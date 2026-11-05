@@ -174,7 +174,8 @@ jobs:
 
       # Diagnostics only on failure; never artefacts. continue-on-error so a full storage quota
       # never turns a result red. The smoke files hold no passwords: screenshots (the password field
-      # is masked), smoke.json and the app's server log.
+      # is masked), smoke.json and the app's server log. env/.state/ is a hidden directory, which
+      # upload-artifact skips unless include-hidden-files is set.
       - name: Upload diagnostics
         if: ${{ failure() && steps.dedupe.outputs.skip != 'true' }}
         continue-on-error: true
@@ -185,5 +186,6 @@ jobs:
             */target/surefire-reports/
             */target/*.log
             env/.state/smoke/
+          include-hidden-files: true
           retention-days: 3
           if-no-files-found: ignore

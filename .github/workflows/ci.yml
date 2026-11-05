@@ -161,7 +161,7 @@ jobs:
       # PoeInf is refused. Passwords are read from DefaultEntityHelper.java, never printed or written.
       - name: 'Smoke: log in as each web test user'
         if: steps.dedupe.outputs.skip != 'true'
-        run: node env/smoke.cjs env/.state/smoke; exit 1 # TEMP
+        run: node env/smoke.cjs env/.state/smoke
 
       # Always, also on failure or cancel, once the start step has run.
       - name: 'Smoke: app log, stop the app (env/down.sh)'

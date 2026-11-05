@@ -1,0 +1,30 @@
+
+@mixin sormas-upload {
+	
+	.v-upload {
+		margin-top: -5px;
+	}
+	
+	.v-upload .v-button {
+		margin-top: 10px;
+		display: block;
+		width: 195px;
+		@extend .v-button-primary;
+		border: none;
+	}
+
+	.v-upload .v-button .v-button-caption {
+		margin-top: 6px;
+		margin-left: 24px;
+		position: absolute;
+	}
+
+	.v-upload .v-button:before {
+		content: "\E746";
+		font-family: "Vaadin-Icons";
+		left: 20px;
+		position: absolute;
+		margin-top: 7px;
+	}
+
+}

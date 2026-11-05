@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ SORMAS® - Surveillance Outbreak Response Management & Analysis System
+  ~ Copyright © 2016-2018 Helmholtz-Zentrum für Infektionsforschung GmbH (HZI)
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:descendantFocusability="beforeDescendants"
+    android:id="@+id/base_layout">
+
+    <data>
+        <variable name="data" type="de.symeda.sormas.app.login.LoginViewModel" />
+    </data>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_horizontal"
+                android:paddingLeft="@dimen/parentLayoutHorizontalPadding"
+                android:paddingRight="@dimen/parentLayoutHorizontalPadding"
+                android:focusable="true"
+                android:focusableInTouchMode="true">
+
+                <ImageView
+                    android:id="@+id/logo"
+                    android:layout_width="@dimen/logoWidth"
+                    android:layout_height="@dimen/logoHeight"
+                    android:layout_marginTop="@dimen/logoMarginTop"
+                    android:layout_marginBottom="@dimen/logoMarginBottom"
+                    android:contentDescription="@string/description_sormas_logo"
+                    android:src="@drawable/sormas_logo" />
+
+                <!-- SORMAS description texts -->
+
+                <TextView
+                    android:id="@+id/heading_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/heading_surveillance_outbreak"
+                    style="@style/LoginHeading1" />
+
+                <TextView
+                    android:id="@+id/heading_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/heading_response_management"
+                    style="@style/LoginHeading2" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="@dimen/serviceMarginBottom">
+
+                    <TextView
+                        android:id="@+id/sub_heading_1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/heading_disease_prevention"
+                        style="@style/LoginSubHeadingText" />
+
+                    <View
+                        android:id="@+id/sub_heading_separator_1"
+                        style="@style/LoginSubHeadingSeparator" />
+
+                    <TextView
+                        android:id="@+id/sub_heading_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/heading_disease_detection"
+                        style="@style/LoginSubHeadingText" />
+
+                    <View
+                        android:id="@+id/sub_heading_separator_2"
+                        style="@style/LoginSubHeadingSeparator" />
+
+                    <TextView
+                        android:id="@+id/sub_heading_3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/heading_outbreak_response"
+                        style="@style/LoginSubHeadingText" />
+
+                </LinearLayout>
+
+                <!-- Sign In -->
+
+                <LinearLayout
+                    android:id="@+id/signInLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/signInHeader"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/heading_sign_in"
+                        style="@style/LoginSignInText" />
+
+                    <TextView
+                        android:id="@+id/signInSubHeader"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/info_sign_in"
+                        style="@style/LoginSignInTagLineText" />
+
+                    <de.symeda.sormas.app.component.controls.ControlTextEditField
+                        android:id="@+id/login_username"
+                        style="@style/ControlSingleColumnStyle"
+                        app:hint="@string/hint_login_username"
+                        app:labelCaption="@string/caption_username"
+                        app:description="@string/description_username"
+                        app:required="true"
+                        app:value="@={data.username}" />
+
+                    <de.symeda.sormas.app.component.controls.ControlPasswordField
+                        android:id="@+id/login_password"
+                        style="@style/ControlSingleColumnStyle"
+                        app:hint="@string/hint_login_password"
+                        app:labelCaption="@string/caption_password"
+                        app:description="@string/description_password"
+                        app:required="true"
+                        app:value="@={data.password}" />
+
+                    <Button
+                        android:id="@+id/btn_login"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/loginButtonMarginTop"
+                        android:text="@string/action_login"
+                        style="@style/PrimaryButtonStyle"
+                        android:onClick="login" />
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/btn_login_default_user"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:text="@string/action_login_default_user"
+                            style="@style/PrimaryButtonStyle"
+                            android:onClick="loginDefaultUser" />
+
+                        <Button
+                            android:id="@+id/btn_change_settings"
+                            android:layout_alignParentEnd="true"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/action_change_settings"
+                            style="@style/SubtleButtonStyle"
+                            android:onClick="showSettingsView" />
+
+                    </RelativeLayout>
+
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <include
+                android:id="@+id/notification_frame"
+                layout="@layout/activity_root_notification_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </FrameLayout>
+
+    </ScrollView>
+
+</layout>

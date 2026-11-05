@@ -1,0 +1,187 @@
+// If you edit this file you need to compile the theme. See README.md for details.
+
+// Global variable overrides. Must be declared before importing Valo.
+// For more information, see: https://vaadin.com/book/-/page/themes.valo.html
+// Example variants can be copy/pasted from https://vaadin.com/docs/v8/framework/articles/ValoExamples.html
+// See also https://vaadin.com/api/valo/
+
+$v-luminance-threshold: 180 !default;
+
+$s-default-color: #6691C4;
+$s-primary-color: #005A9C;
+$s-secondary-color: #6591C4;
+$s-critical-color: rgb(200, 0, 0);
+$s-critical-transparent-color: rgba(200, 0, 0, 0.7);
+$s-critical-more-transparent-color: rgba(200, 0, 0, 0.5);
+$s-critical-most-transparent-color: rgba(200, 0, 0, 0.1);
+$s-important-color: rgb(190, 105, 0);
+$s-important-transparent-color: rgba(190, 105, 0, 0.7);
+$s-warning-color: $s-important-color;
+$s-relevant-color: rgb(200, 170, 0);
+$s-relevant-transparent-color: rgba(200, 170, 0, 0.7);
+$s-neutral-color: #00BFFF;
+$s-positive-color: #32CD32;
+$s-minor-color: #808080;
+$s-steady-color: #FF8C00;
+$s-highlight-subtle-color: rgba(244, 244, 244, 0.8);
+$s-highlight-slightly-subtle-color: rgba(244, 244, 244, 0.7);
+$s-highlight-color: #C9C9C9;
+
+$v-background-color: #FEFEFE !default;
+$v-app-background-color: $v-background-color !default;
+$v-font-color: #394C5B !default;
+$v-selection-color: $s-primary-color !default;
+$v-focus-color: #CDD8EC !default;
+$v-focus-light-color: #EDF2FD !default;
+$v-error-indicator-color: $s-critical-color !default;
+$v-friendly-color: $s-default-color !default;
+
+$v-font-family: "Open Sans", sans-serif, "Source Sans Pro";
+$v-font-size: 12px !default;
+$v-font-weight: 400 !default;
+$v-font-weight--header: 400 !default;
+$v-font-size--h3: 16px;
+
+$v-link-font-color: #1565A2;
+
+$v-unit-size: 32px !default;
+$v-gradient: false;
+
+$v-border: 2px solid $v-focus-color;
+$v-border-subtle: 2px solid $v-selection-color;
+$v-border-primary: 2px solid $v-primary-color;
+$v-caption-font-weight: 600 !default;
+
+$v-layout-margin-top: round($v-unit-size / 1.5) !default;
+$v-layout-margin-right: $v-layout-margin-top !default;
+$v-layout-margin-bottom: $v-layout-margin-top !default;
+$v-layout-margin-left: $v-layout-margin-top !default;
+$v-layout-spacing-vertical: round($v-unit-size / 1.8) !default;
+$v-layout-spacing-horizontal: round($v-unit-size / 1.8) !default;
+
+
+$editor-shadow: 0 0 10px 10px rgba(0, 0, 0, .1) !default;
+$editor-background-color: #6691C4 !default;
+$editor-embed-background-color: darken($editor-background-color, 5%) !default;
+$editor-raised-background-color: lighten($editor-background-color, 10%) !default;
+$editor-caption-font-color: valo-font-color($editor-background-color, 0.5) !default;
+
+@import "global.scss";
+@import "deprecated.scss";
+@import "bootstrap-grid.scss";
+
+@import "components/button.scss";
+@import "components/checkbox.scss";
+@import "components/combobox.scss";
+@import "components/countelement.scss";
+@import "components/customcomponent.scss";
+@import "components/customizablefields.scss";
+@import "components/datefield.scss";
+@import "components/exttokenfield.scss";
+@import "components/grid.scss";
+@import "components/gridlayout.scss";
+@import "components/label.scss";
+@import "components/leaflet.scss";
+@import "components/list.scss";
+@import "components/link.scss";
+@import "components/loadingindicator.scss";
+@import "components/menu.scss";
+@import "components/notification.scss";
+@import "components/optiongroup.scss";
+@import "components/orderedlayout.scss";
+@import "components/panel.scss";
+@import "components/progressbar.scss";
+@import "components/svg.scss";
+@import "components/tabsheet.scss";
+@import "components/table.scss";
+@import "components/textarea.scss";
+@import "components/textfield.scss";
+@import "components/tooltip.scss";
+@import "components/upload.scss";
+@import "components/window.scss";
+
+@import "views/view.scss";
+@import "views/about.scss";
+@import "views/dashboard.scss";
+@import "views/disease.scss";
+@import "views/lab-message.scss";
+@import "views/login.scss";
+@import "views/configuration.scss";
+@import "views/statistics.scss";
+@import "views/classification.scss";
+
+@import "../valo/valo.scss";
+
+// #613 see https://stackoverflow.com/questions/36281582/vaadin-modal-window-how-to-get-scrollbars-on-the-parent-view
+// must be outside theme mixin as per https://vaadin.com/wiki/-/wiki/Main/Adding+a+splash+screen
+.v-generated-body {
+  // change the overflow from hidden to auto
+  overflow: auto;
+}
+
+@function valo-font-color ($bg-color, $contrast: $v-font-color-contrast) {
+  @if type-of($bg-color)==color {
+    @if is-dark-color($bg-color) {
+      @return $v-background-color;
+    }
+
+    @else {
+      @return #374B59;
+    }
+  }
+
+  @return #374B59;
+}
+
+@mixin sormas {
+  @include valo;
+
+  @include sormas-global;
+
+  @include sormas-button;
+  @include sormas-checkbox;
+  @include sormas-combobox;
+  @include sormas-countelement;
+  @include sormas-customcomponent;
+  @include sormas-customizablefields;
+  @include sormas-datefield;
+  @include sormas-exttokenfield;
+  @include sormas-grid;
+  @include sormas-gridlayout;
+  @include sormas-label;
+  @include sormas-leaflet;
+  @include sormas-list;
+  @include sormas-link;
+  @include sormas-loadingindicator;
+  @include sormas-menu;
+  @include sormas-notification;
+  @include sormas-optiongroup;
+  @include sormas-orderedlayout;
+  @include sormas-panel;
+  @include sormas-progressbar;
+  @include sormas-svg;
+  @include sormas-tabsheet;
+  @include sormas-table;
+  @include sormas-textarea;
+  @include sormas-textfield;
+  @include sormas-tooltip;
+  @include sormas-upload;
+  @include sormas-window;
+
+  @include sormas-about-view;
+  @include sormas-classification-view;
+  @include sormas-configuration-view;
+  @include sormas-dashboard-view;
+  @include sormas-disease-styles;
+  @include sormas-lab-message-view;
+  @include sormas-login-view;
+  @include sormas-statistics-view;
+  @include sormas-view;
+
+  @include sormas-bootstrap-grid;
+  @include sormas-deprecated;
+
+  .sormas-content {
+    overflow: auto;
+  }
+}

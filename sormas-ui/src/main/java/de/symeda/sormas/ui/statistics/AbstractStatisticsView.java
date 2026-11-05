@@ -1,0 +1,64 @@
+/*******************************************************************************
+ * SORMAS® - Surveillance Outbreak Response Management & Analysis System
+ * Copyright © 2016-2018 Helmholtz-Zentrum für Infektionsforschung GmbH (HZI)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *******************************************************************************/
+package de.symeda.sormas.ui.statistics;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.vaadin.server.ExternalResource;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Link;
+
+import de.symeda.sormas.api.FacadeProvider;
+import de.symeda.sormas.api.feature.FeatureType;
+import de.symeda.sormas.api.i18n.Captions;
+import de.symeda.sormas.api.i18n.I18nProperties;
+import de.symeda.sormas.api.user.UserRight;
+import de.symeda.sormas.ui.SubMenu;
+import de.symeda.sormas.ui.UiUtil;
+import de.symeda.sormas.ui.epipulse.EpipulseExportView;
+import de.symeda.sormas.ui.utils.AbstractSubNavigationView;
+import de.symeda.sormas.ui.utils.CssStyles;
+
+public class AbstractStatisticsView extends AbstractSubNavigationView<Component> {
+
+	public static final String ROOT_VIEW_NAME = "statistics";
+
+	protected AbstractStatisticsView(String viewName) {
+		super(viewName);
+	}
+
+	@Override
+	public void refreshMenu(SubMenu menu, String params) {
+		menu.removeAllViews();
+		menu.addView(StatisticsView.VIEW_NAME, I18nProperties.getCaption(Captions.statisticsStatistics), params);
+		if (UiUtil.permitted(UserRight.DATABASE_EXPORT_ACCESS)) {
+			menu.addView(DatabaseExportView.VIEW_NAME, I18nProperties.getCaption(Captions.statisticsDatabaseExport), params);
+		}
+
+		if (UiUtil.permitted(FeatureType.EPIPULSE_EXPORT, UserRight.EPIPULSE_EXPORT_VIEW)) {
+			menu.addView(EpipulseExportView.VIEW_NAME, I18nProperties.getCaption(Captions.statisticsEpipulseExport), params);
+		}
+
+		String sormasStatsUrl = FacadeProvider.getConfigFacade().getSormasStatsUrl();
+		if (StringUtils.isNotBlank(sormasStatsUrl)) {
+			Link sormasStatsLink = new Link(I18nProperties.getCaption(Captions.statisticsOpenSormasStats), new ExternalResource(sormasStatsUrl));
+			sormasStatsLink.addStyleNames(CssStyles.LINK_BUTTON, CssStyles.LINK_BUTTON_PRIMARY);
+			this.addHeaderComponent(sormasStatsLink);
+		}
+	}
+}

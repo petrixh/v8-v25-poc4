@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ SORMAS® - Surveillance Outbreak Response Management & Analysis System
+  ~ Copyright © 2016-2018 Helmholtz-Zentrum für Infektionsforschung GmbH (HZI)
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:descendantFocusability="beforeDescendants"
+    android:id="@+id/base_layout">
+
+    <data>
+        <import type="de.symeda.sormas.app.component.controls.ControlButtonType" />
+        <import type="de.symeda.sormas.api.person.PersonHelper" />
+        <import type="de.symeda.sormas.app.util.DateFormatHelper" />
+
+        <variable name="data" type="de.symeda.sormas.app.backend.person.Person" />
+        <variable name="availablePersons" type="androidx.databinding.ObservableList&lt;de.symeda.sormas.app.backend.person.Person&gt;" />
+        <variable name="updateSearchCallback" type="de.symeda.sormas.app.core.IEntryItemOnClickListener" />
+        <variable name="availablePersonItemClickCallback" type="de.symeda.sormas.app.core.IEntryItemOnClickListener" />
+    </data>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="@dimen/rowListItemHorizontalMargin"
+                android:paddingEnd="@dimen/rowListItemHorizontalMargin">
+
+                <TextView
+                    android:id="@+id/dialog_description"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/controlReadTextMarginBottom"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="@string/info_similar_persons_found"
+                    android:textColor="@color/pageHintText"
+                    android:textSize="@dimen/defaultPageHintTextSize"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <de.symeda.sormas.app.component.controls.ControlTextReadField
+                        android:id="@+id/person_firstName"
+                        app:value="@{data.firstName}"
+                        style="@style/ControlFirstOfTwoColumnsStyle" />
+
+                    <de.symeda.sormas.app.component.controls.ControlTextReadField
+                        android:id="@+id/person_lastName"
+                        app:value="@{data.lastName}"
+                        style="@style/ControlSecondOfTwoColumnsStyle" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <de.symeda.sormas.app.component.controls.ControlTextReadField
+                        android:id="@+id/person_sex"
+                        app:value="@{data.sex}"
+                        style="@style/ControlFirstOfTwoColumnsStyle" />
+
+                    <de.symeda.sormas.app.component.controls.ControlTextReadField
+                        android:id="@+id/person_birthdate"
+                        app:caption="@string/caption_date_of_birth"
+                        app:value="@{DateFormatHelper.formatBirthdate(data.birthdateDD, data.birthdateMM, data.birthdateYYYY)}"
+                        style="@style/ControlSecondOfTwoColumnsStyle" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@color/formListSectionBackground"
+                android:layout_marginTop="@dimen/parentLayoutVerticalMargin"
+                android:paddingTop="@dimen/parentLayoutVerticalMargin"
+                android:paddingLeft="@dimen/parentLayoutHorizontalPadding"
+                android:paddingRight="@dimen/parentLayoutHorizontalPadding"
+                android:layout_marginBottom="@dimen/controlReadTextMarginBottom">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/heading_existing_persons"
+                        style="@style/SubHeadingCompactStyle" />
+
+                    <TextView
+                        android:id="@+id/pick_person_description"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/info_pick_person"
+                        style="@style/SubHeadingDescriptionStyle" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/existing_persons_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:clipToPadding="false"
+                    android:padding="@dimen/rowListItemParentPadding"
+                    app:entries="@{availablePersons}"
+                    app:layout="@{@layout/row_select_or_create_person_layout}"
+                    app:callback="@{availablePersonItemClickCallback}" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/create_person_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/info_create_person"
+                android:paddingStart="@dimen/rowListItemHorizontalMargin"
+                android:paddingEnd="@dimen/rowListItemHorizontalMargin"
+                style="@style/SubHeadingDescriptionStyle" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</layout>

@@ -1,0 +1,183 @@
+
+@mixin sormas-label {
+	
+  .v-label {
+	// Font colors
+	&.v-label-primary, .primary {
+		color: $s-primary-color;
+		font-weight: 600;
+	}
+
+	&.v-label-secondary, .secondary {
+		color: $s-secondary-color;
+	}
+
+	&.v-label-critical, .critical {
+		color: $s-critical-color;
+		font-weight: 600;
+	}
+
+	&.v-label-important, .important {
+		color: $s-important-color;
+		font-weight: 600;
+	}
+
+	&.v-label-warning, .warning {
+		color: $s-warning-color;
+		font-weight: 600;
+	}
+
+	&.v-label-relevant, .relevant {
+		color: $s-relevant-color;
+	}
+
+	&.v-label-neutral, .neutral {
+		color: $s-neutral-color;
+	}
+
+	&.v-label-positive, .positive {
+		color: $s-positive-color;
+	}
+
+	&.v-label-minor, .minor {
+		color: $s-minor-color;
+	}
+	
+	&.v-label-discarded, .discarded {
+        text-decoration: line-through;
+        color: #888;
+    }
+
+    &.v-label-done, .done {
+        color: #888;
+    }
+
+   	&.v-label-not, .not {
+        color: #C44;
+    }
+    
+    &.v-label-white {
+    	color: #FFF;
+    }
+   
+    &.v-label-bg-follow-up-symptomatic, .bg-follow-up-symptomatic {
+    	background: $s-critical-color;
+    	line-height: 2em;
+    }
+   
+    &.v-label-bg-follow-up-not-symptomatic, .bg-follow-up-not-symptomatic {
+    	background: $s-positive-color;
+    	line-height: 2em;
+    }
+   
+    &.v-label-bg-follow-up-unavailable, .bg-follow-up-unavailable {
+    	background: #6277cc;
+    	line-height: 2em;
+    }
+   
+    &.v-label-bg-follow-up-uncooperative, .bg-follow-up-uncooperative {
+    	background: #ff19ff;
+    	line-height: 2em;
+    }
+   
+    &.v-label-bg-follow-up-not-performed, .bg-follow-up-not-performed {
+    	background: $s-minor-color;
+    	line-height: 2em;
+    }
+
+	// Label with rounded corners
+	&.v-label-rounded-corners, .rounded-corners {
+		border-radius: 8px;
+		padding: 8px;
+	}
+		
+	&.v-label-rounded-corners-slim, .rounded-corners-slim {
+		border-radius: 4px;
+		padding: 4px;
+	}
+
+	// Label with background
+	&.v-label-background-focus-light, .background-focus-light {
+		background: $v-focus-light-color;
+	}
+
+	// Label with centered value
+	&.v-label-vertical-align-super, .vertical-align-super {
+		vertical-align: super;
+	}
+
+	// Font sizes
+	&.v-label-small, .small {
+    	font-size: 0.75em;
+	}
+
+	&.v-label-medium, .medium {
+    	font-size: 1em;
+	}
+
+	&.v-label-large, .large {
+		font-size: 1.25em;
+	}
+
+	&.v-label-large-alt, .large-alt {
+		font-size: 1.25em;
+		line-height: 1.1;
+	}
+
+	&.v-label-xlarge, .xlarge {
+		font-size: 1.5em;
+	}
+	
+	&.v-label-xxlarge, .xxlarge {
+		font-size: 2em;
+	}
+
+	&.v-label-xxxlarge, .xxxlarge {
+    	font-size: 2.5em;
+	}
+
+	&.v-label-really-large, .really-large {
+		font-size: 5em;
+		line-height: 1em;
+	}
+
+	// Font styles
+	&.v-label-bold, .bold {
+		font-weight: bold;
+	}
+
+	&.v-label-italic, .italic {
+		font-style: italic;
+	}
+
+	&.v-label-uppercase, .uppercase {
+		text-transform: uppercase;
+	}
+
+	&.v-label-bottom-line, .bottom-line {
+		border-bottom: 1px solid #CDD8EC;
+	}
+
+	&.v-label-white-space-normal, .white-space-normal {
+		white-space: normal !important;
+	}
+
+	&.v-label-text-align-right {
+		text-align: right;
+	}
+
+	&.v-label-caption-truncated, .caption-truncated {
+		width: 100%;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
+		display: block;
+	}
+  }
+
+  .side-component .v-label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

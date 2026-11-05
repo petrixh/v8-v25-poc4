@@ -1,0 +1,61 @@
+<div class="headline-container" style="margin-bottom: 50px; text-align: center;">
+	<h1 style="color: #FFF">Welcome to the SORMAS play server!</h1>
+	<h2 style="color: #CCC">This server only contains dummy data. No data of real cases is included.</h2>
+	<h2 style="color: #CCC">Click on any default user login button to access the SORMAS play version.</h2>
+</div>
+<div class="content-container" style="text-align: center;">
+	<div style="display: inline-block; background-color: rgba(255,255,255,0.5); padding: 32px; border-radius: 4px;">
+		<table>
+			<tr>
+				<td id="demoUsers" style="padding-right: 40px; width: 200px; height: 377px;">
+					<div onclick="doLogin(this)" style="width:100%" class="v-button v-widget primary v-button-primary vspace-3" tabindex="0" role="button">
+						<span class="v-button-wrap">
+							<span class="v-button-caption" style="color: #FFF;"></span>
+						</span>
+					</div>
+				</td>
+				<td style="height: 377; width: 312px;">
+					<div location="login"></div>
+				</td>
+			</tr>
+		</table>
+	</div>
+</div>
+<script type="text/javascript" id="demoUsersScript" >
+	var demoUsersEl = document.getElementById('demoUsers');
+	var template = demoUsersEl.firstElementChild;
+	demoUsersEl.removeChild(template);
+	
+	var demoUsers = [
+		{id: "logInAsSurveillanceSupervisor", name: "Surveillance Supervisor", user: "SurvSup", pass: "SurvSup"},
+		{id: "logInAsCaseSupervisor", name: "Case Supervisor", user: "CaseSup", pass: "CaseSup"},
+		{id: "logInAsContactSupervisor", name: "Contact Supervisor", user: "ContSup", pass: "ContSup"},
+		{id: "logInAsPOESupervisor", name: "POE Supervisor", user: "PoeSup", pass: "PoeSup"},
+		{id: "logInAsLabUser", name: "Lab Officer", user: "LabOff", pass: "LabOff"},
+		{id: "logInAsEventOfficer", name: "Event Officer", user: "EveOff", pass: "EveOff"},
+		{id: "logInAsNationalUser", name: "National User", user: "NatUser", pass: "NatUser"},
+		{id: "logInAsNationalClinician", name: "National Clinician", user: "NatClin", pass: "NatClin"}
+	];
+	
+	window.doLogin = function (el) {
+		document.getElementById('username').value = el.user; 
+		document.getElementById('password').value = el.pass; 
+		document.getElementById('loginForm').getElementsByClassName('v-button')[0].click();
+	}
+	
+	demoUsers.forEach(function (el) {
+		var div = template.cloneNode(true);
+		div.user = el.user;
+		div.pass = el.pass;
+		div.id = el.id;
+		div.firstElementChild.firstElementChild.textContent = 'Log in as ' + el.name;
+		demoUsersEl.appendChild(div);
+	});
+	
+	var thisScript = document.getElementById('demoUsersScript');
+	thisScript.parentElement.removeChild(thisScript);
+</script>
+<div class="footer" style="margin-top: 50px">
+	<h3 align="center" style="color: #CCC">See <a href="//www.sormas.org" style="color: #FFF">www.sormas.org</a> for more information</h3>
+	<h3 align="center" style="color: #CCC">Contact SORMAS team: sormas@helmholtz-hzi.de</h3>
+</div>

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ SORMAS® - Surveillance Outbreak Response Management & Analysis System
+  ~ Copyright © 2016-2018 Helmholtz-Zentrum für Infektionsforschung GmbH (HZI)
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="data"
+            type="de.symeda.sormas.app.backend.person.Person" />
+        <variable
+            name="index"
+            type="java.lang.Integer" />
+
+        <variable
+            name="callback"
+            type="de.symeda.sormas.app.core.IEntryItemOnClickListener" />
+    </data>
+
+    <LinearLayout
+        android:tag="@string/tag_row_item_select_or_create_person"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/controlReadTextMarginBottom"
+        android:paddingTop="@dimen/parentLayoutVerticalPadding"
+        android:paddingBottom="@dimen/parentLayoutVerticalPadding"
+        android:paddingLeft="@dimen/rowListItemHorizontalMargin"
+        android:paddingRight="@dimen/rowListItemHorizontalMargin"
+        android:orientation="vertical"
+        android:background="@drawable/selector_list_section_row_background"
+        android:elevation="2dp"
+        android:onClickListener="@{(view) -> callback.onClick(view, data)}"
+        >
+        <!--android:background="@drawable/selector_list_section_row_background"
+        android:background="@{data.isSelected? @drawable/selector_list_section_row_background_selected : @drawable/selector_list_section_row_background}"-->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/case_person_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/listActivityRowSecondaryTextVerticalMargin"
+                android:textSize="@dimen/listActivityRowPrimaryTextSize"
+                android:textColor="@color/listActivityRowPrimaryText"
+                android:fontFamily="sans-serif-medium"
+                android:scrollHorizontally="true"
+                android:maxLines="1"
+                android:ellipsize="end"
+                app:personValue="@{data}"
+                app:defaultValue='@{@string/value_person_unknown}'
+                />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                >
+
+                <TextView
+                    android:id="@+id/person_sex"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:textSize="@dimen/row_entry_secondary_text_size"
+                    android:textColor="@color/row_entry_secondary_text"
+                    app:value="@{data.sex}"
+                    app:prependValue="@{@string/caption_sex}"
+                    app:defaultValue='@{@string/value_not_available}'
+                    app:valueFormat='@{@string/title_detail_format}'
+                    />
+
+                <TextView
+                    android:id="@+id/person_approximateAge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:textSize="@dimen/row_entry_secondary_text_size"
+                    android:textColor="@color/row_entry_secondary_text"
+                    app:ageWithDateValue="@{data}"
+                    app:prependValue="@{@string/caption_age}"
+                    app:defaultValue='@{@string/value_not_available}'
+                    app:valueFormat='@{@string/age_with_dob_and_prepend_format}'
+                    />
+
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/person_presentCondition"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="top"
+                android:textSize="@dimen/row_entry_secondary_text_size"
+                android:textColor="@color/row_entry_secondary_text"
+                app:value="@{data.presentCondition}"
+                app:prependValue="@{@string/caption_present_condition}"
+                app:defaultValue='@{@string/value_not_available}'
+                app:valueFormat='@{@string/title_detail_format}'
+                />
+
+            <TextView
+                android:id="@+id/txtAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="top"
+                android:textSize="@dimen/row_entry_secondary_text_size"
+                android:textColor="@color/row_entry_secondary_text"
+                android:singleLine="false"
+                android:maxLines="5"
+                app:locationValue="@{data.address}"
+                app:prependValue="@{@string/caption_address}"
+                app:defaultValue='@{@string/value_not_available}'
+                app:valueFormat='@{@string/title_detail_format}'
+                />
+
+            <!--<LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                >
+
+
+
+                <TextView
+                    android:id="@+id/txtReporter"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top|left"
+                    android:textSize="@dimen/listActivityRowTertiaryTextSize"
+                    android:textColor="@color/listActivityRowLeastText"
+                    android:fontFamily="sans-serif-medium"
+                    app:userValue="@{caze.reportingUser}"
+                    app:defaultValue='@{@string/person_unknown}'
+                    />
+
+
+
+
+                <TextView
+                    android:id="@+id/txtReportDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="top|end"
+                    android:textSize="@dimen/listActivityRowDateTextSize"
+                    android:textColor="@color/listActivityRowDateText"
+                    android:fontFamily="sans-serif"
+                    android:textAlignment="viewEnd"
+                    app:timeAgoValue="@{caze.reportDate}"
+                    app:defaultValue='@{@string/report_date_unknown}'
+                    />
+
+            </LinearLayout>-->
+
+        </LinearLayout>
+    </LinearLayout>
+</layout>

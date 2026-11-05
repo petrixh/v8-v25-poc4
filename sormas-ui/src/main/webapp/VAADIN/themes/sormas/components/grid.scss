@@ -1,0 +1,198 @@
+
+$v-grid-border: 1px solid $v-focus-color !default;
+$v-grid-row-stripe-background-color: $v-grid-row-background-color !default;
+$v-grid-row-selected-background-color: $v-focus-color !default;
+$v-grid-cell-vertical-border: none !default;
+$v-grid-cell-horizontal-border: $v-grid-border !default;
+$v-grid-cell-focused-border: none !default;
+
+
+@mixin sormas-grid {
+  
+  .v-grid,
+  .v-treegrid {
+  
+    .v-grid-tablewrapper, .v-grid-header-deco, .v-grid-footer-deco, .v-grid-scroller, 
+    .v-treegrid-tablewrapper, v.treegrid-header-deco, .v-treegrid-footer-deco, .v-treegrid-scroller {
+      border-left: none;
+      border-right: none;
+    }
+    .v-grid-scroller,
+    .v-treegrid-scroller {
+      border-top: none;
+    }
+    
+    .v-grid-row,
+    .v-treegrid-row {
+    
+      > td, > th {
+        background-color: inherit;
+      }
+      
+      &.v-grid-row-selected > td, &.v-grid-row-selected > th,
+      &.v-treegrid-row-selected > td, &.v-treegrid-row.selected > th {
+        background-color: $v-focus-color;
+      }
+      
+      &.v-treegrid-parent-row > td, &.v-treegrid-parent-row > th {
+      	background-color: $v-focus-light-color;
+      }
+      
+      &.v-treegrid-child-row > td, &.v-treegrid-child-row > th {
+      	border-bottom: 3px solid #CDD8EC;
+      }
+    
+      .v-grid-cell,
+      .v-treegrid-cell {
+      
+        padding: 3px 6px;
+      
+        &:first-child {
+          padding-left: 0;
+        }
+        &:last-child {
+          padding-right: 0;
+        }
+
+        &.link {
+          cursor: pointer;
+        }
+      
+        &.priority-high {
+          color: $s-important-color;
+          font-weight: 600;
+        }
+        &.priority-normal {
+          color: $s-default-color;
+        }
+        &.warning {
+          color: $s-warning-color;
+          font-weight: 600;
+        }
+        &.status-pending {
+          color: $s-warning-color;
+        }
+        &.status-in-progress {
+          color: $s-neutral-color;
+        }
+        &.status-completed {
+          color: $s-positive-color;
+        }
+        &.status-failed {
+          color: $s-critical-color;
+        }
+        &.status-cancelled {
+          color: $v-font-color;
+        }
+		
+        &.odd {
+          background-color: #eee;
+        }
+       
+        &.follow-up-symptomatic > .component-wrap {
+          background-color: $s-critical-color;
+          line-height: 2;
+        }
+       
+        &.follow-up-not-symptomatic > .component-wrap {
+          background-color: $s-positive-color;
+          line-height: 2;
+        }
+       
+        &.follow-up-unavailable > .component-wrap {
+          background-color: #6277cc;
+          line-height: 2;
+        }
+       
+        &.follow-up-uncooperative > .component-wrap {
+          background-color: #ff19ff;
+          line-height: 2;
+        }
+       
+        &.follow-up-not-performed > .component-wrap {
+          background-color: $s-minor-color;
+          line-height: 2;
+        }
+
+        &.follow-up-symptomatic-external > .component-wrap {
+          background: $s-critical-color url(../img/smartphone.png) no-repeat;
+          background-size: 40% 80%;
+          background-position-x: center;
+          background-position-y: center;
+          line-height: 2;
+        }
+
+        &.follow-up-not-symptomatic-external > .component-wrap {
+          background: $s-positive-color url(../img/smartphone.png) no-repeat;
+          background-size: 40% 80%;
+          background-position-x: center;
+          background-position-y: center;
+          line-height: 2;
+        }
+
+        &.follow-up-unavailable-external > .component-wrap {
+          background: #6277cc url(../img/smartphone.png) no-repeat;
+          background-size: 40% 80%;
+          background-position-x: center;
+          background-position-y: center;
+          line-height: 2;
+        }
+
+        &.follow-up-uncooperative-external > .component-wrap {
+          background: #ff19ff url(../img/smartphone.png) no-repeat;
+          background-size: 40% 80%;
+          background-position-x: center;
+          background-position-y: center;
+          line-height: 2;
+        }
+
+        &.follow-up-not-performed-external > .component-wrap {
+          background: $s-minor-color url(../img/smartphone.png) no-repeat;
+          background-size: 40% 80%;
+          background-position-x: center;
+          background-position-y: center;
+          line-height: 2;
+        }
+      }
+    	
+      &.status-discarded .v-grid-cell {
+        text-decoration: line-through;
+        color: #888;
+      }
+      &.status-done .v-grid-cell {
+        color: #888;
+      }
+      &.status-not .v-grid-cell {
+        color: #C44;
+      }
+    }
+   
+    .row-title {
+      text-transform: uppercase;
+      font-weight: 600;
+	  min-height: $v-grid-row-height;
+	  font-size: 10px;
+    }
+     
+    .v-grid-header,
+    .v-treegrid-header {
+    
+      background-color: $v-background-color; 
+
+	  .v-grid-cell,
+	  .v-treegrid-cell {
+	    border-left: none;
+	    border-bottom: none;
+        background-color: #FEFEFE;
+      }
+      
+      .v-grid-column-header-content,
+      .v-treegrid-column-header-content {
+        text-transform: uppercase;
+        font-weight: 600;
+	    border-bottom: $v-border;
+	    min-height: $v-grid-row-height;
+      }
+    }
+  }
+}

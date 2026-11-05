@@ -1,0 +1,196 @@
+.marker {
+	background-size: contain;
+	background-repeat: no-repeat;
+ 	background-position: center;
+}
+.marker div {
+	height: 80%;
+	margin: 10%;
+	padding-top: 40%;
+	text-align: center;
+}
+.marker span {
+	display: inline-block;
+	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+	line-height: 14px;
+	margin-top: -7px;
+	vertical-align: top;
+}
+
+.marker.case {
+	border-radius: 20px;
+}
+.marker.case div {
+	border-radius: 20px;
+}
+
+.marker.contact {
+	border-radius: 2px;
+}
+.marker.contact div {
+	border-radius: 1px;
+}
+
+.marker.case.confirmed,
+.marker.contact.long-overdue {
+	background-color: rgba(216, 49, 43, 0.8);
+}
+.marker.case.confirmed div,
+.marker.contact.long-overdue div {
+	background-color: rgba(229, 166, 160, 0.8);
+}
+
+.marker.case.probable {
+	background-color: rgba(204, 103, 20, 0.8);
+}
+.marker.case.probable div {
+	background-color: rgba(250, 190, 146, 0.8);
+}
+
+.marker.case.suspect,
+.marker.contact.overdue {
+	background-color: rgba(204, 173, 20, 0.8);
+}
+.marker.case.suspect div,
+.marker.contact.overdue div {
+	background-color: rgba(250, 225, 146, 0.8);
+}
+
+.marker.case.unclassified {
+	background-color: rgba(127, 127, 127, 0.8);
+}
+.marker.case.unclassified div {
+	background-color: rgba(203, 203, 203, 0.8);
+}
+
+.marker.contact.ok {
+	background-color: rgba(76, 165, 67, 0.8);
+}
+.marker.contact.ok div {
+	background-color: rgba(175, 227, 168, 0.8);
+}
+
+.marker.sample:after {
+	content: "\e737";
+	font-family: "Vaadin-Icons";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	font-size: 25px;
+	margin-top: -6px;
+	z-index: -1;
+}
+.marker.sample div {
+	border-radius: 0;
+}
+.marker.sample.case div {
+ 	background-color: rgba(216, 49, 43, 0.6);
+}
+.marker.sample.case:after {
+	color: rgba(216, 49, 43, 0.8);
+}
+.marker.sample.contact div {
+	background-color: rgba(204, 173, 20, 0.6);
+}
+.marker.sample.contact:after {
+	color: rgba(204, 173, 20, 0.8);
+}
+.marker.sample.event-participant div {
+	background-color: rgba(0, 90, 156, 0.6);
+}
+.marker.sample.event-participant:after {
+	color: rgba(0, 90, 156, 0.8);
+}
+.marker.sample.environment div {
+	background-color: rgba(175, 227, 168, 0.8);
+}
+.marker.sample.environment:after {
+	color: rgba(76, 165, 67, 0.8);
+}
+
+.marker.facility {
+	background-color: none;
+}
+.marker.facility.confirmed {
+	background-image: url("marker/facility-confirmed.png");
+}
+.marker.facility.suspect {
+	background-image: url("marker/facility-suspect.png");
+}
+.marker.facility.probable {
+	background-image: url("marker/facility-probable.png");
+}
+.marker.facility.unclassified {
+	background-image: url("marker/facility-unclassified.png");
+}
+
+.marker.event {
+	margin: -25% 0;
+}
+.marker.event.outbreak {
+	background-image: url("marker/event-outbreak.png");
+}
+.marker.event.rumor {
+	background-image: url("marker/event-rumor.png");
+}
+
+.marker.aefi:after {
+	content: "\e615";
+	font-family: "Vaadin-Icons";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	font-size: 25px;
+	margin-top: -6px;
+	z-index: -1;
+}
+
+.marker.aefi div {
+	border-radius: 0;
+}
+
+.marker.aefi.serious div {
+	background-color: rgba(216, 49, 43, 0.6);
+}
+
+.marker.aefi.serious:after {
+	color: rgba(216, 49, 43, 0.8);
+}
+
+.marker.aefi.non-serious div {
+	background-color: rgba(204, 173, 20, 0.6);
+}
+
+.marker.aefi.non-serious:after {
+	color: rgba(204, 173, 20, 0.8);
+}
+
+.marker.aefi.unclassified div {
+	background-color: rgba(203, 203, 203, 0.8);
+}
+
+.marker.aefi.unclassified:after {
+	color: rgba(127, 127, 127, 0.8);
+}
+
+.leaflet-cluster-anim .leaflet-marker-icon, .leaflet-cluster-anim .leaflet-marker-shadow
+	{
+	-webkit-transition: -webkit-transform 0.3s ease-out, opacity 0.3s
+		ease-in;
+	-moz-transition: -moz-transform 0.3s ease-out, opacity 0.3s ease-in;
+	-o-transition: -o-transform 0.3s ease-out, opacity 0.3s ease-in;
+	transition: transform 0.3s ease-out, opacity 0.3s ease-in;
+}
+
+.leaflet-cluster-spider-leg {
+	/* stroke-dashoffset (duration and function) should match with leaflet-marker-icon transform in order to track it exactly */
+	-webkit-transition: -webkit-stroke-dashoffset 0.3s ease-out,
+		-webkit-stroke-opacity 0.3s ease-in;
+	-moz-transition: -moz-stroke-dashoffset 0.3s ease-out,
+		-moz-stroke-opacity 0.3s ease-in;
+	-o-transition: -o-stroke-dashoffset 0.3s ease-out, -o-stroke-opacity
+		0.3s ease-in;
+	transition: stroke-dashoffset 0.3s ease-out, stroke-opacity 0.3s ease-in;
+}

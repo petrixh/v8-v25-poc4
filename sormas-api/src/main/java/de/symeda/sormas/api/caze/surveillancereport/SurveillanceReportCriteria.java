@@ -1,0 +1,70 @@
+/*
+ * SORMAS® - Surveillance Outbreak Response Management & Analysis System
+ * Copyright © 2016-2021 Helmholtz-Zentrum für Infektionsforschung GmbH (HZI)
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package de.symeda.sormas.api.caze.surveillancereport;
+
+import java.util.List;
+
+import de.symeda.sormas.api.caze.CaseReferenceDto;
+import de.symeda.sormas.api.utils.criteria.BaseCriteria;
+
+public class SurveillanceReportCriteria extends BaseCriteria {
+
+	private static final long serialVersionUID = -1086704371622664429L;
+
+	private CaseReferenceDto caze;
+
+	private List<String> caseUuids;
+
+	private ReportingType reportingType;
+
+	public CaseReferenceDto getCaze() {
+		return caze;
+	}
+
+	public SurveillanceReportCriteria caze(CaseReferenceDto caze) {
+		this.caze = caze;
+
+		return this;
+	}
+
+	public List<String> getCaseUuids() {
+		return caseUuids;
+	}
+
+	public SurveillanceReportCriteria caseUuids(List<String> caseUuids) {
+		this.caseUuids = caseUuids;
+		return this;
+	}
+
+	/**
+	 * Gets the type of reporting for the criteria.
+	 *
+	 * @return the reporting type
+	 */
+	public ReportingType getReportingType() {
+		return reportingType;
+	}
+
+	/**
+	 * Sets the type of reporting for the criteria.
+	 *
+	 * @param reportingType
+	 *            the reporting type to set
+	 */
+	public void setReportingType(ReportingType reportingType) {
+		this.reportingType = reportingType;
+	}
+}

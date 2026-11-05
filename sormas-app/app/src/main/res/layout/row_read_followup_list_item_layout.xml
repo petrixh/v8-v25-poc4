@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ SORMAS® - Surveillance Outbreak Response Management & Analysis System
+  ~ Copyright © 2016-2018 Helmholtz-Zentrum für Infektionsforschung GmbH (HZI)
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="android.view.View"/>
+        <import type="de.symeda.sormas.api.VisitOrigin"/>
+        <variable name="data" type="de.symeda.sormas.app.backend.visit.Visit"/>
+    </data>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_gravity="fill"
+        android:paddingLeft="@dimen/rowListItemHorizontalMargin"
+        android:paddingRight="@dimen/rowListItemHorizontalMargin"
+        android:background="@drawable/selector_list_activity_row_background"
+        >
+
+        <!---->
+        <LinearLayout
+            android:id="@+id/row_item"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="fill"
+            android:layout_gravity="fill"
+            android:paddingTop="@dimen/rowListItemVerticalPadding"
+            android:paddingBottom="@dimen/rowListItemVerticalPadding"
+            android:background="@drawable/background_list_activity_row"
+            >
+
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="fill"
+                android:layout_gravity="fill">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txtVisitStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/listActivityRowPrimaryTextSize"
+                        android:textColor="@color/listActivityRowPrimaryText"
+                        android:fontFamily="sans-serif-medium"
+                        android:scrollHorizontally="true"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        app:value="@{data.visitStatus}"
+                        app:defaultValue='@{@string/value_status_unknown}'
+                        />
+
+                    <TextView
+                        android:id="@+id/visit_visitRemarks"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:gravity="top"
+                        android:layout_marginBottom="@dimen/listActivityRowSecondaryTextVerticalMargin"
+                        android:textSize="@dimen/row_entry_secondary_text_size"
+                        android:textColor="@color/row_entry_secondary_text"
+                        app:value="@{data.visitRemarks}"
+                        app:defaultValue='@{@string/value_visit_remarks_unknown}'
+                        />
+
+
+
+                </LinearLayout>
+
+
+                <RelativeLayout
+                    android:layout_width="100dp"
+                    android:layout_height="match_parent"
+                    android:paddingLeft="24dp"
+                    >
+
+                    <ImageView
+                        android:id="@+id/imgSyncIcon"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:tint="@color/syncIconListActivityRowItem"
+                        android:scaleType="fitEnd"
+                        android:layout_alignParentTop="false"
+                        android:layout_alignParentBottom="false"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentRight="true"
+                        />
+
+                </RelativeLayout>
+
+
+                <ImageView
+                    android:id="@+id/img_open_entry"
+                    android:layout_width="@dimen/listGoToIconWidth"
+                    android:layout_height="@dimen/listGoToIconHeight"
+                    android:layout_gravity="center_vertical"
+                    android:scaleType="fitEnd"
+                    android:src="@drawable/ic_go_to_read_view_24dp"
+                    />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/listItemBottomConentMarginTop"
+                android:layout_marginRight="8dp"
+                >
+
+                <ImageView
+                    android:id="@+id/img_smartphone"
+                    android:visibility="@{data.origin.equals(VisitOrigin.EXTERNAL_JOURNAL) ? View.VISIBLE : View.GONE }"
+                    android:layout_width="@dimen/listGoToIconWidth"
+                    android:layout_height="@dimen/listGoToIconHeight"
+                    android:layout_gravity="center_vertical"
+                    android:scaleType="fitEnd"
+                    android:src="@drawable/smartphone"
+                    android:layout_marginStart="-7dp"
+                    />
+
+                <TextView
+                    android:id="@+id/visit_visitDateTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="start"
+                    android:textSize="@dimen/listActivityRowTertiaryTextSize"
+                    android:textColor="@color/listActivityRowLeastText"
+                    android:fontFamily="sans-serif-medium"
+                    app:dateValue="@{data.visitDateTime}"
+                    app:defaultValue='@{@string/value_visit_date_unknown}'
+                    />
+
+                <TextView
+                    android:id="@+id/txtVisitTime"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="end"
+                    android:textSize="@dimen/row_entry_date_text_size"
+                    android:textColor="@color/listActivityRowDateText"
+                    android:fontFamily="sans-serif"
+                    app:timeAgoValue="@{data.visitDateTime}"
+                    app:defaultValue='@{@string/value_visit_time_unknown}'
+                    />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </LinearLayout>
+</layout>

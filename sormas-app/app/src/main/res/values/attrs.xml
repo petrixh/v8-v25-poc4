@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ SORMAS® - Surveillance Outbreak Response Management & Analysis System
+  ~ Copyright © 2016-2018 Helmholtz-Zentrum für Infektionsforschung GmbH (HZI)
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+    <!-- Martin
+    -->
+    <declare-styleable name="FieldAttrs">
+        <attr name="show_caption" format="boolean" />
+    </declare-styleable>
+
+    <attr name="data" format="string" />
+    <attr name="dataFile" format="string" />
+    <attr name="title" format="string" />
+    <attr name="cellLayout" format="reference" />
+    <attr name="counterBackgroundColor" format="reference" />
+    <attr name="counterBackgroundActiveColor" format="reference" />
+    <attr name="iconColor" format="reference" />
+    <attr name="iconActiveColor" format="reference" />
+    <attr name="positionColor" format="reference" />
+    <attr name="positionActiveColor" format="reference" />
+    <attr name="titleColor" format="reference" />
+    <attr name="titleActiveColor" format="reference" />
+    <attr name="singleLine" format="boolean"/>
+    <attr name="maxLines" format="integer"/>
+    <attr name="maxLength" format="integer"/>
+    <attr name="textArea" format="boolean"/>
+    <attr name="image" format="reference"/>
+    <attr name="imageColor" format="reference"/>
+    <attr name="imageWidth" format="integer"/>
+    <attr name="imageHeight" format="integer"/>
+
+    <attr name="passwordToggleEnabled" format="boolean" />
+    <attr name="showCaption" format="boolean" />
+    <attr name="horizontalFlow" format="boolean" />
+
+    <attr name="iconStart" format="reference"  />
+    <attr name="iconEnd" format="reference"  />
+    <attr name="iconLeft" format="reference"  />
+    <attr name="iconRight" format="reference"  />
+    <attr name="iconTop" format="reference"  />
+    <attr name="iconBottom" format="reference"  />
+
+    <attr name="background" format="reference" />
+    <attr name="buttonBackground" format="reference" />
+    <attr name="buttonBackgroundLast" format="reference" />
+    <attr name="textColor" format="reference|color" />
+
+    <attr name="rounded" format="boolean" />
+
+    <attr name="caption" format="string"/>
+    <attr name="captionCapitalized" format="boolean" />
+    <attr name="captionItalic" format="boolean" />
+    <attr name="slim" format="boolean" />
+    <attr name="distinct" format="boolean" />
+    <attr name="iconOnly" format="boolean" />
+    <attr name="includeUnknown" format="reference|boolean" />
+    <attr name="useAbbreviations" format="boolean" />
+    <attr name="useBoolean" format="boolean" />
+    <attr name="nullable" format="boolean" />
+
+    <attr name="value" format="string" />
+    <attr name="valueFormat" format="reference" />
+    <attr name="labelCaption" format="string" />
+    <attr name="labelColor" format="color|reference"/>
+    <attr name="hint" format="string" />
+    <attr name="description" format="string" />
+    <attr name="required" format="boolean" />
+    <attr name="soft_required" format="boolean" />
+    <attr name="defaultValue" format="string" />
+
+    <attr name="dateHint" format="string" />
+    <attr name="timeHint" format="string" />
+
+    <attr name="scale" format="float|reference" />
+    <attr name="scaleX" format="float|reference" />
+    <attr name="scaleY" format="float|reference" />
+    <attr name="includeMarginStart" format="boolean|reference" />
+
+    <attr name="borderSize" format="dimension" />
+    <attr name="paddingTop" format="dimension" />
+    <attr name="paddingBottom" format="dimension" />
+    <attr name="paddingLeft" format="dimension" />
+    <attr name="paddingRight" format="dimension" />
+    <attr name="marginTop" format="dimension" />
+    <attr name="marginBottom" format="dimension" />
+    <attr name="marginLeft" format="dimension" />
+    <attr name="marginRight" format="dimension" />
+
+
+    <attr name="textColorHint" format="reference|color" />
+    <attr name="iconPadding" format="dimension" />
+
+    <attr name="textSize" format="dimension" />
+
+
+    <attr name="visibility" format="boolean" />
+    <attr name="collapsible" format="boolean" />
+    <attr name="marginBottomOffset" format="reference" />
+    <attr name="timeAgoDetailLevelDays" format="boolean" />
+
+    <attr name="gravity">
+        <flag name="bottom" value="80" />
+        <flag name="center" value="17" />
+        <flag name="center_horizontal" value="1" />
+        <flag name="center_vertical" value="16" />
+        <flag name="clip_horizontal" value="8" />
+        <flag name="clip_vertical" value="128" />
+        <flag name="end" value="8388613" />
+        <flag name="fill" value="119" />
+        <flag name="fill_horizontal" value="7" />
+        <flag name="fill_vertical" value="112" />
+        <flag name="left" value="3" />
+        <flag name="right" value="5" />
+        <flag name="start" value="8388611" />
+        <flag name="top" value="48" />
+    </attr>
+
+    <attr name="textAlignment" format="enum">
+        <enum name="inherit" value="0" />
+        <enum name="gravity" value="1" />
+        <enum name="textStart" value="2" />
+        <enum name="textEnd" value="3" />
+        <enum name="center" value="4" />
+        <enum name="viewStart" value="5" />
+        <enum name="viewEnd" value="6" />
+    </attr>
+
+    <attr name="orientation" format="enum">
+        <enum name="horizontal" value="0" />
+        <enum name="vertical" value="1" />
+    </attr>
+
+    <attr name="buttonType" format="string" />
+    <attr name="userEditRight" format="string" />
+
+    <!--<attr name="buttonType" format="enum">-->
+        <!--<enum name="primary" value="0"/>-->
+        <!--<enum name="secondary" value="1"/>-->
+        <!--<enum name="success" value="2"/>-->
+        <!--<enum name="warning" value="3"/>-->
+        <!--<enum name="danger" value="4"/>-->
+        <!--<enum name="inverse_primary" value="5"/>-->
+        <!--<enum name="inverse_secondary" value="6"/>-->
+        <!--<enum name="inverse_success" value="7"/>-->
+        <!--<enum name="inverse_warning" value="8"/>-->
+        <!--<enum name="inverse_danger" value="9"/>-->
+        <!--<enum name="line_primary" value="10"/>-->
+        <!--<enum name="line_secondary" value="11"/>-->
+        <!--<enum name="line_success" value="12"/>-->
+        <!--<enum name="line_warning" value="13"/>-->
+        <!--<enum name="line_danger" value="14"/>-->
+    <!--</attr>-->
+
+    <declare-styleable name="ControlSwitchField">
+        <attr name="useAbbreviations" />
+        <attr name="useBoolean" />
+        <attr name="nullable" />
+    </declare-styleable>
+
+
+    <!--    <attr name="caption1" />
+        <attr name="caption2" />
+        <attr name="caption3" />
+        <attr name="caption4" />-->
+
+    <declare-styleable name="ControlPropertyField">
+        <attr name="caption" />
+        <attr name="textAlignment" />
+        <attr name="gravity" />
+        <attr name="description" />
+        <attr name="showCaption" />
+        <attr name="imeOptions" />
+        <attr name="slim" />
+        <attr name="captionCapitalized" />
+        <attr name="captionItalic" />
+    </declare-styleable>
+
+    <declare-styleable name="ControlPropertyEditField">
+        <attr name="required" />
+        <attr name="softRequired" />
+        <attr name="hint" />
+    </declare-styleable>
+
+    <declare-styleable name="ControlDateField">
+        <attr name="allowedDaysInFuture" />
+    </declare-styleable>
+
+    <declare-styleable name="ControlDateTimeField">
+        <attr name="dateHint" />
+        <attr name="timeHint" />
+        <attr name="allowedDaysInFuture"/>
+    </declare-styleable>
+
+    <declare-styleable name="ControlTextEditField">
+        <attr name="labelCaption" />
+        <attr name="labelColor" />
+        <attr name="textAlignment" />
+        <attr name="gravity" />
+        <!--<attr name="hint" />-->
+        <attr name="description" />
+        <attr name="required" />
+        <attr name="singleLine" />
+        <attr name="maxLines" />
+        <attr name="maxLength" />
+        <attr name="textArea" />
+        <attr name="userEditRight" />
+        <attr name="inputType" />
+        <attr name="slim" />
+    </declare-styleable>
+
+    <declare-styleable name="ControlSpinnerField">
+        <attr name="excludeEmptyItem" />
+    </declare-styleable>
+
+    <declare-styleable name="ControlPasswordField">
+        <attr name="labelCaption" />
+        <attr name="labelColor" />
+        <attr name="textAlignment" />
+        <attr name="gravity" />
+        <!--<attr name="hint" />-->
+        <attr name="description" />
+        <attr name="required" />
+    </declare-styleable>
+
+
+    <declare-styleable name="ControlTextPopupField">
+        <attr name="textSize" />
+        <attr name="textColor" />
+        <attr name="background" />
+
+        <!--<attr name="hint" />-->
+        <attr name="singleLine" />
+        <attr name="maxLines" />
+        <attr name="maxLength" />
+        <attr name="inputType" />
+
+        <attr name="textColorHint" />
+        <attr name="iconPadding" />
+        <attr name="iconStart" />
+        <attr name="iconEnd" />
+        <attr name="iconLeft" />
+        <attr name="iconRight" />
+    </declare-styleable>
+
+    <declare-styleable name="ControlCheckBoxField">
+        <attr name="labelCaption" />
+        <attr name="labelColor" />
+        <attr name="textAlignment" />
+        <attr name="gravity" />
+        <!--<attr name="hint" />-->
+        <attr name="description" />
+        <attr name="required" />
+    </declare-styleable>
+
+    <declare-styleable name="ControlRadioGroupField">
+        <attr name="labelCaption" />
+        <attr name="labelColor" />
+        <attr name="textAlignment" />
+        <attr name="gravity" />
+        <!--<attr name="hint" />-->
+        <attr name="description" />
+        <attr name="required" />
+        <!--<attr name="showCaption" />-->
+        <attr name="horizontalFlow" />
+        <attr name="scaleX" />
+        <attr name="scaleY" />
+        <attr name="includeMarginStart"/>
+        <attr name="radioButtonMarginStart" format="dimension|reference"/>
+        <attr name="radioButtonLabelMarginStart" format="dimension|reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="ControlTextReadField">
+        <attr name="labelCaption" />
+        <!--<attr name="labelColor" />-->
+        <attr name="textAlignment" />
+        <attr name="gravity" />
+        <attr name="description" />
+        <attr name="singleLine" />
+        <attr name="maxLines" />
+        <attr name="maxLength" />
+        <attr name="distinct" />
+        <attr name="slim" />
+    </declare-styleable>
+
+    <declare-styleable name="ControlTextImageField">
+        <attr name="labelCaption" />
+        <attr name="labelColor" />
+        <attr name="textAlignment" />
+        <attr name="gravity" />
+        <attr name="description" />
+        <attr name="image" />
+        <attr name="imageColor" />
+        <attr name="imageWidth" />
+        <attr name="imageHeight" />
+    </declare-styleable>
+
+    <declare-styleable name="ControlButton">
+        <attr name="buttonType" />
+        <attr name="iconEnd" />
+        <attr name="iconStart" />
+        <attr name="iconOnly" />
+        <attr name="rounded" />
+        <attr name="slim" />
+        <attr name="text" />
+    </declare-styleable>
+
+    <declare-styleable name="PageMenuControl">
+        <attr name="cellLayout" />
+        <attr name="counterBackgroundColor" />
+        <attr name="counterBackgroundActiveColor" />
+        <attr name="iconColor" />
+        <attr name="iconActiveColor" />
+        <attr name="positionColor" />
+        <attr name="positionActiveColor" />
+        <attr name="titleColor" />
+        <attr name="titleActiveColor" />
+        <attr name="visibility" />
+        <attr name="collapsible" />
+        <attr name="marginBottomOffsetResId" />
+    </declare-styleable>
+
+    <declare-styleable name="LandingPageSummaryControl">
+        <attr name="data"/>
+    </declare-styleable>
+
+    <!-- default style for theme -->
+    <attr name="ttlm_defaultStyle" format="reference" />
+
+    <!-- default style -->
+    <declare-styleable name="TooltipLayout">
+        <attr name="ttlm_padding" format="dimension" />
+        <attr name="ttlm_strokeColor" format="color" />
+        <attr name="ttlm_backgroundColor" format="color" />
+        <attr name="ttlm_strokeWeight" format="dimension" />
+        <attr name="ttlm_cornerRadius" format="dimension" />
+        <attr name="ttlm_arrowRatio" format="float" />
+        <attr name="android:textAppearance" />
+        <attr name="android:gravity" />
+        <attr name="ttlm_overlayStyle" format="reference" />
+        <attr name="ttlm_font" format="string" />
+
+        <!-- elevation of the tooltip. Works only on non custom views -->
+        <attr name="ttlm_elevation" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="TooltipOverlay">
+        <attr name="android:color" />
+        <attr name="android:alpha" />
+        <attr name="ttlm_repeatCount" format="integer" />
+        <attr name="ttlm_duration" format="integer" />
+        <attr name="android:layout_margin" />
+    </declare-styleable>
+
+    <attr name="inputType">
+        <flag name="none" value="0x00000000" />
+        <flag name="text" value="0x00000001" />
+        <flag name="textCapCharacters" value="0x00001001" />
+        <flag name="textCapWords" value="0x00002001" />
+        <flag name="textCapSentences" value="0x00004001" />
+        <flag name="textAutoCorrect" value="0x00008001" />
+        <flag name="textAutoComplete" value="0x00010001" />
+        <flag name="textMultiLine" value="0x00020001" />
+        <flag name="textImeMultiLine" value="0x00040001" />
+        <flag name="textNoSuggestions" value="0x00080001" />
+        <flag name="textUri" value="0x00000011" />
+        <flag name="textEmailAddress" value="0x00000021" />
+        <flag name="textEmailSubject" value="0x00000031" />
+        <flag name="textShortMessage" value="0x00000041" />
+        <flag name="textLongMessage" value="0x00000051" />
+        <flag name="textPersonName" value="0x00000061" />
+        <flag name="textPostalAddress" value="0x00000071" />
+        <flag name="textPassword" value="0x00000081" />
+        <flag name="textVisiblePassword" value="0x00000091" />
+        <flag name="textWebEditText" value="0x000000a1" />
+        <flag name="textFilter" value="0x000000b1" />
+        <flag name="textPhonetic" value="0x000000c1" />
+        <flag name="number" value="0x00000002" />
+        <flag name="numberSigned" value="0x00001002" />
+        <flag name="numberDecimal" value="0x00002002" />
+        <flag name="phone" value="0x00000003" />
+        <flag name="datetime" value="0x00000004" />
+        <flag name="date" value="0x00000014" />
+        <flag name="time" value="0x00000024" />
+    </attr>
+
+    <attr name="imeOptions">
+        <flag name="normal" value="0x00000000" />
+        <flag name="actionUnspecified" value="0x00000000" />
+        <flag name="actionNone" value="0x00000001" />
+        <flag name="actionGo" value="0x00000002" />
+        <flag name="actionSearch" value="0x00000003" />
+        <flag name="actionSend" value="0x00000004" />
+        <flag name="actionNext" value="0x00000005" />
+        <flag name="actionDone" value="0x00000006" />
+        <flag name="actionPrevious" value="0x00000007" />
+        <flag name="flagNoPersonalizedLearning" value="0x1000000" />
+        <flag name="flagNoFullscreen" value="0x2000000" />
+        <flag name="flagNavigatePrevious" value="0x4000000" />
+        <flag name="flagNavigateNext" value="0x8000000" />
+        <flag name="flagNoExtractUi" value="0x10000000" />
+        <flag name="flagNoAccessoryAction" value="0x20000000" />
+        <flag name="flagNoEnterAction" value="0x40000000" />
+        <flag name="flagForceAscii" value="0x80000000" />
+    </attr>
+
+</resources>

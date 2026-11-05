@@ -1,0 +1,204 @@
+
+@mixin sormas-optiongroup {
+	
+  .v-select-optiongroup-horizontal {	
+  
+	  padding-right: 2px;
+  
+	  .v-radiobutton, .v-checkbox {
+	    margin: 0 -2px -2px 0 !important;
+	    padding: 0 !important;
+	    border: $v-border;
+	    border-radius: 0;
+	    font-size: 11px;
+	    text-transform: uppercase;
+	      
+	    &:first-child {
+	      border-radius: 4px 0 0 4px; 
+	      margin-left: 0 !important;
+	    }
+	    &:last-child {
+	      border-radius: 0 4px 4px 0; 
+	    }
+	    
+	    &.v-radiobutton-disabled label {
+	      cursor: default;
+	      color: #888;
+	    }
+	    
+	    :root & > input {
+	      display: none;
+		  
+	      & ~ label {
+	        margin-bottom: 0;
+	        padding: 4px 8px;
+	        height: 28px;
+	        line-height: 20px;
+	      }
+	    
+		  &:checked ~ label {
+	        background: $v-focus-color;
+	      }
+	
+	      & ~ label:before,
+	      & ~ label:after {
+	        content: none;
+	      }
+	    }
+	  }
+		
+	  &.soft-required,
+	  &.v-required {
+	  	.v-radiobutton, .v-checkbox {
+		  border-color: $v-selection-color;
+        }
+      }
+     
+      &.error-color-primary {
+	  	&.v-select-optiongroup-error {
+	  	  .v-radiobutton {
+	  	  	border-color: $v-error-indicator-color !important;
+	  	  }
+	  	}
+      }
+     
+      &.v-select-optiongroup-error {
+	  	.v-radiobutton {
+	  	  border-color: $v-error-indicator-color;
+	  	}
+	  }
+
+	  &.v-select-optiongroup-error-info {
+		  .v-radiobutton, .v-checkbox {
+			  border-color: #00a7f5 !important;
+		  }
+	  }
+		
+	  &.v-select-optiongroup-caption-inline {
+	  	text-align: right;
+	  }
+	 
+	  &.v-select-optiongroup-caption-area-inline {
+	  	text-align: right;
+	  }
+	  	
+	  &.v-select-optiongroup-horizontal-subtle {
+	  	margin-bottom: 0px;
+ 		.v-radiobutton {
+	      border: $v-border-subtle;
+    	  font-size: 12px;
+ 	  	  :root & > input {
+ 	        &:checked ~ label {
+	      	  background: $v-selection-color;
+	      	  color: #FFF;
+	    	}
+	  	  }
+		}
+  	  }
+  	 
+  	  &.v-select-optiongroup-horizontal-primary {
+  	  	.v-radiobutton {
+  	  	  border: $v-border-subtle;
+  	  	  font-size: 13px;
+  	  	  :root & > input {
+  	  	  	&:checked ~ label {
+  	  	  	  background: $v-selection-color;
+  	  	  	  color: #FFF;
+  	  	  	}
+  	  	  }
+  	  	}
+  	  }
+  	 
+  	  &.v-select-optiongroup-horizontal-switch-critical {
+  	  	.v-radiobutton {
+  	  	  &:first-child {
+  	  	  	:root & > input {
+  	  	  	  &:checked ~ label {
+  	  	  	  	background: lighten($s-critical-color, 25%);
+  	  	  	  }
+  	  	    }
+  	  	  }
+  	  	}
+  	  }
+  }
+ 
+  .v-select-optiongroup-checkboxes-horizontal {
+  
+  	.v-select-option {
+  	  display: inline-block;
+  	  
+  	  	.v-radiobutton {
+  	  	  padding-right: 10px;
+  	  	}
+  	}
+  	
+  }
+ 
+  .v-select-optiongroup {
+  	
+  	.v-radiobutton {	 
+	  &.v-radiobutton-disabled {
+	  	& > input {
+	  	  & ~ label:before,
+	  	  & ~ label:after {
+	  	  	border-color: $v-focus-color !important;
+	  	  }
+	  	}
+	    label {
+	  	  cursor: default;
+	    }
+	  }
+	}
+  	
+ 	&.soft-required,
+ 	&.v-required {
+	  .v-radiobutton {
+	 	& > input {
+	  	  & ~ label:before,
+	      & ~ label:after {
+		    border-color: $v-selection-color;
+		  }
+        }
+	  }
+    }
+
+	  &.v-select-optiongroup-grid-layout {
+		  .v-radiobutton {
+			  width: 50%;
+
+			  label {
+				  width: 100%;
+				  text-align: center;
+			  }
+		  }
+	  }
+
+    &.v-select-optiongroup-max-height-150 {
+        max-height: 150px;
+        overflow-y: auto;
+    }
+  }
+
+  .v-caption-caption-inline {
+    float: left;
+    padding-top: 7px;
+    margin-bottom: -30px;
+    margin-right: 160px;
+    font-weight: 500;
+    font-size: 12px;
+    text-transform: none;
+    white-space: inherit;
+  }
+ 
+  .v-caption-caption-area-inline {
+    float: left;
+    padding-top: 7px;
+    margin-right: 20px;
+    margin-bottom: 2px;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: none;
+    white-space: inherit;
+  }
+ 
+}

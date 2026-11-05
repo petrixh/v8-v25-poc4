@@ -1,0 +1,51 @@
+
+$v-textfield-background-color--readonly: $v-app-background-color !default;
+
+@mixin sormas-textfield {
+
+  .v-textfield {
+
+    background-color: $v-background-color;
+  
+    &.v-readonly {
+      border: none;
+      padding: 0;
+      background: inherit;
+      color: inherit;
+      height: inherit;
+    }
+   
+    &.soft-required,
+    &.v-required {
+  	  border-color: $v-selection-color;
+	}
+
+	&.error-color-primary {
+	  &.v-textfield-error {
+	  	border-color: $v-error-indicator-color !important;
+	  }
+    }
+  }
+
+  // Hide spinner buttons from number input
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .v-textfield-row {
+    float: right;
+  }
+
+  .v-caption-caption-inline {
+    float: left;
+    padding-top: 7px;
+    margin-bottom: -30px;
+    margin-right: 160px;
+    font-weight: 500;
+    font-size: 12px;
+    text-transform: none;
+    white-space: inherit;
+  }
+}

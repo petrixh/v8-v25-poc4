@@ -1,0 +1,235 @@
+/*
+ * SORMAS® - Surveillance Outbreak Response Management & Analysis System
+ * Copyright © 2016-2018 Helmholtz-Zentrum für Infektionsforschung GmbH (HZI)
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package de.symeda.sormas.app.contact.edit;
+
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Set;
+
+import de.symeda.sormas.api.CountryHelper;
+import de.symeda.sormas.api.Disease;
+import de.symeda.sormas.api.contact.ContactCategory;
+import de.symeda.sormas.api.contact.ContactProximity;
+import de.symeda.sormas.api.contact.ContactRelation;
+import de.symeda.sormas.api.person.Sex;
+import de.symeda.sormas.api.utils.DateHelper;
+import de.symeda.sormas.api.utils.YesNoUnknown;
+import de.symeda.sormas.app.BaseEditFragment;
+import de.symeda.sormas.app.R;
+import de.symeda.sormas.app.backend.caze.Case;
+import de.symeda.sormas.app.backend.common.DatabaseHelper;
+import de.symeda.sormas.app.backend.config.ConfigProvider;
+import de.symeda.sormas.app.backend.contact.Contact;
+import de.symeda.sormas.app.caze.edit.CaseNewFragment;
+import de.symeda.sormas.app.component.Item;
+import de.symeda.sormas.app.databinding.FragmentContactNewLayoutBinding;
+import de.symeda.sormas.app.person.edit.PersonValidator;
+import de.symeda.sormas.app.util.DataUtils;
+import de.symeda.sormas.app.util.DiseaseConfigurationCache;
+import de.symeda.sormas.app.util.InfrastructureDaoHelper;
+import de.symeda.sormas.app.util.InfrastructureFieldsDependencyHandler;
+
+public class ContactNewFragment extends BaseEditFragment<FragmentContactNewLayoutBinding, Contact, Contact> {
+
+	public static final String TAG = CaseNewFragment.class.getSimpleName();
+
+	private Contact record;
+	private Case sourceCase;
+
+	private List<Item> relationshipList;
+	private List<Item> initialRegions;
+	private List<Item> initialDistricts;
+	private List<Item> initialCommunities;
+	private List<Item> diseaseList;
+	private List<Item> sexList;
+	private List<Item> categoryList;
+
+	public static ContactNewFragment newInstance(Contact activityRootData) {
+		return newInstance(ContactNewFragment.class, null, activityRootData);
+	}
+
+	@Override
+	protected String getSubHeadingTitle() {
+		return getResources().getString(R.string.caption_new_contact);
+	}
+
+	@Override
+	public Contact getPrimaryData() {
+		return record;
+	}
+
+	@Override
+	protected void prepareFragmentData() {
+		record = getActivityRootData();
+		if (record.getCaseUuid() != null) {
+			sourceCase = DatabaseHelper.getCaseDao().queryUuidBasic(record.getCaseUuid());
+		}
+		relationshipList = DataUtils.getEnumItems(ContactRelation.class, true);
+		initialRegions = InfrastructureDaoHelper.loadRegionsByServerCountry();
+		initialDistricts = InfrastructureDaoHelper.loadDistricts(record.getRegion());
+		initialCommunities = InfrastructureDaoHelper.loadCommunities(record.getDistrict());
+		diseaseList = DataUtils.toItems(DiseaseConfigurationCache.getInstance().getAllDiseases(true, true, true));
+		sexList = DataUtils.getEnumItems(Sex.class, true);
+		categoryList = DataUtils.getEnumItems(ContactCategory.class, true);
+	}
+
+	@Override
+	public void onLayoutBinding(FragmentContactNewLayoutBinding contentBinding) {
+		contentBinding.setData(record);
+		contentBinding.setYesNoUnknownClass(YesNoUnknown.class);
+
+		PersonValidator
+			.initializeBirthDateValidation(contentBinding.personBirthdateYYYY, contentBinding.personBirthdateMM, contentBinding.personBirthdateDD);
+
+		InfrastructureFieldsDependencyHandler.instance.initializeRegionFields(
+			contentBinding.contactRegion,
+			initialRegions,
+			record.getRegion(),
+			contentBinding.contactDistrict,
+			initialDistricts,
+			record.getDistrict(),
+			contentBinding.contactCommunity,
+			initialCommunities,
+			record.getCommunity());
+
+		contentBinding.contactFirstContactDate.addValueChangedListener(e -> contentBinding.contactLastContactDate.setRequired(e.getValue() != null));
+
+		contentBinding.contactDisease.initializeSpinner(
+			diseaseList,
+			record.getDisease() != null ? record.getDisease() : DiseaseConfigurationCache.getInstance().getDefaultDisease(),
+			e -> {
+				contentBinding.contactContactProximities.setVisibility(e.getValue() == null ? GONE : VISIBLE);
+				if (ConfigProvider.isConfiguredServer(CountryHelper.COUNTRY_CODE_GERMANY)) {
+					contentBinding.contactContactProximityDetails.setVisibility(e.getValue() == null ? GONE : VISIBLE);
+					contentBinding.contactContactCategory.setVisibility(e.getValue() == null ? GONE : VISIBLE);
+				}
+				contentBinding.contactContactProximities.setValue(null);
+				contentBinding.contactContactProximities
+					.setItems(Arrays.asList(ContactProximity.getValues((Disease) e.getValue(), ConfigProvider.getServerLocale())));
+			});
+
+		if (ConfigProvider.isConfiguredServer(CountryHelper.COUNTRY_CODE_GERMANY)) {
+			contentBinding.contactContactProximities.addValueChangedListener(
+				e -> updateContactCategory(contentBinding, (Set<ContactProximity>) contentBinding.contactContactProximities.getValue()));
+		} else {
+			contentBinding.contactContactProximityDetails.setVisibility(GONE);
+			contentBinding.contactContactCategory.setVisibility(GONE);
+		}
+
+		if (record.getCaseUuid() != null) {
+			contentBinding.contactDisease.setVisibility(GONE);
+			contentBinding.contactCaseIdExternalSystem.setVisibility(GONE);
+			contentBinding.contactCaseOrEventInformation.setVisibility(GONE);
+			contentBinding.contactContactProximities
+				.setItems(Arrays.asList(ContactProximity.getValues(sourceCase.getDisease(), ConfigProvider.getServerLocale())));
+		} else {
+			contentBinding.contactDisease.setRequired(true);
+			contentBinding.contactRegion.setRequired(true);
+			contentBinding.contactDistrict.setRequired(true);
+		}
+
+		if (getPrimaryData().getDisease() == null) {
+			contentBinding.contactContactProximities.setVisibility(GONE);
+			contentBinding.contactContactProximityDetails.setVisibility(GONE);
+			contentBinding.contactContactCategory.setVisibility(GONE);
+		}
+
+		ContactValidator.initializeLastContactDateValidation(record, contentBinding);
+	}
+
+	/*
+	 * Only used for Systems in Germany. Follows specific rules for german systems.
+	 */
+	private void updateContactCategory(FragmentContactNewLayoutBinding contentBinding, Set<ContactProximity> proximities) {
+		ContactCategory highestCategory = null;
+		if (proximities != null) {
+			for (ContactProximity proximity : proximities) {
+				if (proximity == null) {
+					continue;
+				}
+				ContactCategory category = getContactCategoryForProximity(proximity);
+				if (category != null && (highestCategory == null || category.ordinal() < highestCategory.ordinal())) {
+					highestCategory = category;
+				}
+			}
+		}
+		contentBinding.contactContactCategory.setValue(highestCategory);
+	}
+
+	private ContactCategory getContactCategoryForProximity(ContactProximity proximity) {
+		if (proximity == null) {
+			return null;
+		}
+		switch (proximity) {
+		case FACE_TO_FACE_LONG:
+		case TOUCHED_FLUID:
+		case AEROSOL:
+			return ContactCategory.HIGH_RISK;
+		case MEDICAL_UNSAFE:
+			return ContactCategory.HIGH_RISK_MED;
+		case MEDICAL_LIMITED:
+			return ContactCategory.MEDIUM_RISK_MED;
+		case SAME_ROOM:
+		case FACE_TO_FACE_SHORT:
+		case MEDICAL_SAME_ROOM:
+			return ContactCategory.LOW_RISK;
+		case MEDICAL_DISTANT:
+		case MEDICAL_SAFE:
+			return ContactCategory.NO_RISK;
+		default:
+			return null;
+		}
+	}
+
+	@Override
+	public void onAfterLayoutBinding(FragmentContactNewLayoutBinding contentBinding) {
+		contentBinding.personSex.initializeSpinner(sexList);
+		contentBinding.contactRelationToCase.initializeSpinner(relationshipList);
+		contentBinding.contactContactCategory.initializeSpinner(categoryList);
+
+		contentBinding.contactFirstContactDate.initializeDateField(getFragmentManager());
+		contentBinding.contactLastContactDate.initializeDateField(getFragmentManager());
+		contentBinding.contactReportDateTime.initializeDateField(getFragmentManager());
+
+		List<Item> monthList = DataUtils.getMonthItems(true);
+		List<Item> yearList = DataUtils.toItems(DateHelper.getYearsToNow(), true);
+		contentBinding.personBirthdateDD.initializeSpinner(new ArrayList<>());
+		contentBinding.personBirthdateMM.initializeSpinner(monthList, field -> {
+			DataUtils.updateListOfDays(
+				contentBinding.personBirthdateDD,
+				(Integer) contentBinding.personBirthdateYYYY.getValue(),
+				(Integer) field.getValue());
+		});
+		contentBinding.personBirthdateYYYY.initializeSpinner(yearList, field -> {
+			DataUtils.updateListOfDays(
+				contentBinding.personBirthdateDD,
+				(Integer) field.getValue(),
+				(Integer) contentBinding.personBirthdateMM.getValue());
+		});
+		int year = Calendar.getInstance().get(Calendar.YEAR);
+		contentBinding.personBirthdateYYYY.setSelectionOnOpen(year - 35);
+	}
+
+	@Override
+	public int getEditLayout() {
+		return R.layout.fragment_contact_new_layout;
+	}
+}

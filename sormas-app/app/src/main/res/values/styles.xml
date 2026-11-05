@@ -1,0 +1,687 @@
+<!--
+  ~ SORMAS® - Surveillance Outbreak Response Management & Analysis System
+  ~ Copyright © 2016-2018 Helmholtz-Zentrum für Infektionsforschung GmbH (HZI)
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+    <!-- Martin
+        <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+        <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />-->
+
+    <!-- Toolbar styles -->
+    <style name="AppToolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="android:textColorPrimary">@color/toolbarTextColor</item>
+        <!-- color of the menu overflow icon -->
+        <item name="android:textColorSecondary">@color/toolbarTextColor</item>
+        <!---->
+
+        <!-- navigation icon color -->
+        <item name="colorControlNormal">@color/blue</item>
+        <item name="colorControlHighlight">@color/toolbarActionButtonPressed</item>
+        <item name="subtitleTextAppearance">
+            @style/TextAppearance.Widget.AppCompat.Toolbar.Subtitle
+        </item>
+        <!--<item name="titleTextAppearance">@style/SormasActionBarTitleTextStyle</item>-->
+        <item name="android:minHeight">@dimen/toolBarMinHeight</item>
+    </style>
+
+    <style name="AppToolbarPopup" parent="Base.ThemeOverlay.AppCompat.ActionBar">
+        <item name="android:textColorPrimary">@color/popupMenuListText</item>
+        <item name="android:minHeight">@dimen/toolBarPopupMinHeight</item>
+        <item name="android:listPreferredItemHeightSmall">
+            @dimen/toolBarListPreferredItemHeightSmall
+        </item>
+        <item name="android:dropDownListViewStyle">@style/PopupMenuListView</item>
+    </style>
+
+    <!-- Change Overflow Menu ListView Divider Property -->
+    <style name="PopupMenuListView" parent="Widget.AppCompat.ListView.DropDown">
+        <item name="android:divider">@color/popupMenuListDivider</item>
+        <item name="android:dividerHeight">@dimen/toolBarPopupDividerHeight</item>
+    </style>
+
+    <style name="SormasActionBarMenuTextAppearance" parent="TextAppearance.AppCompat.Widget.ActionBar.Menu">
+        <item name="textAllCaps">false</item>
+    </style>
+
+    <style name="OverflowMenu" parent="Widget.AppCompat.PopupMenu.Overflow">
+        <!-- Required for pre-Lollipop. -->
+        <item name="overlapAnchor">false</item>
+        <!-- Required for Lollipop. -->
+        <item name="android:overlapAnchor">false</item>
+        <item name="android:dropDownVerticalOffset">@dimen/overflowMenuVerticalOffset</item>
+        <!--<item name="android:dropDownHorizontalOffset">50dp</item>-->
+        <item name="android:popupBackground">@drawable/background_options_menu</item>
+        <item name="android:popupElevation">@dimen/overflowMenuElevation</item>
+        <item name="android:dropDownWidth">wrap_content</item>
+    </style>
+
+    <style name="ToolBarStyle.Base" parent="">
+        <item name="popupTheme">@style/AppToolbarPopup</item>
+        <item name="theme">@style/AppToolbar</item>
+    </style>
+
+    <style name="ToolBarStyle" parent="ToolBarStyle.Base">
+        <item name="android:background">@drawable/background_toolbar</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:elevation">@dimen/toolBarElevation</item>
+        <item name="titleTextAppearance">@style/TextAppearance.Widget.Event.Toolbar.Title</item>
+        <!--<item name="android:drawablePadding">10dp</item>-->
+        <!--<item name="android:background"></item>-->
+    </style>
+
+    <style name="TextAppearance.Widget.Event.Toolbar.Title" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textSize">@dimen/toolBarTitleTextSize</item>
+    </style>
+
+    <style name="ActionButton" parent="@android:style/Widget.ActionButton">
+        <!--<item name="android:background">@drawabackground_action_buttonound</item>-->
+        <item name="android:drawablePadding">@dimen/toolBarActionButtonDrawablePadding</item>
+        <item name="android:paddingStart">@dimen/toolBarActionButtonPaddingStart</item>
+        <item name="android:paddingEnd">@dimen/toolBarActionButtonPaddingEnd</item>
+        <item name="android:gravity">center</item>
+    </style>
+    <!-- /Toolbar styles -->
+
+
+    <!-- CONTROL STYLES -->
+
+    <style name="ControlSingleColumnStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="ControlFirstOfTwoColumnsStyle">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <style name="ControlSecondOfTwoColumnsStyle" parent="ControlFirstOfTwoColumnsStyle">
+        <item name="android:layout_marginStart">@dimen/control_spacing</item>
+    </style>
+
+    <style name="TextViewSecondOfTwoColumnsStyle" parent="ControlSecondOfTwoColumnsStyle">
+        <item name="android:layout_marginStart">@dimen/control_spacing</item>
+        <item name="android:layout_marginTop">30dp</item>
+    </style>
+
+    <style name="ControlLabelStyle">
+        <item name="android:textColor">@color/controlLabelColor</item>
+        <item name="android:textSize">@dimen/controlLabelSize</item>
+        <item name="android:paddingTop">@dimen/controlLabelMarginTop</item>
+        <item name="android:paddingBottom">@dimen/controlLabelMarginBottom</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">false</item>
+        <item name="android:focusableInTouchMode">false</item>
+    </style>
+
+    <style name="ControlLabelFilterStyle" parent="ControlLabelStyle">
+        <item name="android:textColor">@color/whiteOpaque</item>
+        <item name="android:clickable">false</item>
+        <item name="android:padding">8dp</item>
+    </style>
+
+    <style name="ControlLabelRowStyle" parent="ControlLabelStyle">
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">@dimen/row_entry_secondary_text_size</item>
+        <item name="android:textColor">@color/listActivityRowPrimaryText</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="FilterCheckBoxLabelStyle">
+        <item name="android:textColor">@color/controlTextColor</item>
+        <item name="android:textSize">@dimen/textSizeLarge</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:focusable">true</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+    </style>
+
+
+    <style name="CheckBoxLabelStyle">
+        <item name="android:textColor">@color/controlLabelColor</item>
+        <item name="android:textSize">@dimen/controlLabelSize</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+    </style>
+
+    <style name="RequiredIndicatorStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_gravity">top</item>
+        <item name="android:paddingStart">6dp</item>
+        <item name="android:text">@string/indicator_required</item>
+        <item name="android:textColor">@color/watchOut</item>
+        <item name="android:textSize">@dimen/textSizeNormal</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="SoftRequiredIndicatorStyle" parent="@style/RequiredIndicatorStyle">
+        <item name="android:text">@string/indicator_soft_required</item>
+        <item name="android:textColor">@color/controlLabelColor</item>
+    </style>
+
+    <style name="WarningIndicatorStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">top</item>
+        <item name="android:layout_marginStart">6dp</item>
+        <item name="android:text">@string/indicator_warning</item>
+        <item name="android:background">@drawable/background_rounded_edges_warning</item>
+        <item name="android:textColor">@color/whiteOpaque</item>
+        <item name="android:textSize">@dimen/verySmallTextSize</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:minWidth">30dp</item>
+        <item name="android:padding">2dp</item>
+    </style>
+
+    <style name="ErrorIndicatorStyle" parent="WarningIndicatorStyle">
+        <item name="android:text">@string/indicator_error</item>
+        <item name="android:background">@drawable/background_rounded_edges_error</item>
+    </style>
+
+    <style name="ControlTextFieldStyle">
+        <item name="android:layout_height">@dimen/maxControlHeight</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:minHeight">@dimen/maxControlHeight</item>
+        <item name="android:maxHeight">@dimen/maxControlHeight</item>
+        <item name="android:layout_marginBottom">@dimen/controlMarginBottom</item>
+        <item name="android:background">@drawable/selector_text_control_edit</item>
+        <item name="android:cursorVisible">true</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textColor">@color/controlTextColor</item>
+        <item name="android:textColorHint">@color/controlTextViewHint</item>
+        <item name="android:textCursorDrawable">@drawable/cursor</item>
+        <item name="android:textIsSelectable">true</item>
+        <item name="android:textSize">@dimen/defaultControlTextSize</item>
+    </style>
+
+    <style name="ControlTextFieldMultiRowStyle" parent="ControlTextFieldStyle">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingTop">@dimen/textViewTopPadding</item>
+        <item name="android:paddingBottom">@dimen/textViewBottomPadding</item>
+    </style>
+
+    <style name="ControlTextFieldSlimStyle" parent="ControlTextFieldStyle">
+        <item name="android:textSize">@dimen/slimControlTextSize</item>
+        <item name="android:paddingTop">@dimen/slimTextViewTopPadding</item>
+        <item name="android:paddingBottom">@dimen/slimTextViewBottomPadding</item>
+        <item name="android:layout_height">@dimen/slimControlHeight</item>
+        <item name="android:minHeight">@dimen/slimControlHeight</item>
+        <item name="android:maxHeight">@dimen/slimControlHeight</item>
+        <item name="android:layout_marginBottom">0dp</item>
+    </style>
+
+    <style name="ControlTextFieldReadStyle">
+        <item name="android:background">@color/controlReadTextViewBackground</item>
+        <item name="android:cursorVisible">true</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:focusable">false</item>
+        <item name="android:textColor">@color/controlReadTextColor</item>
+        <item name="android:textColorHint">@color/controlReadTextViewHint</item>
+        <item name="android:textSize">@dimen/controlReadTextSize</item>
+        <item name="android:layout_marginBottom">@dimen/controlMarginBottom</item>
+    </style>
+
+    <style name="ControlTextFieldReadDistinctStyle" parent="ControlTextFieldReadStyle">
+        <item name="android:background">@drawable/background_control_text_read_form_style</item>
+        <item name="android:paddingTop">@dimen/teboTextReadVerticalPadding</item>
+        <item name="android:paddingBottom">@dimen/teboTextReadVerticalPadding</item>
+        <item name="android:paddingStart">@dimen/textViewRightPadding</item>
+        <item name="android:paddingEnd">@dimen/textViewRightPadding</item>
+    </style>
+
+    <style name="ControlTextFieldReadDistinctSlimStyle" parent="ControlTextFieldReadDistinctStyle">
+        <item name="android:layout_height">@dimen/slimControlHeight</item>
+        <item name="android:minHeight">@dimen/slimControlHeight</item>
+        <item name="android:maxHeight">@dimen/slimControlHeight</item>
+    </style>
+
+    <style name="ControlPopupTextViewEditStyle">
+        <item name="android:paddingLeft">@dimen/textViewLeftPadding</item>
+        <item name="android:paddingRight">@dimen/textViewRightPadding</item>
+        <item name="android:paddingTop">@dimen/textViewTopPadding</item>
+        <item name="android:paddingBottom">@dimen/textViewBottomPadding</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:maxLines">5</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:background">@drawable/control_link_edittextview_background_selector
+        </item>
+        <item name="android:textColor">@color/control_link_edittextview_color_selector</item>
+        <item name="android:textColorHint">@color/control_link_edittextview_hint_color_selector
+        </item>
+        <item name="android:drawablePadding">@dimen/contentHorizontalSpacing</item>
+        <item name="android:layout_marginBottom">@dimen/controlMarginBottom</item>
+    </style>
+
+    <style name="ControlPopupTextViewEditSlimStyle" parent="ControlPopupTextViewEditStyle">
+        <item name="android:textSize">@dimen/slimControlTextSize</item>
+        <item name="android:layout_height">@dimen/slimControlHeight</item>
+        <item name="android:paddingTop">@dimen/slimTextViewTopPadding</item>
+        <item name="android:paddingBottom">@dimen/slimTextViewBottomPadding</item>
+    </style>
+
+    <style name="ControlDateOrTimePickerInputStyle" parent="@style/ControlTextFieldStyle">
+        <item name="android:cursorVisible">false</item>
+        <item name="android:textIsSelectable">false</item>
+    </style>
+
+    <style name="ControlDateOrTimePickerSlimInputStyle" parent="@style/ControlTextFieldSlimStyle">
+        <item name="android:cursorVisible">false</item>
+        <item name="android:textIsSelectable">false</item>
+    </style>
+
+    <style name="ControlSpinnerStyle">
+        <item name="android:layout_height">@dimen/maxSpinnerHeight</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:minHeight">@dimen/maxSpinnerHeight</item>
+        <item name="android:maxHeight">@dimen/maxSpinnerHeight</item>
+        <item name="android:layout_marginBottom">@dimen/controlMarginBottom</item>
+        <item name="android:background">@drawable/selector_spinner</item>
+        <item name="android:spinnerMode">dialog</item>
+        <item name="android:paddingStart">@dimen/spinnerHorizontalSpacing</item>
+        <item name="android:paddingEnd">@dimen/spinnerIconWidth</item>
+    </style>
+
+    <style name="FilterSpinnerFieldStyle" parent="ControlSpinnerStyle">
+        <item name="android:background">@drawable/selector_spinner_filter</item>
+        <item name="android:layout_marginBottom">0dp</item>
+    </style>
+
+    <style name="FilterTextFieldStyle" parent="ControlTextFieldStyle">
+        <item name="android:background">@drawable/selector_text_filter</item>
+        <item name="android:layout_marginBottom">0dp</item>
+    </style>
+
+    <style name="FilterDateFieldStyle" parent="ControlDateOrTimePickerInputStyle">
+        <item name="android:background">@drawable/selector_text_filter</item>
+        <item name="android:layout_marginBottom">0dp</item>
+    </style>
+
+    <style name="ControlSpinnerSlimStyle" parent="ControlSpinnerStyle">
+        <item name="android:layout_height">@dimen/dropdownListSlimItemHeight</item>
+        <item name="android:minHeight">@dimen/dropdownListSlimItemHeight</item>
+        <item name="android:maxHeight">@dimen/dropdownListSlimItemHeight</item>
+        <item name="android:paddingTop">@dimen/slimTextViewTopPadding</item>
+        <item name="android:paddingBottom">@dimen/slimTextViewBottomPadding</item>
+        <item name="android:textSize">@dimen/slimControlTextSize</item>
+        <item name="android:layout_marginBottom">0dp</item>
+    </style>
+
+    <style name="ControlLinkStyle">
+        <item name="android:height">@dimen/linkButtonHeight</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">@dimen/formActivityLinkButtonTextSize</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Button</item>
+        <item name="android:textColor">@color/selector_color_form_activity_link_button</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">false</item>
+        <item name="android:focusableInTouchMode">false</item>
+    </style>
+
+    <style name="ControlCheckboxStyle">
+        <item name="android:layout_width">@dimen/checkBoxWidth</item>
+        <item name="android:layout_height">@dimen/checkBoxHeight</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:textSize">@dimen/defaultControlTextSize</item>
+        <item name="android:button">@null</item>
+        <item name="android:background">?android:attr/listChoiceIndicatorMultiple</item>
+    </style>
+
+    <style name="FilterCheckboxStyle">
+        <item name="android:layout_width">@dimen/filterCheckBoxWidth</item>
+        <item name="android:layout_height">@dimen/filterCheckBoxHeight</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:textSize">@dimen/slimControlTextSize</item>
+        <item name="android:button">@null</item>
+        <item name="android:background">?android:attr/listChoiceIndicatorMultiple</item>
+    </style>
+
+    <style name="FilterCheckboxFieldStyle">
+        <item name="android:layout_height">@dimen/maxSpinnerHeight</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <!-- /CONTROL STYLES -->
+
+    <style name="LayoutContentStyle">
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+    </style>
+
+    <style name="LayoutSingleContentSpaceBelowStyle" parent="LayoutContentStyle">
+        <item name="android:paddingLeft">@dimen/fragment_padding</item>
+        <item name="android:paddingRight">@dimen/fragment_padding</item>
+        <item name="android:paddingTop">@dimen/fragment_padding</item>
+        <item name="android:paddingBottom">64dp</item>
+    </style>
+
+    <style name="LayoutMultipleContentSpaceBelowStyle" parent="LayoutContentStyle">
+        <item name="android:paddingBottom">40dp</item>
+    </style>
+
+    <style name="ImageCaptionStyle">
+        <item name="android:textColor">@color/controlLabelColor</item>
+        <item name="android:textSize">@dimen/controlLabelSize</item>
+        <item name="android:layout_marginBottom">@dimen/field_padding_8</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="DarkColorStyle">
+        <item name="android:textColor">@color/normalText</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="PrimaryButtonStyle">
+        <item name="android:layout_height">@dimen/primaryButtonHeight</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingLeft">@dimen/buttonHorizontalPadding</item>
+        <item name="android:paddingRight">@dimen/buttonHorizontalPadding</item>
+        <item name="android:textColor">@color/primaryButtonText</item>
+        <item name="android:background">@drawable/selector_button_primary</item>
+        <item name="android:elevation">@dimen/primaryButtonElevation</item>
+    </style>
+
+    <style name="EmptyListHintStyle">
+        <item name="android:paddingTop">@dimen/parentLayoutVerticalPadding</item>
+        <item name="android:paddingBottom">@dimen/parentLayoutVerticalPadding</item>
+        <item name="android:paddingLeft">@dimen/parentLayoutHorizontalPadding</item>
+        <item name="android:paddingRight">@dimen/parentLayoutHorizontalPadding</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textColor">@color/controlTextColor</item>
+        <item name="android:textSize">@dimen/defaultControlTextSize</item>
+        <item name="android:textStyle">italic</item>
+    </style>
+
+
+    <style name="LoginHeading1">
+        <item name="android:textColor">@color/normalText</item>
+        <item name="android:textSize">@dimen/loginHeadingTextSize</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="LoginHeading2" parent="LoginHeading1">
+        <item name="android:layout_marginBottom">@dimen/loginHeading2LayoutMarginBottom</item>
+    </style>
+
+    <style name="LoginSubHeadingText">
+        <item name="android:textColor">@color/gray_70</item>
+        <item name="android:textSize">@dimen/loginServiceTextSize</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="LoginSignInText">
+        <item name="android:textColor">@color/lightBlue</item>
+        <item name="android:textSize">@dimen/signInTextSize</item>
+        <item name="android:fontFamily">sans-serif-black</item>
+    </style>
+
+    <style name="LoginSignInTagLineText">
+        <item name="android:textColor">@color/gray_70</item>
+        <item name="android:layout_marginBottom">32dp</item>
+    </style>
+
+    <style name="LoginSubHeadingSeparator">
+        <item name="android:layout_width">@dimen/serviceSeparatorWidth</item>
+        <item name="android:layout_height">@dimen/serviceSeparatorHeight</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:layout_marginLeft">@dimen/serviceSeparatorMarginLeft</item>
+        <item name="android:layout_marginRight">@dimen/serviceSeparatorMarginRight</item>
+        <item name="android:background">@drawable/service_separator</item>
+    </style>
+
+    <style name="SubtleButtonStyle">
+        <item name="android:gravity">center</item>
+        <item name="android:height">@dimen/primaryButtonHeight</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Button</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textColor">@color/selector_color_settings_button</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="LinkButtonStyle">
+        <item name="android:gravity">center</item>
+        <item name="android:height">@dimen/linkButtonHeight</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">@dimen/linkButtonTextSize</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Button</item>
+        <item name="android:textColor">@color/selector_color_link_button</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="PinButtonStyle">
+        <item name="android:layout_width">@dimen/pinButtonWidth</item>
+        <item name="android:layout_height">@dimen/pinButtonHeight</item>
+        <item name="android:background">@drawable/selector_pin_button</item>
+        <item name="android:textSize">@dimen/pinButtonTextSize</item>
+        <item name="android:textColor">@color/selector_color_text_pin_button</item>
+        <item name="android:elevation">@dimen/pinButtonElevation</item>
+    </style>
+
+    <style name="ToolTipStyleOverride">
+        <item name="ttlm_padding">@dimen/tooltipDefaultPadding</item>
+        <item name="ttlm_strokeColor">@android:color/transparent</item>
+        <item name="ttlm_backgroundColor">@color/lighterBlue</item>
+        <item name="ttlm_strokeWeight">@dimen/tooltipDefaultStrokeWeight</item>
+        <item name="ttlm_cornerRadius">@dimen/tooltipDefaultCornerRadius</item>
+        <item name="ttlm_arrowRatio">1.4</item>
+        <item name="android:textAppearance">@style/ToolTipTextAppearanceStyle</item>
+        <item name="ttlm_overlayStyle">@style/ToolTipOverlayStyleOverride</item>
+        <item name="ttlm_elevation">@dimen/tooltipDefaultElevation</item>
+    </style>
+
+    <style name="ToolTipOverlayStyleOverride">
+        <item name="android:color">@color/tooltip_overlay_background_default</item>
+        <item name="ttlm_repeatCount">99</item>
+        <item name="ttlm_duration">600</item>
+        <item name="android:alpha">0.5</item>
+        <item name="android:layout_margin">24dp</item>
+    </style>
+    <!-- Text color, typeface, size, and style for "small" text. Defaults to secondary text color. -->
+    <style name="ToolTipTextAppearanceStyle">
+        <item name="android:textSize">12sp</item>
+        <item name="textAllCaps">false</item>
+        <item name="android:textColor">@color/normalText</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="NavigationDrawerStyle">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="SummaryCellTitleStyle">
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">@dimen/summaryCellTitleTextSize</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="SummaryVisualizationValueStyle">
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">@dimen/summaryVisualizationValueTextSize</item>
+    </style>
+
+    <style name="SummaryVisualizationPercentageStyle">
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">@dimen/summaryVisualizationPercentageTextSize</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="CircularProgressDefaultStyle">
+        <item name="android:layout_gravity">center</item>
+        <item name="donut_finished_color">@color/circularProgressFinishedDefault</item>
+        <item name="donut_unfinished_color">@color/circularProgressUnfinishedDefault</item>
+        <item name="donut_finished_stroke_width">@dimen/circularProgressFinishedStrokeWidth</item>
+        <item name="donut_unfinished_stroke_width">@dimen/circularProgressUnfinishedStrokeWidth
+        </item>
+        <item name="donut_max">@integer/circularProgressMaxValue</item>
+        <item name="donut_text_size">@dimen/circularProgressTextSize</item>
+    </style>
+
+    <style name="EnterPinInputDisplayStyle">
+        <item name="android:ellipsize">start</item>
+        <item name="android:enabled">false</item>
+        <item name="android:gravity">center</item>
+        <item name="android:inputType">numberPassword</item>
+        <item name="android:maxLength">1</item>
+        <item name="android:textColor">@color/pinMask</item>
+        <item name="android:textSize">@dimen/enterPinInputDisplayTextSize</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+
+    <!-- Sub heading with bottom margin -->
+    <style name="HeadingStyle">
+        <item name="android:textColor">@color/normalText</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">@dimen/textSizeXXLarge</item>
+        <item name="android:layout_marginBottom">@dimen/parentLayoutVerticalMargin</item>
+    </style>
+
+    <style name="SubHeadingStyle">
+        <item name="android:textColor">@color/normalText</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">@dimen/readActivitySubHeadingTextSize</item>
+        <item name="android:layout_marginBottom">@dimen/parentLayoutVerticalMargin</item>
+    </style>
+
+    <!-- Sub heading without bottom margin -->
+    <style name="SubHeadingCompactStyle">
+        <item name="android:textColor">@color/normalText</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">@dimen/readActivitySubHeadingTextSize</item>
+    </style>
+
+    <!-- Description of the area below a sub heading -->
+    <style name="SubHeadingDescriptionStyle">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:layout_marginBottom">@dimen/subHeadlineMarginBottom</item>
+        <item name="android:singleLine">false</item>
+        <item name="android:textColor">@color/controlTextColor</item>
+        <item name="android:textIsSelectable">false</item>
+        <item name="android:textSize">@dimen/defaultSubHeadingDescriptionTextSize</item>
+    </style>
+
+    <style name="ReadActivitySubListHeadingNoBMarginStyle">
+        <item name="android:textColor">@color/normalText</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">@dimen/readActivitySubListHeadingTextSize</item>
+    </style>
+
+
+    <style name="FullHorizontalDividerStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/separatorThickness</item>
+        <item name="android:background">@color/viewSeparator</item>
+        <item name="android:layout_marginBottom">@dimen/controlReadTextMarginBottom</item>
+    </style>
+
+    <style name="FullHorizontalDividerStyleNoDefaultMargin">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/separatorThickness</item>
+        <item name="android:background">@color/viewSeparator</item>
+    </style>
+
+    <style name="FluidHorizontalDividerStyle">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">@dimen/separatorThickness</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:layout_marginLeft">@dimen/contentHorizontalSpacing</item>
+        <item name="android:layout_marginRight">@dimen/contentHorizontalSpacing</item>
+        <item name="android:background">@color/viewSeparator</item>
+        <item name="android:layout_marginBottom">@dimen/controlReadTextMarginBottom</item>
+    </style>
+
+    <style name="FormButtonDividerStyle">
+        <item name="android:layout_width">@dimen/separatorThickness</item>
+        <item name="android:layout_height">20dp</item>
+        <item name="android:background">@color/formEditBottomBorder</item>
+        <item name="android:layout_marginTop">@dimen/contentVerticalSpacing</item>
+        <item name="android:layout_marginBottom">@dimen/contentVerticalSpacing</item>
+        <item name="android:layout_marginLeft">@dimen/control_spacing</item>
+        <item name="android:layout_marginRight">@dimen/control_spacing</item>
+    </style>
+
+
+    <!-- Tooltip -->
+    <style name="ToolTipLayoutDefaultStyle">
+        <item name="ttlm_padding">@dimen/ttlm_default_padding</item>
+        <item name="ttlm_strokeColor">@android:color/transparent</item>
+        <item name="ttlm_backgroundColor">?attr/colorAccent</item>
+        <item name="ttlm_strokeWeight">@dimen/ttlm_default_stroke_weight</item>
+        <item name="ttlm_cornerRadius">@dimen/ttlm_default_corner_radius</item>
+        <item name="ttlm_arrowRatio">1.4</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="ttlm_overlayStyle">@style/ToolTipOverlayDefaultStyle</item>
+        <item name="ttlm_elevation">@dimen/ttlm_default_elevation</item>
+    </style>
+
+    <style name="ToolTipOverlayDefaultStyle">
+        <item name="android:color">?attr/colorAccent</item>
+        <item name="ttlm_repeatCount">99</item>
+        <item name="ttlm_duration">600</item>
+        <item name="android:alpha">0.5</item>
+        <item name="android:layout_margin">8dp</item>
+    </style>
+
+    <style name="SummarySectionTitleStyle">
+        <item name="android:paddingTop">@dimen/contentVerticalSpacingDouble</item>
+        <item name="android:paddingBottom">@dimen/contentVerticalSpacingDouble</item>
+        <item name="android:paddingLeft">@dimen/parentLayoutHorizontalPadding</item>
+        <item name="android:paddingRight">@dimen/parentLayoutHorizontalPadding</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/normalText</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="AdditionalTestCaptionStyle">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+</resources>

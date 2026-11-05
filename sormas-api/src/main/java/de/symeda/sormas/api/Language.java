@@ -1,0 +1,126 @@
+package de.symeda.sormas.api;
+
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+
+import de.symeda.sormas.api.i18n.I18nProperties;
+
+public enum Language {
+
+	EN(new Locale("en"), "M/d/yyyy", "M/d/yyyy h:mm a", "M/d"),
+	EN_NG(new Locale("en", "NG"), "dd/MM/yyyy", "dd/MM/yyyy h:mm a", "dd/MM"),
+	EN_GM(new Locale("en", "GM"), "dd/MM/yyyy", "dd/MM/yyyy h:mm", "dd/MM"),
+	EN_LR(new Locale("en", "LR"), "dd/MM/yyyy", "dd/MM/yyyy h:mm", "dd/MM"),
+	EN_GH(new Locale("en", "GH"), "dd/MM/yyyy", "dd/MM/yyyy h:mm a", "dd/MM"),
+	EN_KE(new Locale("en", "KE"), "dd/MM/yyyy", "dd/MM/yyyy h:mm", "dd/MM"),
+	EN_AF(new Locale("en", "AF"), "dd/MM/yyyy", "dd/MM/yyyy h:mm a", "dd/MM"),
+	FR(new Locale("fr", "FR"), "dd/MM/yyyy", "dd/MM/yyyy HH:mm", "dd/MM"),
+	FR_CH(new Locale("fr", "CH"), "dd/MM/yyyy", "dd/MM/yyyy HH:mm", "dd/MM"),
+	FR_TN(new Locale("fr", "TN"), "dd/MM/yyyy", "dd/MM/yyyy HH:mm", "dd/MM"),
+	DE(new Locale("de", "DE"), "dd.MM.yyyy", "dd.MM.yyyy HH:mm", "dd.MM"),
+	DE_CH(new Locale("de", "CH"), "dd.MM.yyyy", "dd.MM.yyyy HH:mm", "dd.MM"),
+	PT_CV(new Locale("pt", "CV"), "dd/MM/yyyy", "dd/MM/yyyy H:mm", "dd/MM"),
+	ES_BO(new Locale("es", "BO"), "dd/MM/yyyy", "dd/MM/yyyy H:mm", "dd/MM"),
+	ES_EC(new Locale("es", "EC"), "dd/MM/yyyy", "dd/MM/yyyy H:mm", "dd/MM"),
+	ES_CU(new Locale("es", "CU"), "dd/MM/yyyy", "dd/MM/yyyy H:mm", "dd/MM"),
+	IT(new Locale("it", "IT"), "dd/MM/yyyy", "dd/MM/yyyy H:mm", "dd/MM"),
+	IT_CH(new Locale("it", "CH"), "dd/MM/yyyy", "dd/MM/yyyy H:mm", "dd/MM"),
+	FI(new Locale("fi", "FI"), "dd.MM.yyyy", "dd.MM.yyyy H.mm", "dd.MM"),
+	PS(new Locale("ps", "AF"), "dd/MM/yyyy", "dd/MM/yyyy HH:mm", "dd/MM"),
+	FA(new Locale("fa", "AF"), "dd/MM/yyyy", "dd/MM/yyyy HH:mm", "dd/MM"),
+	CZ(new Locale("cs", "CZ"), "dd.MM.yyyy", "dd.MM.yyyy HH:mm", "dd.MM."),
+	UR_PK(new Locale("ur", "PK"), "dd/MM/yyyy", "dd/MM/yyyy HH:mm", "dd/MM"),
+	AR(new Locale("ar", "EG"), "dd/MM/yyyy", "dd/MM/yyyy HH:mm", "dd/MM"),
+	KA(new Locale("ka", "GE"), "dd.MM.yyyy", "dd.MM.yyyy HH:mm", "dd.MM"),
+	RU(new Locale("ru", "RU"), "dd.MM.yyyy", "dd.MM.yyyy HH:mm", "dd.MM");
+
+	/**
+	 * Links locale strings to Languages
+	 */
+	private static final Map<String, Language> languageLookup;
+	static {
+		languageLookup = new HashMap<>();
+		for (Language lang : Language.values()) {
+			Locale locale = lang.getLocale();
+			languageLookup.put(createKey(locale.getLanguage(), locale.getCountry()), lang);
+
+			//add first Language enum as default for the plain language Locale
+			String langKey = createKey(locale.getLanguage(), "");
+			if (!languageLookup.containsKey(langKey)) {
+				languageLookup.put(langKey, lang);
+			}
+		}
+	}
+
+	private Locale locale;
+	private String dateFormat;
+	private String dateTimeFormat;
+	private String dayMonthFormat;
+
+	Language(Locale locale, String dateFormat, String dateTimeFormat, String dayMonthFormat) {
+
+		this.locale = locale;
+		this.dateFormat = dateFormat;
+		this.dateTimeFormat = dateTimeFormat;
+		this.dayMonthFormat = dayMonthFormat;
+	}
+
+	@Override
+	public String toString() {
+		return I18nProperties.getEnumCaption(this);
+	}
+
+	public Locale getLocale() {
+		return locale;
+	}
+
+	public String getDateFormat() {
+		return dateFormat;
+	}
+
+	public String getDateTimeFormat() {
+		return dateTimeFormat;
+	}
+
+	public String getDayMonthFormat() {
+		return dayMonthFormat;
+	}
+
+	/**
+	 * @return EN when the locale does not fit any language
+	 */
+	public static Language fromLocaleString(String locale) {
+
+		if (StringUtils.isBlank(locale)) {
+			return EN;
+		}
+
+		String key = createKey(locale.trim().split("[_-]"));
+
+		Language language = languageLookup.get(key);
+
+		if (language == null) {
+			language = EN;
+		}
+
+		return language;
+	}
+
+	private static String createKey(String... localeComponents) {
+
+		//only language and country are factored in
+		StringBuilder sb = new StringBuilder(5);
+		sb.append(localeComponents[0].toLowerCase());
+
+		if (localeComponents.length > 1) {
+			String c = localeComponents[1];
+			if (StringUtils.isNotEmpty(c)) {
+				sb.append('-').append(c.toUpperCase());
+			}
+		}
+		return sb.toString();
+	}
+}

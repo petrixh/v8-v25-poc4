@@ -1,0 +1,520 @@
+/*
+ * SORMAS® - Surveillance Outbreak Response Management & Analysis System
+ * Copyright © 2016-2022 Helmholtz-Zentrum für Infektionsforschung GmbH (HZI)
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package de.symeda.sormas.ui.contact;
+
+import static de.symeda.sormas.ui.utils.CssStyles.LAYOUT_COL_HIDE_INVSIBLE;
+import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.v7.ui.AbstractField;
+import com.vaadin.v7.ui.CheckBox;
+import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.v7.ui.DateField;
+import com.vaadin.v7.ui.OptionGroup;
+import com.vaadin.v7.ui.TextArea;
+import com.vaadin.v7.ui.TextField;
+
+import de.symeda.sormas.api.CountryHelper;
+import de.symeda.sormas.api.Disease;
+import de.symeda.sormas.api.FacadeProvider;
+import de.symeda.sormas.api.caze.CaseDataDto;
+import de.symeda.sormas.api.contact.ContactDto;
+import de.symeda.sormas.api.contact.ContactProximity;
+import de.symeda.sormas.api.contact.ContactRelation;
+import de.symeda.sormas.api.feature.FeatureType;
+import de.symeda.sormas.api.i18n.Captions;
+import de.symeda.sormas.api.i18n.I18nProperties;
+import de.symeda.sormas.api.i18n.Strings;
+import de.symeda.sormas.api.infrastructure.district.DistrictReferenceDto;
+import de.symeda.sormas.api.infrastructure.region.RegionReferenceDto;
+import de.symeda.sormas.api.person.PersonDto;
+import de.symeda.sormas.api.therapy.Drug;
+import de.symeda.sormas.api.utils.DataHelper;
+import de.symeda.sormas.api.utils.Diseases;
+import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
+import de.symeda.sormas.ui.ControllerProvider;
+import de.symeda.sormas.ui.UiUtil;
+import de.symeda.sormas.ui.person.PersonCreateForm;
+import de.symeda.sormas.ui.person.PersonFormHelper;
+import de.symeda.sormas.ui.utils.AbstractEditForm;
+import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.DateComparisonValidator;
+import de.symeda.sormas.ui.utils.FieldHelper;
+import de.symeda.sormas.ui.utils.LayoutUtil;
+import de.symeda.sormas.ui.utils.NullableOptionGroup;
+
+public class ContactCreateForm extends AbstractEditForm<ContactDto> {
+
+	private static final long serialVersionUID = 1L;
+
+	private static final String PERSON_NAME_LOC = "personNameLoc";
+	private static final String CASE_INFO_LOC = "caseInfoLoc";
+	private static final String CHOOSE_CASE_LOC = "chooseCaseLoc";
+	private static final String REMOVE_CASE_LOC = "removeCaseLoc";
+	private static final String ADOPT_ADDRESS_LOC = "adoptAddressLoc";
+	private static final String PROPHYLAXIS_LOC = "prophylaxisLoc";
+
+	//@formatter:off
+	private static final String HTML_LAYOUT =
+			LayoutUtil.loc(PERSON_NAME_LOC) +
+					LayoutUtil.fluidRowLocs(ContactDto.PERSON) +
+					LayoutUtil.fluidRowLocs(ContactDto.RETURNING_TRAVELER) +
+					LayoutUtil.fluidRowLocs(ContactDto.REPORT_DATE_TIME, CaseDataDto.CASE_REFERENCE_NUMBER) +
+					LayoutUtil.fluidRowLocs(ContactDto.DISEASE, ContactDto.DISEASE_DETAILS) +
+					LayoutUtil.fluidRowLocs(6, CASE_INFO_LOC, 3, CHOOSE_CASE_LOC, 3, REMOVE_CASE_LOC) +
+					LayoutUtil.fluidRowLocs(ContactDto.CASE_ID_EXTERNAL_SYSTEM) +
+					LayoutUtil.fluidRowLocs(ContactDto.MULTI_DAY_CONTACT) +
+					LayoutUtil.fluidRow(
+					LayoutUtil.fluidColumnLocCss(LAYOUT_COL_HIDE_INVSIBLE,6,0, ContactDto.FIRST_CONTACT_DATE),
+					LayoutUtil.fluidColumnLoc(6, 0, ContactDto.LAST_CONTACT_DATE)) +
+					LayoutUtil.fluidRowLocs(ContactDto.CASE_OR_EVENT_INFORMATION) +
+					LayoutUtil.fluidRowLocs(ContactDto.REGION, ContactDto.DISTRICT) +
+					LayoutUtil.fluidRowLocs(ContactDto.COMMUNITY) +
+					LayoutUtil.fluidRowLocs(ContactDto.CONTACT_PROXIMITIES) +
+					fluidRowLocs(ContactDto.CONTACT_PROXIMITY_DETAILS) +
+					fluidRowLocs(ContactDto.CONTACT_CATEGORY) +
+					LayoutUtil.fluidRowLocs(ContactDto.RELATION_TO_CASE) +
+					LayoutUtil.fluidRowLocs(ADOPT_ADDRESS_LOC) +
+					LayoutUtil.fluidRowLocs(ContactDto.RELATION_DESCRIPTION) +
+					LayoutUtil.fluidRowLocs(ContactDto.DESCRIPTION) +
+						LayoutUtil.loc(PROPHYLAXIS_LOC) +
+						LayoutUtil.fluidRowLocs(4, ContactDto.PROPHYLAXIS_PRESCRIBED, 4, ContactDto.PRESCRIBED_DRUG, 4, ContactDto.PRESCRIBED_DRUG_TEXT);
+	//@formatter:on
+
+	private OptionGroup contactProximities;
+	private Disease disease;
+	private final Boolean hasCaseRelation;
+	private final boolean asSourceContact;
+	private final boolean isPersonReadOnly;
+	private NullableOptionGroup contactCategory;
+	private TextField contactProximityDetails;
+
+	private PersonCreateForm personCreateForm;
+	private Label prophylaxisLabel;
+
+	DateField reportDate;
+	CheckBox multiDayContact;
+	DateField firstContactDate;
+	DateField lastContactDate;
+	ComboBox relationToCase;
+	AdoptAddressLayout adoptAddressLayout;
+
+	ComboBox region;
+	ComboBox district;
+	ComboBox community;
+
+	private final boolean showPersonSearchButton;
+	private Window warningSimilarPersons;
+
+	public ContactCreateForm(Disease disease, boolean hasCaseRelation, boolean asSourceContact, boolean showPersonSearchButton) {
+		this(disease, hasCaseRelation, asSourceContact, showPersonSearchButton, false);
+	}
+
+	/**
+	 * TODO use disease and case relation information given in ContactDto
+	 */
+	public ContactCreateForm(
+		Disease disease,
+		boolean hasCaseRelation,
+		boolean asSourceContact,
+		boolean showPersonSearchButton,
+		boolean isPersonReadOnly) {
+		super(
+			ContactDto.class,
+			ContactDto.I18N_PREFIX,
+			FieldVisibilityCheckers.withDisease(disease)
+				.andWithCountry(FacadeProvider.getConfigFacade().getCountryLocale())
+				.andWithFeatureType(FacadeProvider.getFeatureConfigurationFacade().getActiveServerFeatureConfigurations()));
+
+		this.disease = disease;
+		this.hasCaseRelation = hasCaseRelation;
+		this.asSourceContact = asSourceContact;
+		this.isPersonReadOnly = isPersonReadOnly;
+		this.showPersonSearchButton = showPersonSearchButton;
+
+		addFields();
+
+		setWidth(680, Unit.PIXELS);
+		hideValidationUntilNextCommit();
+	}
+
+	@Override
+	protected void addFields() {
+
+		if (hasCaseRelation == null) {
+			return;
+		}
+
+		reportDate = addField(ContactDto.REPORT_DATE_TIME, DateField.class);
+		addField(CaseDataDto.CASE_REFERENCE_NUMBER, TextField.class);
+		ComboBox cbDisease = addDiseaseField(ContactDto.DISEASE, false, true, true);
+		addField(ContactDto.DISEASE_DETAILS, TextField.class);
+
+		personCreateForm = new PersonCreateForm(false, false, false, showPersonSearchButton);
+		if (isPersonReadOnly) {
+			personCreateForm.setPersonDetailsReadOnly();
+		}
+		personCreateForm.setWidth(100, Unit.PERCENTAGE);
+		personCreateForm.setValue(new PersonDto());
+		getContent().addComponent(personCreateForm, ContactDto.PERSON);
+
+		personCreateForm.getNationalHealthIdField().addTextFieldValueChangeListener(e -> {
+			// Only check if the health ID can be edited
+			if (!personCreateForm.getNationalHealthIdField().isEnabled()) {
+				return;
+			}
+			warningSimilarPersons = PersonFormHelper
+				.warningSimilarPersons(personCreateForm.getNationalHealthIdField().getValue(), null, () -> warningSimilarPersons = null);
+		});
+
+		addField(ContactDto.RETURNING_TRAVELER, NullableOptionGroup.class);
+		region = addInfrastructureField(ContactDto.REGION);
+		district = addInfrastructureField(ContactDto.DISTRICT);
+		community = addInfrastructureField(ContactDto.COMMUNITY);
+
+		multiDayContact = addField(ContactDto.MULTI_DAY_CONTACT, CheckBox.class);
+		firstContactDate = addField(ContactDto.FIRST_CONTACT_DATE, DateField.class);
+		lastContactDate = addField(ContactDto.LAST_CONTACT_DATE, DateField.class);
+		firstContactDate.addValueChangeListener(event -> lastContactDate.setRequired(event.getProperty().getValue() != null));
+		multiDayContact.addValueChangeListener(event -> updateDateComparison());
+
+		List<AbstractField<Date>> validatedFields = Arrays.asList(firstContactDate, lastContactDate, reportDate);
+		validatedFields.forEach(field -> field.addValueChangeListener(r -> {
+			validatedFields.forEach(otherField -> {
+				otherField.setValidationVisible(!otherField.isValid());
+			});
+		}));
+
+		FieldHelper
+			.setVisibleWhen(getFieldGroup(), ContactDto.FIRST_CONTACT_DATE, ContactDto.MULTI_DAY_CONTACT, Collections.singletonList(true), true);
+		updateDateComparison();
+
+		contactProximities = addField(ContactDto.CONTACT_PROXIMITIES, OptionGroup.class);
+		contactProximities.setCaption(I18nProperties.getCaption(Captions.Contact_contactProximityLongForm));
+		contactProximities.setMultiSelect(true);
+		contactProximities.removeStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
+		if (isConfiguredServer(CountryHelper.COUNTRY_CODE_GERMANY)) {
+			contactProximities.addValueChangeListener(e -> {
+				Object value = contactProximities.getValue();
+				if (value instanceof Set) {
+					@SuppressWarnings("unchecked")
+					Set<ContactProximity> proximities = (Set<ContactProximity>) value;
+					updateContactCategory(proximities);
+				}
+			});
+			contactProximityDetails = addField(ContactDto.CONTACT_PROXIMITY_DETAILS, TextField.class);
+			contactCategory = addField(ContactDto.CONTACT_CATEGORY, NullableOptionGroup.class);
+		}
+		addField(ContactDto.DESCRIPTION, TextArea.class).setRows(4);
+		relationToCase = addField(ContactDto.RELATION_TO_CASE, ComboBox.class);
+		addField(ContactDto.RELATION_DESCRIPTION, TextField.class);
+
+		adoptAddressLayout = new AdoptAddressLayout();
+		adoptAddressLayout.setVisible(false);
+		getContent().addComponent(adoptAddressLayout, ADOPT_ADDRESS_LOC);
+
+		addField(ContactDto.CASE_ID_EXTERNAL_SYSTEM, TextField.class);
+		addField(ContactDto.CASE_OR_EVENT_INFORMATION, TextArea.class).setRows(4);
+
+		// Prophylaxis details for IMI (Luxembourg only) - mirrors ContactDataForm
+		prophylaxisLabel = new Label(I18nProperties.getString(Strings.headingProphylaxisLoc));
+		prophylaxisLabel.addStyleName(CssStyles.H3);
+		getContent().addComponent(prophylaxisLabel, PROPHYLAXIS_LOC);
+		prophylaxisLabel.setVisible(Disease.INVASIVE_MENINGOCOCCAL_INFECTION == disease);
+
+		CheckBox prophylaxisPrescribed = addField(ContactDto.PROPHYLAXIS_PRESCRIBED, CheckBox.class);
+		prophylaxisPrescribed.setCaption(I18nProperties.getCaption(Captions.Contact_prophylaxisPrescribed));
+		addField(ContactDto.PRESCRIBED_DRUG, ComboBox.class);
+		addField(ContactDto.PRESCRIBED_DRUG_TEXT, TextField.class);
+
+		initializeVisibilitiesAndAllowedVisibilities();
+
+		region.addValueChangeListener(e -> {
+			RegionReferenceDto regionDto = (RegionReferenceDto) e.getProperty().getValue();
+			FieldHelper
+				.updateItems(district, regionDto != null ? FacadeProvider.getDistrictFacade().getAllActiveByRegion(regionDto.getUuid()) : null);
+		});
+		region.addItems(FacadeProvider.getRegionFacade().getAllActiveByServerCountry());
+		district.addValueChangeListener(e -> {
+			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getProperty().getValue();
+			FieldHelper.updateItems(
+				community,
+				districtDto != null ? FacadeProvider.getCommunityFacade().getAllActiveByDistrict(districtDto.getUuid()) : null);
+		});
+
+		setRequired(true, ContactDto.REPORT_DATE_TIME);
+		FieldHelper.setVisibleWhen(
+			getFieldGroup(),
+			ContactDto.RELATION_DESCRIPTION,
+			ContactDto.RELATION_TO_CASE,
+			Arrays.asList(ContactRelation.OTHER),
+			true);
+		FieldHelper.setVisibleWhen(getFieldGroup(), ContactDto.DISEASE_DETAILS, ContactDto.DISEASE, Arrays.asList(Disease.OTHER), true);
+		FieldHelper.setRequiredWhen(getFieldGroup(), ContactDto.DISEASE, Arrays.asList(ContactDto.DISEASE_DETAILS), Arrays.asList(Disease.OTHER));
+
+		FieldHelper.setVisibleWhen(
+			getFieldGroup(),
+			ContactDto.PRESCRIBED_DRUG,
+			ContactDto.PROPHYLAXIS_PRESCRIBED,
+			Collections.singletonList(Boolean.TRUE),
+			true);
+		FieldHelper.setRequiredWhenNotNull(getFieldGroup(), ContactDto.PROPHYLAXIS_PRESCRIBED, ContactDto.PRESCRIBED_DRUG);
+		FieldHelper.setVisibleWhen(
+			getFieldGroup(),
+			ContactDto.PRESCRIBED_DRUG_TEXT,
+			ContactDto.PRESCRIBED_DRUG,
+			Collections.singletonList(Drug.OTHER),
+			true);
+		FieldHelper.setRequiredWhen(
+			getFieldGroup(),
+			ContactDto.PRESCRIBED_DRUG,
+			Arrays.asList(ContactDto.PRESCRIBED_DRUG_TEXT),
+			Arrays.asList(Drug.OTHER));
+
+		cbDisease.addValueChangeListener(e -> {
+			disease = (Disease) e.getProperty().getValue();
+			setVisible(disease != null, ContactDto.CONTACT_PROXIMITIES);
+			if (isConfiguredServer(CountryHelper.COUNTRY_CODE_GERMANY)) {
+				setVisible(disease == Disease.CORONAVIRUS, ContactDto.CONTACT_CATEGORY, ContactDto.CONTACT_PROXIMITY_DETAILS);
+			}
+			updateContactProximity();
+			updateProphylaxisSectionVisibility();
+		});
+		updateProphylaxisSectionVisibility();
+
+		if (!hasCaseRelation) {
+			Label caseInfoLabel = new Label(I18nProperties.getString(Strings.infoNoSourceCaseSelected), ContentMode.HTML);
+			Button chooseCaseButton = ButtonHelper.createButton(Captions.contactChooseCase, null, ValoTheme.BUTTON_PRIMARY, CssStyles.VSPACE_2);
+			Button removeCaseButton = ButtonHelper.createButton(Captions.contactRemoveCase, null, ValoTheme.BUTTON_LINK);
+
+			CssStyles.style(caseInfoLabel, CssStyles.VSPACE_TOP_4);
+			getContent().addComponent(caseInfoLabel, CASE_INFO_LOC);
+
+			chooseCaseButton.addClickListener(e -> {
+				ControllerProvider.getContactController().openSelectCaseForContactWindow((Disease) cbDisease.getValue(), selectedCase -> {
+					if (selectedCase != null) {
+						caseInfoLabel.setValue(
+							String.format(
+								I18nProperties.getString(Strings.infoContactCreationSourceCase),
+								selectedCase.getPersonFirstName() + " " + selectedCase.getPersonLastName() + " " + "("
+									+ DataHelper.getShortUuid(selectedCase.getUuid()) + ")"));
+						caseInfoLabel.removeStyleName(CssStyles.VSPACE_TOP_4);
+						removeCaseButton.setVisible(true);
+						chooseCaseButton.setCaption(I18nProperties.getCaption(Captions.contactChangeCase));
+
+						getValue().setCaze(selectedCase.toReference());
+						cbDisease.setValue(selectedCase.getDisease());
+						updateFieldVisibilitiesByCase(true);
+					}
+				});
+			});
+			getContent().addComponent(chooseCaseButton, CHOOSE_CASE_LOC);
+
+			removeCaseButton.addClickListener(e -> {
+				getValue().setCaze(null);
+				cbDisease.setValue(null);
+				caseInfoLabel.setValue(I18nProperties.getString(Strings.infoNoSourceCaseSelected));
+				caseInfoLabel.addStyleName(CssStyles.VSPACE_TOP_4);
+				removeCaseButton.setVisible(false);
+				chooseCaseButton.setCaption(I18nProperties.getCaption(Captions.contactChooseCase));
+
+				updateFieldVisibilitiesByCase(false);
+			});
+			getContent().addComponent(removeCaseButton, REMOVE_CASE_LOC);
+			removeCaseButton.setVisible(false);
+		}
+		if (asSourceContact) {
+			setEnabled(false, ContactDto.DISEASE, ContactDto.DISEASE_DETAILS);
+		}
+
+		addValueChangeListener(e -> {
+			updateFieldVisibilitiesByCase(hasCaseRelation);
+			if (!hasCaseRelation && disease == null) {
+				setVisible(false, ContactDto.CONTACT_PROXIMITIES);
+				if (isConfiguredServer("de")) {
+					contactCategory.setVisible(false);
+					contactProximityDetails.setVisible(false);
+				}
+			}
+
+			updateContactProximity();
+
+			if (asSourceContact) {
+				personCreateForm.setVisible(false);
+				personCreateForm.enablePersonFields(false);
+
+				TextField personNameField = addCustomField(PERSON_NAME_LOC, String.class, TextField.class);
+				personNameField.setCaption(I18nProperties.getPrefixCaption(ContactDto.I18N_PREFIX, ContactDto.PERSON));
+				personNameField.setValue(getValue().getPerson().getCaption());
+				personNameField.setReadOnly(true);
+			}
+		});
+	}
+
+	/*
+	 * Only used for Systems in Germany. Follows specific rules for german systems.
+	 * With multiple contact proximities selected, determines category based on highest risk proximity.
+	 */
+	private void updateContactCategory(Set<ContactProximity> proximities) {
+
+		ContactDataForm.deduceContactCategory(proximities, contactCategory);
+	}
+
+	private void updateFieldVisibilitiesByCase(boolean caseSelected) {
+		setVisible(!caseSelected, ContactDto.DISEASE, ContactDto.CASE_ID_EXTERNAL_SYSTEM, ContactDto.CASE_OR_EVENT_INFORMATION);
+		setRequired(!caseSelected, ContactDto.DISEASE, ContactDto.REGION, ContactDto.DISTRICT);
+		ValueChangeListener valueChangeListener = e -> {
+			boolean sameHousehold = ContactRelation.SAME_HOUSEHOLD.equals(relationToCase.getValue());
+			adoptAddressLayout.setVisible(sameHousehold);
+			adoptAddressLayout.setAdoptAddress(sameHousehold);
+		};
+		if (caseSelected) {
+			relationToCase.addValueChangeListener(valueChangeListener);
+			if (ContactRelation.SAME_HOUSEHOLD.equals(relationToCase.getValue())) {
+				boolean sameHousehold = ContactRelation.SAME_HOUSEHOLD.equals(relationToCase.getValue());
+				adoptAddressLayout.setVisible(sameHousehold);
+				adoptAddressLayout.setAdoptAddress(sameHousehold);
+			}
+		} else {
+			relationToCase.removeValueChangeListener(valueChangeListener);
+			adoptAddressLayout.setVisible(false);
+			adoptAddressLayout.setAdoptAddress(false);
+		}
+	}
+
+	private void updateContactProximity() {
+
+		Object valueObj = contactProximities.getValue();
+		@SuppressWarnings("unchecked")
+		Set<ContactProximity> value = valueObj instanceof Set ? (Set<ContactProximity>) valueObj : null;
+		FieldHelper.updateEnumData(
+			contactProximities,
+			Arrays.asList(ContactProximity.getValues(disease, FacadeProvider.getConfigFacade().getCountryLocale())));
+		contactProximities.setValue(value);
+	}
+
+	private void updateProphylaxisSectionVisibility() {
+
+		boolean imiVisible = Disease.INVASIVE_MENINGOCOCCAL_INFECTION == disease;
+
+		// Re-check @Diseases(IMI) against the current disease AND @HideForCountriesExcept("lu") against the deployment country.
+		FieldVisibilityCheckers checkers =
+			FieldVisibilityCheckers.withDisease(disease).andWithCountry(FacadeProvider.getConfigFacade().getCountryLocale());
+
+		for (String propertyId : new String[] {
+			ContactDto.PROPHYLAXIS_PRESCRIBED,
+			ContactDto.PRESCRIBED_DRUG,
+			ContactDto.PRESCRIBED_DRUG_TEXT }) {
+			if (checkers.isVisible(ContactDto.class, propertyId)) {
+				// Re-enable fields that were hidden and disallowed at init (e.g. directory flow, disease = null).
+				addToVisibleAllowedFields(getField(propertyId));
+			}
+		}
+
+		if (imiVisible) {
+			// Re-filter the drug options for the selected disease; the field factory populated them at construction time
+			// (disease may have been null then, e.g. directory flow), so the list would otherwise show non-IMI drugs.
+			FieldHelper.updateEnumData(
+				(ComboBox) getField(ContactDto.PRESCRIBED_DRUG),
+				Diseases.DiseasesConfiguration.getVisibleValues(Drug.class, disease));
+		}
+
+		// Only the checkbox is toggled directly; the two dependent fields are driven by the setVisibleWhen rules.
+		setVisible(imiVisible, ContactDto.PROPHYLAXIS_PRESCRIBED);
+		if (!imiVisible) {
+			getField(ContactDto.PROPHYLAXIS_PRESCRIBED).clear();
+			getField(ContactDto.PRESCRIBED_DRUG).clear();
+			getField(ContactDto.PRESCRIBED_DRUG_TEXT).clear();
+			setVisible(false, ContactDto.PRESCRIBED_DRUG, ContactDto.PRESCRIBED_DRUG_TEXT);
+		}
+
+		prophylaxisLabel.setVisible(imiVisible && checkers.isVisible(ContactDto.class, ContactDto.PROPHYLAXIS_PRESCRIBED));
+	}
+
+	private void hideAndFillJurisdictionFields() {
+
+		region.setVisible(false);
+		region.setValue(FacadeProvider.getRegionFacade().getDefaultInfrastructureReference());
+		district.setVisible(false);
+		district.setValue(FacadeProvider.getDistrictFacade().getDefaultInfrastructureReference());
+		community.setVisible(false);
+		community.setValue(FacadeProvider.getCommunityFacade().getDefaultInfrastructureReference());
+	}
+
+	@Override
+	protected String createHtmlLayout() {
+		return HTML_LAYOUT;
+	}
+
+	public PersonCreateForm getPersonCreateForm() {
+		return personCreateForm;
+	}
+
+	public PersonDto getSearchedPerson() {
+		return personCreateForm.getSearchedPerson();
+	}
+
+	public void setPerson(PersonDto person) {
+		personCreateForm.setPerson(person);
+	}
+
+	public void setPerson(PersonDto person, boolean isNewPerson) {
+		personCreateForm.setPerson(person, isNewPerson);
+	}
+
+	public void setDiseaseReadOnly() {
+		getField(CaseDataDto.DISEASE).setEnabled(false);
+	}
+
+	@Override
+	public void setValue(ContactDto newFieldValue) {
+		super.setValue(newFieldValue);
+		updateDateComparison();
+		adoptAddressLayout.setContact(newFieldValue);
+
+		if (UiUtil.enabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {
+			hideAndFillJurisdictionFields();
+		}
+	}
+
+	private void updateDateComparison() {
+		DateComparisonValidator.removeDateComparisonValidators(firstContactDate);
+		DateComparisonValidator.removeDateComparisonValidators(lastContactDate);
+		DateComparisonValidator.removeDateComparisonValidators(reportDate);
+
+		DateComparisonValidator.addStartEndValidators(lastContactDate, reportDate);
+
+		if (firstContactDate.isVisible() || multiDayContact.getValue() == Boolean.TRUE) {
+			DateComparisonValidator.addStartEndValidators(firstContactDate, lastContactDate);
+			DateComparisonValidator.addStartEndValidators(firstContactDate, reportDate);
+		}
+	}
+
+	public Window getWarningSimilarPersons() {
+		return warningSimilarPersons;
+	}
+}

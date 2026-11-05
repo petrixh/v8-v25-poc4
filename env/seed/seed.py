@@ -72,10 +72,12 @@ REGION = ref("00000000-0000-0000-0000-000000000003")
 DISTRICT = ref("00000000-0000-0000-0000-000000000004")
 COMMUNITY = ref("00000000-0000-0000-0000-000000000005")
 users = {u["userName"]: ref(u["uuid"]) for u in call("GET", "/users/all/0")}
-facilities = {f["name"]: f for f in call("GET", f"/facilities/region/{REGION['uuid']}/0")}
-HOSPITAL = ref(facilities["Default Facility"]["uuid"])
-LAB = ref(facilities["Default Laboratory"]["uuid"])
-POE = ref(next(p["uuid"] for p in call("GET", "/pointsofentry/all/0") if p["name"] == "Default Point Of Entry"))
+# The default facility, laboratory and point of entry by type, not name: their names follow country.locale ("Default
+# Facility" in C1, "Voreingestellte Einrichtung" in C2). SORMAS-CONST* entries are the app's built-in "other"/"none" ones.
+facilities = [f for f in call("GET", f"/facilities/region/{REGION['uuid']}/0") if not f["uuid"].startswith("SORMAS-CONST")]
+HOSPITAL = ref(next(f["uuid"] for f in facilities if f.get("type") != "LABORATORY"))
+LAB = ref(next(f["uuid"] for f in facilities if f.get("type") == "LABORATORY"))
+POE = ref(next(p["uuid"] for p in call("GET", "/pointsofentry/all/0") if not p["uuid"].startswith("SORMAS-CONST")))
 SURVSUP, SURVOFF, LABOFF = users["SurvSup"], users["SurvOff"], users["LabOff"]
 JURISDICTION = {"responsibleRegion": REGION, "responsibleDistrict": DISTRICT, "responsibleCommunity": COMMUNITY}
 

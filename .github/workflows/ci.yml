@@ -1,0 +1,131 @@
+---
+# Build and test every pushed commit once. See CI.md.
+name: CI
+
+on:
+  # Push only, all branches: a pushed commit's checks show on its PR, so a pull_request
+  # trigger would only run the same commit again.
+  push:
+    branches: ['**']
+
+permissions:
+  contents: read
+  actions: read # to look up earlier runs of this commit
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      # One run per commit: end here when this commit already has a successful run of this
+      # workflow (e.g. a branch created at an already checked commit, or a re-run of a green run).
+      - name: Skip if this commit already has a green run
+        id: dedupe
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          wf="${GITHUB_WORKFLOW_REF%@*}"; wf="${wf##*/}"
+          prev=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$wf/runs?head_sha=$GITHUB_SHA&status=success&per_page=100" \
+            --jq "[.workflow_runs[] | select(.id != $GITHUB_RUN_ID)][0].html_url // empty") \
+            || { echo "::warning::Could not query earlier runs; running the full job"; prev=""; }
+          if [ -z "$prev" ] && [ "$GITHUB_RUN_ATTEMPT" -gt 1 ]; then
+            for ((a = 1; a < GITHUB_RUN_ATTEMPT; a++)); do
+              c=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/attempts/$a" --jq '.conclusion // empty') || c=""
+              if [ "$c" = success ]; then prev="attempt $a of this run"; break; fi
+            done
+          fi
+          if [ -n "$prev" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Commit $GITHUB_SHA already has a green run: $prev. Skipping." | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "No earlier green run of $GITHUB_SHA; running the full job."
+          fi
+
+      # The default checkout sets origin to the GitHub URL, which InfoProviderTest needs.
+      - name: Checkout
+        if: steps.dedupe.outputs.skip != 'true'
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 11 (Temurin)
+        if: steps.dedupe.outputs.skip != 'true'
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      # Dependency cache (actions cache, not artifact storage). The project's own artifacts,
+      # installed by this build, are left out.
+      - name: Cache Maven dependencies
+        if: steps.dedupe.outputs.skip != 'true'
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.m2/repository
+            !~/.m2/repository/de/symeda
+          key: ${{ runner.os }}-jdk11-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-jdk11-m2-
+
+      # Testcontainers 1.18.3 (HistoryTablesTest) asks Docker for API 1.32 unless told otherwise;
+      # Docker 29 refuses anything below 1.44 and the test is then skipped silently. 1.44 is
+      # accepted by Docker 25 and later.
+      - name: Docker API version for Testcontainers
+        if: steps.dedupe.outputs.skip != 'true'
+        run: |
+          docker version --format 'Docker server {{.Server.Version}}, API {{.Server.APIVersion}}, minimum API {{.Server.MinAPIVersion}}'
+          echo "api.version=1.44" > "$HOME/.docker-java.properties"
+          java -version 2>&1 | head -1
+          mvn -v | head -1
+
+      - name: Build and test (mvn clean install, default profiles)
+        if: steps.dedupe.outputs.skip != 'true'
+        working-directory: sormas-base
+        run: mvn -B -ntp clean install
+
+      # Test counts per module in the job summary; fails when HistoryTablesTest did not run.
+      - name: Test report
+        if: ${{ !cancelled() && steps.dedupe.outputs.skip != 'true' }}
+        run: |
+          python3 - <<'EOF'
+          import glob, os, sys, xml.etree.ElementTree as ET
+          keys = ('tests', 'failures', 'errors', 'skipped')
+          totals, history = {}, None
+          for f in sorted(glob.glob('*/target/surefire-reports/TEST-*.xml')):
+              root = ET.parse(f).getroot()
+              vals = [int(float(root.get(k, 0))) for k in keys]
+              mod = totals.setdefault(f.split('/')[0], [0, 0, 0, 0])
+              for i, v in enumerate(vals):
+                  mod[i] += v
+              if root.get('name', '').endswith('.HistoryTablesTest'):
+                  history = vals
+          lines = ['### Tests', '', '| Module | Run | Failures | Errors | Skipped |', '|---|---|---|---|---|']
+          lines += ['| %s | %d | %d | %d | %d |' % (m, *v) for m, v in sorted(totals.items())]
+          lines.append('| **Total** | %d | %d | %d | %d |' % tuple(sum(v[i] for v in totals.values()) for i in range(4)))
+          ok = history is not None and history[0] > 0 and history[3] == 0 and history[1] + history[2] == 0
+          lines += ['', 'HistoryTablesTest (Testcontainers): %s' % ('ran, passed' if ok else 'NOT RUN, SKIPPED OR FAILED: %s' % (history,))]
+          text = '\n'.join(lines) + '\n'
+          print(text)
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as s:
+              s.write(text)
+          if not ok:
+              print('::error::HistoryTablesTest did not run and pass (Docker not usable by Testcontainers?)')
+              sys.exit(1)
+          EOF
+
+      # Smoke step goes here, in this job on the artefact just built: start the app with the
+      # reproducible environment scripts and log in (added by a later PR).
+
+      # Diagnostics only on failure; never artefacts. continue-on-error so a full storage quota
+      # never turns a result red.
+      - name: Upload diagnostics
+        if: ${{ failure() && steps.dedupe.outputs.skip != 'true' }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v7
+        with:
+          name: diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            */target/surefire-reports/
+            */target/*.log
+          retention-days: 3
+          if-no-files-found: ignore

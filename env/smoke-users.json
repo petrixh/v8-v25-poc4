@@ -1,0 +1,23 @@
+{
+  "_comment": "Login smoke for env/smoke.cjs (see env/README.md, 'Smoke check'). No passwords here: env/smoke.cjs reads them at run time from sormas-api/src/main/java/de/symeda/sormas/api/utils/DefaultEntityHelper.java. PoeInf (POE_INFORMANT) has SORMAS_REST but not SORMAS_UI, so the web login refuses it by design (errorNoAccessToWeb in sormas-api strings.properties).",
+  "loginPath": "/login",
+  "login": {
+    "user": "#username",
+    "password": "#password",
+    "submit": "[id='Login.doLogIn']"
+  },
+  "loggedInSelector": ".valo-menu",
+  "settleMs": 4000,
+  "maxScrollFactor": 4,
+  "refusedText": "Your user account does not have access to the web application",
+  "users": [
+    { "username": "admin" },
+    { "username": "SurvSup" },
+    { "username": "NatUser" },
+    { "username": "SurvOff" },
+    { "username": "LabOff" },
+    { "username": "HospInf" },
+    { "username": "PoeSup" },
+    { "username": "PoeInf", "expectWebLoginRefused": true }
+  ]
+}

@@ -113,11 +113,68 @@ jobs:
               sys.exit(1)
           EOF
 
-      # Smoke step goes here, in this job on the artefact just built: start the app with the
-      # reproducible environment scripts and log in (added by a later PR).
+      # Smoke, in this job on the artefacts just built: start one app copy with env/, log in as each
+      # web test user, stop the copy. See CI.md and env/README.md ("Smoke check").
+      #
+      # env/up.sh --no-build reuses the image and env/.state/build/deploy only; it cannot take the
+      # target/ directories of this build (without them it would build the app a second time). This
+      # step puts this build's artefacts where env/build.sh would and builds the same Payara image.
+      # Keep it in step with env/build.sh (collect and image).
+      - name: 'Smoke: env/ artefacts and Payara image from this build'
+        if: steps.dedupe.outputs.skip != 'true'
+        run: |
+          source env/lib.sh
+          D=$APP_ENV_DEPLOY_DIR
+          mkdir -p "$D/apps" "$D/setup" "$BUILD_DIR/dl" "$BUILD_DIR/ctx"
+          cp sormas-ear/target/sormas-ear.ear sormas-ui/target/sormas-ui.war sormas-rest/target/sormas-rest.war "$D/apps/"
+          cp sormas-base/setup/{sormas.properties,logback.xml,loginsidebar.html,loginsidebar-header.html,logindetails.html,loginmain.html} "$D/setup/"
+          cat sormas-base/setup/sormas.properties env/sormas.properties.env > "$D/sormas.properties"
+          mvn -B -ntp -q -f sormas-serverlibs/pom.xml -DincludeScope=compile -DoutputDirectory="$D/serverlibs" dependency:copy-dependencies
+          git rev-parse HEAD > "$D/commit"
+          ZIP=$BUILD_DIR/dl/payara-$PAYARA_VERSION.zip
+          curl -sSfL -o "$ZIP" "$PAYARA_ZIP_URL"
+          [ "$(sha1sum < "$ZIP" | cut -c1-40)" = "$(curl -sSfL "$PAYARA_ZIP_URL.sha1" | cut -c1-40)" ] || { echo "::error::Payara zip sha1 mismatch"; exit 1; }
+          cp env/payara/{Dockerfile,payara-setup.sh,entrypoint.sh} "$BUILD_DIR/ctx/"
+          mv "$ZIP" "$BUILD_DIR/ctx/payara.zip"
+          docker build -q -t "$APP_ENV_IMAGE" "$BUILD_DIR/ctx"
+          ls -l "$D/apps"; echo "server libs: $(find "$D/serverlibs" -name "*.jar" | wc -l)"
+
+      - name: 'Smoke: Node 22'
+        if: steps.dedupe.outputs.skip != 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: 'Smoke: Playwright 1.63 and Chromium'
+        if: steps.dedupe.outputs.skip != 'true'
+        run: |
+          npm install -g --no-fund --no-audit playwright@1.63.0
+          playwright install --with-deps chromium
+
+      # One copy with the env/ defaults (port 18080, project sormas-old-env): start, seed, snapshot.
+      - name: 'Smoke: start the app (env/up.sh --no-build)'
+        id: smoke_up
+        if: steps.dedupe.outputs.skip != 'true'
+        run: env/up.sh --no-build
+
+      # Each web test user logs in and the first view loads with no console error and no HTTP >= 400;
+      # PoeInf is refused. Passwords are read from DefaultEntityHelper.java, never printed or written.
+      - name: 'Smoke: log in as each web test user'
+        if: steps.dedupe.outputs.skip != 'true'
+        run: node env/smoke.cjs env/.state/smoke
+
+      # Always, also on failure or cancel, once the start step has run.
+      - name: 'Smoke: app log, stop the app (env/down.sh)'
+        if: ${{ always() && steps.smoke_up.outcome != 'skipped' && steps.dedupe.outputs.skip != 'true' }}
+        run: |
+          source env/lib.sh
+          mkdir -p env/.state/smoke
+          docker logs "$APP_ENV_CONTAINER" > env/.state/smoke/app.log 2>&1 || true
+          env/down.sh
 
       # Diagnostics only on failure; never artefacts. continue-on-error so a full storage quota
-      # never turns a result red.
+      # never turns a result red. The smoke files hold no passwords: screenshots (the password field
+      # is masked), smoke.json and the app's server log.
       - name: Upload diagnostics
         if: ${{ failure() && steps.dedupe.outputs.skip != 'true' }}
         continue-on-error: true
@@ -127,5 +184,6 @@ jobs:
           path: |
             */target/surefire-reports/
             */target/*.log
+            env/.state/smoke/
           retention-days: 3
           if-no-files-found: ignore

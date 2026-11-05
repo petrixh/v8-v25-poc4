@@ -46,6 +46,8 @@ services:
       TZ: Europe/Berlin
     volumes:
       - ${APP_ENV_DEPLOY_DIR:?}:/deploy:ro
+      # This copy's sormas.properties (configuration C1/C2, default-password check), written by up.sh
+      - ${APP_ENV_COPY_DIR}/sormas.properties:/deploy/sormas.properties:ro
     ports:
       - "127.0.0.1:${APP_ENV_PORT:?}:4880"
     depends_on:

@@ -1,12 +1,14 @@
 # Reproducible environment
 
-One command starts a copy of SORMAS in a known state: Payara 5.2022.5 on JDK 11, PostgreSQL 14, a small synthetic data
-set and a local mail sink. Several copies can run side by side, each with its own port, containers and database.
+One command starts a copy of SORMAS in a known state: Payara 5.2022.5 on JDK 11, PostgreSQL 14, a synthetic data set
+from a committed snapshot and a local mail sink, in one of two test configurations (C1 default, C2 Germany with optional
+features). Several copies can run side by side, each with its own port, containers, database and configuration.
 
 ```sh
-env/up.sh          # build, start, seed: http://localhost:18080/sormas-ui/
-env/reset.sh       # back to the seed state
-env/down.sh        # stop and remove this copy
+env/up.sh                        # build, start C1 with its snapshot: http://localhost:18080/sormas-ui/
+env/reset.sh                     # back to the snapshot state
+env/down.sh                      # stop and remove this copy
+APP_ENV_CONFIG=C2 APP_ENV_PORT=18081 APP_ENV_PROJECT=sormas-old-c2 env/up.sh --no-build   # a C2 copy next to it
 ```
 
 Log in with a default user (`admin`, `SurvSup`, `NatUser`, ...; passwords in
@@ -32,8 +34,12 @@ Each script reads these variables; the defaults start one copy.
 | `APP_ENV_STATE_DIR` | `env/.state` | Build output and per-copy files (git-ignored) |
 | `APP_ENV_M2_REPO` | `~/.m2/repository` | Maven repository used by the build container |
 | `APP_ENV_WAIT_S` | `900` | How long `up.sh` waits for the app |
+| `APP_ENV_CONFIG` | `C1` | Test configuration, `C1` or `C2` (see "Configurations") |
+| `APP_ENV_PWCHECK` | `off` | `on`: the "Security Alert: default password" dialog after a default-user login (`skipDefaultPasswordCheck=false`) |
+| `APP_ENV_SEED` | `snapshot` | `up.sh` data: `snapshot` (the committed `env/seed/snapshot-<C>.pgdump`) or `rest` (only the small REST seed; `env/seed/generate.sh` uses it) |
 
-Use the same variables for `up.sh`, `reset.sh` and `down.sh` of one copy. Two copies:
+Use the same variables for `up.sh`, `reset.sh` and `down.sh` of one copy. `APP_ENV_CONFIG`, `APP_ENV_PWCHECK` and
+`APP_ENV_SEED` matter to `up.sh` only: the copy keeps them until `down.sh`. Two copies:
 
 ```sh
 APP_ENV_PORT=18081 APP_ENV_PROJECT=sormas-old-1 env/up.sh
@@ -52,19 +58,24 @@ These scripts follow the replay runner's env-script contract (`up.sh [--no-build
    - `mvn clean install -DskipTests` with Maven 3.9 on JDK 11 in a container (`maven:3.9-eclipse-temurin-11`), default
      profiles, on a clean clone of this checkout's **committed HEAD** in `env/.state/build/src` (uncommitted changes
      are not built; `up.sh` warns). The files under `env/` are used from the working tree.
-   - collects the ear, the two wars, the server libraries and `sormas-base/setup` files into `env/.state/build/deploy`;
-     `sormas.properties` is the stock file plus `env/sormas.properties.env`.
+   - collects the ear, the two wars, the server libraries and `sormas-base/setup` files into `env/.state/build/deploy`.
    - builds the image `sormas-old-env-payara:5.2022.5`: `eclipse-temurin:11-jdk` plus the Payara zip (sha1 checked),
      domain set up as `sormas-base/setup/server-setup.sh` does (`env/payara/`). Works on arm64 and amd64.
    - A lock makes a second build wait for the first. Log: `env/.state/build/build.log`.
 3. Generates a throwaway database password for this copy (`env/.state/copies/<project>/db.env`, mode 600; never in an
-   image or a tracked file) and starts the compose project (`env/compose.yml`): `db` (postgres:14, fresh volume),
-   `mail` (SMTP sink) and `app` (Payara; deploys the ear and the wars at container start).
-4. Waits until `GET /sormas-ui/login` answers 200.
-5. Seeds the data set (`env/seed/seed.py`), then waits for the app's case completeness job (every 2 minutes) so that
-   it has written the seeded cases before the snapshot.
-6. Stops the app's Payara domain, copies the database to the template database `sormas_seed` (the snapshot), starts
-   the domain again and waits for 200. The copy is now in exactly the state `reset.sh` restores.
+   image or a tracked file) and writes the copy's `sormas.properties` (`env/.state/copies/<project>/sormas.properties`,
+   mounted over the shared one): the stock `sormas-base/setup/sormas.properties`, then `env/sormas.properties.env`, then
+   `env/config/<C>.properties`, then `skipDefaultPasswordCheck=false` if `APP_ENV_PWCHECK=on`. Later lines win.
+4. Starts the compose project (`env/compose.yml`): `db` (postgres:14, fresh volume), `mail` (SMTP sink) and `app`
+   (Payara; deploys the ear and the wars at container start). With `APP_ENV_SEED=snapshot` it starts `db` first and
+   loads `env/seed/snapshot-<C>.pgdump` into it (`pg_restore`, objects owned by the app's database user), so that the
+   app's first start finds the data.
+5. Waits until `GET /sormas-ui/login` answers 200. With `APP_ENV_SEED=rest` it seeds the small data set
+   (`env/seed/seed.py`). Then it waits for the app's case completeness job (every 2 minutes) until every case has
+   been written by it, so that the job does not change cases after a reset.
+6. Stops the app's Payara domain, sets the configuration's feature switches (`env/config/<C>.sql`, C2 only), copies the
+   database to the template database `sormas_seed` (the reset point), starts the domain again and waits for 200. The
+   copy is now in exactly the state `reset.sh` restores.
 
 `reset.sh` restores the database from `sormas_seed` and empties the mail sink. Modes (`APP_ENV_RESET_MODE`):
 - `restart` (default): stops the Payara domain, restores, starts it. Nothing in memory survives: no sessions, no cached
@@ -76,40 +87,103 @@ These scripts follow the replay runner's env-script contract (`up.sh [--no-build
 state directory. It is safe after a half-finished `up.sh` and when the copy is already gone. Other copies, the build
 output and the images stay.
 
-Measured on a 10-CPU arm64 host (2026-11-05):
+Measured on a 10-CPU arm64 host (2026-11-05, three copies at once for the snapshot rows):
 
 | Step | Time |
 |---|---|
 | Build (warm Maven repository) | about 1 min |
-| `up.sh --no-build` | 1.5 to 3 min: start about 35 s, seed 5 s, waiting for the completeness job 0 to 2 min, snapshot about 25 s |
+| `up.sh --no-build` (snapshot, C1 or C2) | about 70 s: loading the snapshot 5 s, start about 38 s, reset point about 30 s |
+| `up.sh --no-build` with `APP_ENV_SEED=rest` | 1.5 to 3 min: start about 35 s, seed 5 s, waiting for the completeness job 0 to 2 min, reset point about 25 s |
+| `env/seed/generate.sh --no-build` | about 6 min: the `rest` start above, the generator about 80 s, the completeness job up to 2 min, dump and reset point about 30 s |
 | `reset.sh` (`restart`) | about 25 s |
 | `reset.sh` (`db`) | about 1 s |
 | Memory per copy | app about 2.7 to 3.1 GB (heap limit 4 GB), database about 0.1 GB, mail sink about 10 MB |
 
+## Configurations
+
+`APP_ENV_CONFIG` selects one of two test configurations. Both run with `createDefaultEntities=true`,
+`skipDefaultPasswordCheck=true` (unless `APP_ENV_PWCHECK=on`), `devmode=true` and mail to the local sink
+(`env/sormas.properties.env`), each with its own snapshot.
+
+| | C1 (default) | C2 Germany |
+|---|---|---|
+| `sormas.properties` | stock (`country.locale=en`); `env/config/C1.properties` adds nothing | `country.locale=de-DE` (`env/config/C2.properties`): German texts and date formats for users without a language of their own, and the DE-specific UI (`isConfiguredCountry("de")`) |
+| Features (`featureconfiguration` table) | stock | `env/config/C2.sql` switches on campaigns, AEFI, environments, surveys, self reports, the GDPR consent popup at login and travel entries; external messages and SORMAS-to-SORMAS stay off |
+| Default infrastructure names | "Default Region", "Default Facility", ... | German: "Voreingestelltes Bundesland", "Voreingestellte Einrichtung", ... (made by the app in `country.locale`) |
+
+The feature switches are set in the database because that is where SORMAS keeps them (`docs/SERVER_CUSTOMIZATION.md`;
+the admin UI's Features page offers only two other switches). `up.sh` runs `env/config/<C>.sql` with the app stopped,
+before the reset point, so the app reads them at start. In C2 the GDPR popup opens at every login of a user who has not
+consented; closing it consents to nothing. In C2, `NatUser` has every switched-on menu (Umgebungen, Adverse Events,
+Einreisen, Kampagnen, Self Reports, Surveys); `SurvSup` has all but environments and AEFI (role rights).
+`APP_ENV_PWCHECK=on` works with either configuration.
+
 ## Seed data
 
-Created through the app's REST API (`/sormas-rest/.../push`, Basic auth as `SurvSup`), so the app's own rules apply. All
-records are in the Default region, district and community. Names are obviously synthetic (`Alpha Seedperson`, ...).
-Fixed UUIDs: the short ids the UI shows are `SPER01`, `SCAS01`, `SCON01` and so on.
+`up.sh` loads the configuration's committed snapshot, `env/seed/snapshot-<C>.pgdump` (`pg_dump` custom format of
+`sormas_db`), with its metadata in `env/seed/snapshot-<C>.json`: snapshot date, app commit, generator settings, row
+counts and the dump's sha256. Each snapshot holds the small REST seed and, on top of it, data from SORMAS's own dev-mode
+generator. The new app restores the same files (its schema must match the old app's).
+
+| Snapshot | Snapshot date | Size | Cases (investigation pending) | Contacts | Events (participants) | Samples (at the lab, result pending) | Tasks (SurvOff / SurvSup) | Persons |
+|---|---|---|---|---|---|---|---|---|
+| C1 | 2026-11-05 | 0.96 MB | 84 (57) | 151 | 13 (85) | 41 (40) | 60 (6 / 54) | 232 |
+| C2 | 2026-11-05 | 0.96 MB | 84 (50) | 131 | 13 (76) | 41 (40) | 53 (6 / 47) | 223 |
+
+All records are in the default region and district (the only ones). `SurvSup` and `NatUser` see all of them, `SurvOff`
+those of the district, `LabOff` the samples at the default laboratory.
+
+**Dates.** All dates in a snapshot are relative to its snapshot date and do not move: not on `reset.sh`, not on `up.sh`.
+The REST seed's dates are whole days before or after the snapshot date at 10:00 UTC; the generated records fall in the
+90 days up to the snapshot date. Workflows that need "today" compute it from `snapshotDate` in the metadata (also in
+`env/.state/copies/<project>/seed-date`). The longer a snapshot is in use, the older its data looks to the app (e.g.
+follow-up periods end, tasks become overdue): make a new snapshot when that matters, for both configurations at once.
+
+**REST seed** (`env/seed/seed.py`): created through the app's REST API (`/sormas-rest/.../push`, Basic auth as
+`SurvSup`), so the app's own rules apply. Names are obviously synthetic (`Alpha Seedperson`, ...). Fixed UUIDs: the short
+ids the UI shows are `SPER01`, `SCAS01`, `SCON01` and so on.
 
 | Record | Values |
 |---|---|
 | Persons | 8: Alpha ... Hotel `Seedperson`, fixed sex and birth dates |
-| Cases | 4: SCAS01 COVID-19 confirmed (investigation done), SCAS02 COVID-19 not a case, SCAS03 measles suspect, SCAS04 cholera not yet classified; at the Default Facility |
+| Cases | 4: SCAS01 COVID-19 confirmed (investigation done), SCAS02 COVID-19 not a case, SCAS03 measles suspect, SCAS04 cholera not yet classified; at the default facility |
 | Contact | SCON01: Echo, confirmed contact of SCAS01 |
 | Event | SEVT01 "Seed event: community gathering", COVID-19, moderate risk, with participant Foxtrot (SEVP01) |
-| Sample | SSAM01 of SCAS01 at the Default Laboratory, with a positive PCR test (SPAT01) |
+| Sample | SSAM01 of SCAS01 at the default laboratory, with a positive PCR test (SPAT01) |
 | Tasks | STSK01 case investigation of SCAS02, STSK02 contact follow-up of SCON01, both for SurvOff |
 | Immunization | SIMM01: Golf, COVID-19 vaccination, completed |
-| Travel entry | STRV01: Hotel, via the Default Point Of Entry (the travel entry views are not in SurvSup's menu) |
+| Travel entry | STRV01: Hotel, via the default point of entry (the travel entry views are in the menu in C2 only) |
 
-Dates are whole days relative to the seed date (the UTC date `up.sh` ran, in `env/.state/copies/<project>/seed-date`)
-at 10:00 UTC. A copy keeps its seed date until it is started again with `up.sh`; `reset.sh` does not move it.
+**Generated data** (Configuration > Developer, `DevModeView`, driven by `env/seed/devmode.cjs`): COVID-19 cases,
+contacts of those cases, events with participants (some of them cases or contacts) and samples of cases sent to the
+default laboratory, with the generator's seed `sormasenv` and its default date range (90 days up to the snapshot date).
+The app adds tasks (e.g. case investigation, contact follow-up) for SurvOff and SurvSup by its own rules. Names are
+random combinations from the generator's built-in lists of fictitious first and last names. The generator does not make
+campaign, AEFI, environment, survey, self-report or travel-entry data: those views are empty in C2 apart from STRV01.
 
-Set by the app, not by the seed: creation and change dates, epid numbers, the UUIDs of the default users and of the
-Default Facility, Laboratory and Point Of Entry, and four tasks the app creates by itself when cases and contacts are
-saved (random UUIDs, times of the seeding). Two copies seeded on the same day therefore have the same row counts and
-the same seeded records, but not byte-identical databases.
+The seed makes the generator's choices repeatable, but not the whole data set: UUIDs, creation times and a few values
+(additional test results) are random in the app, and generating again on another day moves all dates. The committed
+snapshot is therefore the fixed data set, not the generator run.
+
+**Make a new snapshot** (for example after a schema change, or to move the dates), per configuration:
+
+```sh
+APP_ENV_CONFIG=C1 APP_ENV_PORT=18081 APP_ENV_PROJECT=sormas-old-gen-c1 env/seed/generate.sh --no-build
+APP_ENV_CONFIG=C2 APP_ENV_PORT=18082 APP_ENV_PROJECT=sormas-old-gen-c2 env/seed/generate.sh --no-build
+# check the counts it prints, look at the data, then commit env/seed/snapshot-C1.* and snapshot-C2.*
+```
+
+`generate.sh` starts a copy with `APP_ENV_SEED=rest` (fresh database, REST seed, the configuration's feature switches),
+then runs the dev-mode generator through the UI as `SurvSup` with the settings at the top of `generate.sh`, waits for the
+case completeness job, stops the app and writes the dump and the metadata. The generator picks source cases for contacts
+and samples within the user's jurisdiction, and `admin`, the only default user with the `DEV_MODE` right, has none; so
+for the run `generate.sh` gives SurvSup's role the `DEV_MODE` right and removes it again before the dump (the role's
+history table `userroles_userrights_history` keeps one row of it). It needs Node and Playwright as the smoke check does. The copy stays up in the new
+snapshot's state; remove it with `down.sh`.
+
+Set by the app, not by the seed: creation and change dates, epid numbers and the UUIDs of the default users and of the
+default facility, laboratory and point of entry. They are in the snapshot, so every copy started from the same
+snapshot has the same row counts and UUIDs (checked for two C1 copies), and `reset.sh` returns to them.
 
 ## Integrations
 

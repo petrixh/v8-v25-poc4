@@ -121,6 +121,30 @@ the same seeded records, but not byte-identical databases.
 - Login: the built-in SORMAS login. No Keycloak.
 - Vaadin runs in production mode (the stock setting).
 
+## Smoke check
+
+`env/smoke.cjs` checks a running copy: each web test user in `env/smoke-users.json` (`admin`, `SurvSup`, `NatUser`,
+`SurvOff`, `LabOff`, `HospInf`, `PoeSup`) logs in, and the first view must load with no console or page error, no HTTP
+response of 400 or more and no collapsed layout (a scroll height over 4 window heights). `PoeInf` must be refused by the
+web login ("Your user account does not have access to the web application"): its role has no web UI right. CI runs it
+after every build (`CI.md`).
+
+```sh
+APP_ENV_PORT=18091 APP_ENV_PROJECT=sormas-old-smoke env/up.sh --no-build
+APP_ENV_PORT=18091 APP_ENV_PROJECT=sormas-old-smoke node env/smoke.cjs   # exit 0: all pass
+APP_ENV_PORT=18091 APP_ENV_PROJECT=sormas-old-smoke env/down.sh
+```
+
+- Base URL: `http://localhost:$APP_ENV_PORT/sormas-ui`, or `APP_ENV_SMOKE_URL`. Output: one screenshot per user (the
+  window is made as tall as the view's scrolling content, up to 4 window heights) and
+  `smoke.json` (results) in the directory given as the first argument, default `env/.state/smoke/<project>`.
+- Needs Node (22 tested) and Playwright for Node 1.63 with Chromium (`npm install -g playwright@1.63.0`,
+  `playwright install chromium`); a local install, a global one or `PW=<path to the playwright module>`.
+- Passwords are read at run time from `DefaultEntityHelper.java`, as the seeding does; the script never prints or
+  writes them.
+- The browser sends a real Chrome user agent (`HeadlessChrome` replaced with `Chrome`): Vaadin 8 gives `HeadlessChrome`
+  the ES5 client bundle, which real browsers do not get.
+
 ## Logs and troubleshooting
 
 - App: `docker logs <APP_ENV_CONTAINER>` (the Payara server log).

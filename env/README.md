@@ -87,12 +87,14 @@ These scripts follow the replay runner's env-script contract (`up.sh [--no-build
 state directory. It is safe after a half-finished `up.sh` and when the copy is already gone. Other copies, the build
 output and the images stay.
 
-Measured on a 10-CPU arm64 host (2026-11-05):
+Measured on a 10-CPU arm64 host (2026-11-05, three copies at once for the snapshot rows):
 
 | Step | Time |
 |---|---|
 | Build (warm Maven repository) | about 1 min |
-| `up.sh --no-build` | 1.5 to 3 min: start about 35 s, seed 5 s, waiting for the completeness job 0 to 2 min, snapshot about 25 s |
+| `up.sh --no-build` (snapshot, C1 or C2) | about 70 s: loading the snapshot 5 s, start about 38 s, reset point about 30 s |
+| `up.sh --no-build` with `APP_ENV_SEED=rest` | 1.5 to 3 min: start about 35 s, seed 5 s, waiting for the completeness job 0 to 2 min, reset point about 25 s |
+| `env/seed/generate.sh --no-build` | about 6 min: the `rest` start above, the generator about 80 s, the completeness job up to 2 min, dump and reset point about 30 s |
 | `reset.sh` (`restart`) | about 25 s |
 | `reset.sh` (`db`) | about 1 s |
 | Memory per copy | app about 2.7 to 3.1 GB (heap limit 4 GB), database about 0.1 GB, mail sink about 10 MB |
@@ -112,7 +114,9 @@ Measured on a 10-CPU arm64 host (2026-11-05):
 The feature switches are set in the database because that is where SORMAS keeps them (`docs/SERVER_CUSTOMIZATION.md`;
 the admin UI's Features page offers only two other switches). `up.sh` runs `env/config/<C>.sql` with the app stopped,
 before the reset point, so the app reads them at start. In C2 the GDPR popup opens at every login of a user who has not
-consented; closing it consents to nothing. `APP_ENV_PWCHECK=on` works with either configuration.
+consented; closing it consents to nothing. In C2, `NatUser` has every switched-on menu (Umgebungen, Adverse Events,
+Einreisen, Kampagnen, Self Reports, Surveys); `SurvSup` has all but environments and AEFI (role rights).
+`APP_ENV_PWCHECK=on` works with either configuration.
 
 ## Seed data
 
@@ -174,12 +178,12 @@ then runs the dev-mode generator through the UI as `SurvSup` with the settings a
 case completeness job, stops the app and writes the dump and the metadata. The generator picks source cases for contacts
 and samples within the user's jurisdiction, and `admin`, the only default user with the `DEV_MODE` right, has none; so
 for the run `generate.sh` gives SurvSup's role the `DEV_MODE` right and removes it again before the dump (the role's
-history table keeps one row of it). It needs Node and Playwright as the smoke check does. The copy stays up in the new
+history table `userroles_userrights_history` keeps one row of it). It needs Node and Playwright as the smoke check does. The copy stays up in the new
 snapshot's state; remove it with `down.sh`.
 
 Set by the app, not by the seed: creation and change dates, epid numbers and the UUIDs of the default users and of the
-default facility, laboratory and point of entry. Every copy started from the same snapshot has the same database
-(row counts and UUIDs); only the app's own writes at start (e.g. the first-start check of the feature rows) happen per copy.
+default facility, laboratory and point of entry. They are in the snapshot, so every copy started from the same
+snapshot has the same row counts and UUIDs (checked for two C1 copies), and `reset.sh` returns to them.
 
 ## Integrations
 

@@ -1183,8 +1183,9 @@ public class TaskFacadeEjb implements TaskFacade {
 	 * The url is bound to the Sormas UI made with Vaadin.
 	 * This function will need to be modified if the UI will have URL modifications
 	 * or in case the UI app is replaced by another one.
+	 * The UI's routes are the old view names as paths: {@code <ui.url>/cases/data/<uuid>} (was {@code <ui.url>/#!cases/data/<uuid>}).
 	 */
-	private String getUiUrl(TaskContext taskContext, String uuid) {
+	String getUiUrl(TaskContext taskContext, String uuid) {
 		if (taskContext.getUrlPattern() == null || uuid == null) {
 			return null;
 		}
@@ -1198,7 +1199,7 @@ public class TaskFacadeEjb implements TaskFacade {
 		if (!uiUrl.endsWith("/")) {
 			uiUrlBuilder.append("/");
 		}
-		return uiUrlBuilder.append("#!").append(taskContext.getUrlPattern()).append("/data/").append(uuid).toString();
+		return uiUrlBuilder.append(taskContext.getUrlPattern()).append("/data/").append(uuid).toString();
 	}
 
 	@Override

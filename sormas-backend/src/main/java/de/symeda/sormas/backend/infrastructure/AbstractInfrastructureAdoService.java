@@ -85,7 +85,7 @@ public abstract class AbstractInfrastructureAdoService<ADO extends Infrastructur
 		Class<T> targetElementClass) {
 
 		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<T> cq = cb.createQuery(targetElementClass);
+		CriteriaQuery<Object> cq = cb.createQuery();
 		Root<T> root = cq.from(targetElementClass);
 		Join<T, ADO> join = root.join(adoAttribute);
 

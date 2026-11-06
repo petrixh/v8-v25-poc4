@@ -697,7 +697,7 @@ public class EventParticipantService extends AbstractCoreAdoService<EventPartici
 
 		Join<Object, Object> requestsJoin = shareInfoFrom.join(SormasToSormasShareInfo.REQUESTS);
 		sharesQuery.where(
-			cb.equal(shareInfoFrom.get(SormasToSormasShareInfo.EVENT_PARTICIPANT), from.get(EventParticipant.ID)),
+			cb.equal(shareInfoFrom.get(SormasToSormasShareInfo.EVENT_PARTICIPANT).get(EventParticipant.ID), from.get(EventParticipant.ID)),
 			cb.equal(shareInfoFrom.get(SormasToSormasShareInfo.OWNERSHIP_HANDED_OVER), true),
 			cb.equal(
 				requestsJoin.on(cb.equal(requestsJoin.get(ShareRequestInfo.CREATION_DATE), latestRequestDateQuery))

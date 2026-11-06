@@ -453,7 +453,7 @@ public class FeatureConfigurationFacadeEjb implements FeatureConfigurationFacade
 		}
 
 		final CriteriaBuilder cb = em.getCriteriaBuilder();
-		final CriteriaQuery<T> cq = cb.createQuery(returnType);
+		final CriteriaQuery<Object> cq = cb.createQuery();
 		final Root<FeatureConfiguration> root = cq.from(FeatureConfiguration.class);
 
 		Predicate predicate = cb.equal(root.get(FeatureConfiguration.FEATURE_TYPE), featureType);

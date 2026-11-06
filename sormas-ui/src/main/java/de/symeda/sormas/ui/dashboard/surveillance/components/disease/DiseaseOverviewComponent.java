@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.disease.DiseaseBurdenDto;
 import de.symeda.sormas.ui.dashboard.surveillance.components.disease.burden.DiseaseBurdenComponent;
@@ -26,42 +26,42 @@ public class DiseaseOverviewComponent extends HorizontalLayout {
     private final Button showTableViewButton;
 
     public DiseaseOverviewComponent() {
-        setWidth(100, Sizeable.Unit.PERCENTAGE);
-        setMargin(false);
+        setWidth(100, Unit.PERCENTAGE);
+        setPadding(false);
 
         diseaseBurdenComponent = new DiseaseBurdenComponent();
         diseaseTileViewLayout = new DiseaseTileViewLayout();
 
-        addComponent(diseaseTileViewLayout);
-        setExpandRatio(diseaseTileViewLayout, 1);
+        add(diseaseTileViewLayout);
+        setFlexGrow(1, diseaseTileViewLayout);
 
         // "Expand" and "Collapse" buttons
         showTableViewButton =
-            ButtonHelper.createIconButtonWithCaption("showTableView", "", VaadinIcons.TABLE, null, CssStyles.BUTTON_SUBTLE, CssStyles.VSPACE_NONE);
+            ButtonHelper.createIconButtonWithCaption("showTableView", "", VaadinIcon.TABLE, null, CssStyles.BUTTON_SUBTLE, CssStyles.VSPACE_NONE);
         Button showTileViewButton = ButtonHelper
-            .createIconButtonWithCaption("showTileView", "", VaadinIcons.SQUARE_SHADOW, null, CssStyles.BUTTON_SUBTLE, CssStyles.VSPACE_NONE);
+            .createIconButtonWithCaption("showTileView", "", VaadinIcon.SQUARE_SHADOW, null, CssStyles.BUTTON_SUBTLE, CssStyles.VSPACE_NONE);
 
         showTableViewButton.addClickListener(e -> {
-            removeComponent(diseaseTileViewLayout);
-            addComponent(diseaseBurdenComponent);
-            setExpandRatio(diseaseBurdenComponent, 1);
+            remove(diseaseTileViewLayout);
+            add(diseaseBurdenComponent);
+            setFlexGrow(1, diseaseBurdenComponent);
 
-            removeComponent(showTableViewButton);
-            addComponent(showTileViewButton);
-            setComponentAlignment(showTileViewButton, Alignment.TOP_RIGHT);
+            remove(showTableViewButton);
+            add(showTileViewButton);
+            setVerticalComponentAlignment(FlexComponent.Alignment.START, showTileViewButton);
         });
         showTileViewButton.addClickListener(e -> {
-            removeComponent(diseaseBurdenComponent);
-            addComponent(diseaseTileViewLayout);
-            setExpandRatio(diseaseTileViewLayout, 1);
+            remove(diseaseBurdenComponent);
+            add(diseaseTileViewLayout);
+            setFlexGrow(1, diseaseTileViewLayout);
 
-            removeComponent(showTileViewButton);
-            addComponent(showTableViewButton);
-            setComponentAlignment(showTableViewButton, Alignment.TOP_RIGHT);
+            remove(showTileViewButton);
+            add(showTableViewButton);
+            setVerticalComponentAlignment(FlexComponent.Alignment.START, showTableViewButton);
         });
 
-        addComponent(showTableViewButton);
-        setComponentAlignment(showTableViewButton, Alignment.TOP_RIGHT);
+        add(showTableViewButton);
+        setVerticalComponentAlignment(FlexComponent.Alignment.START, showTableViewButton);
     }
 
     public void refresh(List<DiseaseBurdenDto> diseasesBurden, boolean isShowingAllDiseases) {

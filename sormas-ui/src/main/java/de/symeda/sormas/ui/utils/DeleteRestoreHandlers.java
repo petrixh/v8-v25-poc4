@@ -5,11 +5,9 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.server.UserError;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.DeletableFacade;
 import de.symeda.sormas.api.EntityDto;
@@ -102,18 +100,20 @@ public final class DeleteRestoreHandlers {
 
 		@Override
 		public void addAdditionalDeleteReasonField(VerticalLayout verticalLayout) {
-			deleteReasonComboBox = new ComboBox(null, Arrays.asList(DeletionReason.values()));
-			deleteReasonComboBox.setCaption(I18nProperties.getCaption(Captions.deletionReason));
-			deleteReasonComboBox.setWidth(100, Sizeable.Unit.PERCENTAGE);
+			deleteReasonComboBox = new ComboBox<>(null, Arrays.asList(DeletionReason.values()));
+			deleteReasonComboBox.setLabel(I18nProperties.getCaption(Captions.deletionReason));
+			deleteReasonComboBox.setWidthFull();
 			deleteReasonComboBox.setRequiredIndicatorVisible(true);
-			verticalLayout.addComponent(deleteReasonComboBox);
+			verticalLayout.add(deleteReasonComboBox);
 
 			otherDeletionReason = new TextArea();
-			otherDeletionReason.setCaption(I18nProperties.getCaption(Captions.otherDeletionReason));
-			verticalLayout.addComponent(otherDeletionReason);
+			otherDeletionReason.setLabel(I18nProperties.getCaption(Captions.otherDeletionReason));
+			verticalLayout.add(otherDeletionReason);
 			otherDeletionReason.setVisible(false);
-			otherDeletionReason.setWidth(100, Sizeable.Unit.PERCENTAGE);
-			otherDeletionReason.setRows(3);
+			otherDeletionReason.setWidthFull();
+			// was setRows(3)
+			otherDeletionReason.setMinRows(3);
+			otherDeletionReason.setMaxRows(3);
 			otherDeletionReason.setMaxLength(FieldConstraints.CHARACTER_LIMIT_TEXT);
 			otherDeletionReason.setRequiredIndicatorVisible(true);
 
@@ -123,17 +123,19 @@ public final class DeleteRestoreHandlers {
 
 			deleteReasonComboBox.addValueChangeListener(valueChangeEvent -> {
 				if (deleteReasonComboBox.isEmpty()) {
-					deleteReasonComboBox.setComponentError(new UserError(I18nProperties.getString(Strings.messageDeleteReasonNotFilled)));
+					deleteReasonComboBox.setErrorMessage(I18nProperties.getString(Strings.messageDeleteReasonNotFilled));
+deleteReasonComboBox.setInvalid(true);
 				} else {
-					deleteReasonComboBox.setComponentError(null);
+					deleteReasonComboBox.setInvalid(false);
 				}
 			});
 
 			otherDeletionReason.addValueChangeListener(valueChangeEvent -> {
 				if (deleteReasonComboBox.getValue() == DeletionReason.OTHER_REASON && StringUtils.isBlank(otherDeletionReason.getValue())) {
-					otherDeletionReason.setComponentError(new UserError(I18nProperties.getString(Strings.messageOtherDeleteReasonNotFilled)));
+					otherDeletionReason.setErrorMessage(I18nProperties.getString(Strings.messageOtherDeleteReasonNotFilled));
+otherDeletionReason.setInvalid(true);
 				} else {
-					otherDeletionReason.setComponentError(null);
+					otherDeletionReason.setInvalid(false);
 				}
 			});
 		}
@@ -141,10 +143,12 @@ public final class DeleteRestoreHandlers {
 		@Override
 		public boolean validateAdditionalDeleteReasonFields() {
 			if (deleteReasonComboBox.isEmpty()) {
-				deleteReasonComboBox.setComponentError(new UserError(I18nProperties.getString(Strings.messageDeleteReasonNotFilled)));
+				deleteReasonComboBox.setErrorMessage(I18nProperties.getString(Strings.messageDeleteReasonNotFilled));
+deleteReasonComboBox.setInvalid(true);
 				return false;
 			} else if (deleteReasonComboBox.getValue() == DeletionReason.OTHER_REASON && StringUtils.isBlank(otherDeletionReason.getValue())) {
-				otherDeletionReason.setComponentError(new UserError(I18nProperties.getString(Strings.messageOtherDeleteReasonNotFilled)));
+				otherDeletionReason.setErrorMessage(I18nProperties.getString(Strings.messageOtherDeleteReasonNotFilled));
+otherDeletionReason.setInvalid(true);
 				return false;
 			}
 

@@ -15,16 +15,15 @@
 
 package de.symeda.sormas.ui.utils;
 
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
+
 import java.util.Collections;
 import java.util.List;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.server.UserError;
-import com.vaadin.ui.DateField;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.ui.CheckBox;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.checkbox.Checkbox;
 
 import de.symeda.sormas.api.ArchivableFacade;
 import de.symeda.sormas.api.CoreFacade;
@@ -177,7 +176,7 @@ public final class ArchiveHandlers {
 
 		private final ArchiveMessages archiveMessages;
 
-		protected DateField endOfProcessingDateField;
+		protected DatePicker endOfProcessingDateField;
 		protected TextArea dearchiveReasonField;
 
 		protected CoreEntityArchiveHandler(F entityFacade, ArchiveMessages archiveMessages) {
@@ -200,9 +199,9 @@ public final class ArchiveHandlers {
 			ProcessedEntity processedEntity = entityFacade.archive(entityUuid, UtilDate.from(endOfProcessingDateField.getValue()));
 
 			if (processedEntity.getProcessedEntityStatus().equals(ProcessedEntityStatus.EXTERNAL_SURVEILLANCE_FAILURE)) {
-				Notification.show(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.ExternalSurveillanceToolGateway_notificationErrorArchiving),
-					Notification.Type.WARNING_MESSAGE);
+					Type.WARNING_MESSAGE);
 			}
 
 			return processedEntity;
@@ -226,30 +225,33 @@ public final class ArchiveHandlers {
 		@Override
 		public void addAdditionalArchiveFields(VerticalLayout verticalLayout, EntityDto entityDto) {
 			if (entityDto != null) {
-				endOfProcessingDateField = new DateField();
+				endOfProcessingDateField = new DatePicker();
 				endOfProcessingDateField.setValue(UtilDate.toLocalDate(entityFacade.calculateEndOfProcessingDate(entityDto.getUuid())));
-				endOfProcessingDateField.setCaption(I18nProperties.getCaption(Captions.endOfProcessingDate));
-				endOfProcessingDateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
+				endOfProcessingDateField.setLabel(I18nProperties.getCaption(Captions.endOfProcessingDate));
+				endOfProcessingDateField.setI18n(new DatePicker.DatePickerI18n().setDateFormat(DateFormatHelper.getDateFormatPattern()));
 				endOfProcessingDateField.setEnabled(false);
 
-				verticalLayout.addComponent(endOfProcessingDateField);
+				verticalLayout.add(endOfProcessingDateField);
 			}
 		}
 
 		@Override
 		public void addAdditionalDearchiveFields(VerticalLayout verticalLayout) {
 			dearchiveReasonField = new TextArea();
-			dearchiveReasonField.setCaption(I18nProperties.getCaption(Captions.dearchiveReason));
-			dearchiveReasonField.setWidth(100, Sizeable.Unit.PERCENTAGE);
-			dearchiveReasonField.setRows(2);
+			dearchiveReasonField.setLabel(I18nProperties.getCaption(Captions.dearchiveReason));
+			dearchiveReasonField.setWidthFull();
+			// was setRows(2)
+			dearchiveReasonField.setMinRows(2);
+			dearchiveReasonField.setMaxRows(2);
 			dearchiveReasonField.setRequiredIndicatorVisible(true);
-			verticalLayout.addComponent(dearchiveReasonField);
+			verticalLayout.add(dearchiveReasonField);
 		}
 
 		@Override
 		public boolean validateAdditionalDearchivationFields() {
 			if (dearchiveReasonField != null && dearchiveReasonField.getValue().isEmpty()) {
-				dearchiveReasonField.setComponentError(new UserError(I18nProperties.getString(Strings.messageArchiveUndoneReasonMandatory)));
+				dearchiveReasonField.setErrorMessage(I18nProperties.getString(Strings.messageArchiveUndoneReasonMandatory));
+dearchiveReasonField.setInvalid(true);
 				return false;
 			}
 
@@ -273,9 +275,9 @@ public final class ArchiveHandlers {
 			List<ProcessedEntity> processedEntities = Collections.singletonList(entityFacade.dearchive(entityUuid, dearchiveReasonField.getValue()));
 
 			if (processedEntities.get(0).getProcessedEntityStatus().equals(ProcessedEntityStatus.EXTERNAL_SURVEILLANCE_FAILURE)) {
-				Notification.show(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.ExternalSurveillanceToolGateway_notificationErrorArchiving),
-					Notification.Type.WARNING_MESSAGE);
+					Type.WARNING_MESSAGE);
 			}
 
 			return processedEntities;
@@ -284,7 +286,7 @@ public final class ArchiveHandlers {
 
 	private static final class CaseArchiveHandler extends CoreEntityArchiveHandler<CaseDataDto, CaseFacade> {
 
-		private CheckBox archiveWithContacts;
+		private Checkbox archiveWithContacts;
 
 		private CaseArchiveHandler() {
 			super(FacadeProvider.getCaseFacade(), ArchiveMessages.CASE);
@@ -296,9 +298,9 @@ public final class ArchiveHandlers {
 				entityFacade.archive(entityUuid, UtilDate.from(endOfProcessingDateField.getValue()), archiveWithContacts.getValue());
 
 			if (processedEntity.getProcessedEntityStatus().equals(ProcessedEntityStatus.EXTERNAL_SURVEILLANCE_FAILURE)) {
-				Notification.show(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.ExternalSurveillanceToolGateway_notificationErrorArchiving),
-					Notification.Type.WARNING_MESSAGE);
+					Type.WARNING_MESSAGE);
 			}
 
 			return processedEntity;
@@ -310,9 +312,9 @@ public final class ArchiveHandlers {
 				Collections.singletonList(entityFacade.dearchive(entityUuid, dearchiveReasonField.getValue(), archiveWithContacts.getValue()));
 
 			if (processedEntities.get(0).getProcessedEntityStatus().equals(ProcessedEntityStatus.EXTERNAL_SURVEILLANCE_FAILURE)) {
-				Notification.show(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.ExternalSurveillanceToolGateway_notificationErrorArchiving),
-					Notification.Type.WARNING_MESSAGE);
+					Type.WARNING_MESSAGE);
 			}
 
 			return processedEntities;
@@ -332,20 +334,20 @@ public final class ArchiveHandlers {
 		public void addAdditionalArchiveFields(VerticalLayout verticalLayout, EntityDto entityDto) {
 			super.addAdditionalArchiveFields(verticalLayout, entityDto);
 
-			archiveWithContacts = new CheckBox();
-			archiveWithContacts.setCaption(I18nProperties.getString(Strings.confirmationArchiveCaseWithContacts));
+			archiveWithContacts = new Checkbox();
+			archiveWithContacts.setLabel(I18nProperties.getString(Strings.confirmationArchiveCaseWithContacts));
 			archiveWithContacts.setValue(false);
-			verticalLayout.addComponent(archiveWithContacts);
+			verticalLayout.add(archiveWithContacts);
 		}
 
 		@Override
 		public void addAdditionalDearchiveFields(VerticalLayout verticalLayout) {
 			super.addAdditionalDearchiveFields(verticalLayout);
 
-			archiveWithContacts = new CheckBox();
-			archiveWithContacts.setCaption(I18nProperties.getString(Strings.confirmationDearchiveCaseWithContacts));
+			archiveWithContacts = new Checkbox();
+			archiveWithContacts.setLabel(I18nProperties.getString(Strings.confirmationDearchiveCaseWithContacts));
 			archiveWithContacts.setValue(false);
-			verticalLayout.addComponent(archiveWithContacts);
+			verticalLayout.add(archiveWithContacts);
 		}
 	}
 
@@ -373,8 +375,7 @@ public final class ArchiveHandlers {
 			ProcessedEntity processedEntity = super.archive(entityUuid);
 
 			if (processedEntity.getProcessedEntityStatus().equals(ProcessedEntityStatus.ACCESS_DENIED_FAILURE)) {
-				Notification
-					.show(I18nProperties.getString(getArchiveMessages().getMessageEntityArchivingNotPossible()), Notification.Type.WARNING_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(getArchiveMessages().getMessageEntityArchivingNotPossible()), Type.WARNING_MESSAGE);
 			}
 
 			return processedEntity;
@@ -385,8 +386,7 @@ public final class ArchiveHandlers {
 			List<ProcessedEntity> processedEntities = super.dearchive(entityUuid);
 
 			if (processedEntities.get(0).getProcessedEntityStatus().equals(ProcessedEntityStatus.ACCESS_DENIED_FAILURE)) {
-				Notification
-					.show(I18nProperties.getString(getArchiveMessages().getMessageEntityArchivingNotPossible()), Notification.Type.WARNING_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(getArchiveMessages().getMessageEntityArchivingNotPossible()), Type.WARNING_MESSAGE);
 			}
 
 			return processedEntities;

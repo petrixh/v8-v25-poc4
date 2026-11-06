@@ -6,20 +6,17 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.EntityDto;
 import de.symeda.sormas.api.common.progress.ProcessedEntity;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.uuid.HasUuid;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 
 public class ArchivingController {
 
@@ -30,10 +27,10 @@ public class ArchivingController {
 
 		VerticalLayout verticalLayout = new VerticalLayout();
 
-		Label contentLabel = new Label(I18nProperties.getString(archiveMessages.getConfirmationArchiveEntity()));
-		contentLabel.setWidth(100, Sizeable.Unit.PERCENTAGE);
+		Span contentLabel = new Span(I18nProperties.getString(archiveMessages.getConfirmationArchiveEntity()));
+		contentLabel.setWidthFull();
 		verticalLayout.setMargin(false);
-		verticalLayout.addComponent(contentLabel);
+		verticalLayout.add(contentLabel);
 
 		archiveHandler.addAdditionalArchiveFields(verticalLayout, entityDto);
 
@@ -46,7 +43,7 @@ public class ArchivingController {
 			e -> {
 				if (Boolean.TRUE.equals(e)) {
 					archiveHandler.archive(entityDto.getUuid());
-					Notification.show(I18nProperties.getString(archiveMessages.getMessageEntityArchived()), Notification.Type.ASSISTIVE_NOTIFICATION);
+					NotificationHelper.show(I18nProperties.getString(archiveMessages.getMessageEntityArchived()), Type.ASSISTIVE_NOTIFICATION);
 
 					callback.run();
 				}
@@ -58,9 +55,9 @@ public class ArchivingController {
 
 		VerticalLayout verticalLayout = new VerticalLayout();
 
-		Label contentLabel = new Label(I18nProperties.getString(archiveMessages.getConfirmationDearchiveEntity()));
-		contentLabel.setWidth(100, Sizeable.Unit.PERCENTAGE);
-		verticalLayout.addComponent(contentLabel);
+		Span contentLabel = new Span(I18nProperties.getString(archiveMessages.getConfirmationDearchiveEntity()));
+		contentLabel.setWidthFull();
+		verticalLayout.add(contentLabel);
 		verticalLayout.setMargin(false);
 
 		archiveHandler.addAdditionalDearchiveFields(verticalLayout);
@@ -78,8 +75,7 @@ public class ArchivingController {
 					}
 
 					archiveHandler.dearchive(entityDto.getUuid());
-					Notification
-						.show(I18nProperties.getString(archiveMessages.getMessageEntityDearchived()), Notification.Type.ASSISTIVE_NOTIFICATION);
+					NotificationHelper.show(I18nProperties.getString(archiveMessages.getMessageEntityDearchived()), Type.ASSISTIVE_NOTIFICATION);
 					callback.run();
 				}
 				return true;
@@ -128,10 +124,11 @@ public class ArchivingController {
 		Button archiveButton = ButtonHelper
 			.createButton(ARCHIVE_DEARCHIVE_BUTTON_ID, I18nProperties.getCaption(archiveHandler.getArchiveButtonCaptionProperty(archived)), e -> {
 				doArchiveDearchive.accept(archived);
-			}, ValoTheme.BUTTON_LINK);
+			}, CssStyles.BUTTON_LINK);
 
 		editView.getButtonsPanel().addComponentAsFirst(archiveButton);
-		editView.getButtonsPanel().setComponentAlignment(archiveButton, Alignment.BOTTOM_LEFT);
+		// was Alignment.BOTTOM_LEFT: left by its position, bottom here
+		editView.getButtonsPanel().setVerticalComponentAlignment(FlexComponent.Alignment.END, archiveButton);
 	}
 
 	private <T extends EntityDto> void archiveOrDearchiveWithCommit(
@@ -176,18 +173,18 @@ public class ArchivingController {
 		ArchiveMessages archiveMessages = archiveHandler.getArchiveMessages();
 
 		if (entities.isEmpty()) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(archiveMessages.getHeadingNoEntitySelected()),
 				I18nProperties.getString(archiveMessages.getMessageNoEntitySelected()),
-				Notification.Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				Type.WARNING_MESSAGE,
+				false);
 		} else {
 
 			VerticalLayout verticalLayout = new VerticalLayout();
-			Label contentLabel =
-				new Label(String.format(I18nProperties.getString(archiveMessages.getConfirmationArchiveEntities()), entities.size()));
-			contentLabel.setWidth(100, Sizeable.Unit.PERCENTAGE);
-			verticalLayout.addComponent(contentLabel);
+			Span contentLabel =
+				new Span(String.format(I18nProperties.getString(archiveMessages.getConfirmationArchiveEntities()), entities.size()));
+			contentLabel.setWidthFull();
+			verticalLayout.add(contentLabel);
 			verticalLayout.setMargin(false);
 
 			archiveHandler.addAdditionalArchiveFields(verticalLayout, null);
@@ -240,18 +237,18 @@ public class ArchivingController {
 		ArchiveMessages archiveMessages = archiveHandler.getArchiveMessages();
 
 		if (entities.isEmpty()) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(archiveMessages.getHeadingNoEntitySelected()),
 				I18nProperties.getString(archiveMessages.getMessageNoEntitySelected()),
-				Notification.Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				Type.WARNING_MESSAGE,
+				false);
 		} else {
 			VerticalLayout verticalLayout = new VerticalLayout();
 
-			Label contentLabel = new Label(String.format(I18nProperties.getString(archiveMessages.getConfirmDearchiveEntities()), entities.size()));
-			contentLabel.setWidth(100, Sizeable.Unit.PERCENTAGE);
+			Span contentLabel = new Span(String.format(I18nProperties.getString(archiveMessages.getConfirmDearchiveEntities()), entities.size()));
+			contentLabel.setWidthFull();
 			verticalLayout.setMargin(false);
-			verticalLayout.addComponent(contentLabel);
+			verticalLayout.add(contentLabel);
 
 			archiveHandler.addAdditionalDearchiveFields(verticalLayout);
 

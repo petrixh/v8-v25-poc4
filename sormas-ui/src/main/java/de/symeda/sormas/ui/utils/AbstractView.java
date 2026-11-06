@@ -21,26 +21,24 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.vaadin.hene.popupbutton.PopupButton;
-
-import com.vaadin.navigator.Navigator;
-import com.vaadin.navigator.View;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.Resource;
-import com.vaadin.server.StreamResource;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.AttachmentType;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.popover.Popover;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.utils.DataHelper;
 import de.symeda.sormas.api.utils.criteria.BaseCriteria;
 import de.symeda.sormas.ui.SormasUI;
+import de.symeda.sormas.ui.navigation.Navigator;
+import de.symeda.sormas.ui.navigation.View;
 
 public abstract class AbstractView extends VerticalLayout implements View {
 
@@ -49,8 +47,8 @@ public abstract class AbstractView extends VerticalLayout implements View {
 	protected final String viewName;
 	private final HorizontalLayout viewHeader;
 	private final VerticalLayout viewTitleLayout;
-	private final Label viewTitleLabel;
-	private final Label viewSubTitleLabel;
+	private final Span viewTitleLabel;
+	private final Span viewSubTitleLabel;
 
 	protected boolean applyingCriteria;
 
@@ -58,13 +56,14 @@ public abstract class AbstractView extends VerticalLayout implements View {
 		this.viewName = viewName;
 
 		setSizeFull();
-		setMargin(false);
+		setPadding(false);
 		setSpacing(false);
 
 		viewHeader = new HorizontalLayout();
-		viewHeader.setWidth(100, Unit.PERCENTAGE);
-		viewHeader.setHeightUndefined();
-		viewHeader.setMargin(new MarginInfo(false, true));
+		viewHeader.setWidthFull();
+		viewHeader.setHeight(null);
+		// was a left and right margin only (MarginInfo); spacing details belong to the theme work
+		viewHeader.setPadding(false);
 		viewHeader.setSpacing(true);
 		CssStyles.style(viewHeader, "view-header");
 
@@ -72,50 +71,56 @@ public abstract class AbstractView extends VerticalLayout implements View {
 		{
 			viewTitleLayout.setSizeUndefined();
 			viewTitleLayout.setSpacing(false);
-			viewTitleLayout.setMargin(false);
+			viewTitleLayout.setPadding(false);
 
 			// note: splitting title and subtitle into labels does not work with the css
 			String viewTitle = I18nProperties.getPrefixCaption("View", viewName.replace("/", "."));
 			String viewSubTitle = I18nProperties.getPrefixCaption("View", viewName.replace("/", ".") + ".sub", "");
-			viewTitleLabel = new Label(viewTitle);
+			viewTitleLabel = new Span(viewTitle);
 			viewTitleLabel.setSizeUndefined();
 			CssStyles.style(viewTitleLabel, CssStyles.H1, CssStyles.VSPACE_NONE);
-			viewTitleLayout.addComponent(viewTitleLabel);
-			viewSubTitleLabel = new Label(viewSubTitle);
+			viewTitleLayout.add(viewTitleLabel);
+
+			viewSubTitleLabel = new Span(viewSubTitle);
 			viewSubTitleLabel.setSizeUndefined();
 			CssStyles.style(viewSubTitleLabel, CssStyles.H4, CssStyles.VSPACE_TOP_NONE);
-			viewTitleLayout.addComponent(viewSubTitleLabel);
+			viewTitleLayout.add(viewSubTitleLabel);
 		}
-		viewHeader.addComponent(viewTitleLayout);
-		viewHeader.setExpandRatio(viewTitleLayout, 1);
+
+		viewHeader.add(viewTitleLayout);
+		viewHeader.setFlexGrow(1, viewTitleLayout);
 
 		addComponent(viewHeader);
-		setExpandRatio(viewHeader, 0);
+		setFlexGrow(0, viewHeader);
 	}
 
 	protected void addHeaderComponent(Component c) {
-		viewHeader.addComponent(c);
-		viewHeader.setComponentAlignment(c, Alignment.MIDDLE_RIGHT);
+		viewHeader.add(c);
+		// was Alignment.MIDDLE_RIGHT: the title layout grows, so header components sit on the right
+		viewHeader.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, c);
 	}
 
 	protected void setMainHeaderComponent(Component c) {
-		viewHeader.removeComponent(viewTitleLayout);
-		viewHeader.addComponent(c, 0);
-		viewHeader.setExpandRatio(c, 1);
+		viewHeader.remove(viewTitleLayout);
+		viewHeader.addComponentAsFirst(c);
+		viewHeader.setFlexGrow(1, c);
 	}
 
-	@Override
+	/**
+	 * Adds a component that takes the remaining height (Vaadin 8: expand ratio 1 by default). Subclasses keep calling
+	 * this instead of {@code add(..)} where the old code called {@code addComponent(..)}.
+	 */
 	public void addComponent(Component c) {
-		super.addComponent(c);
+		add(c);
 		// set expansion to 1 by default
-		setExpandRatio(c, 1);
+		setFlexGrow(1, c);
 	}
 
-	public Label getViewTitleLabel() {
+	public Span getViewTitleLabel() {
 		return viewTitleLabel;
 	}
 
-	public Label getViewSubTitleLabel() {
+	public Span getViewSubTitleLabel() {
 		return viewSubTitleLabel;
 	}
 
@@ -199,33 +204,39 @@ public abstract class AbstractView extends VerticalLayout implements View {
 	}
 
 	protected void addExportButton(
-		StreamResource streamResource,
-		PopupButton exportPopupButton,
+		DownloadHandler streamResource,
+		Popover exportPopupButton,
 		VerticalLayout exportLayout,
-		Resource icon,
+		VaadinIcon icon,
 		String captionKey,
 		String descriptionKey) {
 
+		// was a FileDownloader extending the button: Flow downloads through a link around it
+		Anchor exportLink = new Anchor();
+		exportLink.setHref(streamResource, AttachmentType.DOWNLOAD);
+		exportLink.setWidthFull();
+
 		Button exportButton = ButtonHelper.createIconButton(captionKey, icon, e -> {
 
-			Button button = e.getButton();
-			int buttonPos = exportLayout.getComponentIndex(button);
+			Button button = e.getSource();
+			int buttonPos = exportLayout.indexOf(exportLink);
 
-			DownloadUtil.showExportWaitDialog(button, ce -> {
+			// the link has to remain in the UI for the download to succeed
+			DownloadUtil.showExportWaitDialog(exportLink, ce -> {
 				//restore the button
-				exportLayout.addComponent(button, buttonPos);
+				exportLayout.addComponentAtIndex(buttonPos, exportLink);
 				button.setEnabled(true);
 			});
-			exportPopupButton.setPopupVisible(false);
-		}, ValoTheme.BUTTON_PRIMARY);
+			exportPopupButton.close();
+		});
+		exportButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
 		exportButton.setDisableOnClick(true);
-		exportButton.setDescription(I18nProperties.getDescription(descriptionKey));
-		exportButton.setWidth(100, Unit.PERCENTAGE);
+		exportButton.setTooltipText(I18nProperties.getDescription(descriptionKey));
+		exportButton.setWidthFull();
 
-		exportLayout.addComponent(exportButton);
-
-		new FileDownloader(streamResource).extend(exportButton);
+		exportLink.add(exportButton);
+		exportLayout.add(exportLink);
 	}
 
 	/**

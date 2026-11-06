@@ -17,7 +17,10 @@
  *******************************************************************************/
 package de.symeda.sormas.ui;
 
+import java.io.Serializable;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import jakarta.validation.ValidationException;
@@ -29,20 +32,15 @@ import org.omg.CORBA.SystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.server.AbstractErrorMessage.ContentMode;
-import com.vaadin.server.DefaultErrorHandler;
-import com.vaadin.server.ErrorEvent;
-import com.vaadin.server.ErrorHandler;
-import com.vaadin.server.ErrorMessage;
-import com.vaadin.server.Page;
-import com.vaadin.server.SystemError;
-import com.vaadin.server.UserError;
-import com.vaadin.shared.ui.ErrorLevel;
-import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.Notification;
-import com.vaadin.v7.data.Buffered;
-import com.vaadin.v7.data.Validator;
-import com.vaadin.v7.ui.AbstractField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.server.ErrorEvent;
+import com.vaadin.flow.server.ErrorHandler;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
@@ -88,32 +86,53 @@ public class SormasErrorHandler implements ErrorHandler {
 			}
 		}
 
-		// finds the original source of the error/exception
-		AbstractComponent component = DefaultErrorHandler.findAbstractComponent(event);
-		if (errorMessage != null && component != null) {
-			// Shows the error in AbstractComponent
+		// finds the original source of the error/exception. Flow does not name a component for every error that
+		// Vaadin 8 attributed to one (e.g. an exception in a click listener), so the notification is also shown when
+		// only the UI is known.
+		Component component = event.getComponent().orElse(null);
+		if (errorMessage != null && (component != null || UI.getCurrent() != null)) {
 			if (errorMessage instanceof SystemError) {
-				Notification.show(
+				showNotification(
 					I18nProperties.getString(Strings.errorOccurred, I18nProperties.getString(Strings.errorOccurred)),
 					I18nProperties.getString(Strings.errorWasReported),
-					Notification.Type.ERROR_MESSAGE);
+					false,
+					NotificationVariant.LUMO_ERROR);
 			} else {
-
-				// to prevent the original message from appearing, if necessary
-				if (component instanceof AbstractField<?>) {
-					((AbstractField<?>) component).setCurrentBufferedSourceException(null);
-				}
-
-				Notification notification = new Notification(
+				showNotification(
 					I18nProperties.getString(Strings.errorProblemOccurred, I18nProperties.getString(Strings.errorProblemOccurred)),
 					errorMessage.getFormattedHtmlMessage(),
-					Notification.Type.WARNING_MESSAGE,
-					true);
-				notification.setDelayMsec(-1);
-				notification.show(Page.getCurrent());
-				component.setComponentError(errorMessage);
+					true,
+					NotificationVariant.LUMO_WARNING);
+				// Shows the error on the component (was setComponentError); Flow has it for fields only
+				if (component instanceof HasValidation) {
+					((HasValidation) component).setErrorMessage(errorMessage.getMessage());
+					((HasValidation) component).setInvalid(true);
+				}
 			}
 		}
+	}
+
+	/**
+	 * A notification that stays until the user clicks it, as the Vaadin 8 error and (here) warning notifications did.
+	 */
+	private static void showNotification(String caption, String description, boolean htmlDescription, NotificationVariant variant) {
+
+		Div captionDiv = new Div();
+		captionDiv.setText(caption);
+		Div descriptionDiv = new Div();
+		if (htmlDescription) {
+			descriptionDiv.getElement().setProperty("innerHTML", description);
+		} else {
+			descriptionDiv.setText(description);
+		}
+		Div content = new Div(captionDiv, descriptionDiv);
+
+		Notification notification = new Notification(content);
+		notification.setDuration(0);
+		notification.setPosition(Notification.Position.MIDDLE);
+		notification.addThemeVariants(variant);
+		content.addClickListener(e -> notification.close());
+		notification.open();
 	}
 
 	/**
@@ -124,24 +143,16 @@ public class SormasErrorHandler implements ErrorHandler {
 		//return AbstractErrorMessage.getErrorMessageForException(t)
 		if (null == t) {
 			return null;
-		} else if (t instanceof ErrorMessage) {
-			// legacy case for custom error messages
-			return (ErrorMessage) t;
-		} else if (t instanceof Validator.InvalidValueException) {
-			LocalUserError error = new LocalUserError(((Validator.InvalidValueException) t).getHtmlMessage(), ContentMode.HTML, ErrorLevel.ERROR);
-			for (Validator.InvalidValueException nestedException : ((Validator.InvalidValueException) t).getCauses()) {
-				error.addCause(getErrorMessageForException(nestedException));
-			}
-			return error;
-		} else if (t instanceof Buffered.SourceException) {
+		} else if (t instanceof com.vaadin.flow.data.binder.ValidationException) {
+			// Binder validation (was the Vaadin 7 Validator.InvalidValueException / Buffered.SourceException):
 			// no message, only the causes to be painted
 			LocalUserError error = new LocalUserError(null);
-			// in practice, this was always ERROR in Vaadin 6 unless tweaked in
-			// custom exceptions implementing ErrorMessage
 			error.setErrorLevel(ErrorLevel.ERROR);
-			// causes
-			for (Throwable nestedException : ((Buffered.SourceException) t).getCauses()) {
-				error.addCause(getErrorMessageForException(nestedException));
+			com.vaadin.flow.data.binder.ValidationException validationException = (com.vaadin.flow.data.binder.ValidationException) t;
+			validationException.getFieldValidationErrors()
+				.forEach(e -> e.getMessage().ifPresent(m -> error.addCause(new LocalUserError(m, ContentMode.TEXT, ErrorLevel.ERROR))));
+			for (ValidationResult result : validationException.getBeanValidationErrors()) {
+				error.addCause(new LocalUserError(result.getErrorMessage(), ContentMode.TEXT, ErrorLevel.ERROR));
 			}
 			return error;
 		} else {
@@ -220,26 +231,130 @@ public class SormasErrorHandler implements ErrorHandler {
 		return message;
 	}
 
-	private static final class LocalUserError extends UserError {
+	/**
+	 * Content mode of an {@link ErrorMessage} (was {@code com.vaadin.server.AbstractErrorMessage.ContentMode}).
+	 */
+	public enum ContentMode {
+		TEXT,
+		PREFORMATTED,
+		HTML
+	}
+
+	/**
+	 * Level of an {@link ErrorMessage} (was {@code com.vaadin.shared.ui.ErrorLevel}).
+	 */
+	public enum ErrorLevel {
+		INFO,
+		WARNING,
+		ERROR,
+		CRITICAL,
+		SYSTEM
+	}
+
+	/**
+	 * Error message with nested causes, as Vaadin 8's {@code AbstractErrorMessage} (removed in Flow): the handler shows
+	 * {@link #getFormattedHtmlMessage()} in its notification.
+	 */
+	public static class ErrorMessage implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+
+		private final String message;
+		private final ContentMode mode;
+		private ErrorLevel errorLevel;
+		private final List<ErrorMessage> causes = new ArrayList<>();
+
+		protected ErrorMessage(String message, ContentMode mode, ErrorLevel errorLevel) {
+			this.message = message;
+			this.mode = mode;
+			this.errorLevel = errorLevel;
+		}
+
+		public String getMessage() {
+			return message;
+		}
+
+		public ErrorLevel getErrorLevel() {
+			return errorLevel;
+		}
+
+		protected void setErrorLevel(ErrorLevel level) {
+			this.errorLevel = level;
+		}
+
+		public List<ErrorMessage> getCauses() {
+			return causes;
+		}
+
+		protected void addCause(ErrorMessage cause) {
+			causes.add(cause);
+		}
+
+		/**
+		 * Same rules as Vaadin 8's {@code AbstractErrorMessage.getFormattedHtmlMessage()}: the escaped or HTML message,
+		 * or else the messages of the causes in one {@code <div>} each.
+		 */
+		public String getFormattedHtmlMessage() {
+
+			String result = null;
+			if (message != null) {
+				switch (mode) {
+				case TEXT:
+					result = escapeHtml(message);
+					break;
+				case PREFORMATTED:
+					result = "<pre>" + escapeHtml(message) + "</pre>";
+					break;
+				case HTML:
+					result = message;
+					break;
+				}
+			}
+			if (result == null && !causes.isEmpty()) {
+				StringBuilder sb = new StringBuilder();
+				for (ErrorMessage cause : causes) {
+					String childMessage = cause.getFormattedHtmlMessage();
+					if (childMessage != null && !childMessage.isEmpty()) {
+						sb.append("<div>");
+						sb.append(childMessage);
+						sb.append("</div>\n");
+					}
+				}
+				if (sb.length() > 0) {
+					result = sb.toString();
+				}
+			}
+			return result != null ? result : "";
+		}
+
+		private static String escapeHtml(String text) {
+			return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
+		}
+	}
+
+	/**
+	 * Unexpected error: logged with its stack trace; the user gets a generic notification (was Vaadin 8's
+	 * {@code SystemError}).
+	 */
+	private static final class SystemError extends ErrorMessage {
+
+		private static final long serialVersionUID = 1L;
+
+		public SystemError(String message) {
+			super(message, ContentMode.HTML, ErrorLevel.SYSTEM);
+		}
+	}
+
+	private static final class LocalUserError extends ErrorMessage {
 
 		private static final long serialVersionUID = 1L;
 
 		public LocalUserError(String textErrorMessage) {
-			super(textErrorMessage);
+			super(textErrorMessage, ContentMode.TEXT, ErrorLevel.ERROR);
 		}
 
 		public LocalUserError(String message, ContentMode contentMode, ErrorLevel errorLevel) {
 			super(message, contentMode, errorLevel);
-		}
-
-		@Override
-		public void addCause(ErrorMessage cause) {
-			super.addCause(cause);
-		}
-
-		@Override
-		public void setErrorLevel(ErrorLevel level) {
-			super.setErrorLevel(level);
 		}
 	}
 }

@@ -17,65 +17,72 @@
  *******************************************************************************/
 package de.symeda.sormas.ui;
 
-import com.vaadin.annotations.Theme;
-import com.vaadin.annotations.VaadinServletConfiguration;
-import com.vaadin.annotations.Viewport;
-import com.vaadin.annotations.Widgetset;
-import com.vaadin.server.Responsive;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinServlet;
-import com.vaadin.server.VaadinSession;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.server.InitParameters;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinServlet;
+import com.vaadin.flow.server.VaadinSession;
+
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.UserProvider.HasUserProvider;
 import de.symeda.sormas.ui.ViewModelProviders.HasViewModelProviders;
-import de.symeda.sormas.ui.utils.SormasDefaultConverterFactory;
+import de.symeda.sormas.ui.navigation.Navigator;
 
 import jakarta.servlet.annotation.HttpConstraint;
 import jakarta.servlet.annotation.ServletSecurity;
+import jakarta.servlet.annotation.WebInitParam;
 import jakarta.servlet.annotation.WebServlet;
 
 /**
  * Main UI class of the application that shows either the login screen or the
  * main view of the application depending on whether a user is signed in.
  *
- * The @Viewport annotation configures the viewport meta tags appropriately on
- * mobile devices. Instead of device based scaling (default), using responsive
- * layouts.
+ * The viewport meta tags (formerly the @Viewport annotation here) are set by
+ * {@link SormasAppShell}.
  */
 @SuppressWarnings("serial")
-@Viewport("user-scalable=no,initial-scale=1.0")
-@Theme("sormas")
-@Widgetset("de.symeda.sormas.SormasWidgetset")
 public class SormasUI extends UI implements HasUserProvider, HasViewModelProviders {
 
 	private final UserProvider userProvider = new UserProvider();
 	private final ViewModelProviders viewModelProviders = new ViewModelProviders();
 
+	private Navigator navigator;
+	private MainScreen mainScreen;
+
 	@Override
-	public void init(VaadinRequest vaadinRequest) {
+	protected void init(VaadinRequest vaadinRequest) {
 
-		setErrorHandler(SormasErrorHandler.get());
+		VaadinSession.getCurrent().setErrorHandler(SormasErrorHandler.get());
 		setLocale(vaadinRequest.getLocale());
-
-		Responsive.makeResponsive(this);
-
-		VaadinSession.getCurrent().setConverterFactory(new SormasDefaultConverterFactory());
 
 		getPage().setTitle(FacadeProvider.getConfigFacade().getSormasInstanceName());
 
 		initMainScreen();
 	}
 
+	/**
+	 * Builds the main screen (menu and view registration) when the UI is created, as before: the routes of this
+	 * session are registered before the first navigation. {@link de.symeda.sormas.ui.navigation.MainLayout} shows it.
+	 */
 	protected void initMainScreen() {
-		addStyleName(ValoTheme.UI_WITH_MENU);
-		setContent(new MainScreen(SormasUI.this));
+		mainScreen = new MainScreen(SormasUI.this);
 	}
 
 	public static SormasUI get() {
 		return (SormasUI) UI.getCurrent();
+	}
+
+	public Navigator getNavigator() {
+		return navigator;
+	}
+
+	public void setNavigator(Navigator navigator) {
+		this.navigator = navigator;
+	}
+
+	public MainScreen getMainScreen() {
+		return mainScreen;
 	}
 
 	@Override
@@ -89,8 +96,8 @@ public class SormasUI extends UI implements HasUserProvider, HasViewModelProvide
 	}
 
 	@WebServlet(urlPatterns = {
-		"/*" }, name = "SormasUIServlet", asyncSupported = true)
-	@VaadinServletConfiguration(ui = SormasUI.class, productionMode = false)
+		"/*" }, name = "SormasUIServlet", asyncSupported = true, initParams = @WebInitParam(name = InitParameters.UI_PARAMETER,
+			value = "de.symeda.sormas.ui.SormasUI"))
 	@ServletSecurity(@HttpConstraint(rolesAllowed = UserRight._SORMAS_UI))
 	public static class SormasUIServlet extends VaadinServlet {
 

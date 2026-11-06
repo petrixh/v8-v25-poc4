@@ -21,34 +21,37 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.ExternalResource;
-import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.Link;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.VaadinIcon;
+
+import de.symeda.sormas.ui.navigation.Navigator;
 
 /**
  * A sub navigation menu presenting a list of available views to the user.
  * It emulates the HTML components of a tabsheet to use it's styling.
  */
 @SuppressWarnings("serial")
-public class SubMenu extends CssLayout {
+public class SubMenu extends Div {
 
-	private Map<String, AbstractComponent> viewMenuItemMap = new HashMap<String, AbstractComponent>();
+	// attribute that makes Flow handle a link click as a router navigation
+	private static final String ROUTER_LINK = "router-link";
 
-	private CssLayout menuItemsLayout;
+	private Map<String, Div> viewMenuItemMap = new HashMap<String, Div>();
+
+	private Div menuItemsLayout;
 
 	public SubMenu() {
 
-		setWidth(100, Unit.PERCENTAGE);
-		setHeightUndefined();
-		setPrimaryStyleName("v-tabsheet");
+		setWidthFull();
+		setHeight(null);
+		setClassName("v-tabsheet");
 
-		menuItemsLayout = new CssLayout();
-		menuItemsLayout.setPrimaryStyleName("v-tabsheet-tabcontainer");
-		menuItemsLayout.setWidth(100, Unit.PERCENTAGE);
-		menuItemsLayout.setHeightUndefined();
-		addComponent(menuItemsLayout);
+		menuItemsLayout = new Div();
+		menuItemsLayout.setClassName("v-tabsheet-tabcontainer");
+		menuItemsLayout.setWidthFull();
+		menuItemsLayout.setHeight(null);
+		add(menuItemsLayout);
 	}
 
 	public void addView(final String name, String caption) {
@@ -61,59 +64,61 @@ public class SubMenu extends CssLayout {
 
 	public void addView(final String name, String caption, String params, boolean isBackNavigation) {
 
-		String target = "#!" + name + (params != null ? "/" + params : "");
+		String target = Navigator.getUrl(name + (params != null ? "/" + params : ""));
 
-		CssLayout tabItemCell = new CssLayout();
+		Div tabItemCell = new Div();
 		tabItemCell.setSizeUndefined();
-		tabItemCell.setPrimaryStyleName("v-tabsheet-tabitemcell");
+		tabItemCell.setClassName("v-tabsheet-tabitemcell");
 
-		CssLayout tabItem = new CssLayout();
+		Div tabItem = new Div();
 		tabItem.setId("tab-" + name.replaceAll("/", "-"));
 		tabItem.setSizeUndefined();
-		tabItem.setPrimaryStyleName("v-tabsheet-tabitem");
+		tabItem.setClassName("v-tabsheet-tabitem");
 		if (isBackNavigation) {
-			tabItem.addStyleName("back");
+			tabItem.addClassName("back");
 		}
-		tabItemCell.addComponent(tabItem);
+		tabItemCell.add(tabItem);
 
-		Link link = new Link(caption, new ExternalResource(target));
-		link.addStyleName("v-caption");
+		Anchor link = new Anchor(target, caption);
+		link.getElement().setAttribute(ROUTER_LINK, true);
+		link.addClassName("v-caption");
 		if (isBackNavigation)
-			link.setIcon(VaadinIcons.ARROW_CIRCLE_LEFT);
-		tabItem.addComponent(link);
+			link.addComponentAsFirst(VaadinIcon.ARROW_CIRCLE_LEFT.create());
+		tabItem.add(link);
 
-		menuItemsLayout.addComponent(tabItemCell);
+		menuItemsLayout.add(tabItemCell);
 		viewMenuItemMap.put(name, tabItem);
 	}
 
 	public void addView(final String name, String caption, Supplier<Boolean> onClick) {
 
-		CssLayout tabItemCell = new CssLayout();
+		Div tabItemCell = new Div();
 		tabItemCell.setSizeUndefined();
-		tabItemCell.setPrimaryStyleName("v-tabsheet-tabitemcell");
+		tabItemCell.setClassName("v-tabsheet-tabitemcell");
 
-		CssLayout tabItem = new CssLayout();
+		Div tabItem = new Div();
 		tabItem.setSizeUndefined();
-		tabItem.setPrimaryStyleName("v-tabsheet-tabitem");
-		tabItemCell.addComponent(tabItem);
+		tabItem.setClassName("v-tabsheet-tabitem");
+		tabItemCell.add(tabItem);
 
-		Link link = new Link(caption, null);
-		link.addStyleName("v-caption");
+		Anchor link = new Anchor();
+		link.setText(caption);
+		link.addClassName("v-caption");
 
-		tabItem.addComponent(link);
-		tabItem.addLayoutClickListener((e) -> {
+		tabItem.add(link);
+		tabItem.addClickListener((e) -> {
 			if (Boolean.TRUE.equals(onClick.get())) {
 				this.setActiveView(name);
 			}
 		});
 
-		menuItemsLayout.addComponent(tabItemCell);
+		menuItemsLayout.add(tabItemCell);
 		viewMenuItemMap.put(name, tabItem);
 	}
 
 	public void removeAllViews() {
 
-		menuItemsLayout.removeAllComponents();
+		menuItemsLayout.removeAll();
 		viewMenuItemMap.clear();
 	}
 
@@ -126,12 +131,12 @@ public class SubMenu extends CssLayout {
 	 */
 	public void setActiveView(String viewName) {
 
-		for (AbstractComponent button : viewMenuItemMap.values()) {
-			button.removeStyleName("selected");
+		for (Div button : viewMenuItemMap.values()) {
+			button.removeClassName("selected");
 		}
-		AbstractComponent selected = viewMenuItemMap.get(viewName);
+		Div selected = viewMenuItemMap.get(viewName);
 		if (selected != null) {
-			selected.addStyleName("selected");
+			selected.addClassName("selected");
 		}
 	}
 }

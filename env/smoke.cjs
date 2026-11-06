@@ -3,7 +3,7 @@
 // expectWebLoginRefused must be refused by the web login (no menu, the "no access to the web application" message).
 // Usage: node env/smoke.cjs [outDir]
 //   Base URL: APP_ENV_SMOKE_URL, else http://localhost:$APP_ENV_PORT/sormas-ui (APP_ENV_PORT default 18080, as env/).
-//   outDir default: $APP_ENV_STATE_DIR/smoke/$APP_ENV_PROJECT (env/.state/smoke/sormas-old-env). Writes one screenshot
+//   outDir default: $APP_ENV_STATE_DIR/smoke/$APP_ENV_PROJECT (env/.state/smoke/sormas-new-env). Writes one screenshot
 //   per user and smoke.json (results, no passwords). Exit 0 all pass, 1 a check failed, 2 setup error.
 // Passwords are read at run time from DefaultEntityHelper.java and never printed or written.
 // Needs Playwright for Node (1.63) with Chromium: a local or global npm install, or PW=<path to the module>.
@@ -26,7 +26,7 @@ function loadPlaywright() {
   const cfg = JSON.parse(fs.readFileSync(path.join(ENV_DIR, 'smoke-users.json'), 'utf8'));
   const base = (process.env.APP_ENV_SMOKE_URL || `http://localhost:${process.env.APP_ENV_PORT || 18080}/sormas-ui`).replace(/\/+$/, '');
   const out = path.resolve(process.argv[2] || path.join(process.env.APP_ENV_STATE_DIR || path.join(ENV_DIR, '.state'),
-    'smoke', process.env.APP_ENV_PROJECT || 'sormas-old-env'));
+    'smoke', process.env.APP_ENV_PROJECT || 'sormas-new-env'));
   fs.mkdirSync(out, { recursive: true });
 
   // Passwords: in memory only, passed to the password field and nowhere else. Messages are cut to their first line,

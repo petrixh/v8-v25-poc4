@@ -1,20 +1,20 @@
 # Reproducible environment
 
-One command starts a copy of SORMAS in a known state: Payara 5.2022.5 on JDK 11, PostgreSQL 14, a synthetic data set
+One command starts a copy of SORMAS in a known state: Payara 7.2026.10 on JDK 21, PostgreSQL 14, a synthetic data set
 from a committed snapshot and a local mail sink, in one of two test configurations (C1 default, C2 Germany with optional
 features). Several copies can run side by side, each with its own port, containers, database and configuration.
 
-**Java 21 build, Payara 5 runtime (migration stage 1a, until ticket 1a-22).** `build.sh` builds with JDK 21 and the app
-targets Java 21 (`maven.compiler.release` 21). The image is still Payara 5.2022.5 on JDK 11, which cannot load Java 21
-classes ("Unsupported class file major version 65"): the build succeeds, but the app does not come up and `up.sh`
-stops with "app did not come up".
-Ticket 1a-22 brings the Payara 7 environment on JDK 21. Until then a copy of the app cannot be started from this branch.
+**Payara 7 runtime, app not deployable yet (migration stage 1a, until ticket 1a-91).** The image is Payara Server 7
+Community 7.2026.10 (Jakarta EE 11) on JDK 21. The app is still being ported to Jakarta EE (stage 1a): until ticket
+1a-91 it does not build or does not deploy on Payara 7. Start copies with `APP_ENV_DEPLOY=0` meanwhile: the domain,
+database (with the snapshot and the reset point) and mail sink, without the app (see "Settings" and "Payara 7 domain").
 
 ```sh
 env/up.sh                        # build, start C1 with its snapshot: http://localhost:18080/sormas-ui/
 env/reset.sh                     # back to the snapshot state
 env/down.sh                      # stop and remove this copy
-APP_ENV_CONFIG=C2 APP_ENV_PORT=18081 APP_ENV_PROJECT=sormas-old-c2 env/up.sh --no-build   # a C2 copy next to it
+APP_ENV_CONFIG=C2 APP_ENV_PORT=18081 APP_ENV_PROJECT=sormas-new-c2 env/up.sh --no-build   # a C2 copy next to it
+APP_ENV_DEPLOY=0 env/up.sh       # the domain only (no app build, no deploy): http://localhost:18080/
 ```
 
 Log in with a default user (`admin`, `SurvSup`, `NatUser`, ...; passwords in
@@ -25,6 +25,9 @@ users and their default passwords exist on purpose.
 
 Docker with Compose v2, bash, git, curl, python3 (standard library only) and flock. About 4 GB of RAM per copy.
 The first build downloads the Maven dependencies, the Docker images and the Payara zip from Maven Central.
+An old-app copy (the Payara 5 environment of the old app, names `sormas-old-*`) can run next to new-app copies: names,
+images (`sormas-old-env-payara:5.2022.5`, `sormas-new-env-payara:7.2026.10`) and state directories (`env/.state` of each
+checkout) differ; give each copy its own `APP_ENV_PORT`.
 
 ## Settings
 
@@ -33,7 +36,7 @@ Each script reads these variables; the defaults start one copy.
 | Variable | Default | What |
 |---|---|---|
 | `APP_ENV_PORT` | `18080` | Port of the app on 127.0.0.1 (`/sormas-ui`, `/sormas-rest`) |
-| `APP_ENV_PROJECT` | `sormas-old-env` | Compose project: names the network `<project>_default`, the database volume `<project>_dbdata` and the containers `<project>-db`, `<project>-mail` |
+| `APP_ENV_PROJECT` | `sormas-new-env` | Compose project: names the network `<project>_default`, the database volume `<project>_dbdata` and the containers `<project>-db`, `<project>-mail` |
 | `APP_ENV_CONTAINER` | `<project>-app` | Name of the app container |
 | `APP_ENV_MAIL_PORT` | free port | Port of the mail sink's web UI on 127.0.0.1 (`up.sh` prints it) |
 | `APP_ENV_RESET_MODE` | `restart` | `reset.sh`: `restart` or `db` (see "Reset") |
@@ -43,14 +46,16 @@ Each script reads these variables; the defaults start one copy.
 | `APP_ENV_CONFIG` | `C1` | Test configuration, `C1` or `C2` (see "Configurations") |
 | `APP_ENV_PWCHECK` | `off` | `on`: the "Security Alert: default password" dialog after a default-user login (`skipDefaultPasswordCheck=false`) |
 | `APP_ENV_SEED` | `snapshot` | `up.sh` data: `snapshot` (the committed `env/seed/snapshot-<C>.pgdump`) or `rest` (only the small REST seed; `env/seed/generate.sh` uses it) |
+| `APP_ENV_DEPLOY` | `1` | `0`: the domain only. `build.sh` does not build the app, the container does not deploy it, `up.sh` waits for `GET /` (Payara's default page) instead of the login page and takes the reset point right after loading the snapshot. Needs `APP_ENV_SEED=snapshot`. For stage 1a, until the app deploys on Payara 7 (ticket 1a-91) |
 
-Use the same variables for `up.sh`, `reset.sh` and `down.sh` of one copy. `APP_ENV_CONFIG`, `APP_ENV_PWCHECK` and
-`APP_ENV_SEED` matter to `up.sh` only: the copy keeps them until `down.sh`. Two copies:
+Use the same variables for `up.sh`, `reset.sh` and `down.sh` of one copy. `APP_ENV_CONFIG`, `APP_ENV_PWCHECK`,
+`APP_ENV_SEED` and `APP_ENV_DEPLOY` matter to `up.sh` only: the copy keeps them until `down.sh` (`up.sh` records
+`APP_ENV_DEPLOY` in the copy's state directory for `reset.sh`). Two copies:
 
 ```sh
-APP_ENV_PORT=18081 APP_ENV_PROJECT=sormas-old-1 env/up.sh
-APP_ENV_PORT=18082 APP_ENV_PROJECT=sormas-old-2 env/up.sh --no-build
-APP_ENV_PORT=18081 APP_ENV_PROJECT=sormas-old-1 env/down.sh
+APP_ENV_PORT=18081 APP_ENV_PROJECT=sormas-new-1 env/up.sh
+APP_ENV_PORT=18082 APP_ENV_PROJECT=sormas-new-2 env/up.sh --no-build
+APP_ENV_PORT=18081 APP_ENV_PROJECT=sormas-new-1 env/down.sh
 ```
 
 These scripts follow the replay runner's env-script contract (`up.sh [--no-build]`, `reset.sh`, `down.sh`, configured by
@@ -60,25 +65,30 @@ These scripts follow the replay runner's env-script contract (`up.sh [--no-build
 
 `up.sh [--no-build]`
 1. Refuses to start when this copy's containers already exist (run `down.sh` first).
-2. Builds (`build.sh`), unless `--no-build` is given and the image and the built artefacts exist:
-   - `mvn clean install -DskipTests` with Maven 3.9 on JDK 21 in a container (`maven:3.9-eclipse-temurin-21`), default
-     profiles, on a clean clone of this checkout's **committed HEAD** in `env/.state/build/src` (uncommitted changes
-     are not built; `up.sh` warns). The files under `env/` are used from the working tree.
-   - collects the ear, the two wars, the server libraries and `sormas-base/setup` files into `env/.state/build/deploy`.
-   - builds the image `sormas-old-env-payara:5.2022.5`: `eclipse-temurin:11-jdk` plus the Payara zip (sha1 checked),
-     domain set up as `sormas-base/setup/server-setup.sh` does (`env/payara/`). Works on arm64 and amd64.
+2. Builds (`build.sh`), unless `--no-build` is given and the image and the built artefacts exist (with
+   `APP_ENV_DEPLOY=0`: the image, the server libraries and the setup files):
+   - builds the image `sormas-new-env-payara:7.2026.10` first: `eclipse-temurin:21-jdk` plus the Payara 7 zip from Maven
+     Central (sha1 checked), domain set up as `sormas-base/setup/server-setup.sh` does (`env/payara/`, see "Payara 7
+     domain"). Works on arm64 and amd64. It does not depend on the app, so a failing app build cannot fail it.
+   - on a clean clone of this checkout's **committed HEAD** in `env/.state/build/src` (uncommitted changes are not
+     built; `up.sh` warns; the files under `env/` are used from the working tree): collects the `sormas-base/setup`
+     files and the server libraries (`dependency:copy-dependencies` on `sormas-serverlibs`) into
+     `env/.state/build/deploy`.
+   - unless `APP_ENV_DEPLOY=0`: `mvn clean install -DskipTests` with Maven 3.9 on JDK 21 in a container
+     (`maven:3.9-eclipse-temurin-21`), default profiles, and collects the ear and the two wars.
    - A lock makes a second build wait for the first. Log: `env/.state/build/build.log`.
 3. Generates a throwaway database password for this copy (`env/.state/copies/<project>/db.env`, mode 600; never in an
    image or a tracked file) and writes the copy's `sormas.properties` (`env/.state/copies/<project>/sormas.properties`,
    mounted over the shared one): the stock `sormas-base/setup/sormas.properties`, then `env/sormas.properties.env`, then
    `env/config/<C>.properties`, then `skipDefaultPasswordCheck=false` if `APP_ENV_PWCHECK=on`. Later lines win.
 4. Starts the compose project (`env/compose.yml`): `db` (postgres:14, fresh volume), `mail` (SMTP sink) and `app`
-   (Payara; deploys the ear and the wars at container start). With `APP_ENV_SEED=snapshot` it starts `db` first and
+   (Payara; deploys the ear and the wars at container start, unless `APP_ENV_DEPLOY=0`). With `APP_ENV_SEED=snapshot` it starts `db` first and
    loads `env/seed/snapshot-<C>.pgdump` into it (`pg_restore`, objects owned by the app's database user), so that the
    app's first start finds the data.
-5. Waits until `GET /sormas-ui/login` answers 200. With `APP_ENV_SEED=rest` it seeds the small data set
-   (`env/seed/seed.py`). Then it waits for the app's case completeness job (every 2 minutes) until every case has
-   been written by it, so that the job does not change cases after a reset.
+5. Waits until `GET /sormas-ui/login` answers 200 (`APP_ENV_DEPLOY=0`: `GET /`). With `APP_ENV_SEED=rest` it seeds the
+   small data set (`env/seed/seed.py`). Then it waits for the app's case completeness job (every 2 minutes) until
+   every case has been written by it, so that the job does not change cases after a reset (not with
+   `APP_ENV_DEPLOY=0`: no app, no job).
 6. Stops the app's Payara domain, sets the configuration's feature switches (`env/config/<C>.sql`, C2 only), copies the
    database to the template database `sormas_seed` (the reset point), starts the domain again and waits for 200. The
    copy is now in exactly the state `reset.sh` restores.
@@ -95,7 +105,8 @@ stay). Modes (`APP_ENV_RESET_MODE`):
 state directory. It is safe after a half-finished `up.sh` and when the copy is already gone. Other copies, the build
 output and the images stay.
 
-Measured on a 10-CPU arm64 host (2026-11-05, three copies at once for the snapshot rows):
+Measured on a 10-CPU arm64 host on the Payara 5 environment of the old app (2026-11-05, three copies at once for the
+snapshot rows); the app rows are measured again on Payara 7 once the app deploys (ticket 1a-91):
 
 | Step | Time |
 |---|---|
@@ -106,6 +117,16 @@ Measured on a 10-CPU arm64 host (2026-11-05, three copies at once for the snapsh
 | `reset.sh` (`restart`) | about 25 s |
 | `reset.sh` (`db`) | about 1 s |
 | Memory per copy | app about 2.7 to 3.1 GB (heap limit 4 GB), database about 0.1 GB, mail sink about 10 MB |
+
+Payara 7, `APP_ENV_DEPLOY=0` (same host, 2026-11-06, two copies):
+
+| Step | Time |
+|---|---|
+| Image build (Payara zip already downloaded) | about 30 s; image 1.73 GB |
+| Server libraries, cold Maven repository | about 2.5 min |
+| `up.sh --no-build` (snapshot, C1 or C2) | about 20 s: loading the snapshot 4 s, domain answers after 8 to 9 s, reset point about 10 s |
+| `reset.sh` (`restart`) | about 6 s |
+| Memory per copy | domain about 0.9 to 1.0 GB, database about 0.06 GB |
 
 ## Configurations
 
@@ -197,10 +218,10 @@ has no record: it needs a campaign form definition, which SORMAS does not ship.
 **Make a new snapshot** (for example after a schema change, or to move the dates), per configuration:
 
 ```sh
-APP_ENV_CONFIG=C1 APP_ENV_PORT=18081 APP_ENV_PROJECT=sormas-old-gen-c1 env/seed/generate.sh --no-build
-APP_ENV_CONFIG=C2 APP_ENV_PORT=18082 APP_ENV_PROJECT=sormas-old-gen-c2 env/seed/generate.sh --no-build
-APP_ENV_CONFIG=C1 APP_ENV_PORT=18081 APP_ENV_PROJECT=sormas-old-gen-c1 env/seed/extend.sh
-APP_ENV_CONFIG=C2 APP_ENV_PORT=18082 APP_ENV_PROJECT=sormas-old-gen-c2 env/seed/extend.sh
+APP_ENV_CONFIG=C1 APP_ENV_PORT=18081 APP_ENV_PROJECT=sormas-new-gen-c1 env/seed/generate.sh --no-build
+APP_ENV_CONFIG=C2 APP_ENV_PORT=18082 APP_ENV_PROJECT=sormas-new-gen-c2 env/seed/generate.sh --no-build
+APP_ENV_CONFIG=C1 APP_ENV_PORT=18081 APP_ENV_PROJECT=sormas-new-gen-c1 env/seed/extend.sh
+APP_ENV_CONFIG=C2 APP_ENV_PORT=18082 APP_ENV_PROJECT=sormas-new-gen-c2 env/seed/extend.sh
 # check the counts they print, look at the data, then commit env/seed/snapshot-C1.* and snapshot-C2.*
 ```
 
@@ -243,9 +264,9 @@ web login ("Your user account does not have access to the web application"): its
 after every build (`CI.md`).
 
 ```sh
-APP_ENV_PORT=18091 APP_ENV_PROJECT=sormas-old-smoke env/up.sh --no-build
-APP_ENV_PORT=18091 APP_ENV_PROJECT=sormas-old-smoke node env/smoke.cjs   # exit 0: all pass
-APP_ENV_PORT=18091 APP_ENV_PROJECT=sormas-old-smoke env/down.sh
+APP_ENV_PORT=18091 APP_ENV_PROJECT=sormas-new-smoke env/up.sh --no-build
+APP_ENV_PORT=18091 APP_ENV_PROJECT=sormas-new-smoke node env/smoke.cjs   # exit 0: all pass
+APP_ENV_PORT=18091 APP_ENV_PROJECT=sormas-new-smoke env/down.sh
 ```
 
 - Base URL: `http://localhost:$APP_ENV_PORT/sormas-ui`, or `APP_ENV_SMOKE_URL`. Output: one screenshot per user (the
@@ -262,7 +283,41 @@ APP_ENV_PORT=18091 APP_ENV_PROJECT=sormas-old-smoke env/down.sh
 
 - App: `docker logs <APP_ENV_CONTAINER>` (the Payara server log).
 - Build: `env/.state/build/build.log`.
-- Known, from the app and its stock setup (not changed here): deployment logs `SEVERE` lines (e.g. `@Lock is only
-  permitted for singleton session beans`, annotation processing of `sormas-backend`), and
-  `set server-config.ejb-container.max-pool-size=128` fails during the image build, so the EJB pool stays at Payara's
-  default of 32 (`env/payara/payara-setup.sh` keeps the line as `server-setup.sh` has it). Neither stops the app.
+- Known, from the app (not changed here): on the Payara 5 environment of the old app, deployment logs `SEVERE` lines
+  (e.g. `@Lock is only permitted for singleton session beans`, annotation processing of `sormas-backend`) that do not
+  stop the app. On Payara 7 they are checked again once the app deploys (ticket 1a-91).
+- `server.log` in a fresh container starts with the image build's own domain start (`WARNING` lines "cannot take effect
+  without server restart" for the JVM options set then); they are from the build, not from this start.
+
+## Payara 7 domain
+
+`env/payara/payara-setup.sh` sets up the domain `sormas` at image build time, as `sormas-base/setup/server-setup.sh`
+does and as the Payara 5 environment of the old app did. No secrets in the image: the JDBC pool reads the database host
+and password from the container env at run time (`${ENV=SORMAS_DB_HOST}`, `${ENV=SORMAS_DB_PW}`).
+
+| Setting | Value |
+|---|---|
+| Server | Payara Server 7 Community (Full) 7.2026.10 (Jakarta EE 11), zip from Maven Central, on `eclipse-temurin:21-jdk` (Temurin 21) |
+| Ports | port base 4800: HTTP 4880 (published on 127.0.0.1:`APP_ENV_PORT`), admin 4848 (inside the container only) |
+| JDBC | pool `sormasDataPool` (`org.postgresql.ds.PGConnectionPoolDataSource`, PostgreSQL connection validation, max 128, database `sormas_db`, user `sormas_user`), resource `jdbc/sormasDataPool` (the name in `sormas-backend`'s `persistence.xml`) |
+| Mail | `mail/MailSession`: host `mail` (the copy's SMTP sink), port 1025, user `sormas`, from `noreply@sormas.local` |
+| Properties | custom resource `sormas/Properties` reading `${com.sun.aas.instanceRoot}/sormas.properties` (this copy's file, copied in at start) |
+| JVM | `-Xmx4096m`, `-XX:+IgnoreUnrecognizedVMOptions`, logback configuration `config/logback.xml`, `-DlogbackDisableServletContainerInitializer=true`; time zone Europe/Berlin from the container's `TZ` (the JVM reports `user.timezone = Europe/Berlin`) |
+| Class loading | system property `fish.payara.classloading.delegate=false` |
+| Pools | EJB `max-pool-size` 128, HTTP thread pool max 50 |
+| Domain lib | the server libraries (`sormas-serverlibs`, collected by `build.sh`) copied to `domains/sormas/lib/` at container start; also holds the PostgreSQL driver the JDBC pool needs |
+| Login | none in the domain: SORMAS authenticates in the app (Jakarta Security: `SormasIdentityStore` and `MultiAuthenticationMechanism` in the two wars) and maps its user rights to roles through `glassfish-ejb-jar.xml` / `glassfish-web.xml`; the setup scripts create no realm, as before. No Keycloak |
+| Directories | `/opt/sormas/{custom,documents,temp,generated}`; login pages from `sormas-base/setup` into `custom` at start |
+
+Differences to the Payara 5 environment of the old app (`sormas-old-env-payara:5.2022.5`):
+
+- Payara 5.2022.5 (Jakarta EE 8, `javax.*`) on JDK 11 → Payara 7.2026.10 (Jakarta EE 11, `jakarta.*`) on JDK 21; the
+  mail resource uses Eclipse Angus Mail.
+- EJB pool: 128 as `server-setup.sh` intends. The old environment's `set` of it failed (no `get` before it) and the
+  pool stayed at Payara's default of 32.
+- The domain lib holds today's server library list (`sormas-serverlibs/pom.xml` at HEAD). Migration ticket 1a-02
+  changes that list to Jakarta EE 11 artefacts; `build.sh` collects whatever the pom says, so nothing changes here, but
+  1a-91 checks the list against the deployed app.
+- `APP_ENV_DEPLOY=0` (new): the domain without the app.
+- Payara 7's own defaults differ from Payara 5's (e.g. its default JVM options with `--add-opens` for JDK 21); the
+  setup does not change them.

@@ -1,6 +1,6 @@
 package de.symeda.sormas.ui.importer;
 
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.UI;
 
 public class CountryImportProgressLayout extends ImportProgressLayout {
 

@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
@@ -29,9 +30,7 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.server.Page;
-import com.vaadin.ui.Notification;
-import com.wcs.wcslib.vaadin.widget.multifileupload.receiver.UploadReceiver;
+import com.vaadin.flow.component.UI;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -39,38 +38,56 @@ import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.importexport.ImportExportUtils;
 import de.symeda.sormas.api.utils.DataHelper;
 import de.symeda.sormas.api.utils.DateHelper;
-import de.symeda.sormas.ui.UiUtil;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
-public class DocumentUploadReceiver implements UploadReceiver {
+/**
+ * The temporary file of one uploaded document (was the MultiFileUpload add-on's {@code UploadReceiver}), used by
+ * {@link DocumentMultiFileUpload}.
+ */
+public class DocumentUploadReceiver implements Serializable {
 
 	private static final long serialVersionUID = 2971535728102027968L;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DocumentUploadReceiver.class);
 
+	private final String userUuid;
 	private File file;
 
-	@Override
-	public OutputStream receiveUpload() {
+	/**
+	 * @param userUuid
+	 *            the uploading user (the upload request runs outside the UI, where the current user is not known)
+	 */
+	public DocumentUploadReceiver(String userUuid) {
+		this.userUuid = userUuid;
+	}
+
+	/**
+	 * @param ui
+	 *            for the error notification
+	 */
+	public OutputStream receiveUpload(UI ui) {
 		try {
+			// Flow can upload several files at the same time (the add-on did one after the other): a unique suffix keeps
+			// their temporary files apart
 			String newFileName = ImportExportUtils.TEMP_FILE_PREFIX + "_document_upload" + DateHelper.formatDateForExport(new Date()) + "_"
-				+ DataHelper.getShortUuid(UiUtil.getUserUuid());
+				+ DataHelper.getShortUuid(userUuid) + "_" + DataHelper.createUuid();
 			file = Paths.get(FacadeProvider.getConfigFacade().getTempFilesPath()).resolve(newFileName).toFile();
 			return new BufferedOutputStream(Files.newOutputStream(file.toPath()));
 
 		} catch (IOException e) {
 			deleteTempFile();
 			LOGGER.error(e.getMessage(), e);
-			new Notification(
-				I18nProperties.getString(Strings.headingImportError),
-				I18nProperties.getString(Strings.messageImportError),
-				Notification.Type.ERROR_MESSAGE,
-				false).show(Page.getCurrent());
+			ui.access(
+				() -> NotificationHelper.show(
+					I18nProperties.getString(Strings.headingImportError),
+					I18nProperties.getString(Strings.messageImportError),
+					NotificationHelper.Type.ERROR_MESSAGE,
+					false));
 			// Workaround because returning null here throws an uncatchable UploadException
 			return new ByteArrayOutputStream();
 		}
 	}
 
-	@Override
 	public void deleteTempFile() {
 		if (file != null && file.exists()) {
 			file.delete();
@@ -78,7 +95,6 @@ public class DocumentUploadReceiver implements UploadReceiver {
 		}
 	}
 
-	@Override
 	public InputStream getStream() {
 		try {
 			if (file != null) {

@@ -41,10 +41,8 @@ import org.slf4j.LoggerFactory;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvValidationException;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -81,6 +79,7 @@ import de.symeda.sormas.api.utils.LegacyEnumHelper;
 import de.symeda.sormas.ui.person.PersonSelectionField;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.DownloadUtil;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.progress.ProgressResult;
 
@@ -166,23 +165,24 @@ public abstract class DataImporter {
 	/**
 	 * Opens a progress layout and runs the import logic in a separate thread.
 	 */
-	public void startImport(Consumer<StreamResource> errorReportConsumer, UI currentUI, boolean duplicatesPossible)
+	public void startImport(Consumer<StreamSourceDownloadHandler> errorReportConsumer, UI currentUI, boolean duplicatesPossible)
 		throws IOException, CsvValidationException {
 
 		ImportProgressLayout progressLayout = this.getImportProgressLayout(currentUI, duplicatesPossible);
 
 		importedLineCallback = result -> progressLayout.updateProgress(new ImportProgressUpdateInfo(result));
 
-		Window window = VaadinUiUtil.createPopupWindow();
-		window.setCaption(I18nProperties.getString(Strings.headingDataImport));
-		window.setWidth(800, Unit.PIXELS);
-		window.setContent(progressLayout);
-		window.setClosable(false);
-		currentUI.addWindow(window);
+		Dialog window = VaadinUiUtil.createPopupWindow();
+		window.setHeaderTitle(I18nProperties.getString(Strings.headingDataImport));
+		window.setWidth("800px");
+		window.add(progressLayout);
+		VaadinUiUtil.setClosable(window, false);
+		window.open();
 
 		Thread importThread = new Thread(() -> {
 			try {
-				currentUI.setPollInterval(300);
+				// Flow: UI state changes need the session lock
+				currentUI.access(() -> currentUI.setPollInterval(300));
 				I18nProperties.setUserLanguage(currentUser.getLanguage());
 				FacadeProvider.getI18nFacade().setUserLanguage(currentUser.getLanguage());
 
@@ -192,7 +192,7 @@ public abstract class DataImporter {
 
 				// Display a window presenting the import result
 				currentUI.access(() -> {
-					window.setClosable(true);
+					VaadinUiUtil.setClosable(window, true);
 					ProgressResult progressResult;
 					String newInfoText;
 					switch (importStatus) {
@@ -216,9 +216,9 @@ public abstract class DataImporter {
 					}
 					progressLayout.finishProgress(progressResult, newInfoText, null, window::close);
 
-					window.addCloseListener(e -> {
+					VaadinUiUtil.addCloseListener(window, e -> {
 						if (importStatus == ImportResultStatus.COMPLETED_WITH_ERRORS || importStatus == ImportResultStatus.CANCELED_WITH_ERRORS) {
-							StreamResource streamResource = createErrorReportStreamResource();
+							StreamSourceDownloadHandler streamResource = createErrorReportStreamResource();
 							errorReportConsumer.accept(streamResource);
 						}
 					});
@@ -227,7 +227,7 @@ public abstract class DataImporter {
 				});
 			} catch (InvalidColumnException e) {
 				currentUI.access(() -> {
-					window.setClosable(true);
+					VaadinUiUtil.setClosable(window, true);
 					progressLayout.finishProgress(
 						ProgressResult.FAILURE,
 						String.format(I18nProperties.getString(Strings.messageImportInvalidColumn), e.getColumnName()),
@@ -239,7 +239,7 @@ public abstract class DataImporter {
 				logger.error(e.getMessage(), e);
 
 				currentUI.access(() -> {
-					window.setClosable(true);
+					VaadinUiUtil.setClosable(window, true);
 					progressLayout
 						.finishProgress(ProgressResult.FAILURE, I18nProperties.getString(Strings.messageImportFailedFull), null, window::close);
 					currentUI.setPollInterval(-1);
@@ -368,7 +368,7 @@ public abstract class DataImporter {
 		return new FileWriter(errorReportFile.getPath());
 	}
 
-	protected StreamResource createErrorReportStreamResource() {
+	protected StreamSourceDownloadHandler createErrorReportStreamResource() {
 		return DownloadUtil.createFileStreamResource(
 			errorReportFilePath,
 			getErrorReportFileName(),
@@ -658,7 +658,7 @@ public abstract class DataImporter {
 		UI currentUI) {
 		currentUI.accessSynchronously(() -> {
 			PersonSelectionField personSelect = new PersonSelectionField(newPerson, I18nProperties.getString(infoText));
-			personSelect.setWidth(1024, Unit.PIXELS);
+			personSelect.setWidth("1024px");
 
 			if (personSelect.hasMatches()) {
 				final CommitDiscardWrapperComponent<PersonSelectionField> component = new CommitDiscardWrapperComponent<>(personSelect);

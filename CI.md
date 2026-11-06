@@ -15,7 +15,7 @@ On every push to any branch (there is no pull request trigger: a pushed commit's
 
 ## Smoke
 
-**Non-blocking during migration stage 1a, until ticket 1a-22.** The app is built for Java 21 (`maven.compiler.release` 21), but `env/` still runs Payara 5.2022.5 on JDK 11, which cannot load Java 21 classes: the ear and the wars fail to deploy, so the smoke fails. Every smoke step has `continue-on-error: true`, the start waits 5 minutes instead of 15 (`APP_ENV_WAIT_S=300`), and the step "Smoke: result" reports the outcome as a warning and in the job summary. A green job therefore says nothing about the smoke until then. Ticket 1a-22 brings the Payara 7 environment on JDK 21 and makes the smoke blocking again.
+**Non-blocking during migration stage 1a, until ticket 1a-22.** The app is built for Java 21 (`maven.compiler.release` 21), but `env/` still runs Payara 5.2022.5 on JDK 11, which cannot read Java 21 classes ("Unsupported class file major version 65" while Payara scans the archives): the app does not come up, so the smoke fails. Every smoke step has `continue-on-error: true`, the start waits 5 minutes instead of 15 (`APP_ENV_WAIT_S=300`), the logins run only when the start succeeded, and the step "Smoke: result" reports the outcome as a warning and in the job summary. A green job therefore says nothing about the smoke until then. Ticket 1a-22 brings the Payara 7 environment on JDK 21 and makes the smoke blocking again.
 
 The smoke steps use the reproducible environment ([`env/README.md`](env/README.md)) with its defaults (port 18080, project `sormas-old-env`):
 

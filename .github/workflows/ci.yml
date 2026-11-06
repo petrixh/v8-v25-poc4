@@ -117,7 +117,8 @@ jobs:
       # web test user, stop the copy. See CI.md and env/README.md ("Smoke check").
       #
       # NON-BLOCKING until ticket 1a-22 (migration stage 1a): the app is built for Java 21, but env/
-      # still runs Payara 5 on JDK 11, which cannot load Java 21 classes, so the deployment fails.
+      # still runs Payara 5 on JDK 11, which cannot read Java 21 classes ("Unsupported class file major
+      # version 65"), so the app does not come up. The logins run only when the start succeeded.
       # Every smoke step has continue-on-error: its result shows in the log and the job stays green.
       # 1a-22 brings the Payara 7 environment and removes continue-on-error again (CI.md "Smoke").
       #
@@ -164,7 +165,7 @@ jobs:
         continue-on-error: true # non-blocking until 1a-22, see above
         id: smoke_up
         if: steps.dedupe.outputs.skip != 'true'
-        # Until 1a-22 the deployment fails and the app never answers: wait 5 min, not the default 15
+        # Until 1a-22 the app never answers: wait 5 min, not the default 15
         env:
           APP_ENV_WAIT_S: '300'
         run: env/up.sh --no-build
@@ -174,7 +175,7 @@ jobs:
       - name: 'Smoke: log in as each web test user'
         continue-on-error: true # non-blocking until 1a-22, see above
         id: smoke_login
-        if: steps.dedupe.outputs.skip != 'true'
+        if: steps.dedupe.outputs.skip != 'true' && steps.smoke_up.outcome == 'success'
         run: node env/smoke.cjs env/.state/smoke
 
       # Always, also on failure or cancel, once the start step has run.

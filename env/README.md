@@ -6,7 +6,8 @@ features). Several copies can run side by side, each with its own port, containe
 
 **Java 21 build, Payara 5 runtime (migration stage 1a, until ticket 1a-22).** `build.sh` builds with JDK 21 and the app
 targets Java 21 (`maven.compiler.release` 21). The image is still Payara 5.2022.5 on JDK 11, which cannot load Java 21
-classes: the build succeeds, but the ear and the wars fail to deploy and `up.sh` stops with "app did not come up".
+classes ("Unsupported class file major version 65"): the build succeeds, but the app does not come up and `up.sh`
+stops with "app did not come up".
 Ticket 1a-22 brings the Payara 7 environment on JDK 21. Until then a copy of the app cannot be started from this branch.
 
 ```sh

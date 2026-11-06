@@ -5,7 +5,7 @@
 #   2. collect the ear, the wars, the server libs and the setup files into $APP_ENV_STATE_DIR/build/deploy
 #   3. build the Payara image $APP_ENV_IMAGE (eclipse-temurin:11-jdk + the Payara zip from Maven Central, arm64 and amd64)
 # Until ticket 1a-22 the image is still Payara 5 on JDK 11, which cannot load the Java 21 classes built in step 1: the
-# build succeeds, the deployment fails (env/README.md, "Java 21 build, Payara 5 runtime").
+# build succeeds, the app does not come up (env/README.md, "Java 21 build, Payara 5 runtime").
 # Usually run by up.sh. Holds a lock so two copies never build at once.
 set -euo pipefail
 source "$(dirname "$0")/lib.sh"

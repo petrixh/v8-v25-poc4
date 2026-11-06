@@ -25,9 +25,9 @@ import java.util.Date;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.v7.data.Validator;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.caze.CaseDataDto;

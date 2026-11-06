@@ -25,8 +25,8 @@ import java.util.function.Consumer;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -122,7 +122,7 @@ public class VisitController {
 			new CommitDiscardWrapperComponent<>(editForm, isEditOrDeleteAllowed, editForm.getFieldGroup());
 		editView.setWidth(100, Unit.PERCENTAGE);
 
-		Window window =
+		Dialog window =
 			VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getString(!canEdit ? Strings.headingViewVisit : Strings.headingEditVisit));
 		window.setWidth(editForm.getWidth() + 90, Unit.PIXELS);
 		window.setHeight(80, Unit.PERCENTAGE);
@@ -175,7 +175,7 @@ public class VisitController {
 			}
 		});
 
-		Window window = VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getString(Strings.headingCreateNewVisit));
+		Dialog window = VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getString(Strings.headingCreateNewVisit));
 		// visit form is too big for typical screens
 		window.setWidth(createForm.getWidth() + 64 + 24, Unit.PIXELS);
 		window.setHeight(80, Unit.PERCENTAGE);
@@ -236,7 +236,7 @@ public class VisitController {
 
 	}
 
-	private Consumer<List<VisitIndexDto>> bulkOperationCallback(VisitGrid visitGrid, Runnable noEntriesRemainingCallback, Window popupWindow) {
+	private Consumer<List<VisitIndexDto>> bulkOperationCallback(VisitGrid visitGrid, Runnable noEntriesRemainingCallback, Dialog popupWindow) {
 		return remainingVisits -> {
 			if (popupWindow != null) {
 				popupWindow.close();

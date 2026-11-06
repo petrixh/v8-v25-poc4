@@ -41,15 +41,15 @@ import java.util.function.Supplier;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomLayout;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.Component;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -248,7 +248,7 @@ public class EpiDataForm extends AbstractEditForm<EpiDataDto> {
 
 		if (sourceContactsToggleCallback != null) {
 			ogContactWithSourceCaseKnown.addValueChangeListener(e -> {
-				YesNoUnknown sourceContactsKnown = (YesNoUnknown) FieldHelper.getNullableSourceFieldValue((Field<?>) e.getProperty());
+				YesNoUnknown sourceContactsKnown = (YesNoUnknown) FieldHelper.getNullableSourceFieldValue((Field<?>) e.getHasValue());
 				sourceContactsToggleCallback.accept(YesNoUnknown.YES == sourceContactsKnown);
 			});
 		}
@@ -549,7 +549,7 @@ public class EpiDataForm extends AbstractEditForm<EpiDataDto> {
 			LOC_SOURCE_CASE_CONTACTS_HEADING);
 
 		Label otherInformationLabel = new Label(I18nProperties.getString(Strings.headingEpiDataOtherInformation));
-		otherInformationLabel.addStyleName(H3);
+		otherInformationLabel.addClassName(H3);
 		getContent().addComponent(otherInformationLabel, LOC_OTHER_INFORMATION_HEADING);
 	}
 

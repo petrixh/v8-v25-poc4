@@ -19,7 +19,7 @@ package de.symeda.sormas.ui.hospitalization;
 
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.v7.data.Property;
 import com.vaadin.v7.ui.Table;
 
@@ -177,7 +177,7 @@ public class PreviousHospitalizationsField extends AbstractTableField<PreviousHo
 				editForm.getFieldGroup());
 		editView.getCommitButton().setCaption(I18nProperties.getString(Strings.done));
 
-		Window popupWindow = VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getCaption(PreviousHospitalizationDto.I18N_PREFIX));
+		Dialog popupWindow = VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getCaption(PreviousHospitalizationDto.I18N_PREFIX));
 
 		if (isEditAllowed) {
 			editView.addCommitListener(new CommitListener() {

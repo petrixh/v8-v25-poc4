@@ -45,14 +45,14 @@ import java.util.stream.Stream;
 import com.google.common.collect.ImmutableList;
 import com.vaadin.server.ErrorMessage;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.shared.ui.ContentMode;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.shared.ui.ErrorLevel;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.Component;
+import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.themes.ValoTheme;
@@ -60,12 +60,12 @@ import com.vaadin.v7.data.fieldgroup.FieldGroup;
 import com.vaadin.v7.data.util.converter.Converter.ConversionException;
 import com.vaadin.v7.data.util.converter.StringToFloatConverter;
 import com.vaadin.v7.ui.AbstractField;
-import com.vaadin.v7.ui.AbstractSelect;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.OptionGroup;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.SelectField;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -635,7 +635,7 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 				&& isVisibleAllowed(SKIN_RASH_ONSET_DATE));
 		DateField skinRashOnsetDate = addField(skinRashDateLayout, SKIN_RASH_ONSET_DATE, DateField.class);
 		skinRashOnsetDate.setId(SKIN_RASH_ONSET_DATE);
-		skinRashOnsetDate.addStyleNames(ValoTheme.DATEFIELD_BORDERLESS, CssStyles.VIEW_SECTION_WIDTH_AUTO, VSPACE_3);
+		skinRashOnsetDate.addClassNames(ValoTheme.DATEFIELD_BORDERLESS, CssStyles.VIEW_SECTION_WIDTH_AUTO, VSPACE_3);
 		skinRashOnsetDate.setCaption(null);
 		skinRashDateLayout.addComponent(skinRashOnsetDate, SKIN_RASH_ONSET_DATE);
 		getContent().addComponent(skinRashDateLayout, "LAYOUT_SKIN_RASH_ONSET_DATE");
@@ -643,7 +643,7 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 		getField(SKIN_RASH).addValueChangeListener(e -> {
 			// Show skin rash onset date field only if skin rash is set to YES
 			if (isConfiguredServer(CountryHelper.COUNTRY_CODE_LUXEMBOURG) && isVisibleAllowed(SKIN_RASH_ONSET_DATE)) {
-				Object v = FieldHelper.getNullableSourceFieldValue((Field) e.getProperty());
+				Object v = FieldHelper.getNullableSourceFieldValue((Field) e.getHasValue());
 				boolean isVisible = v == SymptomState.YES || (v instanceof java.util.Set && ((java.util.Set<?>) v).contains(SymptomState.YES));
 				skinRashDateLabel.setVisible(isVisible);
 			}
@@ -963,7 +963,7 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 			.setVisible(FieldHelper.getNullableSourceFieldValue(getFieldGroup().getField(LESIONS)) == SymptomState.YES);
 		getFieldGroup().getField(LESIONS).addValueChangeListener(e -> {
 			getContent().getComponent(LESIONS_LOCATIONS_LOC)
-				.setVisible(FieldHelper.getNullableSourceFieldValue((Field) e.getProperty()) == SymptomState.YES);
+				.setVisible(FieldHelper.getNullableSourceFieldValue((Field) e.getHasValue()) == SymptomState.YES);
 		});
 
 		// Symptoms hint text
@@ -1131,7 +1131,7 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 			FieldHelper.setEnabledWhen(getFieldGroup(), DATE_OF_ONSET_KNOWN, YesNoUnknown.YES, ONSET_DATE, true);
 
 			ComboBox clinicalPresentationStatusField = addField(CLINICAL_PRESENTATION_STATUS, ComboBox.class);
-			clinicalPresentationStatusField.setItemCaptionMode(AbstractSelect.ItemCaptionMode.EXPLICIT_DEFAULTS_ID);
+			clinicalPresentationStatusField.setItemCaptionMode(SelectField.ItemCaptionMode.EXPLICIT_DEFAULTS_ID);
 			clinicalPresentationStatusField
 				.setItemCaption(ClinicalPresentationStatus.COMPATIBLE, ClinicalPresentationStatus.COMPATIBLE.buildCaption(disease.toShortString()));
 			getFieldGroup().getField(OTHER_CLINICAL_PRESENTATION_TEXT).setVisible(true);
@@ -1239,7 +1239,7 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 	private Label createLabel(String text, String h4, String location) {
 		final Label label = new Label(text);
 		label.setId(text);
-		label.addStyleName(h4);
+		label.addClassName(h4);
 		getContent().addComponent(label, location);
 		return label;
 	}
@@ -1282,7 +1282,7 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 	}
 
 	@Override
-	public void setValue(SymptomsDto newFieldValue) throws ReadOnlyException, ConversionException {
+	public void setValue(SymptomsDto newFieldValue) {
 		super.setValue(newFieldValue);
 
 		initializeSymptomRequirementsForCase();
@@ -1445,7 +1445,7 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 		getFieldGroup().getField(LESIONS).addValueChangeListener(e -> {
 			for (String monkeypoxImage : monkeypoxImages) {
 				getContent().getComponent(monkeypoxImage)
-					.setVisible(FieldHelper.getNullableSourceFieldValue((Field) e.getProperty()) == SymptomState.YES);
+					.setVisible(FieldHelper.getNullableSourceFieldValue((Field) e.getHasValue()) == SymptomState.YES);
 			}
 		});
 	}

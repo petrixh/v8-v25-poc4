@@ -17,10 +17,10 @@ package de.symeda.sormas.ui.epidata;
 
 import java.util.function.Consumer;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.FacadeProvider;
@@ -84,15 +84,15 @@ public class CaseEpiDataView extends AbstractCaseView {
 
 			final SourceContactListComponent sourceContactList =
 				new SourceContactListComponent(getCaseRef(), this, UiUtil.permitted(isEditAllowed(), UserRight.CASE_EDIT));
-			sourceContactList.addStyleName(CssStyles.SIDE_COMPONENT);
+			sourceContactList.addClassName(CssStyles.SIDE_COMPONENT);
 			sourceContactsLayout.addComponent(sourceContactList);
 
 			if (UiUtil.permitted(UserRight.CONTACT_CREATE, UserRight.CASE_EDIT)) {
-				sourceContactList.addStyleName(CssStyles.VSPACE_NONE);
+				sourceContactList.addClassName(CssStyles.VSPACE_NONE);
 				Label contactCreationDisclaimer = new Label(
-					VaadinIcons.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoCreateNewContactDiscardsChanges),
+					VaadinIcon.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoCreateNewContactDiscardsChanges),
 					ContentMode.HTML);
-				contactCreationDisclaimer.addStyleName(CssStyles.VSPACE_TOP_4);
+				contactCreationDisclaimer.addClassName(CssStyles.VSPACE_TOP_4);
 
 				sourceContactsLayout.addComponent(contactCreationDisclaimer);
 			}

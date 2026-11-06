@@ -34,17 +34,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.CustomLayout;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.AbstractSelect.ItemCaptionMode;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.OptionGroup;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.v7.ui.SelectField.ItemCaptionMode;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -276,7 +276,7 @@ public class ExposureForm extends AbstractEditForm<ExposureDto> {
 		locationGeneralPanel.updateFieldsDisplay();
 		locationDetailsLayout.addComponent(locationGeneralPanel, LOC_CUSTOMIZABLE_FIELDS_LOCATION_GENERAL);
 		getField(ExposureDto.MEANS_OF_TRANSPORT).addValueChangeListener(e -> {
-			if (e.getProperty().getValue() == MeansOfTransport.PLANE) {
+			if (e.getValue() == MeansOfTransport.PLANE) {
 				getField(ExposureDto.CONNECTION_NUMBER).setCaption(I18nProperties.getCaption(Captions.exposureFlightNumber));
 			} else {
 				getField(ExposureDto.CONNECTION_NUMBER)
@@ -384,7 +384,7 @@ public class ExposureForm extends AbstractEditForm<ExposureDto> {
 		sexualContactField.setVisible(false);
 
 		categoryField.addValueChangeListener(e -> {
-			ExposureCategory selectedCategory = (ExposureCategory) e.getProperty().getValue();
+			ExposureCategory selectedCategory = (ExposureCategory) e.getValue();
 			updateSettingFieldItems(selectedCategory);
 
 			// Also update subSettings when category changes (setting will be null/cleared)
@@ -402,7 +402,7 @@ public class ExposureForm extends AbstractEditForm<ExposureDto> {
 		});
 
 		settingField.addValueChangeListener(e -> {
-			ExposureSetting selectedSetting = (ExposureSetting) e.getProperty().getValue();
+			ExposureSetting selectedSetting = (ExposureSetting) e.getValue();
 
 			// 1. Show/hide settingDetailsField if setting is OTHER
 			settingDetailsField.setVisible(selectedSetting == ExposureSetting.OTHER);
@@ -419,7 +419,7 @@ public class ExposureForm extends AbstractEditForm<ExposureDto> {
 		subSettingsField.addValueChangeListener(e -> {
 			// 3. Show/hide subSettingsDetailsField if subSettings contains OTHER
 			@SuppressWarnings("unchecked")
-			Set<ExposureSubSetting> selectedSubSettings = (Set<ExposureSubSetting>) e.getProperty().getValue();
+			Set<ExposureSubSetting> selectedSubSettings = (Set<ExposureSubSetting>) e.getValue();
 			boolean containsOther = selectedSubSettings != null && selectedSubSettings.contains(ExposureSubSetting.OTHER);
 			subSettingsDetailsField.setVisible(containsOther);
 			// prophylaxis is allowed only for Malaria abroad travelers, not all diseases
@@ -441,20 +441,20 @@ public class ExposureForm extends AbstractEditForm<ExposureDto> {
 
 		contactFactorsField.addValueChangeListener(e -> {
 			@SuppressWarnings("unchecked")
-			Set<ExposureContactFactor> selectedContactFactors = (Set<ExposureContactFactor>) e.getProperty().getValue();
+			Set<ExposureContactFactor> selectedContactFactors = (Set<ExposureContactFactor>) e.getValue();
 			boolean containsOther = selectedContactFactors != null && selectedContactFactors.contains(ExposureContactFactor.OTHER);
 			contactFactorDetailsField.setVisible(containsOther);
 		});
 
 		protectiveMeasuresField.addValueChangeListener(e -> {
 			@SuppressWarnings("unchecked")
-			Set<ExposureProtectiveMeasure> selectedProtectiveMeasures = (Set<ExposureProtectiveMeasure>) e.getProperty().getValue();
+			Set<ExposureProtectiveMeasure> selectedProtectiveMeasures = (Set<ExposureProtectiveMeasure>) e.getValue();
 			boolean containsOther = selectedProtectiveMeasures != null && selectedProtectiveMeasures.contains(ExposureProtectiveMeasure.OTHER);
 			protectiveMeasureDetailsField.setVisible(containsOther);
 		});
 
 		conditionOfAnimalField.addValueChangeListener(e -> {
-			Object value = e.getProperty().getValue();
+			Object value = e.getValue();
 			boolean hasValue = value != null;
 
 			// Show/hide and set required for animalCategoryField
@@ -473,7 +473,7 @@ public class ExposureForm extends AbstractEditForm<ExposureDto> {
 		});
 
 		animalCategoryField.addValueChangeListener(e -> {
-			Object value = e.getProperty().getValue();
+			Object value = e.getValue();
 			boolean hasValue = value != null;
 
 			// Show/hide typeOfAnimal, animalCategoryDetailsField
@@ -532,7 +532,7 @@ public class ExposureForm extends AbstractEditForm<ExposureDto> {
 		conclusionHeading.setVisible(List.of(Disease.GIARDIASIS, Disease.CRYPTOSPORIDIOSIS).contains(disease));
 		locationForm.setFacilityFieldsVisible(getField(ExposureDto.TYPE_OF_PLACE).getValue() == TypeOfPlace.FACILITY, true);
 		getField(ExposureDto.TYPE_OF_PLACE)
-			.addValueChangeListener(e -> locationForm.setFacilityFieldsVisible(e.getProperty().getValue() == TypeOfPlace.FACILITY, true));
+			.addValueChangeListener(e -> locationForm.setFacilityFieldsVisible(e.getValue() == TypeOfPlace.FACILITY, true));
 		locationForm.setContinentFieldsVisibility();
 	}
 
@@ -653,7 +653,7 @@ public class ExposureForm extends AbstractEditForm<ExposureDto> {
 	}
 
 	@Override
-	public void setValue(ExposureDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(ExposureDto newFieldValue) {
 		super.setValue(newFieldValue);
 
 		populateExposureTypes(newFieldValue);
@@ -883,7 +883,7 @@ public class ExposureForm extends AbstractEditForm<ExposureDto> {
 		if (FacadeProvider.getConfigFacade().isConfiguredCountry(CountryHelper.COUNTRY_CODE_GERMANY) && epiDataParentClass == CaseDataDto.class) {
 			HTML_LAYOUT += fluidRowLocs(ExposureDto.PROBABLE_INFECTION_ENVIRONMENT) +
 			(FacadeProvider.getExternalSurveillanceToolFacade().isFeatureEnabled()
-				? VaadinIcons.INFO_CIRCLE.getHtml() + " " + (I18nProperties.getString(Strings.infoCheckProbableInfectionEnvironment)) + "<p>   </p>" : "<p>   </p>");
+				? VaadinIcon.INFO_CIRCLE.getHtml() + " " + (I18nProperties.getString(Strings.infoCheckProbableInfectionEnvironment)) + "<p>   </p>" : "<p>   </p>");
 		}
 		//@formatter:on
 		return HTML_LAYOUT;

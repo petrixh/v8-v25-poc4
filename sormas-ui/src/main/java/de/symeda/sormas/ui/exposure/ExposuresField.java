@@ -25,9 +25,9 @@ import java.util.function.Supplier;
 import org.apache.commons.lang3.StringUtils;
 
 import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.v7.data.Property;
 import com.vaadin.v7.ui.Label;
 import com.vaadin.v7.ui.Table;
@@ -220,7 +220,7 @@ public class ExposuresField extends AbstractTableField<ExposureDto> {
 			new CommitDiscardWrapperComponent<>(exposureForm, UiUtil.permitted(isEditAllowed, UserRight.CASE_EDIT), exposureForm.getFieldGroup());
 		component.getCommitButton().setCaption(I18nProperties.getString(Strings.done));
 
-		Window popupWindow = VaadinUiUtil.showModalPopupWindow(component, I18nProperties.getString(Strings.entityExposure));
+		Dialog popupWindow = VaadinUiUtil.showModalPopupWindow(component, I18nProperties.getString(Strings.entityExposure));
 		popupWindow.setHeight(90, Unit.PERCENTAGE);
 
 		if (isEditAllowed) {
@@ -305,7 +305,7 @@ public class ExposuresField extends AbstractTableField<ExposureDto> {
 
 	private void showMultipleInfectionEnvironmentsPopup(ExposureDto entry) {
 		VerticalLayout warningLayout = VaadinUiUtil.createWarningLayout();
-		Window popupWindow = VaadinUiUtil.showPopupWindow(warningLayout);
+		Dialog popupWindow = VaadinUiUtil.showPopupWindow(warningLayout);
 		com.vaadin.ui.Label infoLabel = new com.vaadin.ui.Label(I18nProperties.getValidationError(Validations.caseMultipleInfectionEnvironments));
 		CssStyles.style(infoLabel, CssStyles.LABEL_LARGE, CssStyles.LABEL_WHITE_SPACE_NORMAL);
 		warningLayout.addComponent(infoLabel);

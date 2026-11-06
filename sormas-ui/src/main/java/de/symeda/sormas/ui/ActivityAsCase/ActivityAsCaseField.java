@@ -25,9 +25,9 @@ import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.v7.data.Property;
-import com.vaadin.v7.shared.ui.label.ContentMode;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.v7.ui.Label;
 import com.vaadin.v7.ui.Table;
 
@@ -171,7 +171,7 @@ public class ActivityAsCaseField extends AbstractTableField<ActivityAsCaseDto> {
 			activityAsCaseForm.getFieldGroup());
 		component.getCommitButton().setCaption(I18nProperties.getString(Strings.done));
 
-		Window popupWindow = VaadinUiUtil.showModalPopupWindow(component, I18nProperties.getString(Strings.entityActivityAsCase));
+		Dialog popupWindow = VaadinUiUtil.showModalPopupWindow(component, I18nProperties.getString(Strings.entityActivityAsCase));
 		popupWindow.setHeight(90, Unit.PERCENTAGE);
 
 		if (isEditAllowed) {

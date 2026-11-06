@@ -32,11 +32,11 @@ import com.vaadin.server.ErrorMessage;
 import com.vaadin.server.UserError;
 import com.vaadin.shared.ui.ErrorLevel;
 import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -125,11 +125,11 @@ public class HospitalizationForm extends AbstractEditForm<HospitalizationDto> {
 		}
 
 		Label hospitalizationHeadingLabel = new Label(I18nProperties.getString(Strings.headingHospitalization));
-		hospitalizationHeadingLabel.addStyleName(H3);
+		hospitalizationHeadingLabel.addClassName(H3);
 		getContent().addComponent(hospitalizationHeadingLabel, HOSPITALIZATION_HEADING_LOC);
 
 		Label previousHospitalizationsHeadingLabel = new Label(I18nProperties.getString(Strings.headingPreviousHospitalizations));
-		previousHospitalizationsHeadingLabel.addStyleName(H3);
+		previousHospitalizationsHeadingLabel.addClassName(H3);
 		getContent().addComponent(previousHospitalizationsHeadingLabel, PREVIOUS_HOSPITALIZATIONS_HEADING_LOC);
 
 		TextField facilityField = addCustomField(HEALTH_FACILITY, FacilityReferenceDto.class, TextField.class);
@@ -204,7 +204,7 @@ public class HospitalizationForm extends AbstractEditForm<HospitalizationDto> {
 
 		// Add listener to trigger RSV hospitalization reason defaulting when admitted to health facility
 		admittedToHealthFacilityField.addValueChangeListener(event -> {
-			final Object eventValue = event.getProperty().getValue();
+			final Object eventValue = event.getValue();
 			final boolean isAdmitted =
 				eventValue != null && eventValue instanceof Collection<?> ? ((Collection<?>) eventValue).contains(YesNoUnknown.YES) : false;
 			if (caze.getDisease() == Disease.RESPIRATORY_SYNCYTIAL_VIRUS && isAdmitted && hospitalizationReason.getValue() == null) {

@@ -23,6 +23,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.BeforeLeaveEvent;
 import com.vaadin.flow.router.BeforeLeaveObserver;
+import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.RouterLayout;
 
 import de.symeda.sormas.ui.SormasUI;
@@ -30,9 +31,11 @@ import de.symeda.sormas.ui.SormasUI;
 /**
  * Parent layout of all views registered by the {@link Navigator}. It holds the UI's {@code MainScreen} (menu and view
  * container, built when the UI is created, as in Vaadin 8), shows each view in the main screen's view container and
- * hands the Flow navigation events to the UI's {@link Navigator}.
+ * hands the Flow navigation events to the UI's {@link Navigator}. It also keeps the page title set when the UI was
+ * created: Flow sets the title after every navigation, to an empty one unless a target in the chain gives it.
  */
-public class MainLayout extends Div implements RouterLayout, BeforeEnterObserver, BeforeLeaveObserver, AfterNavigationObserver {
+public class MainLayout extends Div
+	implements RouterLayout, BeforeEnterObserver, BeforeLeaveObserver, AfterNavigationObserver, HasDynamicTitle {
 
 	private static final long serialVersionUID = 1L;
 
@@ -64,6 +67,12 @@ public class MainLayout extends Div implements RouterLayout, BeforeEnterObserver
 	@Override
 	public void afterNavigation(AfterNavigationEvent event) {
 		navigator().afterNavigation(event);
+	}
+
+	@Override
+	public String getPageTitle() {
+		SormasUI sormasUI = SormasUI.get();
+		return sormasUI != null ? sormasUI.getPageTitle() : null;
 	}
 
 	private static Navigator navigator() {

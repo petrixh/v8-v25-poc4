@@ -187,9 +187,9 @@ public class UserProvider {
 	 */
 	public static UserProvider getCurrent() {
 
-		UI currentUI = UI.getCurrent();
-		if (currentUI instanceof HasUserProvider) {
-			return ((HasUserProvider) currentUI).getUserProvider();
+		SormasUI currentUI = SormasUI.get();
+		if (currentUI != null) {
+			return currentUI.getUserProvider();
 		}
 		return null;
 	}

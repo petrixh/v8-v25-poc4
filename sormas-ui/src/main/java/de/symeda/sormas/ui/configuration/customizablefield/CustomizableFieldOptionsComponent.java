@@ -18,13 +18,13 @@ package de.symeda.sormas.ui.configuration.customizablefield;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
@@ -49,38 +49,39 @@ public class CustomizableFieldOptionsComponent extends VerticalLayout {
     private final VerticalLayout rowsLayout;
     private final List<OptionRow> rows = new ArrayList<>();
     private final List<Runnable> changeListeners = new ArrayList<>();
-    private final Label lblNoOptions;
+    private final Span lblNoOptions;
 
     public CustomizableFieldOptionsComponent() {
 
         setWidthFull();
-        setMargin(new MarginInfo(false, false, true, false));
+        setPadding(false);
+        // was a bottom-only margin (MarginInfo(false, false, true, false)): spacing below the rows is look only
         setSpacing(false);
         CssStyles.style(this, CssStyles.VSPACE_TOP_4);
 
-        lblNoOptions = new Label(I18nProperties.getString(Strings.infoNoCustomizableFieldOptions));
-        addComponent(lblNoOptions);
+        lblNoOptions = new Span(I18nProperties.getString(Strings.infoNoCustomizableFieldOptions));
+        add(lblNoOptions);
 
         rowsLayout = new VerticalLayout();
         rowsLayout.setWidthFull();
-        rowsLayout.setMargin(false);
+        rowsLayout.setPadding(false);
         rowsLayout.setSpacing(false);
-        addComponent(rowsLayout);
+        add(rowsLayout);
 
-        Button btnAdd = ButtonHelper.createIconButtonWithCaption(null, null, VaadinIcons.PLUS, e -> addRow(null, true), CssStyles.VSPACE_TOP_5);
+        Button btnAdd = ButtonHelper.createIconButtonWithCaption(null, null, VaadinIcon.PLUS, e -> addRow(null, true), CssStyles.VSPACE_TOP_5);
         btnAdd.setHeight(25, Unit.PIXELS);
         btnAdd.setWidthFull();
-        addComponent(btnAdd);
+        add(btnAdd);
     }
 
     public void setValue(List<String> options) {
 
         rows.clear();
-        rowsLayout.removeAllComponents();
+        rowsLayout.removeAll();
 
         if (options != null) {
             options.forEach(option -> addRow(option, false));
-            rows.forEach(rowsLayout::addComponent);
+            rows.forEach(rowsLayout::add);
         }
 
         updateNoOptionsLabelVisibility();
@@ -123,7 +124,7 @@ public class CustomizableFieldOptionsComponent extends VerticalLayout {
         OptionRow row = new OptionRow(value);
         row.setDeleteCallback(() -> {
             rows.remove(row);
-            rowsLayout.removeComponent(row);
+            rowsLayout.remove(row);
             updateNoOptionsLabelVisibility();
             fireChangeListeners();
         });
@@ -131,7 +132,7 @@ public class CustomizableFieldOptionsComponent extends VerticalLayout {
         rows.add(row);
         updateNoOptionsLabelVisibility();
         if (render) {
-            rowsLayout.addComponent(row);
+            rowsLayout.add(row);
             fireChangeListeners();
         }
     }
@@ -171,13 +172,13 @@ public class CustomizableFieldOptionsComponent extends VerticalLayout {
 
             CssStyles.style(CssStyles.VSPACE_NONE, tfValue);
 
-            Button btnDelete = ButtonHelper.createIconButtonWithCaption(null, null, VaadinIcons.TRASH, e -> deleteCallback.run());
+            Button btnDelete = ButtonHelper.createIconButtonWithCaption(null, null, VaadinIcon.TRASH, e -> deleteCallback.run());
 
-            addComponent(tfValue);
-            addComponent(btnDelete);
-            setExpandRatio(tfValue, 1);
+            add(tfValue);
+            add(btnDelete);
+            setFlexGrow(1, tfValue);
             setWidthFull();
-            setMargin(false);
+            setPadding(false);
         }
 
         public String getValue() {

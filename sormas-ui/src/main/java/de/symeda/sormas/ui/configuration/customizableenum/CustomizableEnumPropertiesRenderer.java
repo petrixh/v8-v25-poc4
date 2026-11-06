@@ -19,16 +19,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.vaadin.ui.renderers.TextRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
 import de.symeda.sormas.api.customizableenum.CustomizableEnum;
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
-import elemental.json.JsonValue;
 
 public class CustomizableEnumPropertiesRenderer extends TextRenderer {
 
-	public JsonValue encode(Object value) {
+	public String encode(Object value) {
 
 		if (!(value instanceof Map)) {
 			return super.encode(I18nProperties.getCaption(Captions.customizableEnumValueNoProperties));

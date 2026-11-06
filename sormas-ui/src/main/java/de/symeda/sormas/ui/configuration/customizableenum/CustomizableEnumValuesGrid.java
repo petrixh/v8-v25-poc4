@@ -53,8 +53,8 @@ public class CustomizableEnumValuesGrid extends FilteredGrid<CustomizableEnumVal
 
 		addEditColumn(e -> ControllerProvider.getCustomizableEnumController().editCustomizableEnumValue(e.getUuid()));
 
-		for (Column<?, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(CustomizableEnumValueDto.I18N_PREFIX, column.getId(), column.getCaption()));
+		for (Column<?, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(CustomizableEnumValueDto.I18N_PREFIX, column.getKey(), column.getCaption()));
 		}
 	}
 

@@ -27,15 +27,15 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import de.symeda.sormas.ui.navigation.View;
-import com.vaadin.server.Page;
 import com.vaadin.flow.component.Unit;
-import com.vaadin.server.ThemeResource;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import de.symeda.sormas.ui.utils.NotificationHelper;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -70,7 +70,7 @@ public class UserController {
 		CommitDiscardWrapperComponent<UserEditForm> userCreateComponent = getUserCreateComponent();
 		Dialog window = VaadinUiUtil.showModalPopupWindow(userCreateComponent, I18nProperties.getString(Strings.headingCreateNewUser));
 		// user form is too big for typical screens
-		window.setWidth(userCreateComponent.getWrappedComponent().getWidth() + 64 + 20, Unit.PIXELS);
+		window.setWidth(Unit.getSize(userCreateComponent.getWrappedComponent().getWidth()) + 64 + 20, Unit.PIXELS);
 		window.setHeight(90, Unit.PERCENTAGE);
 	}
 
@@ -78,10 +78,10 @@ public class UserController {
 		Dialog window = VaadinUiUtil.createPopupWindow();
 		CommitDiscardWrapperComponent<UserEditForm> userComponent = getUserEditComponent(user.getUuid(), window::close);
 
-		window.setCaption(I18nProperties.getString(Strings.headingEditUser));
-		window.setContent(userComponent);
+		window.setHeaderTitle(I18nProperties.getString(Strings.headingEditUser));
+		window.add(userComponent);
 		// user form is too big for typical screens
-		window.setWidth(userComponent.getWrappedComponent().getWidth() + 64 + 20, Unit.PIXELS);
+		window.setWidth(Unit.getSize(userComponent.getWrappedComponent().getWidth()) + 64 + 20, Unit.PIXELS);
 		window.setHeight(90, Unit.PERCENTAGE);
 		window.open();
 	}
@@ -102,8 +102,7 @@ public class UserController {
 			fragmentParameter = caseUuid;
 		}
 
-		Page page = SormasUI.get().getPage();
-		page.setUriFragment("!" + UsersView.VIEW_NAME + "/" + fragmentParameter, false);
+		SormasUI.get().getNavigator().updateUrl(UsersView.VIEW_NAME + "/" + fragmentParameter);
 	}
 
 	public CommitDiscardWrapperComponent<UserEditForm> getUserEditComponent(final String userUuid, Runnable closeWindowCallback) {
@@ -116,7 +115,7 @@ public class UserController {
 		// Add reset password button
 		if (FacadeProvider.getFeatureConfigurationFacade().isFeatureDisabled(FeatureType.AUTH_PROVIDER_TO_SORMAS_USER_SYNC)) {
 			Button resetPasswordButton = createResetPasswordButton(userUuid, userDto.getUserEmail(), editView);
-			editView.getButtonsPanel().add(resetPasswordButton, 0);
+			editView.getButtonsPanel().addComponentAtIndex(0, resetPasswordButton);
 		}
 
 		editView.addDiscardListener(closeWindowCallback::run);
@@ -237,7 +236,7 @@ public class UserController {
 		passwordLabel.addClassName(CssStyles.H2);
 		layout.add(passwordLabel);
 		Dialog popupWindow = VaadinUiUtil.showPopupWindow(layout);
-		popupWindow.setCaption(I18nProperties.getString(Strings.headingNewPassword));
+		popupWindow.setHeaderTitle(I18nProperties.getString(Strings.headingNewPassword));
 		layout.setPadding(true);
 	}
 
@@ -245,7 +244,7 @@ public class UserController {
 		VerticalLayout layout = new VerticalLayout();
 		layout.add(new Span(I18nProperties.getString(Strings.messageActivateAccount)));
 		Dialog popupWindow = VaadinUiUtil.showPopupWindow(layout);
-		popupWindow.setCaption(I18nProperties.getString(Strings.headingNewAccount));
+		popupWindow.setHeaderTitle(I18nProperties.getString(Strings.headingNewAccount));
 		popupWindow.setWidth(350, Unit.PIXELS);
 		layout.setPadding(true);
 	}
@@ -254,7 +253,7 @@ public class UserController {
 		VerticalLayout layout = new VerticalLayout();
 		layout.add(new Span(I18nProperties.getString(Strings.messagePasswordResetEmailLink)));
 		Dialog popupWindow = VaadinUiUtil.showPopupWindow(layout);
-		popupWindow.setCaption(I18nProperties.getString(Strings.headingNewPassword));
+		popupWindow.setHeaderTitle(I18nProperties.getString(Strings.headingNewPassword));
 		popupWindow.setWidth(450, Unit.PIXELS);
 		layout.setPadding(true);
 	}
@@ -269,26 +268,12 @@ public class UserController {
 
 	public Button createResetPasswordButton(String userUuid, String userEmail, CommitDiscardWrapperComponent<UserEditForm> editView) {
 
-		return ButtonHelper.createIconButton(Captions.userResetPassword, VaadinIcon.UNLOCK, new ClickListener() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				ConfirmationComponent resetPasswordComponent = getResetPasswordConfirmationComponent(userUuid, userEmail, editView);
-				Dialog popupWindow = VaadinUiUtil.showPopupWindow(resetPasswordComponent);
-				resetPasswordComponent.addDoneListener(() -> popupWindow.close());
-				resetPasswordComponent.getCancelButton().addClickListener(new ClickListener() {
-
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public void buttonClick(ClickEvent event) {
-						popupWindow.close();
-					}
-				});
-				popupWindow.setCaption(I18nProperties.getString(Strings.headingUpdatePassword));
-			}
+		return ButtonHelper.createIconButton(Captions.userResetPassword, VaadinIcon.UNLOCK, event -> {
+			ConfirmationComponent resetPasswordComponent = getResetPasswordConfirmationComponent(userUuid, userEmail, editView);
+			Dialog popupWindow = VaadinUiUtil.showPopupWindow(resetPasswordComponent);
+			resetPasswordComponent.addDoneListener(() -> popupWindow.close());
+			resetPasswordComponent.getCancelButton().addClickListener(e -> popupWindow.close());
+			popupWindow.setHeaderTitle(I18nProperties.getString(Strings.headingUpdatePassword));
 		}, CssStyles.BUTTON_LINK);
 	}
 
@@ -311,8 +296,8 @@ public class UserController {
 			protected void onCancel() {
 			}
 		};
-		resetPasswordConfirmationComponent.getConfirmButton().setCaption(I18nProperties.getCaption(Captions.userUpdatePasswordConfirmation));
-		resetPasswordConfirmationComponent.getCancelButton().setCaption(I18nProperties.getCaption(Captions.actionCancel));
+		resetPasswordConfirmationComponent.getConfirmButton().setText(I18nProperties.getCaption(Captions.userUpdatePasswordConfirmation));
+		resetPasswordConfirmationComponent.getCancelButton().setText(I18nProperties.getCaption(Captions.actionCancel));
 		resetPasswordConfirmationComponent.setPadding(true);
 		return resetPasswordConfirmationComponent;
 	}
@@ -329,7 +314,7 @@ public class UserController {
 				FacadeProvider.getUserFacade().saveUser(changedUser, true);
 				I18nProperties.setUserLanguage(changedUser.getLanguage());
 				FacadeProvider.getI18nFacade().setUserLanguage(changedUser.getLanguage());
-				Page.getCurrent().reload();
+				UI.getCurrent().getPage().reload();
 				commitOrDiscardCallback.run();
 			}
 		});
@@ -339,9 +324,17 @@ public class UserController {
 	}
 
 	public void setFlagIcons(ComboBox cbLanguage) {
-		for (Language language : Language.values()) {
-			cbLanguage.setItemIcon(language, new ThemeResource("img/flag-icons/" + language.name().toLowerCase() + ".png"));
-		}
+		// was setItemIcon per language (a ThemeResource of the sormas theme): Flow combo boxes show item icons through
+		// a renderer, in the item list
+		cbLanguage.setRenderer(new ComponentRenderer<Component, Object>(item -> {
+			HorizontalLayout itemLayout = new HorizontalLayout();
+			if (item instanceof Language) {
+				itemLayout.add(
+					new Image(VaadinUiUtil.THEME_IMAGE_PATH + "img/flag-icons/" + ((Language) item).name().toLowerCase() + ".png", ""));
+			}
+			itemLayout.add(new Span(cbLanguage.getItemCaption(item)));
+			return itemLayout;
+		}));
 	}
 
 	public void sync() {
@@ -356,7 +349,7 @@ public class UserController {
 			SormasUI.refreshView();
 		} else {
 			Dialog window = VaadinUiUtil.showPopupWindow(new UsersSyncLayout());
-			window.setCaption(I18nProperties.getCaption(Captions.syncUsers));
+			window.setHeaderTitle(I18nProperties.getCaption(Captions.syncUsers));
 		}
 	}
 
@@ -398,7 +391,7 @@ public class UserController {
 						}, new ArrayList<>(selectedRows), remaining -> {
 							userGrid.reload();
 							if (CollectionUtils.isNotEmpty(remaining)) {
-								userGrid.asMultiSelect().selectItems(remaining.toArray(new UserDto[0]));
+								userGrid.asMultiSelect().select(remaining.toArray(new UserDto[0]));
 							} else {
 								overview();
 							}
@@ -445,7 +438,7 @@ public class UserController {
 						}, new ArrayList<>(selectedRows), remaining -> {
 							userGrid.reload();
 							if (CollectionUtils.isNotEmpty(remaining)) {
-								userGrid.asMultiSelect().selectItems(remaining.toArray(new UserDto[0]));
+								userGrid.asMultiSelect().select(remaining.toArray(new UserDto[0]));
 							} else {
 								overview();
 							}

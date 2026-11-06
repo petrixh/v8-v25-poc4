@@ -32,10 +32,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.opencsv.CSVWriter;
-import com.vaadin.flow.component.Unit;
-import com.vaadin.server.StreamResource;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dialog.Dialog;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -99,7 +98,7 @@ public class UserSyncHandler {
 		this.csvSeparator = FacadeProvider.getConfigFacade().getCsvSeparator();
 	}
 
-	public void startSync(Consumer<StreamResource> errorReportConsumer, UI currentUI) {
+	public void startSync(Consumer<StreamSourceDownloadHandler> errorReportConsumer, UI currentUI) {
 
 		long totalCount = FacadeProvider.getUserFacade().count(new UserCriteria());
 
@@ -108,21 +107,24 @@ public class UserSyncHandler {
 		userSyncCallback = progressLayout::updateProgress;
 
 		Dialog window = VaadinUiUtil.createPopupWindow();
-		window.setCaption(I18nProperties.getString(Strings.headingSyncUsers));
-		window.setWidth(800, Unit.PIXELS);
-		window.setContent(progressLayout);
-		window.setClosable(false);
-		currentUI.addWindow(window);
+		window.setHeaderTitle(I18nProperties.getString(Strings.headingSyncUsers));
+		window.setWidth("800px");
+		window.add(progressLayout);
+		VaadinUiUtil.setClosable(window, false);
+		window.open();
 
 		Thread importThread = new Thread(() -> {
 			try {
-				currentUI.setPollInterval(300);
+				// Flow: UI state changes need the session lock (as DataImporter, 1a-69)
+				currentUI.access(() -> currentUI.setPollInterval(300));
 
 				ImportResultStatus importResult = runUserSync();
 
 				// Display a window presenting the import result
 				currentUI.access(() -> {
-					window.setClosable(true);
+					// first, so that polling stops even if a later line throws (1a-69 review F1)
+					currentUI.setPollInterval(-1);
+					VaadinUiUtil.setClosable(window, true);
 					progressLayout.makeClosable(window::close);
 
 					if (importResult == ImportResultStatus.COMPLETED) {
@@ -139,24 +141,22 @@ public class UserSyncHandler {
 						progressLayout.setInfoLabelText(I18nProperties.getString(Strings.messageUserSyncCanceledErrors));
 					}
 
-					window.addCloseListener(e -> {
+					VaadinUiUtil.addCloseListener(window, e -> {
 						if (importResult == ImportResultStatus.COMPLETED_WITH_ERRORS || importResult == ImportResultStatus.CANCELED_WITH_ERRORS) {
-							StreamResource streamResource = createErrorReportStreamResource();
+							StreamSourceDownloadHandler streamResource = createErrorReportStreamResource();
 							errorReportConsumer.accept(streamResource);
 						}
 					});
-
-					currentUI.setPollInterval(-1);
 				});
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 
 				currentUI.access(() -> {
-					window.setClosable(true);
+					currentUI.setPollInterval(-1);
+					VaadinUiUtil.setClosable(window, true);
 					progressLayout.makeClosable(window::close);
 					progressLayout.displayErrorIcon();
 					progressLayout.setInfoLabelText(I18nProperties.getString(Strings.messageUserSyncFailedFull));
-					currentUI.setPollInterval(-1);
 				});
 			}
 		});
@@ -246,7 +246,7 @@ public class UserSyncHandler {
 		return new FileWriter(errorReportFile.getPath());
 	}
 
-	protected StreamResource createErrorReportStreamResource() {
+	protected StreamSourceDownloadHandler createErrorReportStreamResource() {
 		return DownloadUtil.createFileStreamResource(
 			errorReportFilePath,
 			errorReportFileName,

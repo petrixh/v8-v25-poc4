@@ -22,14 +22,14 @@ public class UserRoleGrid extends FilteredGrid<UserRoleDto, UserRoleCriteria> {
 		((Column<UserRoleDto, String>) getColumn(UserRoleDto.UUID)).setRenderer(new UuidRenderer());
 		addItemClickListener(new ShowDetailsListener<>(UserRoleDto.UUID, e -> ControllerProvider.getUserRoleController().editData(e.getUuid())));
 
-		for (Column<?, ?> column : getColumns()) {
-			if (column.getId().equals(UserRoleDto.DESCRIPTION)) {
+		for (Column<?, ?> column : getAllColumns()) {
+			if (column.getKey().equals(UserRoleDto.DESCRIPTION)) {
 				column.setMaximumWidth(700);
 			}
-			if (column.getId().equals(UserRoleDto.CAPTION)) {
+			if (column.getKey().equals(UserRoleDto.CAPTION)) {
 				column.setCaption(I18nProperties.getCaption(Captions.UserRole));
 			} else {
-				column.setCaption(I18nProperties.getPrefixCaption(UserRoleDto.I18N_PREFIX, column.getId(), column.getCaption()));
+				column.setCaption(I18nProperties.getPrefixCaption(UserRoleDto.I18N_PREFIX, column.getKey(), column.getCaption()));
 			}
 		}
 	}

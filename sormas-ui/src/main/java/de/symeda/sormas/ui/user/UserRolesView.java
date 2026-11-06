@@ -7,11 +7,14 @@ import java.nio.file.Files;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
+
 import de.symeda.sormas.ui.navigation.ViewChangeListener;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Alignment;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -46,6 +49,8 @@ public class UserRolesView extends AbstractUserView {
 	public static final String DISABLED_FILTER = I18nProperties.getString(Strings.disabled);
 	public static final String ALL_FILTER = I18nProperties.getString(Strings.all);
 
+	private static final String XLSX_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
 	private UserRoleCriteria criteria;
 
 	private UserRoleGrid grid;
@@ -79,22 +84,24 @@ public class UserRolesView extends AbstractUserView {
 
 		Button exportUserRightsButton = ButtonHelper.createIconButton(Captions.exportUserRoles, VaadinIcon.DOWNLOAD, null, CssStyles.BUTTON_PRIMARY);
 
-		new FileDownloader(new StreamResource(() -> new DownloadUtil.DelayedInputStream((out) -> {
+		// was a FileDownloader extending the button: Flow downloads through a link around it. The download runs
+		// without the session lock, so its error notification goes through the UI (was shown directly)
+		UI currentUI = UI.getCurrent();
+		String exportFileName = createFileNameWithCurrentDate(ExportEntityName.USER_ROLES, ".xlsx");
+		addHeaderComponent(DownloadUtil.createDownloadLink(exportUserRightsButton, DownloadHandler.fromInputStream(event -> new DownloadResponse(new DownloadUtil.DelayedInputStream((out) -> {
 			try {
 				String documentPath = FacadeProvider.getUserRoleFacade().generateUserRolesDocument();
 				IOUtils.copy(Files.newInputStream(new File(documentPath).toPath()), out);
 			} catch (IOException e) {
 				LoggerFactory.getLogger(DownloadUtil.class).error(e.getMessage(), e);
-				NotificationHelper.show(
+				NotificationHelper.showAsync(
+					currentUI,
 					I18nProperties.getString(Strings.headingExportUserRightsFailed),
 					I18nProperties.getString(Strings.messageUserRightsExportFailed),
-					NotificationHelper.Type.ERROR_MESSAGE,
-					false);
+					NotificationHelper.Type.ERROR_MESSAGE);
 			}
 		}, (e) -> {
-		}), createFileNameWithCurrentDate(ExportEntityName.USER_ROLES, ".xlsx"))).extend(exportUserRightsButton);
-
-		addHeaderComponent(exportUserRightsButton);
+		}), exportFileName, XLSX_MIME_TYPE, -1))));
 
 		if (UiUtil.permitted(UserRight.USER_ROLE_EDIT)) {
 			createButton = ButtonHelper.createIconButton(
@@ -131,7 +138,8 @@ public class UserRolesView extends AbstractUserView {
 		});
 		actionButtonsLayout.add(enabledFilter);
 		statusFilterLayout.add(actionButtonsLayout);
-		statusFilterLayout.setComponentAlignment(actionButtonsLayout, Alignment.TOP_RIGHT);
+		// was Alignment.TOP_RIGHT: the layout grows, its content goes right
+		actionButtonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 		statusFilterLayout.setFlexGrow(1, actionButtonsLayout);
 
 		return statusFilterLayout;
@@ -167,7 +175,7 @@ public class UserRolesView extends AbstractUserView {
 
 		showOnlyRestrictedAccessToAssignedEntities = new Checkbox();
 		showOnlyRestrictedAccessToAssignedEntities.setId(UserRoleDto.RESTRICT_ACCESS_TO_ASSIGNED_ENTITIES);
-		showOnlyRestrictedAccessToAssignedEntities.setCaption(I18nProperties.getCaption(Captions.userRoleShowOnlyRestrictedAccessToAssignCases));
+		showOnlyRestrictedAccessToAssignedEntities.setLabel(I18nProperties.getCaption(Captions.userRoleShowOnlyRestrictedAccessToAssignCases));
 		showOnlyRestrictedAccessToAssignedEntities.addClassName(CssStyles.CHECKBOX_FILTER_INLINE);
 		showOnlyRestrictedAccessToAssignedEntities.addValueChangeListener(e -> {
 			criteria.setShowOnlyRestrictedAccessToAssignedEntities(e.getValue());

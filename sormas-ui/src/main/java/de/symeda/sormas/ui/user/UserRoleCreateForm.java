@@ -19,8 +19,6 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 
 import java.util.Collections;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.vaadin.flow.component.icon.VaadinIcon;
 import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.flow.component.html.Span;
@@ -34,6 +32,8 @@ import de.symeda.sormas.api.user.JurisdictionLevel;
 import de.symeda.sormas.api.user.UserRoleDto;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class UserRoleCreateForm extends AbstractEditForm<UserRoleDto> {
 
@@ -61,10 +61,10 @@ public class UserRoleCreateForm extends AbstractEditForm<UserRoleDto> {
 
 	@Override
 	protected void addFields() {
-		Span infoLabel =
-			new Span(VaadinIcon.INFO_CIRCLE.getHtml() + " " + I18nProperties.getDescription(Descriptions.userRoleTemplate), ContentMode.HTML);
+		Span infoLabel = VaadinUiUtil
+			.createLabel(HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " " + I18nProperties.getDescription(Descriptions.userRoleTemplate), ContentMode.HTML);
 		infoLabel.setWidthFull();
-		infoLabel.setCaption(StringUtils.EMPTY);
+		// the Vaadin 8 empty caption (space above the label, next to the combo box caption) is look only: dropped
 		getContent().addComponent(infoLabel, TEMPLATE_INFO_LOC);
 
 		ComboBox templateRoleCombo = addCustomField(TEMPLATE_USER_ROLE, UserRoleDto.class, ComboBox.class);

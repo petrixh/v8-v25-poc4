@@ -18,24 +18,27 @@
 
 package de.symeda.sormas.ui.user;
 
-import com.vaadin.server.ThemeResource;
 import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.shared.Registration;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 /**
  * @author Alex Vidrean
@@ -59,7 +62,9 @@ public class UserSyncProgressLayout extends VerticalLayout {
 	private Image warningIcon;
 	private Component currentInfoComponent;
 
-	private final ClickListener cancelListener;
+	private final ComponentEventListener<ClickEvent<Button>> cancelListener;
+	// Flow buttons remove a listener through its registration (was removeClickListener)
+	private Registration cancelListenerRegistration;
 
 	// Counts
 	private int processedImportsCount;
@@ -74,7 +79,7 @@ public class UserSyncProgressLayout extends VerticalLayout {
 		this.currentUI = currentUI;
 
 		setWidthFull();
-		setMargin(true);
+		setPadding(true);
 
 		// Info text and icon/progress circle
 		infoLayout = new HorizontalLayout();
@@ -83,15 +88,14 @@ public class UserSyncProgressLayout extends VerticalLayout {
 		initializeInfoComponents();
 		currentInfoComponent = progressCircle;
 		infoLayout.add(currentInfoComponent);
-		infoLabel = new Span(String.format(I18nProperties.getString(Strings.infoUserSyncProcess), totalCount));
-		infoLabel.setContentMode(ContentMode.HTML);
+		infoLabel = VaadinUiUtil.createLabel(String.format(I18nProperties.getString(Strings.infoUserSyncProcess), totalCount), ContentMode.HTML);
 		infoLayout.add(infoLabel);
 		infoLayout.setFlexGrow(1, infoLabel);
 
 		add(infoLayout);
 
 		// Progress bar
-		progressBar = new ProgressBar(0.0f);
+		progressBar = new ProgressBar(0, 1, 0);
 		CssStyles.style(progressBar, CssStyles.VSPACE_TOP_3);
 		add(progressBar);
 		progressBar.setWidthFull();
@@ -110,15 +114,16 @@ public class UserSyncProgressLayout extends VerticalLayout {
 		progressInfoLayout.add(syncErrorsLabel);
 
 		add(progressInfoLayout);
-		setComponentAlignment(progressInfoLayout, Alignment.TOP_RIGHT);
+		setHorizontalComponentAlignment(FlexComponent.Alignment.END, progressInfoLayout);
 
 		// Cancel button
 		cancelListener = e -> cancelCallback.run();
 
-		closeCancelButton = ButtonHelper.createButton(Captions.actionCancel, cancelListener, CssStyles.VSPACE_TOP_2);
+		closeCancelButton = ButtonHelper.createButton(Captions.actionCancel, null, CssStyles.VSPACE_TOP_2);
+		cancelListenerRegistration = closeCancelButton.addClickListener(cancelListener);
 
 		add(closeCancelButton);
-		setComponentAlignment(closeCancelButton, Alignment.MIDDLE_RIGHT);
+		setHorizontalComponentAlignment(FlexComponent.Alignment.END, closeCancelButton);
 	}
 
 	private void initializeInfoComponents() {
@@ -126,13 +131,14 @@ public class UserSyncProgressLayout extends VerticalLayout {
 		progressCircle.setIndeterminate(true);
 		CssStyles.style(progressCircle, "v-progressbar-indeterminate-large");
 
-		errorIcon = new Image(null, new ThemeResource("img/error-icon.png"));
+		// was a ThemeResource of the sormas theme
+		errorIcon = new Image(VaadinUiUtil.THEME_IMAGE_PATH + "img/error-icon.png", "");
 		errorIcon.setHeight(35, Unit.PIXELS);
 		errorIcon.setWidth(35, Unit.PIXELS);
-		successIcon = new Image(null, new ThemeResource("img/success-icon.png"));
+		successIcon = new Image(VaadinUiUtil.THEME_IMAGE_PATH + "img/success-icon.png", "");
 		successIcon.setHeight(35, Unit.PIXELS);
 		successIcon.setWidth(35, Unit.PIXELS);
-		warningIcon = new Image(null, new ThemeResource("img/warning-icon.png"));
+		warningIcon = new Image(VaadinUiUtil.THEME_IMAGE_PATH + "img/warning-icon.png", "");
 		warningIcon.setHeight(35, Unit.PIXELS);
 		warningIcon.setWidth(35, Unit.PIXELS);
 	}
@@ -141,39 +147,39 @@ public class UserSyncProgressLayout extends VerticalLayout {
 		currentUI.access(() -> {
 			processedImportsCount++;
 			if (result == SyncResult.SUCCESS) {
-				syncSuccessLabel.setValue(String.format(I18nProperties.getCaption(Captions.syncSuccessful), ++syncSuccessCount));
+				syncSuccessLabel.setText(String.format(I18nProperties.getCaption(Captions.syncSuccessful), ++syncSuccessCount));
 			} else if (result == SyncResult.ERROR) {
-				syncErrorsLabel.setValue(String.format(I18nProperties.getCaption(Captions.syncErrors), ++syncErrorCount));
+				syncErrorsLabel.setText(String.format(I18nProperties.getCaption(Captions.syncErrors), ++syncErrorCount));
 			}
-			processedImportsLabel.setValue(String.format(I18nProperties.getCaption(Captions.syncProcessed), processedImportsCount, totalCount));
+			processedImportsLabel.setText(String.format(I18nProperties.getCaption(Captions.syncProcessed), processedImportsCount, totalCount));
 			progressBar.setValue((float) processedImportsCount / (float) totalCount);
 		});
 	}
 
 	public void makeClosable(Runnable closeCallback) {
-		closeCancelButton.setCaption(I18nProperties.getCaption(Captions.actionClose));
-		closeCancelButton.removeClickListener(cancelListener);
+		closeCancelButton.setText(I18nProperties.getCaption(Captions.actionClose));
+		cancelListenerRegistration.remove();
 		closeCancelButton.addClickListener(e -> closeCallback.run());
 	}
 
 	public void setInfoLabelText(String text) {
-		infoLabel.setValue(text);
+		VaadinUiUtil.setLabelValue(infoLabel, text, ContentMode.HTML);
 	}
 
 	public void displayErrorIcon() {
-		infoLayout.removeComponent(currentInfoComponent);
+		infoLayout.remove(currentInfoComponent);
 		currentInfoComponent = errorIcon;
 		infoLayout.addComponentAsFirst(currentInfoComponent);
 	}
 
 	public void displaySuccessIcon() {
-		infoLayout.removeComponent(currentInfoComponent);
+		infoLayout.remove(currentInfoComponent);
 		currentInfoComponent = successIcon;
 		infoLayout.addComponentAsFirst(currentInfoComponent);
 	}
 
 	public void displayWarningIcon() {
-		infoLayout.removeComponent(currentInfoComponent);
+		infoLayout.remove(currentInfoComponent);
 		currentInfoComponent = warningIcon;
 		infoLayout.addComponentAsFirst(currentInfoComponent);
 	}

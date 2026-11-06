@@ -18,10 +18,13 @@ package de.symeda.sormas.ui.user;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.flow.component.Component;
-import com.vaadin.ui.CustomField;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.CustomField;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.Descriptions;
@@ -35,10 +38,7 @@ public class UserRoleTemplateSelectionField extends CustomField<UserRoleDto> {
 	private UserRoleEditForm userRoleEditForm;
 	private UserRoleNotificationsForm userRoleNotificationsForm;
 
-	@Override
-	protected void doSetValue(UserRoleDto userRoleDto) {
-		super.setValue(userRoleDto);
-	}
+	// the Vaadin 8 doSetValue override (never called) is gone: the value is the combo box value, see getValue()
 
 	@Override
 	protected Component initContent() {
@@ -48,8 +48,8 @@ public class UserRoleTemplateSelectionField extends CustomField<UserRoleDto> {
 		mainLayout.setSizeFull();
 		mainLayout.setWidthFull();
 
-		Span infoLabel =
-			new Span(VaadinIcon.INFO_CIRCLE.getHtml() + " " + I18nProperties.getDescription(Descriptions.userRoleTemplate), ContentMode.HTML);
+		Span infoLabel = VaadinUiUtil
+			.createLabel(HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " " + I18nProperties.getDescription(Descriptions.userRoleTemplate), ContentMode.HTML);
 		mainLayout.add(infoLabel);
 
 		templateRoleCombo = new ComboBox();

@@ -42,7 +42,9 @@ import de.symeda.sormas.api.user.JurisdictionLevel;
 import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.api.user.UserRoleDto;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.CheckboxSet;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class UserRoleEditForm extends AbstractUserRoleForm {
 
@@ -88,12 +90,13 @@ public class UserRoleEditForm extends AbstractUserRoleForm {
 		addField(UserRoleDto.PORT_HEALTH_USER).addClassNames(CssStyles.VSPACE_TOP_3);
 		addField(UserRoleDto.RESTRICT_ACCESS_TO_ASSIGNED_ENTITIES).addClassNames(CssStyles.VSPACE_TOP_3, CssStyles.VSPACE_3);
 
-		Span userRightsLabel = new Span(I18nProperties.getCaption(Captions.UserRole_userRights), ContentMode.HTML);
+		Span userRightsLabel = VaadinUiUtil.createLabel(I18nProperties.getCaption(Captions.UserRole_userRights), ContentMode.HTML);
 		userRightsLabel.addClassNames(CssStyles.H2);
 		getContent().addComponent(userRightsLabel, USER_RIGHTS_LABEL_LOC);
 
-		Span versionUpdateInfoLabel =
-			new Span(VaadinIcon.INFO_CIRCLE.getHtml() + " " + I18nProperties.getDescription(Descriptions.userRoleVersionUpdate), ContentMode.HTML);
+		Span versionUpdateInfoLabel = VaadinUiUtil.createLabel(
+			HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " " + I18nProperties.getDescription(Descriptions.userRoleVersionUpdate),
+			ContentMode.HTML);
 		versionUpdateInfoLabel.setWidthFull();
 		getContent().addComponent(versionUpdateInfoLabel, VERSION_UPDATE_INFO_LOC);
 
@@ -112,7 +115,7 @@ public class UserRoleEditForm extends AbstractUserRoleForm {
 		userRightCbSet.addCheckboxValueChangeListener(e -> {
 			CheckBox checkbox = e.getCheckbox();
 			if (Boolean.TRUE.equals(checkbox.getValue())) {
-				Set<UserRight> requiredUserRights = UserRight.getRequiredUserRights(Collections.singleton((UserRight) checkbox.getData()));
+				Set<UserRight> requiredUserRights = UserRight.getRequiredUserRights(Collections.singleton((UserRight) CheckboxSet.getCheckboxData(checkbox)));
 				requiredUserRights.forEach(r -> userRightCbSet.getCheckboxByData(r).ifPresent(cb -> cb.setValue(true)));
 			}
 		});

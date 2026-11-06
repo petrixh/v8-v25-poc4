@@ -21,10 +21,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.button.Button;
 import de.symeda.sormas.ui.utils.NotificationHelper;
-import com.vaadin.flow.component.UI;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -41,6 +40,7 @@ import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
+import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 public class UserRoleController {
@@ -140,7 +140,7 @@ public class UserRoleController {
 
 					if (usersWithOnlyRole.isEmpty()) {
 						FacadeProvider.getUserRoleFacade().deleteUserRole(userRoleRef);
-						UI.getCurrent().getNavigator().navigateTo(UserRolesView.VIEW_NAME);
+						SormasUI.get().getNavigator().navigateTo(UserRolesView.VIEW_NAME);
 					} else {
 						VaadinUiUtil.showSimplePopupWindow(
 							I18nProperties.getString(Strings.headingDeleteUserRoleNotPossible),
@@ -151,7 +151,7 @@ public class UserRoleController {
 					}
 				} else {
 					FacadeProvider.getUserRoleFacade().deleteUserRole(userRoleRef);
-					UI.getCurrent().getNavigator().navigateTo(UserRolesView.VIEW_NAME);
+					SormasUI.get().getNavigator().navigateTo(UserRolesView.VIEW_NAME);
 				}
 			}, I18nProperties.getCaption(UserRoleDto.I18N_PREFIX), () -> {
 				long userCountWithRole = FacadeProvider.getUserFacade().getUserCountHavingRole(userRoleRef);
@@ -178,7 +178,7 @@ public class UserRoleController {
 		}, CssStyles.BUTTON_LINK);
 
 		editView.getButtonsPanel().addComponentAsFirst(enableDisableButton);
-		editView.getButtonsPanel().setComponentAlignment(enableDisableButton, Alignment.BOTTOM_LEFT);
+		editView.getButtonsPanel().setVerticalComponentAlignment(FlexComponent.Alignment.END, enableDisableButton);
 
 		editView.restrictEditableComponentsOnEditView(UserRight.USER_ROLE_EDIT, null, UserRight.USER_ROLE_DELETE, null, true);
 

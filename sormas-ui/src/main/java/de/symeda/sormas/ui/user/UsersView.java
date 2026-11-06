@@ -17,9 +17,12 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.user;
 
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.data.value.ValueChangeMode;
+
 import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.ui.Alignment;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -234,8 +237,13 @@ public class UsersView extends AbstractUserView {
 		searchField.setInputPrompt(I18nProperties.getString(Strings.promptUserSearch));
 		searchField.setDescription(I18nProperties.getString(Strings.promptUserSearch));
 		searchField.setImmediate(true);
-		searchField.addTextChangeListener(e -> {
-			criteria.freeText(e.getText());
+		// was a V7 text change listener (lazy, user input only)
+		searchField.setValueChangeMode(ValueChangeMode.LAZY);
+		searchField.addValueChangeListener(e -> {
+			if (!e.isFromClient()) {
+				return;
+			}
+			criteria.freeText(e.getValue());
 			grid.reload();
 			rowsCount.update(grid.getDataSize());
 		});
@@ -243,7 +251,7 @@ public class UsersView extends AbstractUserView {
 
 		showOnlyRestrictedAccessToAssignedEntities = new Checkbox();
 		showOnlyRestrictedAccessToAssignedEntities.setId("showOnly");
-		showOnlyRestrictedAccessToAssignedEntities.setCaption(I18nProperties.getCaption(Captions.userRoleShowOnlyRestrictedAccessToAssignCases));
+		showOnlyRestrictedAccessToAssignedEntities.setLabel(I18nProperties.getCaption(Captions.userRoleShowOnlyRestrictedAccessToAssignCases));
 		showOnlyRestrictedAccessToAssignedEntities.addClassName(CssStyles.CHECKBOX_FILTER_INLINE);
 		showOnlyRestrictedAccessToAssignedEntities.addValueChangeListener(e -> {
 			criteria.setShowOnlyRestrictedAccessToAssignedEntities(e.getValue());
@@ -280,7 +288,8 @@ public class UsersView extends AbstractUserView {
 			actionButtonsLayout.add(bulkOperationsDropdown);
 
 			statusFilterLayout.add(actionButtonsLayout);
-			statusFilterLayout.setComponentAlignment(actionButtonsLayout, Alignment.TOP_RIGHT);
+			// was Alignment.TOP_RIGHT: the layout grows, its content goes right
+			actionButtonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 			statusFilterLayout.setFlexGrow(1, actionButtonsLayout);
 		}
 

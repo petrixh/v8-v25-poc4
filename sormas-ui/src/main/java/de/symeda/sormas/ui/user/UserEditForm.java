@@ -34,9 +34,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.v7.data.Validator;
-import com.vaadin.v7.data.util.converter.Converter;
 import de.symeda.sormas.ui.utils.fields.CheckBox;
 import de.symeda.sormas.ui.utils.fields.ComboBox;
 import de.symeda.sormas.ui.utils.fields.OptionGroup;
@@ -68,6 +67,7 @@ import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.UserPhoneNumberValidator;
 import de.symeda.sormas.ui.utils.components.CheckboxSet;
+import de.symeda.sormas.ui.utils.fields.Field;
 
 public class UserEditForm extends AbstractEditForm<UserDto> {
 
@@ -258,7 +258,8 @@ public class UserEditForm extends AbstractEditForm<UserDto> {
 
         if (FacadeProvider.getFeatureConfigurationFacade().isFeatureEnabled(FeatureType.AUTH_PROVIDER_TO_SORMAS_USER_SYNC)) {
             this.getFieldGroup().getFields().forEach(userField ->{
-                if (!excludedFields.contains(userField.getId())) {
+                // Flow: getId() is an Optional
+                if (!excludedFields.contains(userField.getId().orElse(null))) {
                     userField.setEnabled(false);
                 }
             });
@@ -266,7 +267,7 @@ public class UserEditForm extends AbstractEditForm<UserDto> {
     }
 
 	@Override
-	public void setValue(UserDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(UserDto newFieldValue) {
 		final OptionGroup userRolesField = (OptionGroup)getFieldGroup().getField(UserDto.USER_ROLES);
 		FieldHelper.updateItems(userRolesField, getFilteredUserRoles(newFieldValue.getUserRoles()));
         
@@ -382,15 +383,15 @@ public class UserEditForm extends AbstractEditForm<UserDto> {
         return HTML_LAYOUT;
     }
 
-    class UserNameValidator implements Validator {
+    class UserNameValidator implements Field.ValueValidator<Object> {
 
         private static final long serialVersionUID = 1L;
 
         @Override
-        public void validate(Object value) throws InvalidValueException {
+        public void validate(Object value) throws Field.InvalidValueException {
             UserDto dto = getValue();
             if (!(value instanceof String && ControllerProvider.getUserController().isLoginUnique(dto.getUuid(), (String) value)))
-                throw new InvalidValueException(I18nProperties.getValidationError(Validations.userNameNotUnique));
+                throw new Field.InvalidValueException(I18nProperties.getValidationError(Validations.userNameNotUnique));
         }
     }
 }

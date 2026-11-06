@@ -42,7 +42,6 @@ import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.utils.FilteredGrid;
 import de.symeda.sormas.ui.utils.UuidRenderer;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
-import elemental.json.JsonValue;
 
 @SuppressWarnings("serial")
 public class UserGrid extends FilteredGrid<UserDto, UserCriteria> {
@@ -81,7 +80,8 @@ public class UserGrid extends FilteredGrid<UserDto, UserCriteria> {
 			columns.add(UserDto.EXTERNAL_ID);
 		}
 
-		setColumns(columns);
+		// was Vaadin 8 setColumns(Collection), which called setColumns(String...)
+		setColumns(columns.toArray(new String[0]));
 
 		((Column<UserDto, String>) getColumn(UserDto.UUID)).setRenderer(new UuidRenderer());
 		Column<UserDto, Set<UserRoleDto>> userRolesColumn = ((Column<UserDto, Set<UserRoleDto>>) getColumn(UserDto.USER_ROLES));
@@ -89,8 +89,8 @@ public class UserGrid extends FilteredGrid<UserDto, UserCriteria> {
 		userRolesColumn.setSortable(false);
 		((Column<UserDto, Boolean>) getColumn(UserDto.ACTIVE)).setRenderer(value -> String.valueOf(value), new ActiveRenderer());
 
-		for (Column<?, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(UserDto.I18N_PREFIX, column.getId().toString(), column.getCaption()));
+		for (Column<?, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(UserDto.I18N_PREFIX, column.getKey(), column.getCaption()));
 		}
 	}
 
@@ -106,7 +106,7 @@ public class UserGrid extends FilteredGrid<UserDto, UserCriteria> {
 
 	public void reload() {
 
-		if (getSelectionModel().isUserSelectionAllowed()) {
+		if (isUserSelectionAllowed()) {
 			deselectAll();
 		}
 
@@ -121,10 +121,10 @@ public class UserGrid extends FilteredGrid<UserDto, UserCriteria> {
 	public static class ActiveRenderer extends HtmlRenderer {
 
 		@Override
-		public JsonValue encode(String value) {
-			String iconValue = VaadinIcon.CHECK_SQUARE_O.getHtml();
+		public String encode(String value) {
+			String iconValue = iconHtml(VaadinIcon.CHECK_SQUARE_O);
 			if (!Boolean.parseBoolean(value)) {
-				iconValue = VaadinIcon.THIN_SQUARE.getHtml();
+				iconValue = iconHtml(VaadinIcon.THIN_SQUARE);
 			}
 			return super.encode(iconValue);
 		}
@@ -133,7 +133,7 @@ public class UserGrid extends FilteredGrid<UserDto, UserCriteria> {
 	public static class UserRolesRenderer extends TextRenderer {
 
 		@Override
-		public JsonValue encode(Object value) {
+		public String encode(Object value) {
 			if (value != null) {
 				StringBuilder sb = new StringBuilder();
 				AtomicBoolean first = new AtomicBoolean(true);

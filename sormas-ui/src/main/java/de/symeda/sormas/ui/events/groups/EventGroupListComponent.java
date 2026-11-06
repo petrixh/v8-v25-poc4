@@ -45,7 +45,7 @@ public class EventGroupListComponent extends SideComponent {
 		}
 
 		EventGroupList eventList = new EventGroupList(eventReference);
-		addComponent(eventList);
+		add(eventList);
 		eventList.reload();
 	}
 }

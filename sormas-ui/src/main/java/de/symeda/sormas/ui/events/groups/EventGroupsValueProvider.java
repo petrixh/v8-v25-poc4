@@ -18,7 +18,7 @@
 
 package de.symeda.sormas.ui.events.groups;
 
-import com.vaadin.data.ValueProvider;
+import com.vaadin.flow.function.ValueProvider;
 
 import de.symeda.sormas.api.event.EventGroupsIndexDto;
 import de.symeda.sormas.api.i18n.Captions;

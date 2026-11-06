@@ -22,10 +22,7 @@ package de.symeda.sormas.ui.events.groups;
 
 import java.util.List;
 
-import com.vaadin.server.Page;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseReferenceDto;
@@ -38,13 +35,15 @@ import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.UiUtil;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 import de.symeda.sormas.ui.utils.PaginationList;
 
 public class EventGroupMemberList extends PaginationList<EventIndexDto> {
 
 	private final EventGroupReferenceDto eventGroupReference;
 	private final EventCriteria eventCriteria = new EventCriteria();
-	private final Label noEventLabel;
+	private final Span noEventLabel;
 
 	public EventGroupMemberList(EventGroupReferenceDto eventGroupReference) {
 		super(10);
@@ -53,7 +52,7 @@ public class EventGroupMemberList extends PaginationList<EventIndexDto> {
 
 		eventCriteria.setEventGroup(eventGroupReference);
 		eventCriteria.setUserFilterIncluded(false);
-		noEventLabel = new Label(I18nProperties.getCaption(Captions.eventNoEventLinkedToEventGroup));
+		noEventLabel = new Span(I18nProperties.getCaption(Captions.eventNoEventLinkedToEventGroup));
 	}
 
 	@Override
@@ -64,9 +63,9 @@ public class EventGroupMemberList extends PaginationList<EventIndexDto> {
 		if (!events.isEmpty()) {
 			showPage(1);
 		} else {
-			listLayout.removeAllComponents();
+			listLayout.removeAll();
 			updatePaginationLayout();
-			listLayout.addComponent(noEventLabel);
+			listLayout.add(noEventLabel);
 		}
 	}
 
@@ -78,15 +77,15 @@ public class EventGroupMemberList extends PaginationList<EventIndexDto> {
 			EventGroupMemberListEntry listEntry = new EventGroupMemberListEntry(event);
 
 			if (event.isInJurisdiction() && UiUtil.permitted(UserRight.EVENTGROUP_LINK)) {
-				listEntry.addUnlinkEventButton(i, (ClickListener) clickEvent -> {
+				listEntry.addUnlinkEventButton(i, clickEvent -> {
 					if (!FacadeProvider.getEventFacade().isInJurisdictionOrOwned(event.getUuid())
 						&& !UiUtil.hasNationJurisdictionLevel()
 						&& !UiUtil.isAdmin()) {
-						new Notification(
+						NotificationHelper.show(
 							I18nProperties.getString(Strings.headingEventGroupUnlinkEventIssue),
 							I18nProperties.getString(Strings.errorEventFromAnotherJurisdiction),
-							Notification.Type.WARNING_MESSAGE,
-							false).show(Page.getCurrent());
+							Type.WARNING_MESSAGE,
+							false);
 						return;
 					}
 
@@ -97,9 +96,9 @@ public class EventGroupMemberList extends PaginationList<EventIndexDto> {
 			listEntry.addNavigateToEventButton(
 				i,
 				event.isInJurisdiction(),
-				(ClickListener) clickEvent -> ControllerProvider.getEventController().navigateToData(listEntry.getEvent().getUuid()));
+				clickEvent -> ControllerProvider.getEventController().navigateToData(listEntry.getEvent().getUuid()));
 
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 

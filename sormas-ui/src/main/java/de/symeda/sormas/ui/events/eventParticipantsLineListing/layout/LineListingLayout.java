@@ -7,17 +7,16 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import com.vaadin.data.Binder;
-import com.vaadin.data.BinderValidationStatus;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.BinderValidationStatus;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -51,10 +50,10 @@ public class LineListingLayout extends VerticalLayout {
 
 	private final EventDto eventDto;
 	private final List<EventParticipantLineLayout> eventParticipantLines;
-	private final Window window;
+	private final Dialog window;
 	private Consumer<LinkedList<LineDto<EventParticipantDto>>> saveCallback;
 
-	public LineListingLayout(Window window, EventDto eventDto) {
+	public LineListingLayout(Dialog window, EventDto eventDto) {
 		this.window = window;
 		this.eventDto = eventDto;
 
@@ -63,24 +62,24 @@ public class LineListingLayout extends VerticalLayout {
 		LineListingSection sharedInformationComponent = new LineListingSection(Captions.lineListingSharedInformation);
 
 		HorizontalLayout sharedInformationBar = new HorizontalLayout();
-		sharedInformationBar.addStyleName(CssStyles.SPACING_SMALL);
+		sharedInformationBar.addClassName(CssStyles.SPACING_SMALL);
 
 		region = new ComboBox<>(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_REGION));
-		region.setItemCaptionGenerator(item -> item.buildCaption());
+		region.setItemLabelGenerator(item -> item.buildCaption());
 		region.setId("lineListingRegion");
-		sharedInformationBar.addComponent(region);
+		sharedInformationBar.add(region);
 
 		region.addValueChangeListener(e -> {
 			updateDistricts(e.getValue());
 		});
 
 		district = new ComboBox<>(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_DISTRICT));
-		district.setItemCaptionGenerator(item -> item.buildCaption());
+		district.setItemLabelGenerator(item -> item.buildCaption());
 		district.setId("lineListingDistrict");
-		sharedInformationBar.addComponent(district);
+		sharedInformationBar.add(district);
 
-		sharedInformationComponent.addComponent(sharedInformationBar);
-		addComponent(sharedInformationComponent);
+		sharedInformationComponent.add(sharedInformationBar);
+		add(sharedInformationComponent);
 
 		LineListingSection lineComponent = new LineListingSection(Captions.lineListingNewEventParticipantsList);
 
@@ -88,9 +87,9 @@ public class LineListingLayout extends VerticalLayout {
 
 		EventParticipantLineLayout line = buildNewLine(lineComponent);
 		eventParticipantLines.add(line);
-		lineComponent.addComponent(line);
+		lineComponent.add(line);
 		lineComponent.setSpacing(false);
-		addComponent(lineComponent);
+		add(lineComponent);
 
 		if (UiUtil.hasRegionJurisdictionLevel()) {
 			RegionReferenceDto userRegion = UiUtil.getUser().getRegion();
@@ -108,41 +107,40 @@ public class LineListingLayout extends VerticalLayout {
 		}
 
 		HorizontalLayout actionBar = new HorizontalLayout();
-		Button addLine = ButtonHelper.createIconButton(Captions.lineListingAddLine, VaadinIcons.PLUS, e -> {
+		Button addLine = ButtonHelper.createIconButton(Captions.lineListingAddLine, VaadinIcon.PLUS, e -> {
 			EventParticipantLineLayout newLine = buildNewLine(lineComponent);
 			eventParticipantLines.add(newLine);
-			lineComponent.addComponent(newLine);
+			lineComponent.add(newLine);
 
 			if (eventParticipantLines.size() > 1) {
 				eventParticipantLines.get(0).getDelete().setEnabled(true);
 			}
-		}, ValoTheme.BUTTON_PRIMARY);
+		}, CssStyles.BUTTON_PRIMARY);
 
-		actionBar.addComponent(addLine);
-		actionBar.setComponentAlignment(addLine, Alignment.MIDDLE_LEFT);
+		actionBar.add(addLine);
+		actionBar.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, addLine);
 
-		addComponent(actionBar);
+		add(actionBar);
 
 		HorizontalLayout buttonsPanel = new HorizontalLayout();
-		buttonsPanel.setMargin(false);
+		buttonsPanel.setPadding(false);
 		buttonsPanel.setSpacing(true);
-		buttonsPanel.setWidth(100, Unit.PERCENTAGE);
+		buttonsPanel.setWidthFull();
 
 		Button cancelButton = ButtonHelper.createButton(Captions.actionDiscard, event -> closeWindow());
 
-		buttonsPanel.addComponent(cancelButton);
-		buttonsPanel.setComponentAlignment(cancelButton, Alignment.BOTTOM_RIGHT);
-		buttonsPanel.setExpandRatio(cancelButton, 1);
+		// was right-aligned in an expanded slot: both buttons sit on the right
+		buttonsPanel.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+		buttonsPanel.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.END);
+		buttonsPanel.add(cancelButton);
 
 		Button saveButton =
-			ButtonHelper.createButton(Captions.actionSave, event -> saveCallback.accept(getEventParticipantLineDtos()), ValoTheme.BUTTON_PRIMARY);
+			ButtonHelper.createButton(Captions.actionSave, event -> saveCallback.accept(getEventParticipantLineDtos()), CssStyles.BUTTON_PRIMARY);
 
-		buttonsPanel.addComponent(saveButton);
-		buttonsPanel.setComponentAlignment(saveButton, Alignment.BOTTOM_RIGHT);
-		buttonsPanel.setExpandRatio(saveButton, 0);
+		buttonsPanel.add(saveButton);
 
-		addComponent(buttonsPanel);
-		setComponentAlignment(buttonsPanel, Alignment.BOTTOM_RIGHT);
+		add(buttonsPanel);
+		setHorizontalComponentAlignment(FlexComponent.Alignment.END, buttonsPanel);
 	}
 
 	private LinkedList<LineDto<EventParticipantDto>> getEventParticipantLineDtos() {
@@ -217,8 +215,8 @@ public class LineListingLayout extends VerticalLayout {
 
 		newLine.setBean(newLineDto);
 		newLine.addDeleteLineListener(e -> {
-			EventParticipantLineLayout selectedLine = (EventParticipantLineLayout) e.getComponent();
-			lineComponent.removeComponent(selectedLine);
+			EventParticipantLineLayout selectedLine = (EventParticipantLineLayout) e.getSource();
+			lineComponent.remove(selectedLine);
 			eventParticipantLines.remove(selectedLine);
 			eventParticipantLines.get(0).formatAsFirstLine();
 			if (eventParticipantLines.size() > 1) {
@@ -239,8 +237,8 @@ public class LineListingLayout extends VerticalLayout {
 
 		public EventParticipantLineLayout(int lineIndex) {
 
-			addStyleName(CssStyles.SPACING_SMALL);
-			setMargin(false);
+			addClassName(CssStyles.SPACING_SMALL);
+			setPadding(false);
 
 			if (eventDto.getEventLocation().getDistrict() == null) {
 				binder.forField(region).asRequired().bind(EventParticipantLineDto.REGION);
@@ -252,7 +250,7 @@ public class LineListingLayout extends VerticalLayout {
 
 			involvementDescription = new TextField();
 			involvementDescription.setId("lineListingInvolvementDescription_" + lineIndex);
-			involvementDescription.setWidth(160, Unit.PIXELS);
+			involvementDescription.setWidth("160px");
 			binder.forField(involvementDescription).bind(EventParticipantLineDto.INVOLVEMENT_DESCRIPTION);
 
 			person = new PersonField();
@@ -260,9 +258,9 @@ public class LineListingLayout extends VerticalLayout {
 			binder.forField(person).bind(EventParticipantLineDto.PERSON);
 
 			delete = ButtonHelper
-				.createIconButtonWithCaption("delete_" + lineIndex, null, VaadinIcons.TRASH, event -> fireEvent(new DeleteLineEvent(this)));
+				.createIconButtonWithCaption("delete_" + lineIndex, null, VaadinIcon.TRASH, event -> fireEvent(new DeleteLineEvent(this)));
 
-			addComponents(involvementDescription, person, delete);
+			add(involvementDescription, person, delete);
 
 			if (lineIndex == 0) {
 				formatAsFirstLine();
@@ -293,10 +291,10 @@ public class LineListingLayout extends VerticalLayout {
 			formatAsOtherLine();
 
 			involvementDescription
-				.setCaption(I18nProperties.getPrefixCaption(EventParticipantDto.I18N_PREFIX, EventParticipantDto.INVOLVEMENT_DESCRIPTION));
+				.setLabel(I18nProperties.getPrefixCaption(EventParticipantDto.I18N_PREFIX, EventParticipantDto.INVOLVEMENT_DESCRIPTION));
 			person.showCaptions();
 			delete.setEnabled(false);
-			setComponentAlignment(delete, Alignment.MIDDLE_LEFT);
+			setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, delete);
 		}
 
 		private void formatAsOtherLine() {

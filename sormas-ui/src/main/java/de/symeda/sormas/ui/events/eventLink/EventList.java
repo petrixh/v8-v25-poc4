@@ -24,8 +24,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -48,7 +47,7 @@ import de.symeda.sormas.ui.utils.VaadinUiUtil;
 public class EventList extends PaginationList<EventIndexDto> {
 
 	private final EventCriteria eventCriteria = new EventCriteria();
-	private final Label noEventLabel;
+	private final Span noEventLabel;
 	private BiConsumer<Integer, EventListEntry> addUnlinkEventListener;
 	private final Consumer<Runnable> actionCallback;
 	private final boolean isEditAllowed;
@@ -60,13 +59,13 @@ public class EventList extends PaginationList<EventIndexDto> {
 		this.isEditAllowed = isEditAllowed;
 		eventCriteria.caze(caseReferenceDto);
 		eventCriteria.setUserFilterIncluded(false);
-		noEventLabel = new Label(I18nProperties.getCaption(Captions.eventNoEventLinkedToCase));
+		noEventLabel = new Span(I18nProperties.getCaption(Captions.eventNoEventLinkedToCase));
 		addUnlinkEventListener = (Integer i, EventListEntry listEntry) -> {
 			if (UiUtil.permitted(isEditAllowed, UserRight.EVENT_EDIT, UserRight.CASE_EDIT)) {
-				listEntry.addUnlinkEventListener(i, (ClickListener) clickEvent -> {
+				listEntry.addUnlinkEventListener(i, clickEvent -> {
 					VaadinUiUtil.showConfirmationPopup(
 						I18nProperties.getString(Strings.headingUnlinkCaseFromEvent),
-						new Label(I18nProperties.getString(Strings.confirmationUnlinkCaseFromEvent)),
+						new Span(I18nProperties.getString(Strings.confirmationUnlinkCaseFromEvent)),
 						I18nProperties.getString(Strings.yes),
 						I18nProperties.getString(Strings.no),
 						480,
@@ -94,13 +93,13 @@ public class EventList extends PaginationList<EventIndexDto> {
 		this.isEditAllowed = isEditAllowed;
 		eventCriteria.environment(environmentReferenceDto);
 		eventCriteria.setUserFilterIncluded(false);
-		noEventLabel = new Label(I18nProperties.getCaption(Captions.eventNoEventLinkedToEnvironment));
+		noEventLabel = new Span(I18nProperties.getCaption(Captions.eventNoEventLinkedToEnvironment));
 		addUnlinkEventListener = (Integer i, EventListEntry listEntry) -> {
 			if (UiUtil.permitted(isEditAllowed, UserRight.EVENT_EDIT, UserRight.CASE_EDIT)) {
-				listEntry.addUnlinkEventListener(i, (ClickListener) clickEvent -> {
+				listEntry.addUnlinkEventListener(i, clickEvent -> {
 					VaadinUiUtil.showConfirmationPopup(
 						I18nProperties.getString(Strings.headingUnlinkEventFromEnvironment),
-						new Label(I18nProperties.getString(Strings.confirmationUnlinkEventFromEnvironment)),
+						new Span(I18nProperties.getString(Strings.confirmationUnlinkEventFromEnvironment)),
 						I18nProperties.getString(Strings.yes),
 						I18nProperties.getString(Strings.no),
 						480,
@@ -128,12 +127,12 @@ public class EventList extends PaginationList<EventIndexDto> {
 		this.isEditAllowed = isEditAllowed;
 		eventCriteria.setPerson(contact.getPerson());
 		eventCriteria.setUserFilterIncluded(false);
-		noEventLabel = new Label(I18nProperties.getCaption(Captions.eventNoEventLinkedToContact));
+		noEventLabel = new Span(I18nProperties.getCaption(Captions.eventNoEventLinkedToContact));
 		addUnlinkEventListener = (Integer i, EventListEntry listEntry) -> {
 			if (contact.getPerson() != null && UiUtil.permitted(isEditAllowed, UserRight.EVENTPARTICIPANT_DELETE)) {
 				listEntry.addUnlinkEventListener(
 					i,
-					(ClickListener) clickEvent -> ControllerProvider.getEventParticipantController()
+					clickEvent -> ControllerProvider.getEventParticipantController()
 						.deleteEventParticipant(listEntry.getEvent().getUuid(), contact.getPerson().getUuid(), this::reload));
 			}
 		};
@@ -146,10 +145,10 @@ public class EventList extends PaginationList<EventIndexDto> {
 		this.isEditAllowed = isEditAllowed;
 		eventCriteria.superordinateEvent(superordinateEvent);
 		eventCriteria.setUserFilterIncluded(false);
-		noEventLabel = new Label(I18nProperties.getString(Strings.infoNoSubordinateEvents));
+		noEventLabel = new Span(I18nProperties.getString(Strings.infoNoSubordinateEvents));
 		addUnlinkEventListener = (Integer i, EventListEntry listEntry) -> {
 			if (UiUtil.permitted(UserRight.EVENT_EDIT)) {
-				listEntry.addUnlinkEventListener(i, (ClickListener) clickEvent -> {
+				listEntry.addUnlinkEventListener(i, clickEvent -> {
 					EventDto selectedEvent = FacadeProvider.getEventFacade().getEventByUuid(listEntry.getEvent().getUuid(), false);
 					ControllerProvider.getEventController()
 						.removeSuperordinateEvent(selectedEvent, false, I18nProperties.getString(Strings.messageEventSubordinateEventUnlinked));
@@ -168,9 +167,9 @@ public class EventList extends PaginationList<EventIndexDto> {
 		if (!events.isEmpty()) {
 			showPage(1);
 		} else {
-			listLayout.removeAllComponents();
+			listLayout.removeAll();
 			updatePaginationLayout();
-			listLayout.addComponent(noEventLabel);
+			listLayout.add(noEventLabel);
 		}
 	}
 
@@ -189,11 +188,11 @@ public class EventList extends PaginationList<EventIndexDto> {
 			}
 			listEntry.addActionButton(
 				String.valueOf(i),
-				(ClickListener) clickEvent -> actionCallback
+				clickEvent -> actionCallback
 					.accept(() -> ControllerProvider.getEventController().navigateToData(listEntry.getEvent().getUuid())),
 				UiUtil.permitted(isEditAllowed, UserRight.EVENT_EDIT));
 			listEntry.setEnabled(isEditAllowed);
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 

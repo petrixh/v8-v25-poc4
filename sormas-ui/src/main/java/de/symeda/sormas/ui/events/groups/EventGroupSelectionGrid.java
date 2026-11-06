@@ -20,8 +20,7 @@
 
 package de.symeda.sormas.ui.events.groups;
 
-import com.vaadin.data.provider.ConfigurableFilterDataProvider;
-import com.vaadin.shared.ui.grid.HeightMode;
+import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.event.EventGroupCriteria;
@@ -29,6 +28,7 @@ import de.symeda.sormas.api.event.EventGroupIndexDto;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.ui.utils.FilteredGrid;
 import de.symeda.sormas.ui.utils.GridHeightResizer;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
 
 @SuppressWarnings("serial")
 public class EventGroupSelectionGrid extends FilteredGrid<EventGroupIndexDto, EventGroupCriteria> {
@@ -51,8 +51,8 @@ public class EventGroupSelectionGrid extends FilteredGrid<EventGroupIndexDto, Ev
 
 		setColumns(EventGroupIndexDto.UUID, EventGroupIndexDto.NAME, EventGroupIndexDto.EVENT_COUNT);
 
-		for (Column<EventGroupIndexDto, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(EventGroupIndexDto.I18N_PREFIX, column.getId(), column.getCaption()));
+		for (Column<EventGroupIndexDto, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(EventGroupIndexDto.I18N_PREFIX, column.getKey(), column.getCaption()));
 		}
 		getColumn(EventGroupIndexDto.EVENT_COUNT).setSortable(false);
 

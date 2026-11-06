@@ -93,7 +93,32 @@ public class CriteriaBuilderHelperTest {
 		}
 
 		@Override
+		public Predicate equalTo(Expression<?> value) {
+			return null;
+		}
+
+		@Override
+		public Predicate equalTo(Object value) {
+			return null;
+		}
+
+		@Override
+		public Predicate notEqualTo(Expression<?> value) {
+			return null;
+		}
+
+		@Override
+		public Predicate notEqualTo(Object value) {
+			return null;
+		}
+
+		@Override
 		public <X> Expression<X> as(Class<X> type) {
+			return null;
+		}
+
+		@Override
+		public <X> Expression<X> cast(Class<X> type) {
 			return null;
 		}
 

@@ -2,8 +2,8 @@ package de.symeda.sormas.ui.immunization.components.grid;
 
 import java.util.Date;
 
-import com.vaadin.ui.renderers.DateRenderer;
-import com.vaadin.ui.renderers.TextRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.AgeAndBirthDateDto;
@@ -100,11 +100,11 @@ public class ImmunizationGrid extends FilteredGrid<ImmunizationIndexDto, Immuniz
 		((Column<ImmunizationIndexDto, Date>) getColumn(ImmunizationIndexDto.RECOVERY_DATE))
 			.setRenderer(new DateRenderer(DateFormatHelper.getDateFormat()));
 
-		for (Column<ImmunizationIndexDto, ?> column : getColumns()) {
+		for (Column<ImmunizationIndexDto, ?> column : getAllColumns()) {
 			column.setCaption(
 				I18nProperties
-					.findPrefixCaptionWithDefault(column.getId(), column.getCaption(), ImmunizationIndexDto.I18N_PREFIX, PersonDto.I18N_PREFIX));
-			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getId()));
+					.findPrefixCaptionWithDefault(column.getKey(), column.getCaption(), ImmunizationIndexDto.I18N_PREFIX, PersonDto.I18N_PREFIX));
+			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getKey()));
 		}
 
 		if (UiUtil.enabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {

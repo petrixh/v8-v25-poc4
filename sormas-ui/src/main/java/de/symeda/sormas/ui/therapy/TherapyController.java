@@ -8,14 +8,10 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import com.vaadin.navigator.Navigator;
-import com.vaadin.server.Page;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -31,10 +27,13 @@ import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.api.utils.criteria.BaseCriteria;
 import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.UiUtil;
+import de.symeda.sormas.ui.navigation.Navigator;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent.CommitListener;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent.DeleteListener;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 public class TherapyController {
@@ -78,7 +77,7 @@ public class TherapyController {
 				if (!form.getFieldGroup().isModified()) {
 					PrescriptionDto dto = form.getValue();
 					FacadeProvider.getPrescriptionFacade().savePrescription(dto);
-					Notification.show(I18nProperties.getString(Strings.messagePrescriptionCreated), Type.TRAY_NOTIFICATION);
+					NotificationHelper.show(I18nProperties.getString(Strings.messagePrescriptionCreated), Type.TRAY_NOTIFICATION);
 					callback.run();
 				}
 			}
@@ -99,7 +98,7 @@ public class TherapyController {
 		boolean isEditOrDeleteAllowed = isEditAllowed || isDeleteAllowed;
 		final CommitDiscardWrapperComponent<PrescriptionForm> view =
 			new CommitDiscardWrapperComponent<>(form, isEditOrDeleteAllowed, form.getFieldGroup());
-		Window popupWindow = VaadinUiUtil
+		Dialog popupWindow = VaadinUiUtil
 			.showModalPopupWindow(view, I18nProperties.getString(!isEditAllowed ? Strings.headingViewPrescription : Strings.headingEditPrescription));
 
 		if (isEditOrDeleteAllowed) {
@@ -111,7 +110,7 @@ public class TherapyController {
 						PrescriptionDto dto = form.getValue();
 						FacadeProvider.getPrescriptionFacade().savePrescription(dto);
 						popupWindow.close();
-						Notification.show(I18nProperties.getString(Strings.messagePrescriptionSaved), Type.TRAY_NOTIFICATION);
+						NotificationHelper.show(I18nProperties.getString(Strings.messagePrescriptionSaved), Type.TRAY_NOTIFICATION);
 						if (callback != null) {
 							callback.run();
 						}
@@ -173,7 +172,7 @@ public class TherapyController {
 		};
 		VaadinUiUtil.showChooseOptionPopup(
 			I18nProperties.getCaption(Captions.prescriptionWithTreatmentTitleDelete),
-			new Label(I18nProperties.getString(Strings.confirmationDeletePrescriptionWithTreatment)),
+			new Span(I18nProperties.getString(Strings.confirmationDeletePrescriptionWithTreatment)),
 			I18nProperties.getCaption(Captions.prescriptionAlone),
 			I18nProperties.getCaption(Captions.prescriptionWithTreatment),
 			650,
@@ -198,7 +197,7 @@ public class TherapyController {
 				if (!form.getFieldGroup().isModified()) {
 					TreatmentDto dto = form.getValue();
 					FacadeProvider.getTreatmentFacade().saveTreatment(dto);
-					Notification.show(I18nProperties.getString(Strings.messageTreatmentCreated), Type.TRAY_NOTIFICATION);
+					NotificationHelper.show(I18nProperties.getString(Strings.messageTreatmentCreated), Type.TRAY_NOTIFICATION);
 					callback.run();
 				}
 			}
@@ -220,7 +219,7 @@ public class TherapyController {
 				if (!form.getFieldGroup().isModified()) {
 					TreatmentDto dto = form.getValue();
 					FacadeProvider.getTreatmentFacade().saveTreatment(dto);
-					Notification.show(I18nProperties.getString(Strings.messageTreatmentCreated), Type.TRAY_NOTIFICATION);
+					NotificationHelper.show(I18nProperties.getString(Strings.messageTreatmentCreated), Type.TRAY_NOTIFICATION);
 					callback.run();
 				}
 			}
@@ -245,7 +244,7 @@ public class TherapyController {
 		final CommitDiscardWrapperComponent<TreatmentForm> view =
 			new CommitDiscardWrapperComponent<>(form, isEditOrDeleteAllowed, form.getFieldGroup());
 
-		Window popupWindow = VaadinUiUtil
+		Dialog popupWindow = VaadinUiUtil
 			.showModalPopupWindow(view, I18nProperties.getString(!isEditAllowed ? Strings.headingViewTreatment : Strings.headingEditTreatment));
 
 		if (isEditOrDeleteAllowed) {
@@ -254,7 +253,7 @@ public class TherapyController {
 					TreatmentDto dto = form.getValue();
 					FacadeProvider.getTreatmentFacade().saveTreatment(dto);
 					popupWindow.close();
-					Notification.show(I18nProperties.getString(Strings.messageTreatmentSaved), Type.TRAY_NOTIFICATION);
+					NotificationHelper.show(I18nProperties.getString(Strings.messageTreatmentSaved), Type.TRAY_NOTIFICATION);
 					callback.run();
 				}
 			});
@@ -285,18 +284,18 @@ public class TherapyController {
 				callback.run();
 			});
 
-			view.getButtonsPanel().addComponent(openPrescriptionButton, view.getButtonsPanel().getComponentIndex(view.getDiscardButton()));
-			view.getButtonsPanel().setComponentAlignment(openPrescriptionButton, Alignment.MIDDLE_LEFT);
+			view.getButtonsPanel().addComponentAtIndex(view.getButtonsPanel().indexOf(view.getDiscardButton()), openPrescriptionButton);
+			view.getButtonsPanel().setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, openPrescriptionButton);
 		}
 	}
 
-	public void deleteAllSelectedPrescriptions(Collection<Object> selectedRows, Runnable callback) {
+	public void deleteAllSelectedPrescriptions(Collection<?> selectedRows, Runnable callback) {
 		if (selectedRows.size() == 0) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingNoPrescriptionsSelected),
 				I18nProperties.getString(Strings.messageNoPrescriptionsSelected),
 				Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				false);
 		} else {
 			VaadinUiUtil.showDeleteConfirmationWindow(
 				String.format(I18nProperties.getString(Strings.confirmationDeletePrescriptions), selectedRows.size()),
@@ -319,24 +318,24 @@ public class TherapyController {
 						}
 
 						callback.run();
-						new Notification(
+						NotificationHelper.show(
 							I18nProperties.getString(Strings.headingPrescriptionsDeleted),
 							I18nProperties.getString(Strings.messagePrescriptionsDeleted),
 							Type.HUMANIZED_MESSAGE,
-							false).show(Page.getCurrent());
+							false);
 					}
 				});
 		}
 	}
 
-	public void deleteAllSelectedTreatments(Collection<Object> selectedRows, Runnable callback) {
+	public void deleteAllSelectedTreatments(Collection<?> selectedRows, Runnable callback) {
 
 		if (selectedRows.size() == 0) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingNoTreatmentsSelected),
 				I18nProperties.getString(Strings.messageNoTreatmentsSelected),
 				Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				false);
 		} else {
 			VaadinUiUtil.showDeleteConfirmationWindow(
 				String.format(I18nProperties.getString(Strings.confirmationDeleteTreatments), selectedRows.size()),
@@ -347,11 +346,11 @@ public class TherapyController {
 							FacadeProvider.getTreatmentFacade().deleteTreatment(((TreatmentIndexDto) selectedRow).getUuid());
 						}
 						callback.run();
-						new Notification(
+						NotificationHelper.show(
 							I18nProperties.getString(Strings.headingTreatmentsDeleted),
 							I18nProperties.getString(Strings.messageTreatmentsDeleted),
 							Type.HUMANIZED_MESSAGE,
-							false).show(Page.getCurrent());
+							false);
 					}
 				});
 		}

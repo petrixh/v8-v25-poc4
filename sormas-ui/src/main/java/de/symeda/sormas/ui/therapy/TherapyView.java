@@ -17,6 +17,8 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.therapy;
 
+import com.vaadin.flow.component.Unit;
+
 import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.UiUtil;
@@ -39,7 +41,8 @@ public class TherapyView extends AbstractCaseView {
 		setSubComponent(therapyForm);
 		setEditPermission(therapyForm, UiUtil.permitted(UserRight.CASE_EDIT));
 
-		subComponent.setWidth(100, Unit.PERCENTAGE);
+		// was subComponent.setWidth(100, PERCENTAGE): the sub component is the therapy form wrapper
+		therapyForm.setWidth(100, Unit.PERCENTAGE);
 		setSubComponent(therapyForm);
 	}
 }

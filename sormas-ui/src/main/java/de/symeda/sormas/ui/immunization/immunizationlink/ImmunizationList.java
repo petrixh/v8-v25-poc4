@@ -2,8 +2,7 @@ package de.symeda.sormas.ui.immunization.immunizationlink;
 
 import java.util.List;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -39,8 +38,8 @@ public class ImmunizationList extends PaginationList<ImmunizationListEntryDto> {
 			showPage(1);
 		} else {
 			updatePaginationLayout();
-			Label noImmunizationsLabel = new Label(I18nProperties.getCaption(Captions.immunizationNoImmunizationsForPerson));
-			listLayout.addComponent(noImmunizationsLabel);
+			Span noImmunizationsLabel = new Span(I18nProperties.getCaption(Captions.immunizationNoImmunizationsForPerson));
+			listLayout.add(noImmunizationsLabel);
 		}
 	}
 
@@ -57,13 +56,13 @@ public class ImmunizationList extends PaginationList<ImmunizationListEntryDto> {
 				boolean isEditableAndHasEditRight = UiUtil.permitted(isEditAllowed, UserRight.IMMUNIZATION_EDIT);
 				listEntry.addActionButton(
 					listEntry.getImmunizationEntry().getUuid(),
-					(Button.ClickListener) event -> ControllerProvider.getImmunizationController()
+					event -> ControllerProvider.getImmunizationController()
 						.navigateToImmunization(listEntry.getImmunizationEntry().getUuid()),
 					isEditableAndHasEditRight);
 				listEntry.setEnabled(isEditableAndHasEditRight);
 			}
 
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 }

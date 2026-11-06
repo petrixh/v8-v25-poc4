@@ -34,6 +34,9 @@ import de.symeda.sormas.ui.utils.fields.OptionGroup;
  * then a set with zero or one item id, and {@link NullableOptionGroupConverter} maps it to the single property value.
  * When required it is a plain single select (radio buttons) without converter, as in V7.
  */
+@SuppressWarnings({
+	"rawtypes",
+	"unchecked" })
 public class NullableOptionGroup extends OptionGroup {
 
 	private static final long serialVersionUID = 1L;
@@ -57,7 +60,7 @@ public class NullableOptionGroup extends OptionGroup {
 		if (isRequired()) {
 			setConverter(null);
 		} else {
-			setConverter(new NullableOptionGroupConverter(getFirstValue(getValue())));
+			setConverter(new NullableOptionGroupConverter(getValue() instanceof Set ? getFirstValue((Set) getValue()) : null));
 		}
 		addStyleName("multiline");
 	}
@@ -90,12 +93,12 @@ public class NullableOptionGroup extends OptionGroup {
 
 	public Object getNullableValue() {
 		final Object value = super.getValue();
-		return ObjectUtils.isNotEmpty(value) ? getFirstValue(value) : null;
+		return ObjectUtils.isNotEmpty(value) ? getFirstValue((Set) value) : null;
 	}
 
 	public void setNullableValue(Object value) {
 		if (value != null) {
-			super.setValue(isMultiSelect() ? new LinkedHashSet<>(Collections.singleton(value)) : value);
+			super.setValue(new LinkedHashSet<>(Collections.singleton(value)));
 		} else {
 			super.setValue(null);
 		}
@@ -110,11 +113,9 @@ public class NullableOptionGroup extends OptionGroup {
 		setReadOnly(readOnly);
 	}
 
-	private Object getFirstValue(Object value) {
-		if (value instanceof Set) {
-			return ((Set<?>) value).stream().findFirst().orElse(null);
-		}
-		return value;
+	private Object getFirstValue(Set value) {
+		// Flow: the empty value of the field is null (V7: an empty set)
+		return value != null ? value.stream().findFirst().orElse(null) : null;
 	}
 
 	public void setInaccessible() {

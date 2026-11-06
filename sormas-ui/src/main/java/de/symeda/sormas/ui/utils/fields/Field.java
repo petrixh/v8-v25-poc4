@@ -64,6 +64,7 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 	String DATA_INVALID_COMMITTED = "sormas.invalidCommitted";
 	String DATA_DESCRIPTION = "sormas.description";
 	String DATA_NULL_REPRESENTATION = "sormas.nullRepresentation";
+	String DATA_MODIFIED = "sormas.modified";
 
 	// Value methods, implemented by the Flow HasValue superclass
 
@@ -188,6 +189,16 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 		if (this instanceof HasPlaceholder) {
 			((HasPlaceholder) this).setPlaceholder(inputPrompt);
 		}
+	}
+
+	/**
+	 * V7 {@code Buffered.isModified()} of a field bound in a form's field group
+	 * ({@link de.symeda.sormas.ui.utils.AbstractForm.BeanFieldGroup}): the value changed since the group read, committed
+	 * or discarded the bean, by the user or programmatically, also if it was changed back to the read value. Always
+	 * {@code false} for a field that is not bound (V7: no data source).
+	 */
+	default boolean isModified() {
+		return Boolean.TRUE.equals(ComponentUtil.getData(asComponent(), DATA_MODIFIED));
 	}
 
 	/**

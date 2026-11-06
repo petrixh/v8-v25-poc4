@@ -95,7 +95,7 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 			checkboxGroup.setReadOnly(isReadOnly());
 			checkboxGroup.addValueChangeListener(e -> {
 				if (e.isFromClient()) {
-					updateValue();
+					clientValueChanged(e.getValue());
 				}
 			});
 			add(checkboxGroup);
@@ -107,12 +107,27 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 			radioGroup.setReadOnly(isReadOnly());
 			radioGroup.addValueChangeListener(e -> {
 				if (e.isFromClient()) {
-					updateValue();
+					clientValueChanged(e.getValue());
 				}
 			});
 			add(radioGroup);
 		}
 		setPresentationValue(getValue());
+	}
+
+	/**
+	 * V7 null selection off: the user cannot deselect the last item (multi select) or the selected item. The client's
+	 * empty selection is ignored (no value change event) and the client shows the kept value again. A programmatic
+	 * {@code setValue} still works, as in V7.
+	 */
+	private void clientValueChanged(Object clientValue) {
+		if (!isNullSelectionAllowed()) {
+			if (clientValue == null || (clientValue instanceof Collection && ((Collection<?>) clientValue).isEmpty())) {
+				setPresentationValue(getValue());
+				return;
+			}
+		}
+		updateValue();
 	}
 
 	/**

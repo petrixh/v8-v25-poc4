@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.Unit;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -43,6 +43,7 @@ import de.symeda.sormas.api.sample.SampleMaterial;
 import de.symeda.sormas.ui.dashboard.components.DashboardFilterLayout;
 import de.symeda.sormas.ui.utils.ComboBoxHelper;
 import de.symeda.sormas.ui.utils.components.datetypeselector.DateTypeSelectorComponent;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 public class SampleDashboardFilterLayout extends DashboardFilterLayout<SampleDashboardDataProvider> {
 
@@ -89,7 +90,7 @@ public class SampleDashboardFilterLayout extends DashboardFilterLayout<SampleDas
 			.build();
 
 		dateTypeSelectorComponent.addValueChangeListener(e -> {
-			dashboardDataProvider.setDateType((SampleDashboardFilterDateType) e.getProperty().getValue());
+			dashboardDataProvider.setDateType((SampleDashboardFilterDateType) e.getValue());
 		});
 
 		addCustomComponent(dateTypeSelectorComponent, DATE_TYPE_FILTER);
@@ -203,16 +204,16 @@ public class SampleDashboardFilterLayout extends DashboardFilterLayout<SampleDas
 		sampleMaterialFilter.addValueChangeListener(e -> {
 			// In Other as the selected sample, all samples should select.
 			boolean environmentOnly = false;
-			if (e.getProperty().getValue() == SampleMaterial.OTHER || e.getProperty().getValue() == EnvironmentSampleMaterial.OTHER) {
+			if (e.getValue() == SampleMaterial.OTHER || e.getValue() == EnvironmentSampleMaterial.OTHER) {
 				dashboardDataProvider.setEnvironmentSampleMaterial(EnvironmentSampleMaterial.OTHER);
 				dashboardDataProvider.setSampleMaterial(SampleMaterial.OTHER);
-			} else if (e.getProperty().getValue() instanceof EnvironmentSampleMaterial) {
-				dashboardDataProvider.setEnvironmentSampleMaterial((EnvironmentSampleMaterial) e.getProperty().getValue());
+			} else if (e.getValue() instanceof EnvironmentSampleMaterial) {
+				dashboardDataProvider.setEnvironmentSampleMaterial((EnvironmentSampleMaterial) e.getValue());
 				dashboardDataProvider.setSampleMaterial(null);
 				environmentOnly = true;
-			} else if (e.getProperty().getValue() instanceof SampleMaterial) {
+			} else if (e.getValue() instanceof SampleMaterial) {
 				dashboardDataProvider.setEnvironmentSampleMaterial(null);
-				dashboardDataProvider.setSampleMaterial((SampleMaterial) e.getProperty().getValue());
+				dashboardDataProvider.setSampleMaterial((SampleMaterial) e.getValue());
 			} else {
 				dashboardDataProvider.setEnvironmentSampleMaterial(null);
 				dashboardDataProvider.setSampleMaterial(null);

@@ -17,13 +17,16 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.dashboard.statistics;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
 
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 @SuppressWarnings("serial")
-public class SvgBarElement extends Label {
+// was a Vaadin 8 Label in HTML mode
+public class SvgBarElement extends Span {
 
 	private static final int BAR_HEIGHT = 4;
 
@@ -31,7 +34,6 @@ public class SvgBarElement extends Label {
 
 	public SvgBarElement(String fillClass) {
 		this.fillClass = fillClass;
-		setContentMode(ContentMode.HTML);
 		setHeight(BAR_HEIGHT, Unit.PIXELS);
 		updateSvg(100);
 	}
@@ -39,10 +41,10 @@ public class SvgBarElement extends Label {
 	public void updateSvg(int percentageValue) {
 
 		//@formatter:off
-		setValue("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"" + BAR_HEIGHT + "px\">"
+		VaadinUiUtil.setLabelValue(this, "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"" + BAR_HEIGHT + "px\">"
 				+ "<rect class=\"svg-bar " + fillClass + "\" width=\"" + percentageValue + "%\" height=\"" + BAR_HEIGHT + "px\"/>"
 				+ "<rect class=\"svg-bar " + CssStyles.SVG_FILL_BACKGROUND + "\" x=\"" + percentageValue + "%\" width=\"" + (100 - percentageValue) + "%\" height=\"" + BAR_HEIGHT + "px\"/>"
-				+ "</svg>");
+				+ "</svg>", ContentMode.HTML);
 		//@formatter:on
 	}
 

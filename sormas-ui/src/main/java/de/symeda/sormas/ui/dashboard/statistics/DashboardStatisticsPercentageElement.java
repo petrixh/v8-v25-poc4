@@ -17,10 +17,11 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.dashboard.statistics;
 
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.ui.utils.CssStyles;
 
@@ -28,42 +29,43 @@ import de.symeda.sormas.ui.utils.CssStyles;
 public class DashboardStatisticsPercentageElement extends VerticalLayout {
 
 	private SvgBarElement svgBarElement;
-	private Label percentageLabel;
+	private Span percentageLabel;
 
 	public DashboardStatisticsPercentageElement(String caption, String svgFillClass) {
-		this.setMargin(false);
+		this.setPadding(false);
 		this.setSpacing(false);
 
 		HorizontalLayout captionAndValueLayout = new HorizontalLayout();
 		captionAndValueLayout.setWidth(100, Unit.PERCENTAGE);
 
-		Label captionLabel = new Label(caption);
-		captionLabel.setWidthUndefined();
+		Span captionLabel = new Span(caption);
+		captionLabel.setWidth(null);
 		CssStyles.style(captionLabel, CssStyles.LABEL_SECONDARY, CssStyles.LABEL_BOLD);
-		captionAndValueLayout.addComponent(captionLabel);
+		captionAndValueLayout.add(captionLabel);
 
-		percentageLabel = new Label();
+		percentageLabel = new Span();
 		CssStyles.style(percentageLabel, CssStyles.LABEL_PRIMARY, CssStyles.LABEL_BOLD);
-		percentageLabel.setWidthUndefined();
-		captionAndValueLayout.addComponent(percentageLabel);
+		percentageLabel.setWidth(null);
+		captionAndValueLayout.add(percentageLabel);
 
-		captionAndValueLayout.setComponentAlignment(captionLabel, Alignment.MIDDLE_LEFT);
-		captionAndValueLayout.setComponentAlignment(percentageLabel, Alignment.MIDDLE_RIGHT);
+		// was MIDDLE_LEFT and MIDDLE_RIGHT in two equal slots: the caption at the left end, the value at the right end
+		captionAndValueLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+		captionAndValueLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, captionLabel, percentageLabel);
 
-		addComponent(captionAndValueLayout);
+		add(captionAndValueLayout);
 
 		svgBarElement = new SvgBarElement(svgFillClass);
 		svgBarElement.setWidth(100, Unit.PERCENTAGE);
-		addComponent(svgBarElement);
+		add(svgBarElement);
 	}
 
 	public void updatePercentageValue(int percentageValue) {
-		percentageLabel.setValue(Integer.toString(percentageValue) + "%");
+		percentageLabel.setText(Integer.toString(percentageValue) + "%");
 		svgBarElement.updateSvg(percentageValue);
 	}
 
 	public void updatePercentageValueWithCount(int count, int percentageValue) {
-		percentageLabel.setValue(Integer.toString(count) + " (" + Integer.toString(percentageValue) + " %)");
+		percentageLabel.setText(Integer.toString(count) + " (" + Integer.toString(percentageValue) + " %)");
 		svgBarElement.updateSvg(percentageValue);
 	}
 }

@@ -24,10 +24,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.ui.CheckBox;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.dashboard.SampleDashboardCriteria;
@@ -248,7 +248,7 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
             showCaseSamplesCheckBox.setCaption(I18nProperties.getCaption(Captions.sampleDashboardShowCaseSamples));
             showCaseSamplesCheckBox.setValue(shouldShowCaseSamples());
             showCaseSamplesCheckBox.addValueChangeListener(e -> {
-                if ((boolean) e.getProperty().getValue()) {
+                if ((boolean) e.getValue()) {
                     displayedHumanSamples.add(SampleAssociationType.CASE);
                 } else {
                     displayedHumanSamples.remove(SampleAssociationType.CASE);
@@ -256,7 +256,7 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
 
                 refreshMap(true);
             });
-            layersLayout.addComponent(showCaseSamplesCheckBox);
+            layersLayout.add(showCaseSamplesCheckBox);
         }
 
         if (UiUtil.permitted(UserRight.CONTACT_VIEW)) {
@@ -265,7 +265,7 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
             showContactSamplesCheckBox.setCaption(I18nProperties.getCaption(Captions.sampleDashboardShowContactSamples));
             showContactSamplesCheckBox.setValue(shouldShowContactSamples());
             showContactSamplesCheckBox.addValueChangeListener(e -> {
-                if ((boolean) e.getProperty().getValue()) {
+                if ((boolean) e.getValue()) {
                     displayedHumanSamples.add(SampleAssociationType.CONTACT);
                 } else {
                     displayedHumanSamples.remove(SampleAssociationType.CONTACT);
@@ -273,7 +273,7 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
 
                 refreshMap(true);
             });
-            layersLayout.addComponent(showContactSamplesCheckBox);
+            layersLayout.add(showContactSamplesCheckBox);
         }
 
         if (UiUtil.permitted(UserRight.EVENTPARTICIPANT_VIEW)) {
@@ -282,7 +282,7 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
             showEventParticipantSamplesCheckBox.setCaption(I18nProperties.getCaption(Captions.sampleDashboardShowEventParticipantSamples));
             showEventParticipantSamplesCheckBox.setValue(shouldShowEventParticipantSamples());
             showEventParticipantSamplesCheckBox.addValueChangeListener(e -> {
-                if ((boolean) e.getProperty().getValue()) {
+                if ((boolean) e.getValue()) {
                     displayedHumanSamples.add(SampleAssociationType.EVENT_PARTICIPANT);
                 } else {
                     displayedHumanSamples.remove(SampleAssociationType.EVENT_PARTICIPANT);
@@ -290,7 +290,7 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
 
                 refreshMap(true);
             });
-            layersLayout.addComponent(showEventParticipantSamplesCheckBox);
+            layersLayout.add(showEventParticipantSamplesCheckBox);
         }
 
         if (UiUtil.permitted(UserRight.ENVIRONMENT_VIEW)) {
@@ -299,10 +299,10 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
             showEnvironmentSamplesCheckBox.setCaption(I18nProperties.getCaption(Captions.sampleDashboardShowEnvironmentSamples));
             showEnvironmentSamplesCheckBox.setValue(showEnvironmentalSamples); // Use the correct state!
             showEnvironmentSamplesCheckBox.addValueChangeListener(e -> {
-                showEnvironmentalSamples = (boolean) e.getProperty().getValue();
+                showEnvironmentalSamples = (boolean) e.getValue();
                 refreshMap(true);
             });
-            layersLayout.addComponent(showEnvironmentSamplesCheckBox);
+            layersLayout.add(showEnvironmentSamplesCheckBox);
         }
     }
 
@@ -319,20 +319,20 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
 
         HorizontalLayout samplesLegendLayout = new HorizontalLayout();
         samplesLegendLayout.setSpacing(false);
-        samplesLegendLayout.setMargin(false);
+        samplesLegendLayout.setPadding(false);
 
         if (shouldShowCaseSamples()) {
             HorizontalLayout legendEntry =
                 buildMarkerLegendEntry(MarkerIcon.SAMPLE_CASE, I18nProperties.getCaption(Captions.sampleDashboardCaseSamples));
             CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-            samplesLegendLayout.addComponent(legendEntry);
+            samplesLegendLayout.add(legendEntry);
         }
 
         if (shouldShowContactSamples()) {
             HorizontalLayout legendEntry =
                 buildMarkerLegendEntry(MarkerIcon.SAMPLE_CONTACT, I18nProperties.getCaption(Captions.sampleDashboardContactSamples));
             CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-            samplesLegendLayout.addComponent(legendEntry);
+            samplesLegendLayout.add(legendEntry);
         }
 
         if (shouldShowEventParticipantSamples()) {
@@ -340,13 +340,13 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
                 MarkerIcon.SAMPLE_EVENT_PARTICIPANT,
                 I18nProperties.getCaption(Captions.sampleDashboardEventParticipantSamples));
             CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-            samplesLegendLayout.addComponent(legendEntry);
+            samplesLegendLayout.add(legendEntry);
         }
 
         if (showEnvironmentalSamples) {
             HorizontalLayout legendEntry =
                 buildMarkerLegendEntry(MarkerIcon.SAMPLE_ENVIRONMENT, I18nProperties.getCaption(Captions.sampleDashboardEnvironmentsSamples));
-            samplesLegendLayout.addComponent(legendEntry);
+            samplesLegendLayout.add(legendEntry);
         }
 
         return Collections.singletonList(samplesLegendLayout);

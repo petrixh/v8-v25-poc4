@@ -18,8 +18,6 @@ package de.symeda.sormas.ui.dashboard.sample;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
-import com.vaadin.server.Page;
-import com.vaadin.ui.Notification;
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.dashboard.SampleDashboardCriteria;
 import de.symeda.sormas.api.dashboard.sample.SampleShipmentStatus;
@@ -33,6 +31,7 @@ import de.symeda.sormas.api.sample.SampleMaterial;
 import de.symeda.sormas.api.sample.SamplePurpose;
 import de.symeda.sormas.api.sample.SpecimenCondition;
 import de.symeda.sormas.ui.dashboard.AbstractDashboardDataProvider;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 public class SampleDashboardDataProvider extends AbstractDashboardDataProvider<SampleDashboardCriteria> {
 
@@ -64,11 +63,11 @@ public class SampleDashboardDataProvider extends AbstractDashboardDataProvider<S
 		SampleDashboardCriteria sampleDashboardCriteria = buildDashboardCriteriaWithDates();
 		// Invalid combination disease with environment
 		if (sampleDashboardCriteria.getDisease() != null && sampleDashboardCriteria.getEnvironmentSampleMaterial() != null) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingSearchSample),
 				I18nProperties.getString(Strings.messageSampleSearchWithDisease),
-				Notification.Type.ERROR_MESSAGE,
-				false).show(Page.getCurrent());
+				NotificationHelper.Type.ERROR_MESSAGE,
+				false);
 			return;
 		}
 		// If the sampleCriteria is for Humans

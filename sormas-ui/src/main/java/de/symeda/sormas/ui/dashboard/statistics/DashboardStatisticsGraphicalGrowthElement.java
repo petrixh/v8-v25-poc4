@@ -17,77 +17,77 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.dashboard.statistics;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 @SuppressWarnings("serial")
 public class DashboardStatisticsGraphicalGrowthElement extends VerticalLayout {
 
 	private SvgBarElement svgBarElement;
-	private Label countLabel;
-	private Label growthLabel;
-	private Label percentageLabel;
+	private Span countLabel;
+	private Span growthLabel;
+	private Span percentageLabel;
 
 	public DashboardStatisticsGraphicalGrowthElement(String caption, String svgFillClass) {
-		this.setMargin(false);
+		this.setPadding(false);
 		this.setSpacing(false);
 
 		HorizontalLayout captionAndValueLayout = new HorizontalLayout();
-		captionAndValueLayout.setMargin(false);
+		captionAndValueLayout.setPadding(false);
 		captionAndValueLayout.setSpacing(false);
 		captionAndValueLayout.setWidth(100, Unit.PERCENTAGE);
 
-		Label captionLabel = new Label(caption);
+		Span captionLabel = new Span(caption);
 		CssStyles.style(captionLabel, CssStyles.LABEL_SECONDARY, CssStyles.LABEL_BOLD);
-		captionAndValueLayout.addComponent(captionLabel);
+		captionAndValueLayout.add(captionLabel);
 
-		countLabel = new Label();
+		countLabel = new Span();
 		CssStyles.style(countLabel, CssStyles.LABEL_PRIMARY, CssStyles.LABEL_BOLD, CssStyles.HSPACE_RIGHT_4);
-		countLabel.setWidthUndefined();
-		captionAndValueLayout.addComponent(countLabel);
-		growthLabel = new Label();
-		growthLabel.setHeightUndefined();
-		growthLabel.setWidthUndefined();
-		growthLabel.setContentMode(ContentMode.HTML);
+		countLabel.setWidth(null);
+		captionAndValueLayout.add(countLabel);
+		growthLabel = new Span();
+		growthLabel.setHeight(null);
+		growthLabel.setWidth(null);
 		CssStyles.style(growthLabel, CssStyles.LABEL_SMALL, CssStyles.LABEL_PRIMARY, CssStyles.LABEL_BOLD, CssStyles.HSPACE_RIGHT_4);
-		captionAndValueLayout.addComponent(growthLabel);
-		percentageLabel = new Label();
+		captionAndValueLayout.add(growthLabel);
+		percentageLabel = new Span();
 		CssStyles.style(percentageLabel, CssStyles.LABEL_PRIMARY, CssStyles.LABEL_BOLD);
-		percentageLabel.setWidthUndefined();
-		captionAndValueLayout.addComponent(percentageLabel);
+		percentageLabel.setWidth(null);
+		captionAndValueLayout.add(percentageLabel);
 
-		captionAndValueLayout.setComponentAlignment(captionLabel, Alignment.MIDDLE_LEFT);
-		captionAndValueLayout.setComponentAlignment(countLabel, Alignment.MIDDLE_RIGHT);
-		captionAndValueLayout.setComponentAlignment(growthLabel, Alignment.MIDDLE_RIGHT);
-		captionAndValueLayout.setComponentAlignment(percentageLabel, Alignment.MIDDLE_RIGHT);
-		captionAndValueLayout.setExpandRatio(captionLabel, 1);
+		// was MIDDLE_LEFT for the caption and MIDDLE_RIGHT for the values; the caption's slot grows, so the values sit at the right
+		captionAndValueLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, captionLabel, countLabel, growthLabel, percentageLabel);
+		captionAndValueLayout.setFlexGrow(1, captionLabel);
 
-		addComponent(captionAndValueLayout);
+		add(captionAndValueLayout);
 
 		svgBarElement = new SvgBarElement(svgFillClass);
 		svgBarElement.setWidth(100, Unit.PERCENTAGE);
-		addComponent(svgBarElement);
+		add(svgBarElement);
 	}
 
 	public void update(int count, int percentage, int growthPercentage, boolean increaseIsPositive, boolean showPercentage) {
-		countLabel.setValue(count + (showPercentage ? " (" + percentage + " %)" : ""));
+		countLabel.setText(count + (showPercentage ? " (" + percentage + " %)" : ""));
 		svgBarElement.updateSvg(percentage);
-		percentageLabel.setValue(growthPercentage != Integer.MIN_VALUE ? (growthPercentage + " %") : "");
+		percentageLabel.setText(growthPercentage != Integer.MIN_VALUE ? (growthPercentage + " %") : "");
 		CssStyles.removeStyles(growthLabel, CssStyles.LABEL_CRITICAL, CssStyles.LABEL_POSITIVE, CssStyles.LABEL_IMPORTANT);
 		if (growthPercentage > 0) {
-			growthLabel.setValue(VaadinIcons.CHEVRON_UP.getHtml());
+			VaadinUiUtil.setLabelValue(growthLabel, HtmlRenderer.iconHtml(VaadinIcon.CHEVRON_UP), ContentMode.HTML);
 			CssStyles.style(growthLabel, increaseIsPositive ? CssStyles.LABEL_POSITIVE : CssStyles.LABEL_CRITICAL);
 		} else if (growthPercentage < 0) {
-			growthLabel.setValue(VaadinIcons.CHEVRON_DOWN.getHtml());
+			VaadinUiUtil.setLabelValue(growthLabel, HtmlRenderer.iconHtml(VaadinIcon.CHEVRON_DOWN), ContentMode.HTML);
 			CssStyles.style(growthLabel, increaseIsPositive ? CssStyles.LABEL_CRITICAL : CssStyles.LABEL_POSITIVE);
 		} else {
-			growthLabel.setValue(VaadinIcons.CHEVRON_RIGHT.getHtml());
+			VaadinUiUtil.setLabelValue(growthLabel, HtmlRenderer.iconHtml(VaadinIcon.CHEVRON_RIGHT), ContentMode.HTML);
 			CssStyles.style(growthLabel, CssStyles.LABEL_IMPORTANT);
 		}
 	}

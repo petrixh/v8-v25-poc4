@@ -33,6 +33,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.opencsv.CSVWriter;
 import com.vaadin.flow.component.ComponentUtil;
@@ -61,6 +63,8 @@ import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 @SuppressWarnings("serial")
 public class GridExportStreamResource {
 
+	private static final Logger logger = LoggerFactory.getLogger(GridExportStreamResource.class);
+
 	private static final String EXPORT_VALUE_PROVIDER = GridExportStreamResource.class.getName() + ".valueProvider";
 
 	/**
@@ -74,7 +78,7 @@ public class GridExportStreamResource {
 
 	/**
 	 * @return the registered value provider of the column, else the getter of the bean property named like the column
-	 *         key, else a provider of {@code null}
+	 *         key, else a provider of {@code null} (logged as a warning: the column exports empty cells)
 	 */
 	@SuppressWarnings({
 		"unchecked",
@@ -96,6 +100,11 @@ public class GridExportStreamResource {
 				// not a bean property path
 			}
 		}
+		logger.warn(
+			"Grid export: column '{}' of grid {} has no export value provider and is not a bean property; it is exported empty. "
+				+ "Register one with GridExportStreamResource.setExportValueProvider",
+			column.getKey(),
+			grid.getClass().getName());
 		return row -> null;
 	}
 

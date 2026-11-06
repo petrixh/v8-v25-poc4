@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.ui.utils.processing;
 
-import com.vaadin.server.Sizeable;
+import com.vaadin.flow.component.Unit;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.feature.FeatureType;
@@ -54,8 +54,8 @@ public final class ProcessingUiHelper {
 		HandlerCallback<PickOrCreateEntryResult> callback) {
 
 		final CommitDiscardWrapperComponent<EntrySelectionComponent> commitDiscardComponent = new CommitDiscardWrapperComponent<>(entrySelectionComponent);
-		commitDiscardComponent.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionConfirm));
-		commitDiscardComponent.setWidth(1280, Sizeable.Unit.PIXELS);
+		commitDiscardComponent.getCommitButton().setText(I18nProperties.getCaption(Captions.actionConfirm));
+		commitDiscardComponent.setWidth(1280, Unit.PIXELS);
 
 		commitDiscardComponent.addCommitListener(() -> callback.done(entrySelectionComponent.getSelectionResult()));
 		commitDiscardComponent.addDiscardListener(callback::cancel);

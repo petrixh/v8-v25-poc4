@@ -64,8 +64,23 @@ public class ComboBox extends com.vaadin.flow.component.combobox.ComboBox<Object
 		addCustomValueSetListener(e -> {
 			if (newItemHandler != null) {
 				newItemHandler.addNewItem(e.getDetail());
+			} else {
+				addNewItemDefault(e.getDetail());
 			}
 		});
+	}
+
+	/**
+	 * V7 {@code AbstractSelect.DefaultNewItemHandler}: adds the typed text as a new item and selects it. A read-only
+	 * combo box takes no new items (V7 threw a {@code ReadOnlyException}).
+	 */
+	private void addNewItemDefault(String newItemCaption) {
+		if (isReadOnly()) {
+			return;
+		}
+		if (addItem(newItemCaption) != null) {
+			setValue(newItemCaption);
+		}
 	}
 
 	private boolean matchesFilter(Object item, String filterText) {

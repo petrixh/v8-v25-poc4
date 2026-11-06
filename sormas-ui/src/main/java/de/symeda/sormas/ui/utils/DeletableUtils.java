@@ -5,13 +5,10 @@ import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.server.UserError;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 
 import de.symeda.sormas.api.common.DeletionDetails;
 import de.symeda.sormas.api.common.DeletionReason;
@@ -24,25 +21,27 @@ public class DeletableUtils {
 
 	public static void showDeleteWithReasonPopup(String message, Consumer<DeletionDetails> handler) {
 		VerticalLayout verticalLayout = new VerticalLayout();
-		verticalLayout.setMargin(false);
+		verticalLayout.setPadding(false);
 
-		Label contentLabel = new Label(message, ContentMode.HTML);
-		contentLabel.addStyleName(CssStyles.LABEL_WHITE_SPACE_NORMAL);
+		Span contentLabel = VaadinUiUtil.createLabel(message, ContentMode.HTML);
+		contentLabel.addClassName(CssStyles.LABEL_WHITE_SPACE_NORMAL);
 		contentLabel.setWidthFull();
-		verticalLayout.addComponent(contentLabel);
+		verticalLayout.add(contentLabel);
 
-		ComboBox<DeletionReason> deleteReasonComboBox = new ComboBox(null, Arrays.asList(DeletionReason.values()));
-		deleteReasonComboBox.setCaption(I18nProperties.getCaption(Captions.deletionReason));
-		deleteReasonComboBox.setWidth(100, Sizeable.Unit.PERCENTAGE);
+		ComboBox<DeletionReason> deleteReasonComboBox = new ComboBox<>(null, Arrays.asList(DeletionReason.values()));
+		deleteReasonComboBox.setLabel(I18nProperties.getCaption(Captions.deletionReason));
+		deleteReasonComboBox.setWidthFull();
 		deleteReasonComboBox.setRequiredIndicatorVisible(true);
 
-		verticalLayout.addComponent(deleteReasonComboBox);
+		verticalLayout.add(deleteReasonComboBox);
 		TextArea otherDeletionReason = new TextArea();
-		otherDeletionReason.setCaption(I18nProperties.getCaption(Captions.otherDeletionReason));
-		verticalLayout.addComponent(otherDeletionReason);
+		otherDeletionReason.setLabel(I18nProperties.getCaption(Captions.otherDeletionReason));
+		verticalLayout.add(otherDeletionReason);
 		otherDeletionReason.setVisible(false);
-		otherDeletionReason.setWidth(100, Sizeable.Unit.PERCENTAGE);
-		otherDeletionReason.setRows(3);
+		otherDeletionReason.setWidthFull();
+		// was setRows(3)
+		otherDeletionReason.setMinRows(3);
+		otherDeletionReason.setMaxRows(3);
 		otherDeletionReason.setMaxLength(FieldConstraints.CHARACTER_LIMIT_TEXT);
 
 		otherDeletionReason.setRequiredIndicatorVisible(true);
@@ -53,17 +52,19 @@ public class DeletableUtils {
 
 		deleteReasonComboBox.addValueChangeListener(valueChangeEvent -> {
 			if (deleteReasonComboBox.isEmpty()) {
-				deleteReasonComboBox.setComponentError(new UserError(I18nProperties.getString(Strings.messageDeleteReasonNotFilled)));
+				deleteReasonComboBox.setErrorMessage(I18nProperties.getString(Strings.messageDeleteReasonNotFilled));
+				deleteReasonComboBox.setInvalid(true);
 			} else {
-				deleteReasonComboBox.setComponentError(null);
+				deleteReasonComboBox.setInvalid(false);
 			}
 		});
 
 		otherDeletionReason.addValueChangeListener(valueChangeEvent -> {
 			if (deleteReasonComboBox.getValue() == DeletionReason.OTHER_REASON && StringUtils.isBlank(otherDeletionReason.getValue())) {
-				otherDeletionReason.setComponentError(new UserError(I18nProperties.getString(Strings.messageOtherDeleteReasonNotFilled)));
+				otherDeletionReason.setErrorMessage(I18nProperties.getString(Strings.messageOtherDeleteReasonNotFilled));
+				otherDeletionReason.setInvalid(true);
 			} else {
-				otherDeletionReason.setComponentError(null);
+				otherDeletionReason.setInvalid(false);
 			}
 		});
 
@@ -76,11 +77,13 @@ public class DeletableUtils {
 			confirmed -> {
 				if (Boolean.TRUE.equals(confirmed)) {
 					if (deleteReasonComboBox.isEmpty()) {
-						deleteReasonComboBox.setComponentError(new UserError(I18nProperties.getString(Strings.messageDeleteReasonNotFilled)));
+						deleteReasonComboBox.setErrorMessage(I18nProperties.getString(Strings.messageDeleteReasonNotFilled));
+						deleteReasonComboBox.setInvalid(true);
 						return false;
 					} else if (deleteReasonComboBox.getValue() == DeletionReason.OTHER_REASON
 						&& StringUtils.isBlank(otherDeletionReason.getValue())) {
-						otherDeletionReason.setComponentError(new UserError(I18nProperties.getString(Strings.messageOtherDeleteReasonNotFilled)));
+						otherDeletionReason.setErrorMessage(I18nProperties.getString(Strings.messageOtherDeleteReasonNotFilled));
+						otherDeletionReason.setInvalid(true);
 						return false;
 					}
 

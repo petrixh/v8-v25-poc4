@@ -21,9 +21,10 @@ import java.util.function.Consumer;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.utils.dataprocessing.PickOrCreateEntryResult;
@@ -54,7 +55,7 @@ public abstract class EntrySelectionComponent extends VerticalLayout {
 		this.propertyI18nPrefix = propertyI18nPrefix;
 
 		setSpacing(true);
-		setMargin(false);
+		setPadding(false);
 		setSizeUndefined();
 	}
 
@@ -64,16 +65,16 @@ public abstract class EntrySelectionComponent extends VerticalLayout {
 
 		entrySelectionField = new EntrySelectionField(selectableOptions);
 		entrySelectionField.setSizeFull();
-		addComponent(entrySelectionField);
+		add(entrySelectionField);
 	}
 
 	private void addInfoComponent() {
 		if (CollectionUtils.isNotEmpty(getSelectableItems(EntrySelectionField.OptionType.SELECT_CASE))
 			|| CollectionUtils.isNotEmpty(getSelectableItems(EntrySelectionField.OptionType.SELECT_CONTACT))
 			|| CollectionUtils.isNotEmpty(getSelectableItems(EntrySelectionField.OptionType.SELECT_EVENT_PARTICIPANT))) {
-			addComponent(VaadinUiUtil.createInfoComponent(I18nProperties.getString(infoSelectOrCreateString)));
+			add(VaadinUiUtil.createInfoComponent(I18nProperties.getString(infoSelectOrCreateString)));
 		} else {
-			addComponent(VaadinUiUtil.createInfoComponent(I18nProperties.getString(infoCreateString)));
+			add(VaadinUiUtil.createInfoComponent(I18nProperties.getString(infoCreateString)));
 		}
 	}
 
@@ -83,20 +84,23 @@ public abstract class EntrySelectionComponent extends VerticalLayout {
 
 		createAndAddSearchFieldComponents();
 
-		addComponent(searchDetailsLayout);
+		add(searchDetailsLayout);
 	}
 
 	protected abstract void createAndAddSearchFieldComponents();
 
 	protected void createAndAddSearchDetailLabel(Object value, String property) {
-		Label label = new Label();
+		Span label = new Span();
 		if (value != null) {
-			label.setValue(value.toString());
+			label.setText(value.toString());
 		}
-		label.setCaption(I18nProperties.getPrefixCaption(propertyI18nPrefix, property));
-		label.setWidthUndefined();
+		// Flow components have no caption: the caption goes above the label, as Vaadin 8 rendered it
+		Span caption = new Span(I18nProperties.getPrefixCaption(propertyI18nPrefix, property));
+		caption.addClassName("v-caption");
+		Div captionedLabel = new Div(caption, new Div(label));
+		captionedLabel.setWidth(null);
 
-		searchDetailsLayout.addComponent(label);
+		searchDetailsLayout.add(captionedLabel);
 	}
 
 	private List<?> getSelectableItems(EntrySelectionField.OptionType optionType) {

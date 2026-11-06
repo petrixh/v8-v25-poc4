@@ -25,12 +25,11 @@ import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.data.provider.Query;
-import com.vaadin.ui.AbstractLayout;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.RadioButtonGroup;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.customfield.CustomField;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 
 import de.symeda.sormas.api.caze.CaseSelectionDto;
 import de.symeda.sormas.api.contact.SimilarContactDto;
@@ -62,13 +61,14 @@ public class EntrySelectionField extends CustomField<PickOrCreateEntryResult> {
 	public EntrySelectionField(Options selectableOptions) {
 		super();
 		this.selectableOptions = selectableOptions;
+		// Vaadin 8 built the content on first attach; a Flow custom field holds it from the start
+		add(initContent());
 	}
 
-	@Override
 	protected Component initContent() {
 		VerticalLayout mainLayout = new VerticalLayout();
 		mainLayout.setSpacing(true);
-		mainLayout.setMargin(false);
+		mainLayout.setPadding(false);
 		mainLayout.setSizeFull();
 
 		for (Option<?> option : selectableOptions.selectableOptions) {
@@ -104,7 +104,7 @@ public class EntrySelectionField extends CustomField<PickOrCreateEntryResult> {
 	}
 
 	@Override
-	protected void doSetValue(PickOrCreateEntryResult pickOrCreateEntryResult) {
+	protected void setPresentationValue(PickOrCreateEntryResult pickOrCreateEntryResult) {
 		if (pickOrCreateEntryResult == null) {
 			throw new IllegalArgumentException();
 		}
@@ -122,18 +122,26 @@ public class EntrySelectionField extends CustomField<PickOrCreateEntryResult> {
 	}
 
 	@Override
+	protected PickOrCreateEntryResult generateModelValue() {
+		return getValue();
+	}
+
+	/**
+	 * As in Vaadin 8, the value is read from the current selection, not from a stored model value.
+	 */
+	@Override
 	public PickOrCreateEntryResult getValue() {
 		if (caseGrid != null && rbSelectCase.getValue() != null) {
 			PickOrCreateEntryResult value = new PickOrCreateEntryResult();
-			value.setCaze((CaseSelectionDto) caseGrid.getSelectedRow());
+			value.setCaze((CaseSelectionDto) getSelectedRow(caseGrid));
 			return value;
 		} else if (contactGrid != null && rbSelectContact.getValue() != null) {
 			PickOrCreateEntryResult value = new PickOrCreateEntryResult();
-			value.setContact((SimilarContactDto) contactGrid.getSelectedRow());
+			value.setContact((SimilarContactDto) getSelectedRow(contactGrid));
 			return value;
 		} else if (eventParticipantGrid != null && rbSelectEventParticipant.getValue() != null) {
 			PickOrCreateEntryResult value = new PickOrCreateEntryResult();
-			value.setEventParticipant((SimilarEventParticipantDto) eventParticipantGrid.getSelectedRow());
+			value.setEventParticipant((SimilarEventParticipantDto) getSelectedRow(eventParticipantGrid));
 			return value;
 		} else if (OptionType.CREATE_CASE.equals(rbCreateEntity.getValue())) {
 			PickOrCreateEntryResult value = new PickOrCreateEntryResult();
@@ -155,10 +163,17 @@ public class EntrySelectionField extends CustomField<PickOrCreateEntryResult> {
 		this.selectionChangeCallback = selectionChangeCallback;
 	}
 
-	private void addSelectCaseRadioGroup(AbstractLayout mainLayout) {
+	/**
+	 * Was the V7 grid's {@code getSelectedRow()}.
+	 */
+	private static Object getSelectedRow(Grid<?> grid) {
+		return grid.getSelectedItems().stream().findFirst().orElse(null);
+	}
+
+	private void addSelectCaseRadioGroup(VerticalLayout mainLayout) {
 		rbSelectCase = new RadioButtonGroup<>();
 		rbSelectCase.setItems(OptionType.SELECT_CASE);
-		rbSelectCase.setItemCaptionGenerator(item -> I18nProperties.getCaption(Captions.caseSelect));
+		rbSelectCase.setItemLabelGenerator(item -> I18nProperties.getCaption(Captions.caseSelect));
 		CssStyles.style(rbSelectCase, CssStyles.VSPACE_NONE);
 		rbSelectCase.addValueChangeListener(e -> {
 			if (e.getValue() != null) {
@@ -166,7 +181,7 @@ public class EntrySelectionField extends CustomField<PickOrCreateEntryResult> {
 				caseGrid.setEnabled(true);
 
 				if (selectionChangeCallback != null) {
-					selectionChangeCallback.accept(caseGrid.getSelectedRow() != null);
+					selectionChangeCallback.accept(getSelectedRow(caseGrid) != null);
 				}
 			} else {
 				caseGrid.deselectAll();
@@ -174,28 +189,28 @@ public class EntrySelectionField extends CustomField<PickOrCreateEntryResult> {
 			}
 		});
 
-		mainLayout.addComponent(rbSelectCase);
+		mainLayout.add(rbSelectCase);
 	}
 
-	private void addCaseGrid(List<CaseSelectionDto> cases, AbstractLayout mainLayout) {
+	private void addCaseGrid(List<CaseSelectionDto> cases, VerticalLayout mainLayout) {
 		caseGrid = new CaseSelectionGrid(cases);
 		caseGrid.addSelectionListener(e -> {
-			if (!e.getSelected().isEmpty()) {
+			if (!e.getAllSelectedItems().isEmpty()) {
 				onRadioSelected(rbSelectCase);
 			}
 
 			if (selectionChangeCallback != null) {
-				selectionChangeCallback.accept(!e.getSelected().isEmpty());
+				selectionChangeCallback.accept(!e.getAllSelectedItems().isEmpty());
 			}
 		});
 		caseGrid.setEnabled(false);
-		mainLayout.addComponent(caseGrid);
+		mainLayout.add(caseGrid);
 	}
 
-	private void addSelectContactRadioGroup(AbstractLayout mainLayout) {
+	private void addSelectContactRadioGroup(VerticalLayout mainLayout) {
 		rbSelectContact = new RadioButtonGroup<>();
 		rbSelectContact.setItems(OptionType.SELECT_CONTACT);
-		rbSelectContact.setItemCaptionGenerator(item -> I18nProperties.getCaption(Captions.contactSelect));
+		rbSelectContact.setItemLabelGenerator(item -> I18nProperties.getCaption(Captions.contactSelect));
 		CssStyles.style(rbSelectContact, CssStyles.VSPACE_NONE);
 		rbSelectContact.addValueChangeListener(e -> {
 			if (e.getValue() != null) {
@@ -203,7 +218,7 @@ public class EntrySelectionField extends CustomField<PickOrCreateEntryResult> {
 				contactGrid.setEnabled(true);
 
 				if (selectionChangeCallback != null) {
-					selectionChangeCallback.accept(contactGrid.getSelectedRow() != null);
+					selectionChangeCallback.accept(getSelectedRow(contactGrid) != null);
 				}
 			} else {
 				contactGrid.deselectAll();
@@ -211,28 +226,28 @@ public class EntrySelectionField extends CustomField<PickOrCreateEntryResult> {
 			}
 		});
 
-		mainLayout.addComponent(rbSelectContact);
+		mainLayout.add(rbSelectContact);
 	}
 
-	private void addContactGrid(List<SimilarContactDto> contacts, AbstractLayout mainLayout) {
+	private void addContactGrid(List<SimilarContactDto> contacts, VerticalLayout mainLayout) {
 		contactGrid = new ContactSelectionGrid(contacts);
 		contactGrid.addSelectionListener(e -> {
-			if (!e.getSelected().isEmpty()) {
+			if (!e.getAllSelectedItems().isEmpty()) {
 				onRadioSelected(rbSelectContact);
 			}
 
 			if (selectionChangeCallback != null) {
-				selectionChangeCallback.accept(!e.getSelected().isEmpty());
+				selectionChangeCallback.accept(!e.getAllSelectedItems().isEmpty());
 			}
 		});
 		contactGrid.setEnabled(false);
-		mainLayout.addComponent(contactGrid);
+		mainLayout.add(contactGrid);
 	}
 
-	private void addSelectEventParticipantRadioGroup(AbstractLayout mainLayout) {
+	private void addSelectEventParticipantRadioGroup(VerticalLayout mainLayout) {
 		rbSelectEventParticipant = new RadioButtonGroup<>();
 		rbSelectEventParticipant.setItems(OptionType.SELECT_EVENT_PARTICIPANT);
-		rbSelectEventParticipant.setItemCaptionGenerator(item -> I18nProperties.getCaption(Captions.eventParticipantSelect));
+		rbSelectEventParticipant.setItemLabelGenerator(item -> I18nProperties.getCaption(Captions.eventParticipantSelect));
 		CssStyles.style(rbSelectEventParticipant, CssStyles.VSPACE_NONE);
 		rbSelectEventParticipant.addValueChangeListener(e -> {
 			if (e.getValue() != null) {
@@ -240,7 +255,7 @@ public class EntrySelectionField extends CustomField<PickOrCreateEntryResult> {
 				eventParticipantGrid.setEnabled(true);
 
 				if (selectionChangeCallback != null) {
-					selectionChangeCallback.accept(eventParticipantGrid.getSelectedRow() != null);
+					selectionChangeCallback.accept(getSelectedRow(eventParticipantGrid) != null);
 				}
 			} else {
 				eventParticipantGrid.deselectAll();
@@ -248,28 +263,28 @@ public class EntrySelectionField extends CustomField<PickOrCreateEntryResult> {
 			}
 		});
 
-		mainLayout.addComponent(rbSelectEventParticipant);
+		mainLayout.add(rbSelectEventParticipant);
 	}
 
-	private void addEventParticipantGrid(List<SimilarEventParticipantDto> eventParticipants, AbstractLayout mainLayout) {
+	private void addEventParticipantGrid(List<SimilarEventParticipantDto> eventParticipants, VerticalLayout mainLayout) {
 		eventParticipantGrid = new EventParticipantSelectionGrid(eventParticipants);
 		eventParticipantGrid.addSelectionListener(e -> {
-			if (!e.getSelected().isEmpty()) {
+			if (!e.getAllSelectedItems().isEmpty()) {
 				onRadioSelected(rbSelectEventParticipant);
 			}
 
 			if (selectionChangeCallback != null) {
-				selectionChangeCallback.accept(!e.getSelected().isEmpty());
+				selectionChangeCallback.accept(!e.getAllSelectedItems().isEmpty());
 			}
 		});
 		eventParticipantGrid.setEnabled(false);
-		mainLayout.addComponent(eventParticipantGrid);
+		mainLayout.add(eventParticipantGrid);
 	}
 
-	private void addCreateEntityRadio(OptionType creationOptionType, AbstractLayout mainLayout) {
+	private void addCreateEntityRadio(OptionType creationOptionType, VerticalLayout mainLayout) {
 		if (rbCreateEntity == null) {
 			rbCreateEntity = new RadioButtonGroup<>();
-			rbCreateEntity.setItemCaptionGenerator((item) -> {
+			rbCreateEntity.setItemLabelGenerator((item) -> {
 				if (item == OptionType.CREATE_CASE) {
 					return I18nProperties.getCaption(Captions.caseCreateNew);
 				} else if (item == OptionType.CREATE_CONTACT) {
@@ -291,11 +306,11 @@ public class EntrySelectionField extends CustomField<PickOrCreateEntryResult> {
 			});
 			CssStyles.style(rbCreateEntity, CssStyles.OPTIONGROUP_HORIZONTAL_PRIMARY);
 
-			mainLayout.addComponent(rbCreateEntity);
+			mainLayout.add(rbCreateEntity);
 		}
 
 		rbCreateEntity.setItems(
-			Stream.concat(rbCreateEntity.getDataProvider().fetch(new Query<>()), Stream.of(creationOptionType)).collect(Collectors.toList()));
+			Stream.concat(rbCreateEntity.getGenericDataView().getItems(), Stream.of(creationOptionType)).collect(Collectors.toList()));
 	}
 
 	private void onRadioSelected(RadioButtonGroup<OptionType> radio) {

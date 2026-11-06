@@ -18,6 +18,7 @@
     { "username": "LabOff" },
     { "username": "HospInf" },
     { "username": "PoeSup" },
+    { "username": "NatClin" },
     { "username": "PoeInf", "expectWebLoginRefused": true }
   ]
 }

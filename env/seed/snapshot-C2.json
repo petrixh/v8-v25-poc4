@@ -6,8 +6,8 @@
   "appCommit": "688ce2975fd5ddfc43bc49611e1e7717af50820a",
   "pgDump": "pg_dump (PostgreSQL) 14.24 (Debian 14.24-1.pgdg13+2)",
   "file": "snapshot-C2.pgdump",
-  "bytes": 978873,
-  "sha256": "25bbd11892f3201767e6d5526ec313646fb5505b100de672e232f7b04b7b902f",
+  "bytes": 994772,
+  "sha256": "149405469f91d2c298d917b4926fc902e13590ca4a3da3bbd0db39188eb53395",
   "restSeed": "env/seed/seed.py",
   "devModeGenerator": {
     "user": "SurvSup",
@@ -23,7 +23,7 @@
     "dateRange": "the generator's default: 90 days before snapshotDate to snapshotDate"
   },
   "rowCounts": {
-    "person": 223,
+    "person": 224,
     "cases": 84,
     "contact": 131,
     "events": 13,
@@ -32,11 +32,27 @@
     "pathogentest": 1,
     "task": 53,
     "visit": 0,
-    "immunization": 1,
+    "immunization": 2,
     "travelentry": 1,
     "casesInvestigationPending": 50,
     "samplesAtLabResultPending": 40,
+    "eventgroups": 1,
+    "environments": 1,
+    "environmentsamples": 1,
+    "campaigns": 1,
+    "surveys": 1,
+    "surveytokens": 1,
+    "selfreports": 1,
+    "adverseevents": 1,
+    "adverseeventinvestigations": 1,
+    "continents": 6,
+    "subcontinents": 27,
+    "countries": 201,
     "tasksForSurvOff": 6,
     "tasksForSurvSup": 47
-  }
+  },
+  "extendedAt": "2026-11-06T08:10:59Z",
+  "extendNote": "Seed additions (env/seed/extend.sh) made on the snapshot of createdAt: dates relative to snapshotDate as the REST seed's; creation and change dates of the added records are those of extendedAt.",
+  "extendAppCommit": "5da5bfc06e11b66645cd95c5ae6dfd39754f8081",
+  "seedAdditions": "env/seed/extend.py, env/seed/extend.cjs"
 }

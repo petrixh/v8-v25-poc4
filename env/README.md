@@ -77,7 +77,9 @@ These scripts follow the replay runner's env-script contract (`up.sh [--no-build
    database to the template database `sormas_seed` (the reset point), starts the domain again and waits for 200. The
    copy is now in exactly the state `reset.sh` restores.
 
-`reset.sh` restores the database from `sormas_seed` and empties the mail sink. Modes (`APP_ENV_RESET_MODE`):
+`reset.sh` restores the database from `sormas_seed`, empties the mail sink and removes uploaded document templates
+(`/opt/sormas/custom/docgeneration` in the app container: their database rows go with the restore, the files would
+stay). Modes (`APP_ENV_RESET_MODE`):
 - `restart` (default): stops the Payara domain, restores, starts it. Nothing in memory survives: no sessions, no cached
   users, roles or infrastructure (Hibernate second-level cache).
 - `db`: restores the database while the app runs. Logged-in sessions and the cache survive; use it only when tests
@@ -122,13 +124,14 @@ Einreisen, Kampagnen, Self Reports, Surveys); `SurvSup` has all but environments
 
 `up.sh` loads the configuration's committed snapshot, `env/seed/snapshot-<C>.pgdump` (`pg_dump` custom format of
 `sormas_db`), with its metadata in `env/seed/snapshot-<C>.json`: snapshot date, app commit, generator settings, row
-counts and the dump's sha256. Each snapshot holds the small REST seed and, on top of it, data from SORMAS's own dev-mode
-generator. The new app restores the same files (its schema must match the old app's).
+counts and the dump's sha256. Each snapshot holds the small REST seed, on top of it data from SORMAS's own dev-mode
+generator, and on top of that the seed additions (one record for each detail view the other two leave empty). The new
+app restores the same files (its schema must match the old app's).
 
 | Snapshot | Snapshot date | Size | Cases (investigation pending) | Contacts | Events (participants) | Samples (at the lab, result pending) | Tasks (SurvOff / SurvSup) | Persons |
 |---|---|---|---|---|---|---|---|---|
-| C1 | 2026-11-05 | 0.96 MB | 84 (57) | 151 | 13 (85) | 41 (40) | 60 (6 / 54) | 232 |
-| C2 | 2026-11-05 | 0.96 MB | 84 (50) | 131 | 13 (76) | 41 (40) | 53 (6 / 47) | 223 |
+| C1 | 2026-11-05 | 0.97 MB | 84 (57) | 151 | 13 (85) | 41 (40) | 60 (6 / 54) | 232 |
+| C2 | 2026-11-05 | 0.97 MB | 84 (50) | 131 | 13 (76) | 41 (40) | 53 (6 / 47) | 224 |
 
 All records are in the default region and district (the only ones). `SurvSup` and `NatUser` see all of them, `SurvOff`
 those of the district, `LabOff` the samples at the default laboratory.
@@ -159,18 +162,40 @@ contacts of those cases, events with participants (some of them cases or contact
 default laboratory, with the generator's seed `sormasenv` and its default date range (90 days up to the snapshot date).
 The app adds tasks (e.g. case investigation, contact follow-up) for SurvOff and SurvSup by its own rules. Names are
 random combinations from the generator's built-in lists of fictitious first and last names. The generator does not make
-campaign, AEFI, environment, survey, self-report or travel-entry data: those views are empty in C2 apart from STRV01.
+event group, campaign, AEFI, environment, survey or self-report data: the seed additions below add one of each.
 
 The seed makes the generator's choices repeatable, but not the whole data set: UUIDs, creation times and a few values
 (additional test results) are random in the app, and generating again on another day moves all dates. The committed
 snapshot is therefore the fixed data set, not the generator run.
+
+**Seed additions** (`env/seed/extend.sh`): records neither the REST seed nor the generator makes, so that every detail
+view has a record to open, and the default infrastructure the app's own buttons load. Made on the snapshot above
+(same snapshot date) through the app: its REST API where it has an endpoint (`env/seed/extend.py`, fixed UUIDs), else
+its UI as a user would (`env/seed/extend.cjs`; the app sets the UUIDs). Dates are fixed days before the snapshot date.
+
+| Record | Values | In |
+|---|---|---|
+| Continents, subcontinents, countries | the app's default lists (6, 27, 201), loaded with "Import default continents / subcontinents / countries" as `admin` | C1, C2 |
+| Default point of entry | set active (the app creates it inactive) as `admin`, so it is offered in forms and shown without "(Inactive)" | C1, C2 |
+| Event group | SEGR01 "Seed event group", linked to the event the event directory lists first (newest change), so the directory's order stays the same | C1, C2 |
+| Environment | SENV01 "Seed environment: village well" (water, groundwater, investigation pending), with environment sample SESA01 (water, at the default laboratory, received) | C2 |
+| Immunization | SIMM02: India `Seedperson` (SPER09), COVID-19, one vaccination (SVAC01, COMIRNATY) | C2 |
+| Adverse event | report SEED-AEFI-01 on SIMM02 (serious, hospitalization, fever, recovered) with investigation SEED-INV-01 | C2 |
+| Campaign | "Seed campaign: vaccination drive", 30 days before to 30 days after the snapshot date, no form | C2 |
+| Survey | "Seed survey: symptom follow-up" (COVID-19) with one imported token `SEEDTOKEN01` | C2 |
+| Self report | Juliett `Seedperson`, case, COVID-19, imported from CSV | C2 |
+
+The features of the C2-only records are off in C1. The campaign form data view (`campaign/campaigndata/dataform`) still
+has no record: it needs a campaign form definition, which SORMAS does not ship.
 
 **Make a new snapshot** (for example after a schema change, or to move the dates), per configuration:
 
 ```sh
 APP_ENV_CONFIG=C1 APP_ENV_PORT=18081 APP_ENV_PROJECT=sormas-old-gen-c1 env/seed/generate.sh --no-build
 APP_ENV_CONFIG=C2 APP_ENV_PORT=18082 APP_ENV_PROJECT=sormas-old-gen-c2 env/seed/generate.sh --no-build
-# check the counts it prints, look at the data, then commit env/seed/snapshot-C1.* and snapshot-C2.*
+APP_ENV_CONFIG=C1 APP_ENV_PORT=18081 APP_ENV_PROJECT=sormas-old-gen-c1 env/seed/extend.sh
+APP_ENV_CONFIG=C2 APP_ENV_PORT=18082 APP_ENV_PROJECT=sormas-old-gen-c2 env/seed/extend.sh
+# check the counts they print, look at the data, then commit env/seed/snapshot-C1.* and snapshot-C2.*
 ```
 
 `generate.sh` starts a copy with `APP_ENV_SEED=rest` (fresh database, REST seed, the configuration's feature switches),
@@ -180,6 +205,14 @@ and samples within the user's jurisdiction, and `admin`, the only default user w
 for the run `generate.sh` gives SurvSup's role the `DEV_MODE` right and removes it again before the dump (the role's
 history table `userroles_userrights_history` keeps one row of it). It needs Node and Playwright as the smoke check does. The copy stays up in the new
 snapshot's state; remove it with `down.sh`.
+
+`extend.sh` adds the seed additions to a copy that holds the committed snapshot (started with `up.sh`, unchanged; it
+refuses a copy that already has an event group), stops the app and writes the dump and the metadata again: the snapshot
+date stays, `extendedAt` records when. To add them to the current snapshot without regenerating it, start a copy with
+`up.sh --no-build` and run `extend.sh` on it (about 1 min for C1, 2 min for C2). It needs Node and Playwright as the
+smoke check does. Running `extend.sh` again does not reproduce the UUIDs or the creation and change times of the records
+made through the UI (campaign, survey and token, self report, adverse event and investigation): the committed snapshot
+is the fixed seed, not the script run.
 
 Set by the app, not by the seed: creation and change dates, epid numbers and the UUIDs of the default users and of the
 default facility, laboratory and point of entry. They are in the snapshot, so every copy started from the same
@@ -198,7 +231,7 @@ snapshot has the same row counts and UUIDs (checked for two C1 copies), and `res
 ## Smoke check
 
 `env/smoke.cjs` checks a running copy: each web test user in `env/smoke-users.json` (`admin`, `SurvSup`, `NatUser`,
-`SurvOff`, `LabOff`, `HospInf`, `PoeSup`) logs in, and the first view must load with no console or page error, no HTTP
+`SurvOff`, `LabOff`, `HospInf`, `PoeSup`, `NatClin`) logs in, and the first view must load with no console or page error, no HTTP
 response of 400 or more and no collapsed layout (a scroll height over 4 window heights). `PoeInf` must be refused by the
 web login ("Your user account does not have access to the web application"): its role has no web UI right. CI runs it
 after every build (`CI.md`).

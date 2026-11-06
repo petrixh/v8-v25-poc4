@@ -61,16 +61,7 @@ done
 
 domain stop
 role_right revoke
-counts=$(db_psql -d sormas_db -F= -c "SELECT 'person', count(*) FROM person UNION ALL SELECT 'cases', count(*) FROM cases
-  UNION ALL SELECT 'contact', count(*) FROM contact UNION ALL SELECT 'events', count(*) FROM events
-  UNION ALL SELECT 'eventparticipant', count(*) FROM eventparticipant UNION ALL SELECT 'samples', count(*) FROM samples
-  UNION ALL SELECT 'pathogentest', count(*) FROM pathogentest UNION ALL SELECT 'task', count(*) FROM task
-  UNION ALL SELECT 'visit', count(*) FROM visit UNION ALL SELECT 'immunization', count(*) FROM immunization
-  UNION ALL SELECT 'travelentry', count(*) FROM travelentry
-  UNION ALL SELECT 'casesInvestigationPending', count(*) FROM cases WHERE investigationstatus='PENDING' AND NOT deleted
-  UNION ALL SELECT 'samplesAtLabResultPending', count(*) FROM samples s JOIN facility f ON f.id=s.lab_id
-    WHERE f.type='LABORATORY' AND s.pathogentestresult='PENDING' AND NOT s.deleted
-  UNION ALL SELECT 'tasksFor' || u.username, count(*) FROM task t JOIN users u ON u.id=t.assigneeuser_id GROUP BY u.username")
+counts=$(snapshot_counts)
 c=$APP_ENV_PROJECT-db
 docker exec "$c" pg_dump -U postgres -Fc -Z 9 --no-owner --no-acl -f /tmp/snapshot.pgdump sormas_db || die "pg_dump failed"
 docker cp "$c:/tmp/snapshot.pgdump" "$SNAPSHOT_DUMP.part" >/dev/null && mv "$SNAPSHOT_DUMP.part" "$SNAPSHOT_DUMP"

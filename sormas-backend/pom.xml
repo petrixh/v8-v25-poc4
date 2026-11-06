@@ -288,6 +288,12 @@
 			<scope>test</scope>
 			<!-- Needed dependency for docx4j-JAXB-ReferenceImpl (javax XML Binding; domain lib on the server) -->
 		</dependency>
+		<dependency>
+			<groupId>org.eclipse.angus</groupId>
+			<artifactId>angus-mail</artifactId>
+			<scope>test</scope>
+			<!-- Jakarta Mail implementation for tests that create a mail Session (Payara module angus-mail on the server) -->
+		</dependency>
 
 		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>

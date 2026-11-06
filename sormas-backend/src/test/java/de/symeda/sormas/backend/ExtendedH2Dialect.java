@@ -6,6 +6,7 @@ import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 import org.hibernate.query.sqm.function.SqmFunctionRegistry;
 import org.hibernate.type.BasicType;
 import org.hibernate.type.BasicTypeReference;
+import org.hibernate.type.SqlTypes;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.type.spi.TypeConfiguration;
 
@@ -75,6 +76,15 @@ public class ExtendedH2Dialect extends H2Dialect {
 
 		BasicType<?> basicType = types.getBasicTypeRegistry().resolve(type);
 		registry.patternDescriptorBuilder(name, pattern).setInvariantType(basicType).setExactArgumentCount(argumentCount).register();
+	}
+
+	/**
+	 * Hibernate 6+ maps enums without {@code @Enumerated(STRING)} (ordinal) to TINYINT, which H2 does not know in PostgreSQL mode
+	 * (<em>Unknown data type: "TINYINT"</em> while the test schema is created). Hibernate 5 created them as integer columns.
+	 */
+	@Override
+	protected String columnType(int sqlTypeCode) {
+		return sqlTypeCode == SqlTypes.TINYINT ? "integer" : super.columnType(sqlTypeCode);
 	}
 
 	/**

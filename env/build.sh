@@ -1,9 +1,11 @@
 #!/bin/bash
 # Build the app and the runtime image, shared by all copies:
 #   1. mvn clean install -DskipTests on a clone of this checkout's committed HEAD (uncommitted changes are not built),
-#      Maven 3.9 on JDK 11 in a container (default profiles, no Android app)
+#      Maven 3.9 on JDK 21 in a container (default profiles, no Android app)
 #   2. collect the ear, the wars, the server libs and the setup files into $APP_ENV_STATE_DIR/build/deploy
 #   3. build the Payara image $APP_ENV_IMAGE (eclipse-temurin:11-jdk + the Payara zip from Maven Central, arm64 and amd64)
+# Until ticket 1a-22 the image is still Payara 5 on JDK 11, which cannot load the Java 21 classes built in step 1: the
+# build succeeds, the deployment fails (env/README.md, "Java 21 build, Payara 5 runtime").
 # Usually run by up.sh. Holds a lock so two copies never build at once.
 set -euo pipefail
 source "$(dirname "$0")/lib.sh"
@@ -32,7 +34,7 @@ mvn_run() { # mvn_run <name> <mvn args...>
     -w "$SRC/sormas-base" "$MVN_IMAGE" mvn -B -Dmaven.repo.local=/m2 "$@"
 }
 
-log "build: mvn clean install -DskipTests (JDK 11 container; log: $LOG)"
+log "build: mvn clean install -DskipTests (JDK 21 container; log: $LOG)"
 t0=$SECONDS
 mvn_run build clean install -DskipTests >> "$LOG" 2>&1 || die "maven build failed (log: $LOG)"
 for f in sormas-ear/target/sormas-ear.ear sormas-ui/target/sormas-ui.war sormas-rest/target/sormas-rest.war; do

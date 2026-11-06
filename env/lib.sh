@@ -32,7 +32,7 @@ APP_ENV_SEED=${APP_ENV_SEED:-snapshot}
 PAYARA_VERSION=5.2022.5
 PAYARA_ZIP_URL=https://repo1.maven.org/maven2/fish/payara/distributions/payara/$PAYARA_VERSION/payara-$PAYARA_VERSION.zip
 export APP_ENV_IMAGE=sormas-old-env-payara:$PAYARA_VERSION
-MVN_IMAGE=maven:3.9-eclipse-temurin-11
+MVN_IMAGE=maven:3.9-eclipse-temurin-21
 
 BUILD_DIR=$APP_ENV_STATE_DIR/build
 export APP_ENV_DEPLOY_DIR=$BUILD_DIR/deploy

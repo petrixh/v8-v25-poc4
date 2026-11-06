@@ -97,3 +97,25 @@ snapshot_load() {
     pg_restore -U postgres -d sormas_db --no-owner --no-acl --role=sormas_user --exit-on-error --single-transaction -L /tmp/snapshot.list /tmp/snapshot.pgdump &&
     rm -f /tmp/snapshot.pgdump /tmp/snapshot.list'
 }
+
+# Row counts of the seed data, "name=count" per line, for the snapshot metadata (env/seed/generate.sh, extend.sh)
+snapshot_counts() {
+  db_psql -d sormas_db -F= -c "SELECT 'person', count(*) FROM person UNION ALL SELECT 'cases', count(*) FROM cases
+  UNION ALL SELECT 'contact', count(*) FROM contact UNION ALL SELECT 'events', count(*) FROM events
+  UNION ALL SELECT 'eventparticipant', count(*) FROM eventparticipant UNION ALL SELECT 'samples', count(*) FROM samples
+  UNION ALL SELECT 'pathogentest', count(*) FROM pathogentest UNION ALL SELECT 'task', count(*) FROM task
+  UNION ALL SELECT 'visit', count(*) FROM visit UNION ALL SELECT 'immunization', count(*) FROM immunization
+  UNION ALL SELECT 'travelentry', count(*) FROM travelentry
+  UNION ALL SELECT 'casesInvestigationPending', count(*) FROM cases WHERE investigationstatus='PENDING' AND NOT deleted
+  UNION ALL SELECT 'samplesAtLabResultPending', count(*) FROM samples s JOIN facility f ON f.id=s.lab_id
+    WHERE f.type='LABORATORY' AND s.pathogentestresult='PENDING' AND NOT s.deleted
+  UNION ALL SELECT 'eventgroups', count(*) FROM eventgroups UNION ALL SELECT 'environments', count(*) FROM environments
+  UNION ALL SELECT 'environmentsamples', count(*) FROM environmentsamples UNION ALL SELECT 'campaigns', count(*) FROM campaigns
+  UNION ALL SELECT 'surveys', count(*) FROM surveys UNION ALL SELECT 'surveytokens', count(*) FROM surveytokens
+  UNION ALL SELECT 'selfreports', count(*) FROM selfreports
+  UNION ALL SELECT 'adverseevents', count(*) FROM adverseeventsfollowingimmunization
+  UNION ALL SELECT 'adverseeventinvestigations', count(*) FROM adverseeventsfollowingimmunizationinvestigation
+  UNION ALL SELECT 'continents', count(*) FROM continent UNION ALL SELECT 'subcontinents', count(*) FROM subcontinent
+  UNION ALL SELECT 'countries', count(*) FROM country
+  UNION ALL SELECT 'tasksFor' || u.username, count(*) FROM task t JOIN users u ON u.id=t.assigneeuser_id GROUP BY u.username"
+}

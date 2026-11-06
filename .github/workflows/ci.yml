@@ -78,10 +78,16 @@ jobs:
           java -version 2>&1 | head -1
           mvn -v | head -1
 
+      # The production frontend build of sormas-ui checks the Vaadin commercial licence (Rich Text
+      # Editor): the CI server key comes from the repository secret, as VAADIN_OFFLINE_KEY. Never echo it.
       - name: Build and test (mvn clean install, default profiles)
         if: steps.dedupe.outputs.skip != 'true'
         working-directory: sormas-base
-        run: mvn -B -ntp clean install
+        env:
+          VAADIN_OFFLINE_KEY: ${{ secrets.VAADIN_PRODMODE_CI_SERVER_KEY }}
+        run: |
+          [ -n "$VAADIN_OFFLINE_KEY" ] || echo "::warning::VAADIN_OFFLINE_KEY is empty (repository secret VAADIN_PRODMODE_CI_SERVER_KEY missing): the sormas-ui production frontend build fails its Vaadin licence check"
+          mvn -B -ntp clean install
 
       # Test counts per module in the job summary; fails when HistoryTablesTest did not run.
       - name: Test report

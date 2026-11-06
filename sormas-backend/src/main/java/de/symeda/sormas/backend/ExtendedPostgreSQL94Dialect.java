@@ -56,7 +56,8 @@ public class ExtendedPostgreSQL94Dialect extends PostgreSQLDialect {
 
 		// needed because of hibernate bug: https://hibernate.atlassian.net/browse/HHH-11938
 		registry.registerNamed("regexp_replace");
-		registry.registerNamed(ARRAY_TO_STRING);
+		// array_to_string returns text; without a type Hibernate 7 gives it the type of its first argument (an array)
+		registry.namedDescriptorBuilder(ARRAY_TO_STRING).setInvariantType(types.getBasicTypeRegistry().resolve(StandardBasicTypes.STRING)).register();
 		registry.namedDescriptorBuilder(CONCAT_FUNCTION, "concat").register();
 		registry.registerNamed(ARRAY_AGG);
 		pattern(registry, types, SIMILARITY_OPERATOR, StandardBasicTypes.BOOLEAN, "?1 % ?2", 2);

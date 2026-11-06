@@ -100,8 +100,8 @@ public abstract class QueryContext<ADO extends AbstractDomainObject, J extends Q
 		return pcdSubQuery;
 	}
 
-	protected Subquery<Object> phoneOwnerSubquery(From<?, Person> from) {
-		final Subquery<Object> phoneOwnerSubQuery = getQuery().subquery(Object.class);
+	protected Subquery<String> phoneOwnerSubquery(From<?, Person> from) {
+		final Subquery<String> phoneOwnerSubQuery = getQuery().subquery(String.class);
 		final Root<PersonContactDetail> phoneRoot = phoneOwnerSubQuery.from(PersonContactDetail.class);
 		CriteriaBuilder cb = getCriteriaBuilder();
 		phoneOwnerSubQuery.where(
@@ -110,8 +110,8 @@ public abstract class QueryContext<ADO extends AbstractDomainObject, J extends Q
 				cb.isTrue(phoneRoot.get(PersonContactDetail.PRIMARY_CONTACT)),
 				cb.equal(phoneRoot.get(PersonContactDetail.PERSON_CONTACT_DETAIL_TYPE), PersonContactDetailType.PHONE)));
 		phoneOwnerSubQuery.select(
-			cb.selectCase()
-				.when(cb.isTrue(phoneRoot.get(PersonContactDetail.THIRD_PARTY)), phoneRoot.get(PersonContactDetail.THIRD_PARTY_NAME))
+			cb.<String> selectCase()
+				.when(cb.isTrue(phoneRoot.get(PersonContactDetail.THIRD_PARTY)), phoneRoot.<String> get(PersonContactDetail.THIRD_PARTY_NAME))
 				.otherwise(cb.literal(I18nProperties.getCaption(Captions.personContactDetailThisPerson))));
 		return phoneOwnerSubQuery;
 	}

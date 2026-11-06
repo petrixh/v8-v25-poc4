@@ -20,8 +20,6 @@ package de.symeda.sormas.ui.security;
 
 import fish.payara.security.annotations.OpenIdAuthenticationDefinition;
 
-import jakarta.servlet.annotation.HttpConstraint;
-import jakarta.servlet.annotation.ServletSecurity;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,9 +31,12 @@ import java.io.IOException;
  *
  * @author Alex Vidrean
  * @see OpenIdAuthenticationDefinition#redirectURI()
+ *      <p>
+ *      No {@code @ServletSecurity(@HttpConstraint())} any more: it only marked this address as open, and any URL
+ *      constraint in this web module makes Payara 7 refuse the main servlet's root (E001). Nothing is protected by URL
+ *      now, so the address stays open.
  */
 @WebServlet(urlPatterns = { "/Callback" })
-@ServletSecurity(@HttpConstraint())
 public class CallbackServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 7429937658924321436L;

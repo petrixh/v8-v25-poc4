@@ -19,7 +19,8 @@ package de.symeda.sormas.ui.login;
 
 import java.util.List;
 
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.user.UserDto;
@@ -52,16 +53,26 @@ public class DefaultPasswordUIHelper {
 				boolean currentUserUsesDefaultPassword = DefaultEntityHelper.currentUserUsesDefaultPassword(usersWithDefaultPassword, currentUser);
 				boolean otherUsersWithDefaultPassword = DefaultEntityHelper.otherUsersUseDefaultPassword(usersWithDefaultPassword, currentUser);
 				if (currentUserUsesDefaultPassword) {
-					vaadinUI.addWindow(new ChangeDefaultUserPasswordWindow(otherUsersWithDefaultPassword ? () -> {
-						vaadinUI.addWindow(
+					addWindow(vaadinUI, new ChangeDefaultUserPasswordWindow(otherUsersWithDefaultPassword ? () -> {
+						addWindow(
+							vaadinUI,
 							new ChangeDefaultPasswordsWindow(originalLoginListener::loginSuccessful, without(usersWithDefaultPassword, currentUser)));
 					} : originalLoginListener::loginSuccessful, currentUser));
 				} else {
-					vaadinUI.addWindow(
+					addWindow(
+						vaadinUI,
 						new ChangeDefaultPasswordsWindow(originalLoginListener::loginSuccessful, without(usersWithDefaultPassword, currentUser)));
 				}
 			}
 		};
+	}
+
+	/**
+	 * Was {@code UI.addWindow(Window)}.
+	 */
+	private static void addWindow(UI vaadinUI, Dialog window) {
+		vaadinUI.add(window);
+		window.open();
 	}
 
 	private static List<UserDto> getUsersWithDefaultPassword() {

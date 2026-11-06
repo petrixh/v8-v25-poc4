@@ -21,6 +21,9 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.server.VaadinServletService;
 
+import de.symeda.sormas.ui.login.LoginHelper;
+import de.symeda.sormas.ui.login.LoginUI;
+
 /**
  * Runs {@link SormasUI#init} for every new UI of the main servlet ({@link SormasUI.SormasUIServlet}).
  * <p>
@@ -29,7 +32,9 @@ import com.vaadin.flow.server.VaadinServletService;
  * navigation, as {@code UI.init} did. Registered through {@code META-INF/services}: the main servlet is a plain
  * {@code VaadinServlet} (no CDI servlet, so a CDI-observed {@code ServiceInitEvent} would not be fired).
  * <p>
- * UIs of other Vaadin servlets in the war (the login servlet) are left alone: their users are not logged in yet.
+ * The login is a route of this servlet (E001): every UI gets the login check, and only the UI of a user who is logged
+ * in with the web UI right gets the main screen and the routes of the application. UIs of other Vaadin servlets in the
+ * war (none today) are left alone.
  */
 public class SormasUIInitListener implements VaadinServiceInitListener {
 
@@ -44,6 +49,15 @@ public class SormasUIInitListener implements VaadinServiceInitListener {
 			return;
 		}
 
-		service.addUIInitListener(uiInitEvent -> SormasUI.init(uiInitEvent.getUI(), VaadinRequest.getCurrent()));
+		service.addUIInitListener(uiInitEvent -> {
+			VaadinRequest request = VaadinRequest.getCurrent();
+			// every UI: the login route and the login check (was the container constraint on this servlet)
+			LoginUI.init(uiInitEvent.getUI(), request);
+			// the main screen and the routes of the main application only for a user who is logged in (E001); a user who
+			// logs in gets a new UI: the login page loads the application again
+			if (LoginHelper.isLoggedInToWebUi()) {
+				SormasUI.init(uiInitEvent.getUI(), request);
+			}
+		});
 	}
 }

@@ -22,11 +22,14 @@ import fish.payara.security.annotations.ClaimsDefinition;
 import fish.payara.security.annotations.LogoutDefinition;
 import fish.payara.security.annotations.OpenIdAuthenticationDefinition;
 import fish.payara.security.annotations.OpenIdProviderMetadata;
+import fish.payara.security.annotations.ProxyDefinition;
 import fish.payara.security.openid.api.DisplayType;
 import fish.payara.security.openid.api.OpenIdConstant;
 import fish.payara.security.openid.api.PromptType;
 
 import java.lang.annotation.Annotation;
+
+import jakarta.enterprise.inject.Vetoed;
 
 /**
  * Default implementation of  {@link OpenIdAuthenticationDefinition} to allow inline declaration.
@@ -36,6 +39,10 @@ import java.lang.annotation.Annotation;
  * @author Alex Vidrean
  * @since 12-Aug-20
  */
+// Not a CDI bean: OpenIdAuthenticationExtension creates it when no definition is given. With bean discovery "all"
+// (sormas-ui beans.xml) it would otherwise be a second OpenIdAuthenticationDefinition bean next to the one of the
+// OIDC connector 4.x, and the deployment fails (ambiguous dependency, probe 1a-30b).
+@Vetoed
 public class DefaultOpenIdAuthenticationDefinition implements OpenIdAuthenticationDefinition {
 
 	@Override
@@ -146,6 +153,28 @@ public class DefaultOpenIdAuthenticationDefinition implements OpenIdAuthenticati
 			@Override
 			public String callerGroupsClaim() {
 				return OpenIdConstant.GROUPS;
+			}
+		};
+	}
+
+	@Override
+	public ProxyDefinition proxyDefinition() {
+		// new in connector 4.x: no proxy, as before
+		return new ProxyDefinition() {
+
+			@Override
+			public Class<? extends Annotation> annotationType() {
+				return ProxyDefinition.class;
+			}
+
+			@Override
+			public String hostName() {
+				return "";
+			}
+
+			@Override
+			public String port() {
+				return "";
 			}
 		};
 	}

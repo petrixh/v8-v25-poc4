@@ -18,7 +18,7 @@ package de.symeda.sormas.ui.utils;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 public class DetailSubComponentWrapper extends VerticalLayout implements DirtyStateComponent {
 

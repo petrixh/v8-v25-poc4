@@ -12,12 +12,9 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.common.progress.ProcessedEntity;
@@ -31,6 +28,7 @@ import de.symeda.sormas.api.uuid.HasUuid;
 import de.symeda.sormas.ui.utils.components.progress.BulkProgressLayout;
 import de.symeda.sormas.ui.utils.components.progress.BulkProgressUpdateInfo;
 import de.symeda.sormas.ui.utils.components.progress.ProgressResult;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 
 public class BulkOperationHandler<T extends HasUuid> {
 
@@ -51,7 +49,7 @@ public class BulkOperationHandler<T extends HasUuid> {
 	private int ineligibleEntryCount;
 	private int eligibleEntryCount;
 	private boolean areIneligibleEntriesSelected = false;
-	private Window window;
+	private Dialog window;
 
 	private final String allEntriesProcessedMessageProperty;
 	private final String ineligibleEntriesNotProcessedMessageProperty;
@@ -133,7 +131,7 @@ public class BulkOperationHandler<T extends HasUuid> {
 						performBulkOperation(bulkOperationFunction, selectedEntries, entitiesToBeProcessed, bulkProgressLayout::updateProgress);
 
 					currentUI.access(() -> {
-						window.setClosable(true);
+						VaadinUiUtil.setClosable(window, true);
 
 						//all the selected items were ineligible
 						if (eligibleEntryCount == 0 && successfulEntryCount == 0) {
@@ -249,7 +247,7 @@ public class BulkOperationHandler<T extends HasUuid> {
 
 		if (eligibleEntryCount == 0 && successfulEntryCount == 0) {
 			//all the selected items were ineligible
-			NotificationHelper.showNotification(I18nProperties.getString(noEligibleEntityMessageProperty), Notification.Type.WARNING_MESSAGE, -1);
+			NotificationHelper.showNotification(I18nProperties.getString(noEligibleEntityMessageProperty), Type.WARNING_MESSAGE, -1);
 			return;
 		}
 
@@ -263,16 +261,16 @@ public class BulkOperationHandler<T extends HasUuid> {
 		if (eligibleEntryCount > successfulEntryCount) {
 			String description = buildDescription(ineligibleEntriesDescription, processedEntities);
 
-			Window response = VaadinUiUtil.showSimplePopupWindow(heading, description, ContentMode.HTML);
-			response.setWidth(600, Sizeable.Unit.PIXELS);
+			Dialog response = VaadinUiUtil.showSimplePopupWindow(heading, description, ContentMode.HTML);
+			response.setWidth("600px");
 		} else {
 			if (areIneligibleEntriesSelected) {
-				Window response = VaadinUiUtil.showSimplePopupWindow(heading, ineligibleEntriesDescription, ContentMode.HTML);
-				response.setWidth(600, Sizeable.Unit.PIXELS);
+				Dialog response = VaadinUiUtil.showSimplePopupWindow(heading, ineligibleEntriesDescription, ContentMode.HTML);
+				response.setWidth("600px");
 			} else {
 				//all the selected eligible entities were processed
 				NotificationHelper
-					.showNotification(I18nProperties.getString(allEntriesProcessedMessageProperty), Notification.Type.HUMANIZED_MESSAGE, -1);
+					.showNotification(I18nProperties.getString(allEntriesProcessedMessageProperty), Type.HUMANIZED_MESSAGE, -1);
 			}
 		}
 	}
@@ -345,7 +343,7 @@ public class BulkOperationHandler<T extends HasUuid> {
 		cancelButtonClicked = true;
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getCaption(Captions.actionConfirmAction),
-			new Label(I18nProperties.getString(Strings.confirmationCancelBulkAction)),
+			new Span(I18nProperties.getString(Strings.confirmationCancelBulkAction)),
 			I18nProperties.getCaption(Captions.actionYes),
 			I18nProperties.getCaption(Captions.actionNo),
 			560,
@@ -458,16 +456,16 @@ public class BulkOperationHandler<T extends HasUuid> {
 			.collect(Collectors.toList());
 	}
 
-	public Window getWindow() {
+	public Dialog getWindow() {
 		return window;
 	}
 
 	public void addWindow(BulkProgressLayout layout, UI currentUI) {
 		window = VaadinUiUtil.createPopupWindow();
-		window.setCaption(I18nProperties.getString(Strings.headingBulkOperationProgress));
-		window.setWidth(800, Sizeable.Unit.PIXELS);
-		window.setContent(layout);
-		window.setClosable(false);
-		currentUI.addWindow(window);
+		window.setHeaderTitle(I18nProperties.getString(Strings.headingBulkOperationProgress));
+		window.setWidth("800px");
+		window.add(layout);
+		VaadinUiUtil.setClosable(window, false);
+		window.open();
 	}
 }

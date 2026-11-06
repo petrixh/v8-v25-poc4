@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.function.Supplier;
 
-import com.vaadin.server.StreamResource;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -39,7 +38,7 @@ import de.symeda.sormas.api.person.PersonDto;
 
 public class EventParticipantDownloadUtil {
 
-	public static StreamResource createExtendedEventParticipantExportResource(
+	public static StreamSourceDownloadHandler createExtendedEventParticipantExportResource(
 		EventParticipantCriteria criteria,
 		Supplier<Collection<String>> selectedRows,
 		ExportConfigurationDto exportConfiguration) {

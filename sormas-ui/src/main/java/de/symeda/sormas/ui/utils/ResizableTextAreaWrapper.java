@@ -22,15 +22,16 @@ import java.util.stream.Collectors;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.ComponentContainer;
-import com.vaadin.v7.data.Validator;
-import com.vaadin.v7.ui.AbstractTextField;
-import com.vaadin.v7.ui.Label;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.data.value.HasValueChangeMode;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
+import de.symeda.sormas.ui.utils.fields.AbstractTextField;
+import de.symeda.sormas.ui.utils.fields.TextArea;
 
 public class ResizableTextAreaWrapper<T extends AbstractTextField> implements FieldWrapper<T> {
 
@@ -41,7 +42,7 @@ public class ResizableTextAreaWrapper<T extends AbstractTextField> implements Fi
 	private final boolean withMaxLength;
 	private T textField;
 	private String caption;
-	private Label labelField;
+	private Span labelField;
 
 	public ResizableTextAreaWrapper() {
 		this(true);
@@ -52,54 +53,55 @@ public class ResizableTextAreaWrapper<T extends AbstractTextField> implements Fi
 	}
 
 	@Override
-	public ComponentContainer wrap(T textField, String caption) {
+	public Component wrap(T textField, String caption) {
 		return wrap(textField, caption, true);
 	}
 
 	@Override
-	public ComponentContainer wrap(T textField, String caption, boolean withMargin) {
+	public Component wrap(T textField, String caption, boolean withMargin) {
 
 		this.textField = textField;
 		this.caption = caption;
 
 		VerticalLayout layout = new VerticalLayout();
 		layout.setSpacing(false);
-		layout.setMargin(false);
-		layout.setWidth(100, Sizeable.Unit.PERCENTAGE);
+		layout.setPadding(false);
+		layout.setWidthFull();
 		if (withMargin) {
-			layout.addStyleName(CssStyles.FIELD_WRAPPER);
+			layout.addClassName(CssStyles.FIELD_WRAPPER);
 		}
 
-		textField.setWidth(100, Sizeable.Unit.PERCENTAGE);
+		textField.setWidthFull();
 		textField.addStyleName(CssStyles.RESIZABLE);
 		textField.setNullRepresentation("");
-		textField.setTextChangeTimeout(200);
+		// was setTextChangeTimeout(200) with a text change listener: the value follows typing after 200 ms
+		if (textField instanceof HasValueChangeMode) {
+			((HasValueChangeMode) textField).setValueChangeMode(ValueChangeMode.TIMEOUT);
+			((HasValueChangeMode) textField).setValueChangeTimeout(200);
+		}
 
 		// Collect validators first to avoid ConcurrentModificationException
-		List<Validator> maxLengthValidators =
+		List<Validator<? super String>> maxLengthValidators =
 			textField.getValidators().stream().filter(v -> v instanceof MaxLengthValidator).collect(Collectors.toList());
 
 		if (withMaxLength) {
 			maxLengthValidators.stream().findFirst().map(v -> ((MaxLengthValidator) v).getMaxLength()).ifPresent(textField::setMaxLength);
 
-			labelField = new Label(buildLabelMessage(textField.getValue(), textField, caption));
-			labelField.setId(textField.getId() + "_label");
-			labelField.setWidth(100, Sizeable.Unit.PERCENTAGE);
-			labelField.addStyleNames(CssStyles.ALIGN_RIGHT, CssStyles.FIELD_EXTRA_INFO, CssStyles.LABEL_ITALIC);
+			labelField = new Span(buildLabelMessage(textField.getValue(), textField, caption));
+			labelField.setId(textField.getId().orElse(null) + "_label");
+			labelField.setWidthFull();
+			labelField.addClassNames(CssStyles.ALIGN_RIGHT, CssStyles.FIELD_EXTRA_INFO, CssStyles.LABEL_ITALIC);
 		} else {
 			maxLengthValidators.forEach(textField::removeValidator);
 		}
 
-		textField.addTextChangeListener(e -> {
-			updateTextfieldAppearance();
-		});
 		textField.addValueChangeListener(e -> {
 			updateTextfieldAppearance();
 		});
 
-		layout.addComponents(textField);
+		layout.add(textField.asComponent());
 		if (withMaxLength) {
-			layout.addComponents(labelField);
+			layout.add(labelField);
 		}
 		return layout;
 	}
@@ -107,13 +109,22 @@ public class ResizableTextAreaWrapper<T extends AbstractTextField> implements Fi
 	private void updateTextfieldAppearance() {
 		if (withMaxLength) {
 			// XXX: notify user if text is not valid (e.g. too long)
-			labelField.setValue(buildLabelMessage(textField.getValue(), textField, caption));
+			labelField.setText(buildLabelMessage(textField.getValue(), textField, caption));
 		}
 		adjustRows(textField);
 	}
 
 	private String buildLabelMessage(String text, T textField, String caption) {
-		return String.format(I18nProperties.getCaption(caption), Strings.nullToEmpty(text).length(), textField.getMaxLength());
+		return String.format(I18nProperties.getCaption(caption), Strings.nullToEmpty(text).length(), getMaxLength(textField));
+	}
+
+	private static int getMaxLength(AbstractTextField textField) {
+		if (textField instanceof com.vaadin.flow.component.textfield.TextArea) {
+			return ((com.vaadin.flow.component.textfield.TextArea) textField).getMaxLength();
+		} else if (textField instanceof com.vaadin.flow.component.textfield.TextField) {
+			return ((com.vaadin.flow.component.textfield.TextField) textField).getMaxLength();
+		}
+		return -1;
 	}
 
 	/**

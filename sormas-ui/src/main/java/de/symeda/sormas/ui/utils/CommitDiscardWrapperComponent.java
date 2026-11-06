@@ -35,30 +35,14 @@ import javax.naming.CannotProceedException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.event.Action.Notifier;
-import com.vaadin.event.ShortcutAction.KeyCode;
-import com.vaadin.server.Page;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.Buffered;
-import com.vaadin.v7.data.Validator;
-import com.vaadin.v7.data.Validator.InvalidValueException;
-import com.vaadin.v7.data.fieldgroup.FieldGroup;
-import com.vaadin.v7.data.fieldgroup.FieldGroup.CommitException;
-import com.vaadin.v7.ui.AbstractLegacyComponent;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.RichTextArea;
-import com.vaadin.v7.ui.TextArea;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasEnabled;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.dom.DomListenerRegistration;
 
 import de.symeda.sormas.api.CoreFacade;
 import de.symeda.sormas.api.DeletableFacade;
@@ -72,12 +56,16 @@ import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.location.LocationDto;
 import de.symeda.sormas.api.person.PersonDto;
 import de.symeda.sormas.api.user.UserRight;
+import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.clinicalcourse.HealthConditionsForm;
 import de.symeda.sormas.ui.events.EventDataForm;
 import de.symeda.sormas.ui.location.AccessibleTextField;
 import de.symeda.sormas.ui.location.LocationEditForm;
 import de.symeda.sormas.ui.person.PersonEditForm;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.FieldGroup;
 
 public class CommitDiscardWrapperComponent<C extends Component> extends VerticalLayout implements DirtyStateComponent, Buffered {
 
@@ -126,7 +114,8 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 	// only to check if it's set
 	private transient CommitListener primaryCommitListener;
 
-	private Panel contentPanel;
+	// was a Panel: scrolls the wrapped component when it is larger than the wrapper
+	private Scroller contentPanel;
 
 	private C wrappedComponent;
 	private ArrayList<FieldGroup> fieldGroups;
@@ -143,6 +132,8 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 	private boolean shortcutsEnabled = false;
 
 	private boolean hideButtons = false;
+
+	private boolean readOnly = false;
 
 	protected transient List<ClickShortcut> actions;
 
@@ -192,33 +183,31 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 		}
 
 		setSpacing(false);
-		setMargin(true);
+		// was setMargin(true): a Vaadin 8 margin is the layout's inner space, the padding in Flow
+		setPadding(true);
 		setSizeUndefined();
 
-		contentPanel = new Panel(component);
+		contentPanel = new Scroller(component);
 		updateInternalWidth();
 		updateInternalHeight();
-		addComponent(contentPanel);
-		setExpandRatio(contentPanel, 1);
+		add(contentPanel);
+		setFlexGrow(1, contentPanel);
 
 		if (!hideButtons) {
 			buttonsPanel = new HorizontalLayout();
-			buttonsPanel.setMargin(false);
+			buttonsPanel.setPadding(false);
 			buttonsPanel.setSpacing(true);
-			buttonsPanel.setWidth(100, Unit.PERCENTAGE);
+			buttonsPanel.setWidthFull();
 
+			// was expand ratio 1 and right alignment for discard: buttons added before it (delete, archive) stay left
 			Button discardButton = getDiscardButton();
-			buttonsPanel.addComponent(discardButton);
-			buttonsPanel.setComponentAlignment(discardButton, Alignment.BOTTOM_RIGHT);
-			buttonsPanel.setExpandRatio(discardButton, 1);
+			buttonsPanel.add(discardButton);
+			discardButton.getStyle().set("margin-left", "auto");
 
 			Button commitButton = getCommitButton();
-			buttonsPanel.addComponent(commitButton);
-			buttonsPanel.setComponentAlignment(commitButton, Alignment.BOTTOM_RIGHT);
-			buttonsPanel.setExpandRatio(commitButton, 0);
+			buttonsPanel.add(commitButton);
 
-			addComponent(buttonsPanel);
-			setComponentAlignment(buttonsPanel, Alignment.BOTTOM_RIGHT);
+			add(buttonsPanel);
 		}
 
 		setShortcutsEnabled(shortcutsEnabled);
@@ -227,7 +216,7 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 			// convention: set wrapper to read-only when all wrapped field groups are read-only
 			boolean allReadOnly = true;
 			for (FieldGroup fieldGroup : fieldGroups) {
-				if (!fieldGroup.isReadOnly()) {
+				if (!buffered(fieldGroup).isReadOnly()) {
 					allReadOnly = false;
 					break;
 				}
@@ -236,7 +225,7 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 				setReadOnly(true);
 			}
 		} else if (wrappedComponent != null) {
-			if (wrappedComponent instanceof AbstractLegacyComponent && ((AbstractLegacyComponent) wrappedComponent).isReadOnly()) {
+			if (wrappedComponent instanceof HasValue && ((HasValue<?, ?>) wrappedComponent).isReadOnly()) {
 				setReadOnly(true);
 			}
 		}
@@ -267,7 +256,7 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 	protected void addDirtyHandler(FieldGroup[] fieldGroups) {
 		if (fieldGroups != null) {
 			Stream.of(fieldGroups).forEach(fg -> fg.getFields().forEach(f -> f.addValueChangeListener(ev -> {
-				final Object source = ((Field.ValueChangeEvent) ev).getSource();
+				final Object source = ev.getSource();
 				// Note by @MateStrysewske: It seems like the duplicate code here is necessary; for some reason,
 				// moving it to a separate method breaks the logic at least on my dev system
 				if (source instanceof PersonEditForm) {
@@ -282,13 +271,13 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 						.getFields()
 						.stream()
 						.filter(lf -> !(lf instanceof AccessibleTextField))
-						.anyMatch(Buffered::isModified)) {
+						.anyMatch(CommitDiscardWrapperComponent::isModified)) {
 						dirty = true;
 					} else if (personEditForm.getFieldGroup()
 						.getFields()
 						.stream()
 						.filter(lf -> !(lf instanceof AccessibleTextField))
-						.anyMatch(Buffered::isModified)) {
+						.anyMatch(CommitDiscardWrapperComponent::isModified)) {
 						dirty = true;
 					}
 				} else if (source instanceof EventDataForm) {
@@ -303,13 +292,13 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 						.getFields()
 						.stream()
 						.filter(lf -> !(lf instanceof AccessibleTextField))
-						.anyMatch(Buffered::isModified)) {
+						.anyMatch(CommitDiscardWrapperComponent::isModified)) {
 						dirty = true;
 					} else if (eventDataForm.getFieldGroup()
 						.getFields()
 						.stream()
 						.filter(lf -> !(lf instanceof AccessibleTextField))
-						.anyMatch(Buffered::isModified)) {
+						.anyMatch(CommitDiscardWrapperComponent::isModified)) {
 						dirty = true;
 					}
 				} else if (source instanceof LocationEditForm) {
@@ -323,7 +312,7 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 						.getFields()
 						.stream()
 						.filter(lf -> !(lf instanceof AccessibleTextField))
-						.anyMatch(Buffered::isModified)) {
+						.anyMatch(CommitDiscardWrapperComponent::isModified)) {
 						dirty = true;
 					}
 				} else if (source instanceof HealthConditionsForm) {
@@ -343,9 +332,17 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 		}
 	}
 
+	/**
+	 * Was {@code Buffered::isModified} on Vaadin 7 fields: a field reports changes through {@link Buffered}.
+	 */
+	private static boolean isModified(Object field) {
+		return field instanceof Buffered && ((Buffered) field).isModified();
+	}
+
 	private boolean atLeastOneFieldModified(AccessibleTextField... fields) {
 		for (AccessibleTextField field : fields) {
-			if (field.getState().modified) {
+			// was field.getState().modified, the same flag as isModified()
+			if (field.isModified()) {
 				return true;
 			}
 		}
@@ -379,10 +376,10 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 			actions = new ArrayList<>();
 		}
 
-		Collection<Notifier> notifiers = Arrays.asList((Notifier) contentPanel);
+		Collection<Component> notifiers = Arrays.asList(contentPanel);
 
 		if (shortcutsEnabled) {
-			for (Notifier notifier : notifiers) {
+			for (Component notifier : notifiers) {
 				registerActions(notifier);
 			}
 
@@ -394,9 +391,9 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 		}
 	}
 
-	protected void registerActions(Notifier notifier) {
-		actions.add(new ClickShortcut(notifier, commitButton, KeyCode.ENTER));
-		actions.add(new ClickShortcut(notifier, discardButton, KeyCode.ESCAPE));
+	protected void registerActions(Component notifier) {
+		actions.add(new ClickShortcut(notifier, commitButton, "Enter"));
+		actions.add(new ClickShortcut(notifier, discardButton, "Escape"));
 	}
 
 	public C getWrappedComponent() {
@@ -416,15 +413,8 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 	 */
 	public Button getCommitButton() {
 		if (commitButton == null) {
-			commitButton = ButtonHelper.createButton("commit", I18nProperties.getCaption(Captions.actionSave), new ClickListener() {
-
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public void buttonClick(ClickEvent event) {
-					commitAndHandle();
-				}
-			}, ValoTheme.BUTTON_PRIMARY);
+			commitButton =
+				ButtonHelper.createButton("commit", I18nProperties.getCaption(Captions.actionSave), event -> commitAndHandle(), CssStyles.BUTTON_PRIMARY);
 		}
 
 		return commitButton;
@@ -439,16 +429,8 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 	 */
 	public Button getDiscardButton() {
 		if (discardButton == null) {
-			discardButton = ButtonHelper.createButton("discard", I18nProperties.getCaption(Captions.actionDiscard), new ClickListener() {
-
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public void buttonClick(ClickEvent event) {
-					discard();
-				}
-			});
-			discardButton.setDescription(I18nProperties.getDescription(Descriptions.discardDescription));
+			discardButton = ButtonHelper.createButton("discard", I18nProperties.getCaption(Captions.actionDiscard), event -> discard());
+			discardButton.setTooltipText(I18nProperties.getDescription(Descriptions.discardDescription));
 		}
 
 		return discardButton;
@@ -502,7 +484,7 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 					deletePopupCallback.run();
 				}
 			},
-			ValoTheme.BUTTON_DANGER,
+			CssStyles.BUTTON_DANGER,
 			CssStyles.BUTTON_BORDER_NEUTRAL);
 
 		return deleteButton;
@@ -512,7 +494,7 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 	public boolean isModified() {
 		if (fieldGroups != null) {
 			for (FieldGroup fieldGroup : fieldGroups) {
-				if (fieldGroup.isModified()) {
+				if (buffered(fieldGroup).isModified()) {
 					return true;
 				}
 			}
@@ -545,25 +527,16 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 		if (fieldGroups != null) {
 			if (fieldGroups.size() > 1) {
 				List<InvalidValueException> invalidValueExceptions =
-					fieldGroups.stream().filter(fieldGroup -> !fieldGroup.isValid()).map(fieldGroup -> {
+					fieldGroups.stream().map(CommitDiscardWrapperComponent::buffered).filter(fieldGroup -> !fieldGroup.isValid()).map(fieldGroup -> {
 						try {
-							// all invalid fieldGroups are committed to fetch the CommitExceptions
+							// all invalid fieldGroups are committed to fetch the InvalidValueExceptions
 							fieldGroup.commit();
-						} catch (CommitException e) {
+						} catch (InvalidValueException e) {
+							// keep invalid value exceptions, the rest (SourceException) is thrown
 							return e;
 						}
-						// when the fieldGroup did not throw a CommitException, it is invalid and committed
+						// when the fieldGroup did not throw an InvalidValueException, it is invalid and committed
 						throw new IllegalStateException();
-					}).map(e -> {
-						// keep invalid value exceptions, throw the rest
-						Throwable c = e.getCause();
-						if (c instanceof InvalidValueException) {
-							return (InvalidValueException) c;
-						} else if (c instanceof SourceException) {
-							throw (SourceException) c;
-						} else {
-							throw new CommitRuntimeException(e);
-						}
 					}).collect(Collectors.toList());
 
 				if (invalidValueExceptions.isEmpty()) {
@@ -580,19 +553,9 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 				}
 			}
 
-			try {
-				for (FieldGroup fieldGroup : fieldGroups) {
-					fieldGroup.commit();
-				}
-			} catch (CommitException e) {
-				Throwable c = e.getCause();
-				if (c instanceof InvalidValueException) {
-					throw (InvalidValueException) c;
-				} else if (c instanceof SourceException) {
-					throw (SourceException) c;
-				} else {
-					throw new CommitRuntimeException(e);
-				}
+			// was FieldGroup.commit() with a CommitException around the InvalidValueException or SourceException
+			for (FieldGroup fieldGroup : fieldGroups) {
+				buffered(fieldGroup).commit();
 			}
 		} else if (wrappedComponent instanceof Buffered) {
 			((Buffered) wrappedComponent).commit();
@@ -604,6 +567,17 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 		onCommit();
 		commited = true;
 		onDone();
+	}
+
+	/**
+	 * The field groups of the form layer implement {@link Buffered} (was the Vaadin 7 FieldGroup's commit, discard and
+	 * modified state).
+	 */
+	private static Buffered buffered(FieldGroup fieldGroup) {
+		if (fieldGroup instanceof Buffered) {
+			return (Buffered) fieldGroup;
+		}
+		throw new IllegalStateException("FieldGroup does not implement Buffered: " + fieldGroup.getClass().getName());
 	}
 
 	private String findHtmlMessage(InvalidValueException exception) {
@@ -674,15 +648,14 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 				}
 			}
 
-			new Notification(I18nProperties.getString(Strings.messageCheckInputData), htmlMsg.toString(), Type.ERROR_MESSAGE, true)
-				.show(Page.getCurrent());
+			NotificationHelper.show(I18nProperties.getString(Strings.messageCheckInputData), htmlMsg.toString(), Type.ERROR_MESSAGE, true);
 
 			return false;
 		}
 	}
 
 	public List<InvalidValueException> extractCauses(InvalidValueException cause) {
-		List<Validator.InvalidValueException> tempCauses = new ArrayList<>();
+		List<InvalidValueException> tempCauses = new ArrayList<>();
 
 		if (cause.isInvisible()) {
 			return tempCauses;
@@ -703,7 +676,7 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 	public void discard() {
 		if (fieldGroups != null) {
 			for (FieldGroup fieldGroup : fieldGroups) {
-				fieldGroup.discard();
+				buffered(fieldGroup).discard();
 			}
 		} else if (wrappedComponent instanceof Buffered) {
 			((Buffered) wrappedComponent).discard();
@@ -720,7 +693,7 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 	public void setBuffered(boolean buffered) {
 		if (fieldGroups != null) {
 			for (FieldGroup fieldGroup : fieldGroups) {
-				fieldGroup.setBuffered(buffered);
+				buffered(fieldGroup).setBuffered(buffered);
 			}
 		} else if (wrappedComponent instanceof Buffered) {
 			((Buffered) wrappedComponent).setBuffered(buffered);
@@ -734,9 +707,9 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 		if (fieldGroups != null) {
 			Boolean buffered = null;
 			for (FieldGroup fieldGroup : fieldGroups) {
-				if (buffered != null && buffered.booleanValue() != fieldGroup.isBuffered())
+				if (buffered != null && buffered.booleanValue() != buffered(fieldGroup).isBuffered())
 					throw new IllegalStateException("FieldGroups have different isBuffered states");
-				buffered = fieldGroup.isBuffered();
+				buffered = buffered(fieldGroup).isBuffered();
 			}
 			return Boolean.TRUE.equals(buffered);
 		} else if (wrappedComponent instanceof Buffered) {
@@ -820,14 +793,14 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 
 	public void addDeleteListener(DeleteListener listener, String entityName) {
 		if (deleteListeners.isEmpty())
-			buttonsPanel.addComponent(getDeleteButton(entityName, null), 0);
+			buttonsPanel.addComponentAtIndex(0, getDeleteButton(entityName, null));
 		if (!deleteListeners.contains(listener))
 			deleteListeners.add(listener);
 	}
 
 	public void addDeleteListener(DeleteListener listener, String entityName, Supplier<String> confirmationMessageSupplier) {
 		if (deleteListeners.isEmpty())
-			buttonsPanel.addComponent(getDeleteButton(entityName, confirmationMessageSupplier), 0);
+			buttonsPanel.addComponentAtIndex(0, getDeleteButton(entityName, confirmationMessageSupplier));
 		if (!deleteListeners.contains(listener))
 			deleteListeners.add(listener);
 	}
@@ -840,7 +813,7 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 	public void addDeleteWithReasonListener(DeleteWithDetailsListener listener, String entityName, String details) {
 
 		if (deleteWithDetailsListeners.isEmpty()) {
-			buttonsPanel.addComponent(getDeleteWithReasonOrRestoreButton(entityName, false, null), 0);
+			buttonsPanel.addComponentAtIndex(0, getDeleteWithReasonOrRestoreButton(entityName, false, null));
 		}
 		if (!deleteWithDetailsListeners.contains(listener)) {
 			deleteWithDetailsListeners.add(listener);
@@ -858,7 +831,7 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 		final boolean deleted = coreFacade.isDeleted(entityUuid);
 
 		if (deleteWithDetailsListeners.isEmpty()) {
-			buttonsPanel.addComponent(getDeleteWithReasonOrRestoreButton(entityName, deleted, details), 0);
+			buttonsPanel.addComponentAtIndex(0, getDeleteWithReasonOrRestoreButton(entityName, deleted, details));
 		}
 
 		if (!deleted) {
@@ -875,7 +848,7 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 		boolean isDeleted) {
 
 		if (deleteWithDetailsListeners.isEmpty()) {
-			buttonsPanel.addComponent(getDeleteWithReasonOrRestoreButton(entityName, isDeleted, null), 0);
+			buttonsPanel.addComponentAtIndex(0, getDeleteWithReasonOrRestoreButton(entityName, isDeleted, null));
 		}
 
 		if (!isDeleted) {
@@ -906,7 +879,7 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 		final boolean deleted = deletableFacade.isDeleted(entityUuid);
 
 		if (deleteWithDetailsListeners.isEmpty()) {
-			buttonsPanel.addComponent(getDeleteWithReasonOrRestoreButton(entityName, deleted, details), 0);
+			buttonsPanel.addComponentAtIndex(0, getDeleteWithReasonOrRestoreButton(entityName, deleted, details));
 		}
 
 		if (!deleted) {
@@ -920,7 +893,7 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 				}
 			});
 		}
-		deleteWithDetailsListeners.add((deleteDetails) -> UI.getCurrent().getNavigator().navigateTo(viewName));
+		deleteWithDetailsListeners.add((deleteDetails) -> SormasUI.get().getNavigator().navigateTo(viewName));
 
 	}
 
@@ -935,44 +908,52 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 		}
 	}
 
-	@Override
+	/**
+	 * Vaadin 8 kept a read-only flag on the layout (it did not change the children); kept as a flag.
+	 */
 	public void setReadOnly(boolean readOnly) {
-		try {
-			super.setReadOnly(readOnly);
-		} catch (IllegalStateException e) {
-			super.setEnabled(readOnly);
-		}
+		this.readOnly = readOnly;
 	}
 
-	protected static class ClickShortcut extends Button.ClickShortcut {
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+
+	/**
+	 * Clicks the button on a key pressed in the notifier, except in a text area (where Enter and Escape edit the text).
+	 * Was a Vaadin 8 {@code Button.ClickShortcut} action.
+	 */
+	protected static class ClickShortcut implements java.io.Serializable {
 
 		private static final long serialVersionUID = 1L;
 
-		private final Notifier notifier;
+		private final Component notifier;
+		private final Button button;
+		private final String key;
+		private final DomListenerRegistration registration;
 
-		public ClickShortcut(Notifier notifier, Button button, int keyCode) {
-			super(button, keyCode, null);
+		public ClickShortcut(Component notifier, Button button, String key) {
 			this.notifier = notifier;
-			notifier.addAction(this);
+			this.button = button;
+			this.key = key;
+			this.registration = notifier.getElement().addEventListener("keydown", e -> {
+				// Vaadin 8: Button.click() did nothing for a disabled or read-only button
+				if (button.isEnabled() && button.isVisible()) {
+					button.click();
+				}
+			})
+				.setFilter(
+					"event.key === '" + key
+						+ "' && !(event.target && event.target.closest && event.target.closest('vaadin-text-area, textarea, vaadin-rich-text-editor'))");
 		}
 
 		public void remove() {
-			notifier.removeAction(this);
-		}
-
-		@Override
-		public void handleAction(Object sender, Object target) {
-
-			if (target instanceof TextArea || target instanceof RichTextArea) {
-				// NOOP
-			} else {
-				super.handleAction(sender, target);
-			}
+			registration.remove();
 		}
 
 		@Override
 		public String toString() {
-			return notifier + "[" + getKeyCode() + "] =>" + button.getCaption();
+			return notifier + "[" + key + "] =>" + button.getText();
 		}
 	}
 
@@ -980,20 +961,23 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 
 		private static final long serialVersionUID = 1L;
 
-		public CommitRuntimeException(CommitException e) {
+		public CommitRuntimeException(Throwable e) {
 			super(e.getMessage(), e);
 		}
 	}
 
+	/**
+	 * Was {@code setWidth(float, Unit)}; all Flow width setters end here.
+	 */
 	@Override
-	public void setWidth(float width, Unit unit) {
-		super.setWidth(width, unit);
+	public void setWidth(String width) {
+		super.setWidth(width);
 		updateInternalWidth();
 	}
 
 	@Override
-	public void setHeight(float height, Unit unit) {
-		super.setHeight(height, unit);
+	public void setHeight(String height) {
+		super.setHeight(height);
 		updateInternalHeight();
 	}
 
@@ -1001,10 +985,10 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 		if (contentPanel == null) {
 			return;
 		}
-		if (getWidth() < 0) {
-			contentPanel.setWidth(-1, Unit.PIXELS);
+		if (getWidth() == null) {
+			contentPanel.setWidth(null);
 		} else {
-			contentPanel.setWidth(100, Unit.PERCENTAGE);
+			contentPanel.setWidthFull();
 		}
 	}
 
@@ -1012,10 +996,10 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 		if (contentPanel == null) {
 			return;
 		}
-		if (getHeight() < 0) {
-			contentPanel.setHeight(-1, Unit.PIXELS);
+		if (getHeight() == null) {
+			contentPanel.setHeight(null);
 		} else {
-			contentPanel.setHeight(100, Unit.PERCENTAGE);
+			contentPanel.setHeightFull();
 		}
 	}
 
@@ -1086,17 +1070,25 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 	public void setEditable(boolean editable, String... excludedButtons) {
 		if (WithChildComponents.class.isAssignableFrom(wrappedComponent.getClass())) {
 			((WithChildComponents) wrappedComponent).forEachComponent(component -> {
-				component.setEnabled(editable);
+				setEnabled(component, editable);
 			});
 		} else {
-			wrappedComponent.setEnabled(editable);
+			setEnabled(wrappedComponent, editable);
 		}
 
 		for (int i = 0; i < buttonsPanel.getComponentCount(); i++) {
-			Component button = buttonsPanel.getComponent(i);
-			if (!ArrayUtils.contains(excludedButtons, button.getId())) {
-				button.setEnabled(editable);
+			Component button = buttonsPanel.getComponentAt(i);
+			if (!ArrayUtils.contains(excludedButtons, button.getId().orElse(null))) {
+				setEnabled(button, editable);
 			}
+		}
+	}
+
+	private static void setEnabled(Component component, boolean enabled) {
+		if (component instanceof HasEnabled) {
+			((HasEnabled) component).setEnabled(enabled);
+		} else {
+			component.getElement().setEnabled(enabled);
 		}
 	}
 

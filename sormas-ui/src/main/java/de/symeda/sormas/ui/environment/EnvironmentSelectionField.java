@@ -3,13 +3,13 @@ package de.symeda.sormas.ui.environment;
 import java.util.Date;
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.Component;
 import com.vaadin.ui.CustomField;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.ui.RadioButtonGroup;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 import de.symeda.sormas.api.environment.EnvironmentCriteria;
@@ -159,7 +159,7 @@ public class EnvironmentSelectionField extends CustomField<EnvironmentIndexDto> 
 				toDate = toDate == null ? criteria.getReportDateTo() : toDate;
 			}
 
-			applyButton.removeStyleName(ValoTheme.BUTTON_PRIMARY);
+			applyButton.removeClassName(ValoTheme.BUTTON_PRIMARY);
 			criteria.reportDateBetween(fromDate, toDate, dateFilterOption);
 			environmentGrid.setCriteria(criteria);
 			environmentGrid.getSelectedItems();

@@ -10,11 +10,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.environment.EnvironmentDto;
@@ -109,7 +109,7 @@ public class EnvironmentDataForm extends AbstractEditForm<EnvironmentDto> {
 		TextField otherInfrastructureDetails = addField(EnvironmentDto.OTHER_INFRASTRUCTUIRE_DETAILS, TextField.class);
 		otherInfrastructureDetails.setInputPrompt(I18nProperties.getString(Strings.pleaseSpecify));
 
-		Label useOfWaterHeading = new Label(I18nProperties.getString(Strings.headingWaterUse));
+		Span useOfWaterHeading = new Span(I18nProperties.getString(Strings.headingWaterUse));
 		CssStyles.style(useOfWaterHeading, CssStyles.LABEL_XLARGE, CssStyles.VSPACE_TOP_3);
 		getContent().addComponent(useOfWaterHeading, WATER_USE_HEADING_LOC);
 
@@ -120,8 +120,8 @@ public class EnvironmentDataForm extends AbstractEditForm<EnvironmentDto> {
 		waterUseCheckBoxTree.setEnumType(WaterUse.class, null);
 
 		waterUseCheckBoxTree.addValueChangeListener((e) -> {
-			if (e.getProperty().getValue() != null) {
-				if (Boolean.TRUE.equals(((Map<WaterUse, Boolean>) e.getProperty().getValue()).get(WaterUse.OTHER))) {
+			if (e.getValue() != null) {
+				if (Boolean.TRUE.equals(((Map<WaterUse, Boolean>) e.getValue()).get(WaterUse.OTHER))) {
 					otherWaterUse.setVisible(true);
 				} else {
 					otherWaterUse.setVisible(false);
@@ -135,8 +135,8 @@ public class EnvironmentDataForm extends AbstractEditForm<EnvironmentDto> {
 		TextArea description = addField(EnvironmentDto.DESCRIPTION, TextArea.class, new ResizableTextAreaWrapper<>());
 		description.setRows(2);
 
-		Label locationHeadingLabel = new Label(I18nProperties.getString(Strings.headingLocation));
-		locationHeadingLabel.addStyleName(H3);
+		Span locationHeadingLabel = new Span(I18nProperties.getString(Strings.headingLocation));
+		locationHeadingLabel.addClassName(H3);
 		getContent().addComponent(locationHeadingLabel, LOCATION_HEADING_LOC);
 
 		LocationEditForm locationForm = addField(EnvironmentDto.LOCATION, LocationEditForm.class);
@@ -162,7 +162,7 @@ public class EnvironmentDataForm extends AbstractEditForm<EnvironmentDto> {
 
 		regionField.addValueChangeListener(e -> {
 			List<UserReferenceDto> filteredResponsibleUsers;
-			RegionReferenceDto region = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto region = (RegionReferenceDto) e.getValue();
 			if (region == null) {
 				filteredResponsibleUsers = FacadeProvider.getUserFacade()
 					.getUserRefsByInfrastructure(null, JurisdictionLevel.NATION, JurisdictionLevel.NATION, null, UserRight.ENVIRONMENT_EDIT);
@@ -201,10 +201,10 @@ public class EnvironmentDataForm extends AbstractEditForm<EnvironmentDto> {
 			EnvironmentDto.ENVIRONMENT_NAME);
 
 		environmentMedia.addValueChangeListener(valueChangeEvent -> {
-			if (EnvironmentMedia.WATER.equals(valueChangeEvent.getProperty().getValue())) {
+			if (EnvironmentMedia.WATER.equals(valueChangeEvent.getValue())) {
 				vectorType.setVisible(false);
 				setVisible(true, infrastructureDetails, waterUseCheckBoxTree, otherWaterUse);
-			} else if (EnvironmentMedia.VECTORS.equals(valueChangeEvent.getProperty().getValue())) {
+			} else if (EnvironmentMedia.VECTORS.equals(valueChangeEvent.getValue())) {
 				useOfWaterHeading.setVisible(false);
 				setVisible(false, waterType, infrastructureDetails, waterUseCheckBoxTree, otherWaterUse);
 				vectorType.setVisible(true);

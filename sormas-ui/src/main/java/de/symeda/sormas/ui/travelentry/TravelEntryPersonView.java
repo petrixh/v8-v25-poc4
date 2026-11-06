@@ -1,6 +1,6 @@
 package de.symeda.sormas.ui.travelentry;
 
-import com.vaadin.ui.CustomLayout;
+import de.symeda.sormas.ui.utils.CustomLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.common.DeletableEntityType;

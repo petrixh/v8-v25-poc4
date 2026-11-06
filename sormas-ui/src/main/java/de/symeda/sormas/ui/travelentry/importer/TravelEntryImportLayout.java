@@ -22,7 +22,7 @@ import java.io.IOException;
 import com.opencsv.exceptions.CsvValidationException;
 import com.vaadin.server.ClassResource;
 import com.vaadin.server.Page;
-import com.vaadin.ui.Notification;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;

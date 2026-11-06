@@ -1,6 +1,6 @@
 package de.symeda.sormas.ui.travelentry;
 
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.ui.themes.ValoTheme;
 
 import de.symeda.sormas.api.EditPermissionType;
@@ -109,7 +109,7 @@ public class TravelEntryDataView extends AbstractTravelEntryView {
 				travelEntryDto.getDisease(),
 				this::showUnsavedChangesPopup,
 				editAllowed);
-			taskList.addStyleName(CssStyles.SIDE_COMPONENT);
+			taskList.addClassName(CssStyles.SIDE_COMPONENT);
 			layout.addSidePanelComponent(taskList, TASKS_LOC);
 		}
 
@@ -127,7 +127,7 @@ public class TravelEntryDataView extends AbstractTravelEntryView {
 
 		CaseDataDto caseDto = FacadeProvider.getCaseFacade().getCaseDataByUuid(caseUuid);
 		CaseInfoLayout caseInfoLayout = new CaseInfoLayout(caseDto, true);
-		caseInfoLayout.addStyleName(CssStyles.SIDE_COMPONENT);
+		caseInfoLayout.addClassName(CssStyles.SIDE_COMPONENT);
 
 		return caseInfoLayout;
 	}

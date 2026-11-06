@@ -17,11 +17,11 @@ package de.symeda.sormas.ui.environment;
 
 import java.util.List;
 
-import com.vaadin.navigator.Navigator;
+import de.symeda.sormas.ui.navigation.Navigator;
 import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.common.DeletionReason;
@@ -92,12 +92,12 @@ public class EnvironmentController {
 					} else {
 						navigateToData(EventDataView.VIEW_NAME);
 					}
-					Notification.show(I18nProperties.getString(Strings.messageEnvironmentLinkedToEvent), Notification.Type.TRAY_NOTIFICATION);
+					NotificationHelper.show(I18nProperties.getString(Strings.messageEnvironmentLinkedToEvent), NotificationHelper.Type.TRAY_NOTIFICATION);
 				} else {
 					Notification notification = new Notification(
 						I18nProperties.getString(Strings.messageEnvironmentAlreadyLinkedToEvent),
 						"",
-						Notification.Type.HUMANIZED_MESSAGE);
+						NotificationHelper.Type.HUMANIZED_MESSAGE);
 					notification.setDelayMsec(10000);
 					notification.show(Page.getCurrent());
 				}
@@ -144,7 +144,7 @@ public class EnvironmentController {
 				if (!createForm.getFieldGroup().isModified()) {
 					EnvironmentDto dto = createForm.getValue();
 					FacadeProvider.getEnvironmentFacade().save(dto);
-					Notification.show(I18nProperties.getString(Strings.messageEnvironmentCreated), Notification.Type.WARNING_MESSAGE);
+					NotificationHelper.show(I18nProperties.getString(Strings.messageEnvironmentCreated), NotificationHelper.Type.WARNING_MESSAGE);
 
 					navigateToEnvironment(dto.getUuid());
 				}
@@ -171,7 +171,7 @@ public class EnvironmentController {
 					EnvironmentDto environmentDto = createForm.getValue();
 					environmentDto.addEventReference(eventDto.toReference());
 					FacadeProvider.getEnvironmentFacade().save(environmentDto);
-					Notification.show(I18nProperties.getString(Strings.messageEnvironmentCreated), Notification.Type.WARNING_MESSAGE);
+					NotificationHelper.show(I18nProperties.getString(Strings.messageEnvironmentCreated), NotificationHelper.Type.WARNING_MESSAGE);
 					navigateToEnvironment(environmentDto.getUuid());
 				}
 			});
@@ -193,7 +193,7 @@ public class EnvironmentController {
 	private static void saveEnvironment(EnvironmentDto environment) {
 		FacadeProvider.getEnvironmentFacade().save(environment);
 
-		Notification.show(I18nProperties.getString(Strings.messageEnvironmentSaved), Notification.Type.WARNING_MESSAGE);
+		NotificationHelper.show(I18nProperties.getString(Strings.messageEnvironmentSaved), NotificationHelper.Type.WARNING_MESSAGE);
 		SormasUI.refreshView();
 	}
 
@@ -231,7 +231,7 @@ public class EnvironmentController {
 				if (outsideJurisdiction) {
 					VaadinUiUtil.showConfirmationPopup(
 						I18nProperties.getString(Strings.headingEnvironmentJurisdictionUpdated),
-						new Label(I18nProperties.getString(Strings.messageEnvironmentJurisdictionUpdated)),
+						new Span(I18nProperties.getString(Strings.messageEnvironmentJurisdictionUpdated)),
 						I18nProperties.getString(Strings.yes),
 						I18nProperties.getString(Strings.no),
 						500,
@@ -313,6 +313,6 @@ public class EnvironmentController {
 
 	public void unlinkEnvironment(EnvironmentIndexDto environmentIndex, String eventUuid) {
 		FacadeProvider.getEnvironmentFacade().unlinkEnvironment(environmentIndex, eventUuid);
-		Notification.show(I18nProperties.getString(Strings.messageEventUnlinkedFromEnvironment), Notification.Type.TRAY_NOTIFICATION);
+		NotificationHelper.show(I18nProperties.getString(Strings.messageEventUnlinkedFromEnvironment), NotificationHelper.Type.TRAY_NOTIFICATION);
 	}
 }

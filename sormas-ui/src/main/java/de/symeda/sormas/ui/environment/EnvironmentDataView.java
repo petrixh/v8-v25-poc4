@@ -59,19 +59,19 @@ public class EnvironmentDataView extends AbstractEnvironmentView implements HasN
 		if (UiUtil.permitted(FeatureType.TASK_MANAGEMENT, UserRight.TASK_VIEW)) {
 			TaskListComponent taskList =
 				new TaskListComponent(TaskContext.ENVIRONMENT, getEnvironmentRef(), null, this::showUnsavedChangesPopup, isEditAllowed);
-			taskList.addStyleName(CssStyles.SIDE_COMPONENT);
+			taskList.addClassName(CssStyles.SIDE_COMPONENT);
 			layout.addSidePanelComponent(taskList, TASKS_LOC);
 		}
 
 		if (UiUtil.permitted(FeatureType.SAMPLES_LAB, UserRight.ENVIRONMENT_SAMPLE_VIEW)) {
 			EnvironmentSampleListComponent sampleList = new EnvironmentSampleListComponent(environment, isEditAllowed, this::showUnsavedChangesPopup);
-			sampleList.addStyleName(CssStyles.SIDE_COMPONENT);
+			sampleList.addClassName(CssStyles.SIDE_COMPONENT);
 			layout.addSidePanelComponent(sampleList, SAMPLES_LOC);
 		}
 
 		if (UiUtil.permitted(FeatureType.EVENT_SURVEILLANCE, UserRight.EVENT_VIEW)) {
 			EventListComponent eventList = new EventListComponent(environment.toReference(), this::showUnsavedChangesPopup, isEditAllowed);
-			eventList.addStyleName(CssStyles.SIDE_COMPONENT);
+			eventList.addClassName(CssStyles.SIDE_COMPONENT);
 			layout.addSidePanelComponent(eventList, EVENTS_LOC);
 		}
 

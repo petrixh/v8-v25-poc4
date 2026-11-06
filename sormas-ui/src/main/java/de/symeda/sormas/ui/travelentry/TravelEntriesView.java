@@ -3,18 +3,18 @@ package de.symeda.sormas.ui.travelentry;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.ComboBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;
@@ -50,7 +50,7 @@ public class TravelEntriesView extends AbstractView {
 	private TravelEntryFilterForm filterForm;
 
 	// Filters
-	private Label relevanceStatusInfoLabel;
+	private Span relevanceStatusInfoLabel;
 	private ComboBox relevanceStatusFilter;
 
 	// Bulk operations
@@ -82,8 +82,8 @@ public class TravelEntriesView extends AbstractView {
 		addComponent(gridLayout);
 
 		if (UiUtil.permitted(UserRight.TRAVEL_ENTRY_CREATE)) {
-			addHeaderComponent(ButtonHelper.createIconButton(I18nProperties.getCaption(Captions.actionImport), VaadinIcons.UPLOAD, e -> {
-				Window popupWindow = VaadinUiUtil.showPopupWindow(new TravelEntryImportLayout());
+			addHeaderComponent(ButtonHelper.createIconButton(I18nProperties.getCaption(Captions.actionImport), VaadinIcon.UPLOAD, e -> {
+				Dialog popupWindow = VaadinUiUtil.showPopupWindow(new TravelEntryImportLayout());
 				popupWindow.setCaption(I18nProperties.getString(Strings.headingImportTravelEntries));
 				popupWindow.addCloseListener(c -> ((TravelEntryGrid) grid).reload());
 			}));
@@ -98,12 +98,12 @@ public class TravelEntriesView extends AbstractView {
 
 		if (UiUtil.permitted(UserRight.TRAVEL_ENTRY_DELETE, UserRight.PERFORM_BULK_OPERATIONS)) {
 
-			Button btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcons.CHECK_SQUARE_O, null);
+			Button btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcon.CHECK_SQUARE_O, null);
 			btnEnterBulkEditMode.setVisible(!viewConfiguration.isInEagerMode());
 			addHeaderComponent(btnEnterBulkEditMode);
 
 			Button btnLeaveBulkEditMode =
-				ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcons.CLOSE, null, ValoTheme.BUTTON_PRIMARY);
+				ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcon.CLOSE, null, ValoTheme.BUTTON_PRIMARY);
 			btnLeaveBulkEditMode.setVisible(viewConfiguration.isInEagerMode());
 			addHeaderComponent(btnLeaveBulkEditMode);
 
@@ -182,7 +182,7 @@ public class TravelEntriesView extends AbstractView {
 		statusFilterLayout.setSpacing(true);
 		statusFilterLayout.setMargin(false);
 		statusFilterLayout.setWidth(100, Unit.PERCENTAGE);
-		statusFilterLayout.addStyleName(CssStyles.VSPACE_3);
+		statusFilterLayout.addClassName(CssStyles.VSPACE_3);
 
 		HorizontalLayout actionButtonsLayout = new HorizontalLayout();
 		actionButtonsLayout.setSpacing(true);
@@ -199,12 +199,12 @@ public class TravelEntriesView extends AbstractView {
 						FeatureTypeProperty.THRESHOLD_IN_DAYS,
 						Integer.class);
 				if (daysAfterTravelEntryGetsArchived > 0) {
-					relevanceStatusInfoLabel = new Label(
-						VaadinIcons.INFO_CIRCLE.getHtml() + " "
+					relevanceStatusInfoLabel = new Span(
+						VaadinIcon.INFO_CIRCLE.getHtml() + " "
 							+ String.format(I18nProperties.getString(Strings.infoArchivedTravelEntries), daysAfterTravelEntryGetsArchived),
 						ContentMode.HTML);
 					relevanceStatusInfoLabel.setVisible(false);
-					relevanceStatusInfoLabel.addStyleName(CssStyles.LABEL_VERTICAL_ALIGN_SUPER);
+					relevanceStatusInfoLabel.addClassName(CssStyles.LABEL_VERTICAL_ALIGN_SUPER);
 					actionButtonsLayout.addComponent(relevanceStatusInfoLabel);
 					actionButtonsLayout.setComponentAlignment(relevanceStatusInfoLabel, Alignment.MIDDLE_RIGHT);
 				}
@@ -239,14 +239,14 @@ public class TravelEntriesView extends AbstractView {
 
 			relevanceStatusFilter.addValueChangeListener(e -> {
 				if (relevanceStatusInfoLabel != null) {
-					relevanceStatusInfoLabel.setVisible(EntityRelevanceStatus.ARCHIVED.equals(e.getProperty().getValue()));
+					relevanceStatusInfoLabel.setVisible(EntityRelevanceStatus.ARCHIVED.equals(e.getValue()));
 				}
 
 				if (grid.getColumn(grid.DELETE_REASON_COLUMN) != null) {
 					grid.getColumn(grid.DELETE_REASON_COLUMN).setHidden(!relevanceStatusFilter.getValue().equals(EntityRelevanceStatus.DELETED));
 				}
 
-				criteria.relevanceStatus((EntityRelevanceStatus) e.getProperty().getValue());
+				criteria.relevanceStatus((EntityRelevanceStatus) e.getValue());
 				navigateTo(criteria);
 			});
 			actionButtonsLayout.addComponent(relevanceStatusFilter);
@@ -259,12 +259,12 @@ public class TravelEntriesView extends AbstractView {
 				bulkActions.add(
 					new MenuBarHelper.MenuBarItem(
 						I18nProperties.getCaption(Captions.bulkDelete),
-						VaadinIcons.TRASH,
+						VaadinIcon.TRASH,
 						mi -> grid.bulkActionHandler(
 							items -> ControllerProvider.getTravelEntryController()
 								.deleteAllSelectedItems(items, (TravelEntryGrid) grid, () -> navigateTo(criteria)),
 							true)));
-				bulkActions.add(new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkEmailSend), VaadinIcons.ENVELOPE, mi -> {
+				bulkActions.add(new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkEmailSend), VaadinIcon.ENVELOPE, mi -> {
 					grid.bulkActionHandler(
 						items -> ControllerProvider.getTravelEntryController().sendEmailsToAllSelectedItems(items, (TravelEntryGrid) grid),
 						true);
@@ -273,7 +273,7 @@ public class TravelEntriesView extends AbstractView {
 				bulkActions.add(
 					new MenuBarHelper.MenuBarItem(
 						I18nProperties.getCaption(Captions.bulkRestore),
-						VaadinIcons.ARROW_BACKWARD,
+						VaadinIcon.ARROW_BACKWARD,
 						mi -> grid.bulkActionHandler(
 							items -> ControllerProvider.getTravelEntryController()
 								.restoreSelectedTravelEntries(items, (TravelEntryGrid) grid, () -> navigateTo(criteria)),

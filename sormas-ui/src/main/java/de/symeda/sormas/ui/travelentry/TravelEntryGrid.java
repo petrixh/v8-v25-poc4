@@ -2,7 +2,7 @@ package de.symeda.sormas.ui.travelentry;
 
 import java.util.Date;
 
-import com.vaadin.ui.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;

@@ -18,12 +18,12 @@ package de.symeda.sormas.ui.environment;
 import java.util.Collections;
 import java.util.Set;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.ui.themes.ValoTheme;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
@@ -70,8 +70,8 @@ public class EnvironmentsView extends AbstractView {
 		addComponent(gridComponent);
 
 		if (UiUtil.permitted(UserRight.ENVIRONMENT_IMPORT)) {
-			Button importButton = ButtonHelper.createIconButton(Captions.actionImport, VaadinIcons.UPLOAD, e -> {
-				Window popupWindow = VaadinUiUtil.showPopupWindow(new EnvironmentImportLayout());
+			Button importButton = ButtonHelper.createIconButton(Captions.actionImport, VaadinIcon.UPLOAD, e -> {
+				Dialog popupWindow = VaadinUiUtil.showPopupWindow(new EnvironmentImportLayout());
 				popupWindow.setCaption(I18nProperties.getString(Strings.headingImportEnvironments));
 				popupWindow.addCloseListener(c -> gridComponent.reload());
 			}, ValoTheme.BUTTON_PRIMARY);
@@ -80,7 +80,7 @@ public class EnvironmentsView extends AbstractView {
 		}
 
 		if (UiUtil.permitted(UserRight.ENVIRONMENT_EXPORT)) {
-			Button exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcons.TABLE, null, ValoTheme.BUTTON_PRIMARY);
+			Button exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcon.TABLE, null, ValoTheme.BUTTON_PRIMARY);
 			exportButton.setDescription(I18nProperties.getDescription(Descriptions.descExportButton));
 			addHeaderComponent(exportButton);
 
@@ -93,7 +93,7 @@ public class EnvironmentsView extends AbstractView {
 		if (UiUtil.permitted(UserRight.ENVIRONMENT_CREATE)) {
 			final Button btnNewContact = ButtonHelper.createIconButton(
 				Captions.environmentNewEnvironment,
-				VaadinIcons.PLUS_CIRCLE,
+				VaadinIcon.PLUS_CIRCLE,
 				e -> ControllerProvider.getEnvironmentController().create(),
 				ValoTheme.BUTTON_PRIMARY);
 			addHeaderComponent(btnNewContact);

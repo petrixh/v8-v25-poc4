@@ -2,8 +2,8 @@ package de.symeda.sormas.ui.environment;
 
 import java.util.List;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.environment.EnvironmentCriteria;
@@ -22,7 +22,7 @@ import de.symeda.sormas.ui.utils.VaadinUiUtil;
 public class EnvironmentList extends PaginationList<EnvironmentIndexDto> {
 
 	private final EnvironmentCriteria criteria;
-	private final Label noEnvironmentLabel;
+	private final Span noEnvironmentLabel;
 	private final boolean isEditAllowed;
 	private final EventReferenceDto event;
 
@@ -33,7 +33,7 @@ public class EnvironmentList extends PaginationList<EnvironmentIndexDto> {
 		criteria = new EnvironmentCriteria();
 		criteria.event(event);
 		noEnvironmentLabel =
-			new Label(String.format(I18nProperties.getCaption(Captions.environmentNoEnvs), DataHelper.getShortUuid(event.getUuid())));
+			new Span(String.format(I18nProperties.getCaption(Captions.environmentNoEnvs), DataHelper.getShortUuid(event.getUuid())));
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class EnvironmentList extends PaginationList<EnvironmentIndexDto> {
 				listEntry.addUnlinkEnvironmentListener(i, (Button.ClickListener) clickEvent -> {
 					VaadinUiUtil.showConfirmationPopup(
 						I18nProperties.getString(Strings.headingUnlinkEnvironmentFromEvent),
-						new Label(I18nProperties.getString(Strings.confirmationUnlinkEnvironmentFromEvent)),
+						new Span(I18nProperties.getString(Strings.confirmationUnlinkEnvironmentFromEvent)),
 						I18nProperties.getString(Strings.yes),
 						I18nProperties.getString(Strings.no),
 						480,

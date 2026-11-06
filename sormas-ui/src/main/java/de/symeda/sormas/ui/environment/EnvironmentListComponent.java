@@ -2,12 +2,12 @@ package de.symeda.sormas.ui.environment;
 
 import java.util.function.Consumer;
 
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 import de.symeda.sormas.api.FacadeProvider;
@@ -69,15 +69,15 @@ public class EnvironmentListComponent extends VerticalLayout {
 		addComponent(environmentList);
 		environmentList.reload();
 
-		Label environmentLabel = new Label(heading);
-		environmentLabel.addStyleName(CssStyles.H3);
+		Span environmentLabel = new Span(heading);
+		environmentLabel.addClassName(CssStyles.H3);
 		componentHeader.addComponent(environmentLabel);
 
 		if (UiUtil.permitted(isEditAllowed, UserRight.ENVIRONMENT_CREATE)) {
 			createButton = ButtonHelper.createButton(I18nProperties.getCaption(Captions.linkEnvironment));
-			createButton.setIcon(VaadinIcons.PLUS_CIRCLE);
+			createButton.setIcon(VaadinIcon.PLUS_CIRCLE);
 			createButton.addClickListener(e -> actionCallback.accept(linkEnvironmentCallback));
-			createButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+			createButton.addClassName(ValoTheme.BUTTON_PRIMARY);
 
 			if (bottomCreateButton) {
 				HorizontalLayout buttonLayout = new HorizontalLayout();

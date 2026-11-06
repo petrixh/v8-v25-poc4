@@ -16,8 +16,8 @@
 package de.symeda.sormas.ui.travelentry.travelentrylink;
 
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.travelentry.TravelEntryListEntryDto;
@@ -40,11 +40,11 @@ public class TravelEntryListEntry extends SideComponentField {
 		uuidReportDateLayout.setMargin(false);
 		uuidReportDateLayout.setSpacing(true);
 
-		Label travelEntryUuidLabel = new Label(DataHelper.getShortUuid(travelEntry.getUuid()));
+		Span travelEntryUuidLabel = new Span(DataHelper.getShortUuid(travelEntry.getUuid()));
 		travelEntryUuidLabel.setDescription(travelEntry.getUuid());
 		uuidReportDateLayout.addComponent(travelEntryUuidLabel);
 
-		Label reportDateLabel = new Label(
+		Span reportDateLabel = new Span(
 			I18nProperties.getPrefixCaption(TravelEntryListEntryDto.I18N_PREFIX, TravelEntryListEntryDto.REPORT_DATE)
 				+ SEPARATOR
 				+ DateFormatHelper.formatDate(travelEntry.getReportDate()));
@@ -59,12 +59,12 @@ public class TravelEntryListEntry extends SideComponentField {
 		diseasePointOfEntryLayout.setMargin(false);
 		diseasePointOfEntryLayout.setSpacing(true);
 
-		Label diseaseLabel = new Label(DataHelper.toStringNullable(travelEntry.getDisease()));
+		Span diseaseLabel = new Span(DataHelper.toStringNullable(travelEntry.getDisease()));
 		CssStyles.style(diseaseLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
 		diseasePointOfEntryLayout.addComponent(diseaseLabel);
 
-		Label pointOfEntryLabel =
-			new Label(I18nProperties.getPrefixCaption(TravelEntryListEntryDto.POINT_OF_ENTRY_I18N_PREFIX, travelEntry.getPointOfEntryName()));
+		Span pointOfEntryLabel =
+			new Span(I18nProperties.getPrefixCaption(TravelEntryListEntryDto.POINT_OF_ENTRY_I18N_PREFIX, travelEntry.getPointOfEntryName()));
 		diseasePointOfEntryLayout.addComponent(pointOfEntryLabel);
 
 		diseasePointOfEntryLayout.setWidthFull();

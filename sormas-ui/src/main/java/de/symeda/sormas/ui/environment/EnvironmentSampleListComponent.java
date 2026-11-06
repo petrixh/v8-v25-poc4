@@ -19,10 +19,10 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.environment.EnvironmentDto;
@@ -93,7 +93,7 @@ public class EnvironmentSampleListComponent extends SideComponent {
 			} else {
 				listLayout.removeAllComponents();
 				updatePaginationLayout();
-				Label noSamplesLabel = new Label(I18nProperties.getString(Strings.infoNoEnvironmentSamples));
+				Span noSamplesLabel = new Span(I18nProperties.getString(Strings.infoNoEnvironmentSamples));
 				listLayout.addComponent(noSamplesLabel);
 			}
 
@@ -138,22 +138,22 @@ public class EnvironmentSampleListComponent extends SideComponent {
 			topLeftLayout.setMargin(false);
 			topLeftLayout.setSpacing(false);
 
-			Label materialLabel = new Label(DataHelper.toStringNullable(sampleIndex.getSampleMaterial()));
+			Span materialLabel = new Span(DataHelper.toStringNullable(sampleIndex.getSampleMaterial()));
 			CssStyles.style(materialLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
 			materialLabel.setWidth(50, Unit.PERCENTAGE);
 			topLeftLayout.addComponent(materialLabel);
 
 			if (sampleIndex.getSpecimenCondition() == SpecimenCondition.NOT_ADEQUATE) {
-				Label resultLabel = new Label();
+				Span resultLabel = new Span();
 				CssStyles.style(resultLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
 
 				resultLabel.setValue(DataHelper.toStringNullable(sampleIndex.getSpecimenCondition()));
-				resultLabel.addStyleName(CssStyles.LABEL_WARNING);
+				resultLabel.addClassName(CssStyles.LABEL_WARNING);
 
 				topLeftLayout.addComponent(resultLabel);
 			}
 
-			Label dispatchReceiveLabel = new Label();
+			Span dispatchReceiveLabel = new Span();
 			CssStyles.style(dispatchReceiveLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
 
 			if (sampleIndex.isReceived()) {
@@ -169,15 +169,15 @@ public class EnvironmentSampleListComponent extends SideComponent {
 
 			topLeftLayout.addComponent(dispatchReceiveLabel);
 
-			Label dateTimeLabel = new Label(
+			Span dateTimeLabel = new Span(
 				I18nProperties.getPrefixCaption(EnvironmentSampleIndexDto.I18N_PREFIX, EnvironmentSampleIndexDto.SAMPLE_DATE_TIME) + ": "
 					+ DateFormatHelper.formatDate(sampleIndex.getSampleDateTime()));
 			topLeftLayout.addComponent(dateTimeLabel);
 
-			Label labLabel = new Label(DataHelper.toStringNullable(sampleIndex.getLaboratory()));
+			Span labLabel = new Span(DataHelper.toStringNullable(sampleIndex.getLaboratory()));
 			topLeftLayout.addComponent(labLabel);
 
-			Label testCountLabel = new Label(
+			Span testCountLabel = new Span(
 				I18nProperties.getPrefixCaption(EnvironmentSampleIndexDto.I18N_PREFIX, EnvironmentSampleIndexDto.NUMBER_OF_TESTS) + ": "
 					+ sampleIndex.getNumberOfTests());
 			topLeftLayout.addComponent(testCountLabel);
@@ -187,10 +187,10 @@ public class EnvironmentSampleListComponent extends SideComponent {
 				latestTestLayout.setMargin(false);
 				latestTestLayout.setSpacing(false);
 
-				Label heading = new Label(I18nProperties.getCaption(Captions.latestPathogenTest));
+				Span heading = new Span(I18nProperties.getCaption(Captions.latestPathogenTest));
 				CssStyles.style(heading, CssStyles.LABEL_BOLD);
 
-				Label testDate = new Label(sampleIndex.getLatestPathogenTestResult().toString());
+				Span testDate = new Span(sampleIndex.getLatestPathogenTestResult().toString());
 				latestTestLayout.addComponents(heading, testDate);
 				topLeftLayout.addComponent(latestTestLayout);
 			}

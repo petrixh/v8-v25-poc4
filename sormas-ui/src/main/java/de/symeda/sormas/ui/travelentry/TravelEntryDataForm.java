@@ -16,14 +16,14 @@ import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -138,8 +138,8 @@ public class TravelEntryDataForm extends AbstractEditForm<TravelEntryDto> {
 
 	@Override
 	protected void addFields() {
-		Label travelEntryDataHeadingLabel = new Label(I18nProperties.getString(Strings.headingTravelEntryData));
-		travelEntryDataHeadingLabel.addStyleName(H3);
+		Span travelEntryDataHeadingLabel = new Span(I18nProperties.getString(Strings.headingTravelEntryData));
+		travelEntryDataHeadingLabel.addClassName(H3);
 		getContent().addComponent(travelEntryDataHeadingLabel, TRAVEL_ENTRY_HEADING_LOC);
 
 		addField(TravelEntryDto.REPORT_DATE, DateField.class);
@@ -160,14 +160,14 @@ public class TravelEntryDataForm extends AbstractEditForm<TravelEntryDto> {
 		TextField diseaseVariantDetailsField = addField(TravelEntryDto.DISEASE_VARIANT_DETAILS, TextField.class);
 		diseaseVariantDetailsField.setVisible(false);
 
-		addField(TravelEntryDto.RECOVERED).addStyleNames(CssStyles.FORCE_CAPTION_CHECKBOX);
-		addField(TravelEntryDto.VACCINATED).addStyleNames(CssStyles.FORCE_CAPTION_CHECKBOX);
-		addField(TravelEntryDto.TESTED_NEGATIVE).addStyleNames(CssStyles.FORCE_CAPTION_CHECKBOX);
+		addField(TravelEntryDto.RECOVERED).addClassNames(CssStyles.FORCE_CAPTION_CHECKBOX);
+		addField(TravelEntryDto.VACCINATED).addClassNames(CssStyles.FORCE_CAPTION_CHECKBOX);
+		addField(TravelEntryDto.TESTED_NEGATIVE).addClassNames(CssStyles.FORCE_CAPTION_CHECKBOX);
 
 		addField(TravelEntryDto.DATE_OF_ARRIVAL).setRequired(true);
 
-		Label jurisdictionHeadingLabel = new Label(I18nProperties.getString(Strings.headingResponsibleJurisdiction));
-		jurisdictionHeadingLabel.addStyleName(H3);
+		Span jurisdictionHeadingLabel = new Span(I18nProperties.getString(Strings.headingResponsibleJurisdiction));
+		jurisdictionHeadingLabel.addClassName(H3);
 		getContent().addComponent(jurisdictionHeadingLabel, RESPONSIBLE_JURISDICTION_HEADING_LOC);
 
 		responsibleRegion = addInfrastructureField(TravelEntryDto.RESPONSIBLE_REGION);
@@ -180,10 +180,10 @@ public class TravelEntryDataForm extends AbstractEditForm<TravelEntryDto> {
 		InfrastructureFieldsHelper.initInfrastructureFields(responsibleRegion, responsibleDistrict, responsibleCommunity);
 
 		differentPointOfEntryJurisdiction = addCustomField(DIFFERENT_POINT_OF_ENTRY_JURISDICTION, Boolean.class, CheckBox.class);
-		differentPointOfEntryJurisdiction.addStyleName(VSPACE_3);
+		differentPointOfEntryJurisdiction.addClassName(VSPACE_3);
 
-		Label pointOfEntryHeadingLabel = new Label(I18nProperties.getCaption(Captions.travelEntryPointOfEntry));
-		pointOfEntryHeadingLabel.addStyleName(H3);
+		Span pointOfEntryHeadingLabel = new Span(I18nProperties.getCaption(Captions.travelEntryPointOfEntry));
+		pointOfEntryHeadingLabel.addClassName(H3);
 		getContent().addComponent(pointOfEntryHeadingLabel, POINT_OF_ENTRY_HEADING_LOC);
 
 		ComboBox regionCombo = addInfrastructureField(TravelEntryDto.REGION);
@@ -206,7 +206,7 @@ public class TravelEntryDataForm extends AbstractEditForm<TravelEntryDto> {
 
 		regionCombo.addItems(FacadeProvider.getRegionFacade().getAllActiveByServerCountry());
 		regionCombo.addValueChangeListener(e -> {
-			RegionReferenceDto regionDto = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto regionDto = (RegionReferenceDto) e.getValue();
 			FieldHelper
 				.updateItems(districtCombo, regionDto != null ? FacadeProvider.getDistrictFacade().getAllActiveByRegion(regionDto.getUuid()) : null);
 		});
@@ -383,7 +383,7 @@ public class TravelEntryDataForm extends AbstractEditForm<TravelEntryDto> {
 		});
 
 		diseaseField.addValueChangeListener((ValueChangeListener) valueChangeEvent -> {
-			Disease disease = (Disease) valueChangeEvent.getProperty().getValue();
+			Disease disease = (Disease) valueChangeEvent.getValue();
 			List<DiseaseVariant> diseaseVariants =
 				FacadeProvider.getCustomizableEnumFacade().getEnumValues(CustomizableEnumType.DISEASE_VARIANT, disease);
 			FieldHelper.updateItems(diseaseVariantField, diseaseVariants);
@@ -391,7 +391,7 @@ public class TravelEntryDataForm extends AbstractEditForm<TravelEntryDto> {
 				.setVisible(disease != null && isVisibleAllowed(TravelEntryDto.DISEASE_VARIANT) && CollectionUtils.isNotEmpty(diseaseVariants));
 		});
 		diseaseVariantField.addValueChangeListener(e -> {
-			DiseaseVariant diseaseVariant = (DiseaseVariant) e.getProperty().getValue();
+			DiseaseVariant diseaseVariant = (DiseaseVariant) e.getValue();
 			diseaseVariantDetailsField.setVisible(diseaseVariant != null && diseaseVariant.matchPropertyValue(DiseaseVariant.HAS_DETAILS, true));
 		});
 	}
@@ -480,7 +480,7 @@ public class TravelEntryDataForm extends AbstractEditForm<TravelEntryDto> {
 	}
 
 	@Override
-	public void setValue(TravelEntryDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(TravelEntryDto newFieldValue) {
 		updateVisibilityDifferentPointOfEntryJurisdiction(newFieldValue);
 		updatePointsOfEntryForDistrict(
 			newFieldValue.getPointOfEntryDistrict() != null ? newFieldValue.getPointOfEntryDistrict() : newFieldValue.getResponsibleDistrict());

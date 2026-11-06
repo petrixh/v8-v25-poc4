@@ -17,8 +17,8 @@ package de.symeda.sormas.ui.travelentry.travelentrylink;
 
 import java.util.List;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -56,7 +56,7 @@ public class TravelEntryList extends PaginationList<TravelEntryListEntryDto> {
 			showPage(1);
 		} else {
 			updatePaginationLayout();
-			Label noTravelEntriesLabel = new Label(I18nProperties.getCaption(Captions.travelEntriesNoTravelEntriesForPerson));
+			Span noTravelEntriesLabel = new Span(I18nProperties.getCaption(Captions.travelEntriesNoTravelEntriesForPerson));
 			listLayout.addComponent(noTravelEntriesLabel);
 		}
 	}

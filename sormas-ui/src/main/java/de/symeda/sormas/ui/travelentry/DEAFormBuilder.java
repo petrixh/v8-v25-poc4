@@ -3,10 +3,10 @@ package de.symeda.sormas.ui.travelentry;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.Component;
 import com.vaadin.ui.GridLayout;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.travelentry.DeaContentEntry;
 import de.symeda.sormas.api.utils.fieldaccess.UiFieldAccessCheckers;

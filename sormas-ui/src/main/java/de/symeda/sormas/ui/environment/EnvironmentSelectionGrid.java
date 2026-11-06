@@ -2,8 +2,8 @@ package de.symeda.sormas.ui.environment;
 
 import java.util.Date;
 
-import com.vaadin.shared.ui.grid.HeightMode;
-import com.vaadin.ui.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;

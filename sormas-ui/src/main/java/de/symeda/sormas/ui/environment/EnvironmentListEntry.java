@@ -1,11 +1,11 @@
 package de.symeda.sormas.ui.environment;
 
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 import de.symeda.sormas.api.environment.EnvironmentIndexDto;
@@ -41,19 +41,19 @@ public class EnvironmentListEntry extends SideComponentField {
 		{
 			topLeftLayout.setMargin(false);
 			topLeftLayout.setSpacing(false);
-			Label environmentNameLabel = new Label(DataHelper.toStringNullable(environment.getEnvironmentName()));
+			Span environmentNameLabel = new Span(DataHelper.toStringNullable(environment.getEnvironmentName()));
 			CssStyles.style(environmentNameLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
 			topLeftLayout.addComponent(environmentNameLabel);
-			Label environmentMediaLabel = new Label(
+			Span environmentMediaLabel = new Span(
 				I18nProperties.getCaption(Captions.Event_environmentMedia) + ": " + DataHelper.toStringNullable(environment.getEnvironmentMedia()));
 			CssStyles.style(environmentMediaLabel, CssStyles.HSPACE_RIGHT_4);
 			topLeftLayout.addComponent(environmentMediaLabel);
-			Label investigationStatusLabel = new Label(
+			Span investigationStatusLabel = new Span(
 				I18nProperties.getCaption(Captions.Event_environment_investigationStatus) + ": "
 					+ DataHelper.toStringNullable(environment.getInvestigationStatus()));
 			CssStyles.style(investigationStatusLabel);
 			topLeftLayout.addComponent(investigationStatusLabel);
-			Label envReportDtLabel = new Label(
+			Span envReportDtLabel = new Span(
 				I18nProperties.getCaption(Captions.Event_environmentReportDate) + ": "
 					+ DataHelper.toStringNullable(DateHelper.formatLocalDate(environment.getReportDate(), I18nProperties.getUserLanguage())));
 			CssStyles.style(envReportDtLabel);
@@ -63,7 +63,7 @@ public class EnvironmentListEntry extends SideComponentField {
 			topLayout.setComponentAlignment(topLeftLayout, Alignment.TOP_LEFT);
 			// TOP RIGHT
 			VerticalLayout topRightLayout = new VerticalLayout();
-			topRightLayout.addStyleName(CssStyles.ALIGN_RIGHT);
+			topRightLayout.addClassName(CssStyles.ALIGN_RIGHT);
 			topLayout.addComponent(topRightLayout);
 			topLayout.setComponentAlignment(topRightLayout, Alignment.TOP_RIGHT);
 		}
@@ -75,7 +75,7 @@ public class EnvironmentListEntry extends SideComponentField {
 			editButton = ButtonHelper.createIconButtonWithCaption(
 				"edit-environment-" + rowIndex,
 				null,
-				VaadinIcons.PENCIL,
+				VaadinIcon.PENCIL,
 				null,
 				ValoTheme.BUTTON_LINK,
 				CssStyles.BUTTON_COMPACT);
@@ -93,7 +93,7 @@ public class EnvironmentListEntry extends SideComponentField {
 			unlinkEnvironmentButton = ButtonHelper.createIconButtonWithCaption(
 				"unlink-environment-" + rowIndex,
 				null,
-				VaadinIcons.UNLINK,
+				VaadinIcon.UNLINK,
 				null,
 				ValoTheme.BUTTON_LINK,
 				CssStyles.BUTTON_COMPACT);

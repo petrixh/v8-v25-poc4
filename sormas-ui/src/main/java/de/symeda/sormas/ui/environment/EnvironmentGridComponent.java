@@ -19,9 +19,9 @@ import java.util.HashMap;
 import java.util.Set;
 
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
@@ -81,7 +81,7 @@ public class EnvironmentGridComponent extends VerticalLayout {
 		statusFilterBar.setMargin(false);
 		statusFilterBar.setSpacing(true);
 		statusFilterBar.setWidthFull();
-		statusFilterBar.addStyleName(CssStyles.VSPACE_3);
+		statusFilterBar.addClassName(CssStyles.VSPACE_3);
 
 		HorizontalLayout buttonFilterLayout = new HorizontalLayout();
 		// investigation status filter

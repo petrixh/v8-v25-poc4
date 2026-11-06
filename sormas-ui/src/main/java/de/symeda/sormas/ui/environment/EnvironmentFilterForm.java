@@ -22,11 +22,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.vaadin.ui.CustomLayout;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.environment.EnvironmentCriteria;
@@ -157,7 +157,7 @@ public class EnvironmentFilterForm extends AbstractFilterForm<EnvironmentCriteri
 	protected void applyDependenciesOnFieldChange(String propertyId, Property.ValueChangeEvent event) {
 		switch (propertyId) {
 		case EnvironmentCriteria.REGION:
-			RegionReferenceDto region = (RegionReferenceDto) event.getProperty().getValue();
+			RegionReferenceDto region = (RegionReferenceDto) event.getValue();
 			if (region != null) {
 				applyRegionFilterDependency(region, EnvironmentCriteria.DISTRICT);
 				clearAndDisableFields(EnvironmentCriteria.COMMUNITY);
@@ -169,7 +169,7 @@ public class EnvironmentFilterForm extends AbstractFilterForm<EnvironmentCriteri
 
 			break;
 		case EnvironmentCriteria.DISTRICT:
-			DistrictReferenceDto district = (DistrictReferenceDto) event.getProperty().getValue();
+			DistrictReferenceDto district = (DistrictReferenceDto) event.getValue();
 			if (district != null) {
 				applyDistrictDependency(district, EnvironmentCriteria.COMMUNITY);
 			} else {

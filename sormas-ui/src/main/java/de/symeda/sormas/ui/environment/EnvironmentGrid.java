@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import com.vaadin.ui.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;

@@ -7,10 +7,10 @@ import java.util.function.Consumer;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.navigator.Navigator;
+import de.symeda.sormas.ui.navigation.Navigator;
 import com.vaadin.server.Page;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Window;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -187,7 +187,7 @@ public class TravelEntryController {
 			if (!travelEntryEditForm.getFieldGroup().isModified()) {
 				TravelEntryDto travelEntryDto = travelEntryEditForm.getValue();
 				FacadeProvider.getTravelEntryFacade().save(travelEntryDto);
-				Notification.show(I18nProperties.getString(Strings.messageTravelEntrySaved), Notification.Type.WARNING_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageTravelEntrySaved), NotificationHelper.Type.WARNING_MESSAGE);
 				SormasUI.refreshView();
 			}
 		});
@@ -270,7 +270,7 @@ public class TravelEntryController {
 	private Consumer<List<TravelEntryIndexDto>> bulkOperationCallback(
 		TravelEntryGrid travelEntryGrid,
 		Runnable noEntriesRemainingCallback,
-		Window popupWindow) {
+		Dialog popupWindow) {
 		return remainingTravelEntries -> {
 			if (popupWindow != null) {
 				popupWindow.close();
@@ -290,7 +290,7 @@ public class TravelEntryController {
 			new Notification(
 				I18nProperties.getString(Strings.headingNoContactsSelected),
 				I18nProperties.getString(Strings.messageNoContactsSelected),
-				Notification.Type.WARNING_MESSAGE,
+				NotificationHelper.Type.WARNING_MESSAGE,
 				false).show(Page.getCurrent());
 		} else {
 			ControllerProvider.getExternalEmailController()

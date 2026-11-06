@@ -3,7 +3,7 @@ package de.symeda.sormas.ui.travelentry;
 import java.util.Collections;
 import java.util.List;
 
-import com.vaadin.navigator.ViewChangeListener;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 
 import de.symeda.sormas.api.CoreFacade;
 import de.symeda.sormas.api.FacadeProvider;

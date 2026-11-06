@@ -25,20 +25,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.CheckBox;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -66,26 +65,26 @@ public class DatabaseExportView extends AbstractStatisticsView {
 		databaseTableToggles = new HashMap<>();
 		databaseExportLayout = new VerticalLayout();
 		databaseExportLayout.setSpacing(false);
-		databaseExportLayout.setMargin(false);
+		databaseExportLayout.setPadding(false);
 		HorizontalLayout headerLayout = new HorizontalLayout();
 		headerLayout.setSpacing(true);
-		headerLayout.setMargin(false);
-		Label infoLabel = new Label(I18nProperties.getString(Strings.infoDatabaseExportTables));
-		headerLayout.addComponent(infoLabel);
+		headerLayout.setPadding(false);
+		Span infoLabel = new Span(I18nProperties.getString(Strings.infoDatabaseExportTables));
+		headerLayout.add(infoLabel);
 		headerLayout.setComponentAlignment(infoLabel, Alignment.MIDDLE_LEFT);
-		headerLayout.addComponent(createSelectionButtonsLayout());
-		databaseExportLayout.addComponent(headerLayout);
-		databaseExportLayout.addComponent(createDatabaseTablesLayout());
+		headerLayout.add(createSelectionButtonsLayout());
+		databaseExportLayout.add(headerLayout);
+		databaseExportLayout.add(createDatabaseTablesLayout());
 
-		Button exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcons.DOWNLOAD, null, ValoTheme.BUTTON_PRIMARY);
+		Button exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcon.DOWNLOAD, null, CssStyles.BUTTON_PRIMARY);
 
 		StreamResource streamResource = DownloadUtil
 			.createDatabaseExportStreamResource(this, "sormas_export_" + DateHelper.formatDateForExport(new Date()) + ".zip", "application/zip");
 		FileDownloader fileDownloader = new FileDownloader(streamResource);
 		fileDownloader.extend(exportButton);
 
-		databaseExportLayout.addComponent(exportButton);
-		databaseExportLayout.setMargin(true);
+		databaseExportLayout.add(exportButton);
+		databaseExportLayout.setPadding(true);
 		databaseExportLayout.setSpacing(true);
 
 		addComponent(databaseExportLayout);
@@ -101,16 +100,16 @@ public class DatabaseExportView extends AbstractStatisticsView {
 
 	private HorizontalLayout createSelectionButtonsLayout() {
 		HorizontalLayout selectionButtonsLayout = new HorizontalLayout();
-		selectionButtonsLayout.setMargin(false);
+		selectionButtonsLayout.setPadding(false);
 		selectionButtonsLayout.setSpacing(true);
 
 		Button selectAll = ButtonHelper.createButton(Captions.actionSelectAll, e -> {
 			for (CheckBox checkBox : databaseTableToggles.keySet()) {
 				checkBox.setValue(true);
 			}
-		}, ValoTheme.BUTTON_LINK);
+		}, CssStyles.BUTTON_LINK);
 
-		selectionButtonsLayout.addComponent(selectAll);
+		selectionButtonsLayout.add(selectAll);
 
 		Button selectAllSormasData = ButtonHelper.createButton(Captions.exportSelectSormasData, e -> {
 			for (CheckBox checkBox : databaseTableToggles.keySet()) {
@@ -120,53 +119,53 @@ public class DatabaseExportView extends AbstractStatisticsView {
 					checkBox.setValue(false);
 				}
 			}
-		}, ValoTheme.BUTTON_LINK);
+		}, CssStyles.BUTTON_LINK);
 
-		selectionButtonsLayout.addComponent(selectAllSormasData);
+		selectionButtonsLayout.add(selectAllSormasData);
 
 		Button deselectAll = ButtonHelper.createButton(Captions.actionDeselectAll, e -> {
 			for (CheckBox checkBox : databaseTableToggles.keySet()) {
 				checkBox.setValue(false);
 			}
-		}, ValoTheme.BUTTON_LINK);
+		}, CssStyles.BUTTON_LINK);
 
-		selectionButtonsLayout.addComponent(deselectAll);
+		selectionButtonsLayout.add(deselectAll);
 
 		return selectionButtonsLayout;
 	}
 
 	private HorizontalLayout createDatabaseTablesLayout() {
 		HorizontalLayout databaseTablesLayout = new HorizontalLayout();
-		databaseTablesLayout.setMargin(false);
+		databaseTablesLayout.setPadding(false);
 		databaseTablesLayout.setSpacing(true);
 
 		VerticalLayout sormasDataLayout = new VerticalLayout();
-		sormasDataLayout.setMargin(false);
+		sormasDataLayout.setPadding(false);
 		sormasDataLayout.setSpacing(false);
-		Label sormasDataHeadline = new Label(I18nProperties.getCaption(Captions.exportSormasData));
+		Span sormasDataHeadline = new Span(I18nProperties.getCaption(Captions.exportSormasData));
 		CssStyles.style(sormasDataHeadline, CssStyles.H4);
-		sormasDataLayout.addComponent(sormasDataHeadline);
+		sormasDataLayout.add(sormasDataHeadline);
 
 		VerticalLayout infrastructureDataLayout = new VerticalLayout();
-		infrastructureDataLayout.setMargin(false);
+		infrastructureDataLayout.setPadding(false);
 		infrastructureDataLayout.setSpacing(false);
-		Label infrastructureDataHeadline = new Label(I18nProperties.getCaption(Captions.exportInfrastructureData));
+		Span infrastructureDataHeadline = new Span(I18nProperties.getCaption(Captions.exportInfrastructureData));
 		CssStyles.style(infrastructureDataHeadline, CssStyles.H4);
-		infrastructureDataLayout.addComponent(infrastructureDataHeadline);
+		infrastructureDataLayout.add(infrastructureDataHeadline);
 
 		VerticalLayout configurationDataLayout = new VerticalLayout();
-		configurationDataLayout.setMargin(false);
+		configurationDataLayout.setPadding(false);
 		configurationDataLayout.setSpacing(false);
-		Label configurationDataHeadline = new Label(I18nProperties.getCaption(Captions.exportConfigurationData));
+		Span configurationDataHeadline = new Span(I18nProperties.getCaption(Captions.exportConfigurationData));
 		CssStyles.style(configurationDataHeadline, CssStyles.H4);
-		configurationDataLayout.addComponent(configurationDataHeadline);
+		configurationDataLayout.add(configurationDataHeadline);
 
 		VerticalLayout externalDataLayout = new VerticalLayout();
-		externalDataLayout.setMargin(false);
+		externalDataLayout.setPadding(false);
 		externalDataLayout.setSpacing(false);
-		Label externalDataHeadline = new Label(I18nProperties.getCaption(Captions.exportExternalData));
+		Span externalDataHeadline = new Span(I18nProperties.getCaption(Captions.exportExternalData));
 		CssStyles.style(externalDataHeadline, CssStyles.H4);
-		externalDataLayout.addComponent(externalDataHeadline);
+		externalDataLayout.add(externalDataHeadline);
 
 		List<FeatureConfigurationDto> featureConfigurations = FacadeProvider.getFeatureConfigurationFacade().getActiveServerFeatureConfigurations();
 		ConfigFacade configFacade = FacadeProvider.getConfigFacade();
@@ -188,16 +187,16 @@ public class DatabaseExportView extends AbstractStatisticsView {
 
 			switch (databaseTable.getDatabaseTableType()) {
 			case SORMAS:
-				sormasDataLayout.addComponent(checkBox);
+				sormasDataLayout.add(checkBox);
 				break;
 			case INFRASTRUCTURE:
-				infrastructureDataLayout.addComponent(checkBox);
+				infrastructureDataLayout.add(checkBox);
 				break;
 			case CONFIGURATION:
-				configurationDataLayout.addComponent(checkBox);
+				configurationDataLayout.add(checkBox);
 				break;
 			case EXTERNAL:
-				externalDataLayout.addComponent(checkBox);
+				externalDataLayout.add(checkBox);
 				break;
 			default:
 				throw new IllegalArgumentException(databaseTable.getDatabaseTableType().toString());
@@ -206,10 +205,10 @@ public class DatabaseExportView extends AbstractStatisticsView {
 			databaseTableToggles.put(checkBox, databaseTable);
 		}
 
-		databaseTablesLayout.addComponent(sormasDataLayout);
-		databaseTablesLayout.addComponent(infrastructureDataLayout);
-		databaseTablesLayout.addComponent(configurationDataLayout);
-		databaseTablesLayout.addComponent(externalDataLayout);
+		databaseTablesLayout.add(sormasDataLayout);
+		databaseTablesLayout.add(infrastructureDataLayout);
+		databaseTablesLayout.add(configurationDataLayout);
+		databaseTablesLayout.add(externalDataLayout);
 		return databaseTablesLayout;
 	}
 

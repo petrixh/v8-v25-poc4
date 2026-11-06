@@ -21,8 +21,10 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.TreeMap;
 
-import com.vaadin.v7.shared.ui.grid.HeightMode;
-import com.vaadin.v7.ui.Grid;
+import com.vaadin.flow.component.Unit;
+
+import de.symeda.sormas.ui.utils.grid.HeightMode;
+import de.symeda.sormas.ui.utils.grid.Grid;
 
 import de.symeda.sormas.api.ReferenceDto;
 import de.symeda.sormas.api.i18n.Captions;

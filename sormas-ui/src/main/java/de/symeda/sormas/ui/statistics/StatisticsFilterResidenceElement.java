@@ -4,7 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -27,7 +28,7 @@ public class StatisticsFilterResidenceElement extends StatisticsFilterElement {
 
 	public StatisticsFilterResidenceElement(int rowIndex) {
 		setSpacing(true);
-		addStyleName(CssStyles.LAYOUT_MINIMAL);
+		addClassName(CssStyles.LAYOUT_MINIMAL);
 		setWidth(100, Unit.PERCENTAGE);
 
 		VerticalLayout firstColumnLayout = new VerticalLayout();
@@ -54,16 +55,16 @@ public class StatisticsFilterResidenceElement extends StatisticsFilterElement {
 		cityElement = new StatisticsFilterSimpleTextElement(I18nProperties.getCaption(Captions.city), rowIndex);
 		postcodeElement = new StatisticsFilterSimpleTextElement(I18nProperties.getCaption(Captions.postcode), rowIndex);
 
-		firstColumnLayout.addComponent(regionElement);
-		secondColumnLayout.addComponent(districtElement);
+		firstColumnLayout.add(regionElement);
+		secondColumnLayout.add(districtElement);
 
-		firstColumnLayout.addComponent(communityElement);
-		secondColumnLayout.addComponent(cityElement);
+		firstColumnLayout.add(communityElement);
+		secondColumnLayout.add(cityElement);
 
-		firstColumnLayout.addComponent(postcodeElement);
+		firstColumnLayout.add(postcodeElement);
 
-		addComponent(firstColumnLayout);
-		addComponent(secondColumnLayout);
+		add(firstColumnLayout);
+		add(secondColumnLayout);
 
 		regionElement.setValueChangeListener(e -> {
 			districtElement.updateDropdownContent();

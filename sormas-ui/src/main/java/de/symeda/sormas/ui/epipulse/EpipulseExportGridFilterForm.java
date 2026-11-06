@@ -15,8 +15,8 @@
 
 package de.symeda.sormas.ui.epipulse;
 
-import com.vaadin.ui.Button;
-import com.vaadin.v7.ui.PopupDateField;
+import com.vaadin.flow.component.button.Button;
+import de.symeda.sormas.ui.utils.fields.PopupDateField;
 
 import de.symeda.sormas.api.epipulse.EpipulseExportCriteria;
 import de.symeda.sormas.api.epipulse.EpipulseExportIndexDto;

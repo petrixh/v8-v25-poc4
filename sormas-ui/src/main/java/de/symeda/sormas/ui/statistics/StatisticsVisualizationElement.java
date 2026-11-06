@@ -17,7 +17,7 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.statistics;
 
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
@@ -106,7 +106,7 @@ public class StatisticsVisualizationElement extends HorizontalLayout {
 								}
 							}
 
-							addComponent(displayedSubAttributeDropdown);
+							add(displayedSubAttributeDropdown);
 						}
 					};
 
@@ -115,7 +115,7 @@ public class StatisticsVisualizationElement extends HorizontalLayout {
 			}
 		}
 
-		addComponent(displayedAttributeDropdown);
+		add(displayedAttributeDropdown);
 	}
 
 	private void removeSelections(MenuItem parentItem) {
@@ -127,7 +127,7 @@ public class StatisticsVisualizationElement extends HorizontalLayout {
 	private void resetSubAttributeDropdown() {
 		displayedSubAttributeItem.removeChildren();
 		displayedSubAttributeItem.setText(I18nProperties.getCaption(Captions.statisticsSpecifySelection));
-		removeComponent(displayedSubAttributeDropdown);
+		remove(displayedSubAttributeDropdown);
 	}
 
 	public StatisticsCaseAttribute getAttribute() {

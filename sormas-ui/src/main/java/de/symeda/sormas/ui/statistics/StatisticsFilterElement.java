@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.explicatis.ext_token_field.Tokenizable;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.statistics.StatisticsGroupingKey;
 import de.symeda.sormas.api.utils.DataHelper;
@@ -31,7 +31,7 @@ import de.symeda.sormas.api.utils.DataHelper;
 public abstract class StatisticsFilterElement extends HorizontalLayout {
 
 	protected StatisticsFilterElement() {
-		setMargin(false);
+		setPadding(false);
 		setSpacing(false);
 	}
 

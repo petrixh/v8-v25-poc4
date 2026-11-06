@@ -18,8 +18,8 @@ package de.symeda.sormas.ui.epipulse;
 import java.util.Date;
 
 import com.vaadin.data.provider.DataProviderListener;
-import com.vaadin.ui.renderers.DateRenderer;
-import com.vaadin.ui.renderers.HtmlRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;

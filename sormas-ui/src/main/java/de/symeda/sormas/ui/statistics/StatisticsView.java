@@ -32,23 +32,23 @@ import java.util.function.Function;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.text.StringEscapeUtils;
 
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
-import com.vaadin.shared.ui.ContentMode;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.RadioButtonGroup;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.AgeGroup;
 import de.symeda.sormas.api.CaseMeasure;
@@ -114,9 +114,9 @@ public class StatisticsView extends AbstractStatisticsView {
 	private RadioButtonGroup<CaseCountOrIncidence> ogCaseCountOrIncidence;
 	private TextField tfIncidenceDivisor;
 	private Button exportButton;
-	private final Label emptyResultLabel;
-	private Label referenceYearLabel;
-	private Label caseIncidenceNotPossibleLabel;
+	private final Span emptyResultLabel;
+	private Span referenceYearLabel;
+	private Span caseIncidenceNotPossibleLabel;
 	private boolean showCaseIncidence;
 	private boolean hasMissingPopulationData;
 	private boolean caseIncidencePossible;
@@ -132,11 +132,11 @@ public class StatisticsView extends AbstractStatisticsView {
 		super(VIEW_NAME);
 		setWidth(100, Unit.PERCENTAGE);
 
-		emptyResultLabel = new Label(I18nProperties.getString(Strings.infoNoCasesFoundStatistics));
+		emptyResultLabel = new Span(I18nProperties.getString(Strings.infoNoCasesFoundStatistics));
 
 		// Main layout
 		VerticalLayout statisticsLayout = new VerticalLayout();
-		statisticsLayout.setMargin(true);
+		statisticsLayout.setPadding(true);
 		statisticsLayout.setSpacing(true);
 		statisticsLayout.setWidth(100, Unit.PERCENTAGE);
 
@@ -144,14 +144,14 @@ public class StatisticsView extends AbstractStatisticsView {
 		addFiltersLayout(statisticsLayout);
 
 		// Visualization layout
-		Label visualizationTitle = new Label(I18nProperties.getString(Strings.headingVisualization));
+		Span visualizationTitle = new Span(I18nProperties.getString(Strings.headingVisualization));
 		visualizationTitle.setWidthUndefined();
 		CssStyles.style(visualizationTitle, CssStyles.STATISTICS_TITLE);
-		statisticsLayout.addComponent(visualizationTitle);
+		statisticsLayout.add(visualizationTitle);
 
 		visualizationComponent = new StatisticsVisualizationComponent();
 		CssStyles.style(visualizationComponent, CssStyles.STATISTICS_TITLE_BOX);
-		statisticsLayout.addComponent(visualizationComponent);
+		statisticsLayout.add(visualizationComponent);
 		visualizationComponent.addVisualizationTypeChangedListener(visualizationType -> {
 			cbHideOtherCountries.setVisible(StatisticsVisualizationType.MAP.equals(visualizationType));
 		});
@@ -166,52 +166,52 @@ public class StatisticsView extends AbstractStatisticsView {
 		addResultsLayout(statisticsLayout);
 
 		// Disclaimer
-		Label disclaimer =
-			new Label(VaadinIcons.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoStatisticsDisclaimer), ContentMode.HTML);
-		statisticsLayout.addComponent(disclaimer);
+		Span disclaimer =
+			new Span(VaadinIcon.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoStatisticsDisclaimer), ContentMode.HTML);
+		statisticsLayout.add(disclaimer);
 
 		addComponent(statisticsLayout);
 	}
 
 	private void addFiltersLayout(VerticalLayout statisticsLayout) {
-		Label filtersLayoutTitle = new Label(I18nProperties.getString(Strings.headingFilters));
+		Span filtersLayoutTitle = new Span(I18nProperties.getString(Strings.headingFilters));
 		filtersLayoutTitle.setWidthUndefined();
 		CssStyles.style(filtersLayoutTitle, CssStyles.STATISTICS_TITLE);
-		statisticsLayout.addComponent(filtersLayoutTitle);
+		statisticsLayout.add(filtersLayoutTitle);
 
 		VerticalLayout filtersSectionLayout = new VerticalLayout();
 		CssStyles.style(filtersSectionLayout, CssStyles.STATISTICS_TITLE_BOX);
 		filtersSectionLayout.setSpacing(true);
 		filtersSectionLayout.setWidth(100, Unit.PERCENTAGE);
-		Label filtersInfoText = new Label(I18nProperties.getString(Strings.infoStatisticsFilter), ContentMode.HTML);
-		filtersSectionLayout.addComponent(filtersInfoText);
+		Span filtersInfoText = new Span(I18nProperties.getString(Strings.infoStatisticsFilter), ContentMode.HTML);
+		filtersSectionLayout.add(filtersInfoText);
 
 		filtersLayout = new VerticalLayout();
 		filtersLayout.setSpacing(true);
-		filtersLayout.setMargin(false);
-		filtersSectionLayout.addComponent(filtersLayout);
+		filtersLayout.setPadding(false);
+		filtersSectionLayout.add(filtersLayout);
 
 		// Filters footer
 		HorizontalLayout filtersSectionFooter = new HorizontalLayout();
 		{
 			filtersSectionFooter.setSpacing(true);
 
-			Button addFilterButton = ButtonHelper.createIconButton(Captions.statisticsAddFilter, VaadinIcons.PLUS, e -> {
-				filtersLayout.addComponent(createFilterComponentLayout());
-			}, ValoTheme.BUTTON_PRIMARY);
+			Button addFilterButton = ButtonHelper.createIconButton(Captions.statisticsAddFilter, VaadinIcon.PLUS, e -> {
+				filtersLayout.add(createFilterComponentLayout());
+			}, CssStyles.BUTTON_PRIMARY);
 
-			filtersSectionFooter.addComponent(addFilterButton);
+			filtersSectionFooter.add(addFilterButton);
 
 			Button resetFiltersButton = ButtonHelper.createButton(Captions.statisticsResetFilters, e -> {
-				filtersLayout.removeAllComponents();
+				filtersLayout.removeAll();
 				filterComponents.clear();
 			});
 
-			filtersSectionFooter.addComponent(resetFiltersButton);
+			filtersSectionFooter.add(resetFiltersButton);
 		}
 
-		filtersSectionLayout.addComponent(filtersSectionFooter);
-		statisticsLayout.addComponent(filtersSectionLayout);
+		filtersSectionLayout.add(filtersSectionFooter);
+		statisticsLayout.add(filtersSectionLayout);
 	}
 
 	private HorizontalLayout createFilterComponentLayout() {
@@ -221,40 +221,40 @@ public class StatisticsView extends AbstractStatisticsView {
 
 		StatisticsFilterComponent filterComponent = new StatisticsFilterComponent(filtersLayout.getComponentCount());
 
-		Button removeFilterButton = ButtonHelper.createIconButtonWithCaption("close", null, VaadinIcons.CLOSE, e -> {
+		Button removeFilterButton = ButtonHelper.createIconButtonWithCaption("close", null, VaadinIcon.CLOSE, e -> {
 			filterComponents.remove(filterComponent);
-			filtersLayout.removeComponent(filterComponentLayout);
+			filtersLayout.remove(filterComponentLayout);
 		}, CssStyles.FORCE_CAPTION);
 		removeFilterButton.setDescription(I18nProperties.getCaption(Captions.statisticsRemoveFilter));
 
-		filterComponentLayout.addComponent(removeFilterButton);
+		filterComponentLayout.add(removeFilterButton);
 		filterComponents.add(filterComponent);
-		filterComponentLayout.addComponent(filterComponent);
-		filterComponentLayout.setExpandRatio(filterComponent, 1);
+		filterComponentLayout.add(filterComponent);
+		filterComponentLayout.setFlexGrow(1, filterComponent);
 
 		return filterComponentLayout;
 	}
 
 	private void addResultsLayout(VerticalLayout statisticsLayout) {
-		Label resultsLayoutTitle = new Label(I18nProperties.getString(Strings.headingResults));
+		Span resultsLayoutTitle = new Span(I18nProperties.getString(Strings.headingResults));
 		resultsLayoutTitle.setWidthUndefined();
 		CssStyles.style(resultsLayoutTitle, CssStyles.STATISTICS_TITLE);
-		statisticsLayout.addComponent(resultsLayoutTitle);
+		statisticsLayout.add(resultsLayoutTitle);
 
 		resultsLayout = new VerticalLayout();
 		resultsLayout.setWidth(100, Unit.PERCENTAGE);
 		resultsLayout.setSpacing(true);
 		CssStyles.style(resultsLayout, CssStyles.STATISTICS_TITLE_BOX);
-		resultsLayout.addComponent(new Label(I18nProperties.getString(Strings.infoStatisticsResults)));
+		resultsLayout.add(new Span(I18nProperties.getString(Strings.infoStatisticsResults)));
 
-		statisticsLayout.addComponent(resultsLayout);
+		statisticsLayout.add(resultsLayout);
 	}
 
 	private void addOptionsLayout(VerticalLayout statisticsLayout) {
-		Label optionsTitle = new Label(I18nProperties.getCaption(Captions.options));
+		Span optionsTitle = new Span(I18nProperties.getCaption(Captions.options));
 		optionsTitle.setWidthUndefined();
 		CssStyles.style(optionsTitle, CssStyles.STATISTICS_TITLE);
-		statisticsLayout.addComponent(optionsTitle);
+		statisticsLayout.add(optionsTitle);
 
 		HorizontalLayout optionsLayout = new HorizontalLayout();
 		optionsLayout.setWidth(100, Unit.PERCENTAGE);
@@ -272,7 +272,7 @@ public class StatisticsView extends AbstractStatisticsView {
 				visualizationComponent.setStackedColumnAndPieEnabled(!showCaseIncidence);
 			});
 			CssStyles.style(ogCaseCountOrIncidence, CssStyles.VSPACE_NONE, ValoTheme.OPTIONGROUP_HORIZONTAL);
-			optionsLayout.addComponent(ogCaseCountOrIncidence);
+			optionsLayout.add(ogCaseCountOrIncidence);
 
 			tfIncidenceDivisor = new TextField(I18nProperties.getCaption(Captions.statisticsIncidenceDivisor));
 			tfIncidenceDivisor.setId("incidenceDivisor");
@@ -291,27 +291,27 @@ public class StatisticsView extends AbstractStatisticsView {
 						false).show(Page.getCurrent());
 				}
 			});
-			optionsLayout.addComponent(tfIncidenceDivisor);
+			optionsLayout.add(tfIncidenceDivisor);
 			tfIncidenceDivisor.setVisible(false);
 
 			cbShowZeroValues = new CheckBox(I18nProperties.getCaption(Captions.statisticsShowZeroValues));
 			cbShowZeroValues.setId(Captions.statisticsShowZeroValues);
 			cbShowZeroValues.setValue(false);
 			CssStyles.style(cbShowZeroValues, CssStyles.FORCE_CAPTION_CHECKBOX);
-			optionsLayout.addComponent(cbShowZeroValues);
+			optionsLayout.add(cbShowZeroValues);
 
 			cbHideOtherCountries = new CheckBox(I18nProperties.getCaption(Captions.dashboardHideOtherCountries));
 			cbHideOtherCountries.setId(Captions.dashboardHideOtherCountries);
 			cbHideOtherCountries.setValue(false);
 			CssStyles.style(cbHideOtherCountries, CssStyles.FORCE_CAPTION_CHECKBOX);
-			optionsLayout.addComponent(cbHideOtherCountries);
+			optionsLayout.add(cbHideOtherCountries);
 			cbHideOtherCountries.setVisible(StatisticsVisualizationType.MAP.equals(visualizationComponent.getVisualizationType()));
 
-			Label expandedDummy = new Label();
-			optionsLayout.addComponent(expandedDummy);
-			optionsLayout.setExpandRatio(expandedDummy, 1);
+			Span expandedDummy = new Span();
+			optionsLayout.add(expandedDummy);
+			optionsLayout.setFlexGrow(1, expandedDummy);
 		}
-		statisticsLayout.addComponent(optionsLayout);
+		statisticsLayout.add(optionsLayout);
 	}
 
 	private void addGenerateButton(VerticalLayout statisticsLayout) {
@@ -355,7 +355,7 @@ public class StatisticsView extends AbstractStatisticsView {
 				errorNotification.setDelayMsec(-1);
 				errorNotification.show(Page.getCurrent());
 			} else {
-				resultsLayout.removeAllComponents();
+				resultsLayout.removeAll();
 				switch (visualizationComponent.getVisualizationType()) {
 				case TABLE:
 					generateTable();
@@ -368,16 +368,16 @@ public class StatisticsView extends AbstractStatisticsView {
 					break;
 				}
 			}
-		}, ValoTheme.BUTTON_PRIMARY);
+		}, CssStyles.BUTTON_PRIMARY);
 
-		statisticsLayout.addComponent(generateButton);
+		statisticsLayout.add(generateButton);
 	}
 
 	public void generateTable() {
 		List<StatisticsCaseCountDto> resultData = generateStatistics();
 
 		if (resultData.isEmpty()) {
-			resultsLayout.addComponent(emptyResultLabel);
+			resultsLayout.add(emptyResultLabel);
 			return;
 		}
 
@@ -385,42 +385,42 @@ public class StatisticsView extends AbstractStatisticsView {
 			&& caseIncidencePossible
 			&& populationReferenceYear != null
 			&& populationReferenceYear != Calendar.getInstance().get(Calendar.YEAR)) {
-			referenceYearLabel = new Label(
-				VaadinIcons.INFO_CIRCLE.getHtml() + " "
+			referenceYearLabel = new Span(
+				VaadinIcon.INFO_CIRCLE.getHtml() + " "
 					+ String.format(I18nProperties.getString(Strings.infoPopulationReferenceYear), populationReferenceYear),
 				ContentMode.HTML);
-			resultsLayout.addComponent(referenceYearLabel);
+			resultsLayout.add(referenceYearLabel);
 			CssStyles.style(referenceYearLabel, CssStyles.VSPACE_TOP_4);
 		}
 
 		if (showCaseIncidence && (!caseIncidencePossible || hasMissingPopulationData)) {
 			if (!caseIncidencePossible) {
 				if (hasMissingPopulationData) {
-					caseIncidenceNotPossibleLabel = new Label(
-						VaadinIcons.INFO_CIRCLE.getHtml() + " "
+					caseIncidenceNotPossibleLabel = new Span(
+						VaadinIcon.INFO_CIRCLE.getHtml() + " "
 							+ String.format(I18nProperties.getString(Strings.infoCaseIncidenceNotPossible), missingPopulationDataNames),
 						ContentMode.HTML);
 				} else {
-					caseIncidenceNotPossibleLabel = new Label(
-						VaadinIcons.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoCaseIncidenceIncompatible),
+					caseIncidenceNotPossibleLabel = new Span(
+						VaadinIcon.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoCaseIncidenceIncompatible),
 						ContentMode.HTML);
 				}
 			} else {
-				caseIncidenceNotPossibleLabel = new Label(
-					VaadinIcons.INFO_CIRCLE.getHtml() + " "
+				caseIncidenceNotPossibleLabel = new Span(
+					VaadinIcon.INFO_CIRCLE.getHtml() + " "
 						+ String.format(I18nProperties.getString(Strings.infoCaseIncidenceMissingPopulationData), missingPopulationDataNames),
 					ContentMode.HTML);
 			}
-			resultsLayout.addComponent(caseIncidenceNotPossibleLabel);
+			resultsLayout.add(caseIncidenceNotPossibleLabel);
 			caseIncidenceNotPossibleLabel.setWidth(100, Unit.PERCENTAGE);
 			CssStyles.style(caseIncidenceNotPossibleLabel, CssStyles.VSPACE_TOP_4);
 		}
 
 		if (UiUtil.permitted(UserRight.STATISTICS_EXPORT)) {
-			exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcons.TABLE, null, ValoTheme.BUTTON_PRIMARY);
+			exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcon.TABLE, null, CssStyles.BUTTON_PRIMARY);
 			exportButton.setDescription(I18nProperties.getDescription(Descriptions.descExportButton));
 
-			resultsLayout.addComponent(exportButton);
+			resultsLayout.add(exportButton);
 			resultsLayout.setComponentAlignment(exportButton, Alignment.TOP_RIGHT);
 		}
 
@@ -433,11 +433,11 @@ public class StatisticsView extends AbstractStatisticsView {
 			incidenceDivisor,
 			resultData,
 			caseCriteria);
-		resultsLayout.addComponent(statisticsCaseGrid);
-		resultsLayout.setExpandRatio(statisticsCaseGrid, 1);
+		resultsLayout.add(statisticsCaseGrid);
+		resultsLayout.setFlexGrow(1, statisticsCaseGrid);
 
 		if (showCaseIncidence && hasMissingPopulationData && caseIncidencePossible) {
-			resultsLayout.addComponent(caseIncidenceNotPossibleLabel);
+			resultsLayout.add(caseIncidenceNotPossibleLabel);
 		}
 
 		if (exportButton != null) {
@@ -454,7 +454,7 @@ public class StatisticsView extends AbstractStatisticsView {
 		List<StatisticsCaseCountDto> resultData = generateStatistics();
 
 		if (resultData.isEmpty()) {
-			resultsLayout.addComponent(emptyResultLabel);
+			resultsLayout.add(emptyResultLabel);
 			return;
 		}
 
@@ -462,33 +462,33 @@ public class StatisticsView extends AbstractStatisticsView {
 			&& caseIncidencePossible
 			&& populationReferenceYear != null
 			&& populationReferenceYear != Calendar.getInstance().get(Calendar.YEAR)) {
-			referenceYearLabel = new Label(
-				VaadinIcons.INFO_CIRCLE.getHtml() + " "
+			referenceYearLabel = new Span(
+				VaadinIcon.INFO_CIRCLE.getHtml() + " "
 					+ String.format(I18nProperties.getString(Strings.infoPopulationReferenceYear), populationReferenceYear),
 				ContentMode.HTML);
-			resultsLayout.addComponent(referenceYearLabel);
+			resultsLayout.add(referenceYearLabel);
 			CssStyles.style(referenceYearLabel, CssStyles.VSPACE_TOP_4);
 		}
 
 		if (showCaseIncidence && (!caseIncidencePossible || hasMissingPopulationData)) {
 			if (!caseIncidencePossible) {
 				if (hasMissingPopulationData) {
-					caseIncidenceNotPossibleLabel = new Label(
-						VaadinIcons.INFO_CIRCLE.getHtml() + " "
+					caseIncidenceNotPossibleLabel = new Span(
+						VaadinIcon.INFO_CIRCLE.getHtml() + " "
 							+ String.format(I18nProperties.getString(Strings.infoCaseIncidenceNotPossible), missingPopulationDataNames),
 						ContentMode.HTML);
 				} else {
-					caseIncidenceNotPossibleLabel = new Label(
-						VaadinIcons.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoCaseIncidenceIncompatible),
+					caseIncidenceNotPossibleLabel = new Span(
+						VaadinIcon.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoCaseIncidenceIncompatible),
 						ContentMode.HTML);
 				}
 			} else {
-				caseIncidenceNotPossibleLabel = new Label(
-					VaadinIcons.INFO_CIRCLE.getHtml() + " "
+				caseIncidenceNotPossibleLabel = new Span(
+					VaadinIcon.INFO_CIRCLE.getHtml() + " "
 						+ String.format(I18nProperties.getString(Strings.infoCaseIncidenceMissingPopulationData), missingPopulationDataNames),
 					ContentMode.HTML);
 			}
-			resultsLayout.addComponent(caseIncidenceNotPossibleLabel);
+			resultsLayout.add(caseIncidenceNotPossibleLabel);
 			caseIncidenceNotPossibleLabel.setWidth(100, Unit.PERCENTAGE);
 			CssStyles.style(caseIncidenceNotPossibleLabel, CssStyles.VSPACE_TOP_4);
 		}
@@ -769,11 +769,11 @@ public class StatisticsView extends AbstractStatisticsView {
 		//@formatter:on
 
 		chart.setHcjs(hcjs.toString());
-		resultsLayout.addComponent(chart);
-		resultsLayout.setExpandRatio(chart, 1);
+		resultsLayout.add(chart);
+		resultsLayout.setFlexGrow(1, chart);
 
 		if (showCaseIncidence && hasMissingPopulationData && caseIncidencePossible) {
-			resultsLayout.addComponent(caseIncidenceNotPossibleLabel);
+			resultsLayout.add(caseIncidenceNotPossibleLabel);
 		}
 	}
 
@@ -820,7 +820,7 @@ public class StatisticsView extends AbstractStatisticsView {
 		List<StatisticsCaseCountDto> resultData = generateStatistics();
 
 		if (resultData.isEmpty()) {
-			resultsLayout.addComponent(emptyResultLabel);
+			resultsLayout.add(emptyResultLabel);
 			return;
 		}
 
@@ -828,40 +828,40 @@ public class StatisticsView extends AbstractStatisticsView {
 			&& caseIncidencePossible
 			&& populationReferenceYear != null
 			&& populationReferenceYear != Calendar.getInstance().get(Calendar.YEAR)) {
-			referenceYearLabel = new Label(
-				VaadinIcons.INFO_CIRCLE.getHtml() + " "
+			referenceYearLabel = new Span(
+				VaadinIcon.INFO_CIRCLE.getHtml() + " "
 					+ String.format(I18nProperties.getString(Strings.infoPopulationReferenceYear), populationReferenceYear),
 				ContentMode.HTML);
-			resultsLayout.addComponent(referenceYearLabel);
+			resultsLayout.add(referenceYearLabel);
 			CssStyles.style(referenceYearLabel, CssStyles.VSPACE_TOP_4);
 		}
 
 		if (showCaseIncidence && (!caseIncidencePossible || hasMissingPopulationData)) {
 			if (!caseIncidencePossible) {
 				if (hasMissingPopulationData) {
-					caseIncidenceNotPossibleLabel = new Label(
-						VaadinIcons.INFO_CIRCLE.getHtml() + " "
+					caseIncidenceNotPossibleLabel = new Span(
+						VaadinIcon.INFO_CIRCLE.getHtml() + " "
 							+ String.format(I18nProperties.getString(Strings.infoCaseIncidenceNotPossible), missingPopulationDataNames),
 						ContentMode.HTML);
 				} else {
-					caseIncidenceNotPossibleLabel = new Label(
-						VaadinIcons.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoCaseIncidenceIncompatible),
+					caseIncidenceNotPossibleLabel = new Span(
+						VaadinIcon.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoCaseIncidenceIncompatible),
 						ContentMode.HTML);
 				}
 			} else {
-				caseIncidenceNotPossibleLabel = new Label(
-					VaadinIcons.INFO_CIRCLE.getHtml() + " "
+				caseIncidenceNotPossibleLabel = new Span(
+					VaadinIcon.INFO_CIRCLE.getHtml() + " "
 						+ String.format(I18nProperties.getString(Strings.infoCaseIncidenceMissingPopulationData), missingPopulationDataNames),
 					ContentMode.HTML);
 			}
-			resultsLayout.addComponent(caseIncidenceNotPossibleLabel);
+			resultsLayout.add(caseIncidenceNotPossibleLabel);
 			caseIncidenceNotPossibleLabel.setWidth(100, Unit.PERCENTAGE);
 			CssStyles.style(caseIncidenceNotPossibleLabel, CssStyles.VSPACE_TOP_4);
 		}
 
 		HorizontalLayout mapLayout = new HorizontalLayout();
 		mapLayout.setSpacing(true);
-		mapLayout.setMargin(false);
+		mapLayout.setPadding(false);
 		mapLayout.setWidth(100, Unit.PERCENTAGE);
 		mapLayout.setHeightUndefined();
 
@@ -1033,8 +1033,8 @@ public class StatisticsView extends AbstractStatisticsView {
 
 		map.addPolygonGroup("results", resultPolygons);
 
-		mapLayout.addComponent(map);
-		mapLayout.setExpandRatio(map, 1);
+		mapLayout.add(map);
+		mapLayout.setFlexGrow(1, map);
 
 		if (showCaseIncidence && caseIncidencePossible) {
 			valuesLowerQuartile = valuesLowerQuartile.setScale(2, RoundingMode.HALF_UP);
@@ -1050,18 +1050,18 @@ public class StatisticsView extends AbstractStatisticsView {
 			valuesMedian,
 			valuesUpperQuartile,
 			incidenceDivisor);
-		Label legendHeader = new Label(I18nProperties.getCaption(Captions.dashboardMapKey));
+		Span legendHeader = new Span(I18nProperties.getCaption(Captions.dashboardMapKey));
 		CssStyles.style(legendHeader, CssStyles.H4, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_NONE);
 		regionLegend.addComponent(legendHeader, 0);
 
-		mapLayout.addComponent(regionLegend);
-		mapLayout.setExpandRatio(regionLegend, 0);
+		mapLayout.add(regionLegend);
+		mapLayout.setFlexGrow(0, regionLegend);
 
-		resultsLayout.addComponent(mapLayout);
-		resultsLayout.setExpandRatio(mapLayout, 1);
+		resultsLayout.add(mapLayout);
+		resultsLayout.setFlexGrow(1, mapLayout);
 
 		if (showCaseIncidence && hasMissingPopulationData && caseIncidencePossible) {
-			resultsLayout.addComponent(caseIncidenceNotPossibleLabel);
+			resultsLayout.add(caseIncidenceNotPossibleLabel);
 		}
 	}
 

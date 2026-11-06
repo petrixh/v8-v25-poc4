@@ -3,7 +3,8 @@ package de.symeda.sormas.ui.statistics;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.textfield.TextField;
 
 import de.symeda.sormas.ui.utils.CssStyles;
 
@@ -14,13 +15,13 @@ public class StatisticsFilterSimpleTextElement extends StatisticsFilterElement {
 	public StatisticsFilterSimpleTextElement(String caption, int rowIndex) {
 
 		setSpacing(true);
-		addStyleName(CssStyles.LAYOUT_MINIMAL);
+		addClassName(CssStyles.LAYOUT_MINIMAL);
 		setWidth(100, Unit.PERCENTAGE);
 
 		textField = new TextField(caption);
 		textField.setId(caption + "-" + rowIndex);
 
-		addComponent(textField);
+		add(textField);
 	}
 
 	@Override

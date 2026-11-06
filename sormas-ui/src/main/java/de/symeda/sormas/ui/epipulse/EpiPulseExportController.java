@@ -22,10 +22,9 @@ import java.util.Date;
 
 import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.themes.ValoTheme;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.epipulse.EpipulseExportDto;
@@ -131,7 +130,7 @@ public class EpiPulseExportController {
 				Button cancelExportButton = ButtonHelper.createButton(I18nProperties.getCaption(Captions.actionCancel), event -> {
 					VaadinUiUtil.showConfirmationPopup(
 						I18nProperties.getString(Strings.messageEpipulseExportCancelConfirmationCaption),
-						new Label(I18nProperties.getString(Strings.messageEpipulseExportCancelConfirmationDescription)),
+						new Span(I18nProperties.getString(Strings.messageEpipulseExportCancelConfirmationDescription)),
 						I18nProperties.getCaption(Captions.actionYes),
 						I18nProperties.getCaption(Captions.actionNo),
 						null,
@@ -158,7 +157,7 @@ public class EpiPulseExportController {
 								}
 							}
 						});
-				}, ValoTheme.BUTTON_LINK);
+				}, CssStyles.BUTTON_LINK);
 				confirmationComponent.addExtraButton(cancelExportButton, e -> {
 				});
 			}
@@ -171,7 +170,7 @@ public class EpiPulseExportController {
 
 					VaadinUiUtil.showConfirmationPopup(
 						I18nProperties.getString(Strings.messageEpipulseExportDeleteConfirmationCaption),
-						new Label(I18nProperties.getString(Strings.messageEpipulseExportDeleteConfirmationDescription)),
+						new Span(I18nProperties.getString(Strings.messageEpipulseExportDeleteConfirmationDescription)),
 						I18nProperties.getCaption(Captions.actionYes),
 						I18nProperties.getCaption(Captions.actionNo),
 						null,
@@ -198,7 +197,7 @@ public class EpiPulseExportController {
 								}
 							}
 						});
-				}, ValoTheme.BUTTON_LINK);
+				}, CssStyles.BUTTON_LINK);
 				confirmationComponent.addExtraButton(deleteButton, e -> {
 				});
 			}

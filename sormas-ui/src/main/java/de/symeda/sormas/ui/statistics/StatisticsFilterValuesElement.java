@@ -24,14 +24,14 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import com.explicatis.ext_token_field.ExtTokenField;
 import com.explicatis.ext_token_field.Tokenizable;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.data.HasValue.ValueChangeListener;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.Registration;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseClassification;
@@ -71,7 +71,7 @@ public class StatisticsFilterValuesElement extends StatisticsFilterElement {
 	public StatisticsFilterValuesElement(String caption, StatisticsCaseAttribute attribute, StatisticsCaseSubAttribute subAttribute, int rowIndex) {
 
 		setSpacing(true);
-		addStyleName(CssStyles.LAYOUT_MINIMAL);
+		addClassName(CssStyles.LAYOUT_MINIMAL);
 		setWidth(100, Unit.PERCENTAGE);
 
 		this.attribute = attribute;
@@ -79,10 +79,10 @@ public class StatisticsFilterValuesElement extends StatisticsFilterElement {
 
 		ExtTokenField tokenField = createTokenField(caption, rowIndex);
 		VerticalLayout utilityButtonsLayout = createUtilityButtonsLayout(rowIndex);
-		addComponent(tokenField);
-		addComponent(utilityButtonsLayout);
-		setExpandRatio(tokenField, 1);
-		setExpandRatio(utilityButtonsLayout, 0);
+		add(tokenField);
+		add(utilityButtonsLayout);
+		setFlexGrow(1, tokenField);
+		setFlexGrow(0, utilityButtonsLayout);
 		setComponentAlignment(utilityButtonsLayout, Alignment.MIDDLE_RIGHT);
 	}
 
@@ -121,7 +121,7 @@ public class StatisticsFilterValuesElement extends StatisticsFilterElement {
 		addDropdown = new ComboBox<TokenizableValue>("", getFilterValues());
 		addDropdown.setWidth(200, Unit.PIXELS);
 		addDropdown.setId("select-" + rowIndex);
-		addDropdown.addStyleName(CssStyles.VSPACE_NONE);
+		addDropdown.addClassName(CssStyles.VSPACE_NONE);
 		addDropdown.setPlaceholder(I18nProperties.getString(Strings.promptTypeToAdd));
 		tokenField.setInputField(addDropdown);
 		addDropdown.addValueChangeListener(e -> {
@@ -138,30 +138,30 @@ public class StatisticsFilterValuesElement extends StatisticsFilterElement {
 	protected VerticalLayout createUtilityButtonsLayout(int rowIndex) {
 
 		VerticalLayout utilityButtonsLayout = new VerticalLayout();
-		utilityButtonsLayout.setMargin(false);
+		utilityButtonsLayout.setPadding(false);
 		utilityButtonsLayout.setSpacing(false);
 		utilityButtonsLayout.setSizeUndefined();
 
 		Button addAllButton = ButtonHelper
-			.createIconButtonWithCaption(Captions.all + "-" + rowIndex, I18nProperties.getCaption(Captions.all), VaadinIcons.PLUS_CIRCLE, e -> {
+			.createIconButtonWithCaption(Captions.all + "-" + rowIndex, I18nProperties.getCaption(Captions.all), VaadinIcon.PLUS_CIRCLE, e -> {
 				for (TokenizableValue tokenizable : getFilterValues()) {
 					tokenField.addTokenizable(tokenizable);
 				}
-			}, ValoTheme.BUTTON_LINK);
+			}, CssStyles.BUTTON_LINK);
 
 		Button removeAllButton = ButtonHelper.createIconButtonWithCaption(
 			Captions.actionClear + "-" + rowIndex,
 			I18nProperties.getCaption(Captions.actionClear),
-			VaadinIcons.CLOSE_CIRCLE,
+			VaadinIcon.CLOSE_CIRCLE,
 			e -> {
 				for (Tokenizable tokenizable : tokenField.getValue()) {
 					tokenField.removeTokenizable(tokenizable);
 				}
 			},
-			ValoTheme.BUTTON_LINK);
+			CssStyles.BUTTON_LINK);
 
-		utilityButtonsLayout.addComponent(addAllButton);
-		utilityButtonsLayout.addComponent(removeAllButton);
+		utilityButtonsLayout.add(addAllButton);
+		utilityButtonsLayout.add(removeAllButton);
 
 		return utilityButtonsLayout;
 	}

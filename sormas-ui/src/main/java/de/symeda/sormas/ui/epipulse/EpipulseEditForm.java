@@ -19,8 +19,10 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 
 import java.util.List;
 
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
+import com.vaadin.flow.component.Unit;
+
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.epipulse.EpipulseExportDto;

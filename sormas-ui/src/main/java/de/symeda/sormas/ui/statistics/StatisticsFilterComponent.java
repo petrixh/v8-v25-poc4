@@ -17,11 +17,12 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.statistics;
 
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -41,12 +42,12 @@ public class StatisticsFilterComponent extends VerticalLayout {
 
 	public StatisticsFilterComponent(int rowIndex) {
 		setSpacing(true);
-		setMargin(false);
+		setPadding(false);
 
-		addStyleName(CssStyles.LAYOUT_MINIMAL);
+		addClassName(CssStyles.LAYOUT_MINIMAL);
 		setWidth(100, Unit.PERCENTAGE);
 
-		addComponent(createFilterAttributeElement(rowIndex));
+		add(createFilterAttributeElement(rowIndex));
 	}
 
 	private HorizontalLayout createFilterAttributeElement(int rowIndex) {
@@ -107,13 +108,13 @@ public class StatisticsFilterComponent extends VerticalLayout {
 
 						// Only add the sub attribute dropdown if there are any sub attributes that are relevant for the filters section
 						if (filterSubAttributeItem.getChildren() != null && filterSubAttributeItem.getChildren().size() > 0) {
-							filterAttributeLayout.addComponent(filterSubAttributeDropdown);
-							filterAttributeLayout.setExpandRatio(filterSubAttributeDropdown, 1);
+							filterAttributeLayout.add(filterSubAttributeDropdown);
+							filterAttributeLayout.setFlexGrow(1, filterSubAttributeDropdown);
 						} else {
-							filterAttributeLayout.removeComponent(filterSubAttributeDropdown);
+							filterAttributeLayout.remove(filterSubAttributeDropdown);
 						}
 					} else {
-						filterAttributeLayout.removeComponent(filterSubAttributeDropdown);
+						filterAttributeLayout.remove(filterSubAttributeDropdown);
 					}
 					updateFilterElement(rowIndex);
 				};
@@ -122,14 +123,14 @@ public class StatisticsFilterComponent extends VerticalLayout {
 			}
 		}
 
-		filterAttributeLayout.addComponent(filterAttributeDropdown);
-		filterAttributeLayout.setExpandRatio(filterAttributeDropdown, 0);
+		filterAttributeLayout.add(filterAttributeDropdown);
+		filterAttributeLayout.setFlexGrow(0, filterAttributeDropdown);
 		return filterAttributeLayout;
 	}
 
 	private void updateFilterElement(int rowIndex) {
 		if (filterElement != null) {
-			removeComponent(filterElement);
+			remove(filterElement);
 			filterElement = null;
 		}
 
@@ -148,7 +149,7 @@ public class StatisticsFilterComponent extends VerticalLayout {
 		}
 
 		if (filterElement != null) {
-			addComponent(filterElement);
+			add(filterElement);
 		}
 	}
 

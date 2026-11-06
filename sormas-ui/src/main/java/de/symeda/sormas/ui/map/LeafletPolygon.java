@@ -22,10 +22,6 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 import de.symeda.sormas.api.geo.GeoLatLon;
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
-import elemental.json.impl.JsonUtil;
 
 public class LeafletPolygon {
 
@@ -110,54 +106,5 @@ public class LeafletPolygon {
 
 	public void setOptions(String options) {
 		this.options = options;
-	}
-
-	/**
-	 * lat & lon is less precise to save bandwidth
-	 */
-	public JsonObject toJson() {
-		JsonObject polygon = Json.createObject();
-		if (caption != null) {
-			polygon.put("caption", caption);
-		}
-		if (options != null) {
-			polygon.put("options", (JsonObject) JsonUtil.parse(options));
-		}
-		if (latLons != null) {
-			JsonArray latLonsJson = Json.createArray();
-			for (double[] latLon : latLons) {
-				JsonArray latLonJson = Json.createArray();
-				latLonJson.set(0, (int) (latLon[0] * 10000.0) / 10000.0);
-				latLonJson.set(1, (int) (latLon[1] * 10000.0) / 10000.0);
-
-				latLonsJson.set(latLonsJson.length(), latLonJson);
-			}
-
-			if (holeLatLons != null) {
-				JsonArray latLonsOuterJson = Json.createArray();
-				// first is outer
-				latLonsOuterJson.set(latLonsOuterJson.length(), latLonsJson);
-
-				// additional are holes
-				for (double[][] latLons : holeLatLons) {
-					latLonsJson = Json.createArray();
-					for (double[] latLon : latLons) {
-						JsonArray latLonJson = Json.createArray();
-						latLonJson.set(0, (int) (latLon[0] * 10000.0) / 10000.0);
-						latLonJson.set(1, (int) (latLon[1] * 10000.0) / 10000.0);
-
-						latLonsJson.set(latLonsJson.length(), latLonJson);
-					}
-					latLonsOuterJson.set(latLonsOuterJson.length(), latLonsJson);
-				}
-
-				polygon.put("latLons", latLonsOuterJson);
-			} else {
-
-				polygon.put("latLons", latLonsJson);
-			}
-
-		}
-		return polygon;
 	}
 }

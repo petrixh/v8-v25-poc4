@@ -19,8 +19,8 @@ package de.symeda.sormas.ui.map;
 
 public enum MarkerIcon {
 
-	// make sure to update mapIcons in leaflet-connector.js when editing this
-	// clustering always falls back to the lowest icon index
+	// make sure to update LeafletMapIcons when editing this
+	// LeafletMap clusters facilities with the cases of the same classification
 
 	CASE_CONFIRMED,
 	CASE_SUSPECT,

@@ -18,15 +18,13 @@ package de.symeda.sormas.ui.customexport;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.Page;
-import com.vaadin.shared.ui.grid.HeightMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
+import com.vaadin.flow.component.button.Button;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -38,6 +36,7 @@ import de.symeda.sormas.api.importexport.ExportPropertyMetaInfo;
 import de.symeda.sormas.api.importexport.ExportType;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.CssStyles;
 
 @SuppressWarnings("serial")
 public class ExportConfigurationsGrid extends Grid<ExportConfigurationDto> {
@@ -68,7 +67,7 @@ public class ExportConfigurationsGrid extends Grid<ExportConfigurationDto> {
 			.setExpandRatio(1);
 
 		addComponentColumn((config) -> this.buildButtonLayout(config, availableProperties, !isPublicExport))
-			.setId(isPublicExport ? COLUMN_ACTIONS_PUBLIC : COLUMN_ACTIONS)
+			.setKey(isPublicExport ? COLUMN_ACTIONS_PUBLIC : COLUMN_ACTIONS)
 			.setCaption("");
 	}
 
@@ -96,14 +95,14 @@ public class ExportConfigurationsGrid extends Grid<ExportConfigurationDto> {
 		layout.setSpacing(true);
 
 		Button btnExport;
-		btnExport = ButtonHelper.createIconButtonWithCaption(config.getUuid() + "-download", null, VaadinIcons.DOWNLOAD, e -> {
+		btnExport = ButtonHelper.createIconButtonWithCaption(config.getUuid() + "-download", null, VaadinIcon.DOWNLOAD, e -> {
 			if (config.getUuid() != null) {
 				exportCallback.accept(config);
 			}
-		}, ValoTheme.BUTTON_PRIMARY);
-		layout.addComponent(btnExport);
+		}, CssStyles.BUTTON_PRIMARY);
+		layout.add(btnExport);
 
-		Button btnEdit = ButtonHelper.createIconButtonWithCaption(config.getUuid() + "-edit", null, VaadinIcons.EDIT, e -> {
+		Button btnEdit = ButtonHelper.createIconButtonWithCaption(config.getUuid() + "-edit", null, VaadinIcon.EDIT, e -> {
 			if (config.getUuid() != null) {
 				ControllerProvider.getCustomExportController()
 					.openEditExportConfigurationWindow(
@@ -114,18 +113,17 @@ public class ExportConfigurationsGrid extends Grid<ExportConfigurationDto> {
 			}
 		});
 		btnEdit.setEnabled(canEditOrDelete);
-		layout.addComponent(btnEdit);
+		layout.add(btnEdit);
 
-		Button btnDelete = ButtonHelper.createIconButtonWithCaption(config.getUuid() + "-delete", null, VaadinIcons.TRASH, e -> {
+		Button btnDelete = ButtonHelper.createIconButtonWithCaption(config.getUuid() + "-delete", null, VaadinIcon.TRASH, e -> {
 			if (config.getUuid() != null) {
 				FacadeProvider.getExportFacade().deleteExportConfiguration(config.getUuid());
-				new Notification(null, I18nProperties.getString(Strings.messageExportConfigurationDeleted), Type.WARNING_MESSAGE, false)
-					.show(Page.getCurrent());
+				NotificationHelper.show(null, I18nProperties.getString(Strings.messageExportConfigurationDeleted), Type.WARNING_MESSAGE, false);
 				reload(false);
 			}
 		});
 		btnDelete.setEnabled(canEditOrDelete);
-		layout.addComponent(btnDelete);
+		layout.add(btnDelete);
 
 		return layout;
 	}

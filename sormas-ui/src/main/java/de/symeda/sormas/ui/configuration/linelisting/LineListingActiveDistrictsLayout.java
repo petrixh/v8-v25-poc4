@@ -2,9 +2,9 @@ package de.symeda.sormas.ui.configuration.linelisting;
 
 import java.util.List;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.Label;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.feature.FeatureConfigurationIndexDto;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -12,9 +12,10 @@ import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.utils.HtmlHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 @SuppressWarnings("serial")
-public class LineListingActiveDistrictsLayout extends CssLayout {
+public class LineListingActiveDistrictsLayout extends Div {
 
 	private List<FeatureConfigurationIndexDto> configurations;
 
@@ -35,7 +36,7 @@ public class LineListingActiveDistrictsLayout extends CssLayout {
 				captionBuilder.append(I18nProperties.getString(Strings.messageNoEndDate));
 			}
 
-			Label configLabel = new Label(captionBuilder.toString(), ContentMode.HTML);
+			Span configLabel = VaadinUiUtil.createLabel(captionBuilder.toString(), ContentMode.HTML);
 			CssStyles.style(
 				configLabel,
 				CssStyles.LABEL_ROUNDED_CORNERS,
@@ -43,7 +44,7 @@ public class LineListingActiveDistrictsLayout extends CssLayout {
 				CssStyles.ALIGN_CENTER,
 				CssStyles.HSPACE_LEFT_4,
 				CssStyles.VSPACE_4);
-			addComponent(configLabel);
+			add(configLabel);
 		}
 	}
 }

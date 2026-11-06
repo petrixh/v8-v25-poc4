@@ -19,11 +19,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
 
-import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.Unit;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.server.StreamRegistration;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.contact.ContactCriteria;
@@ -44,7 +46,7 @@ import de.symeda.sormas.ui.utils.VaadinUiUtil;
 public class CustomExportController {
 
 	public void openContactExportWindow(ContactCriteria contactCriteria, Supplier<Collection<String>> selectedRows) {
-		Window customExportWindow = VaadinUiUtil.createPopupWindow();
+		Dialog customExportWindow = VaadinUiUtil.createPopupWindow();
 		ExportConfigurationsLayout customExportsLayout = new ExportConfigurationsLayout(
 			ExportType.CONTACT,
 			ImportExportUtils.getContactExportProperties(
@@ -53,16 +55,15 @@ public class CustomExportController {
 				FacadeProvider.getFeatureConfigurationFacade().getActiveServerFeatureConfigurations()),
 			customExportWindow::close);
 		customExportsLayout.setExportCallback(
-			exportConfig -> Page.getCurrent()
-				.open(ContactDownloadUtil.createContactExportResource(contactCriteria, selectedRows, exportConfig), null, true));
-		customExportWindow.setWidth(1024, Sizeable.Unit.PIXELS);
-		customExportWindow.setCaption(I18nProperties.getCaption(Captions.exportCustom));
-		customExportWindow.setContent(customExportsLayout);
-		UI.getCurrent().addWindow(customExportWindow);
+			exportConfig -> openDownload(ContactDownloadUtil.createContactExportResource(contactCriteria, selectedRows, exportConfig)));
+		customExportWindow.setWidth(1024, Unit.PIXELS);
+		customExportWindow.setHeaderTitle(I18nProperties.getCaption(Captions.exportCustom));
+		customExportWindow.add(customExportsLayout);
+		customExportWindow.open();
 	}
 
 	public void openTaskExportWindow(TaskCriteria taskCriteria, Supplier<Collection<String>> selectedRows) {
-		Window customExportWindow = VaadinUiUtil.createPopupWindow();
+		Dialog customExportWindow = VaadinUiUtil.createPopupWindow();
 		ExportConfigurationsLayout customExportsLayout = new ExportConfigurationsLayout(
 			ExportType.TASK,
 			ImportExportUtils.getTaskExportProperties(
@@ -71,15 +72,15 @@ public class CustomExportController {
 				FacadeProvider.getFeatureConfigurationFacade().getActiveServerFeatureConfigurations()),
 			customExportWindow::close);
 		customExportsLayout.setExportCallback(
-			exportConfig -> Page.getCurrent().open(TaskDownloadUtil.createTaskExportResource(taskCriteria, selectedRows, exportConfig), null, true));
-		customExportWindow.setWidth(1024, Sizeable.Unit.PIXELS);
-		customExportWindow.setCaption(I18nProperties.getCaption(Captions.exportCustom));
-		customExportWindow.setContent(customExportsLayout);
-		UI.getCurrent().addWindow(customExportWindow);
+			exportConfig -> openDownload(TaskDownloadUtil.createTaskExportResource(taskCriteria, selectedRows, exportConfig)));
+		customExportWindow.setWidth(1024, Unit.PIXELS);
+		customExportWindow.setHeaderTitle(I18nProperties.getCaption(Captions.exportCustom));
+		customExportWindow.add(customExportsLayout);
+		customExportWindow.open();
 	}
 
 	public void openPersonExportWindow(PersonCriteria personCriteria) {
-		Window customExportWindow = VaadinUiUtil.createPopupWindow();
+		Dialog customExportWindow = VaadinUiUtil.createPopupWindow();
 		ExportConfigurationsLayout customExportsLayout = new ExportConfigurationsLayout(
 			ExportType.PERSON,
 			ImportExportUtils.getPersonExportProperties(
@@ -88,11 +89,11 @@ public class CustomExportController {
 				FacadeProvider.getFeatureConfigurationFacade().getActiveServerFeatureConfigurations()),
 			customExportWindow::close);
 		customExportsLayout.setExportCallback(
-			exportConfig -> Page.getCurrent().open(PersonDownloadUtil.createPersonExportResource(personCriteria, exportConfig), null, true));
-		customExportWindow.setWidth(1024, Sizeable.Unit.PIXELS);
-		customExportWindow.setCaption(I18nProperties.getCaption(Captions.exportCustom));
-		customExportWindow.setContent(customExportsLayout);
-		UI.getCurrent().addWindow(customExportWindow);
+			exportConfig -> openDownload(PersonDownloadUtil.createPersonExportResource(personCriteria, exportConfig)));
+		customExportWindow.setWidth(1024, Unit.PIXELS);
+		customExportWindow.setHeaderTitle(I18nProperties.getCaption(Captions.exportCustom));
+		customExportWindow.add(customExportsLayout);
+		customExportWindow.open();
 	}
 
 	public void openEditExportConfigurationWindow(
@@ -101,20 +102,29 @@ public class CustomExportController {
 		List<ExportPropertyMetaInfo> availableProperties,
 		String caption) {
 
-		Window exportWindow = VaadinUiUtil.createPopupWindow();
+		Dialog exportWindow = VaadinUiUtil.createPopupWindow();
 		ExportConfigurationEditLayout editLayout = new ExportConfigurationEditLayout(config, availableProperties, (exportConfiguration) -> {
 			FacadeProvider.getExportFacade().saveExportConfiguration(exportConfiguration);
 			exportWindow.close();
-			new Notification(null, I18nProperties.getString(Strings.messageExportConfigurationSaved), Notification.Type.WARNING_MESSAGE, false)
-				.show(Page.getCurrent());
+			NotificationHelper.show(null, I18nProperties.getString(Strings.messageExportConfigurationSaved), NotificationHelper.Type.WARNING_MESSAGE, false);
 			grid.reload(false);
 		}, () -> {
 			exportWindow.close();
 			grid.reload(false);
 		});
-		exportWindow.setWidth(1024, Sizeable.Unit.PIXELS);
-		exportWindow.setCaption(caption);
-		exportWindow.setContent(editLayout);
-		UI.getCurrent().addWindow(exportWindow);
+		exportWindow.setWidth(1024, Unit.PIXELS);
+		exportWindow.setHeaderTitle(caption);
+		exportWindow.add(editLayout);
+		exportWindow.open();
+	}
+
+	/**
+	 * Was {@code Page.getCurrent().open(resource, null, true)}: the download opens in the current window (as in
+	 * {@code CasesView}).
+	 */
+	private static void openDownload(DownloadHandler resource) {
+		StreamRegistration exportRegistration =
+			VaadinSession.getCurrent().getResourceRegistry().registerResource(resource, UI.getCurrent().getElement());
+		UI.getCurrent().getPage().open(exportRegistration.getResourceUri().toString(), "_self");
 	}
 }

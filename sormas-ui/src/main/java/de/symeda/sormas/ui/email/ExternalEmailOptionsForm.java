@@ -22,10 +22,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.docgeneneration.DocumentTemplateDto;
@@ -43,6 +42,7 @@ import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.components.MultiSelect;
 import de.symeda.sormas.ui.utils.components.MultilineLabel;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class ExternalEmailOptionsForm extends AbstractEditForm<ExternalEmailOptionsDto> {
 
@@ -105,16 +105,16 @@ public class ExternalEmailOptionsForm extends AbstractEditForm<ExternalEmailOpti
 				attachedDocumentsField.setEnabled(false);
 
 				MultilineLabel attachmentUnavailableInfo = new MultilineLabel(
-					VaadinIcons.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.messageExternalEmailAttachmentNotAvailableInfo),
+					HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " " + I18nProperties.getString(Strings.messageExternalEmailAttachmentNotAvailableInfo),
 					ContentMode.HTML);
-				attachmentUnavailableInfo.addStyleNames(CssStyles.VSPACE_2, CssStyles.VSPACE_TOP_4);
+				attachmentUnavailableInfo.addClassNames(CssStyles.VSPACE_2, CssStyles.VSPACE_TOP_4);
 				getContent().addComponent(attachmentUnavailableInfo, ATTACHMENT_NOT_AVAILABLE_INFO_LOC);
 			}
 		}
 	}
 
 	@Override
-	public void setValue(ExternalEmailOptionsDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(ExternalEmailOptionsDto newFieldValue) {
 		super.setValue(newFieldValue);
 
 		if (attachedDocumentsField != null) {

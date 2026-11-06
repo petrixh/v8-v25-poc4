@@ -251,7 +251,7 @@ public class SampleService extends AbstractDeletableAdoService<Sample>
 			Root<PathogenTest> testCountRoot = testCountSq.from(PathogenTest.class);
 			testCountSq.where(cb.equal(testCountRoot.get(PathogenTest.SAMPLE), sample), cb.isFalse(testCountRoot.get(PathogenTest.DELETED)));
 			testCountSq.select(cb.countDistinct(testCountRoot.get(PathogenTest.ID)));
-			selections.add(testCountSq.getSelection());
+			selections.add(testCountSq);
 
 			selections.addAll(getJurisdictionSelections(sampleQueryContext));
 
@@ -490,7 +490,7 @@ public class SampleService extends AbstractDeletableAdoService<Sample>
 		Root<PathogenTest> testCountRoot = testCountSq.from(PathogenTest.class);
 		testCountSq.where(cb.equal(testCountRoot.get(PathogenTest.SAMPLE), sample), cb.isFalse(testCountRoot.get(PathogenTest.DELETED)));
 		testCountSq.select(cb.countDistinct(testCountRoot.get(PathogenTest.ID)));
-		selections.add(testCountSq.getSelection());
+		selections.add(testCountSq);
 
 		selections.addAll(getJurisdictionSelections(sampleQueryContext));
 		cq.multiselect(selections);

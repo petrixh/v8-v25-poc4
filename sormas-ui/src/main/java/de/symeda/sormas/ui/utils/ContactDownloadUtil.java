@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.function.Supplier;
 
-import com.vaadin.server.StreamResource;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -38,7 +37,7 @@ import de.symeda.sormas.api.vaccination.VaccinationDto;
 
 public class ContactDownloadUtil {
 
-	public static StreamResource createContactExportResource(
+	public static StreamSourceDownloadHandler createContactExportResource(
 		ContactCriteria contactCriteria,
 		Supplier<Collection<String>> selectedRows,
 		ExportConfigurationDto exportConfiguration) {

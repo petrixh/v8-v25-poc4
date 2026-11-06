@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.function.Supplier;
 
-import com.vaadin.server.StreamResource;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.event.EventCriteria;
@@ -35,7 +34,7 @@ import de.symeda.sormas.api.location.LocationDto;
 
 public class EventDownloadUtil {
 
-    public static StreamResource createEventExportResource(
+    public static StreamSourceDownloadHandler createEventExportResource(
           EventCriteria criteria,
           Supplier<Collection<String>> selectedRows,
           ExportConfigurationDto exportConfiguration) {

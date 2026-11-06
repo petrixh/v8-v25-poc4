@@ -52,9 +52,9 @@ public class SurveyTokenGrid extends FilteredGrid<SurveyTokenIndexDto, SurveyTok
 			SurveyTokenIndexDto.RESPONSE_RECEIVED,
 			SurveyTokenIndexDto.RESPONSE_RECEIVED_DATE);
 
-		for (Column<SurveyTokenIndexDto, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(SurveyTokenIndexDto.I18N_PREFIX, column.getId(), column.getCaption()));
-			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getId()));
+		for (Column<SurveyTokenIndexDto, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(SurveyTokenIndexDto.I18N_PREFIX, column.getKey(), column.getCaption()));
+			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getKey()));
 		}
 
 		((Column<SurveyTokenIndexDto, String>) getColumn(SurveyTokenIndexDto.ASSIGNED_CASE_UUID)).setRenderer(new CaseUuidRenderer(uuid -> false));

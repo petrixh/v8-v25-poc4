@@ -22,12 +22,10 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.renderers.DateRenderer;
-import com.vaadin.ui.renderers.TextRenderer;
-import com.vaadin.ui.themes.ValoTheme;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.Component;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;
@@ -47,9 +45,12 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.FieldAccessColumnStyleGenerator;
+import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FilteredGrid;
+import de.symeda.sormas.ui.utils.GridExportStreamResource;
 import de.symeda.sormas.ui.utils.ShowDetailsListener;
 import de.symeda.sormas.ui.utils.UuidRenderer;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
 
 public class SelfReportGrid extends FilteredGrid<SelfReportIndexDto, SelfReportCriteria> {
@@ -90,7 +91,10 @@ public class SelfReportGrid extends FilteredGrid<SelfReportIndexDto, SelfReportC
 				.collect(Collectors.joining(", ")));
 		addressColumn.setId(SelfReportDto.ADDRESS);
 
-		addComponentColumn(this::buildProcessColumn).setId(PROCESS_COLUMN).setSortable(false);
+		Column<SelfReportIndexDto, Component> processColumn = addComponentColumn(this::buildProcessColumn).setKey(PROCESS_COLUMN);
+		processColumn.setSortable(false);
+		// Vaadin 8 exported the button or placeholder component object here; Flow exports this text instead (empty)
+		GridExportStreamResource.setExportValueProvider(processColumn, entry -> "");
 
 		Column<SelfReportIndexDto, String> deleteColumn = addColumn(entry -> {
 			if (entry.getDeletionReason() != null) {
@@ -136,9 +140,9 @@ public class SelfReportGrid extends FilteredGrid<SelfReportIndexDto, SelfReportC
 			removeColumn(DELETE_REASON_COLUMN);
 		}
 
-		for (Column<SelfReportIndexDto, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.findPrefixCaptionWithDefault(column.getId(), column.getCaption(), SelfReportDto.I18N_PREFIX));
-			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(SelfReportIndexDto.class, column.getId()));
+		for (Column<SelfReportIndexDto, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.findPrefixCaptionWithDefault(column.getKey(), column.getCaption(), SelfReportDto.I18N_PREFIX));
+			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(SelfReportIndexDto.class, column.getKey()));
 		}
 
 		if (UiUtil.enabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {
@@ -159,12 +163,10 @@ public class SelfReportGrid extends FilteredGrid<SelfReportIndexDto, SelfReportC
 			// build process button
 			return ButtonHelper.createButton(Captions.selfReportProcess, e -> {
 				ControllerProvider.getSelfReportController().processSelfReport(indexDto.getUuid());
-			}, ValoTheme.BUTTON_PRIMARY);
+			}, CssStyles.BUTTON_PRIMARY);
 		} else {
 			// build placeholder necessary to circumvent a vaadin scaling issue (see #7681)
-			Label placeholder = new Label(PLACEHOLDER_SPACE);
-			placeholder.setContentMode(ContentMode.HTML);
-			return placeholder;
+			return VaadinUiUtil.createLabel(PLACEHOLDER_SPACE, ContentMode.HTML);
 		}
 	}
 

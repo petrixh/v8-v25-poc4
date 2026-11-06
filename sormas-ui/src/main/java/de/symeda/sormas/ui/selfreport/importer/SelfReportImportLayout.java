@@ -3,9 +3,8 @@ package de.symeda.sormas.ui.selfreport.importer;
 import java.io.IOException;
 
 import com.opencsv.exceptions.CsvValidationException;
-import com.vaadin.server.ClassResource;
-import com.vaadin.server.Page;
-import com.vaadin.ui.Notification;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -25,7 +24,7 @@ public class SelfReportImportLayout extends AbstractImportLayout {
 
 		ImportFacade importFacade = FacadeProvider.getImportFacade();
 
-		addDownloadResourcesComponent(1, new ClassResource("/SORMAS_Self_Report_Import_Guide.pdf"));
+		addDownloadResourcesComponent(1, DownloadHandler.forClassResource(SelfReportImportLayout.class, "/SORMAS_Self_Report_Import_Guide.pdf"));
 		addDownloadImportTemplateComponent(2, importFacade.getSelfReportImportTemplateFilePath(), importFacade.getSelfReportImportTemplateFileName());
 		addImportCsvComponent(3, new ImportReceiver("_self_report_import_", file -> {
 			resetDownloadErrorReportButton();
@@ -34,11 +33,11 @@ public class SelfReportImportLayout extends AbstractImportLayout {
 				SelfReportImporter importer = new SelfReportImporter(file, true, currentUser, (ValueSeparator) separator.getValue());
 				importer.startImport(SelfReportImportLayout.this::extendDownloadErrorReportButton, currentUI, true);
 			} catch (IOException | CsvValidationException e) {
-				new Notification(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.headingImportFailed),
 					I18nProperties.getString(Strings.messageImportFailed),
-					Notification.Type.ERROR_MESSAGE,
-					false).show(Page.getCurrent());
+					NotificationHelper.Type.ERROR_MESSAGE,
+					false);
 			}
 		}));
 		addDownloadErrorReportComponent(4);

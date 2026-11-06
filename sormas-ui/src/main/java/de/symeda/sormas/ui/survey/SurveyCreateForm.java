@@ -2,7 +2,7 @@ package de.symeda.sormas.ui.survey;
 
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.survey.SurveyDto;
 import de.symeda.sormas.ui.utils.AbstractEditForm;

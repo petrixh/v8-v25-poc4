@@ -16,17 +16,17 @@ package de.symeda.sormas.ui.survey;
 
 import java.util.List;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.survey.SurveyTokenReferenceDto;
 import de.symeda.sormas.api.survey.external.views.ExternalSurveyView;
 import de.symeda.sormas.api.survey.external.views.QuestionAnswersView;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -45,29 +45,31 @@ public class SurveyQuestionnaireWindow {
 			surveyView = null;
 		}
 
-		Window window = new Window(surveyTokenRef.getCaption());
-		window.setModal(true);
+		// was new Window(caption): modal, movable and closable, not closed by a click outside
+		Dialog window = VaadinUiUtil.createPopupWindow();
+		window.setHeaderTitle(surveyTokenRef.getCaption());
 		window.setResizable(true);
-		window.setWidth(700, com.vaadin.server.Sizeable.Unit.PIXELS);
-		window.setHeight(80, com.vaadin.server.Sizeable.Unit.PERCENTAGE);
+		window.setWidth("700px");
+		window.setHeight("80%");
 
 		VerticalLayout mainLayout = new VerticalLayout();
-		mainLayout.setMargin(true);
+		mainLayout.setPadding(true);
 		mainLayout.setSpacing(false);
 
 		if (surveyView == null || surveyView.getQuestionAnswersViews() == null || surveyView.getQuestionAnswersViews().isEmpty()) {
-			mainLayout.addComponent(new Label("No questionnaire data available."));
+			mainLayout.add(new Span("No questionnaire data available."));
 		} else {
-			Label htmlContent = new Label(buildHtml(surveyView.getQuestionAnswersViews()), ContentMode.HTML);
+			Span htmlContent = VaadinUiUtil.createLabel(buildHtml(surveyView.getQuestionAnswersViews()), ContentMode.HTML);
 			htmlContent.setSizeFull();
-			mainLayout.addComponent(htmlContent);
+			mainLayout.add(htmlContent);
 		}
 
-		Panel scrollPanel = new Panel(mainLayout);
+		// was a Panel: scrolls the content
+		Scroller scrollPanel = new Scroller(mainLayout);
 		scrollPanel.setSizeFull();
 
-		window.setContent(scrollPanel);
-		UI.getCurrent().addWindow(window);
+		window.add(scrollPanel);
+		window.open();
 	}
 
 	private String buildHtml(List<QuestionAnswersView> questions) {

@@ -27,13 +27,12 @@ import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.shared.ui.ErrorLevel;
-import com.vaadin.ui.Label;
-import com.vaadin.v7.data.validator.EmailValidator;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.OptionGroup;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.validator.RegexpValidator;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -59,6 +58,7 @@ import de.symeda.sormas.ui.utils.FieldAccessHelper;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.PhoneNumberValidator;
 import de.symeda.sormas.ui.utils.ValidationUtils;
+import de.symeda.sormas.ui.utils.ValidationUtils.ErrorLevel;
 import de.symeda.sormas.ui.utils.components.BirthdateFields;
 
 public class SelfReportDataForm extends AbstractEditForm<SelfReportDto> {
@@ -67,6 +67,8 @@ public class SelfReportDataForm extends AbstractEditForm<SelfReportDto> {
 
 	private static final String NATIONAL_HEALTH_ID_WARNING_LABEL = "nationalHealthIdWarningLoc";
 	private static final String ADDRESS_HEADER_LOC = "addressHeaderLoc";
+	/** The pattern of the Vaadin 7 {@code EmailValidator}, which Flow's own e-mail validator does not match exactly. */
+	private static final String V7_EMAIL_PATTERN = "^([a-zA-Z0-9_\\.\\-+])+@[a-zA-Z0-9-.]+\\.[a-zA-Z0-9-]{2,}$";
 
 	private static final String HTML_LAYOUT = fluidRowLocs(SelfReportDto.UUID, SelfReportDto.TYPE)
 		+ fluidRowLocs(SelfReportDto.INVESTIGATION_STATUS, SelfReportDto.PROCESSING_STATUS)
@@ -130,8 +132,8 @@ public class SelfReportDataForm extends AbstractEditForm<SelfReportDto> {
 			FieldHelper
 				.setRequiredWhen(getFieldGroup(), SelfReportDto.DISEASE, Arrays.asList(SelfReportDto.DISEASE_DETAILS), Arrays.asList(Disease.OTHER));
 		}
-		diseaseField.addValueChangeListener((ValueChangeListener) valueChangeEvent -> {
-			Disease disease = (Disease) valueChangeEvent.getProperty().getValue();
+		diseaseField.addValueChangeListener(valueChangeEvent -> {
+			Disease disease = (Disease) valueChangeEvent.getValue();
 			List<DiseaseVariant> diseaseVariants =
 				FacadeProvider.getCustomizableEnumFacade().getEnumValues(CustomizableEnumType.DISEASE_VARIANT, disease);
 			FieldHelper.updateItems(diseaseVariantField, diseaseVariants);
@@ -139,7 +141,7 @@ public class SelfReportDataForm extends AbstractEditForm<SelfReportDto> {
 				.setVisible(disease != null && isVisibleAllowed(SelfReportDto.DISEASE_VARIANT) && CollectionUtils.isNotEmpty(diseaseVariants));
 		});
 		diseaseVariantField.addValueChangeListener(e -> {
-			DiseaseVariant diseaseVariant = (DiseaseVariant) e.getProperty().getValue();
+			DiseaseVariant diseaseVariant = (DiseaseVariant) e.getValue();
 			diseaseVariantDetailsField.setVisible(diseaseVariant != null && diseaseVariant.matchPropertyValue(DiseaseVariant.HAS_DETAILS, true));
 		});
 
@@ -154,13 +156,13 @@ public class SelfReportDataForm extends AbstractEditForm<SelfReportDto> {
 		addField(SelfReportDto.SEX, ComboBox.class).setRequired(true);
 
 		TextField nationalHealthIdField = addField(PersonDto.NATIONAL_HEALTH_ID);
-		Label nationalHealthIdWarningLabel = new Label(I18nProperties.getString(Strings.messagePersonNationalHealthIdInvalid));
-		nationalHealthIdWarningLabel.addStyleNames(VSPACE_3, LABEL_WHITE_SPACE_NORMAL);
+		Span nationalHealthIdWarningLabel = new Span(I18nProperties.getString(Strings.messagePersonNationalHealthIdInvalid));
+		nationalHealthIdWarningLabel.addClassNames(VSPACE_3, LABEL_WHITE_SPACE_NORMAL);
 		nationalHealthIdWarningLabel.setVisible(false);
 		getContent().addComponent(nationalHealthIdWarningLabel, NATIONAL_HEALTH_ID_WARNING_LABEL);
 
 		//address
-		Label addressHeader = new Label(I18nProperties.getPrefixCaption(SelfReportDto.I18N_PREFIX, SelfReportDto.ADDRESS));
+		Span addressHeader = new Span(I18nProperties.getPrefixCaption(SelfReportDto.I18N_PREFIX, SelfReportDto.ADDRESS));
 		CssStyles.style(CssStyles.H3, addressHeader);
 		getContent().addComponent(addressHeader, ADDRESS_HEADER_LOC);
 
@@ -169,7 +171,15 @@ public class SelfReportDataForm extends AbstractEditForm<SelfReportDto> {
 
 		// contact info fields
 		TextField emailField = addField(SelfReportDto.EMAIL, TextField.class);
-		emailField.addValidator(new EmailValidator(I18nProperties.getValidationError(Validations.validEmailAddress, emailField.getCaption())));
+		// was the Vaadin 7 EmailValidator: same pattern, and an empty value is valid as in Vaadin 7
+		emailField.addValidator(
+			new RegexpValidator(I18nProperties.getValidationError(Validations.validEmailAddress, emailField.getCaption()), V7_EMAIL_PATTERN) {
+
+				@Override
+				protected boolean isValid(String value) {
+					return value == null || value.isEmpty() || super.isValid(value);
+				}
+			});
 		TextField phoneNumberField = addField(SelfReportDto.PHONE_NUMBER, TextField.class);
 		phoneNumberField
 			.addValidator(new PhoneNumberValidator(I18nProperties.getValidationError(Validations.validPhoneNumber, phoneNumberField.getCaption())));

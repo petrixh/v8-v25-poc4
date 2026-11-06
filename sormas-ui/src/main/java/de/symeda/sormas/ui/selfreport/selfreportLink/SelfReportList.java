@@ -1,7 +1,6 @@
 package de.symeda.sormas.ui.selfreport.selfreportLink;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.selfreport.SelfReportCriteria;
 import de.symeda.sormas.api.selfreport.SelfReportListEntryDto;
@@ -18,12 +17,12 @@ public class SelfReportList extends PaginationList<SelfReportListEntryDto> {
 
 	private final SelfReportCriteria selfReportCriteria;
 
-	private final Label noSelfReportsLabel;
+	private final Span noSelfReportsLabel;
 
 	public SelfReportList(SelfReportCriteria selfReportCriteria) {
 		super(MAX_DISPLAYED_ENTRIES);
 		this.selfReportCriteria = selfReportCriteria;
-		this.noSelfReportsLabel = new Label("There are no self reports for this case");
+		this.noSelfReportsLabel = new Span("There are no self reports for this case");
 	}
 
 	@Override
@@ -35,9 +34,9 @@ public class SelfReportList extends PaginationList<SelfReportListEntryDto> {
 		if (!selfReportEntries.isEmpty()) {
 			showPage(1);
 		} else {
-			listLayout.removeAllComponents();
+			listLayout.removeAll();
 			updatePaginationLayout();
-			listLayout.addComponent(noSelfReportsLabel);
+			listLayout.add(noSelfReportsLabel);
 		}
 	}
 
@@ -50,15 +49,15 @@ public class SelfReportList extends PaginationList<SelfReportListEntryDto> {
 			if (UiUtil.permitted(UserRight.SELF_REPORT_EDIT)) {
 				listEntry.addEditButton(
 					"edit-selfReport" + selfReportUuid,
-					(Button.ClickListener) event -> ControllerProvider.getSelfReportController().navigateToSelfReport(selfReportUuid));
+					event -> ControllerProvider.getSelfReportController().navigateToSelfReport(selfReportUuid));
 			}else {
 				listEntry.addEditButton(
 						"view-selfReport" + selfReportUuid,
-						(Button.ClickListener) event -> ControllerProvider.getSelfReportController().navigateToSelfReport(selfReportUuid));
+						event -> ControllerProvider.getSelfReportController().navigateToSelfReport(selfReportUuid));
 			}
 
 			listEntry.setEnabled(true);
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 }

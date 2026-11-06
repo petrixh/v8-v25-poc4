@@ -20,9 +20,9 @@ package de.symeda.sormas.ui.dashboard.surveillance.components.disease.burden;
 import java.util.List;
 
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.shared.ui.grid.HeightMode;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
 
 import de.symeda.sormas.api.disease.DiseaseBurdenDto;
 import de.symeda.sormas.api.i18n.Captions;
@@ -38,7 +38,7 @@ public class DiseaseBurdenComponent extends VerticalLayout {
 
 	public DiseaseBurdenComponent() {
 
-		Label title = new Label(I18nProperties.getCaption(Captions.dashboardDiseaseBurdenInfo));
+		Span title = new Span(I18nProperties.getCaption(Captions.dashboardDiseaseBurdenInfo));
 		CssStyles.style(title, CssStyles.H2, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_NONE);
 
 		grid = new DiseaseBurdenGrid();
@@ -52,7 +52,7 @@ public class DiseaseBurdenComponent extends VerticalLayout {
 		addComponent(grid);
 		setMargin(new MarginInfo(true, true, false, true));
 		setSpacing(false);
-		setExpandRatio(grid, 1);
+		setFlexGrow(1, grid);
 	}
 
 	public void refresh(List<DiseaseBurdenDto> diseasesBurden) {

@@ -18,7 +18,7 @@
 package de.symeda.sormas.ui.dashboard.surveillance.components.epicurve;
 
 import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 import de.symeda.sormas.ui.dashboard.DashboardDataProvider;
 import de.symeda.sormas.ui.dashboard.diagram.AbstractEpiCurveComponent;
@@ -48,7 +48,7 @@ public class SurveillanceEpiCurveComponent extends AbstractEpiCurveComponent<Das
 		epiCurveModeOptionGroup.setValue(epiCurveSurveillanceMode);
 		epiCurveModeOptionGroup.select(epiCurveSurveillanceMode);
 		epiCurveModeOptionGroup.addValueChangeListener(e -> {
-			epiCurveSurveillanceMode = (SurveillanceEpiCurveMode) e.getProperty().getValue();
+			epiCurveSurveillanceMode = (SurveillanceEpiCurveMode) e.getValue();
 			clearAndFillEpiCurveChart();
 		});
 		return epiCurveModeOptionGroup;

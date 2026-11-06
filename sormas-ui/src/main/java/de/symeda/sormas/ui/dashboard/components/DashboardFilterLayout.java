@@ -25,21 +25,21 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.vaadin.hene.popupbutton.PopupButton;
+import de.symeda.sormas.ui.utils.PopupButton;
 
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.Component;
+import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.ComboBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
@@ -197,18 +197,18 @@ public abstract class DashboardFilterLayout<P extends AbstractDashboardDataProvi
 			CssStyles.BUTTON_FILTER,
 			CssStyles.BUTTON_FILTER_LIGHT);
 
-		Label lblComparedTo = new Label(I18nProperties.getCaption(Captions.dashboardComparedTo));
+		Span lblComparedTo = new Span(I18nProperties.getCaption(Captions.dashboardComparedTo));
 		CssStyles.style(lblComparedTo, CssStyles.VSPACE_TOP_4, CssStyles.LABEL_BOLD);
 
 		btnComparisonPeriod = ButtonHelper.createIconPopupButton(
 			"comparisonPeriod",
 			null,
 			createDateComparisonButtonsLayout(),
-			ValoTheme.BUTTON_BORDERLESS,
+			CssStyles.BUTTON_BORDERLESS,
 			CssStyles.BUTTON_FILTER,
 			CssStyles.BUTTON_FILTER_LIGHT);
 
-		dateFilterLayout.addComponents(btnCurrentPeriod, lblComparedTo, btnComparisonPeriod);
+		dateFilterLayout.add(btnCurrentPeriod, lblComparedTo, btnComparisonPeriod);
 
 		// Set initial date filter
 		CssStyles.style(btnThisWeek, CssStyles.BUTTON_FILTER_DARK);
@@ -307,7 +307,7 @@ public abstract class DashboardFilterLayout<P extends AbstractDashboardDataProvi
 			updateComparisonButtons(DateFilterType.THIS_YEAR, from, to, false);
 		});
 
-		layout.addComponents(btnShowCustomPeriod, btnToday, btnYesterday, btnThisWeek, btnLastWeek, btnThisYear);
+		layout.add(btnShowCustomPeriod, btnToday, btnYesterday, btnThisWeek, btnLastWeek, btnThisYear);
 
 		return layout;
 	}
@@ -325,7 +325,7 @@ public abstract class DashboardFilterLayout<P extends AbstractDashboardDataProvi
 		// Date & Epi Week filter
 		EpiWeekAndDateFilterComponent<NewCaseDateType> weekAndDateFilter =
 			new EpiWeekAndDateFilterComponent<>(true, true, I18nProperties.getString(Strings.infoCaseDate), null);
-		customDateFilterLayout.addComponents(weekAndDateFilter, applyButton);
+		customDateFilterLayout.add(weekAndDateFilter, applyButton);
 
 		// Apply button listener
 		applyButton.addClickListener(e -> {
@@ -399,7 +399,7 @@ public abstract class DashboardFilterLayout<P extends AbstractDashboardDataProvi
 	private Component createDateComparisonButtonsLayout() {
 		HorizontalLayout layout = new HorizontalLayout();
 		layout.setSpacing(true);
-		layout.setMargin(true);
+		layout.setPadding(true);
 
 		btnPeriodBefore = createAndAddDateFilterButton(Captions.dashboardDayBefore, null, dateComparisonButtons);
 		btnPeriodBefore.addClickListener(e -> {
@@ -415,7 +415,7 @@ public abstract class DashboardFilterLayout<P extends AbstractDashboardDataProvi
 			btnComparisonPeriod.setCaption(btnPeriodLastYear.getCaption());
 		});
 
-		layout.addComponents(btnPeriodBefore, btnPeriodLastYear);
+		layout.add(btnPeriodBefore, btnPeriodLastYear);
 
 		return layout;
 	}
@@ -423,7 +423,7 @@ public abstract class DashboardFilterLayout<P extends AbstractDashboardDataProvi
 	private Button createAndAddDateFilterButton(String id, String caption, Set<Button> buttonSet) {
 		Button button = ButtonHelper.createButton(id, caption, e -> {
 			changeCustomDateFilterPanelStyle(e.getButton(), buttonSet);
-		}, ValoTheme.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER, CssStyles.BUTTON_FILTER_LIGHT);
+		}, CssStyles.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER, CssStyles.BUTTON_FILTER_LIGHT);
 
 		buttonSet.add(button);
 
@@ -556,6 +556,6 @@ public abstract class DashboardFilterLayout<P extends AbstractDashboardDataProvi
 
 	protected void addCustomComponent(Component component, String locator) {
 		customLayout.addComponent(component, locator);
-		component.addStyleName(FILTER_ITEM_STYLE);
+		component.addClassName(FILTER_ITEM_STYLE);
 	}
 }

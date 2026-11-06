@@ -17,12 +17,12 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.dashboard.surveillance.components.disease.tile;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.disease.DiseaseBurdenDto;
@@ -36,7 +36,7 @@ public class DiseaseTileComponent extends VerticalLayout {
 	private static final long serialVersionUID = 6582975657305031105L;
 
 	public DiseaseTileComponent(DiseaseBurdenDto diseaseBurden) {
-		setMargin(false);
+		setPadding(false);
 		setSpacing(false);
 
 		addTopLayout(
@@ -49,25 +49,25 @@ public class DiseaseTileComponent extends VerticalLayout {
 
 	private void addTopLayout(Disease disease, Long casesCount, Long previousCasesCount, boolean isOutbreak) {
 		HorizontalLayout layout = new HorizontalLayout();
-		layout.setMargin(false);
+		layout.setPadding(false);
 		layout.setSpacing(false);
-		layout.addStyleName(CssStyles.getDiseaseColor(disease));
+		layout.addClassName(CssStyles.getDiseaseColor(disease));
 		layout.setHeight(75, Unit.PIXELS);
 		layout.setWidth(100, Unit.PERCENTAGE);
 
 		VerticalLayout nameAndOutbreakLayout = new VerticalLayout();
-		nameAndOutbreakLayout.setMargin(false);
+		nameAndOutbreakLayout.setPadding(false);
 		nameAndOutbreakLayout.setSpacing(false);
 		nameAndOutbreakLayout.setHeight(100, Unit.PERCENTAGE);
 		nameAndOutbreakLayout.setWidth(100, Unit.PERCENTAGE);
 
 		HorizontalLayout nameLayout = new HorizontalLayout();
-		nameLayout.setMargin(false);
+		nameLayout.setPadding(false);
 		nameLayout.setSpacing(false);
 		nameLayout.setWidth(100, Unit.PERCENTAGE);
 		nameLayout.setHeight(100, Unit.PERCENTAGE);
-		Label nameLabel = new Label(disease.toShortString());
-		nameLabel.addStyleNames(
+		Span nameLabel = new Span(disease.toShortString());
+		nameLabel.addClassNames(
 			CssStyles.LABEL_WHITE,
 			nameLabel.getValue().length() > 12 ? CssStyles.LABEL_LARGE : CssStyles.LABEL_XLARGE,
 			CssStyles.LABEL_BOLD,
@@ -76,51 +76,51 @@ public class DiseaseTileComponent extends VerticalLayout {
 		nameLayout.addComponent(nameLabel);
 		nameLayout.setComponentAlignment(nameLabel, Alignment.MIDDLE_CENTER);
 		nameAndOutbreakLayout.addComponent(nameLayout);
-		nameAndOutbreakLayout.setExpandRatio(nameLayout, 1);
+		nameAndOutbreakLayout.setFlexGrow(1, nameLayout);
 
 		if (isOutbreak) {
 			HorizontalLayout outbreakLayout = new HorizontalLayout();
-			outbreakLayout.setMargin(false);
+			outbreakLayout.setPadding(false);
 			outbreakLayout.setSpacing(false);
-			outbreakLayout.addStyleName(CssStyles.BACKGROUND_CRITICAL);
+			outbreakLayout.addClassName(CssStyles.BACKGROUND_CRITICAL);
 			outbreakLayout.setWidth(100, Unit.PERCENTAGE);
 			outbreakLayout.setHeight(30, Unit.PIXELS);
-			Label outbreakLabel = new Label(I18nProperties.getCaption(Captions.dashboardOutbreak));
-			outbreakLabel.addStyleNames(CssStyles.LABEL_WHITE, CssStyles.ALIGN_CENTER, CssStyles.LABEL_UPPERCASE);
+			Span outbreakLabel = new Span(I18nProperties.getCaption(Captions.dashboardOutbreak));
+			outbreakLabel.addClassNames(CssStyles.LABEL_WHITE, CssStyles.ALIGN_CENTER, CssStyles.LABEL_UPPERCASE);
 			outbreakLayout.addComponent(outbreakLabel);
 			outbreakLayout.setComponentAlignment(outbreakLabel, Alignment.MIDDLE_CENTER);
 			nameAndOutbreakLayout.addComponent(outbreakLayout);
 		}
 
 		layout.addComponent(nameAndOutbreakLayout);
-		layout.setExpandRatio(nameAndOutbreakLayout, 1);
+		layout.setFlexGrow(1, nameAndOutbreakLayout);
 
 		VerticalLayout countLayout = new VerticalLayout();
-		countLayout.setMargin(false);
+		countLayout.setPadding(false);
 		countLayout.setSpacing(false);
-		countLayout.addStyleNames(CssStyles.getDiseaseColor(disease), CssStyles.BACKGROUND_DARKER);
+		countLayout.addClassNames(CssStyles.getDiseaseColor(disease), CssStyles.BACKGROUND_DARKER);
 		countLayout.setHeight(100, Unit.PERCENTAGE);
 		countLayout.setWidth(100, Unit.PERCENTAGE);
 
-		Label countLabel = new Label(casesCount.toString());
+		Span countLabel = new Span(casesCount.toString());
 		countLabel
-			.addStyleNames(CssStyles.LABEL_WHITE, CssStyles.LABEL_BOLD, CssStyles.LABEL_XXXLARGE, CssStyles.ALIGN_CENTER, CssStyles.VSPACE_TOP_4);
+			.addClassNames(CssStyles.LABEL_WHITE, CssStyles.LABEL_BOLD, CssStyles.LABEL_XXXLARGE, CssStyles.ALIGN_CENTER, CssStyles.VSPACE_TOP_4);
 		countLayout.addComponent(countLabel);
 		countLayout.setComponentAlignment(countLabel, Alignment.BOTTOM_CENTER);
 
 		HorizontalLayout comparisonLayout = new HorizontalLayout();
 		{
-			comparisonLayout.setMargin(false);
+			comparisonLayout.setPadding(false);
 			comparisonLayout.setSpacing(false);
 
-			Label growthLabel = new Label("", ContentMode.HTML);
+			Span growthLabel = new Span("", ContentMode.HTML);
 			String chevronType;
 			if (previousCasesCount < casesCount) {
-				chevronType = VaadinIcons.CHEVRON_UP.getHtml();
+				chevronType = VaadinIcon.CHEVRON_UP.getHtml();
 			} else if (previousCasesCount > casesCount) {
-				chevronType = VaadinIcons.CHEVRON_DOWN.getHtml();
+				chevronType = VaadinIcon.CHEVRON_DOWN.getHtml();
 			} else {
-				chevronType = VaadinIcons.CHEVRON_RIGHT.getHtml();
+				chevronType = VaadinIcon.CHEVRON_RIGHT.getHtml();
 			}
 			growthLabel.setValue(
 				"<div class=\"v-label v-widget " + CssStyles.LABEL_WHITE + " v-label-" + CssStyles.LABEL_WHITE
@@ -129,8 +129,8 @@ public class DiseaseTileComponent extends VerticalLayout {
 
 			comparisonLayout.addComponent(growthLabel);
 
-			Label previousCountLabel = new Label(previousCasesCount.toString());
-			previousCountLabel.addStyleNames(CssStyles.LABEL_WHITE, CssStyles.LABEL_BOLD, CssStyles.LABEL_XLARGE, CssStyles.HSPACE_LEFT_4);
+			Span previousCountLabel = new Span(previousCasesCount.toString());
+			previousCountLabel.addClassNames(CssStyles.LABEL_WHITE, CssStyles.LABEL_BOLD, CssStyles.LABEL_XLARGE, CssStyles.HSPACE_LEFT_4);
 			comparisonLayout.addComponent(previousCountLabel);
 			comparisonLayout.setComponentAlignment(growthLabel, Alignment.MIDDLE_CENTER);
 			comparisonLayout.setComponentAlignment(previousCountLabel, Alignment.MIDDLE_CENTER);
@@ -138,11 +138,11 @@ public class DiseaseTileComponent extends VerticalLayout {
 		countLayout.addComponent(comparisonLayout);
 		countLayout.setComponentAlignment(comparisonLayout, Alignment.MIDDLE_CENTER);
 
-		countLayout.setExpandRatio(countLabel, 0.4f);
-		countLayout.setExpandRatio(comparisonLayout, 0.6f);
+		countLayout.setFlexGrow(0.4f, countLabel);
+		countLayout.setFlexGrow(0.6f, comparisonLayout);
 
 		layout.addComponent(countLayout);
-		layout.setExpandRatio(countLayout, 0.65f);
+		layout.setFlexGrow(0.65f, countLayout);
 
 		addComponent(layout);
 	}
@@ -150,19 +150,19 @@ public class DiseaseTileComponent extends VerticalLayout {
 	private void addStatsLayout(Long fatalities, Long events, String district) {
 		VerticalLayout layout = new VerticalLayout();
 		layout.setWidth(100, Unit.PERCENTAGE);
-		layout.setMargin(false);
+		layout.setPadding(false);
 		layout.setSpacing(false);
-		layout.addStyleName(CssStyles.BACKGROUND_HIGHLIGHT);
+		layout.addClassName(CssStyles.BACKGROUND_HIGHLIGHT);
 
 		StatsItem lastReportItem =
 			new StatsItem.Builder(Captions.dashboardLastReport, district.length() == 0 ? I18nProperties.getString(Strings.none) : district)
 				.singleColumn(true)
 				.build();
-		lastReportItem.addStyleName(CssStyles.VSPACE_TOP_4);
+		lastReportItem.addClassName(CssStyles.VSPACE_TOP_4);
 		layout.addComponent(lastReportItem);
 		layout.addComponent(new StatsItem.Builder(Captions.dashboardFatalities, fatalities).critical(fatalities > 0).build());
 		StatsItem noOfEventsItem = new StatsItem.Builder(Captions.DiseaseBurden_eventCount, events).build();
-		noOfEventsItem.addStyleName(CssStyles.VSPACE_4);
+		noOfEventsItem.addClassName(CssStyles.VSPACE_4);
 		layout.addComponent(noOfEventsItem);
 
 		addComponent(layout);

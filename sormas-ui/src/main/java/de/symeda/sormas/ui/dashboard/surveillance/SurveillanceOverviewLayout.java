@@ -17,14 +17,14 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.dashboard.surveillance;
 
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.button.Button;
+import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.CheckBox;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -85,16 +85,16 @@ public class SurveillanceOverviewLayout extends CustomLayout {
 
 		showMoreButton = ButtonHelper.createIconButton(
 			Captions.dashboardShowAllDiseases,
-			VaadinIcons.CHEVRON_DOWN,
+			VaadinIcon.CHEVRON_DOWN,
 			null,
-			ValoTheme.BUTTON_BORDERLESS,
+			CssStyles.BUTTON_BORDERLESS,
 			CssStyles.VSPACE_TOP_NONE,
 			CssStyles.VSPACE_4);
 		showLessButton = ButtonHelper.createIconButton(
 			Captions.dashboardShowFirstDiseases,
-			VaadinIcons.CHEVRON_UP,
+			VaadinIcon.CHEVRON_UP,
 			null,
-			ValoTheme.BUTTON_BORDERLESS,
+			CssStyles.BUTTON_BORDERLESS,
 			CssStyles.VSPACE_TOP_NONE,
 			CssStyles.VSPACE_4);
 		hideOverview = new CheckBox(I18nProperties.getCaption(Captions.dashboardHideOverview));
@@ -134,18 +134,18 @@ public class SurveillanceOverviewLayout extends CustomLayout {
 		buttonsLayout.addComponent(showMoreButton);
 		buttonsLayout.addComponent(showLessButton);
 		buttonsLayout.setComponentAlignment(showMoreButton, Alignment.BOTTOM_CENTER);
-		buttonsLayout.setExpandRatio(showMoreButton, 1);
+		buttonsLayout.setFlexGrow(1, showMoreButton);
 		buttonsLayout.setComponentAlignment(showLessButton, Alignment.BOTTOM_CENTER);
-		buttonsLayout.setExpandRatio(showLessButton, 1);
+		buttonsLayout.setFlexGrow(1, showLessButton);
 		buttonsLayout.addComponent(hideOverview);
 		buttonsLayout.setComponentAlignment(hideOverview, Alignment.BOTTOM_RIGHT);
-		buttonsLayout.setExpandRatio(hideOverview, 0);
+		buttonsLayout.setFlexGrow(0, hideOverview);
 
 		addComponent(buttonsLayout, EXTEND_BUTTONS_LOC);
 
 		isShowingAllDiseases = false;
 		showLessButton.setVisible(false);
-		buttonsLayout.setExpandRatio(showLessButton, 1);
+		buttonsLayout.setFlexGrow(1, showLessButton);
 	}
 
 	public void refresh() {

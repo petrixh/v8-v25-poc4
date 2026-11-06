@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.disease.DiseaseBurdenDto;
 import de.symeda.sormas.api.i18n.Captions;
@@ -39,16 +39,16 @@ public class CaseCountDifferenceComponent extends VerticalLayout {
 
 	private DashboardDataProvider dashboardDataProvider;
 	private HighChart chart;
-	private Label subtitleLabel;
+	private Span subtitleLabel;
 
 	public CaseCountDifferenceComponent(DashboardDataProvider dashboardDataProvider) {
 
 		this.dashboardDataProvider = dashboardDataProvider;
 
-		Label title = new Label(I18nProperties.getCaption(Captions.dashboardDiseaseDifference));
+		Span title = new Span(I18nProperties.getCaption(Captions.dashboardDiseaseDifference));
 		CssStyles.style(title, CssStyles.H2, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_NONE);
 
-		subtitleLabel = new Label();
+		subtitleLabel = new Span();
 		updateSubHeader();
 
 		chart = new HighChart();
@@ -60,7 +60,7 @@ public class CaseCountDifferenceComponent extends VerticalLayout {
 		addComponent(title);
 		addComponent(subtitleLabel);
 		addComponent(chart);
-		setExpandRatio(chart, 1);
+		setFlexGrow(1, chart);
 
 		setMargin(new MarginInfo(true, true, false, true));
 		setSpacing(false);

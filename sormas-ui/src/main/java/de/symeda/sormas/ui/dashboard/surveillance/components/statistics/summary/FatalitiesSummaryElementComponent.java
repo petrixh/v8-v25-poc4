@@ -2,11 +2,11 @@ package de.symeda.sormas.ui.dashboard.surveillance.components.statistics.summary
 
 import java.util.List;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.dashboard.DashboardCaseDto;
 import de.symeda.sormas.api.i18n.Strings;
@@ -16,10 +16,10 @@ public class FatalitiesSummaryElementComponent extends HorizontalLayout {
 
 	private final DiseaseSummaryElementComponent caseFatalityRateValue;
 	private final DiseaseSummaryElementComponent caseFatalityCountValue;
-	private final Label caseFatalityCountGrowth;
+	private final Span caseFatalityCountGrowth;
 
 	public FatalitiesSummaryElementComponent() {
-		setMargin(false);
+		setPadding(false);
 		setSpacing(false);
 
 		caseFatalityRateValue = new DiseaseSummaryElementComponent(Strings.headingCaseFatalityRate, "00.0%");
@@ -29,12 +29,12 @@ public class FatalitiesSummaryElementComponent extends HorizontalLayout {
 
 		caseFatalityCountValue = new DiseaseSummaryElementComponent(Strings.headingFatalities, "0");
 
-		caseFatalityCountGrowth = new Label("", ContentMode.HTML);
+		caseFatalityCountGrowth = new Span("", ContentMode.HTML);
 		CssStyles.style(caseFatalityCountGrowth, CssStyles.VSPACE_TOP_5);
 		caseFatalityCountValue.addComponent(caseFatalityCountGrowth);
 
 		addComponent(caseFatalityCountValue);
-		setExpandRatio(caseFatalityCountValue, 1);
+		setFlexGrow(1, caseFatalityCountValue);
 		setComponentAlignment(caseFatalityCountValue, Alignment.MIDDLE_RIGHT);
 	}
 
@@ -54,13 +54,13 @@ public class FatalitiesSummaryElementComponent extends HorizontalLayout {
 		String criticalLevel;
 
 		if (fatalCasesGrowth > 0) {
-			chevronType = VaadinIcons.CHEVRON_UP.getHtml();
+			chevronType = VaadinIcon.CHEVRON_UP.getHtml();
 			criticalLevel = CssStyles.LABEL_CRITICAL;
 		} else if (fatalCasesGrowth < 0) {
-			chevronType = VaadinIcons.CHEVRON_DOWN.getHtml();
+			chevronType = VaadinIcon.CHEVRON_DOWN.getHtml();
 			criticalLevel = CssStyles.LABEL_POSITIVE;
 		} else {
-			chevronType = VaadinIcons.CHEVRON_RIGHT.getHtml();
+			chevronType = VaadinIcon.CHEVRON_RIGHT.getHtml();
 			criticalLevel = CssStyles.LABEL_IMPORTANT;
 		}
 

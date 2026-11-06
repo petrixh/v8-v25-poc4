@@ -47,13 +47,13 @@ public class SurveillanceDashboardView extends AbstractDashboardView {
 		}
 		filterLayout = new SurveillanceFilterLayout(this, dashboardDataProvider);
 		filterLayout.addDateTypeValueChangeListener(e -> {
-			dashboardDataProvider.setNewCaseDateType((NewCaseDateType) e.getProperty().getValue());
+			dashboardDataProvider.setNewCaseDateType((NewCaseDateType) e.getValue());
 		});
 		dashboardLayout.addComponent(filterLayout);
 
 		dashboardSwitcher.setValue(DashboardType.SURVEILLANCE);
 		dashboardSwitcher.addValueChangeListener(e -> {
-			dashboardDataProvider.setDashboardType((DashboardType) e.getProperty().getValue());
+			dashboardDataProvider.setDashboardType((DashboardType) e.getValue());
 			navigateToDashboardView(e);
 		});
 
@@ -69,11 +69,11 @@ public class SurveillanceDashboardView extends AbstractDashboardView {
 		//add diseaseCarousel and map
 		diseaseCarouselLayout = new SurveillanceDiseaseCarouselLayout(dashboardDataProvider);
 		dashboardLayout.addComponent(diseaseCarouselLayout);
-		dashboardLayout.setExpandRatio(diseaseCarouselLayout, 1);
+		dashboardLayout.setFlexGrow(1, diseaseCarouselLayout);
 
 		diseaseCarouselLayout.setExpandListener(expanded -> {
 			if (expanded) {
-				dashboardLayout.removeComponent(surveillanceOverviewLayout);
+				dashboardLayout.remove(surveillanceOverviewLayout);
 			} else {
 				dashboardLayout.addComponent(surveillanceOverviewLayout, 1);
 			}

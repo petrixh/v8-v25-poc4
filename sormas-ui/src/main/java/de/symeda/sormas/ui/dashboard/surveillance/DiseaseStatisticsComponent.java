@@ -17,7 +17,7 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.dashboard.surveillance;
 
-import com.vaadin.ui.CustomLayout;
+import de.symeda.sormas.ui.utils.CustomLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.Descriptions;

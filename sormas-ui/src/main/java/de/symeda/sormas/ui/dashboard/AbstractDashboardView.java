@@ -21,11 +21,11 @@ import static de.symeda.sormas.ui.UiUtil.permitted;
 
 import java.util.EnumSet;
 
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.ui.VerticalLayout;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 import de.symeda.sormas.api.feature.FeatureType;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -53,7 +53,7 @@ public abstract class AbstractDashboardView extends AbstractView {
 
 		super(viewName);
 
-		addStyleName(DashboardCssStyles.DASHBOARD_SCREEN);
+		addClassName(DashboardCssStyles.DASHBOARD_SCREEN);
 
 		CssStyles.style(dashboardSwitcher, CssStyles.FORCE_CAPTION, ValoTheme.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_HORIZONTAL_PRIMARY);
 		if (permitted(FeatureType.CASE_SURVEILANCE, UserRight.DASHBOARD_SURVEILLANCE_VIEW)) {
@@ -104,25 +104,25 @@ public abstract class AbstractDashboardView extends AbstractView {
 
 		// Dashboard layout
 		dashboardLayout = new VerticalLayout();
-		dashboardLayout.setMargin(false);
+		dashboardLayout.setPadding(false);
 		dashboardLayout.setSpacing(false);
 		dashboardLayout.setSizeFull();
-		dashboardLayout.setStyleName("crud-main-layout");
+		dashboardLayout.setClassName("crud-main-layout");
 
 		addComponent(dashboardLayout);
-		setExpandRatio(dashboardLayout, 1);
+		setFlexGrow(1, dashboardLayout);
 	}
 
 	protected void navigateToDashboardView(Property.ValueChangeEvent e) {
-		if (DashboardType.SURVEILLANCE.equals(e.getProperty().getValue())) {
+		if (DashboardType.SURVEILLANCE.equals(e.getValue())) {
 			SormasUI.get().getNavigator().navigateTo(SurveillanceDashboardView.VIEW_NAME);
-		} else if (DashboardType.CONTACTS.equals(e.getProperty().getValue())) {
+		} else if (DashboardType.CONTACTS.equals(e.getValue())) {
 			SormasUI.get().getNavigator().navigateTo(ContactsDashboardView.VIEW_NAME);
-		} else if (DashboardType.SAMPLES.equals(e.getProperty().getValue())) {
+		} else if (DashboardType.SAMPLES.equals(e.getValue())) {
 			SormasUI.get().getNavigator().navigateTo(SampleDashboardView.VIEW_NAME);
-		} else if (DashboardType.ADVERSE_EVENTS.equals(e.getProperty().getValue())) {
+		} else if (DashboardType.ADVERSE_EVENTS.equals(e.getValue())) {
 			SormasUI.get().getNavigator().navigateTo(AefiDashboardView.VIEW_NAME);
-		} else if (DashboardType.GIS.equals(e.getProperty().getValue())) {
+		} else if (DashboardType.GIS.equals(e.getValue())) {
 			SormasUI.get().getNavigator().navigateTo(GisDashboardView.VIEW_NAME);
 		} else {
 			SormasUI.get().getNavigator().navigateTo(CampaignDashboardView.VIEW_NAME);

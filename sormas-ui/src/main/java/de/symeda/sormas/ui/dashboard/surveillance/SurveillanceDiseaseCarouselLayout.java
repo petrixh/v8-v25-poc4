@@ -21,11 +21,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.shared.Registration;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.ui.CheckBox;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -71,28 +71,28 @@ public class SurveillanceDiseaseCarouselLayout extends VerticalLayout {
 	}
 
 	private void initLayout() {
-		addStyleName(DashboardCssStyles.CURVE_AND_MAP_LAYOUT);
+		addClassName(DashboardCssStyles.CURVE_AND_MAP_LAYOUT);
 		setWidth(100, Unit.PERCENTAGE);
 		setHeightUndefined();
-		setMargin(false);
+		setPadding(false);
 		setSpacing(false);
 
 		HorizontalLayout carouselMenuLayout = createCarouselMenuLayout();
 		addComponent(carouselMenuLayout);
-		setExpandRatio(carouselMenuLayout, 0);
+		setFlexGrow(0, carouselMenuLayout);
 
 		addComponent(statisticsComponent);
-		statisticsComponent.addStyleName(DashboardCssStyles.HIGHLIGHTED_STATISTICS_COMPONENT);
-		setExpandRatio(statisticsComponent, 0);
+		statisticsComponent.addClassName(DashboardCssStyles.HIGHLIGHTED_STATISTICS_COMPONENT);
+		setFlexGrow(0, statisticsComponent);
 
 		HorizontalLayout epiCurveAndMapLayout = createEpiCurveAndMapLayout();
 		addComponent(epiCurveAndMapLayout);
-		setExpandRatio(epiCurveAndMapLayout, 1);
+		setFlexGrow(1, epiCurveAndMapLayout);
 	}
 
 	private HorizontalLayout createCarouselMenuLayout() {
 		HorizontalLayout layout = new HorizontalLayout();
-		layout.setMargin(false);
+		layout.setPadding(false);
 		CssStyles.style(layout, CssStyles.HSPACE_LEFT_2);
 
 		CheckBox autoSlide = this.setupSlideShow();
@@ -129,8 +129,8 @@ public class SurveillanceDiseaseCarouselLayout extends VerticalLayout {
 
 		epiCurveComponent.setExpandListener(expanded -> {
 			if (expanded) {
-				removeComponent(statisticsComponent);
-				epiCurveAndMapLayout.removeComponent(mapComponent);
+				remove(statisticsComponent);
+				epiCurveAndMapLayout.remove(mapComponent);
 				epiCurveAndMapLayout.setHeight(100, Unit.PERCENTAGE);
 				setHeight(100, Unit.PERCENTAGE);
 			} else {
@@ -147,8 +147,8 @@ public class SurveillanceDiseaseCarouselLayout extends VerticalLayout {
 
 		mapComponent.setExpandListener(expanded -> {
 			if (expanded) {
-				removeComponent(statisticsComponent);
-				epiCurveAndMapLayout.removeComponent(epiCurveComponent);
+				remove(statisticsComponent);
+				epiCurveAndMapLayout.remove(epiCurveComponent);
 				epiCurveAndMapLayout.setHeight(100, Unit.PERCENTAGE);
 				setHeight(100, Unit.PERCENTAGE);
 			} else {

@@ -60,7 +60,7 @@ public class DiseaseSummaryComponent extends DashboardStatisticsSubComponent {
 			addComponent(casesWithReferenceDefinitionFulfilled);
 		}
 
-		addStyleName(CssStyles.VSPACE_TOP_4);
+		addClassName(CssStyles.VSPACE_TOP_4);
 	}
 
 	public void update(DashboardDataProvider dashboardDataProvider) {

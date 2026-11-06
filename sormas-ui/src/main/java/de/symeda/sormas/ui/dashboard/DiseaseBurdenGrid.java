@@ -20,7 +20,7 @@ package de.symeda.sormas.ui.dashboard;
 import java.util.List;
 import java.util.Locale;
 
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.v7.data.util.BeanItemContainer;
 import com.vaadin.v7.data.util.GeneratedPropertyContainer;
 import com.vaadin.v7.data.util.converter.StringToFloatConverter;
@@ -81,13 +81,13 @@ public class DiseaseBurdenGrid extends Grid {
 				String criticalLevel = "";
 
 				if (value > 0) {
-					chevronType = VaadinIcons.CHEVRON_UP.getHtml();
+					chevronType = VaadinIcon.CHEVRON_UP.getHtml();
 					criticalLevel = CssStyles.LABEL_CRITICAL;
 				} else if (value < 0) {
-					chevronType = VaadinIcons.CHEVRON_DOWN.getHtml();
+					chevronType = VaadinIcon.CHEVRON_DOWN.getHtml();
 					criticalLevel = CssStyles.LABEL_POSITIVE;
 				} else {
-					chevronType = VaadinIcons.CHEVRON_RIGHT.getHtml();
+					chevronType = VaadinIcon.CHEVRON_RIGHT.getHtml();
 					criticalLevel = CssStyles.LABEL_IMPORTANT;
 				}
 

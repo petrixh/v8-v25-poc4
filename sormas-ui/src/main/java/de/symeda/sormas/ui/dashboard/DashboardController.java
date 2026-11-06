@@ -21,7 +21,7 @@ import static de.symeda.sormas.ui.UiUtil.permitted;
 
 import java.util.EnumSet;
 
-import com.vaadin.navigator.Navigator;
+import de.symeda.sormas.ui.navigation.Navigator;
 
 import de.symeda.sormas.api.feature.FeatureType;
 import de.symeda.sormas.api.user.UserRight;

@@ -19,7 +19,7 @@ package de.symeda.sormas.ui.dashboard.surveillance.components.disease.tile;
 
 import java.util.List;
 
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.Component;
 import com.vaadin.ui.CssLayout;
 
 import de.symeda.sormas.api.disease.DiseaseBurdenDto;
@@ -34,7 +34,7 @@ public class DiseaseTileViewLayout extends CssLayout {
 	}
 
 	public void refresh(List<DiseaseBurdenDto> diseasesBurden) {
-		this.removeAllComponents();
+		this.removeAll();
 
 		for (DiseaseBurdenDto diseaseBurden : diseasesBurden) {
 			DiseaseTileComponent tile = new DiseaseTileComponent(diseaseBurden);

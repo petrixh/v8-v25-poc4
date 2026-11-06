@@ -22,11 +22,11 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 import static de.symeda.sormas.ui.utils.LayoutUtil.locs;
 
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Label;
-import com.vaadin.v7.ui.OptionGroup;
-import com.vaadin.v7.ui.RichTextArea;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.SormasRichTextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.action.ActionContext;
 import de.symeda.sormas.api.action.ActionDto;
@@ -98,13 +98,13 @@ public class ActionEditForm extends AbstractEditForm<ActionDto> {
 
 		addField(ActionDto.ACTION_MEASURE, TextField.class);
 		TextField title = addField(ActionDto.TITLE, TextField.class);
-		RichTextArea description = addField(ActionDto.DESCRIPTION, RichTextArea.class);
+		SormasRichTextArea description = addField(ActionDto.DESCRIPTION, SormasRichTextArea.class);
 
 		description.setNullRepresentation("");
 		description.setImmediate(true);
 		VaadinUiUtil.addGdprMessageOnClick(description);
 
-		RichTextArea reply = addField(ActionDto.REPLY, RichTextArea.class);
+		SormasRichTextArea reply = addField(ActionDto.REPLY, SormasRichTextArea.class);
 		reply.setNullRepresentation("");
 		reply.setImmediate(true);
 
@@ -114,34 +114,34 @@ public class ActionEditForm extends AbstractEditForm<ActionDto> {
 
 	private void updateLastModifiedByInfo() {
 		if (getValue().getLastModifiedBy() != null && getValue().getChangeDate() != null) {
-			Label replyLabel = new Label(
+			Span replyLabel = new Span(
 				String.format(
 					I18nProperties.getCaption(Captions.actionLastModifiedByLabel),
 					DateFormatHelper.formatDate(getValue().getChangeDate()),
 					getValue().getLastModifiedBy().getCaption()));
-			replyLabel.addStyleNames(CssStyles.LABEL_ITALIC);
+			replyLabel.addClassNames(CssStyles.LABEL_ITALIC);
 			getContent().addComponent(replyLabel, LAST_MODIFIED_BY_LABEL_LOC);
 		}
 	}
 
 	private void updateStatusChangeInfo() {
 		if (getValue().getStatusChangeDate() != null) {
-			Label statusChangeLabel = new Label(
+			Span statusChangeLabel = new Span(
 				String.format(
 					I18nProperties.getCaption(Captions.actionStatusChangeDate),
 					DateFormatHelper.formatDate(getValue().getStatusChangeDate())));
-			statusChangeLabel.addStyleNames(CssStyles.LABEL_ITALIC);
+			statusChangeLabel.addClassNames(CssStyles.LABEL_ITALIC);
 			getContent().addComponent(statusChangeLabel, STATUS_CHANGE_LABEL_LOC);
 		}
 	}
 
 	private void updateCreationInfo() {
-		Label creationLabel = new Label(
+		Span creationLabel = new Span(
 			String.format(
 				I18nProperties.getCaption(Captions.actionCreatingLabel),
 				DateFormatHelper.formatDate(getValue().getCreationDate()),
 				getValue().getCreatorUser().getCaption()));
-		creationLabel.addStyleNames(CssStyles.LABEL_ITALIC);
+		creationLabel.addClassNames(CssStyles.LABEL_ITALIC);
 		getContent().addComponent(creationLabel, CREATING_LABEL_LOC);
 	}
 

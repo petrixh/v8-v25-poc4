@@ -13,7 +13,7 @@ import java.util.Date;
 import java.util.function.Supplier;
 
 import com.vaadin.server.Page;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.ui.Notification;
 import com.vaadin.v7.ui.Upload.StartedEvent;
 
@@ -105,7 +105,7 @@ public class DocumentTemplateReceiver
 	protected void duplicateTemplateFileResponse(String fileName) {
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getString(Strings.headingFileExists),
-			new Label(String.format(I18nProperties.getString(Strings.infoDocumentAlreadyExists), fileName)),
+			new Span(String.format(I18nProperties.getString(Strings.infoDocumentAlreadyExists), fileName)),
 			I18nProperties.getCaption(Captions.actionConfirm),
 			I18nProperties.getCaption(Captions.actionCancel),
 			null,

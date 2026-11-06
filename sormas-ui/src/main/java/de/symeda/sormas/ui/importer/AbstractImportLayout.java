@@ -3,25 +3,24 @@ package de.symeda.sormas.ui.importer;
 import java.io.IOException;
 import java.util.function.Function;
 
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.server.ClassResource;
 import com.vaadin.server.Extension;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
-import com.vaadin.shared.ui.ContentMode;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.UI;
 import com.vaadin.v7.ui.Upload;
-import com.vaadin.v7.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -55,7 +54,7 @@ public class AbstractImportLayout extends VerticalLayout {
 	protected void addDownloadResourcesComponent(int step, ClassResource importGuideResource) {
 		String headline = I18nProperties.getString(Strings.headingDownloadImportGuide);
 		String infoText = I18nProperties.getString(Strings.infoDownloadImportGuide);
-		Resource buttonIcon = VaadinIcons.FILE_PRESENTATION;
+		Resource buttonIcon = VaadinIcon.FILE_PRESENTATION;
 		String buttonCaption = I18nProperties.getCaption(Captions.importDownloadImportGuide);
 		ImportLayoutComponent importGuideComponent = new ImportLayoutComponent(step, headline, infoText, buttonIcon, buttonCaption);
 		FileDownloader importGuideDownloader = new FileDownloader(importGuideResource);
@@ -64,9 +63,9 @@ public class AbstractImportLayout extends VerticalLayout {
 
 		Button dataDictionaryButton = ButtonHelper.createIconButton(
 			Captions.importDownloadDataDictionary,
-			VaadinIcons.FILE_TABLE,
+			VaadinIcon.FILE_TABLE,
 			null,
-			ValoTheme.BUTTON_PRIMARY,
+			CssStyles.BUTTON_PRIMARY,
 			CssStyles.VSPACE_TOP_3,
 			CssStyles.VSPACE_2);
 		DownloadUtil.attachDataDictionaryDownloader(dataDictionaryButton);
@@ -76,7 +75,7 @@ public class AbstractImportLayout extends VerticalLayout {
 	protected void addDownloadImportTemplateComponent(int step, String templateFilePath, String templateFileName) {
 		String headline = I18nProperties.getString(Strings.headingDownloadImportTemplate);
 		String infoText = I18nProperties.getString(Strings.infoDownloadImportTemplate);
-		Resource buttonIcon = VaadinIcons.DOWNLOAD;
+		Resource buttonIcon = VaadinIcon.DOWNLOAD;
 		String buttonCaption = I18nProperties.getCaption(Captions.importDownloadImportTemplate);
 		ImportLayoutComponent importTemplateComponent = new ImportLayoutComponent(step, headline, infoText, buttonIcon, buttonCaption);
 
@@ -140,10 +139,10 @@ public class AbstractImportLayout extends VerticalLayout {
 		checkboxBar.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
 		checkboxBar.setDescription(I18nProperties.getString(Strings.infoImportInfrastructureAllowOverwrite));
 		CssStyles.style(checkboxBar, CssStyles.VSPACE_TOP_3);
-		CheckBox allowOverwrite = new CheckBox(I18nProperties.getCaption(Captions.infrastructureImportAllowOverwrite));
+		Checkbox allowOverwrite = new Checkbox(I18nProperties.getCaption(Captions.infrastructureImportAllowOverwrite));
 		allowOverwrite.setValue(false);
 		checkboxBar.addComponent(allowOverwrite);
-		Label labelInfo = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
+		Span labelInfo = new Span(VaadinIcon.INFO_CIRCLE.getHtml(), ContentMode.HTML);
 		checkboxBar.addComponent(labelInfo);
 		CssStyles.style(checkboxBar, CssStyles.VSPACE_3);
 		addComponent(checkboxBar);
@@ -162,7 +161,7 @@ public class AbstractImportLayout extends VerticalLayout {
 	protected void addDownloadErrorReportComponent(int step) {
 		String headline = I18nProperties.getString(Strings.headingDownloadErrorReport);
 		String infoText = I18nProperties.getString(Strings.infoDownloadErrorReport);
-		Resource buttonIcon = VaadinIcons.DOWNLOAD;
+		Resource buttonIcon = VaadinIcon.DOWNLOAD;
 		String buttonCaption = I18nProperties.getCaption(Captions.importDownloadErrorReport);
 		ImportLayoutComponent errorReportComponent = new ImportLayoutComponent(step, headline, infoText, buttonIcon, buttonCaption);
 		downloadErrorReportButton = errorReportComponent.getButton();

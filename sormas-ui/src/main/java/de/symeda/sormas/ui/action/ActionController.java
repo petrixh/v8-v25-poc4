@@ -17,8 +17,8 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.action;
 
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.ReferenceDto;
@@ -81,7 +81,7 @@ public class ActionController {
 		form.setValue(newDto);
 		final CommitDiscardWrapperComponent<ActionEditForm> editView = new CommitDiscardWrapperComponent<>(form, true, form.getFieldGroup());
 
-		Window popupWindow = VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getString(Strings.headingEditAction));
+		Dialog popupWindow = VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getString(Strings.headingEditAction));
 
 		editView.addCommitListener(() -> {
 			if (!form.getFieldGroup().isModified()) {

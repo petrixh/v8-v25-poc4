@@ -18,15 +18,14 @@ import static de.symeda.sormas.api.utils.HtmlHelper.cleanHtml;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.action.ActionDto;
 import de.symeda.sormas.api.action.ActionPriority;
@@ -58,7 +57,7 @@ public class ActionListEntry extends HorizontalLayout {
 
 		setMargin(false);
 		setSpacing(true);
-		setWidth(100, Unit.PERCENTAGE);
+		setWidthFull();
 		addStyleName(CssStyles.SORMAS_LIST_ENTRY);
 
 		VerticalLayout withContentLayout = new VerticalLayout();
@@ -70,31 +69,31 @@ public class ActionListEntry extends HorizontalLayout {
 		titleLayout = new HorizontalLayout();
 		titleLayout.setMargin(false);
 		titleLayout.setSpacing(false);
-		Label title = new Label(MoreObjects.firstNonNull(Strings.emptyToNull(action.getTitle()), "-"));
-		title.addStyleNames(CssStyles.H3, CssStyles.HSPACE_LEFT_3);
+		Span title = new Span(MoreObjects.firstNonNull(Strings.emptyToNull(action.getTitle()), "-"));
+		title.addClassNames(CssStyles.H3, CssStyles.HSPACE_LEFT_3);
 		titleLayout.addComponent(title);
 		withContentLayout.addComponent(titleLayout);
 
 		HorizontalLayout topLayout = new HorizontalLayout();
 		topLayout.setMargin(false);
 		topLayout.setSpacing(false);
-		topLayout.setWidth(100, Unit.PERCENTAGE);
+		topLayout.setWidthFull();
 		withContentLayout.addComponent(topLayout);
 
 		VerticalLayout descReplyLayout = new VerticalLayout();
 		descReplyLayout.setMargin(false);
 		descReplyLayout.setSpacing(false);
-		descReplyLayout.setWidth(100, Unit.PERCENTAGE);
-		descReplyLayout.addStyleName(CssStyles.RICH_TEXT_CONTENT_CONTAINER);
+		descReplyLayout.setWidthFull();
+		descReplyLayout.addClassName(CssStyles.RICH_TEXT_CONTENT_CONTAINER);
 		withContentLayout.addComponents(descReplyLayout);
 
-		Label description = new Label(cleanHtml(action.getDescription(), HtmlHelper.EVENTACTION_WHITELIST), ContentMode.HTML);
-		description.setWidth(100, Unit.PERCENTAGE);
+		Span description = new Span(cleanHtml(action.getDescription(), HtmlHelper.EVENTACTION_WHITELIST), ContentMode.HTML);
+		description.setWidthFull();
 		descReplyLayout.addComponent(description);
 		if (!Strings.isNullOrEmpty(action.getReply())) {
-			Label replyLabel = new Label(cleanHtml(action.getReply(), HtmlHelper.EVENTACTION_WHITELIST), ContentMode.HTML);
-			replyLabel.setWidth(100, Unit.PERCENTAGE);
-			replyLabel.addStyleName(CssStyles.REPLY);
+			Span replyLabel = new Span(cleanHtml(action.getReply(), HtmlHelper.EVENTACTION_WHITELIST), ContentMode.HTML);
+			replyLabel.setWidthFull();
+			replyLabel.addClassName(CssStyles.REPLY);
 			descReplyLayout.addComponent(replyLabel);
 		}
 
@@ -104,26 +103,26 @@ public class ActionListEntry extends HorizontalLayout {
 		topLeftLayout.setMargin(false);
 		topLeftLayout.setSpacing(false);
 
-		Label dateLabel =
-			new Label(I18nProperties.getPrefixCaption(ActionDto.I18N_PREFIX, ActionDto.DATE) + ": " + DateFormatHelper.formatDate(action.getDate()));
+		Span dateLabel =
+			new Span(I18nProperties.getPrefixCaption(ActionDto.I18N_PREFIX, ActionDto.DATE) + ": " + DateFormatHelper.formatDate(action.getDate()));
 		topLeftLayout.addComponent(dateLabel);
 
-		Label creatorLabel = new Label(
+		Span creatorLabel = new Span(
 			String.format(
 				I18nProperties.getCaption(Captions.actionCreatingLabel),
 				DateFormatHelper.formatDate(action.getCreationDate()),
 				action.getCreatorUser().getCaption()));
-		creatorLabel.addStyleName(CssStyles.LABEL_ITALIC);
+		creatorLabel.addClassName(CssStyles.LABEL_ITALIC);
 		topLeftLayout.addComponent(creatorLabel);
 
-		Label lastModifiedByLabel = null;
+		Span lastModifiedByLabel = null;
 		if (action.getLastModifiedBy() != null) {
-			lastModifiedByLabel = new Label(
+			lastModifiedByLabel = new Span(
 				String.format(
 					I18nProperties.getCaption(Captions.actionLastModifiedByLabel),
 					DateFormatHelper.formatDate(action.getChangeDate()),
 					action.getLastModifiedBy().getCaption()));
-			lastModifiedByLabel.addStyleName(CssStyles.LABEL_ITALIC);
+			lastModifiedByLabel.addClassName(CssStyles.LABEL_ITALIC);
 			topLeftLayout.addComponent(lastModifiedByLabel);
 		}
 
@@ -132,32 +131,32 @@ public class ActionListEntry extends HorizontalLayout {
 		// TOP RIGHT
 		VerticalLayout topRightLayout = new VerticalLayout();
 
-		topRightLayout.addStyleName(CssStyles.ALIGN_RIGHT);
+		topRightLayout.addClassName(CssStyles.ALIGN_RIGHT);
 		topRightLayout.setMargin(false);
 		topRightLayout.setSpacing(false);
 
 		HorizontalLayout statusContainer = new HorizontalLayout();
-		Label statusLabel = new Label(
+		Span statusLabel = new Span(
 			I18nProperties.getPrefixCaption(ActionDto.I18N_PREFIX, ActionDto.ACTION_STATUS) + ": "
 				+ DataHelper.toStringNullable(action.getActionStatus()));
 		CssStyles.style(statusLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
 		statusContainer.addComponent(statusLabel);
-		Label statusChangeLabel = null;
+		Span statusChangeLabel = null;
 		if (action.getStatusChangeDate() != null) {
-			statusChangeLabel = new Label(
+			statusChangeLabel = new Span(
 				String.format(I18nProperties.getCaption(Captions.actionStatusChangeDate), DateFormatHelper.formatDate(action.getStatusChangeDate())));
-			statusChangeLabel.addStyleName(CssStyles.LABEL_ITALIC);
+			statusChangeLabel.addClassName(CssStyles.LABEL_ITALIC);
 			statusContainer.addComponent(statusChangeLabel);
 		}
 
 		topRightLayout.addComponent(statusContainer);
 
-		Label priorityLabel = new Label(
+		Span priorityLabel = new Span(
 			DataHelper.toStringNullable(I18nProperties.getPrefixCaption(ActionDto.I18N_PREFIX, ActionDto.PRIORITY) + ": " + action.getPriority()));
 		if (ActionPriority.HIGH == action.getPriority()) {
-			priorityLabel.addStyleName(CssStyles.LABEL_IMPORTANT);
+			priorityLabel.addClassName(CssStyles.LABEL_IMPORTANT);
 		} else if (ActionPriority.NORMAL == action.getPriority()) {
-			priorityLabel.addStyleName(CssStyles.LABEL_NEUTRAL);
+			priorityLabel.addClassName(CssStyles.LABEL_NEUTRAL);
 		}
 		topRightLayout.addComponent(priorityLabel);
 
@@ -166,16 +165,16 @@ public class ActionListEntry extends HorizontalLayout {
 
 		String statusStyle = action.getActionStatus() == ActionStatus.DONE ? CssStyles.LABEL_DONE : null;
 		if (statusStyle != null) {
-			statusLabel.addStyleName(statusStyle);
-			dateLabel.addStyleName(statusStyle);
+			statusLabel.addClassName(statusStyle);
+			dateLabel.addClassName(statusStyle);
 			if (statusChangeLabel != null) {
-				statusChangeLabel.addStyleName(statusStyle);
+				statusChangeLabel.addClassName(statusStyle);
 			}
-			creatorLabel.addStyleName(statusStyle);
+			creatorLabel.addClassName(statusStyle);
 			if (lastModifiedByLabel != null) {
-				lastModifiedByLabel.addStyleName(statusStyle);
+				lastModifiedByLabel.addClassName(statusStyle);
 			}
-			priorityLabel.addStyleName(statusStyle);
+			priorityLabel.addClassName(statusStyle);
 		}
 
 		if (UiUtil.permitted(FeatureType.DOCUMENTS, UserRight.DOCUMENT_VIEW)) {
@@ -197,14 +196,14 @@ public class ActionListEntry extends HorizontalLayout {
 			editButton = ButtonHelper.createIconButtonWithCaption(
 				"edit-action-" + rowIndex,
 				null,
-				VaadinIcons.PENCIL,
+				VaadinIcon.PENCIL,
 				null,
-				ValoTheme.BUTTON_LINK,
+				CssStyles.BUTTON_LINK,
 				CssStyles.BUTTON_COMPACT,
 				CssStyles.LABEL_VERTICAL_ALIGN_TOP);
 
 			titleLayout.addComponent(editButton, 0);
-			editButton.addStyleNames(CssStyles.LABEL_HEADING_TITLE, CssStyles.HSPACE_LEFT_4);
+			editButton.addClassNames(CssStyles.LABEL_HEADING_TITLE, CssStyles.HSPACE_LEFT_4);
 			titleLayout.setComponentAlignment(editButton, Alignment.TOP_RIGHT);
 			titleLayout.setExpandRatio(editButton, 0);
 		}

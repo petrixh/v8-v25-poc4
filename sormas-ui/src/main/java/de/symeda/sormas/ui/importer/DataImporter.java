@@ -43,8 +43,8 @@ import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvValidationException;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.server.StreamResource;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -173,7 +173,7 @@ public abstract class DataImporter {
 
 		importedLineCallback = result -> progressLayout.updateProgress(new ImportProgressUpdateInfo(result));
 
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 		window.setCaption(I18nProperties.getString(Strings.headingDataImport));
 		window.setWidth(800, Unit.PIXELS);
 		window.setContent(progressLayout);

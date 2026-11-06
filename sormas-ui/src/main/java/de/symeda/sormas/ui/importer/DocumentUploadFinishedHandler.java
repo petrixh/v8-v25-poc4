@@ -22,7 +22,7 @@ import java.util.Collections;
 
 import com.google.common.io.ByteStreams;
 import com.vaadin.server.Page;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.ui.Notification;
 import com.wcs.wcslib.vaadin.widget.multifileupload.ui.UploadFinishedHandler;
 
@@ -62,7 +62,7 @@ public class DocumentUploadFinishedHandler implements UploadFinishedHandler {
 				if (UiUtil.permitted(UserRight.DOCUMENT_DELETE)) {
 					VaadinUiUtil.showConfirmationPopup(
 						I18nProperties.getString(Strings.headingFileExists),
-						new Label(String.format(I18nProperties.getString(Strings.infoDocumentOverride), fileName)),
+						new Span(String.format(I18nProperties.getString(Strings.infoDocumentOverride), fileName)),
 						I18nProperties.getCaption(Captions.actionConfirm),
 						I18nProperties.getCaption(Captions.actionCancel),
 						null,
@@ -103,7 +103,7 @@ public class DocumentUploadFinishedHandler implements UploadFinishedHandler {
 				} else {
 					VaadinUiUtil.showConfirmationPopup(
 						I18nProperties.getString(Strings.headingFileExists),
-						new Label(String.format(I18nProperties.getString(Strings.infoDocumentAlreadyExists), fileName)),
+						new Span(String.format(I18nProperties.getString(Strings.infoDocumentAlreadyExists), fileName)),
 						I18nProperties.getCaption(Captions.actionConfirm),
 						I18nProperties.getCaption(Captions.actionCancel),
 						null,

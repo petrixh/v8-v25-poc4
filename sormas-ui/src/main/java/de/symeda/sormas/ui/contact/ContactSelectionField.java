@@ -178,9 +178,7 @@ public class ContactSelectionField extends CustomField<SimilarContactDto> {
 	 * Was a Vaadin 8 label with a caption: the caption is shown above the value, as Vaadin rendered it.
 	 */
 	private static Div withCaption(String caption, Span label) {
-		Span captionLabel = new Span(caption);
-		captionLabel.addClassName("v-caption");
-		return new Div(captionLabel, new Div(label));
+		return new Div(new Span(caption), new Div(label));
 	}
 
 	private void addSelectContactRadioGroup() {

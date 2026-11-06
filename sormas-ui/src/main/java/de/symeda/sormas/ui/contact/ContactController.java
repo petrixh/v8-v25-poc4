@@ -511,12 +511,14 @@ public class ContactController {
 						final PersonDto person = PersonDto.build();
 
 						if (createForm.getWarningSimilarPersons() != null) {
+							// was Window.getContent(): the wrapper is the dialog's content component
 							CommitDiscardWrapperComponent<PersonSelectionGrid> warningPopUpDuplicatePerson =
 								(CommitDiscardWrapperComponent<PersonSelectionGrid>) createComponent.getWrappedComponent()
 									.getWarningSimilarPersons()
 									.getChildren()
+									.filter(CommitDiscardWrapperComponent.class::isInstance)
 									.findFirst()
-									.orElse(null);
+									.orElseThrow(() -> new IllegalStateException("Similar persons dialog has no CommitDiscardWrapperComponent"));
 							warningPopUpDuplicatePerson.getDiscardButton().setVisible(true);
 							warningPopUpDuplicatePerson.getCommitButton().setText(I18nProperties.getCaption(Captions.actionContinue));
 							warningPopUpDuplicatePerson.addDoneListener(() -> {

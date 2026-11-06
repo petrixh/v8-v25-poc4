@@ -32,7 +32,6 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.oneOfTwoCol;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Objects;
 import java.util.Set;
 
 import com.vaadin.flow.component.HasValue;
@@ -315,11 +314,8 @@ public class ContactDataForm extends AbstractEditForm<ContactDto> {
 
 		if (isConfiguredServer(CountryHelper.COUNTRY_CODE_GERMANY)) {
 			contactProximities.addValueChangeListener(e -> {
-				// contactCategory.isModified() was the V7 buffered-field state (changed since the bean was read); Flow fields have
-				// none, so compare with the read value
 				if (generateModelValue() != null
-					&& (!generateModelValue().getContactProximities().equals(e.getValue())
-						|| !Objects.equals(contactCategory.getNullableValue(), generateModelValue().getContactCategory()))) {
+					&& (!generateModelValue().getContactProximities().equals(e.getValue()) || contactCategory.isModified())) {
 					updateContactCategory((Set<ContactProximity>) contactProximities.getValue());
 				}
 			});
@@ -328,14 +324,6 @@ public class ContactDataForm extends AbstractEditForm<ContactDto> {
 		addField(ContactDto.RELATION_DESCRIPTION, TextField.class);
 		cbDisease = addDiseaseField(ContactDto.DISEASE, false, true);
 		cbDisease.setNullSelectionAllowed(false);
-		// was setNullSelectionAllowed(false): Vaadin 7 kept the selection when the user cleared the text; a Flow combo box
-		// sets null. Restore the previous value once this request's value change listeners have run.
-		cbDisease.addValueChangeListener(e -> {
-			if (e.isFromClient() && e.getValue() == null && e.getOldValue() != null) {
-				Object previousDisease = e.getOldValue();
-				cbDisease.getUI().ifPresent(ui -> ui.beforeClientResponse(cbDisease, context -> cbDisease.setValue(previousDisease)));
-			}
-		});
 		addField(ContactDto.DISEASE_DETAILS, TextField.class);
 
 		addField(ContactDto.PROHIBITION_TO_WORK, NullableOptionGroup.class).addStyleName(SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL);
@@ -545,12 +533,7 @@ public class ContactDataForm extends AbstractEditForm<ContactDto> {
 		addField(ContactDto.IMMUNOSUPPRESSIVE_THERAPY_BASIC_DISEASE_DETAILS, TextField.class);
 		NullableOptionGroup ogCareForPeopleOver60 = addField(ContactDto.CARE_FOR_PEOPLE_OVER_60, NullableOptionGroup.class);
 
-		cbDisease.addValueChangeListener(e -> {
-			// a disease cleared by the user is restored at the end of the request (above); Vaadin 7 never had "no disease" here
-			if (!(e.isFromClient() && e.getValue() == null)) {
-				updateDiseaseConfiguration((Disease) e.getValue());
-			}
-		});
+		cbDisease.addValueChangeListener(e -> updateDiseaseConfiguration((Disease) e.getValue()));
 
 		HealthConditionsForm clinicalCourseForm = addField(
 			ContactDto.HEALTH_CONDITIONS,

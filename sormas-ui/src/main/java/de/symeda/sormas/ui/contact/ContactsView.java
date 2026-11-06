@@ -473,11 +473,6 @@ public class ContactsView extends AbstractView implements HasName {
 				ownershipFilter.addItems((Object[]) S2SOwnershipStatusFilter.values());
 				ownershipFilter.setValue(S2SOwnershipStatusFilter.fromCriteriaValue(criteria.getWithOwnership()));
 				ownershipFilter.addValueChangeListener(e -> {
-					// was setNullSelectionAllowed(false): a Flow combo box can still be cleared by the user
-					if (e.isFromClient() && e.getValue() == null) {
-						ownershipFilter.setValue(e.getOldValue());
-						return;
-					}
 					S2SOwnershipStatusFilter status = (S2SOwnershipStatusFilter) e.getValue();
 					criteria.setWithOwnership(status.getCriteriaValue());
 					navigateTo(criteria);
@@ -530,11 +525,6 @@ public class ContactsView extends AbstractView implements HasName {
 				}
 
 				relevanceStatusFilter.addValueChangeListener(e -> {
-					// was setNullSelectionAllowed(false): a Flow combo box can still be cleared by the user
-					if (e.isFromClient() && e.getValue() == null) {
-						relevanceStatusFilter.setValue(e.getOldValue());
-						return;
-					}
 					if (relevanceStatusInfoLabel != null) {
 						relevanceStatusInfoLabel.setVisible(EntityRelevanceStatus.ARCHIVED.equals(e.getValue()));
 					}

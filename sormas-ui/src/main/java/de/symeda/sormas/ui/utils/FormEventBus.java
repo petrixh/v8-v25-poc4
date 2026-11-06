@@ -14,7 +14,7 @@ public class FormEventBus {
 
 	private final Map<Class<?>, List<Consumer<?>>> listeners = new HashMap<>();
 
-	public <E> com.vaadin.shared.Registration on(Class<E> eventType, Consumer<E> handler) {
+	public <E> com.vaadin.flow.shared.Registration on(Class<E> eventType, Consumer<E> handler) {
 		listeners.computeIfAbsent(eventType, k -> new ArrayList<>()).add(handler);
 		return () -> {
 			List<Consumer<?>> list = listeners.get(eventType);

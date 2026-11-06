@@ -5,6 +5,7 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.filterLocs;
 import static de.symeda.sormas.ui.utils.LayoutUtil.locCss;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -14,16 +15,10 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.data.fieldgroup.FieldGroup;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.AbstractField;
-import com.vaadin.v7.ui.AbstractTextField;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.PopupDateField;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.button.Button;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.ReferenceDto;
@@ -36,6 +31,10 @@ import de.symeda.sormas.api.user.UserDto;
 import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.components.FormActionButtonsComponent;
+import de.symeda.sormas.ui.utils.fields.AbstractTextField;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.PopupDateField;
 
 public abstract class AbstractFilterForm<T> extends AbstractForm<T> {
 
@@ -183,11 +182,11 @@ public abstract class AbstractFilterForm<T> extends AbstractForm<T> {
 		});
 	}
 
-	public void addResetHandler(Button.ClickListener resetHandler) {
+	public void addResetHandler(ComponentEventListener<ClickEvent<Button>> resetHandler) {
 		formActionButtonsComponent.addResetHandler(resetHandler);
 	}
 
-	public void addApplyHandler(Button.ClickListener applyHandler) {
+	public void addApplyHandler(ComponentEventListener<ClickEvent<Button>> applyHandler) {
 		formActionButtonsComponent.addApplyHandler(applyHandler);
 	}
 
@@ -201,16 +200,13 @@ public abstract class AbstractFilterForm<T> extends AbstractForm<T> {
 		}
 
 		// set description tooltip for fields without caption and description
-		if (field instanceof AbstractField) {
-			AbstractField withDescription = (AbstractField) field;
-			if (StringUtils.isBlank(withDescription.getCaption()) && StringUtils.isBlank(withDescription.getDescription())) {
-				withDescription.setDescription(getFieldCaption(field));
-			}
+		if (StringUtils.isBlank(field.getCaption()) && StringUtils.isBlank(field.getDescription())) {
+			field.setDescription(getFieldCaption(field));
 		}
 	}
 
 	@Override
-	public void setValue(T newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(T newFieldValue) {
 
 		doWithoutChangeHandler(() -> {
 			super.setValue(newFieldValue);
@@ -271,7 +267,8 @@ public abstract class AbstractFilterForm<T> extends AbstractForm<T> {
 			}
 		} else {
 			districtField.setEnabled(false);
-			FieldHelper.updateItems(districtField, Collections.singletonList(userDistrict));
+			List<DistrictReferenceDto> userDistricts = Collections.singletonList(userDistrict);
+			FieldHelper.updateItems(districtField, userDistricts);
 			districtField.setValue(userDistrict);
 		}
 	}
@@ -301,20 +298,24 @@ public abstract class AbstractFilterForm<T> extends AbstractForm<T> {
 		}
 	}
 
-	private void onFieldValueChange(String propertyId, Property.ValueChangeEvent event) {
+	private void onFieldValueChange(String propertyId, HasValue.ValueChangeEvent<?> event) {
 		if (!skipChangeEvents) {
 			try {
 				doWithoutChangeHandler(() -> applyDependenciesOnFieldChange(propertyId, event));
 
 				this.getFieldGroup().commit();
 				this.fireValueChange(true);
-			} catch (FieldGroup.CommitException ex) {
-				// do nothing
+			} catch (de.symeda.sormas.ui.utils.InvalidValueException | SourceException ex) {
+				// do nothing (was FieldGroup.CommitException)
 			}
 		}
 	}
 
-	protected void applyDependenciesOnFieldChange(String propertyId, Property.ValueChangeEvent event) {
+	/**
+	 * @param event
+	 *            the Flow value change event: {@code event.getValue()} was {@code event.getProperty().getValue()}
+	 */
+	protected void applyDependenciesOnFieldChange(String propertyId, HasValue.ValueChangeEvent<?> event) {
 	}
 
 	private void doWithoutChangeHandler(Callable callback) {
@@ -340,6 +341,7 @@ public abstract class AbstractFilterForm<T> extends AbstractForm<T> {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	private <T1 extends Field> String getFieldCaption(T1 field) {
 		if (field instanceof ComboBox) {
 			return ((ComboBox) field).getInputPrompt();
@@ -356,6 +358,9 @@ public abstract class AbstractFilterForm<T> extends AbstractForm<T> {
 		return hasFilter;
 	}
 
+	@SuppressWarnings({
+		"rawtypes",
+		"unchecked" })
 	protected void clearAndDisableFields(Field... fields) {
 		for (Field field : fields) {
 			if (field != null) {
@@ -365,9 +370,12 @@ public abstract class AbstractFilterForm<T> extends AbstractForm<T> {
 		}
 	}
 
+	@SuppressWarnings({
+		"rawtypes",
+		"unchecked" })
 	protected void clearAndDisableFields(String... propertyIds) {
 		for (String propertyId : propertyIds) {
-			Field<?> field = getField(propertyId);
+			Field field = getField(propertyId);
 
 			field.setValue(null);
 			field.setEnabled(false);
@@ -388,14 +396,17 @@ public abstract class AbstractFilterForm<T> extends AbstractForm<T> {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	protected void enableFields(Field... fields) {
 		updateFieldsEnabling(fields, true);
 	}
 
+	@SuppressWarnings("rawtypes")
 	protected void disableFields(Field... fields) {
 		updateFieldsEnabling(fields, false);
 	}
 
+	@SuppressWarnings("rawtypes")
 	private void updateFieldsEnabling(Field[] fields, boolean enabled) {
 		for (Field field : fields) {
 			if (field != null) {

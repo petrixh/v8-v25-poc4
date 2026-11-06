@@ -17,8 +17,11 @@ package de.symeda.sormas.ui.utils;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -52,14 +55,14 @@ public abstract class PersonDependentEditForm<DTO> extends AbstractEditForm<DTO>
 	}
 
 	protected Button createPersonSearchButton(String personSearchLoc) {
-		return ButtonHelper.createIconButtonWithCaption(personSearchLoc, StringUtils.EMPTY, VaadinIcons.SEARCH, clickEvent -> {
-			VaadinIcons icon = (VaadinIcons) clickEvent.getButton().getIcon();
-			if (icon == VaadinIcons.SEARCH) {
+		return ButtonHelper.createIconButtonWithCaption(personSearchLoc, StringUtils.EMPTY, VaadinIcon.SEARCH, clickEvent -> {
+			Button button = clickEvent.getSource();
+			if (isIcon(button, VaadinIcon.SEARCH)) {
 				PersonSearchField personSearchField = new PersonSearchField(null, I18nProperties.getString(Strings.infoSearchPerson));
 				personSearchField.setWidth(1280, Unit.PIXELS);
 
 				final CommitDiscardWrapperComponent<PersonSearchField> component = new CommitDiscardWrapperComponent<>(personSearchField);
-				component.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionConfirm));
+				component.getCommitButton().setText(I18nProperties.getCaption(Captions.actionConfirm));
 				component.getCommitButton().setEnabled(false);
 				component.addCommitListener(() -> {
 					SimilarPersonDto pickedPerson = personSearchField.getValue();
@@ -68,7 +71,7 @@ public abstract class PersonDependentEditForm<DTO> extends AbstractEditForm<DTO>
 						searchedPerson = FacadeProvider.getPersonFacade().getByUuid(pickedPerson.getUuid());
 						setPerson(searchedPerson);
 						enablePersonFields(false);
-						clickEvent.getButton().setIcon(VaadinIcons.CLOSE);
+						button.setIcon(VaadinIcon.CLOSE.create());
 					}
 				});
 
@@ -79,9 +82,17 @@ public abstract class PersonDependentEditForm<DTO> extends AbstractEditForm<DTO>
 				searchedPerson = null;
 				setPerson(searchedPerson);
 				enablePersonFields(true);
-				clickEvent.getButton().setIcon(VaadinIcons.SEARCH);
+				button.setIcon(VaadinIcon.SEARCH.create());
 			}
 		}, CssStyles.FORCE_CAPTION);
+	}
+
+	/**
+	 * Was the comparison of the Vaadin 8 button icon with {@code VaadinIcons.SEARCH}.
+	 */
+	private static boolean isIcon(Button button, VaadinIcon vaadinIcon) {
+		Component icon = button.getIcon();
+		return icon instanceof Icon && vaadinIcon.create().getElement().getAttribute("icon").equals(icon.getElement().getAttribute("icon"));
 	}
 
 	public abstract void setPerson(PersonDto person);

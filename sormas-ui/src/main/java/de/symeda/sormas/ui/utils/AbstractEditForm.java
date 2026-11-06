@@ -15,8 +15,6 @@
 
 package de.symeda.sormas.ui.utils;
 
-import static com.vaadin.v7.data.fieldgroup.DefaultFieldGroupFieldFactory.CAPTION_PROPERTY_ID;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,20 +28,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.ui.Label;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.Item;
-import com.vaadin.v7.data.Validator;
-import com.vaadin.v7.data.Validator.InvalidValueException;
-import com.vaadin.v7.data.fieldgroup.FieldGroup;
-import com.vaadin.v7.data.fieldgroup.FieldGroup.CommitEvent;
-import com.vaadin.v7.data.fieldgroup.FieldGroup.CommitException;
-import com.vaadin.v7.data.util.converter.Converter.ConversionException;
-import com.vaadin.v7.ui.AbstractField;
-import com.vaadin.v7.ui.AbstractTextField;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.Validator;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -59,8 +48,12 @@ import de.symeda.sormas.api.utils.fieldaccess.UiFieldAccessCheckers;
 import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.clinicalcourse.HealthConditionsForm;
 import de.symeda.sormas.ui.utils.components.NotBlankTextValidator;
+import de.symeda.sormas.ui.utils.fields.AbstractTextField;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
-public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements FieldGroup.CommitHandler {// implements DtoEditForm<DTO> {
+public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements AbstractForm.BeanFieldGroup.CommitHandler {// implements DtoEditForm<DTO> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -135,7 +128,7 @@ public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements
 	}
 
 	@Override
-	public void setValue(DTO newFieldValue) throws com.vaadin.v7.data.Property.ReadOnlyException, ConversionException {
+	public void setValue(DTO newFieldValue) {
 		super.setValue(newFieldValue);
 		// this method should only be called once upon initializing the form, thus allowing us to set the default disease here
 		if (diseaseField != null && diseaseField.getValue() == null && setServerDiseaseAsDefault) {
@@ -194,29 +187,27 @@ public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements
 	}
 
 	@Override
-	public void preCommit(CommitEvent commitEvent) throws CommitException {
+	public void preCommit(BeanFieldGroup.CommitEvent commitEvent) throws BeanFieldGroup.CommitException {
 
 		List<Field<?>> customFields = getCustomFields();
 
 		if (hideValidationUntilNextCommit) {
 			hideValidationUntilNextCommit = false;
 			for (Field<?> field : getFieldGroup().getFields()) {
-				if (field instanceof AbstractField) {
-					AbstractField<?> abstractField = (AbstractField<?>) field;
-					abstractField.setValidationVisible(true);
-				}
+				field.setValidationVisible(true);
 			}
 
 			for (Field<?> field : customFields) {
-				if (field instanceof AbstractField) {
-					AbstractField<?> abstractField = (AbstractField<?>) field;
-					abstractField.setValidationVisible(true);
-				}
+				field.setValidationVisible(true);
 			}
 		}
 
 		for (Field<?> field : customFields) {
-			field.validate();
+			try {
+				field.validateValue();
+			} catch (Field.InvalidValueException e) {
+				throw new de.symeda.sormas.ui.utils.InvalidValueException(e.getMessage());
+			}
 		}
 	}
 
@@ -225,26 +216,21 @@ public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements
 	 * This method is not called when used with CommitDiscardWrapperComponent (uses FieldGroup instead)
 	 */
 	@Override
-	public void commit() throws SourceException, InvalidValueException {
+	public void commit() throws SourceException, de.symeda.sormas.ui.utils.InvalidValueException {
 
 		try {
 			getFieldGroup().commit();
-		} catch (CommitException e) {
-			if (e.getInvalidFields().size() > 0) {
-				throw new InvalidValueException(
-					e.getInvalidFields().keySet().stream().map(f -> f.getCaption()).collect(Collectors.joining(", ")),
-					e.getInvalidFields().values().stream().toArray(InvalidValueException[]::new));
-			} else if (e.getCause() instanceof InvalidValueException) {
-				throw (InvalidValueException) e.getCause();
-			} else {
-				throw new SourceException(this, e);
-			}
+		} catch (BeanFieldGroup.FieldGroupInvalidValueException e) {
+			// the field group throws invalid value and source exceptions as they are (was a CommitException around them)
+			throw new de.symeda.sormas.ui.utils.InvalidValueException(
+				e.getInvalidFields().keySet().stream().map(f -> f.getCaption()).collect(Collectors.joining(", ")),
+				e.getInvalidFields().values().stream().toArray(de.symeda.sormas.ui.utils.InvalidValueException[]::new));
 		}
 		super.commit();
 	}
 
 	@Override
-	public void postCommit(CommitEvent commitEvent) throws CommitException {
+	public void postCommit(BeanFieldGroup.CommitEvent commitEvent) throws BeanFieldGroup.CommitException {
 
 	}
 
@@ -293,10 +279,10 @@ public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements
 
 		// Make sure that the ComboBox still contains a pre-selected inactive disease
 		diseaseField.addValueChangeListener(e -> {
-			Object value = e.getProperty().getValue();
+			Object value = e.getValue();
 			if (value != null && !diseaseField.containsId(value)) {
-				Item newItem = diseaseField.addItem(value);
-				newItem.getItemProperty(CAPTION_PROPERTY_ID).setValue(value.toString());
+				diseaseField.addItem(value);
+				diseaseField.setItemCaption(value, value.toString());
 			}
 		});
 
@@ -324,7 +310,7 @@ public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements
 		ComboBox field = addField(fieldId, ComboBox.class);
 		// Make sure that the ComboBox still contains a pre-selected inactive infrastructure entity
 		field.addValueChangeListener(e -> {
-			InfrastructureDataReferenceDto value = (InfrastructureDataReferenceDto) e.getProperty().getValue();
+			InfrastructureDataReferenceDto value = (InfrastructureDataReferenceDto) e.getValue();
 			if (value != null && !field.containsId(value)) {
 				InfrastructureDataReferenceDto inactiveValue = value.clone();
 				if (showInactiveTag) {
@@ -342,7 +328,7 @@ public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements
 		ComboBox field = addField(fieldId, ComboBox.class);
 		// Make sure that the ComboBox still contains a pre-selected inactive customizable enum
 		field.addValueChangeListener(e -> {
-			CustomizableEnum value = (CustomizableEnum) e.getProperty().getValue();
+			CustomizableEnum value = (CustomizableEnum) e.getValue();
 			if (value != null && !field.containsId(value)) {
 				CustomizableEnum inactiveValue = value.clone();
 				inactiveValue.setCaption(value.getCaption() + " (" + I18nProperties.getString(Strings.inactive) + ")");
@@ -371,7 +357,7 @@ public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements
 		T field = createField(propertyId, fieldType);
 		formatField(field, propertyId);
 		field.setId(propertyId);
-		getContent().addComponent(field, propertyId);
+		getContent().addComponent(field.asComponent(), propertyId);
 		addFutureDateValidator(field, allowedDaysInFuture);
 		return field;
 	}
@@ -390,13 +376,10 @@ public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements
 
 		field.setCaption(customCaption);
 
-		if (field instanceof AbstractField) {
-			AbstractField<?> abstractField = (AbstractField) field;
-			abstractField.setDescription(I18nProperties.getPrefixDescription(propertyI18nPrefix, propertyId, abstractField.getDescription()));
+		field.setDescription(I18nProperties.getPrefixDescription(propertyI18nPrefix, propertyId, field.getDescription()));
 
-			if (hideValidationUntilNextCommit && !abstractField.isInvalidCommitted()) {
-				abstractField.setValidationVisible(false);
-			}
+		if (hideValidationUntilNextCommit && !field.isInvalidCommitted()) {
+			field.setValidationVisible(false);
 		}
 
 		String validationError = I18nProperties.getPrefixValidationError(propertyI18nPrefix, propertyId, customCaption);
@@ -407,7 +390,7 @@ public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements
 
 	protected void styleAsOptionGroupHorizontal(List<String> fields) {
 		for (String field : fields) {
-			CssStyles.style((NullableOptionGroup) getFieldGroup().getField(field), ValoTheme.OPTIONGROUP_HORIZONTAL);
+			((NullableOptionGroup) getFieldGroup().getField(field)).addStyleName(SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL);
 		}
 	}
 
@@ -468,18 +451,34 @@ public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements
 		}
 	}
 
+	/**
+	 * Vaadin 7 {@code field.discard()}: the fields show the value of their property again.
+	 */
+	@SuppressWarnings({
+		"unchecked",
+		"rawtypes" })
 	protected void discard(String... propertyIds) {
 
 		for (String propertyId : propertyIds) {
-			getField(propertyId).discard();
+			Field<?> field = getField(propertyId);
+			if (field instanceof Buffered) {
+				((Buffered) field).discard();
+			}
+			Binder.Binding binding = getFieldGroup().getBinding(field);
+			if (binding != null && getFieldGroup().getBean() != null) {
+				binding.read(getFieldGroup().getBean());
+			}
 		}
 	}
 
+	@SuppressWarnings({
+		"unchecked",
+		"rawtypes" })
 	protected void setRequired(boolean required, String... fieldOrPropertyIds) {
 
 		for (String propertyId : fieldOrPropertyIds) {
 			if (!required || isEditableAllowed(propertyId)) {
-				Field<?> field = getField(propertyId);
+				Field field = getField(propertyId);
 				if (!field.isReadOnly()) {
 					field.setRequired(required);
 					if (TextField.class.isAssignableFrom(field.getClass())) {
@@ -498,16 +497,32 @@ public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements
 		}
 	}
 
-	protected void addFieldListeners(String fieldOrPropertyId, ValueChangeListener... listeners) {
+	@SuppressWarnings({
+		"unchecked",
+		"rawtypes" })
+	protected void addFieldListeners(String fieldOrPropertyId, Field.ValueChangeListener... listeners) {
 
-		for (ValueChangeListener listener : listeners) {
+		for (Field.ValueChangeListener listener : listeners) {
 			getField(fieldOrPropertyId).addValueChangeListener(listener);
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	protected void addValidators(String fieldOrPropertyId, Validator... validators) {
 
 		for (Validator validator : validators) {
+			getField(fieldOrPropertyId).addValidator(validator);
+		}
+	}
+
+	/**
+	 * Validators written like Vaadin 7 ones (one argument, throw an {@code InvalidValueException}), see
+	 * {@link Field#addValidator(Field.ValueValidator)}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected <V> void addValidators(String fieldOrPropertyId, Field.ValueValidator<V>... validators) {
+
+		for (Field.ValueValidator<V> validator : validators) {
 			getField(fieldOrPropertyId).addValidator(validator);
 		}
 	}
@@ -526,20 +541,20 @@ public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements
 		this.hideValidationUntilNextCommit = true;
 
 		for (Field<?> field : getFieldGroup().getFields()) {
-			if (field instanceof AbstractField) {
-				AbstractField<?> abstractField = (AbstractField<?>) field;
-				if (!abstractField.isInvalidCommitted()) {
-					abstractField.setValidationVisible(false);
-				}
-			}
+			hideValidation(field);
 		}
 
 		for (Field<?> field : getCustomFields()) {
-			if (field instanceof AbstractField) {
-				AbstractField<?> abstractField = (AbstractField<?>) field;
-				if (!abstractField.isInvalidCommitted()) {
-					abstractField.setValidationVisible(false);
-				}
+			hideValidation(field);
+		}
+	}
+
+	private static void hideValidation(Field<?> field) {
+		if (!field.isInvalidCommitted()) {
+			field.setValidationVisible(false);
+			// Vaadin 7 hid the error indicator at once
+			if (field instanceof HasValidation) {
+				((HasValidation) field).setInvalid(false);
 			}
 		}
 	}
@@ -549,12 +564,12 @@ public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements
 
 		List<Disease> diseases = FacadeProvider.getDiseaseConfigurationFacade().getAllDiseases(true, false, true);
 		for (Disease disease : diseases) {
-			if (diseaseField.getItem(disease) != null) {
+			if (diseaseField.containsId(disease)) {
 				continue;
 			}
 
-			Item newItem = diseaseField.addItem(disease);
-			newItem.getItemProperty(CAPTION_PROPERTY_ID).setValue(disease.toString());
+			diseaseField.addItem(disease);
+			diseaseField.setItemCaption(disease, disease.toString());
 		}
 	}
 
@@ -562,8 +577,8 @@ public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements
 		List<Disease> allDiseasesWithFollowUp = FacadeProvider.getDiseaseConfigurationFacade().getAllDiseasesWithFollowUp(true, true, true);
 		diseaseField.removeAllItems();
 		for (Object r : allDiseasesWithFollowUp) {
-			Item newItem = diseaseField.addItem(r);
-			newItem.getItemProperty(CAPTION_PROPERTY_ID).setValue(r.toString());
+			diseaseField.addItem(r);
+			diseaseField.setItemCaption(r, r.toString());
 		}
 	}
 
@@ -740,13 +755,13 @@ public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements
 	@SuppressWarnings("unchecked")
 	protected void setupMutuallyExclusiveFields(NullableOptionGroup field1, NullableOptionGroup field2) {
 		field1.addValueChangeListener(e -> {
-			Set<Object> value = (Set<Object>) e.getProperty().getValue();
+			Set<Object> value = (Set<Object>) e.getValue();
 			if (value != null && value.contains(de.symeda.sormas.api.utils.YesNoUnknown.YES)) {
 				field2.setValue(new HashSet<>(Arrays.asList(de.symeda.sormas.api.utils.YesNoUnknown.NO)));
 			}
 		});
 		field2.addValueChangeListener(e -> {
-			Set<Object> value = (Set<Object>) e.getProperty().getValue();
+			Set<Object> value = (Set<Object>) e.getValue();
 			if (value != null && value.contains(de.symeda.sormas.api.utils.YesNoUnknown.YES)) {
 				field1.setValue(new HashSet<>(Arrays.asList(de.symeda.sormas.api.utils.YesNoUnknown.NO)));
 			}
@@ -762,7 +777,8 @@ public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements
 	 * @param label
 	 *            custom label
 	 */
-	protected void updateFieldVisibility(NullableOptionGroup input, Field field, Label label) {
+	@SuppressWarnings("rawtypes")
+	protected void updateFieldVisibility(NullableOptionGroup input, Field field, Component label) {
 		boolean visible = YesNoUnknown.YES.equals(FieldHelper.getNullableSourceFieldValue(input));
 		field.setVisible(visible);
 		label.setVisible(visible);

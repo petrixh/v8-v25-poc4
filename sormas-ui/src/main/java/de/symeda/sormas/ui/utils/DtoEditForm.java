@@ -17,10 +17,9 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.utils;
 
-import com.vaadin.v7.data.fieldgroup.FieldGroup;
-import com.vaadin.v7.ui.Field;
-
 import de.symeda.sormas.api.EntityDto;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.FieldGroup;
 
 public interface DtoEditForm<DTO extends EntityDto> extends Field<DTO> {
 

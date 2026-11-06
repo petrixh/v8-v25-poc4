@@ -20,15 +20,14 @@ package de.symeda.sormas.ui.caze;
 import java.util.Date;
 import java.util.stream.Collectors;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.components.grid.MultiSelectionModelImpl;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.grid.GridMultiSelectionModel;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -74,39 +73,39 @@ public class CaseVisitsView extends AbstractCaseView {
 		HorizontalLayout topLayout = new HorizontalLayout();
 		topLayout.setSpacing(true);
 		topLayout.setWidth(100, Unit.PERCENTAGE);
-		topLayout.addStyleName(CssStyles.VSPACE_3);
+		topLayout.addClassName(CssStyles.VSPACE_3);
 
 		if (isEditAllowed()) {
 			if (UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS, UserRight.CASE_EDIT, UserRight.VISIT_EDIT, UserRight.VISIT_DELETE)) {
 				topLayout.setWidth(100, Unit.PERCENTAGE);
 				MenuBar bulkOperationsDropdown = MenuBarHelper.createDropDown(
 					Captions.bulkActions,
-					new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkDelete), VaadinIcons.TRASH, selectedItem -> {
+					new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkDelete), VaadinIcon.TRASH, selectedItem -> {
 						ControllerProvider.getVisitController()
 							.deleteAllSelectedItems(grid.asMultiSelect().getSelectedItems(), grid, () -> navigateTo(criteria));
 					}));
-				topLayout.addComponent(bulkOperationsDropdown);
-				topLayout.setComponentAlignment(bulkOperationsDropdown, Alignment.MIDDLE_RIGHT);
-				topLayout.setExpandRatio(bulkOperationsDropdown, 1);
+				topLayout.add(bulkOperationsDropdown);
+				topLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, bulkOperationsDropdown);
+				topLayout.setFlexGrow(1, bulkOperationsDropdown);
 			}
 
 			if (UiUtil.permitted(UserRight.VISIT_EXPORT)) {
-				Button exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcons.DOWNLOAD, null, ValoTheme.BUTTON_PRIMARY);
+				Button exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcon.DOWNLOAD, null, CssStyles.BUTTON_PRIMARY);
 				{
-					topLayout.addComponent(exportButton);
-					topLayout.setComponentAlignment(exportButton, Alignment.MIDDLE_RIGHT);
+					topLayout.add(exportButton);
+					topLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, exportButton);
 					if (topLayout.getComponentCount() == 1) {
-						topLayout.setExpandRatio(exportButton, 1);
+						topLayout.setFlexGrow(1, exportButton);
 					}
 				}
 
-				StreamResource exportStreamResource = DownloadUtil.createCsvExportStreamResource(
+				DownloadHandler exportStreamResource = DownloadUtil.createCsvExportStreamResource(
 					VisitExportDto.class,
 					VisitExportType.CONTACT_VISITS,
 					(Integer start, Integer max) -> FacadeProvider.getVisitFacade()
 						.getVisitsExportList(
 							grid.getCriteria(),
-							grid.getSelectionModel() instanceof MultiSelectionModelImpl
+							grid.getSelectionModel() instanceof GridMultiSelectionModel
 								? grid.asMultiSelect().getSelectedItems().stream().map(VisitIndexDto::getUuid).collect(Collectors.toSet())
 								: null,
 							VisitExportType.CONTACT_VISITS,
@@ -128,16 +127,16 @@ public class CaseVisitsView extends AbstractCaseView {
 					ExportEntityName.CASE_VISITS,
 					null);
 
-				new FileDownloader(exportStreamResource).extend(exportButton);
+				DownloadUtil.attachDownloader(exportButton, exportStreamResource);
 			}
 
 			if (UiUtil.permitted(UserRight.VISIT_CREATE, UserRight.CASE_EDIT)) {
-				newButton = ButtonHelper.createIconButton(Captions.visitNewVisit, VaadinIcons.PLUS_CIRCLE, e -> {
+				newButton = ButtonHelper.createIconButton(Captions.visitNewVisit, VaadinIcon.PLUS_CIRCLE, e -> {
 					ControllerProvider.getVisitController().createVisit(this.getCaseRef(), r -> navigateTo(criteria));
-				}, ValoTheme.BUTTON_PRIMARY);
+				}, CssStyles.BUTTON_PRIMARY);
 
-				topLayout.addComponent(newButton);
-				topLayout.setComponentAlignment(newButton, Alignment.MIDDLE_RIGHT);
+				topLayout.add(newButton);
+				topLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, newButton);
 				newButton.setEnabled(isEditAllowed());
 			}
 		}
@@ -157,11 +156,11 @@ public class CaseVisitsView extends AbstractCaseView {
 
 			gridLayout = new DetailSubComponentWrapper(() -> null);
 			gridLayout.setSizeFull();
-			gridLayout.setMargin(true);
+			gridLayout.setPadding(true);
 			gridLayout.setSpacing(false);
-			gridLayout.addComponent(createTopBar());
-			gridLayout.addComponent(grid);
-			gridLayout.setExpandRatio(grid, 1);
+			gridLayout.add(createTopBar());
+			gridLayout.add(grid);
+			gridLayout.setFlexGrow(1, grid);
 			setSubComponent(gridLayout);
 		}
 

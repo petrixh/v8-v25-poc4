@@ -42,10 +42,10 @@ public class CaseSymptomsView extends AbstractCaseView {
 
 	@Override
 	protected void initView(String params) {
-		setHeightUndefined();
+		setHeight(null);
 		DetailSubComponentWrapper container = new DetailSubComponentWrapper(() -> caseSymptomsComponent);
-		container.setWidth(100, Unit.PERCENTAGE);
-		container.setMargin(true);
+		container.setWidth("100%");
+		container.setPadding(true);
 		setSubComponent(container);
 		container.setEnabled(true);
 
@@ -60,10 +60,10 @@ public class CaseSymptomsView extends AbstractCaseView {
 		caseSymptomsComponent =
 			ControllerProvider.getCaseController().getSymptomsEditComponent(getCaseRef().getUuid(), getViewMode(), symptomSideViewComponent);
 		LayoutWithSidePanel layout = new LayoutWithSidePanel(caseSymptomsComponent, COMPLICATIONS_LOC);
-		container.addComponent(layout);
+		container.add(layout);
 		if (showComplications) {
 			layout.addSidePanelComponent(symptomSideViewComponent, COMPLICATIONS_LOC);
-			symptomSideViewComponent.addStyleNames(CssStyles.SIDE_COMPONENT);
+			symptomSideViewComponent.addClassNames(CssStyles.SIDE_COMPONENT);
 		}
 
 		setSubComponent(container);

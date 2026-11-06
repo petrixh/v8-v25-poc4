@@ -5,17 +5,12 @@ import static de.symeda.sormas.ui.utils.AbstractMergeGrid.DUPLICATE_MERGING_LIMI
 
 import java.util.Date;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.Page;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.caze.CaseCriteria;
@@ -26,8 +21,13 @@ import de.symeda.sormas.api.utils.DateHelper;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 import de.symeda.sormas.ui.utils.AbstractView;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.ContentMode;
+import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 import de.symeda.sormas.ui.utils.QueryDetails;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
@@ -72,29 +72,29 @@ public class MergeCasesView extends AbstractView {
 			}
 		});
 		filterComponent.setIgnoreRegionCallback(grid::reload);
-		gridLayout.addComponent(filterComponent);
+		gridLayout.add(filterComponent);
 
-		gridLayout.addComponent(grid);
-		gridLayout.setMargin(true);
+		gridLayout.add(grid);
+		gridLayout.setPadding(true);
 		gridLayout.setSpacing(false);
 		gridLayout.setSizeFull();
-		gridLayout.setExpandRatio(grid, 1);
-		gridLayout.setStyleName("crud-main-layout");
+		gridLayout.setFlexGrow(1, grid);
+		gridLayout.setClassName("crud-main-layout");
 		addComponent(gridLayout);
 
-		Button btnOpenGuide = ButtonHelper.createIconButton(Captions.caseOpenMergeGuide, VaadinIcons.QUESTION, e -> buildAndOpenMergeInstructions());
+		Button btnOpenGuide = ButtonHelper.createIconButton(Captions.caseOpenMergeGuide, VaadinIcon.QUESTION, e -> buildAndOpenMergeInstructions());
 		addHeaderComponent(btnOpenGuide);
 
 		Button btnCalculateCompleteness =
-			ButtonHelper.createIconButton(Captions.caseCalculateCompleteness, VaadinIcons.CALC, e -> showCalculateCompletenessWindow());
+			ButtonHelper.createIconButton(Captions.caseCalculateCompleteness, VaadinIcon.CALC, e -> showCalculateCompletenessWindow());
 
 		addHeaderComponent(btnCalculateCompleteness);
 
 		Button btnBack = ButtonHelper.createIconButton(
 			Captions.caseBackToDirectory,
-			VaadinIcons.ARROW_BACKWARD,
+			VaadinIcon.ARROW_BACKWARD,
 			e -> ControllerProvider.getCaseController().navigateToIndex(),
-			ValoTheme.BUTTON_PRIMARY);
+			CssStyles.BUTTON_PRIMARY);
 
 		addHeaderComponent(btnBack);
 	}
@@ -105,23 +105,22 @@ public class MergeCasesView extends AbstractView {
 	}
 
 	private void buildAndOpenMergeInstructions() {
-		Window window = VaadinUiUtil.showPopupWindow(new MergeGuideLayout());
+		Dialog window = VaadinUiUtil.showPopupWindow(new MergeGuideLayout());
 		window.setWidth(1024, Unit.PIXELS);
-		window.setCaption(I18nProperties.getString(Strings.headingMergeGuide));
+		window.setHeaderTitle(I18nProperties.getString(Strings.headingMergeGuide));
 	}
 
 	private void showCalculateCompletenessWindow() {
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getString(Strings.headingConfirmUpdateCompleteness),
-			new Label(I18nProperties.getString(Strings.confirmationUpdateCompleteness)),
+			new Span(I18nProperties.getString(Strings.confirmationUpdateCompleteness)),
 			I18nProperties.getString(Strings.yes),
 			I18nProperties.getString(Strings.no),
 			null,
 			e -> {
 				if (e) {
 					grid.calculateCompletenessValues();
-					new Notification("", I18nProperties.getString(Strings.messageCompletenessValuesUpdated), Type.HUMANIZED_MESSAGE, false)
-						.show(Page.getCurrent());
+					NotificationHelper.show("", I18nProperties.getString(Strings.messageCompletenessValuesUpdated), Type.HUMANIZED_MESSAGE);
 				}
 			});
 	}

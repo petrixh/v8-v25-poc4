@@ -1,12 +1,14 @@
 package de.symeda.sormas.ui.caze;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 public class CasesGuideLayout extends VerticalLayout {
 
@@ -14,19 +16,18 @@ public class CasesGuideLayout extends VerticalLayout {
 
 	public CasesGuideLayout() {
 
-		setMargin(true);
+		setPadding(true);
 		setSpacing(false);
 
-		Label lblHeadingTermsDefinition = new Label(I18nProperties.getString(Strings.headingExplanationOfTerms));
+		Span lblHeadingTermsDefinition = new Span(I18nProperties.getString(Strings.headingExplanationOfTerms));
 		CssStyles.style(lblHeadingTermsDefinition, CssStyles.H2);
-		addComponent(lblHeadingTermsDefinition);
+		add(lblHeadingTermsDefinition);
 
-		Label lblHeadingCompleteness = new Label(I18nProperties.getString(Strings.headingCompleteness));
+		Span lblHeadingCompleteness = new Span(I18nProperties.getString(Strings.headingCompleteness));
 		CssStyles.style(lblHeadingCompleteness, CssStyles.H3, CssStyles.VSPACE_TOP_5);
-		addComponent(lblHeadingCompleteness);
-		Label lblCompletenessDescription = new Label(I18nProperties.getString(Strings.infoCaseCompleteness));
-		lblCompletenessDescription.setContentMode(ContentMode.HTML);
+		add(lblHeadingCompleteness);
+		Span lblCompletenessDescription = VaadinUiUtil.createLabel(I18nProperties.getString(Strings.infoCaseCompleteness), ContentMode.HTML);
 		lblCompletenessDescription.setWidth(100, Unit.PERCENTAGE);
-		addComponent(lblCompletenessDescription);
+		add(lblCompletenessDescription);
 	}
 }

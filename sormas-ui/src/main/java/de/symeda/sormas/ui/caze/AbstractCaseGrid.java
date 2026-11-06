@@ -23,8 +23,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import com.vaadin.ui.Label;
-import com.vaadin.ui.renderers.DateRenderer;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.DiseaseHelper;
@@ -50,9 +49,11 @@ import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.FieldAccessColumnStyleGenerator;
 import de.symeda.sormas.ui.utils.FilteredGrid;
+import de.symeda.sormas.ui.utils.GridExportStreamResource;
 import de.symeda.sormas.ui.utils.ShowDetailsListener;
 import de.symeda.sormas.ui.utils.UuidRenderer;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 @SuppressWarnings("serial")
 public abstract class AbstractCaseGrid<IndexDto extends CaseIndexDto> extends FilteredGrid<IndexDto, CaseCriteria> {
@@ -125,9 +126,8 @@ public abstract class AbstractCaseGrid<IndexDto extends CaseIndexDto> extends Fi
 		deleteColumn.setSortable(false);
 		deleteColumn.setCaption(I18nProperties.getCaption(Captions.deletionReason));
 
-		addComponentColumn(indexDto -> {
-			Label label =
-				new Label(indexDto.getCompleteness() != null ? new DecimalFormat("#").format(indexDto.getCompleteness() * 100) + " %" : "-");
+		Column<IndexDto, Span> completenessColumn = addComponentColumn(indexDto -> {
+			Span label = new Span(formatCompleteness(indexDto));
 			if (indexDto.getCompleteness() != null) {
 				if (indexDto.getCompleteness() < 0.25f) {
 					CssStyles.style(label, CssStyles.LABEL_CRITICAL);
@@ -140,7 +140,10 @@ public abstract class AbstractCaseGrid<IndexDto extends CaseIndexDto> extends Fi
 				}
 			}
 			return label;
-		}).setId(COLUMN_COMPLETENESS);
+		});
+		completenessColumn.setId(COLUMN_COMPLETENESS);
+		// Vaadin 8 exported the label's text
+		GridExportStreamResource.setExportValueProvider(completenessColumn, this::formatCompleteness);
 
 		setColumns(getGridColumns().toArray(String[]::new));
 
@@ -193,20 +196,24 @@ public abstract class AbstractCaseGrid<IndexDto extends CaseIndexDto> extends Fi
 			removeColumn(CaseIndexDto.CASE_REFERENCE_NUMBER);
 		}
 
-		for (Column<IndexDto, ?> column : getColumns()) {
+		for (Column<IndexDto, ?> column : getAllColumns()) {
 			column.setCaption(
 				I18nProperties.findPrefixCaptionWithDefault(
-					column.getId(),
+					column.getKey(),
 					column.getCaption(),
 					CaseIndexDto.I18N_PREFIX,
 					PersonDto.I18N_PREFIX,
 					LocationDto.I18N_PREFIX));
-			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getId()));
+			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getKey()));
 		}
 
 		if (UiUtil.enabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {
 			getColumn(CaseIndexDto.RESPONSIBLE_DISTRICT_NAME).setHidden(true);
 		}
+	}
+
+	private String formatCompleteness(IndexDto indexDto) {
+		return indexDto.getCompleteness() != null ? new DecimalFormat("#").format(indexDto.getCompleteness() * 100) + " %" : "-";
 	}
 
 	protected Stream<String> getGridColumns() {
@@ -279,7 +286,7 @@ public abstract class AbstractCaseGrid<IndexDto extends CaseIndexDto> extends Fi
 
 	public void reload() {
 
-		if (getSelectionModel().isUserSelectionAllowed()) {
+		if (isUserSelectionAllowed()) {
 			deselectAll();
 		}
 

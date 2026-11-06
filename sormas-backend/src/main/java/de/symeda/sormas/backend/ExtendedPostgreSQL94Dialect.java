@@ -1,17 +1,17 @@
 package de.symeda.sormas.backend;
 
-import java.sql.Types;
-
-import org.hibernate.dialect.PostgreSQL94Dialect;
-import org.hibernate.dialect.function.SQLFunctionTemplate;
-import org.hibernate.dialect.function.StandardSQLFunction;
+import org.hibernate.boot.model.FunctionContributions;
+import org.hibernate.dialect.PostgreSQLDialect;
+import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
+import org.hibernate.query.sqm.function.SqmFunctionRegistry;
+import org.hibernate.type.BasicType;
+import org.hibernate.type.BasicTypeReference;
 import org.hibernate.type.StandardBasicTypes;
-
-import com.vladmihalcea.hibernate.type.json.JsonStringType;
+import org.hibernate.type.spi.TypeConfiguration;
 
 import de.symeda.sormas.backend.vaccination.VaccinationService;
 
-public class ExtendedPostgreSQL94Dialect extends PostgreSQL94Dialect {
+public class ExtendedPostgreSQL94Dialect extends PostgreSQLDialect {
 
 	public final static String SIMILARITY_OPERATOR = "similarity_operator";
 	public final static String ARRAY_CONTAINS_TEXT = "array_contains_operator";
@@ -33,33 +33,69 @@ public class ExtendedPostgreSQL94Dialect extends PostgreSQL94Dialect {
 
 	public ExtendedPostgreSQL94Dialect() {
 		super();
+	}
+
+	public ExtendedPostgreSQL94Dialect(DialectResolutionInfo info) {
+		super(info);
+	}
+
+	/**
+	 * Hibernate 6+ registers SQL functions here instead of in the constructor (the dialect is the {@code FunctionContributor}).
+	 * Every function keeps the name, argument count and SQL it had with Hibernate 5. Functions registered without a type
+	 * return the type of their first argument, as {@code StandardSQLFunction} did.
+	 */
+	@Override
+	public void initializeFunctionRegistry(FunctionContributions functionContributions) {
+		super.initializeFunctionRegistry(functionContributions);
+		SqmFunctionRegistry registry = functionContributions.getFunctionRegistry();
+		TypeConfiguration types = functionContributions.getTypeConfiguration();
+
 		// needed because of hibernate bug: https://hibernate.atlassian.net/browse/HHH-11938
-		registerFunction("regexp_replace", new StandardSQLFunction("regexp_replace"));
-		registerFunction(ARRAY_TO_STRING, new StandardSQLFunction(ARRAY_TO_STRING));
-		registerFunction(CONCAT_FUNCTION, new StandardSQLFunction("concat"));
-		registerFunction(ARRAY_AGG, new StandardSQLFunction(ARRAY_AGG));
-		registerHibernateType(Types.OTHER, JsonStringType.class.getName());
-		registerFunction(SIMILARITY_OPERATOR, new SQLFunctionTemplate(StandardBasicTypes.BOOLEAN, "?1 % ?2"));
-		registerFunction(UNACCENT, new SQLFunctionTemplate(StandardBasicTypes.STRING, "unaccent(?1)"));
-		registerFunction(ILIKE, new SQLFunctionTemplate(StandardBasicTypes.BOOLEAN, "?1 ILIKE ?2"));
-		registerFunction(
+		registry.registerNamed("regexp_replace");
+		registry.registerNamed(ARRAY_TO_STRING);
+		registry.namedDescriptorBuilder(CONCAT_FUNCTION, "concat").register();
+		registry.registerNamed(ARRAY_AGG);
+		pattern(registry, types, SIMILARITY_OPERATOR, StandardBasicTypes.BOOLEAN, "?1 % ?2", 2);
+		pattern(registry, types, UNACCENT, StandardBasicTypes.STRING, "unaccent(?1)", 1);
+		pattern(registry, types, ILIKE, StandardBasicTypes.BOOLEAN, "?1 ILIKE ?2", 2);
+		pattern(
+			registry,
+			types,
 			WINDOW_FIRST_VALUE_DESC,
-			new SQLFunctionTemplate(
-				StandardBasicTypes.STRING,
-				"FIRST_VALUE(?1) OVER (PARTITION BY ?2 ORDER BY ?3 DESC RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)"));
-		registerFunction(
+			StandardBasicTypes.STRING,
+			"FIRST_VALUE(?1) OVER (PARTITION BY ?2 ORDER BY ?3 DESC RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)",
+			3);
+		pattern(
+			registry,
+			types,
 			WINDOW_COUNT,
-			new SQLFunctionTemplate(
-				StandardBasicTypes.LONG,
-				"COUNT(?1) OVER (PARTITION BY ?2 RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)"));
-		registerFunction(GREATEST, new StandardSQLFunction(GREATEST));
-		registerFunction(ARRAY_CONTAINS_TEXT, new SQLFunctionTemplate(StandardBasicTypes.BOOLEAN, "?1 @> array[?2]::text[]"));
-		registerFunction(JSON_EXTRACT_PATH_TEXT, new SQLFunctionTemplate(StandardBasicTypes.STRING, "json_extract_path_text(?1, ?2)"));
-		registerFunction(
+			StandardBasicTypes.LONG,
+			"COUNT(?1) OVER (PARTITION BY ?2 RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)",
+			2);
+		registry.registerNamed(GREATEST);
+		pattern(registry, types, ARRAY_CONTAINS_TEXT, StandardBasicTypes.BOOLEAN, "?1 @> array[?2]::text[]", 2);
+		pattern(registry, types, JSON_EXTRACT_PATH_TEXT, StandardBasicTypes.STRING, "json_extract_path_text(?1, ?2)", 2);
+		pattern(
+			registry,
+			types,
 			TIMESTAMP_SUBTRACT_14_DAYS,
-			new SQLFunctionTemplate(StandardBasicTypes.DATE, "?1 - interval '" + VaccinationService.REPORT_DATE_RELEVANT_DAYS + " days'"));
-		registerFunction(AT_END_OF_DAY, new SQLFunctionTemplate(StandardBasicTypes.DATE, "?1::date + interval '1 day' - interval '1 microsecond'"));
-		registerFunction(FULLTEXT_SEARCH, new SQLFunctionTemplate(StandardBasicTypes.BOOLEAN, "?1 @@ plainto_tsquery('simple', unaccent(?2))"));
-		registerFunction(EMPTY_TO_NULL, new SQLFunctionTemplate(StandardBasicTypes.STRING, "NULLIF(TRIM(?1), '')"));
+			StandardBasicTypes.DATE,
+			"?1 - interval '" + VaccinationService.REPORT_DATE_RELEVANT_DAYS + " days'",
+			1);
+		pattern(registry, types, AT_END_OF_DAY, StandardBasicTypes.DATE, "?1::date + interval '1 day' - interval '1 microsecond'", 1);
+		pattern(registry, types, FULLTEXT_SEARCH, StandardBasicTypes.BOOLEAN, "?1 @@ plainto_tsquery('simple', unaccent(?2))", 2);
+		pattern(registry, types, EMPTY_TO_NULL, StandardBasicTypes.STRING, "NULLIF(TRIM(?1), '')", 1);
+	}
+
+	private static void pattern(
+		SqmFunctionRegistry registry,
+		TypeConfiguration types,
+		String name,
+		BasicTypeReference<?> type,
+		String pattern,
+		int argumentCount) {
+
+		BasicType<?> basicType = types.getBasicTypeRegistry().resolve(type);
+		registry.patternDescriptorBuilder(name, pattern).setInvariantType(basicType).setExactArgumentCount(argumentCount).register();
 	}
 }

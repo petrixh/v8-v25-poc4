@@ -20,8 +20,8 @@ package de.symeda.sormas.ui.dashboard.statistics;
 import org.apache.commons.lang3.StringUtils;
 
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.ui.utils.CssStyles;
 
@@ -29,23 +29,23 @@ public class DashboardStatisticsComparisonElement extends VerticalLayout {
 
 	private static final long serialVersionUID = 5403374519423424520L;
 
-	private Label countLabel;
-	private Label captionLabel;
+	private Span countLabel;
+	private Span captionLabel;
 	private String leftCaption;
 	private String rightCaption;
 
 	public DashboardStatisticsComparisonElement(String leftCaption, String rightCaption) {
-		this.setMargin(false);
+		this.setPadding(false);
 		this.setSpacing(false);
 
 		this.leftCaption = leftCaption;
 		this.rightCaption = rightCaption;
 
-		countLabel = new Label();
+		countLabel = new Span();
 		CssStyles.style(countLabel, CssStyles.LABEL_PRIMARY, CssStyles.LABEL_BOLD, CssStyles.LABEL_REALLY_LARGE);
 		addComponent(countLabel);
 
-		captionLabel = new Label();
+		captionLabel = new Span();
 		CssStyles.style(captionLabel, CssStyles.LABEL_SECONDARY, CssStyles.LABEL_UPPERCASE, CssStyles.LABEL_BOLD);
 		addComponent(captionLabel);
 		setComponentAlignment(captionLabel, Alignment.MIDDLE_RIGHT);

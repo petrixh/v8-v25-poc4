@@ -24,10 +24,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.ui.CheckBox;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.dashboard.SampleDashboardCriteria;
@@ -81,7 +81,7 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
             showEnvironmentalSamples = false; // Environment samples are OFF by default
         }
 
-        super.addComponents();
+        super.add();
 
         if (showEnvironmentalSamples) {
             appendHeadingInfo(" " + I18nProperties.getString(Strings.infoHeadingEnvironmentSampleDashboardMap));
@@ -248,7 +248,7 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
             showCaseSamplesCheckBox.setCaption(I18nProperties.getCaption(Captions.sampleDashboardShowCaseSamples));
             showCaseSamplesCheckBox.setValue(shouldShowCaseSamples());
             showCaseSamplesCheckBox.addValueChangeListener(e -> {
-                if ((boolean) e.getProperty().getValue()) {
+                if ((boolean) e.getValue()) {
                     displayedHumanSamples.add(SampleAssociationType.CASE);
                 } else {
                     displayedHumanSamples.remove(SampleAssociationType.CASE);
@@ -265,7 +265,7 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
             showContactSamplesCheckBox.setCaption(I18nProperties.getCaption(Captions.sampleDashboardShowContactSamples));
             showContactSamplesCheckBox.setValue(shouldShowContactSamples());
             showContactSamplesCheckBox.addValueChangeListener(e -> {
-                if ((boolean) e.getProperty().getValue()) {
+                if ((boolean) e.getValue()) {
                     displayedHumanSamples.add(SampleAssociationType.CONTACT);
                 } else {
                     displayedHumanSamples.remove(SampleAssociationType.CONTACT);
@@ -282,7 +282,7 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
             showEventParticipantSamplesCheckBox.setCaption(I18nProperties.getCaption(Captions.sampleDashboardShowEventParticipantSamples));
             showEventParticipantSamplesCheckBox.setValue(shouldShowEventParticipantSamples());
             showEventParticipantSamplesCheckBox.addValueChangeListener(e -> {
-                if ((boolean) e.getProperty().getValue()) {
+                if ((boolean) e.getValue()) {
                     displayedHumanSamples.add(SampleAssociationType.EVENT_PARTICIPANT);
                 } else {
                     displayedHumanSamples.remove(SampleAssociationType.EVENT_PARTICIPANT);
@@ -299,7 +299,7 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
             showEnvironmentSamplesCheckBox.setCaption(I18nProperties.getCaption(Captions.sampleDashboardShowEnvironmentSamples));
             showEnvironmentSamplesCheckBox.setValue(showEnvironmentalSamples); // Use the correct state!
             showEnvironmentSamplesCheckBox.addValueChangeListener(e -> {
-                showEnvironmentalSamples = (boolean) e.getProperty().getValue();
+                showEnvironmentalSamples = (boolean) e.getValue();
                 refreshMap(true);
             });
             layersLayout.addComponent(showEnvironmentSamplesCheckBox);
@@ -319,7 +319,7 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
 
         HorizontalLayout samplesLegendLayout = new HorizontalLayout();
         samplesLegendLayout.setSpacing(false);
-        samplesLegendLayout.setMargin(false);
+        samplesLegendLayout.setPadding(false);
 
         if (shouldShowCaseSamples()) {
             HorizontalLayout legendEntry =

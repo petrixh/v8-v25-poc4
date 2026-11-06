@@ -17,10 +17,10 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.dashboard.statistics;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.ui.utils.CssStyles;
 
@@ -28,41 +28,41 @@ import de.symeda.sormas.ui.utils.CssStyles;
 public class DashboardStatisticsDiseaseElement extends HorizontalLayout {
 
 	public DashboardStatisticsDiseaseElement(String caption, int count, int previousCount) {
-		setMargin(false);
+		setPadding(false);
 		setSpacing(true);
-		Label captionLabel = new Label(caption);
+		Span captionLabel = new Span(caption);
 		captionLabel.setWidthUndefined();
 		CssStyles.style(captionLabel, CssStyles.LABEL_SECONDARY, CssStyles.LABEL_BOLD, CssStyles.LABEL_LARGE);
 		addComponent(captionLabel);
 
-		Label lineLabel = new Label("&nbsp;", ContentMode.HTML);
+		Span lineLabel = new Span("&nbsp;", ContentMode.HTML);
 		CssStyles.style(lineLabel, CssStyles.LABEL_BOTTOM_LINE);
 		addComponent(lineLabel);
 
-		Label countLabel = new Label(Integer.toString(count));
+		Span countLabel = new Span(Integer.toString(count));
 		countLabel.setWidthUndefined();
 		CssStyles.style(countLabel, CssStyles.LABEL_SECONDARY, CssStyles.LABEL_BOLD, CssStyles.LABEL_LARGE);
 		addComponent(countLabel);
 
-		Label growthLabel = new Label();
+		Span growthLabel = new Span();
 		growthLabel.setContentMode(ContentMode.HTML);
 		growthLabel.setWidth(15, Unit.PIXELS);
 
 		CssStyles.removeStyles(growthLabel, CssStyles.LABEL_CRITICAL, CssStyles.LABEL_POSITIVE, CssStyles.LABEL_IMPORTANT);
 		if (count > previousCount) {
-			growthLabel.setValue(VaadinIcons.CHEVRON_UP.getHtml());
+			growthLabel.setValue(VaadinIcon.CHEVRON_UP.getHtml());
 			CssStyles.style(growthLabel, CssStyles.LABEL_CRITICAL);
 		} else if (count == previousCount) {
-			growthLabel.setValue(VaadinIcons.CHEVRON_RIGHT.getHtml());
+			growthLabel.setValue(VaadinIcon.CHEVRON_RIGHT.getHtml());
 			CssStyles.style(growthLabel, CssStyles.LABEL_IMPORTANT, CssStyles.ALIGN_CENTER);
 		} else {
-			growthLabel.setValue(VaadinIcons.CHEVRON_DOWN.getHtml());
+			growthLabel.setValue(VaadinIcon.CHEVRON_DOWN.getHtml());
 			CssStyles.style(growthLabel, CssStyles.LABEL_POSITIVE);
 		}
 
 		CssStyles.style(growthLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_LARGE);
 		addComponent(growthLabel);
 
-		setExpandRatio(lineLabel, 1);
+		setFlexGrow(1, lineLabel);
 	}
 }

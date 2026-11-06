@@ -17,10 +17,10 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.dashboard.contacts;
 
-import org.vaadin.hene.popupbutton.PopupButton;
+import de.symeda.sormas.ui.utils.PopupButton;
 
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.ui.OptionGroup;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -49,7 +49,7 @@ public class ContactsEpiCurveComponent extends AbstractEpiCurveComponent<Dashboa
 		}
 
 		VerticalLayout groupingLayout = new VerticalLayout();
-		groupingLayout.setMargin(true);
+		groupingLayout.setPadding(true);
 		groupingLayout.setSizeUndefined();
 
 		PopupButton dataDropdown = ButtonHelper.createPopupButton(Captions.dashboardData, groupingLayout, CssStyles.BUTTON_SUBTLE);
@@ -60,7 +60,7 @@ public class ContactsEpiCurveComponent extends AbstractEpiCurveComponent<Dashboa
 		dataSelect.setValue(epiCurveContactsMode);
 		dataSelect.select(epiCurveContactsMode);
 		dataSelect.addValueChangeListener(e -> {
-			epiCurveContactsMode = (ContactsEpiCurveMode) e.getProperty().getValue();
+			epiCurveContactsMode = (ContactsEpiCurveMode) e.getValue();
 			switch (epiCurveContactsMode) {
 			case FOLLOW_UP_STATUS:
 				epiCurveLabel.setValue(I18nProperties.getCaption(Captions.dashboardFollowUpStatusChart));

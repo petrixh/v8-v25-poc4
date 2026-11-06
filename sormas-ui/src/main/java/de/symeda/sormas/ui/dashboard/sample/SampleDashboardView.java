@@ -16,10 +16,10 @@
 package de.symeda.sormas.ui.dashboard.sample;
 
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.dashboard.sample.SampleShipmentStatus;
 import de.symeda.sormas.api.i18n.Captions;
@@ -83,7 +83,7 @@ public class SampleDashboardView extends AbstractDashboardView {
 		SampleDashboardFilterLayout filterLayout = new SampleDashboardFilterLayout(this, dataProvider);
 
 		dashboardLayout.addComponent(filterLayout);
-		dashboardLayout.setExpandRatio(filterLayout, 0);
+		dashboardLayout.setFlexGrow(0, filterLayout);
 
 		heading = new DashboardHeadingComponent(Captions.sampleDashboardAllSamples, null);
 		heading.setMargin(new MarginInfo(true, true, false, true));
@@ -151,9 +151,9 @@ public class SampleDashboardView extends AbstractDashboardView {
 		mapLayout = createMapLayout(mapComponent);
 
 		epiCurveAndMapLayout = createEpiCurveAndMapLayout(epiCurveLayout, mapLayout);
-		epiCurveAndMapLayout.addStyleName(CssStyles.VSPACE_TOP_1);
+		epiCurveAndMapLayout.addClassName(CssStyles.VSPACE_TOP_1);
 		dashboardLayout.addComponent(epiCurveAndMapLayout);
-		dashboardLayout.setExpandRatio(epiCurveAndMapLayout, 1);
+		dashboardLayout.setFlexGrow(1, epiCurveAndMapLayout);
 	}
 
 	@Override
@@ -228,9 +228,9 @@ public class SampleDashboardView extends AbstractDashboardView {
 
 	protected HorizontalLayout createEpiCurveAndMapLayout(VerticalLayout epiCurveLayout, VerticalLayout mapLayout) {
 		HorizontalLayout layout = new HorizontalLayout(epiCurveLayout, mapLayout);
-		layout.addStyleName(DashboardCssStyles.CURVE_AND_MAP_LAYOUT);
+		layout.addClassName(DashboardCssStyles.CURVE_AND_MAP_LAYOUT);
 		layout.setWidth(100, Unit.PERCENTAGE);
-		layout.setMargin(false);
+		layout.setPadding(false);
 		layout.setSpacing(false);
 
 		return layout;
@@ -242,14 +242,14 @@ public class SampleDashboardView extends AbstractDashboardView {
 		}
 
 		VerticalLayout layout = new VerticalLayout();
-		layout.setMargin(false);
+		layout.setPadding(false);
 		layout.setSpacing(false);
 		layout.setHeight(EPI_CURVE_AND_MAP_HEIGHT, Unit.PIXELS);
 
 		epiCurveComponent.setSizeFull();
 
 		layout.addComponent(epiCurveComponent);
-		layout.setExpandRatio(epiCurveComponent, 1);
+		layout.setFlexGrow(1, epiCurveComponent);
 
 		epiCurveComponent.setExpandListener(expanded -> {
 			setExpanded(expanded, layout, mapLayout, 1);
@@ -260,14 +260,14 @@ public class SampleDashboardView extends AbstractDashboardView {
 
 	private VerticalLayout createMapLayout(SampleDashboardMapComponent mapComponent) {
 		VerticalLayout layout = new VerticalLayout();
-		layout.setMargin(false);
+		layout.setPadding(false);
 		layout.setSpacing(false);
 		layout.setHeight(EPI_CURVE_AND_MAP_HEIGHT, Unit.PIXELS);
 
 		mapComponent.setSizeFull();
 
 		layout.addComponent(mapComponent);
-		layout.setExpandRatio(mapComponent, 1);
+		layout.setFlexGrow(1, mapComponent);
 
 		mapComponent.setExpandListener(expanded -> {
 			setExpanded(expanded, layout, epiCurveLayout, 0);
@@ -278,9 +278,9 @@ public class SampleDashboardView extends AbstractDashboardView {
 
 	private void setExpanded(Boolean expanded, Component componentToExpand, Component componentToRemove, int removedComponentIndex) {
 		if (expanded) {
-			dashboardLayout.removeComponent(heading);
-			dashboardLayout.removeComponent(sampleCountsLayout);
-			epiCurveAndMapLayout.removeComponent(componentToRemove);
+			dashboardLayout.remove(heading);
+			dashboardLayout.remove(sampleCountsLayout);
+			epiCurveAndMapLayout.remove(componentToRemove);
 			setHeight(100, Unit.PERCENTAGE);
 
 			epiCurveAndMapLayout.setHeightFull();

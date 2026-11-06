@@ -18,9 +18,9 @@
 package de.symeda.sormas.ui.dashboard.statistics;
 
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.ui.utils.CssStyles;
 
@@ -28,21 +28,21 @@ import de.symeda.sormas.ui.utils.CssStyles;
 public class DashboardStatisticsPercentageElement extends VerticalLayout {
 
 	private SvgBarElement svgBarElement;
-	private Label percentageLabel;
+	private Span percentageLabel;
 
 	public DashboardStatisticsPercentageElement(String caption, String svgFillClass) {
-		this.setMargin(false);
+		this.setPadding(false);
 		this.setSpacing(false);
 
 		HorizontalLayout captionAndValueLayout = new HorizontalLayout();
 		captionAndValueLayout.setWidth(100, Unit.PERCENTAGE);
 
-		Label captionLabel = new Label(caption);
+		Span captionLabel = new Span(caption);
 		captionLabel.setWidthUndefined();
 		CssStyles.style(captionLabel, CssStyles.LABEL_SECONDARY, CssStyles.LABEL_BOLD);
 		captionAndValueLayout.addComponent(captionLabel);
 
-		percentageLabel = new Label();
+		percentageLabel = new Span();
 		CssStyles.style(percentageLabel, CssStyles.LABEL_PRIMARY, CssStyles.LABEL_BOLD);
 		percentageLabel.setWidthUndefined();
 		captionAndValueLayout.addComponent(percentageLabel);

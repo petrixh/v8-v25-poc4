@@ -5,15 +5,15 @@ import static de.symeda.sormas.api.campaign.CampaignJurisdictionLevel.COMMUNITY;
 import static de.symeda.sormas.api.campaign.CampaignJurisdictionLevel.DISTRICT;
 import static de.symeda.sormas.api.campaign.CampaignJurisdictionLevel.REGION;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.campaign.CampaignDto;
@@ -37,7 +37,7 @@ public class CampaignDashboardFilterLayout extends HorizontalLayout {
 	private CampaignDashboardView dashboardView;
 	private CampaignDashboardDataProvider dashboardDataProvider;
 
-	private Label infoLabel;
+	private Span infoLabel;
 
 	private ComboBox campaignFilter;
 	private ComboBox areaFilter;
@@ -61,7 +61,7 @@ public class CampaignDashboardFilterLayout extends HorizontalLayout {
 		setWidthFull();
 		setMargin(new MarginInfo(true, true, false, true));
 
-		infoLabel = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
+		infoLabel = new Span(VaadinIcon.INFO_CIRCLE.getHtml(), ContentMode.HTML);
 		infoLabel.setSizeUndefined();
 
 		final CampaignJurisdictionLevel campaignJurisdictionLevel = CampaignJurisdictionLevel.getByJurisdictionLevel(UiUtil.getJurisdictionLevel());
@@ -77,7 +77,7 @@ public class CampaignDashboardFilterLayout extends HorizontalLayout {
 		campaignPhaseSelector.setValue(CampaignPhase.INTRA);
 		campaignPhaseSelector.setEnabled(false);
 		addComponent(campaignPhaseSelector);
-		setExpandRatio(campaignPhaseSelector, 1);
+		setFlexGrow(1, campaignPhaseSelector);
 		setComponentAlignment(campaignPhaseSelector, Alignment.MIDDLE_RIGHT);
 	}
 

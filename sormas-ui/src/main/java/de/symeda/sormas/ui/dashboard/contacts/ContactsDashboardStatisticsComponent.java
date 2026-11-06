@@ -25,10 +25,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -243,7 +243,7 @@ public class ContactsDashboardStatisticsComponent extends AbstractDashboardStati
 			new DashboardStatisticsCountElement(I18nProperties.getCaption(Captions.dashboardNeverVisited), CountElementStyle.MINOR);
 		secondComponent.addComponentToCountLayout(visitStatusCountLayout, neverVisitedContacts);
 
-		Label infoLabel = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
+		Span infoLabel = new Span(VaadinIcon.INFO_CIRCLE.getHtml(), ContentMode.HTML);
 		infoLabel.setSizeUndefined();
 		infoLabel.setDescription(I18nProperties.getDescription(Descriptions.descDashboardFollowUpInfo));
 		CssStyles.style(infoLabel, CssStyles.LABEL_LARGE, CssStyles.LABEL_SECONDARY, "follow-up-status-info-button");
@@ -252,7 +252,7 @@ public class ContactsDashboardStatisticsComponent extends AbstractDashboardStati
 		secondComponent.addComponentToContent(visitStatusCountLayout);
 
 		// Number of missed visits
-		Label missedVisitsLabel = new Label(I18nProperties.getCaption(Captions.dashboardNotVisitedFor));
+		Span missedVisitsLabel = new Span(I18nProperties.getCaption(Captions.dashboardNotVisitedFor));
 		CssStyles.style(
 			missedVisitsLabel,
 			CssStyles.LABEL_BOLD,
@@ -405,7 +405,7 @@ public class ContactsDashboardStatisticsComponent extends AbstractDashboardStati
 		cooperativeVisits =
 			new DashboardStatisticsGraphicalGrowthElement(I18nProperties.getCaption(Captions.dashboardCooperative), CssStyles.SVG_FILL_POSITIVE);
 		fourthComponent.addComponentToContent(cooperativeVisits);
-		Label separator = new Label("<hr/>", ContentMode.HTML);
+		Span separator = new Span("<hr/>", ContentMode.HTML);
 		CssStyles.style(separator, CssStyles.VSPACE_TOP_3, CssStyles.VSPACE_3);
 		fourthComponent.addComponentToContent(separator);
 		missedVisits =

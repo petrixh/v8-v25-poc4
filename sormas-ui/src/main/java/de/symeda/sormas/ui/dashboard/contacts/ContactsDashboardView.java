@@ -21,13 +21,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.ConfigFacade;
 import de.symeda.sormas.api.FacadeProvider;
@@ -71,14 +71,14 @@ public class ContactsDashboardView extends AbstractDashboardView {
 	private VerticalLayout rowsLayout;
 
 	// Case counts
-	private Label minLabel = new Label();
-	private Label maxLabel = new Label();
-	private Label avgLabel = new Label();
-	private Label sourceCasesLabel = new Label();
+	private Span minLabel = new Span();
+	private Span maxLabel = new Span();
+	private Span avgLabel = new Span();
+	private Span sourceCasesLabel = new Span();
 
 	//Contacts in quarantine
-	private Label contactsInQuarantineByDate = new Label();
-	private Label contactsPlacedInQuarantineByDate = new Label();
+	private Span contactsInQuarantineByDate = new Span();
+	private Span contactsPlacedInQuarantineByDate = new Span();
 
 	public ContactsDashboardView() {
 		super(VIEW_NAME);
@@ -96,28 +96,28 @@ public class ContactsDashboardView extends AbstractDashboardView {
 
 		dashboardSwitcher.setValue(DashboardType.CONTACTS);
 		dashboardSwitcher.addValueChangeListener(e -> {
-			dashboardDataProvider.setDashboardType((DashboardType) e.getProperty().getValue());
+			dashboardDataProvider.setDashboardType((DashboardType) e.getValue());
 			navigateToDashboardView(e);
 		});
 
 		rowsLayout = new VerticalLayout();
-		rowsLayout.setMargin(false);
+		rowsLayout.setPadding(false);
 		rowsLayout.setSpacing(false);
 		dashboardLayout.addComponent(rowsLayout);
-		dashboardLayout.setExpandRatio(rowsLayout, 1);
+		dashboardLayout.setFlexGrow(1, rowsLayout);
 
 		// Add statistics
 		statisticsComponent = new ContactsDashboardStatisticsComponent(dashboardDataProvider);
 		rowsLayout.addComponent(statisticsComponent);
-		rowsLayout.setExpandRatio(statisticsComponent, 0);
+		rowsLayout.setFlexGrow(0, statisticsComponent);
 
 		caseStatisticsLayout = createCaseStatisticsLayout();
 		rowsLayout.addComponent(caseStatisticsLayout);
-		rowsLayout.setExpandRatio(caseStatisticsLayout, 0);
+		rowsLayout.setFlexGrow(0, caseStatisticsLayout);
 
 		contactsStatisticsLayout = createContactsStatisticsLayout();
 		rowsLayout.addComponent(contactsStatisticsLayout);
-		rowsLayout.setExpandRatio(contactsStatisticsLayout, 0);
+		rowsLayout.setFlexGrow(0, contactsStatisticsLayout);
 
 		epiCurveComponent = new ContactsEpiCurveComponent(dashboardDataProvider);
 		mapComponent = new DashboardMapComponent(dashboardDataProvider);
@@ -139,16 +139,16 @@ public class ContactsDashboardView extends AbstractDashboardView {
 
 	private HorizontalLayout createCaseStatisticsLayout() {
 		HorizontalLayout layout = new HorizontalLayout();
-		layout.addStyleName(DashboardCssStyles.HIGHLIGHTED_STATISTICS_COMPONENT);
+		layout.addClassName(DashboardCssStyles.HIGHLIGHTED_STATISTICS_COMPONENT);
 		layout.setWidth(100, Unit.PERCENTAGE);
-		layout.setMargin(false);
+		layout.setPadding(false);
 		layout.setSpacing(false);
 
 		HorizontalLayout contactsPerCaseLayout = createContactsPerCaseLayout();
 		HorizontalLayout sourceCasesLayout = createSourceCasesLayout();
 		layout.addComponent(contactsPerCaseLayout);
 		layout.addComponent(sourceCasesLayout);
-		layout.setExpandRatio(contactsPerCaseLayout, 1);
+		layout.setFlexGrow(1, contactsPerCaseLayout);
 		layout.setComponentAlignment(sourceCasesLayout, Alignment.MIDDLE_RIGHT);
 
 		return layout;
@@ -159,7 +159,7 @@ public class ContactsDashboardView extends AbstractDashboardView {
 		layout.setMargin(new MarginInfo(false, true, false, true));
 		layout.setSpacing(false);
 
-		Label caption = new Label(I18nProperties.getString(Strings.headingContactsPerCase));
+		Span caption = new Span(I18nProperties.getString(Strings.headingContactsPerCase));
 		CssStyles.style(caption, CssStyles.H3, CssStyles.HSPACE_RIGHT_1, CssStyles.VSPACE_TOP_NONE);
 		layout.addComponent(caption);
 
@@ -180,7 +180,7 @@ public class ContactsDashboardView extends AbstractDashboardView {
 		layout.setMargin(new MarginInfo(false, true, false, true));
 		layout.setSpacing(false);
 
-		Label caption = new Label(I18nProperties.getString(Strings.headingNewSourceCases));
+		Span caption = new Span(I18nProperties.getString(Strings.headingNewSourceCases));
 		CssStyles.style(caption, CssStyles.H3, CssStyles.HSPACE_RIGHT_1, CssStyles.VSPACE_TOP_NONE);
 		layout.addComponent(caption);
 
@@ -193,9 +193,9 @@ public class ContactsDashboardView extends AbstractDashboardView {
 	private HorizontalLayout createContactsStatisticsLayout() {
 
 		HorizontalLayout layout = new HorizontalLayout();
-		layout.addStyleName(DashboardCssStyles.HIGHLIGHTED_STATISTICS_COMPONENT);
+		layout.addClassName(DashboardCssStyles.HIGHLIGHTED_STATISTICS_COMPONENT);
 		layout.setWidth(100, Unit.PERCENTAGE);
-		layout.setMargin(false);
+		layout.setPadding(false);
 		layout.setSpacing(false);
 
 		HorizontalLayout contactsInQuarantine = createContactsInQuarantineLayout();
@@ -215,7 +215,7 @@ public class ContactsDashboardView extends AbstractDashboardView {
 		layout.setMargin(new MarginInfo(false, true, false, true));
 		layout.setSpacing(false);
 
-		Label captionInQuarantine = new Label(I18nProperties.getString(Strings.headingContactsInQuarantine));
+		Span captionInQuarantine = new Span(I18nProperties.getString(Strings.headingContactsInQuarantine));
 		CssStyles.style(captionInQuarantine, CssStyles.H3, CssStyles.HSPACE_RIGHT_1, CssStyles.VSPACE_TOP_NONE);
 		layout.addComponent(captionInQuarantine);
 
@@ -237,7 +237,7 @@ public class ContactsDashboardView extends AbstractDashboardView {
 		layout.setMargin(new MarginInfo(false, true, false, true));
 		layout.setSpacing(false);
 
-		Label captionPlacedInQuarantine = new Label(I18nProperties.getString(Strings.headingContactsPlacedInQuarantine));
+		Span captionPlacedInQuarantine = new Span(I18nProperties.getString(Strings.headingContactsPlacedInQuarantine));
 		CssStyles.style(captionPlacedInQuarantine, CssStyles.H3, CssStyles.HSPACE_RIGHT_1, CssStyles.VSPACE_TOP_NONE);
 		layout.addComponent(captionPlacedInQuarantine);
 
@@ -291,9 +291,9 @@ public class ContactsDashboardView extends AbstractDashboardView {
 
 	protected HorizontalLayout createEpiCurveAndMapLayout() {
 		HorizontalLayout layout = new HorizontalLayout();
-		layout.addStyleName(DashboardCssStyles.CURVE_AND_MAP_LAYOUT);
+		layout.addClassName(DashboardCssStyles.CURVE_AND_MAP_LAYOUT);
 		layout.setWidth(100, Unit.PERCENTAGE);
-		layout.setMargin(false);
+		layout.setPadding(false);
 		layout.setSpacing(false);
 
 		// Epi curve layout
@@ -309,9 +309,9 @@ public class ContactsDashboardView extends AbstractDashboardView {
 
 	protected HorizontalLayout createNetworkDiagramRowLayout() {
 		HorizontalLayout layout = new HorizontalLayout();
-		//		layout.addStyleName(DashboardCssStyles.CURVE_AND_MAP_LAYOUT);
+		//		layout.addClassName(DashboardCssStyles.CURVE_AND_MAP_LAYOUT);
 		layout.setWidth(100, Unit.PERCENTAGE);
-		layout.setMargin(false);
+		layout.setPadding(false);
 		layout.setSpacing(false);
 
 		// network diagram layout 
@@ -319,9 +319,9 @@ public class ContactsDashboardView extends AbstractDashboardView {
 		networkDiagramLayout.ifPresent(layout::addComponent);
 
 		noNetworkDiagramLayout = new HorizontalLayout();
-		noNetworkDiagramLayout.setMargin(true);
-		Label noDiagramLabel =
-			new Label(VaadinIcons.CLUSTER.getHtml() + " " + I18nProperties.getString(Strings.infoNoNetworkDiagram), ContentMode.HTML);
+		noNetworkDiagramLayout.setPadding(true);
+		Span noDiagramLabel =
+			new Span(VaadinIcon.CLUSTER.getHtml() + " " + I18nProperties.getString(Strings.infoNoNetworkDiagram), ContentMode.HTML);
 		noNetworkDiagramLayout.addComponent(noDiagramLabel);
 		layout.addComponent(noNetworkDiagramLayout);
 		layout.setComponentAlignment(noNetworkDiagramLayout, Alignment.MIDDLE_CENTER);
@@ -341,18 +341,18 @@ public class ContactsDashboardView extends AbstractDashboardView {
 		}
 
 		VerticalLayout layout = new VerticalLayout();
-		layout.setMargin(false);
+		layout.setPadding(false);
 		layout.setSpacing(false);
 		layout.setHeight(ROW_HEIGHT, Unit.PIXELS);
 
 		epiCurveComponent.setSizeFull();
 
 		layout.addComponent(epiCurveComponent);
-		layout.setExpandRatio(epiCurveComponent, 1);
+		layout.setFlexGrow(1, epiCurveComponent);
 
 		epiCurveComponent.setExpandListener(expanded -> {
 			if (expanded) {
-				rowsLayout.removeComponent(statisticsComponent);
+				rowsLayout.remove(statisticsComponent);
 				mapLayout.ifPresent(epiCurveAndMapLayout::removeComponent);
 				ContactsDashboardView.this.setHeight(100, Unit.PERCENTAGE);
 				epiCurveAndMapLayout.setHeight(100, Unit.PERCENTAGE);
@@ -384,20 +384,20 @@ public class ContactsDashboardView extends AbstractDashboardView {
 			throw new UnsupportedOperationException("MapComponent needs to be initialized before calling createMapLayout");
 		}
 		VerticalLayout layout = new VerticalLayout();
-		layout.setMargin(false);
+		layout.setPadding(false);
 		layout.setSpacing(false);
 		layout.setHeight(ROW_HEIGHT, Unit.PIXELS);
 
 		mapComponent.setSizeFull();
 
 		layout.addComponent(mapComponent);
-		layout.setExpandRatio(mapComponent, 1);
+		layout.setFlexGrow(1, mapComponent);
 
 		mapComponent.setExpandListener(expanded -> {
 
 			if (expanded) {
-				rowsLayout.removeComponent(statisticsComponent);
-				epiCurveAndMapLayout.removeComponent(epiCurveLayout);
+				rowsLayout.remove(statisticsComponent);
+				epiCurveAndMapLayout.remove(epiCurveLayout);
 				ContactsDashboardView.this.setHeight(100, Unit.PERCENTAGE);
 				epiCurveAndMapLayout.setHeight(100, Unit.PERCENTAGE);
 				layout.setSizeFull();
@@ -425,18 +425,18 @@ public class ContactsDashboardView extends AbstractDashboardView {
 		return networkDiagramComponent.map(ndc -> {
 
 			VerticalLayout layout = new VerticalLayout();
-			layout.setMargin(false);
+			layout.setPadding(false);
 			layout.setSpacing(false);
 			layout.setHeightUndefined();
 
 			ndc.setSizeFull();
 
 			layout.addComponent(ndc);
-			layout.setExpandRatio(ndc, 1);
+			layout.setFlexGrow(1, ndc);
 
 			ndc.setExpandListener(expanded -> {
 				if (expanded) {
-					rowsLayout.removeComponent(statisticsComponent);
+					rowsLayout.remove(statisticsComponent);
 					ContactsDashboardView.this.setHeight(100, Unit.PERCENTAGE);
 					layout.setSizeFull();
 					networkDiagramRowLayout.setHeight(100, Unit.PERCENTAGE);

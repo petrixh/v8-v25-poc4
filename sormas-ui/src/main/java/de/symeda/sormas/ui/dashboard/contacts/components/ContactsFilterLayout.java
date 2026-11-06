@@ -1,9 +1,9 @@
 package de.symeda.sormas.ui.dashboard.contacts.components;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -43,7 +43,7 @@ public class ContactsFilterLayout extends DashboardFilterLayout<DashboardDataPro
 	}
 
 	private void createInfoLabel() {
-		Label infoLabel = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
+		Span infoLabel = new Span(VaadinIcon.INFO_CIRCLE.getHtml(), ContentMode.HTML);
 		infoLabel.setSizeUndefined();
 		infoLabel.setDescription(I18nProperties.getString(Strings.infoContactDashboard));
 		CssStyles.style(infoLabel, CssStyles.LABEL_XLARGE, CssStyles.LABEL_SECONDARY);

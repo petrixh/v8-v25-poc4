@@ -19,7 +19,7 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 import com.vaadin.server.Page;
-import com.vaadin.ui.Notification;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.dashboard.SampleDashboardCriteria;
 import de.symeda.sormas.api.dashboard.sample.SampleShipmentStatus;

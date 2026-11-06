@@ -23,12 +23,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.button.Button;
+import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 import de.symeda.sormas.api.Disease;
@@ -160,16 +160,16 @@ public abstract class AbstractDashboardStatisticsComponent extends VerticalLayou
 	private void addShowMoreAndLessButtons() {
 		showMoreButton = ButtonHelper.createIconButton(
 			Captions.dashboardShowAllDiseases,
-			VaadinIcons.CHEVRON_DOWN,
+			VaadinIcon.CHEVRON_DOWN,
 			null,
-			ValoTheme.BUTTON_BORDERLESS,
+			CssStyles.BUTTON_BORDERLESS,
 			CssStyles.VSPACE_TOP_NONE,
 			CssStyles.VSPACE_3);
 		showLessButton = ButtonHelper.createIconButton(
 			Captions.dashboardShowFirstDiseases,
-			VaadinIcons.CHEVRON_UP,
+			VaadinIcon.CHEVRON_UP,
 			null,
-			ValoTheme.BUTTON_BORDERLESS,
+			CssStyles.BUTTON_BORDERLESS,
 			CssStyles.VSPACE_TOP_NONE,
 			CssStyles.VSPACE_3);
 

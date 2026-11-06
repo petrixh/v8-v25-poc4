@@ -18,24 +18,24 @@
 package de.symeda.sormas.ui.dashboard.statistics;
 
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.ui.utils.CssStyles;
 
 @SuppressWarnings("serial")
 public class DashboardStatisticsCountElement extends VerticalLayout {
 
-	private Label countLabel;
-	private Label captionLabel;
+	private Span countLabel;
+	private Span captionLabel;
 
 	public DashboardStatisticsCountElement(String caption, CountElementStyle countElementStyle) {
-		this.setMargin(false);
+		this.setPadding(false);
 		this.setSpacing(false);
 
-		addStyleName("count-element");
-		addStyleName(countElementStyle.getCssClass());
-		countLabel = new Label();
+		addClassName("count-element");
+		addClassName(countElementStyle.getCssClass());
+		countLabel = new Span();
 		countLabel.setSizeUndefined();
 		CssStyles.style(
 			countLabel,
@@ -47,7 +47,7 @@ public class DashboardStatisticsCountElement extends VerticalLayout {
 			CssStyles.VSPACE_TOP_NONE);
 		addComponent(countLabel);
 
-		captionLabel = new Label(caption);
+		captionLabel = new Span(caption);
 		captionLabel.setSizeUndefined();
 		CssStyles.style(
 			captionLabel,

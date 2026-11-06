@@ -17,12 +17,12 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.dashboard.statistics;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.ui.utils.CssStyles;
 
@@ -30,10 +30,10 @@ import de.symeda.sormas.ui.utils.CssStyles;
 public class DashboardStatisticsGrowthElement extends VerticalLayout {
 
 	protected HorizontalLayout growthLayout;
-	protected Label countLabel;
-	protected Label growthLabel;
-	protected Label percentageLabel;
-	protected Label captionLabel;
+	protected Span countLabel;
+	protected Span growthLabel;
+	protected Span percentageLabel;
+	protected Span captionLabel;
 
 	protected String caption;
 	private String captionClass;
@@ -43,7 +43,7 @@ public class DashboardStatisticsGrowthElement extends VerticalLayout {
 	}
 
 	public DashboardStatisticsGrowthElement(String caption, String captionClass, Alignment alignment) {
-		this.setMargin(false);
+		this.setPadding(false);
 		this.setSpacing(false);
 
 		this.caption = caption;
@@ -71,12 +71,12 @@ public class DashboardStatisticsGrowthElement extends VerticalLayout {
 	}
 
 	protected void createCountLabel() {
-		countLabel = new Label();
+		countLabel = new Span();
 		CssStyles.style(countLabel, CssStyles.LABEL_LARGE, CssStyles.LABEL_PRIMARY, CssStyles.LABEL_BOLD, CssStyles.HSPACE_RIGHT_4);
 	}
 
 	protected void createGrowthLabel() {
-		growthLabel = new Label();
+		growthLabel = new Span();
 		growthLabel.setHeightUndefined();
 		growthLabel.setContentMode(ContentMode.HTML);
 		CssStyles.style(growthLabel, CssStyles.LABEL_MEDIUM, CssStyles.LABEL_PRIMARY, CssStyles.LABEL_BOLD, CssStyles.HSPACE_RIGHT_4);
@@ -84,12 +84,12 @@ public class DashboardStatisticsGrowthElement extends VerticalLayout {
 	}
 
 	protected void createPercentageLabel() {
-		percentageLabel = new Label();
+		percentageLabel = new Span();
 		CssStyles.style(percentageLabel, CssStyles.LABEL_LARGE, CssStyles.LABEL_PRIMARY, CssStyles.LABEL_BOLD);
 	}
 
 	protected void createCaptionLabel() {
-		captionLabel = new Label(caption);
+		captionLabel = new Span(caption);
 		captionLabel.setWidthUndefined();
 		CssStyles.style(captionLabel, CssStyles.LABEL_MEDIUM, CssStyles.LABEL_UPPERCASE, CssStyles.LABEL_BOLD, captionClass);
 
@@ -100,13 +100,13 @@ public class DashboardStatisticsGrowthElement extends VerticalLayout {
 		percentageLabel.setValue(percentage != Integer.MIN_VALUE ? (percentage + " %") : "");
 		CssStyles.removeStyles(growthLabel, CssStyles.LABEL_CRITICAL, CssStyles.LABEL_POSITIVE, CssStyles.LABEL_IMPORTANT);
 		if (percentage > 0) {
-			growthLabel.setValue(VaadinIcons.CHEVRON_UP.getHtml());
+			growthLabel.setValue(VaadinIcon.CHEVRON_UP.getHtml());
 			CssStyles.style(growthLabel, increaseIsPositive ? CssStyles.LABEL_POSITIVE : CssStyles.LABEL_CRITICAL);
 		} else if (percentage < 0) {
-			growthLabel.setValue(VaadinIcons.CHEVRON_DOWN.getHtml());
+			growthLabel.setValue(VaadinIcon.CHEVRON_DOWN.getHtml());
 			CssStyles.style(growthLabel, increaseIsPositive ? CssStyles.LABEL_CRITICAL : CssStyles.LABEL_POSITIVE);
 		} else {
-			growthLabel.setValue(VaadinIcons.CHEVRON_RIGHT.getHtml());
+			growthLabel.setValue(VaadinIcon.CHEVRON_RIGHT.getHtml());
 			CssStyles.style(growthLabel, CssStyles.LABEL_IMPORTANT);
 		}
 	}

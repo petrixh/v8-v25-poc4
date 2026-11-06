@@ -21,8 +21,8 @@ import org.apache.commons.text.StringEscapeUtils;
 
 import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.JavaScriptFunction;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.VerticalLayout;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Language;
 import de.symeda.sormas.api.campaign.CampaignJurisdictionLevel;
@@ -75,7 +75,7 @@ public class CampaignDashboardDiagramComponent extends VerticalLayout {
 		setSizeFull();
 		campaignColumnChart.setSizeFull();
 
-		setMargin(false);
+		setPadding(false);
 		addComponent(campaignColumnChart);
 
 		final Map<Object, String> axisInfo = new HashMap<>();

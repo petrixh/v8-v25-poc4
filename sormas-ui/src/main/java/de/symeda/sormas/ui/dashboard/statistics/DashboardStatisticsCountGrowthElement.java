@@ -17,9 +17,9 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.dashboard.statistics;
 
-import com.vaadin.shared.ui.ContentMode;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.ui.utils.CssStyles;
 
@@ -28,8 +28,8 @@ public class DashboardStatisticsCountGrowthElement extends DashboardStatisticsGr
 
 	public DashboardStatisticsCountGrowthElement(String caption, CountElementStyle countElementStyle) {
 		super(caption);
-		addStyleName("count-element");
-		addStyleName(countElementStyle.getCssClass());
+		addClassName("count-element");
+		addClassName(countElementStyle.getCssClass());
 
 		setComponentAlignment(captionLabel, Alignment.MIDDLE_CENTER);
 		setComponentAlignment(growthLayout, Alignment.MIDDLE_CENTER);
@@ -37,7 +37,7 @@ public class DashboardStatisticsCountGrowthElement extends DashboardStatisticsGr
 
 	@Override
 	protected void createCountLabel() {
-		countLabel = new Label();
+		countLabel = new Span();
 		countLabel.setSizeUndefined();
 		CssStyles.style(
 			countLabel,
@@ -52,7 +52,7 @@ public class DashboardStatisticsCountGrowthElement extends DashboardStatisticsGr
 
 	@Override
 	protected void createGrowthLabel() {
-		growthLabel = new Label();
+		growthLabel = new Span();
 		growthLabel.setHeightUndefined();
 		growthLabel.setContentMode(ContentMode.HTML);
 		CssStyles.style(
@@ -68,7 +68,7 @@ public class DashboardStatisticsCountGrowthElement extends DashboardStatisticsGr
 
 	@Override
 	protected void createPercentageLabel() {
-		percentageLabel = new Label();
+		percentageLabel = new Span();
 		CssStyles.style(
 			percentageLabel,
 			CssStyles.LABEL_MEDIUM,
@@ -81,7 +81,7 @@ public class DashboardStatisticsCountGrowthElement extends DashboardStatisticsGr
 
 	@Override
 	protected void createCaptionLabel() {
-		captionLabel = new Label(caption);
+		captionLabel = new Span(caption);
 		captionLabel.setSizeUndefined();
 		CssStyles.style(
 			captionLabel,

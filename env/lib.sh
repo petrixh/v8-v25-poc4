@@ -120,5 +120,8 @@ snapshot_counts() {
   UNION ALL SELECT 'adverseeventinvestigations', count(*) FROM adverseeventsfollowingimmunizationinvestigation
   UNION ALL SELECT 'continents', count(*) FROM continent UNION ALL SELECT 'subcontinents', count(*) FROM subcontinent
   UNION ALL SELECT 'countries', count(*) FROM country
+  UNION ALL SELECT 'campaignforms', count(*) FROM campaignformmeta UNION ALL SELECT 'campaignformdata', count(*) FROM campaignformdata
+  UNION ALL SELECT 'areas', count(*) FROM areas UNION ALL SELECT 'userroles', count(*) FROM userroles
+  UNION ALL SELECT 'users', count(*) FROM users
   UNION ALL SELECT 'tasksFor' || u.username, count(*) FROM task t JOIN users u ON u.id=t.assigneeuser_id GROUP BY u.username"
 }

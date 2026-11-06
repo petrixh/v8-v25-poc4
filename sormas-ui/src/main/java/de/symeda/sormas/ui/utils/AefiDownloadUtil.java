@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.function.Supplier;
 
-import com.vaadin.server.StreamResource;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AdverseEventsDto;
@@ -34,7 +33,7 @@ public class AefiDownloadUtil {
 	private AefiDownloadUtil() {
 	}
 
-	public static StreamResource createAefiExportResource(
+	public static StreamSourceDownloadHandler createAefiExportResource(
 		AefiCriteria aefiCriteria,
 		Supplier<Collection<String>> selectedRows,
 		ExportConfigurationDto exportConfiguration) {

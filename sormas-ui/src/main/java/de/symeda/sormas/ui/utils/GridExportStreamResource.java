@@ -35,17 +35,16 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.opencsv.CSVWriter;
-import com.vaadin.data.ValueProvider;
-import com.vaadin.data.provider.DataProvider;
-import com.vaadin.data.provider.Query;
-import com.vaadin.data.provider.QuerySortOrder;
-import com.vaadin.server.Page;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.Column;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.data.binder.BeanPropertySet;
+import com.vaadin.flow.data.binder.PropertyDefinition;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.function.ValueProvider;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.ReferenceDto;
@@ -57,15 +56,54 @@ import de.symeda.sormas.api.person.PersonHelper;
 import de.symeda.sormas.api.utils.CSVCommentLineValidator;
 import de.symeda.sormas.api.utils.CSVUtils;
 import de.symeda.sormas.api.utils.YesNoUnknown;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 
 @SuppressWarnings("serial")
 public class GridExportStreamResource {
 
-	public static StreamResource createStreamResource(Grid<?> grid, ExportEntityName entityName, String... excludePropertyIds) {
+	private static final String EXPORT_VALUE_PROVIDER = GridExportStreamResource.class.getName() + ".valueProvider";
+
+	/**
+	 * Vaadin 8 read each column's value provider for the export; Flow columns do not expose it. Grids register it here
+	 * for columns that are not a property of the grid's bean type (those are read through the bean property).
+	 */
+	public static <T> Column<T> setExportValueProvider(Column<T> column, ValueProvider<T, ?> valueProvider) {
+		ComponentUtil.setData(column, EXPORT_VALUE_PROVIDER, valueProvider);
+		return column;
+	}
+
+	/**
+	 * @return the registered value provider of the column, else the getter of the bean property named like the column
+	 *         key, else a provider of {@code null}
+	 */
+	@SuppressWarnings({
+		"unchecked",
+		"rawtypes" })
+	public static ValueProvider getExportValueProvider(Grid<?> grid, Column<?> column) {
+		ValueProvider valueProvider = (ValueProvider) ComponentUtil.getData(column, EXPORT_VALUE_PROVIDER);
+		if (valueProvider != null) {
+			return valueProvider;
+		}
+		if (grid.getBeanType() != null && column.getKey() != null) {
+			try {
+				java.util.Optional<PropertyDefinition<Object, ?>> property =
+					((com.vaadin.flow.data.binder.PropertySet<Object>) BeanPropertySet.get((Class<Object>) grid.getBeanType()))
+						.getProperty(column.getKey());
+				if (property.isPresent()) {
+					return property.get().getGetter();
+				}
+			} catch (IllegalArgumentException e) {
+				// not a bean property path
+			}
+		}
+		return row -> null;
+	}
+
+	public static StreamSourceDownloadHandler createStreamResource(Grid<?> grid, ExportEntityName entityName, String... excludePropertyIds) {
 		return new GridExportStreamResource(grid, null, entityName, Arrays.asList(excludePropertyIds), Collections.emptyList()).getStreamResource();
 	}
 
-	public static StreamResource createStreamResourceWithSelectedItems(
+	public static StreamSourceDownloadHandler createStreamResourceWithSelectedItems(
 		Grid<?> grid,
 		Supplier<Set<?>> getSelectedRows,
 		ExportEntityName entityName,
@@ -74,7 +112,7 @@ public class GridExportStreamResource {
 			.getStreamResource();
 	}
 
-	public static StreamResource createStreamResourceWithSelectedItems(
+	public static StreamSourceDownloadHandler createStreamResourceWithSelectedItems(
 		Grid<?> grid,
 		Supplier<Set<?>> getSelectedRows,
 		ExportEntityName entityName,
@@ -83,7 +121,7 @@ public class GridExportStreamResource {
 		return new GridExportStreamResource(grid, getSelectedRows, entityName, excludePropertyIds, includePropertyIds).getStreamResource();
 	}
 
-	public static StreamResource createStreamResource(
+	public static StreamSourceDownloadHandler createStreamResource(
 		Grid<?> grid,
 		ExportEntityName entityName,
 		List<String> excludePropertyIds,
@@ -91,7 +129,7 @@ public class GridExportStreamResource {
 		return new GridExportStreamResource(grid, null, entityName, excludePropertyIds, includePropertyIds).getStreamResource();
 	}
 
-	private final StreamResource streamResource;
+	private final StreamSourceDownloadHandler streamResource;
 
 	private GridExportStreamResource(
 		Grid<?> grid,
@@ -101,16 +139,14 @@ public class GridExportStreamResource {
 		List<String> includePropertyIds) {
 		String filename = DownloadUtil.createFileNameWithCurrentDate(entityName, ".csv");
 		GridExportStreamSource streamSource = new GridExportStreamSource(grid, getSelectedRows, excludePropertyIds, includePropertyIds);
-		this.streamResource = new StreamResource(streamSource, filename);
-		this.streamResource.setMIMEType("text/csv");
-		this.streamResource.setCacheTime(0);
+		this.streamResource = new StreamSourceDownloadHandler(streamSource, filename, "text/csv");
 	}
 
-	private StreamResource getStreamResource() {
+	private StreamSourceDownloadHandler getStreamResource() {
 		return this.streamResource;
 	}
 
-	private static class GridExportStreamSource implements StreamResource.StreamSource {
+	private static class GridExportStreamSource implements StreamSourceDownloadHandler.StreamSource {
 
 		private final Grid<?> grid;
 		private final List<String> excludePropertyIds;
@@ -126,10 +162,11 @@ public class GridExportStreamResource {
 
 		@Override
 		public InputStream getStream() {
-			List<Column> columns = getGridColumns();
-			ValueProvider[] columnValueProviders = columns.stream().map(Column::getValueProvider).toArray(ValueProvider[]::new);
-			String[] headerRow = columns.stream().map(Column::getId).toArray(String[]::new);
-			String[] labelsRow = columns.stream().map(Column::getCaption).toArray(String[]::new);
+			List<Column<?>> columns = getGridColumns();
+			ValueProvider[] columnValueProviders =
+				columns.stream().map(column -> getExportValueProvider(grid, column)).toArray(ValueProvider[]::new);
+			String[] headerRow = columns.stream().map(Column::getKey).toArray(String[]::new);
+			String[] labelsRow = columns.stream().map(Column::getHeaderText).toArray(String[]::new);
 			labelsRow[0] = CSVCommentLineValidator.DEFAULT_COMMENT_LINE_PREFIX + labelsRow[0];
 			DataProvider<?, ?> dataProvider = grid.getDataProvider();
 			List<QuerySortOrder> sortOrder = getGridSortOrder();
@@ -165,11 +202,11 @@ public class GridExportStreamResource {
 			} catch (IOException e) {
 				// TODO This currently requires the user to click the "Export" button again or reload the page as the UI
 				// is not automatically updated; this should be changed once Vaadin push is enabled (see #516)
-				new Notification(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.headingExportFailed),
 					I18nProperties.getString(Strings.messageExportFailed),
 					Type.ERROR_MESSAGE,
-					false).show(Page.getCurrent());
+					false);
 				return null;
 			}
 		}
@@ -200,8 +237,9 @@ public class GridExportStreamResource {
 					BirthDateDto birthDate = (BirthDateDto) value;
 					valueString =
 						DateFormatHelper.formatDate(birthDate.getDateOfBirthDD(), birthDate.getDateOfBirthMM(), birthDate.getDateOfBirthYYYY());
-				} else if (value instanceof Label) {
-					valueString = ((Label) value).getValue();
+				} else if (value instanceof HasText) {
+					// was a Label
+					valueString = ((HasText) value).getText();
 				} else if (value instanceof ReferenceDto) {
 					valueString = ((ReferenceDto) value).getCaption();
 				} else {
@@ -212,11 +250,12 @@ public class GridExportStreamResource {
 			writer.writeNext(rowValues);
 		}
 
-		private List<Column> getGridColumns() {
+		private List<Column<?>> getGridColumns() {
 			return grid.getColumns()
 				.stream()
-				.filter(column -> !column.isHidden() || includePropertyIds.contains(column.getId()))
-				.filter(column -> !excludePropertyIds.contains(column.getId()))
+				.map(column -> (Column<?>) column)
+				.filter(column -> column.isVisible() || includePropertyIds.contains(column.getKey()))
+				.filter(column -> !excludePropertyIds.contains(column.getKey()))
 				.collect(Collectors.toList());
 		}
 
@@ -226,7 +265,7 @@ public class GridExportStreamResource {
 				.flatMap(
 					gridSortOrder -> grid.getColumns()
 						.stream()
-						.filter(column -> column.getId().equals(gridSortOrder.getSorted().getId()))
+						.filter(column -> column.getKey().equals(gridSortOrder.getSorted().getKey()))
 						.findFirst()
 						.get()
 						.getSortOrder(gridSortOrder.getDirection()))

@@ -17,7 +17,6 @@ package de.symeda.sormas.ui.utils;
 
 import java.util.Date;
 
-import com.vaadin.server.StreamResource;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -34,7 +33,7 @@ public class PersonDownloadUtil {
 		// Hide Utility Class Constructor
 	}
 
-	public static StreamResource createPersonExportResource(PersonCriteria personCriteria, ExportConfigurationDto exportConfiguration) {
+	public static StreamSourceDownloadHandler createPersonExportResource(PersonCriteria personCriteria, ExportConfigurationDto exportConfiguration) {
 		return DownloadUtil.createCsvExportStreamResource(
 			PersonExportDto.class,
 			null,

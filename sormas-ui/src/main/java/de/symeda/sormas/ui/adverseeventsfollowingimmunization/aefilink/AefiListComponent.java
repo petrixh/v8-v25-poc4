@@ -17,6 +17,8 @@ package de.symeda.sormas.ui.adverseeventsfollowingimmunization.aefilink;
 
 import java.util.function.Consumer;
 
+import com.vaadin.flow.component.Unit;
+
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiListCriteria;
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -31,7 +33,7 @@ public class AefiListComponent extends SideComponent {
 	public AefiListComponent(AefiListCriteria aefiListCriteria, Consumer<Runnable> actionCallback, boolean isEditAllowed, int totalVaccinations) {
 		super(I18nProperties.getString(Strings.headingImmunizationAdverseEvents), actionCallback);
 
-		setMargin(false);
+		setPadding(false);
 		setWidth(100, Unit.PERCENTAGE);
 
 		if (isEditAllowed) {
@@ -47,7 +49,7 @@ public class AefiListComponent extends SideComponent {
 		}
 
 		AefiList aefiList = new AefiList(aefiListCriteria, actionCallback, isEditAllowed);
-		addComponent(aefiList);
+		add(aefiList);
 		aefiList.reload();
 	}
 }

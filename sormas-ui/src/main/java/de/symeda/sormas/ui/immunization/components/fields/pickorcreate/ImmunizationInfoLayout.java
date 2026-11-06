@@ -1,7 +1,8 @@
 package de.symeda.sormas.ui.immunization.components.fields.pickorcreate;
 
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.v7.ui.Label;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.Language;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -15,49 +16,57 @@ public class ImmunizationInfoLayout extends HorizontalLayout {
 		setSpacing(true);
 		setSizeUndefined();
 
-		Label uuidField = new Label();
-		uuidField.setCaption(I18nProperties.getPrefixCaption(ImmunizationDto.I18N_PREFIX, ImmunizationDto.UUID));
-		uuidField.setValue(DataHelper.getShortUuid(immunization.getUuid()));
-		uuidField.setWidthUndefined();
-		addComponent(uuidField);
+		Span uuidField = new Span();
+		String uuidFieldCaption = I18nProperties.getPrefixCaption(ImmunizationDto.I18N_PREFIX, ImmunizationDto.UUID);
+		uuidField.setText(DataHelper.getShortUuid(immunization.getUuid()));
+		uuidField.setWidth(null);
+		add(withCaption(uuidFieldCaption, uuidField));
 
-		Label meansOfImmunizationField = new Label();
-		meansOfImmunizationField.setCaption(I18nProperties.getPrefixCaption(ImmunizationDto.I18N_PREFIX, ImmunizationDto.MEANS_OF_IMMUNIZATION));
-		meansOfImmunizationField.setValue(immunization.getMeansOfImmunization().toString());
-		meansOfImmunizationField.setWidthUndefined();
-		addComponent(meansOfImmunizationField);
+		Span meansOfImmunizationField = new Span();
+		String meansOfImmunizationFieldCaption = I18nProperties.getPrefixCaption(ImmunizationDto.I18N_PREFIX, ImmunizationDto.MEANS_OF_IMMUNIZATION);
+		meansOfImmunizationField.setText(immunization.getMeansOfImmunization().toString());
+		meansOfImmunizationField.setWidth(null);
+		add(withCaption(meansOfImmunizationFieldCaption, meansOfImmunizationField));
 
-		Label managementStatusField = new Label();
-		managementStatusField
-			.setCaption(I18nProperties.getPrefixCaption(ImmunizationDto.I18N_PREFIX, ImmunizationDto.IMMUNIZATION_MANAGEMENT_STATUS));
-		managementStatusField.setValue(immunization.getImmunizationManagementStatus().toString());
-		managementStatusField.setWidthUndefined();
-		addComponent(managementStatusField);
+		Span managementStatusField = new Span();
+		String managementStatusFieldCaption = I18nProperties.getPrefixCaption(ImmunizationDto.I18N_PREFIX, ImmunizationDto.IMMUNIZATION_MANAGEMENT_STATUS);
+		managementStatusField.setText(immunization.getImmunizationManagementStatus().toString());
+		managementStatusField.setWidth(null);
+		add(withCaption(managementStatusFieldCaption, managementStatusField));
 
-		Label immunizationStatusField = new Label();
-		immunizationStatusField.setCaption(I18nProperties.getPrefixCaption(ImmunizationDto.I18N_PREFIX, ImmunizationDto.IMMUNIZATION_STATUS));
-		immunizationStatusField.setValue(immunization.getImmunizationStatus().toString());
-		immunizationStatusField.setWidthUndefined();
-		addComponent(immunizationStatusField);
+		Span immunizationStatusField = new Span();
+		String immunizationStatusFieldCaption = I18nProperties.getPrefixCaption(ImmunizationDto.I18N_PREFIX, ImmunizationDto.IMMUNIZATION_STATUS);
+		immunizationStatusField.setText(immunization.getImmunizationStatus().toString());
+		immunizationStatusField.setWidth(null);
+		add(withCaption(immunizationStatusFieldCaption, immunizationStatusField));
 
 		Language userLanguage = I18nProperties.getUserLanguage();
 
-		Label startDateField = new Label();
-		startDateField.setCaption(I18nProperties.getPrefixCaption(ImmunizationDto.I18N_PREFIX, ImmunizationDto.START_DATE));
-		startDateField.setValue(DateHelper.formatLocalDate(immunization.getStartDate(), userLanguage));
-		startDateField.setWidthUndefined();
-		addComponent(startDateField);
+		Span startDateField = new Span();
+		String startDateFieldCaption = I18nProperties.getPrefixCaption(ImmunizationDto.I18N_PREFIX, ImmunizationDto.START_DATE);
+		startDateField.setText(DateHelper.formatLocalDate(immunization.getStartDate(), userLanguage));
+		startDateField.setWidth(null);
+		add(withCaption(startDateFieldCaption, startDateField));
 
-		Label endDateField = new Label();
-		endDateField.setCaption(I18nProperties.getPrefixCaption(ImmunizationDto.I18N_PREFIX, ImmunizationDto.END_DATE));
-		endDateField.setValue(DateHelper.formatLocalDate(immunization.getEndDate(), userLanguage));
-		endDateField.setWidthUndefined();
-		addComponent(endDateField);
+		Span endDateField = new Span();
+		String endDateFieldCaption = I18nProperties.getPrefixCaption(ImmunizationDto.I18N_PREFIX, ImmunizationDto.END_DATE);
+		endDateField.setText(DateHelper.formatLocalDate(immunization.getEndDate(), userLanguage));
+		endDateField.setWidth(null);
+		add(withCaption(endDateFieldCaption, endDateField));
 
-		Label recoveryDateField = new Label();
-		recoveryDateField.setCaption(I18nProperties.getPrefixCaption(ImmunizationDto.I18N_PREFIX, ImmunizationDto.RECOVERY_DATE));
-		recoveryDateField.setValue(DateHelper.formatLocalDate(immunization.getRecoveryDate(), userLanguage));
-		recoveryDateField.setWidthUndefined();
-		addComponent(recoveryDateField);
+		Span recoveryDateField = new Span();
+		String recoveryDateFieldCaption = I18nProperties.getPrefixCaption(ImmunizationDto.I18N_PREFIX, ImmunizationDto.RECOVERY_DATE);
+		recoveryDateField.setText(DateHelper.formatLocalDate(immunization.getRecoveryDate(), userLanguage));
+		recoveryDateField.setWidth(null);
+		add(withCaption(recoveryDateFieldCaption, recoveryDateField));
+	}
+
+	/**
+	 * Was a Vaadin 7 label with a caption: the caption is shown above the value, as Vaadin rendered it.
+	 */
+	private static Div withCaption(String caption, Span label) {
+		Span captionLabel = new Span(caption);
+		captionLabel.addClassName("v-caption");
+		return new Div(captionLabel, new Div(label));
 	}
 }

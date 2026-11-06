@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.ui.adverseeventsfollowingimmunization;
 
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.Component;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;

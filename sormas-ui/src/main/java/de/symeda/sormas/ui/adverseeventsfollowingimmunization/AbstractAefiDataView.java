@@ -15,8 +15,6 @@
 
 package de.symeda.sormas.ui.adverseeventsfollowingimmunization;
 
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-
 import de.symeda.sormas.api.EditPermissionFacade;
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiDto;
@@ -29,6 +27,7 @@ import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.SubMenu;
 import de.symeda.sormas.ui.immunization.ImmunizationDataView;
 import de.symeda.sormas.ui.immunization.ImmunizationPersonView;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 import de.symeda.sormas.ui.utils.AbstractEditAllowedDetailView;
 
 public abstract class AbstractAefiDataView extends AbstractEditAllowedDetailView<AefiReferenceDto> {

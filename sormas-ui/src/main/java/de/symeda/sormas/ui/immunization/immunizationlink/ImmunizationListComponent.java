@@ -56,14 +56,14 @@ public class ImmunizationListComponent extends SideComponent {
 
 		if (vaccinationStatusPanel != null) {
 			this.vaccinationStatusPanel = vaccinationStatusPanel;
-			addComponent(vaccinationStatusPanel);
+			add(vaccinationStatusPanel);
 		} else {
 			this.vaccinationStatusPanel = null;
 		}
 
 		ImmunizationList immunizationList = new ImmunizationList(criteriaSupplier.get(), isEditAllowed);
 		immunizationList.setActiveUuid(activeUuid);
-		addComponent(immunizationList);
+		add(immunizationList);
 		immunizationList.reload();
 	}
 

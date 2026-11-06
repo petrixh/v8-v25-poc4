@@ -1,6 +1,7 @@
 package de.symeda.sormas.ui.immunization;
 
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.EditPermissionType;
 import de.symeda.sormas.api.FacadeProvider;
@@ -40,7 +41,7 @@ public class ImmunizationDataView extends AbstractImmunizationView {
 
 	@Override
 	protected void initView(String params) {
-		setHeightUndefined();
+		setHeight(null);
 
 		//ImmunizationDto immunization = FacadeProvider.getImmunizationFacade().getByUuid(getReference().getUuid());
 
@@ -49,13 +50,13 @@ public class ImmunizationDataView extends AbstractImmunizationView {
 
 		DetailSubComponentWrapper container = new DetailSubComponentWrapper(() -> editComponent);
 		container.setWidth(100, Unit.PERCENTAGE);
-		container.setMargin(true);
+		container.setPadding(true);
 		setSubComponent(container);
 		container.setEnabled(true);
 
 		LayoutWithSidePanel layout = new LayoutWithSidePanel(editComponent, SORMAS_TO_SORMAS_LOC, ADVERSE_EVENTS_LOC);
 
-		container.addComponent(layout);
+		container.add(layout);
 
 		ImmunizationDto immunization = FacadeProvider.getImmunizationFacade().getImmunizationByUuid(getReference().getUuid());
 
@@ -79,12 +80,12 @@ public class ImmunizationDataView extends AbstractImmunizationView {
 				FeatureType.SORMAS_TO_SORMAS_SHARE_EVENTS);
 		if (sormasToSormasEnabled || immunization.getSormasToSormasOriginInfo() != null || immunization.isOwnershipHandedOver()) {
 			VerticalLayout sormasToSormasLocLayout = new VerticalLayout();
-			sormasToSormasLocLayout.setMargin(false);
+			sormasToSormasLocLayout.setPadding(false);
 			sormasToSormasLocLayout.setSpacing(false);
 
 			SormasToSormasListComponent sormasToSormasListComponent = new SormasToSormasListComponent(immunization);
-			sormasToSormasListComponent.addStyleNames(CssStyles.SIDE_COMPONENT);
-			sormasToSormasLocLayout.addComponent(sormasToSormasListComponent);
+			sormasToSormasListComponent.addClassNames(CssStyles.SIDE_COMPONENT);
+			sormasToSormasLocLayout.add(sormasToSormasListComponent);
 
 			layout.addSidePanelComponent(sormasToSormasLocLayout, SORMAS_TO_SORMAS_LOC);
 		}

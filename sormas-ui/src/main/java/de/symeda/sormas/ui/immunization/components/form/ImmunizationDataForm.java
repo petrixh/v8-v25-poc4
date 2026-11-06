@@ -32,18 +32,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -77,6 +69,7 @@ import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.ComboBoxHelper;
 import de.symeda.sormas.ui.utils.ComboBoxWithPlaceholder;
 import de.symeda.sormas.ui.utils.ConfirmationComponent;
+import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateComparisonValidator;
 import de.symeda.sormas.ui.utils.FieldAccessHelper;
 import de.symeda.sormas.ui.utils.FieldHelper;
@@ -86,6 +79,12 @@ import de.symeda.sormas.ui.utils.NumberValidator;
 import de.symeda.sormas.ui.utils.ResizableTextAreaWrapper;
 import de.symeda.sormas.ui.utils.UserField;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 import de.symeda.sormas.ui.vaccination.VaccinationsField;
 
 @SuppressWarnings("deprecation")
@@ -175,7 +174,7 @@ public class ImmunizationDataForm extends AbstractEditForm<ImmunizationDto> {
 		addField(ImmunizationDto.MEANS_OF_IMMUNIZATION_DETAILS, TextField.class);
 
 		overwriteImmunizationManagementStatus = addCustomField(OVERWRITE_IMMUNIZATION_MANAGEMENT_STATUS, Boolean.class, CheckBox.class);
-		overwriteImmunizationManagementStatus.addStyleName(VSPACE_3);
+		overwriteImmunizationManagementStatus.addClassName(VSPACE_3);
 
 		ComboBox managementStatusField = addField(ImmunizationDto.IMMUNIZATION_MANAGEMENT_STATUS, ComboBox.class);
 		managementStatusField.setNullSelectionAllowed(false);
@@ -197,8 +196,8 @@ public class ImmunizationDataForm extends AbstractEditForm<ImmunizationDto> {
 			I18nProperties.getPrefixDescription(ImmunizationDto.I18N_PREFIX, ImmunizationDto.ADDITIONAL_DETAILS, "") + "\n"
 				+ I18nProperties.getDescription(Descriptions.descGdpr));
 
-		Label jurisdictionHeadingLabel = new Label(I18nProperties.getString(Strings.headingResponsibleJurisdiction));
-		jurisdictionHeadingLabel.addStyleName(H3);
+		Span jurisdictionHeadingLabel = new Span(I18nProperties.getString(Strings.headingResponsibleJurisdiction));
+		jurisdictionHeadingLabel.addClassName(H3);
 		getContent().addComponent(jurisdictionHeadingLabel, RESPONSIBLE_JURISDICTION_HEADING_LOC);
 
 		responsibleRegion = addInfrastructureField(ImmunizationDto.RESPONSIBLE_REGION);
@@ -236,8 +235,8 @@ public class ImmunizationDataForm extends AbstractEditForm<ImmunizationDto> {
 
 		boolean isVaccinationVisibleInitial = shouldShowVaccinationFields(meansOfImmunizationValue);
 
-		Label vaccinationHeadingLabel = new Label(I18nProperties.getString(Strings.headingVaccination));
-		vaccinationHeadingLabel.addStyleName(H3);
+		Span vaccinationHeadingLabel = new Span(I18nProperties.getString(Strings.headingVaccination));
+		vaccinationHeadingLabel.addClassName(H3);
 		getContent().addComponent(vaccinationHeadingLabel, VACCINATION_HEADING_LOC);
 		vaccinationHeadingLabel.setVisible(isVaccinationVisibleInitial);
 
@@ -276,8 +275,8 @@ public class ImmunizationDataForm extends AbstractEditForm<ImmunizationDto> {
 			Arrays.asList(Disease.RESPIRATORY_SYNCYTIAL_VIRUS),
 			true);
 
-		Label recoveryHeadingLabel = new Label(I18nProperties.getString(Strings.headingRecovery));
-		recoveryHeadingLabel.addStyleName(H3);
+		Span recoveryHeadingLabel = new Span(I18nProperties.getString(Strings.headingRecovery));
+		recoveryHeadingLabel.addClassName(H3);
 		getContent().addComponent(recoveryHeadingLabel, RECOVERY_HEADING_LOC);
 		recoveryHeadingLabel.setVisible(shouldShowRecoveryFields(meansOfImmunizationValue));
 
@@ -294,7 +293,7 @@ public class ImmunizationDataForm extends AbstractEditForm<ImmunizationDto> {
 			linkImmunizationToCaseButton = ButtonHelper.createButton(
 				Captions.openLinkedCaseToImmunizationButton,
 				e -> ControllerProvider.getCaseController().navigateToCase(relatedCase.getUuid()),
-				ValoTheme.BUTTON_PRIMARY,
+				CssStyles.BUTTON_PRIMARY,
 				FORCE_CAPTION);
 		} else {
 			linkImmunizationToCaseButton = ButtonHelper.createButton(Captions.linkImmunizationToCaseButton, e -> {
@@ -307,7 +306,7 @@ public class ImmunizationDataForm extends AbstractEditForm<ImmunizationDto> {
 					buildAndOpenSearchSpecificCaseWindow(this.getValue());
 				}
 
-			}, ValoTheme.BUTTON_PRIMARY, FORCE_CAPTION);
+			}, CssStyles.BUTTON_PRIMARY, FORCE_CAPTION);
 		}
 		getContent().addComponent(linkImmunizationToCaseButton, LINK_IMMUNIZATION_TO_CASE_BTN_LOC);
 		linkImmunizationToCaseButton.setVisible(shouldShowRecoveryFields(meansOfImmunizationValue));
@@ -340,7 +339,7 @@ public class ImmunizationDataForm extends AbstractEditForm<ImmunizationDto> {
 			true);
 
 		overwriteImmunizationManagementStatus.addValueChangeListener(valueChangeEvent -> {
-			boolean selectedValue = (boolean) valueChangeEvent.getProperty().getValue();
+			boolean selectedValue = (boolean) valueChangeEvent.getValue();
 			if (!selectedValue) {
 				ImmunizationManagementStatus value = getValue().getImmunizationManagementStatus();
 				managementStatusField.setValue(value);
@@ -350,7 +349,7 @@ public class ImmunizationDataForm extends AbstractEditForm<ImmunizationDto> {
 		});
 
 		meansOfImmunizationField.addValueChangeListener(valueChangeEvent -> {
-			MeansOfImmunization meansOfImmunization = (MeansOfImmunization) valueChangeEvent.getProperty().getValue();
+			MeansOfImmunization meansOfImmunization = (MeansOfImmunization) valueChangeEvent.getValue();
 
 			boolean isVaccinationVisible = shouldShowVaccinationFields(meansOfImmunization);
 			boolean isRecoveryVisible = shouldShowRecoveryFields(meansOfImmunization);
@@ -362,7 +361,7 @@ public class ImmunizationDataForm extends AbstractEditForm<ImmunizationDto> {
 
 						VaadinUiUtil.showConfirmationPopup(
 							I18nProperties.getString(Strings.headingDeleteVaccinations),
-							new Label(I18nProperties.getString(Strings.messageDeleteImmunizationVaccinations)),
+							new Span(I18nProperties.getString(Strings.messageDeleteImmunizationVaccinations)),
 							questionWindow -> {
 								ConfirmationComponent confirmationComponent = new ConfirmationComponent(false) {
 
@@ -387,8 +386,8 @@ public class ImmunizationDataForm extends AbstractEditForm<ImmunizationDto> {
 									}
 								};
 
-								confirmationComponent.getConfirmButton().setCaption(I18nProperties.getCaption(Captions.actionConfirm));
-								confirmationComponent.getCancelButton().setCaption(I18nProperties.getCaption(Captions.actionCancel));
+								confirmationComponent.getConfirmButton().setText(I18nProperties.getCaption(Captions.actionConfirm));
+								confirmationComponent.getCancelButton().setText(I18nProperties.getCaption(Captions.actionCancel));
 
 								return confirmationComponent;
 							},
@@ -420,7 +419,7 @@ public class ImmunizationDataForm extends AbstractEditForm<ImmunizationDto> {
 		});
 
 		managementStatusField.addValueChangeListener(valueChangeEvent -> {
-			ImmunizationManagementStatus managementStatusValue = (ImmunizationManagementStatus) valueChangeEvent.getProperty().getValue();
+			ImmunizationManagementStatus managementStatusValue = (ImmunizationManagementStatus) valueChangeEvent.getValue();
 			switch (managementStatusValue) {
 			case SCHEDULED:
 			case ONGOING:
@@ -447,7 +446,7 @@ public class ImmunizationDataForm extends AbstractEditForm<ImmunizationDto> {
 			true);
 
 		meansOfImmunizationField.addValueChangeListener(e -> {
-			if (shouldShowRecoveryFields((MeansOfImmunization) e.getProperty().getValue())) {
+			if (shouldShowRecoveryFields((MeansOfImmunization) e.getValue())) {
 				positiveTestResultDate.setVisible(true);
 				recoveryDate.setVisible(true);
 				linkImmunizationToCaseButton.setVisible(true);
@@ -460,7 +459,7 @@ public class ImmunizationDataForm extends AbstractEditForm<ImmunizationDto> {
 
 		responsibleDistrict.addValueChangeListener(e -> {
 			FieldHelper.removeItems(facilityCombo);
-			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getProperty().getValue();
+			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getValue();
 			if (districtDto != null && facilityType.getValue() != null) {
 				FieldHelper.updateItems(
 					facilityCombo,
@@ -471,7 +470,7 @@ public class ImmunizationDataForm extends AbstractEditForm<ImmunizationDto> {
 
 		responsibleCommunity.addValueChangeListener(e -> {
 			FieldHelper.removeItems(facilityCombo);
-			CommunityReferenceDto communityDto = (CommunityReferenceDto) e.getProperty().getValue();
+			CommunityReferenceDto communityDto = (CommunityReferenceDto) e.getValue();
 			if (facilityType.getValue() != null) {
 				FieldHelper.updateItems(
 					facilityCombo,
@@ -540,21 +539,21 @@ public class ImmunizationDataForm extends AbstractEditForm<ImmunizationDto> {
 
 	private void buildAndOpenSearchSpecificCaseWindow(ImmunizationDto immunizationDto) {
 
-		Window window = VaadinUiUtil.createPopupWindow();
-		window.setCaption(I18nProperties.getCaption(Captions.caseSearchSpecificCase));
-		window.setWidth(768, Unit.PIXELS);
+		Dialog window = VaadinUiUtil.createPopupWindow();
+		window.setHeaderTitle(I18nProperties.getCaption(Captions.caseSearchSpecificCase));
+		window.setWidth("768px");
 
 		SearchSpecificLayout layout = buildSearchSpecificLayout(window, immunizationDto);
-		window.setContent(layout);
-		UI.getCurrent().addWindow(window);
+		window.add(layout);
+		window.open();
 	}
 
-	private SearchSpecificLayout buildSearchSpecificLayout(Window window, ImmunizationDto immunizationDto) {
+	private SearchSpecificLayout buildSearchSpecificLayout(Dialog window, ImmunizationDto immunizationDto) {
 
 		String description = I18nProperties.getString(Strings.infoSpecificCaseSearch);
 		String confirmCaption = I18nProperties.getCaption(Captions.caseSearchCase);
 
-		com.vaadin.ui.TextField searchField = new com.vaadin.ui.TextField();
+		com.vaadin.flow.component.textfield.TextField searchField = new com.vaadin.flow.component.textfield.TextField();
 		Runnable confirmCallback = () -> {
 
 			boolean foundCase =
@@ -621,7 +620,7 @@ public class ImmunizationDataForm extends AbstractEditForm<ImmunizationDto> {
 	}
 
 	@Override
-	public void setValue(ImmunizationDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(ImmunizationDto newFieldValue) {
 		ignoreMeansOfImmunizationChange = true;
 		super.setValue(newFieldValue);
 

@@ -19,8 +19,7 @@ import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.ui.renderers.DateRenderer;
-import com.vaadin.ui.renderers.TextRenderer;
+import com.vaadin.flow.function.ValueProvider;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiCriteria;
@@ -37,8 +36,11 @@ import de.symeda.sormas.ui.immunization.ImmunizationPersonView;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.FieldAccessColumnStyleGenerator;
 import de.symeda.sormas.ui.utils.FilteredGrid;
+import de.symeda.sormas.ui.utils.GridExportStreamResource;
 import de.symeda.sormas.ui.utils.ShowDetailsListener;
 import de.symeda.sormas.ui.utils.UuidRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
 public class AefiGrid extends FilteredGrid<AefiIndexDto, AefiCriteria> {
 
@@ -50,7 +52,7 @@ public class AefiGrid extends FilteredGrid<AefiIndexDto, AefiCriteria> {
 		setLazyDataProvider();
 		setCriteria(criteria);
 
-		Column<AefiIndexDto, String> primaryVaccineColumn = addColumn(entry -> {
+		ValueProvider<AefiIndexDto, String> primaryVaccineProvider = entry -> {
 			if (entry.getPrimaryVaccine() != null) {
 				if (entry.getPrimaryVaccine() != Vaccine.OTHER) {
 					return entry.getPrimaryVaccine().toString();
@@ -62,17 +64,23 @@ public class AefiGrid extends FilteredGrid<AefiIndexDto, AefiCriteria> {
 			} else {
 				return "-";
 			}
-		});
+		};
+		Column<AefiIndexDto, String> primaryVaccineColumn = addColumn(primaryVaccineProvider);
+		// Vaadin 8 exported the generated column's value
+		GridExportStreamResource.setExportValueProvider(primaryVaccineColumn, primaryVaccineProvider);
 		primaryVaccineColumn.setId(PRIMARY_VACCINE_COLUMN);
 		primaryVaccineColumn.setCaption(I18nProperties.getPrefixCaption(AefiIndexDto.I18N_PREFIX, AefiIndexDto.PRIMARY_VACCINE_NAME));
 
-		Column<AefiIndexDto, String> deleteColumn = addColumn(entry -> {
+		ValueProvider<AefiIndexDto, String> deletionReasonProvider = entry -> {
 			if (entry.getDeletionReason() != null) {
 				return entry.getDeletionReason() + (entry.getOtherDeletionReason() != null ? ": " + entry.getOtherDeletionReason() : "");
 			} else {
 				return "-";
 			}
-		});
+		};
+		Column<AefiIndexDto, String> deleteColumn = addColumn(deletionReasonProvider);
+		// Vaadin 8 exported the generated column's value
+		GridExportStreamResource.setExportValueProvider(deleteColumn, deletionReasonProvider);
 		deleteColumn.setId(DELETE_REASON_COLUMN);
 		deleteColumn.setSortable(false);
 		deleteColumn.setCaption(I18nProperties.getCaption(Captions.deletionReason));
@@ -132,9 +140,9 @@ public class AefiGrid extends FilteredGrid<AefiIndexDto, AefiCriteria> {
 		((Column<AefiIndexDto, Date>) getColumn(AefiIndexDto.REPORT_DATE)).setRenderer(new DateRenderer(DateFormatHelper.getDateFormat()));
 		((Column<AefiIndexDto, Date>) getColumn(AefiIndexDto.START_DATE_TIME)).setRenderer(new DateRenderer(DateFormatHelper.getDateFormat()));
 
-		for (Column<AefiIndexDto, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.findPrefixCaptionWithDefault(column.getId(), column.getCaption(), AefiIndexDto.I18N_PREFIX));
-			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getId()));
+		for (Column<AefiIndexDto, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.findPrefixCaptionWithDefault(column.getKey(), column.getCaption(), AefiIndexDto.I18N_PREFIX));
+			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getKey()));
 		}
 
 		if (UiUtil.enabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {

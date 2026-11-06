@@ -18,15 +18,16 @@ package de.symeda.sormas.ui.adverseeventsfollowingimmunization.components.form;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 public class FormSectionAccordion extends VerticalLayout {
 
 	private final List<FormSectionAccordionPanel> formSectionAccordionPanelList = new ArrayList<>();
 
 	public FormSectionAccordion() {
-		setMargin(false);
+		setPadding(false);
 		setSpacing(false);
 		setWidth(100, Unit.PERCENTAGE);
 	}
@@ -38,7 +39,7 @@ public class FormSectionAccordion extends VerticalLayout {
 
 		formSectionAccordionPanelList.add(formSectionAccordionPanel);
 
-		addComponent(formSectionAccordionPanel);
+		add(formSectionAccordionPanel);
 	}
 
 	public void toggleFormSection(FormSectionAccordionPanel formSectionAccordionPanel) {

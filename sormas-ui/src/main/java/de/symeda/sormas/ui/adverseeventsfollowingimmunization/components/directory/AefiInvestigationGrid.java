@@ -19,8 +19,7 @@ import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.ui.renderers.DateRenderer;
-import com.vaadin.ui.renderers.TextRenderer;
+import com.vaadin.flow.function.ValueProvider;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiInvestigationCriteria;
@@ -36,8 +35,11 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.FieldAccessColumnStyleGenerator;
 import de.symeda.sormas.ui.utils.FilteredGrid;
+import de.symeda.sormas.ui.utils.GridExportStreamResource;
 import de.symeda.sormas.ui.utils.ShowDetailsListener;
 import de.symeda.sormas.ui.utils.UuidRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
 public class AefiInvestigationGrid extends FilteredGrid<AefiInvestigationIndexDto, AefiInvestigationCriteria> {
 
@@ -49,7 +51,7 @@ public class AefiInvestigationGrid extends FilteredGrid<AefiInvestigationIndexDt
 		setLazyDataProvider();
 		setCriteria(criteria);
 
-		Column<AefiInvestigationIndexDto, String> primaryVaccineColumn = addColumn(entry -> {
+		ValueProvider<AefiInvestigationIndexDto, String> primaryVaccineProvider = entry -> {
 			if (entry.getPrimaryVaccine() != null) {
 				if (entry.getPrimaryVaccine() != Vaccine.OTHER) {
 					return entry.getPrimaryVaccine().toString();
@@ -61,18 +63,24 @@ public class AefiInvestigationGrid extends FilteredGrid<AefiInvestigationIndexDt
 			} else {
 				return "-";
 			}
-		});
+		};
+		Column<AefiInvestigationIndexDto, String> primaryVaccineColumn = addColumn(primaryVaccineProvider);
+		// Vaadin 8 exported the generated column's value
+		GridExportStreamResource.setExportValueProvider(primaryVaccineColumn, primaryVaccineProvider);
 		primaryVaccineColumn.setId(PRIMARY_VACCINE_COLUMN);
 		primaryVaccineColumn
 			.setCaption(I18nProperties.getPrefixCaption(AefiInvestigationIndexDto.I18N_PREFIX, AefiInvestigationIndexDto.PRIMARY_VACCINE_NAME));
 
-		Column<AefiInvestigationIndexDto, String> deleteColumn = addColumn(entry -> {
+		ValueProvider<AefiInvestigationIndexDto, String> deletionReasonProvider = entry -> {
 			if (entry.getDeletionReason() != null) {
 				return entry.getDeletionReason() + (entry.getOtherDeletionReason() != null ? ": " + entry.getOtherDeletionReason() : "");
 			} else {
 				return "-";
 			}
-		});
+		};
+		Column<AefiInvestigationIndexDto, String> deleteColumn = addColumn(deletionReasonProvider);
+		// Vaadin 8 exported the generated column's value
+		GridExportStreamResource.setExportValueProvider(deleteColumn, deletionReasonProvider);
 		deleteColumn.setId(DELETE_REASON_COLUMN);
 		deleteColumn.setSortable(false);
 		deleteColumn.setCaption(I18nProperties.getCaption(Captions.deletionReason));
@@ -132,10 +140,10 @@ public class AefiInvestigationGrid extends FilteredGrid<AefiInvestigationIndexDt
 		((Column<AefiInvestigationIndexDto, Date>) getColumn(AefiInvestigationIndexDto.INVESTIGATION_DATE))
 			.setRenderer(new DateRenderer(DateFormatHelper.getDateFormat()));
 
-		for (Column<AefiInvestigationIndexDto, ?> column : getColumns()) {
+		for (Column<AefiInvestigationIndexDto, ?> column : getAllColumns()) {
 			column
-				.setCaption(I18nProperties.findPrefixCaptionWithDefault(column.getId(), column.getCaption(), AefiInvestigationIndexDto.I18N_PREFIX));
-			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getId()));
+				.setCaption(I18nProperties.findPrefixCaptionWithDefault(column.getKey(), column.getCaption(), AefiInvestigationIndexDto.I18N_PREFIX));
+			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getKey()));
 		}
 
 		if (UiUtil.enabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {

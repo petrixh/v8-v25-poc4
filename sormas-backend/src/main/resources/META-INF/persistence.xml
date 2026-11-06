@@ -114,6 +114,8 @@
 			<property name="hibernate.dialect" value="de.symeda.sormas.backend.ExtendedPostgreSQL94Dialect"/>
 			<property name="hibernate.criteria.value_handling_mode" value="bind"/>
 			<property name="hibernate.type.json_format_mapper" value="jackson"/>
+			<!-- Native queries return java.sql.Date/Time/Timestamp for date and time columns, as with Hibernate 5, instead of java.time types -->
+			<property name="hibernate.query.native.prefer_jdbc_datetime_types" value="true"/>
 			<property name="hibernate.transaction.jta.platform"
 					  value="org.hibernate.engine.transaction.jta.platform.internal.GlassFishJtaPlatform"/>
 			<property name="hibernate.show_sql" value="false"/>

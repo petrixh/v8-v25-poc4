@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import com.opencsv.exceptions.CsvValidationException;
 import com.vaadin.flow.component.Unit;
-import com.vaadin.server.StreamResource;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dialog.Dialog;
 
@@ -79,7 +79,7 @@ public class CampaignFormDataImporter extends DataImporter {
 	}
 
 	@Override
-	public void startImport(Consumer<StreamResource> addErrorReportToLayoutCallback, UI currentUI, boolean duplicatesPossible)
+	public void startImport(Consumer<StreamSourceDownloadHandler> addErrorReportToLayoutCallback, UI currentUI, boolean duplicatesPossible)
 		throws IOException, CsvValidationException {
 
 		this.currentUI = currentUI;
@@ -296,9 +296,10 @@ public class CampaignFormDataImporter extends DataImporter {
 
 	private void handleDetectedDuplicate(CampaignFormDataDto newData, CampaignFormDataDto existingData, CampaignFormDataImportLock lock) {
 
-		Dialog popupWindow = VaadinUiUtil.createPopupWindow();
-
+		// runs in the import thread: the dialog is created with the UI lock held (Vaadin 8 created the window before taking it)
 		currentUI.accessSynchronously(() -> {
+			Dialog popupWindow = VaadinUiUtil.createPopupWindow();
+
 			Runnable cancelCallback = () -> {
 				synchronized (lock) {
 					lock.setSimilarityChoice(CampaignFormDataSimilarityChoice.CANCEL);
@@ -335,11 +336,11 @@ public class CampaignFormDataImporter extends DataImporter {
 				skipCallback,
 				overwriteCallback);
 
-			popupWindow.setContent(selectionField);
-			popupWindow.setCaption(I18nProperties.getString(Strings.headingCampaignFormDataAlreadyExisting));
+			popupWindow.add(selectionField);
+			popupWindow.setHeaderTitle(I18nProperties.getString(Strings.headingCampaignFormDataAlreadyExisting));
 			popupWindow.setWidth(960, Unit.PIXELS);
 
-			currentUI.addWindow(popupWindow);
+			popupWindow.open();
 		});
 	}
 

@@ -66,14 +66,14 @@ public class CampaignView extends AbstractDetailView<CampaignReferenceDto> {
 		});
 		editComponent.setPadding(false);
 		editComponent.getWrappedComponent().setWidthFull();
-		editComponent.setHeightUndefined();
+		editComponent.setHeight(null);
 		editComponent.addClassName(CssStyles.ROOT_COMPONENT);
 		editComponent.setWidthFull();
 
 		LayoutWithSidePanel layout = new LayoutWithSidePanel(editComponent);
 		container.add(layout);
 
-		getViewTitleLabel().setValue(campaignDto.getName());
+		getViewTitleLabel().setText(campaignDto.getName());
 
 		final EditPermissionType campaignEditAllowed = FacadeProvider.getCampaignFacade().getEditPermissionType(campaignDto.getUuid());
 		final boolean deleted = FacadeProvider.getCampaignFacade().isDeleted(campaignDto.getUuid());

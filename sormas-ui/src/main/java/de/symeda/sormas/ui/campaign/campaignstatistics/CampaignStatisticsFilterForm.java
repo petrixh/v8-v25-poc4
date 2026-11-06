@@ -2,8 +2,7 @@ package de.symeda.sormas.ui.campaign.campaignstatistics;
 
 import java.util.function.Consumer;
 
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.v7.data.Property;
+import com.vaadin.flow.component.HasValue;
 import de.symeda.sormas.ui.utils.fields.ComboBox;
 import de.symeda.sormas.ui.utils.fields.Field;
 
@@ -37,7 +36,7 @@ public class CampaignStatisticsFilterForm extends AbstractFilterForm<CampaignSta
 		formActionButtonsComponent.style(CssStyles.FORCE_CAPTION);
 		formActionButtonsComponent.setSpacing(false);
 		formActionButtonsComponent.setSizeFull();
-		formActionButtonsComponent.setMargin(new MarginInfo(false, false, false, true));
+		// was a left margin only (MarginInfo); spacing details belong to the theme work
 	}
 
 	@Override
@@ -112,7 +111,7 @@ public class CampaignStatisticsFilterForm extends AbstractFilterForm<CampaignSta
 	}
 
 	@Override
-	protected void applyDependenciesOnFieldChange(String propertyId, Property.ValueChangeEvent event) {
+	protected void applyDependenciesOnFieldChange(String propertyId, HasValue.ValueChangeEvent<?> event) {
 		super.applyDependenciesOnFieldChange(propertyId, event);
 
 		switch (propertyId) {

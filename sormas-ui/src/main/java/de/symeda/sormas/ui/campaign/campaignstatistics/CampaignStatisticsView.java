@@ -9,8 +9,9 @@ import de.symeda.sormas.ui.utils.PopupButton;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
 import de.symeda.sormas.ui.navigation.ViewChangeListener;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
@@ -74,9 +75,15 @@ public class CampaignStatisticsView extends AbstractCampaignView {
 			PopupButton exportPopupButton = ButtonHelper.createIconPopupButton(Captions.export, VaadinIcon.DOWNLOAD, exportLayout);
 			addHeaderComponent(exportPopupButton);
 			{
-				StreamResource streamResource =
+				DownloadHandler streamResource =
 					GridExportStreamResource.createStreamResource(grid, ExportEntityName.CAMPAIGN_STATISTICS, ACTION_BTN_ID);
-				addExportButton(streamResource, exportPopupButton, exportLayout, VaadinIcon.TABLE, Captions.export, Strings.infoBasicExport);
+				addExportButton(
+					streamResource,
+					exportPopupButton.getPopover(),
+					exportLayout,
+					VaadinIcon.TABLE,
+					Captions.export,
+					Strings.infoBasicExport);
 			}
 		}
 
@@ -104,13 +111,14 @@ public class CampaignStatisticsView extends AbstractCampaignView {
 
 		filterForm = createFilterForm();
 		filtersLayout.add(filterForm);
-		filtersLayout.setComponentAlignment(filterForm, Alignment.TOP_LEFT);
+		filtersLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, filterForm);
 		filtersLayout.setFlexGrow(0.8f, filterForm);
 
 		importanceFilterSwitcher = new ImportanceFilterSwitcher();
 		importanceFilterSwitcher.setVisible(false);
 		filtersLayout.add(importanceFilterSwitcher);
-		filtersLayout.setComponentAlignment(importanceFilterSwitcher, Alignment.TOP_RIGHT);
+		// was Alignment.TOP_RIGHT in an expanding slot: the switcher itself takes the slot
+		filtersLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, importanceFilterSwitcher);
 		filtersLayout.setFlexGrow(0.2f, importanceFilterSwitcher);
 
 		mainLayout.add(filtersLayout);

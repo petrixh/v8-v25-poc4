@@ -3,7 +3,7 @@ package de.symeda.sormas.ui.campaign.components;
 import java.util.List;
 
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
@@ -26,13 +26,16 @@ public class CampaignSelector extends HorizontalLayout {
 		campaignLabel.addClassName("v-caption");
 		campaignLabel.addClassName(CssStyles.HSPACE_RIGHT_4);
 		add(campaignLabel);
-		setComponentAlignment(campaignLabel, Alignment.MIDDLE_CENTER);
+		setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, campaignLabel);
 
 		campaignCombo = new ComboBox<>(" ");
 		List<CampaignReferenceDto> campaigns = FacadeProvider.getCampaignFacade().getAllActiveCampaignsAsReference();
 		campaignCombo.setItems(campaigns);
 		campaignCombo.setItemLabelGenerator(item -> item.buildCaption());
-		campaignCombo.setEmptySelectionCaption(I18nProperties.getCaption(Captions.campaignAllCampaigns));
+		// was setEmptySelectionCaption: Flow has no empty item; the empty value shows the caption as placeholder and the
+		// clear button empties it
+		campaignCombo.setPlaceholder(I18nProperties.getCaption(Captions.campaignAllCampaigns));
+		campaignCombo.setClearButtonVisible(true);
 		final CampaignReferenceDto lastStartedCampaign = FacadeProvider.getCampaignFacade().getLastStartedCampaign();
 		if (lastStartedCampaign != null) {
 			campaignCombo.setValue(lastStartedCampaign);

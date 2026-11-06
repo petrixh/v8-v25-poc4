@@ -15,7 +15,8 @@
 
 package de.symeda.sormas.ui.campaign.campaigndata;
 
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
@@ -64,7 +65,7 @@ public class CampaignFormDataSelectionField extends VerticalLayout {
 
 		setSpacing(true);
 		setPadding(true);
-		setHeightUndefined();
+		setHeight(null);
 		setWidthFull();
 
 		addInfoComponent();
@@ -97,7 +98,7 @@ public class CampaignFormDataSelectionField extends VerticalLayout {
 	private void addButtons() {
 
 		HorizontalLayout buttonLayout = new HorizontalLayout();
-		buttonLayout.setWidthUndefined();
+		buttonLayout.setWidth(null);
 
 		Button btnCancel = ButtonHelper.createButton(I18nProperties.getCaption(Captions.importCancelImport));
 		btnCancel.addClickListener(e -> cancelCallback.run());
@@ -113,7 +114,7 @@ public class CampaignFormDataSelectionField extends VerticalLayout {
 		buttonLayout.add(btnOverwrite);
 
 		add(buttonLayout);
-		setComponentAlignment(buttonLayout, Alignment.MIDDLE_RIGHT);
+		setHorizontalComponentAlignment(FlexComponent.Alignment.END, buttonLayout);
 	}
 
 	private HorizontalLayout buildFormDataDetailsComponent(CampaignFormDataDto formData, boolean existingData) {
@@ -122,40 +123,36 @@ public class CampaignFormDataSelectionField extends VerticalLayout {
 		{
 			if (UiUtil.disabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {
 				Span fdRegion = new Span(formData.getRegion() != null ? formData.getRegion().buildCaption() : "");
-				fdRegion.setCaption(I18nProperties.getPrefixCaption(CampaignFormDataDto.I18N_PREFIX, CampaignFormDataDto.REGION));
-				fdRegion.setWidthUndefined();
-				formDataLayout.add(fdRegion);
+				formDataLayout.add(withCaption(I18nProperties.getPrefixCaption(CampaignFormDataDto.I18N_PREFIX, CampaignFormDataDto.REGION), fdRegion));
 
 				Span fdDistrict = new Span(formData.getDistrict() != null ? formData.getDistrict().buildCaption() : "");
-				fdDistrict.setCaption(I18nProperties.getPrefixCaption(CampaignFormDataDto.I18N_PREFIX, CampaignFormDataDto.DISTRICT));
-				fdDistrict.setWidthUndefined();
-				formDataLayout.add(fdDistrict);
+				formDataLayout.add(withCaption(I18nProperties.getPrefixCaption(CampaignFormDataDto.I18N_PREFIX, CampaignFormDataDto.DISTRICT), fdDistrict));
 
 				Span fdCommunity = new Span(formData.getCommunity() != null ? formData.getCommunity().buildCaption() : "");
-				fdCommunity.setCaption(I18nProperties.getPrefixCaption(CampaignFormDataDto.I18N_PREFIX, CampaignFormDataDto.COMMUNITY));
-				fdCommunity.setWidthUndefined();
-				formDataLayout.add(fdCommunity);
+				formDataLayout.add(withCaption(I18nProperties.getPrefixCaption(CampaignFormDataDto.I18N_PREFIX, CampaignFormDataDto.COMMUNITY), fdCommunity));
 			}
 
 			Span fdFormDate = new Span(DateFormatHelper.formatDate(formData.getFormDate()));
-			fdFormDate.setCaption(I18nProperties.getPrefixCaption(CampaignFormDataDto.I18N_PREFIX, CampaignFormDataDto.FORM_DATE));
-			fdFormDate.setWidthUndefined();
-			formDataLayout.add(fdFormDate);
+			formDataLayout.add(withCaption(I18nProperties.getPrefixCaption(CampaignFormDataDto.I18N_PREFIX, CampaignFormDataDto.FORM_DATE), fdFormDate));
 
 			if (existingData) {
 				Span fdCreatingUser = new Span(formData.getCreatingUser() != null ? formData.getCreatingUser().buildCaption() : "");
-				fdCreatingUser.setCaption(I18nProperties.getPrefixCaption(CampaignFormDataDto.I18N_PREFIX, CampaignFormDataDto.CREATING_USER));
-				fdCreatingUser.setWidthUndefined();
-				formDataLayout.add(fdCreatingUser);
+				formDataLayout.add(withCaption(I18nProperties.getPrefixCaption(CampaignFormDataDto.I18N_PREFIX, CampaignFormDataDto.CREATING_USER), fdCreatingUser));
 
 				Span fdCreationDate = new Span(DateFormatHelper.formatDate(formData.getCreationDate()));
-				fdCreationDate.setCaption(I18nProperties.getPrefixCaption(CampaignFormDataDto.I18N_PREFIX, CampaignFormDataDto.CREATION_DATE));
-				fdCreationDate.setWidthUndefined();
-				formDataLayout.add(fdCreationDate);
+				formDataLayout.add(withCaption(I18nProperties.getPrefixCaption(CampaignFormDataDto.I18N_PREFIX, CampaignFormDataDto.CREATION_DATE), fdCreationDate));
 			}
 		}
 
 		return formDataLayout;
 	}
 
+	/**
+	 * Was a Vaadin 8 label with a caption: the caption is shown above the value, as Vaadin rendered it.
+	 */
+	private static Div withCaption(String caption, Span label) {
+		Span captionLabel = new Span(caption);
+		captionLabel.addClassName("v-caption");
+		return new Div(captionLabel, new Div(label));
+	}
 }

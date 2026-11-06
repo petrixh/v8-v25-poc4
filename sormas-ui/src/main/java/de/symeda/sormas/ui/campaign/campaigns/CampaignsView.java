@@ -15,15 +15,17 @@
 
 package de.symeda.sormas.ui.campaign.campaigns;
 
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.ui.Alignment;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import de.symeda.sormas.ui.utils.NotificationHelper;
 import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import de.symeda.sormas.ui.utils.fields.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;
@@ -37,6 +39,7 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.campaign.AbstractCampaignView;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
 
 @SuppressWarnings("serial")
@@ -108,8 +111,13 @@ public class CampaignsView extends AbstractCampaignView {
 		searchField.setNullRepresentation("");
 		searchField.setInputPrompt(I18nProperties.getString(Strings.promptCampaignSearch));
 		searchField.setImmediate(true);
-		searchField.addTextChangeListener(e -> {
-			criteria.freeText(e.getText());
+		// was a V7 text change listener (lazy, user input only)
+		searchField.setValueChangeMode(ValueChangeMode.LAZY);
+		searchField.addValueChangeListener(e -> {
+			if (!e.isFromClient()) {
+				return;
+			}
+			criteria.freeText(e.getValue());
 			grid.reload();
 		});
 		filterLayout.add(searchField);
@@ -142,8 +150,9 @@ public class CampaignsView extends AbstractCampaignView {
 			navigateTo(criteria);
 		});
 		filterLayout.add(relevanceStatusFilter);
-		filterLayout.setComponentAlignment(relevanceStatusFilter, Alignment.MIDDLE_RIGHT);
-		filterLayout.setFlexGrow(1, relevanceStatusFilter);
+		// was Alignment.MIDDLE_RIGHT in an expanding slot: the free space goes before the filter, which keeps its width
+		filterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, relevanceStatusFilter);
+		relevanceStatusFilter.getStyle().set("margin-left", "auto");
 
 		return filterLayout;
 	}

@@ -15,12 +15,10 @@
 
 package de.symeda.sormas.ui.campaign;
 
-import static com.vaadin.v7.data.Validator.InvalidValueException;
 import static de.symeda.sormas.api.campaign.data.CampaignFormDataCriteria.CAMPAIGN;
 
 import de.symeda.sormas.ui.utils.NotificationHelper;
 import de.symeda.sormas.ui.utils.NotificationHelper.Type;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
@@ -45,6 +43,7 @@ import de.symeda.sormas.ui.campaign.campaigns.CampaignView;
 import de.symeda.sormas.ui.campaign.campaigns.CampaignsView;
 import de.symeda.sormas.ui.utils.ArchiveHandlers;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
+import de.symeda.sormas.ui.utils.InvalidValueException;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 public class CampaignController {
@@ -104,8 +103,8 @@ public class CampaignController {
 					Type.TRAY_NOTIFICATION);
 			}, window::close);
 
-		window.setCaption(String.format(I18nProperties.getString(Strings.headingCreateCampaignDataForm), campaignForm.buildCaption()));
-		window.setContent(component);
+		window.setHeaderTitle(String.format(I18nProperties.getString(Strings.headingCreateCampaignDataForm), campaignForm.buildCaption()));
+		window.add(component);
 		window.open();
 	}
 
@@ -195,7 +194,7 @@ public class CampaignController {
 		component.addCommitListener(() -> {
 			if (!form.getFieldGroup().isModified()) {
 				try {
-					form.validate();
+					form.validateValue();
 				} catch (InvalidValueException e) {
 					NotificationHelper.show(I18nProperties.getValidationError(Validations.errorsInForm), Type.ERROR_MESSAGE);
 					return;

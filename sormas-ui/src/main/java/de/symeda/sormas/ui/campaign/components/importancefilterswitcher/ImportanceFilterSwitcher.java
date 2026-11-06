@@ -4,6 +4,7 @@ import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
 
 public class ImportanceFilterSwitcher extends OptionGroup {
 

@@ -17,6 +17,8 @@ package de.symeda.sormas.ui.campaign.campaigndata;
 
 import java.util.Date;
 
+import com.vaadin.flow.function.ValueProvider;
+
 import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
@@ -29,6 +31,7 @@ import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FilteredGrid;
+import de.symeda.sormas.ui.utils.GridExportStreamResource;
 
 public class CampaignDataGrid extends FilteredGrid<CampaignFormDataIndexDto, CampaignFormDataCriteria> {
 
@@ -62,8 +65,8 @@ public class CampaignDataGrid extends FilteredGrid<CampaignFormDataIndexDto, Cam
 		((Column<CampaignFormDataIndexDto, Date>) getColumn(CampaignFormDataIndexDto.FORM_DATE))
 			.setRenderer(new DateRenderer(DateHelper.getLocalDateFormat(I18nProperties.getUserLanguage())));
 
-		for (Column<?, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(CampaignFormDataIndexDto.I18N_PREFIX, column.getId(), column.getCaption()));
+		for (Column<?, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(CampaignFormDataIndexDto.I18N_PREFIX, column.getKey(), column.getCaption()));
 		}
 
 		if (UiUtil.enabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {
@@ -78,11 +81,13 @@ public class CampaignDataGrid extends FilteredGrid<CampaignFormDataIndexDto, Cam
 	}
 
 	public void addCustomColumn(String property, String caption) {
-		Column<CampaignFormDataIndexDto, Object> newColumn =
-			addColumn(e -> e.getFormValues().stream().filter(v -> v.getId().equals(property)).findFirst().orElse(null));
+		ValueProvider<CampaignFormDataIndexDto, Object> valueProvider =
+			e -> e.getFormValues().stream().filter(v -> v.getId().equals(property)).findFirst().orElse(null);
+		Column<CampaignFormDataIndexDto, Object> newColumn = addColumn(valueProvider);
 		newColumn.setSortable(false);
 		newColumn.setCaption(caption);
 		newColumn.setId(property);
+		GridExportStreamResource.setExportValueProvider(newColumn, valueProvider);
 	}
 
 }

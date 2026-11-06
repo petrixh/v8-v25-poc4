@@ -28,13 +28,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.v7.data.util.converter.Converter;
 import de.symeda.sormas.ui.utils.fields.DateField;
 import de.symeda.sormas.ui.utils.fields.TextArea;
 import de.symeda.sormas.ui.utils.fields.TextField;
@@ -47,6 +46,8 @@ import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.i18n.Validations;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.DateComparisonValidator;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class CampaignEditForm extends AbstractEditForm<CampaignDto> {
 
@@ -140,12 +141,12 @@ public class CampaignEditForm extends AbstractEditForm<CampaignDto> {
 
 		final HorizontalLayout usageLayout = new HorizontalLayout();
 		usageLayout.setWidthFull();
-		Span usageLabel =
-			new Span(VaadinIcon.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoUsageOfEditableCampaignGrids), ContentMode.HTML);
+		Span usageLabel = VaadinUiUtil
+			.createLabel(HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " " + I18nProperties.getString(Strings.infoUsageOfEditableCampaignGrids), ContentMode.HTML);
 		usageLabel.setWidthFull();
 		usageLayout.add(usageLabel);
 		usageLayout.setSpacing(true);
-		usageLayout.setMargin(new MarginInfo(true, false, true, false));
+		// was a top and bottom margin (MarginInfo); spacing details belong to the theme work
 		getContent().addComponent(usageLayout, USAGE_INFO);
 
 		campaignFormsGridComponent = new CampaignFormsGridComponent(
@@ -178,7 +179,7 @@ public class CampaignEditForm extends AbstractEditForm<CampaignDto> {
 	}
 
 	@Override
-	public void setValue(CampaignDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(CampaignDto newFieldValue) {
 		super.setValue(newFieldValue);
 		campaignFormsGridComponent
 			.setSavedItems(newFieldValue.getCampaignFormMetas() != null ? new ArrayList<>(newFieldValue.getCampaignFormMetas()) : new ArrayList<>());

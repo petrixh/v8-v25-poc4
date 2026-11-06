@@ -65,12 +65,12 @@ public class CampaignFormDataView extends AbstractCampaignDataView {
 				null);
 		editComponent.setPadding(false);
 		editComponent.getWrappedComponent().setWidthFull();
-		editComponent.setHeightUndefined();
+		editComponent.setHeight(null);
 		editComponent.addClassName(CssStyles.ROOT_COMPONENT);
 		editComponent.setWidthFull();
 
 		container.add(editComponent);
 
-		getViewTitleLabel().setValue(campaignFormData.getCampaignFormMeta().buildCaption());
+		getViewTitleLabel().setText(campaignFormData.getCampaignFormMeta().buildCaption());
 	}
 }

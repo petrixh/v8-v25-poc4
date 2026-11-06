@@ -27,11 +27,13 @@ import de.symeda.sormas.ui.utils.PopupButton;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
 import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.ui.Panel;
+import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.dialog.Dialog;
 
@@ -95,13 +97,14 @@ public class CampaignDataView extends AbstractCampaignView {
 
 		CampaignFormDataFilterForm filterBar = createFilterBar();
 		filtersLayout.add(filterBar);
-		filtersLayout.setComponentAlignment(filterBar, Alignment.TOP_LEFT);
+		filtersLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, filterBar);
 		filtersLayout.setFlexGrow(0.8f, filterBar);
 
 		importanceFilterSwitcher = new ImportanceFilterSwitcher();
 		importanceFilterSwitcher.setVisible(false);
 		filtersLayout.add(importanceFilterSwitcher);
-		filtersLayout.setComponentAlignment(importanceFilterSwitcher, Alignment.TOP_RIGHT);
+		// was Alignment.TOP_RIGHT in an expanding slot: the switcher itself takes the slot
+		filtersLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, importanceFilterSwitcher);
 		filtersLayout.setFlexGrow(0.2f, importanceFilterSwitcher);
 
 		mainLayout.add(filtersLayout);
@@ -137,12 +140,19 @@ public class CampaignDataView extends AbstractCampaignView {
 			addHeaderComponent(exportPopupButton);
 
 			{
-				StreamResource streamResource = GridExportStreamResource.createStreamResource(grid, ExportEntityName.CAMPAIGN_DATA, ACTION_BTN_ID);
-				addExportButton(streamResource, exportPopupButton, exportLayout, VaadinIcon.TABLE, Captions.export, Strings.infoBasicExport);
+				DownloadHandler streamResource = GridExportStreamResource.createStreamResource(grid, ExportEntityName.CAMPAIGN_DATA, ACTION_BTN_ID);
+				addExportButton(
+					streamResource,
+					exportPopupButton.getPopover(),
+					exportLayout,
+					VaadinIcon.TABLE,
+					Captions.export,
+					Strings.infoBasicExport);
 			}
 		}
 
-		Panel newFormPanel = new Panel();
+		// was a Vaadin 8 Panel: a Scroller, which scrolls once its height is fixed
+		Scroller newFormPanel = new Scroller();
 		{
 			VerticalLayout newFormLayout = new VerticalLayout();
 			newFormLayout.setSpacing(true);
@@ -158,7 +168,7 @@ public class CampaignDataView extends AbstractCampaignView {
 			addHeaderComponent(newFormButton);
 		}
 
-		Panel importFormPanel = new Panel();
+		Scroller importFormPanel = new Scroller();
 		{
 			VerticalLayout importFormLayout = new VerticalLayout();
 			importFormLayout.setSpacing(true);
@@ -198,7 +208,7 @@ public class CampaignDataView extends AbstractCampaignView {
 		addComponent(mainLayout);
 	}
 
-	private void fillImportDropdown(Panel containerPanel) {
+	private void fillImportDropdown(Scroller containerPanel) {
 
 		CampaignReferenceDto campaignReferenceDto = campaignSelector.getValue();
 		if (campaignReferenceDto != null) {
@@ -209,8 +219,8 @@ public class CampaignDataView extends AbstractCampaignView {
 					importCampaignButton.setPopupVisible(false);
 					try {
 						Dialog popupWindow = VaadinUiUtil.showPopupWindow(new CampaignFormDataImportLayout(campaignForm, campaignReferenceDto));
-						popupWindow.setCaption(I18nProperties.getString(Strings.headingImportCampaign));
-						popupWindow.addCloseListener(c -> grid.reload());
+						popupWindow.setHeaderTitle(I18nProperties.getString(Strings.headingImportCampaign));
+						VaadinUiUtil.addCloseListener(popupWindow, c -> grid.reload());
 					} catch (IOException ex) {
 						throw new UncheckedIOException(ex);
 					}
@@ -221,15 +231,15 @@ public class CampaignDataView extends AbstractCampaignView {
 			if (campagaignFormReferences.size() >= 10) {
 				// setting a fixed height will enable a scrollbar. Increase width to accommodate it
 				containerPanel.setHeight(400, Unit.PIXELS);
-				containerPanel.setWidth(containerPanel.getContent().getWidth() + 20.0f, Unit.PIXELS);
+				containerPanel.setWidth(getContentWidth(containerPanel) + 20.0f, Unit.PIXELS);
 			} else {
-				containerPanel.setHeightUndefined();
-				containerPanel.setWidth(containerPanel.getContent().getWidth(), Unit.PIXELS);
+				containerPanel.setHeight(null);
+				containerPanel.setWidth(getContentWidth(containerPanel), Unit.PIXELS);
 			}
 		}
 	}
 
-	private void fillNewFormDropdown(Panel containerPanel) {
+	private void fillNewFormDropdown(Scroller containerPanel) {
 
 		CampaignReferenceDto campaignReferenceDto = campaignSelector.getValue();
 		if (campaignReferenceDto != null) {
@@ -246,12 +256,19 @@ public class CampaignDataView extends AbstractCampaignView {
 			if (campagaignFormReferences.size() >= 10) {
 				// setting a fixed height will enable a scrollbar. Increase width to accommodate it
 				containerPanel.setHeight(400, Unit.PIXELS);
-				containerPanel.setWidth(containerPanel.getContent().getWidth() + 20.0f, Unit.PIXELS);
+				containerPanel.setWidth(getContentWidth(containerPanel) + 20.0f, Unit.PIXELS);
 			} else {
-				containerPanel.setHeightUndefined();
-				containerPanel.setWidth(containerPanel.getContent().getWidth(), Unit.PIXELS);
+				containerPanel.setHeight(null);
+				containerPanel.setWidth(getContentWidth(containerPanel), Unit.PIXELS);
 			}
 		}
+	}
+
+	/**
+	 * Was {@code getContent().getWidth()} (Vaadin 8: the width in pixels); the content's width is set in pixels above.
+	 */
+	private static float getContentWidth(Scroller containerPanel) {
+		return Float.parseFloat(((HasSize) containerPanel.getContent()).getWidth().replace("px", ""));
 	}
 
 	public CampaignFormDataFilterForm createFilterBar() {

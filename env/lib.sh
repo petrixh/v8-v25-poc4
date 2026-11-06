@@ -6,7 +6,7 @@ APP_ROOT=$(cd "$ENV_DIR/.." && pwd)
 
 # One app copy = one compose project: app (Payara), db (PostgreSQL), mail (SMTP sink). Everything is named from the project.
 export APP_ENV_PORT=${APP_ENV_PORT:-18080}
-export APP_ENV_PROJECT=${APP_ENV_PROJECT:-sormas-old-env}
+export APP_ENV_PROJECT=${APP_ENV_PROJECT:-sormas-new-env}
 export APP_ENV_CONTAINER=${APP_ENV_CONTAINER:-$APP_ENV_PROJECT-app}
 # Mail sink web UI and API on 127.0.0.1; empty = a free port chosen by Docker (up.sh prints it)
 export APP_ENV_MAIL_PORT=${APP_ENV_MAIL_PORT:-}
@@ -29,16 +29,24 @@ APP_ENV_SEED=${APP_ENV_SEED:-snapshot}
 [[ "$APP_ENV_PWCHECK" =~ ^(on|off)$ ]] || { echo "APP_ENV_PWCHECK must be on or off: $APP_ENV_PWCHECK" >&2; exit 2; }
 [[ "$APP_ENV_SEED" =~ ^(snapshot|rest)$ ]] || { echo "APP_ENV_SEED must be snapshot or rest: $APP_ENV_SEED" >&2; exit 2; }
 
-PAYARA_VERSION=5.2022.5
+PAYARA_VERSION=7.2026.10
 PAYARA_ZIP_URL=https://repo1.maven.org/maven2/fish/payara/distributions/payara/$PAYARA_VERSION/payara-$PAYARA_VERSION.zip
-export APP_ENV_IMAGE=sormas-old-env-payara:$PAYARA_VERSION
+export APP_ENV_IMAGE=sormas-new-env-payara:$PAYARA_VERSION
 MVN_IMAGE=maven:3.9-eclipse-temurin-21
 
 BUILD_DIR=$APP_ENV_STATE_DIR/build
 export APP_ENV_DEPLOY_DIR=$BUILD_DIR/deploy
 COPY_DIR=$APP_ENV_STATE_DIR/copies/$APP_ENV_PROJECT
 export APP_ENV_COPY_DIR=$COPY_DIR
+# 1: build and deploy the app (default). 0: the Payara domain, database and mail sink only, no app build and no deploy
+# (while the app does not build or start, e.g. during migration stage 1a). A running copy keeps the mode up.sh started
+# it with (in its state dir), so reset.sh and down.sh need not repeat it.
+if [ -z "${APP_ENV_DEPLOY:-}" ] && [ -s "$COPY_DIR/deploy" ]; then APP_ENV_DEPLOY=$(cat "$COPY_DIR/deploy"); fi
+export APP_ENV_DEPLOY=${APP_ENV_DEPLOY:-1}
+[[ "$APP_ENV_DEPLOY" =~ ^[01]$ ]] || { echo "APP_ENV_DEPLOY must be 1 or 0: $APP_ENV_DEPLOY" >&2; exit 2; }
 BASE_URL=http://localhost:$APP_ENV_PORT
+# What answers 200 once the copy is up: the app's login page, or with APP_ENV_DEPLOY=0 the domain's default page
+if [ "$APP_ENV_DEPLOY" = 1 ]; then READY_URL=$BASE_URL/sormas-ui/login; else READY_URL=$BASE_URL/; fi
 DB_SVC=db
 # Committed seed snapshot of the configuration (pg_dump custom format) and its metadata (env/seed/generate.sh writes both)
 SNAPSHOT_DUMP=$ENV_DIR/seed/snapshot-$APP_ENV_CONFIG.pgdump
@@ -54,15 +62,16 @@ db_psql() { compose exec -T -e PGOPTIONS=--client-min-messages=warning "$DB_SVC"
 
 http_code() { curl -s -o /dev/null -m 10 -w '%{http_code}' "$1" 2>/dev/null || true; }
 
-# wait_ui <seconds>: until GET /sormas-ui/login answers 200; fails early when the app container stops
+# wait_ui <seconds>: until GET $READY_URL (/sormas-ui/login, or / with APP_ENV_DEPLOY=0) answers 200; fails early
+# when the app container stops
 wait_ui() {
   local deadline=$((SECONDS + $1))
   while [ $SECONDS -lt $deadline ]; do
-    [ "$(http_code "$BASE_URL/sormas-ui/login")" = 200 ] && return 0
+    [ "$(http_code "$READY_URL")" = 200 ] && return 0
     [ "$(docker inspect -f '{{.State.Running}}' "$APP_ENV_CONTAINER" 2>/dev/null)" = true ] || { log "app container is not running"; return 1; }
     sleep 3
   done
-  log "no 200 from $BASE_URL/sormas-ui/login after $1 s"; return 1
+  log "no 200 from $READY_URL after $1 s"; return 1
 }
 
 # Payara domain inside the running app container (deployed apps stay deployed across a domain restart)

@@ -43,6 +43,8 @@ services:
         required: false
     environment:
       SORMAS_DB_HOST: db
+      # 0: start the domain without deploying the app (APP_ENV_DEPLOY=0, env/README.md)
+      SORMAS_DEPLOY: ${APP_ENV_DEPLOY:-1}
       TZ: Europe/Berlin
     volumes:
       - ${APP_ENV_DEPLOY_DIR:?}:/deploy:ro

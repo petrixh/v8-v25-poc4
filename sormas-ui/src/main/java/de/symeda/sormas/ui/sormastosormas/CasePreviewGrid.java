@@ -22,8 +22,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.ui.Label;
-import com.vaadin.ui.renderers.DateRenderer;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
@@ -72,8 +72,8 @@ public class CasePreviewGrid extends BasePreviewGrid<SormasToSormasCasePreview> 
 				diseaseText += diseaseText + " - " + casePreview.getDiseaseVariant().getCaption();
 			}
 
-			return new Label(diseaseText);
-		}).setId(SormasToSormasCasePreview.DISEASE);
+			return new Span(diseaseText);
+		}).setKey(SormasToSormasCasePreview.DISEASE);
 
 		removeColumn(SormasToSormasCasePreview.HEALTH_FACILITY);
 		addComponentColumn(casePreview -> {
@@ -81,9 +81,9 @@ public class CasePreviewGrid extends BasePreviewGrid<SormasToSormasCasePreview> 
 			if (healthFacility == null) {
 				return null;
 			}
-			return new Label(
+			return new Span(
 				FacilityHelper.buildFacilityString(healthFacility.getUuid(), healthFacility.getCaption(), casePreview.getHealthFacilityDetails()));
-		}).setId(SormasToSormasCasePreview.HEALTH_FACILITY);
+		}).setKey(SormasToSormasCasePreview.HEALTH_FACILITY);
 
 		removeColumn(SormasToSormasCasePreview.POINT_OF_ENTRY);
 		addComponentColumn(casePreview -> {
@@ -91,10 +91,10 @@ public class CasePreviewGrid extends BasePreviewGrid<SormasToSormasCasePreview> 
 			if (pointOfEntry == null) {
 				return null;
 			}
-			return new Label(
+			return new Span(
 				InfrastructureHelper
 					.buildPointOfEntryString(pointOfEntry.getUuid(), pointOfEntry.getCaption(), casePreview.getPointOfEntryDetails()));
-		}).setId(SormasToSormasCasePreview.POINT_OF_ENTRY);
+		}).setKey(SormasToSormasCasePreview.POINT_OF_ENTRY);
 
 		List<String> columnConfig = new ArrayList<>();
 		columnConfig.addAll(
@@ -114,7 +114,7 @@ public class CasePreviewGrid extends BasePreviewGrid<SormasToSormasCasePreview> 
 				SormasToSormasCasePreview.HEALTH_FACILITY,
 				SormasToSormasCasePreview.POINT_OF_ENTRY,
 				SormasToSormasCasePreview.ONSET_DATE));
-		setColumns(columnConfig);
+		setColumns(columnConfig.toArray(new String[0]));
 
 		((Column<SormasToSormasCasePreview, String>) getColumn(SormasToSormasCasePreview.UUID)).setRenderer(new UuidRenderer());
 		((Column<SormasToSormasCasePreview, Date>) getColumn(SormasToSormasCasePreview.REPORT_DATE))
@@ -126,10 +126,10 @@ public class CasePreviewGrid extends BasePreviewGrid<SormasToSormasCasePreview> 
 		getColumn(SormasToSormasCasePreview.DISTRICT).setRenderer(new CaptionRenderer());
 		getColumn(SormasToSormasCasePreview.COMMUNITY).setRenderer(new CaptionRenderer());
 
-		for (Column<?, ?> column : getColumns()) {
+		for (Column<?, ?> column : getAllColumns()) {
 			column.setCaption(
 				I18nProperties.findPrefixCaption(
-					column.getId(),
+					column.getKey(),
 					SormasToSormasCasePreview.I18N_PREFIX,
 					SormasToSormasPersonPreview.I18N_PREFIX,
 					SymptomsDto.I18N_PREFIX));

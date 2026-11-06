@@ -22,9 +22,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -54,7 +55,7 @@ public class StatisticsFilterJurisdictionElement extends StatisticsFilterElement
 
 	public StatisticsFilterJurisdictionElement(int rowIndex) {
 		setSpacing(true);
-		addStyleName(CssStyles.LAYOUT_MINIMAL);
+		addClassName(CssStyles.LAYOUT_MINIMAL);
 		setWidth(100, Unit.PERCENTAGE);
 
 		VerticalLayout firstColumnLayout = new VerticalLayout();
@@ -89,7 +90,7 @@ public class StatisticsFilterJurisdictionElement extends StatisticsFilterElement
 		type.setId("type");
 		type.setCaption(I18nProperties.getPrefixCaption(FacilityDto.I18N_PREFIX, FacilityDto.TYPE));
 		type.setWidth(100, Unit.PERCENTAGE);
-		facilityTypeFilterLayout.addComponents(typeGroup, type);
+		facilityTypeFilterLayout.add(typeGroup, type);
 		facilityElement = new StatisticsFilterValuesElement(
 			I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.HEALTH_FACILITY),
 			StatisticsCaseAttribute.JURISDICTION,
@@ -97,14 +98,14 @@ public class StatisticsFilterJurisdictionElement extends StatisticsFilterElement
 			this,
 			rowIndex);
 
-		firstColumnLayout.addComponent(regionElement);
-		secondColumnLayout.addComponent(districtElement);
-		firstColumnLayout.addComponent(communityElement);
-		secondColumnLayout.addComponent(facilityTypeFilterLayout);
-		secondColumnLayout.addComponent(facilityElement);
+		firstColumnLayout.add(regionElement);
+		secondColumnLayout.add(districtElement);
+		firstColumnLayout.add(communityElement);
+		secondColumnLayout.add(facilityTypeFilterLayout);
+		secondColumnLayout.add(facilityElement);
 
-		addComponent(firstColumnLayout);
-		addComponent(secondColumnLayout);
+		add(firstColumnLayout);
+		add(secondColumnLayout);
 
 		regionElement.setValueChangeListener(e -> {
 			districtElement.updateDropdownContent();
@@ -119,7 +120,7 @@ public class StatisticsFilterJurisdictionElement extends StatisticsFilterElement
 				districtValues.stream()
 					.filter(d -> !regionUuids.contains(districtRegionsMap.get(((DistrictReferenceDto) d.getValue()).getUuid())))
 					.forEach(d -> {
-						districtElement.getTokenField().removeTokenizable(d);
+						districtElement.getTokenField().deselect(d);
 					});
 			}
 		});
@@ -141,7 +142,7 @@ public class StatisticsFilterJurisdictionElement extends StatisticsFilterElement
 					communityValues.stream()
 						.filter(c -> !districtUuids.contains(communityDistrictsMap.get(((CommunityReferenceDto) c.getValue()).getUuid())))
 						.forEach(c -> {
-							communityElement.getTokenField().removeTokenizable(c);
+							communityElement.getTokenField().deselect(c);
 						});
 				}
 				if (facilityElement.getSelectedValues() != null) {
@@ -152,7 +153,7 @@ public class StatisticsFilterJurisdictionElement extends StatisticsFilterElement
 					facilityValues.stream()
 						.filter(f -> !districtUuids.contains(facilityDistrictsMap.get(((FacilityReferenceDto) f.getValue()).getUuid())))
 						.forEach(f -> {
-							facilityElement.getTokenField().removeTokenizable(f);
+							facilityElement.getTokenField().deselect(f);
 						});
 				}
 			}
@@ -172,7 +173,7 @@ public class StatisticsFilterJurisdictionElement extends StatisticsFilterElement
 				facilityValues.stream()
 					.filter(f -> !communityUuids.contains(facilityCommunitiesMap.get(((FacilityReferenceDto) f.getValue()).getUuid())))
 					.forEach(f -> {
-						facilityElement.getTokenField().removeTokenizable(f);
+						facilityElement.getTokenField().deselect(f);
 					});
 			}
 		});
@@ -200,7 +201,7 @@ public class StatisticsFilterJurisdictionElement extends StatisticsFilterElement
 				facilityValues.stream()
 					.filter(f -> !facilityUuids.contains(facilityCommunitiesMap.get(((FacilityReferenceDto) f.getValue()).getUuid())))
 					.forEach(f -> {
-						facilityElement.getTokenField().removeTokenizable(f);
+						facilityElement.getTokenField().deselect(f);
 					});
 			}
 		});

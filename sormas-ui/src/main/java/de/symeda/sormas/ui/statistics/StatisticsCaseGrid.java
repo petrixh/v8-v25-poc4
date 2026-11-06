@@ -18,11 +18,11 @@
 package de.symeda.sormas.ui.statistics;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
-import com.vaadin.v7.shared.ui.grid.HeightMode;
-import com.vaadin.v7.ui.Grid;
+import com.vaadin.flow.component.Unit;
 
 import de.symeda.sormas.api.ReferenceDto;
 import de.symeda.sormas.api.i18n.Captions;
@@ -37,28 +37,22 @@ import de.symeda.sormas.api.statistics.StatisticsHelper;
 import de.symeda.sormas.api.statistics.StatisticsHelper.StatisticsKeyComparator;
 import de.symeda.sormas.api.utils.DataHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.GridExportStreamResource;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
 
 @SuppressWarnings("serial")
-public class StatisticsCaseGrid extends Grid {
+public class StatisticsCaseGrid extends Grid<Object[]> {
 
 	private static final String ROW_CAPTION_COLUMN = "RowCaptionColumn";
 	private static final String CASE_COUNT_OR_INCIDENCE_COLUMN = "CaseCountOrIncidenceColumn";
 	private static final String UNKNOWN_COLUMN = "UnknownColumn";
 	private static final String TOTAL_COLUMN = "TotalColumn";
 
-	private final class StatisticsCaseGridCellStyleGenerator implements CellStyleGenerator {
-
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public String getStyle(CellReference cell) {
-			if (cell.getPropertyId().equals(ROW_CAPTION_COLUMN)) {
-				return CssStyles.GRID_ROW_TITLE;
-			}
-
-			return null;
-		}
-	}
+	/**
+	 * Was the Vaadin 7 indexed container: one array per row, one value per column in column order.
+	 */
+	private final List<Object[]> gridRows = new ArrayList<>();
 
 	/**
 	 * @param cellValues
@@ -79,7 +73,7 @@ public class StatisticsCaseGrid extends Grid {
 		setSelectionMode(SelectionMode.NONE);
 		setHeightMode(HeightMode.UNDEFINED);
 		setWidth(100, Unit.PERCENTAGE);
-		setCellStyleGenerator(new StatisticsCaseGridCellStyleGenerator());
+		setItems(gridRows);
 
 		if (cellValues.isEmpty()) {
 			return;
@@ -89,7 +83,7 @@ public class StatisticsCaseGrid extends Grid {
 
 		// If no displayed attributes are selected, simply show the total number or incidence of cases
 		if (rowsAttribute == null && columnsAttribute == null) {
-			addColumn(CASE_COUNT_OR_INCIDENCE_COLUMN);
+			addContainerColumn(CASE_COUNT_OR_INCIDENCE_COLUMN);
 			getColumn(CASE_COUNT_OR_INCIDENCE_COLUMN).setHeaderCaption(dataStyle.toString());
 			if (!showCaseIncidence) {
 				addRow(
@@ -105,7 +99,9 @@ public class StatisticsCaseGrid extends Grid {
 
 		// ## COLUMNS
 		// Extract columns from content and add them to the grid
-		Column captionColumn = addColumn(ROW_CAPTION_COLUMN);
+		Column<Object[], Object> captionColumn = addContainerColumn(ROW_CAPTION_COLUMN);
+		// was StatisticsCaseGridCellStyleGenerator (Vaadin 7 cell style generator for this column)
+		captionColumn.setStyleGenerator(row -> CssStyles.GRID_ROW_TITLE);
 		captionColumn.setHeaderCaption("");
 		captionColumn.setSortable(false);
 		captionColumn.setMaximumWidth(150);
@@ -117,7 +113,7 @@ public class StatisticsCaseGrid extends Grid {
 		if (columnsAttribute == null && columnsSubAttribute == null) {
 			// When no column grouping has been selected, simply display the number of cases or case incidence for the respective row
 			totalColumnIndex = getColumns().size();
-			addColumn(CASE_COUNT_OR_INCIDENCE_COLUMN).setHeaderCaption(dataStyle.toString());
+			addContainerColumn(CASE_COUNT_OR_INCIDENCE_COLUMN).setHeaderCaption(dataStyle.toString());
 		} else {
 			boolean addColumnUnknown = false;
 			// Iterate over content and add new columns to the list
@@ -133,7 +129,7 @@ public class StatisticsCaseGrid extends Grid {
 
 			// Add all collected columns to the grid
 			for (StatisticsGroupingKey columnId : columns.keySet()) {
-				Column column = addColumn(columnId);
+				Column<Object[], Object> column = addContainerColumn(columnId);
 				column.setHeaderCaption(columns.get(columnId));
 				column.setSortable(false);
 				column.setMaximumWidth(120);
@@ -142,7 +138,7 @@ public class StatisticsCaseGrid extends Grid {
 			// Add the column to display unknown numbers if required
 			if (addColumnUnknown && columnsAttribute.isUnknownValueAllowed()) {
 				unknowColumnIndex = getColumns().size();
-				Column column = addColumn(UNKNOWN_COLUMN);
+				Column<Object[], Object> column = addContainerColumn(UNKNOWN_COLUMN);
 				column.setHeaderCaption(I18nProperties.getCaption(Captions.notSpecified));
 				column.setSortable(false);
 				column.setMaximumWidth(120);
@@ -150,7 +146,7 @@ public class StatisticsCaseGrid extends Grid {
 
 			// Add total column
 			totalColumnIndex = getColumns().size();
-			Column totalColumn = addColumn(TOTAL_COLUMN);
+			Column<Object[], Object> totalColumn = addContainerColumn(TOTAL_COLUMN);
 			totalColumn.setHeaderCaption(I18nProperties.getCaption(StatisticsHelper.TOTAL));
 			totalColumn.setSortable(false);
 		}
@@ -320,6 +316,28 @@ public class StatisticsCaseGrid extends Grid {
 		}
 
 		addRow(totalRow);
+	}
+
+	/**
+	 * Was Vaadin 7 {@code addColumn(propertyId)} on the indexed container: the column shows the row's value at the
+	 * column's position. Its key is the property id when it is a string, else its position (the grouping keys of the data
+	 * columns have no unique string form). Its values are also its export values (BR-27).
+	 */
+	private Column<Object[], Object> addContainerColumn(Object propertyId) {
+		int index = getColumns().size();
+		@SuppressWarnings("unchecked")
+		Column<Object[], Object> column = addColumn(row -> row[index]);
+		column.setKey(propertyId instanceof String ? (String) propertyId : "column" + index);
+		GridExportStreamResource.setExportValueProvider(column, row -> row[index]);
+		return column;
+	}
+
+	/**
+	 * Was Vaadin 7 {@code addRow(Object...)}: appends the row to the container.
+	 */
+	private void addRow(Object[] row) {
+		gridRows.add(row);
+		getDataProvider().refreshAll();
 	}
 
 	private int calculateTotalForRow(Object[] row) {

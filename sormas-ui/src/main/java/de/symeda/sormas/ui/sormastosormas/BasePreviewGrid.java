@@ -15,22 +15,17 @@
 
 package de.symeda.sormas.ui.sormastosormas;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import com.vaadin.event.SerializableEventListener;
-import com.vaadin.server.Page;
-import com.vaadin.shared.Registration;
-import com.vaadin.shared.ui.grid.HeightMode;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.util.ReflectTools;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.grid.dataview.GridListDataView;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.shared.Registration;
 
 import de.symeda.sormas.api.EntityDto;
 import de.symeda.sormas.api.i18n.Captions;
@@ -41,7 +36,10 @@ import de.symeda.sormas.api.utils.DateFormatHelper;
 import de.symeda.sormas.api.utils.LocationHelper;
 import de.symeda.sormas.api.utils.pseudonymization.PseudonymizableDto;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 import de.symeda.sormas.ui.utils.ShowDetailsListener;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
 
 public abstract class BasePreviewGrid<T extends PseudonymizableDto> extends Grid<T> {
 
@@ -79,24 +77,23 @@ public abstract class BasePreviewGrid<T extends PseudonymizableDto> extends Grid
 				navigateToUuid.accept(uuid);
 				fireEvent(new NavigateEvent(this));
 			} else if (isPendingRequest) {
-				new Notification(I18nProperties.getString(Strings.messageAcceptRequestToNavigate), Notification.Type.TRAY_NOTIFICATION)
-					.show(Page.getCurrent());
+				NotificationHelper.show(I18nProperties.getString(Strings.messageAcceptRequestToNavigate), NotificationHelper.Type.TRAY_NOTIFICATION);
 			} else {
-				new Notification(
+				NotificationHelper.show(
 					String.format(I18nProperties.getString(Strings.messageEntityNotFound), I18nProperties.getCaption(entityCaptionTag).toLowerCase()),
-					Notification.Type.WARNING_MESSAGE).show(Page.getCurrent());
+					NotificationHelper.Type.WARNING_MESSAGE);
 			}
 		}));
 	}
 
 	protected List<String> createPersonColumns(Function<T, SormasToSormasPersonPreview> getPerson) {
-		((Grid.Column<T, ?>) addComponentColumn(previewData -> {
+		addComponentColumn(previewData -> {
 			SormasToSormasPersonPreview person = getPerson.apply(previewData);
 			if (person.isPseudonymized()) {
-				return new Label(I18nProperties.getCaption(Captions.inaccessibleValue));
+				return new Span(I18nProperties.getCaption(Captions.inaccessibleValue));
 			}
-			return new Label(person.getFirstName() + " " + person.getLastName());
-		})).setId(PERSON_NAME).setStyleGenerator(item -> {
+			return new Span(person.getFirstName() + " " + person.getLastName());
+		}).setKey(PERSON_NAME).setStyleGenerator(item -> {
 			if (item.isPseudonymized()) {
 				return CssStyles.INACCESSIBLE_COLUMN;
 			}
@@ -104,42 +101,45 @@ public abstract class BasePreviewGrid<T extends PseudonymizableDto> extends Grid
 			return "";
 		});
 		addComponentColumn(
-			previewData -> new Label(
+			previewData -> new Span(
 				DateFormatHelper.formatDate(
 					getPerson.apply(previewData).getBirthdateDD(),
 					getPerson.apply(previewData).getBirthdateMM(),
-					getPerson.apply(previewData).getBirthdateYYYY()))).setId(BIRTH_DATE);
-		addComponentColumn(previewData -> new Label(getPerson.apply(previewData).getSex().toString())).setId(SormasToSormasPersonPreview.SEX);
-		addComponentColumn(previewData -> new Label(LocationHelper.buildLocationString(getPerson.apply(previewData).getAddress())))
-			.setId(SormasToSormasPersonPreview.ADDRESS);
+					getPerson.apply(previewData).getBirthdateYYYY()))).setKey(BIRTH_DATE);
+		addComponentColumn(previewData -> new Span(getPerson.apply(previewData).getSex().toString())).setKey(SormasToSormasPersonPreview.SEX);
+		addComponentColumn(previewData -> new Span(LocationHelper.buildLocationString(getPerson.apply(previewData).getAddress())))
+			.setKey(SormasToSormasPersonPreview.ADDRESS);
 
 		return Arrays.asList(PERSON_NAME, BIRTH_DATE, SormasToSormasPersonPreview.SEX, SormasToSormasPersonPreview.ADDRESS);
 	}
 
 	@Override
-	public void setItems(Collection<T> items) {
-		super.setItems(items);
+	public GridListDataView<T> setItems(Collection<T> items) {
+		GridListDataView<T> dataView = super.setItems(items);
 		setHeightByRows(items.size() > 0 ? (Math.min(items.size(), 10)) : 1);
+		return dataView;
 	}
 
 	public Registration addNavigateListener(NavigateListener listener) {
-		return addListener(NavigateEvent.class, listener, NavigateListener.ON_NAVIGATE_METHOD);
+		return addListener(NavigateEvent.class, listener);
 	}
 
-	public interface NavigateListener extends SerializableEventListener {
-
-		Method ON_NAVIGATE_METHOD = ReflectTools.findMethod(NavigateListener.class, "onNavigate", NavigateEvent.class);
+	public interface NavigateListener extends ComponentEventListener<NavigateEvent> {
 
 		void onNavigate(NavigateEvent event);
 
+		@Override
+		default void onComponentEvent(NavigateEvent event) {
+			onNavigate(event);
+		}
 	}
 
-	public static final class NavigateEvent extends Component.Event {
+	public static final class NavigateEvent extends ComponentEvent<BasePreviewGrid<?>> {
 
 		private static final long serialVersionUID = -6258483442328832173L;
 
 		public NavigateEvent(BasePreviewGrid<?> source) {
-			super(source);
+			super(source, false);
 		}
 	}
 }

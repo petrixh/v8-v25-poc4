@@ -49,15 +49,15 @@ public class EventParticipantsPreviewGrid extends BasePreviewGrid<SormasToSormas
 		columnConfig.addAll(Collections.singletonList(SormasToSormasEventParticipantPreview.UUID));
 		columnConfig.addAll(createPersonColumns(SormasToSormasEventParticipantPreview::getPerson));
 
-		setColumns(columnConfig);
+		setColumns(columnConfig.toArray(new String[0]));
 
 		((Column<SormasToSormasEventParticipantPreview, String>) getColumn(SormasToSormasEventParticipantPreview.UUID))
 			.setRenderer(new UuidRenderer());
 
-		for (Column<?, ?> column : getColumns()) {
+		for (Column<?, ?> column : getAllColumns()) {
 			column.setCaption(
 				I18nProperties
-					.findPrefixCaption(column.getId(), SormasToSormasEventParticipantPreview.I18N_PREFIX, SormasToSormasPersonPreview.I18N_PREFIX));
+					.findPrefixCaption(column.getKey(), SormasToSormasEventParticipantPreview.I18N_PREFIX, SormasToSormasPersonPreview.I18N_PREFIX));
 		}
 	}
 }

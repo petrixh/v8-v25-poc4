@@ -20,12 +20,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Date;
 
-import com.vaadin.server.Page;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.server.StreamRegistration;
+import com.vaadin.flow.server.VaadinSession;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.epipulse.EpipulseExportDto;
@@ -41,6 +41,10 @@ import de.symeda.sormas.ui.UserProvider;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.ConfirmationComponent;
+import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 public class EpiPulseExportController {
@@ -69,22 +73,22 @@ public class EpiPulseExportController {
 
 					Notification notification;
 					if (savedEpipulseExport != null) {
-						notification = new Notification(
+						notification = NotificationHelper.createNotification(
 							I18nProperties.getString(Strings.messageEpipulseExportCreatedCaption),
 							I18nProperties.getString(Strings.messageEpipulseExportCreatedDescription),
-							Notification.Type.TRAY_NOTIFICATION,
+							Type.TRAY_NOTIFICATION,
 							true);
-						notification.setDelayMsec(-1);
+						NotificationHelper.setDelayMsec(notification, -1);
 					} else {
-						notification = new Notification(
+						notification = NotificationHelper.createNotification(
 							"",
 							I18nProperties.getString(Strings.messageEpipulseExportCreatedError),
-							Notification.Type.ERROR_MESSAGE,
+							Type.ERROR_MESSAGE,
 							true);
-						notification.setDelayMsec(-1);
+						NotificationHelper.setDelayMsec(notification, -1);
 					}
 
-					notification.show(Page.getCurrent());
+					notification.open();
 
 					if (callback != null) {
 						callback.run();
@@ -96,9 +100,9 @@ public class EpiPulseExportController {
 			VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getString(Strings.headingCreateNewEpipulseExport));
 		} else {
 			Notification notification =
-				new Notification("", I18nProperties.getString(Strings.messageEpipulseInvalidConfigError), Notification.Type.ERROR_MESSAGE, true);
-			notification.setDelayMsec(-1);
-			notification.show(Page.getCurrent());
+				NotificationHelper.createNotification("", I18nProperties.getString(Strings.messageEpipulseInvalidConfigError), Type.ERROR_MESSAGE, true);
+			NotificationHelper.setDelayMsec(notification, -1);
+			notification.open();
 		}
 	}
 
@@ -122,7 +126,7 @@ public class EpiPulseExportController {
 				}
 			};
 
-			confirmationComponent.getConfirmButton().setCaption(I18nProperties.getString(Strings.close));
+			confirmationComponent.getConfirmButton().setText(I18nProperties.getString(Strings.close));
 			confirmationComponent.getCancelButton().setVisible(false);
 
 			EpipulseExportStatus exportStatus = epipulseExportDto.getStatus();
@@ -131,7 +135,7 @@ public class EpiPulseExportController {
 				Button cancelExportButton = ButtonHelper.createButton(I18nProperties.getCaption(Captions.actionCancel), event -> {
 					VaadinUiUtil.showConfirmationPopup(
 						I18nProperties.getString(Strings.messageEpipulseExportCancelConfirmationCaption),
-						new Label(I18nProperties.getString(Strings.messageEpipulseExportCancelConfirmationDescription)),
+						new Span(I18nProperties.getString(Strings.messageEpipulseExportCancelConfirmationDescription)),
 						I18nProperties.getCaption(Captions.actionYes),
 						I18nProperties.getCaption(Captions.actionNo),
 						null,
@@ -148,17 +152,17 @@ public class EpiPulseExportController {
 									popupWindow.close();
 								} catch (Exception e) {
 									if (e instanceof ValidationRuntimeException) {
-										Notification.show(e.getMessage(), Notification.Type.ERROR_MESSAGE);
+										NotificationHelper.show(e.getMessage(), Type.ERROR_MESSAGE);
 									} else {
-										Notification.show(
+										NotificationHelper.show(
 											I18nProperties.getString(Strings.errorOccurred, I18nProperties.getString(Strings.errorOccurred)),
 											I18nProperties.getString(Strings.errorWasReported),
-											Notification.Type.ERROR_MESSAGE);
+											Type.ERROR_MESSAGE);
 									}
 								}
 							}
 						});
-				}, ValoTheme.BUTTON_LINK);
+				}, CssStyles.BUTTON_LINK);
 				confirmationComponent.addExtraButton(cancelExportButton, e -> {
 				});
 			}
@@ -171,7 +175,7 @@ public class EpiPulseExportController {
 
 					VaadinUiUtil.showConfirmationPopup(
 						I18nProperties.getString(Strings.messageEpipulseExportDeleteConfirmationCaption),
-						new Label(I18nProperties.getString(Strings.messageEpipulseExportDeleteConfirmationDescription)),
+						new Span(I18nProperties.getString(Strings.messageEpipulseExportDeleteConfirmationDescription)),
 						I18nProperties.getCaption(Captions.actionYes),
 						I18nProperties.getCaption(Captions.actionNo),
 						null,
@@ -188,17 +192,17 @@ public class EpiPulseExportController {
 									popupWindow.close();
 								} catch (Exception e) {
 									if (e instanceof ValidationRuntimeException) {
-										Notification.show(e.getMessage(), Notification.Type.ERROR_MESSAGE);
+										NotificationHelper.show(e.getMessage(), Type.ERROR_MESSAGE);
 									} else {
-										Notification.show(
+										NotificationHelper.show(
 											I18nProperties.getString(Strings.errorOccurred, I18nProperties.getString(Strings.errorOccurred)),
 											I18nProperties.getString(Strings.errorWasReported),
-											Notification.Type.ERROR_MESSAGE);
+											Type.ERROR_MESSAGE);
 									}
 								}
 							}
 						});
-				}, ValoTheme.BUTTON_LINK);
+				}, CssStyles.BUTTON_LINK);
 				confirmationComponent.addExtraButton(deleteButton, e -> {
 				});
 			}
@@ -209,13 +213,13 @@ public class EpiPulseExportController {
 
 	public void download(EpipulseExportIndexDto exportIndexDto) {
 		if (exportIndexDto.getExportFileName() == null) {
-			Notification notification = new Notification(
+			Notification notification = NotificationHelper.createNotification(
 				"",
 				I18nProperties.getString(Strings.messageEpipulseExportDownloadNoFileName),
-				Notification.Type.ERROR_MESSAGE,
+				Type.ERROR_MESSAGE,
 				true);
-			notification.setDelayMsec(-1);
-			notification.show(Page.getCurrent());
+			NotificationHelper.setDelayMsec(notification, -1);
+			notification.open();
 			return;
 		}
 
@@ -224,29 +228,29 @@ public class EpiPulseExportController {
 
 		File file = new File(exportFilePath);
 		if (!file.exists()) {
-			Notification notification = new Notification(
+			Notification notification = NotificationHelper.createNotification(
 				"",
 				I18nProperties.getString(Strings.messageEpipulseExportDownloadNoFileName),
-				Notification.Type.ERROR_MESSAGE,
+				Type.ERROR_MESSAGE,
 				true);
-			notification.setDelayMsec(-1);
-			notification.show(Page.getCurrent());
+			NotificationHelper.setDelayMsec(notification, -1);
+			notification.open();
 			return;
 		}
 
-		StreamResource streamResource = new StreamResource(() -> {
+		// cache time 0 as before: StreamSourceDownloadHandler sends no-cache
+		StreamSourceDownloadHandler streamResource = new StreamSourceDownloadHandler(() -> {
 			try {
 				return new FileInputStream(file);
 			} catch (FileNotFoundException e) {
-				Notification.show(I18nProperties.getString(Strings.messageEpipulseExportDownloadNoFileName), Notification.Type.ERROR_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageEpipulseExportDownloadNoFileName), Type.ERROR_MESSAGE);
 				return null;
 			}
-		}, exportIndexDto.getExportFileName());
+		}, exportIndexDto.getExportFileName(), "text/csv");
 
-		streamResource.setMIMEType("text/csv");
-
-		streamResource.setCacheTime(0);
-
-		Page.getCurrent().open(streamResource, null, false);
+		// was Page.open(resource, null, false): the download opens in the current window
+		StreamRegistration exportRegistration =
+			VaadinSession.getCurrent().getResourceRegistry().registerResource(streamResource, UI.getCurrent().getElement());
+		UI.getCurrent().getPage().open(exportRegistration.getResourceUri().toString(), "_self");
 	}
 }

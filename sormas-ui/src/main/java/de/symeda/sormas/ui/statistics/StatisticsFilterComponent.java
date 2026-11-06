@@ -17,11 +17,15 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.statistics;
 
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.MenuBar.Command;
-import com.vaadin.ui.MenuBar.MenuItem;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -41,12 +45,12 @@ public class StatisticsFilterComponent extends VerticalLayout {
 
 	public StatisticsFilterComponent(int rowIndex) {
 		setSpacing(true);
-		setMargin(false);
+		setPadding(false);
 
-		addStyleName(CssStyles.LAYOUT_MINIMAL);
+		addClassName(CssStyles.LAYOUT_MINIMAL);
 		setWidth(100, Unit.PERCENTAGE);
 
-		addComponent(createFilterAttributeElement(rowIndex));
+		add(createFilterAttributeElement(rowIndex));
 	}
 
 	private HorizontalLayout createFilterAttributeElement(int rowIndex) {
@@ -54,82 +58,104 @@ public class StatisticsFilterComponent extends VerticalLayout {
 		filterAttributeLayout.setSpacing(true);
 		filterAttributeLayout.setWidth(100, Unit.PERCENTAGE);
 
-		MenuBar filterAttributeDropdown = new MenuBar();
-		filterAttributeDropdown.setId(Captions.statisticsAttribute + "-" + rowIndex);
-		filterAttributeDropdown.setCaption(I18nProperties.getCaption(Captions.statisticsAttribute));
-		MenuItem filterAttributeItem = filterAttributeDropdown.addItem(I18nProperties.getCaption(Captions.statisticsAttributeSelect), null);
-		MenuBar filterSubAttributeDropdown = new MenuBar();
-		filterSubAttributeDropdown.setId(Captions.statisticsAttributeSpecification + "-" + rowIndex);
-		filterSubAttributeDropdown.setCaption(I18nProperties.getCaption(Captions.statisticsAttributeSpecification));
-		MenuItem filterSubAttributeItem = filterSubAttributeDropdown.addItem(SPECIFY_YOUR_SELECTION, null);
+		MenuBar filterAttributeMenuBar = new MenuBar();
+		filterAttributeMenuBar.setId(Captions.statisticsAttribute + "-" + rowIndex);
+		VerticalLayout filterAttributeDropdown =
+			withCaption(new Span(I18nProperties.getCaption(Captions.statisticsAttribute)), filterAttributeMenuBar);
+		MenuItem filterAttributeItem = filterAttributeMenuBar.addItem(I18nProperties.getCaption(Captions.statisticsAttributeSelect));
+		MenuBar filterSubAttributeMenuBar = new MenuBar();
+		filterSubAttributeMenuBar.setId(Captions.statisticsAttributeSpecification + "-" + rowIndex);
+		VerticalLayout filterSubAttributeDropdown =
+			withCaption(new Span(I18nProperties.getCaption(Captions.statisticsAttributeSpecification)), filterSubAttributeMenuBar);
+		MenuItem filterSubAttributeItem = filterSubAttributeMenuBar.addItem(SPECIFY_YOUR_SELECTION);
 
 		// Add attribute groups
 		for (StatisticsCaseAttributeGroup attributeGroup : StatisticsCaseAttributeGroup.values()) {
-			MenuItem attributeGroupItem = filterAttributeItem.addItem(attributeGroup.toString(), null);
+			MenuItem attributeGroupItem = filterAttributeItem.getSubMenu().addItem(attributeGroup.toString());
 			attributeGroupItem.setEnabled(false);
 
 			// Add attributes belonging to the current group
 			for (StatisticsCaseAttribute attribute : attributeGroup.getAttributes()) {
-				Command attributeCommand = selectedItem -> {
+				ComponentEventListener<ClickEvent<MenuItem>> attributeCommand = event -> {
+					MenuItem selectedItem = event.getSource();
 					selectedAttribute = attribute;
 					selectedSubAttribute = null;
 					filterAttributeItem.setText(attribute.toString());
 
 					// Add style to keep chosen item selected and remove it from all other items
-					for (MenuItem menuItem : filterAttributeItem.getChildren()) {
-						menuItem.setStyleName(null);
+					for (MenuItem menuItem : filterAttributeItem.getSubMenu().getItems()) {
+						setSelectedStyle(menuItem, false);
 					}
-					selectedItem.setStyleName("selected-filter");
+					setSelectedStyle(selectedItem, true);
 
 					// Reset the sub attribute dropdown
-					filterSubAttributeItem.removeChildren();
+					filterSubAttributeItem.getSubMenu().removeAll();
 					filterSubAttributeItem.setText(SPECIFY_YOUR_SELECTION);
 
 					if (attribute.getSubAttributes().length > 0) {
 						for (StatisticsCaseSubAttribute subAttribute : attribute.getSubAttributes()) {
 							if (subAttribute.isUsedForFilters()) {
-								Command subAttributeCommand = selectedSubItem -> {
+								ComponentEventListener<ClickEvent<MenuItem>> subAttributeCommand = subEvent -> {
+									MenuItem selectedSubItem = subEvent.getSource();
 									selectedSubAttribute = subAttribute;
 									filterSubAttributeItem.setText(subAttribute.toString());
 
 									// Add style to keep chosen item selected and remove it from all other items
-									for (MenuItem menuItem : filterSubAttributeItem.getChildren()) {
-										menuItem.setStyleName(null);
+									for (MenuItem menuItem : filterSubAttributeItem.getSubMenu().getItems()) {
+										setSelectedStyle(menuItem, false);
 									}
-									selectedSubItem.setStyleName("selected-filter");
+									setSelectedStyle(selectedSubItem, true);
 
 									updateFilterElement(rowIndex);
 								};
 
-								filterSubAttributeItem.addItem(subAttribute.toString(), subAttributeCommand);
+								filterSubAttributeItem.getSubMenu().addItem(subAttribute.toString(), subAttributeCommand);
 							}
 						}
 
 						// Only add the sub attribute dropdown if there are any sub attributes that are relevant for the filters section
-						if (filterSubAttributeItem.getChildren() != null && filterSubAttributeItem.getChildren().size() > 0) {
-							filterAttributeLayout.addComponent(filterSubAttributeDropdown);
-							filterAttributeLayout.setExpandRatio(filterSubAttributeDropdown, 1);
+						if (!filterSubAttributeItem.getSubMenu().getItems().isEmpty()) {
+							filterAttributeLayout.add(filterSubAttributeDropdown);
+							filterAttributeLayout.setFlexGrow(1, filterSubAttributeDropdown);
 						} else {
-							filterAttributeLayout.removeComponent(filterSubAttributeDropdown);
+							filterAttributeLayout.remove(filterSubAttributeDropdown);
 						}
 					} else {
-						filterAttributeLayout.removeComponent(filterSubAttributeDropdown);
+						filterAttributeLayout.remove(filterSubAttributeDropdown);
 					}
 					updateFilterElement(rowIndex);
 				};
 
-				filterAttributeItem.addItem(attribute.toString(), attributeCommand);
+				filterAttributeItem.getSubMenu().addItem(attribute.toString(), attributeCommand);
 			}
 		}
 
-		filterAttributeLayout.addComponent(filterAttributeDropdown);
-		filterAttributeLayout.setExpandRatio(filterAttributeDropdown, 0);
+		filterAttributeLayout.add(filterAttributeDropdown);
+		filterAttributeLayout.setFlexGrow(0, filterAttributeDropdown);
 		return filterAttributeLayout;
+	}
+
+	/**
+	 * Was {@code MenuBar.setCaption}: a Flow menu bar has no caption, so the caption is shown above it.
+	 */
+	static VerticalLayout withCaption(Span caption, Component component) {
+		VerticalLayout captionedLayout = new VerticalLayout(caption, component);
+		captionedLayout.setPadding(false);
+		captionedLayout.setSpacing(false);
+		captionedLayout.setWidth(null);
+		return captionedLayout;
+	}
+
+	/**
+	 * Was {@code MenuItem.setStyleName("selected-filter")} / {@code setStyleName(null)}: marks the chosen item.
+	 */
+	static void setSelectedStyle(MenuItem menuItem, boolean selected) {
+		menuItem.getElement().getClassList().set("selected-filter", selected);
 	}
 
 	private void updateFilterElement(int rowIndex) {
 		if (filterElement != null) {
-			removeComponent(filterElement);
+			remove(filterElement);
 			filterElement = null;
 		}
 
@@ -148,7 +174,7 @@ public class StatisticsFilterComponent extends VerticalLayout {
 		}
 
 		if (filterElement != null) {
-			addComponent(filterElement);
+			add(filterElement);
 		}
 	}
 

@@ -25,19 +25,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.Page;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Alignment;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import de.symeda.sormas.ui.utils.fields.CheckBox;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -47,7 +41,11 @@ import de.symeda.sormas.api.importexport.DatabaseTableType;
 import de.symeda.sormas.api.utils.DateHelper;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 import de.symeda.sormas.ui.utils.DownloadUtil;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
 
 public class DatabaseExportView extends AbstractStatisticsView {
 
@@ -71,19 +69,17 @@ public class DatabaseExportView extends AbstractStatisticsView {
 		headerLayout.setPadding(false);
 		Span infoLabel = new Span(I18nProperties.getString(Strings.infoDatabaseExportTables));
 		headerLayout.add(infoLabel);
-		headerLayout.setComponentAlignment(infoLabel, Alignment.MIDDLE_LEFT);
+		headerLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, infoLabel);
 		headerLayout.add(createSelectionButtonsLayout());
 		databaseExportLayout.add(headerLayout);
 		databaseExportLayout.add(createDatabaseTablesLayout());
 
 		Button exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcon.DOWNLOAD, null, CssStyles.BUTTON_PRIMARY);
 
-		StreamResource streamResource = DownloadUtil
+		DownloadHandler streamResource = DownloadUtil
 			.createDatabaseExportStreamResource(this, "sormas_export_" + DateHelper.formatDateForExport(new Date()) + ".zip", "application/zip");
-		FileDownloader fileDownloader = new FileDownloader(streamResource);
-		fileDownloader.extend(exportButton);
-
-		databaseExportLayout.add(exportButton);
+		// was a FileDownloader on the button: a download link around the button, added in its place
+		databaseExportLayout.add(DownloadUtil.createDownloadLink(exportButton, streamResource));
 		databaseExportLayout.setPadding(true);
 		databaseExportLayout.setSpacing(true);
 
@@ -91,11 +87,11 @@ public class DatabaseExportView extends AbstractStatisticsView {
 	}
 
 	public void showExportErrorNotification() {
-		new Notification(
+		NotificationHelper.show(
 			I18nProperties.getString(Strings.headingDatabaseExportFailed),
 			I18nProperties.getString(Strings.messageDatabaseExportFailed),
 			Type.ERROR_MESSAGE,
-			false).show(Page.getCurrent());
+			false);
 	}
 
 	private HorizontalLayout createSelectionButtonsLayout() {

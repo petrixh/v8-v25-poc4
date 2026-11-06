@@ -19,19 +19,19 @@ package de.symeda.sormas.ui.statistics;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.explicatis.ext_token_field.ExtTokenField;
-import com.explicatis.ext_token_field.Tokenizable;
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.Unit;
-import com.vaadin.data.HasValue.ValueChangeListener;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.shared.Registration;
-import com.vaadin.ui.Alignment;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.ui.ComboBox;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.shared.Registration;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseClassification;
@@ -58,8 +58,16 @@ public class StatisticsFilterValuesElement extends StatisticsFilterElement {
 	private final StatisticsCaseSubAttribute subAttribute;
 
 	private Registration valueChangeListenerRegistration;
-	private ExtTokenField tokenField;
-	private ComboBox<TokenizableValue> addDropdown;
+	/**
+	 * Was the ExtTokenField add-on with a combo box as its input field: the selected values are the combo box's chips,
+	 * in the order they were added.
+	 */
+	private MultiSelectComboBox<TokenizableValue> tokenField;
+	/**
+	 * True while {@link #updateDropdownContent()} replaces the items: Flow clears the value on {@code setItems}, the
+	 * add-on's token field kept its tokens (and fired no event) when the dropdown's items changed.
+	 */
+	private boolean updatingDropdownContent;
 
 	/**
 	 * Only needed when this element is part of a Region/District element.
@@ -77,13 +85,14 @@ public class StatisticsFilterValuesElement extends StatisticsFilterElement {
 		this.attribute = attribute;
 		this.subAttribute = subAttribute;
 
-		ExtTokenField tokenField = createTokenField(caption, rowIndex);
+		MultiSelectComboBox<TokenizableValue> tokenField = createTokenField(caption, rowIndex);
 		VerticalLayout utilityButtonsLayout = createUtilityButtonsLayout(rowIndex);
 		add(tokenField);
 		add(utilityButtonsLayout);
 		setFlexGrow(1, tokenField);
 		setFlexGrow(0, utilityButtonsLayout);
-		setComponentAlignment(utilityButtonsLayout, Alignment.MIDDLE_RIGHT);
+		// was Alignment.MIDDLE_RIGHT in a slot that does not expand: the last component, vertically centred
+		setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, utilityButtonsLayout);
 	}
 
 	public StatisticsFilterValuesElement(
@@ -107,30 +116,28 @@ public class StatisticsFilterValuesElement extends StatisticsFilterElement {
 	}
 
 	public void updateDropdownContent() {
-		addDropdown.setItems(getFilterValues());
+		// Vaadin 8 replaced only the input dropdown's items; the selected tokens stayed, without a value change event
+		Set<TokenizableValue> selectedValues = tokenField.getSelectedItems();
+		updatingDropdownContent = true;
+		try {
+			tokenField.setItems(getFilterValues());
+			tokenField.setValue(selectedValues);
+		} finally {
+			updatingDropdownContent = false;
+		}
 	}
 
-	private ExtTokenField createTokenField(String caption, int rowIndex) {
+	private MultiSelectComboBox<TokenizableValue> createTokenField(String caption, int rowIndex) {
 
-		tokenField = new ExtTokenField();
+		// The add-on's token list and its input combo box ("select-<row>", 200 px, "Type to add") are one field now:
+		// picking an item adds it as a chip at the end, a chip's remove button or a second pick removes it
+		tokenField = new MultiSelectComboBox<>(caption, getFilterValues());
 		tokenField.setId("tokens-" + rowIndex);
-		tokenField.setCaption(caption);
 		tokenField.setWidth(100, Unit.PERCENTAGE);
-		tokenField.setEnableDefaultDeleteTokenAction(true);
-
-		addDropdown = new ComboBox<TokenizableValue>("", getFilterValues());
-		addDropdown.setWidth(200, Unit.PIXELS);
-		addDropdown.setId("select-" + rowIndex);
-		addDropdown.addClassName(CssStyles.VSPACE_NONE);
-		addDropdown.setPlaceholder(I18nProperties.getString(Strings.promptTypeToAdd));
-		tokenField.setInputField(addDropdown);
-		addDropdown.addValueChangeListener(e -> {
-			TokenizableValue token = e.getValue();
-			if (token != null) {
-				tokenField.addTokenizable(token);
-				addDropdown.setValue(null);
-			}
-		});
+		tokenField.addClassName(CssStyles.VSPACE_NONE);
+		tokenField.setPlaceholder(I18nProperties.getString(Strings.promptTypeToAdd));
+		// the add-on's tokens wrapped onto further lines
+		tokenField.setAutoExpand(MultiSelectComboBox.AutoExpandMode.VERTICAL);
 
 		return tokenField;
 	}
@@ -145,7 +152,7 @@ public class StatisticsFilterValuesElement extends StatisticsFilterElement {
 		Button addAllButton = ButtonHelper
 			.createIconButtonWithCaption(Captions.all + "-" + rowIndex, I18nProperties.getCaption(Captions.all), VaadinIcon.PLUS_CIRCLE, e -> {
 				for (TokenizableValue tokenizable : getFilterValues()) {
-					tokenField.addTokenizable(tokenizable);
+					tokenField.select(tokenizable);
 				}
 			}, CssStyles.BUTTON_LINK);
 
@@ -154,8 +161,8 @@ public class StatisticsFilterValuesElement extends StatisticsFilterElement {
 			I18nProperties.getCaption(Captions.actionClear),
 			VaadinIcon.CLOSE_CIRCLE,
 			e -> {
-				for (Tokenizable tokenizable : tokenField.getValue()) {
-					tokenField.removeTokenizable(tokenizable);
+				for (TokenizableValue tokenizable : new ArrayList<>(tokenField.getValue())) {
+					tokenField.deselect(tokenizable);
 				}
 			},
 			CssStyles.BUTTON_LINK);
@@ -292,7 +299,8 @@ public class StatisticsFilterValuesElement extends StatisticsFilterElement {
 		}
 	}
 
-	public void setValueChangeListener(ValueChangeListener<List<Tokenizable>> valueChangeListener) {
+	public void setValueChangeListener(
+		ValueChangeListener<? super ComponentValueChangeEvent<MultiSelectComboBox<TokenizableValue>, Set<TokenizableValue>>> valueChangeListener) {
 
 		if (valueChangeListenerRegistration != null) {
 			valueChangeListenerRegistration.remove();
@@ -300,17 +308,21 @@ public class StatisticsFilterValuesElement extends StatisticsFilterElement {
 		}
 
 		if (valueChangeListener != null) {
-			valueChangeListenerRegistration = tokenField.addValueChangeListener(valueChangeListener);
+			valueChangeListenerRegistration = tokenField.addValueChangeListener(e -> {
+				if (!updatingDropdownContent) {
+					valueChangeListener.valueChanged(e);
+				}
+			});
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<TokenizableValue> getSelectedValues() {
-		return (List<TokenizableValue>) (List<? extends Tokenizable>) tokenField.getValue();
+		// in the order the values were added, as the add-on's value list
+		return new ArrayList<>(tokenField.getValue());
 	}
 
-	public ExtTokenField getTokenField() {
+	public MultiSelectComboBox<TokenizableValue> getTokenField() {
 		return tokenField;
 	}
 }

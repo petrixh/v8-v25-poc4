@@ -56,21 +56,21 @@ public class EpipulseExportInfoLayout extends AbstractInfoLayout<EpipulseExportD
 			EpipulseExportDto.SUBJECT_CODE,
 			epipulseExportDto.getSubjectCode(),
 			I18nProperties.getPrefixCaption(EpipulseExportDto.I18N_PREFIX, EpipulseExportDto.SUBJECT_CODE))
-			.setDescription(epipulseExportDto.getSubjectCode().toString());
+			.setTitle(epipulseExportDto.getSubjectCode().toString());
 
 		String startDate = DateHelper.formatLocalDate(epipulseExportDto.getStartDate(), userLanguage);
 		addDescLabel(
 			leftColumnLayout,
 			EpipulseExportDto.START_DATE,
 			startDate,
-			I18nProperties.getPrefixCaption(EpipulseExportDto.I18N_PREFIX, EpipulseExportDto.START_DATE)).setDescription(startDate);
+			I18nProperties.getPrefixCaption(EpipulseExportDto.I18N_PREFIX, EpipulseExportDto.START_DATE)).setTitle(startDate);
 
 		String creationDate = DateHelper.formatLocalDateTime(epipulseExportDto.getCreationDate(), userLanguage);
 		addDescLabel(
 			leftColumnLayout,
 			EpipulseExportDto.CREATION_DATE,
 			creationDate,
-			I18nProperties.getPrefixCaption(EpipulseExportDto.I18N_PREFIX, EpipulseExportDto.CREATION_DATE)).setDescription(creationDate);
+			I18nProperties.getPrefixCaption(EpipulseExportDto.I18N_PREFIX, EpipulseExportDto.CREATION_DATE)).setTitle(creationDate);
 
 		this.add(leftColumnLayout);
 
@@ -85,14 +85,14 @@ public class EpipulseExportInfoLayout extends AbstractInfoLayout<EpipulseExportD
 			rightColumnLayout,
 			EpipulseExportDto.END_DATE,
 			endDate,
-			I18nProperties.getPrefixCaption(EpipulseExportDto.I18N_PREFIX, EpipulseExportDto.END_DATE)).setDescription(endDate);
+			I18nProperties.getPrefixCaption(EpipulseExportDto.I18N_PREFIX, EpipulseExportDto.END_DATE)).setTitle(endDate);
 
 		String status = epipulseExportDto.getStatus().toString();
 		addDescLabel(
 			rightColumnLayout,
 			EpipulseExportDto.STATUS,
 			status,
-			I18nProperties.getPrefixCaption(EpipulseExportDto.I18N_PREFIX, EpipulseExportDto.STATUS)).setDescription(status);
+			I18nProperties.getPrefixCaption(EpipulseExportDto.I18N_PREFIX, EpipulseExportDto.STATUS)).setTitle(status);
 
 		this.add(rightColumnLayout);
 	}

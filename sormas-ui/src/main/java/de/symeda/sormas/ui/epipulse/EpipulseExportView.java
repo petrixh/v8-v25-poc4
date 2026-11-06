@@ -18,10 +18,10 @@ package de.symeda.sormas.ui.epipulse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import de.symeda.sormas.ui.navigation.ViewChangeListener;
-import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.icon.VaadinIcon;
 
 import de.symeda.sormas.api.epipulse.EpipulseExportCriteria;
 import de.symeda.sormas.api.i18n.Captions;
@@ -29,8 +29,10 @@ import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import de.symeda.sormas.ui.statistics.AbstractStatisticsView;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
 
 // @Push
@@ -81,8 +83,8 @@ public class EpipulseExportView extends AbstractStatisticsView {
 	}
 
 	@Override
-	public void detach() {
-		super.detach();
+	protected void onDetach(DetachEvent detachEvent) {
+		super.onDetach(detachEvent);
 
 		//stopPolling();
 	}

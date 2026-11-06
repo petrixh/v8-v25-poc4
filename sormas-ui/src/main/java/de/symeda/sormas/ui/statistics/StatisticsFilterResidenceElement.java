@@ -79,7 +79,7 @@ public class StatisticsFilterResidenceElement extends StatisticsFilterElement {
 				districtValues.stream()
 					.filter(d -> !regionUuids.contains(districtRegionsMap.get(((DistrictReferenceDto) d.getValue()).getUuid())))
 					.forEach(d -> {
-						districtElement.getTokenField().removeTokenizable(d);
+						districtElement.getTokenField().deselect(d);
 					});
 			}
 		});
@@ -100,7 +100,7 @@ public class StatisticsFilterResidenceElement extends StatisticsFilterElement {
 					communityValues.stream()
 						.filter(c -> !districtUuids.contains(communityDistrictsMap.get(((CommunityReferenceDto) c.getValue()).getUuid())))
 						.forEach(c -> {
-							communityElement.getTokenField().removeTokenizable(c);
+							communityElement.getTokenField().deselect(c);
 						});
 				}
 			}

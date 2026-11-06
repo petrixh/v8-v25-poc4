@@ -17,10 +17,13 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.statistics;
 
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.MenuBar.Command;
-import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -32,8 +35,10 @@ import de.symeda.sormas.ui.utils.CssStyles;
 @SuppressWarnings("serial")
 public class StatisticsVisualizationElement extends HorizontalLayout {
 
-	private MenuBar displayedAttributeDropdown;
-	private MenuBar displayedSubAttributeDropdown;
+	/** The attribute menu with its caption above it (was {@code MenuBar.setCaption}). */
+	private VerticalLayout displayedAttributeDropdown;
+	private Span displayedAttributeCaption;
+	private VerticalLayout displayedSubAttributeDropdown;
 	private MenuItem displayedAttributeItem;
 	private MenuItem emptySelectionItem;
 	private MenuItem displayedSubAttributeItem;
@@ -49,60 +54,65 @@ public class StatisticsVisualizationElement extends HorizontalLayout {
 
 		CssStyles.style(this, CssStyles.LAYOUT_MINIMAL);
 		setSpacing(true);
-		setWidthUndefined();
+		setWidth(null);
 
 		createAndAddComponents();
 	}
 
 	private void createAndAddComponents() {
-		displayedAttributeDropdown = new MenuBar();
-		displayedAttributeDropdown.setId("visualizationType");
-		displayedAttributeDropdown.setCaption(type.toString(visualizationType));
-		displayedAttributeItem = displayedAttributeDropdown.addItem(type.getEmptySelectionString(visualizationType), null);
+		MenuBar displayedAttributeMenuBar = new MenuBar();
+		displayedAttributeMenuBar.setId("visualizationType");
+		displayedAttributeCaption = new Span(type.toString(visualizationType));
+		displayedAttributeDropdown = StatisticsFilterComponent.withCaption(displayedAttributeCaption, displayedAttributeMenuBar);
+		displayedAttributeItem = displayedAttributeMenuBar.addItem(type.getEmptySelectionString(visualizationType));
 
-		displayedSubAttributeDropdown = new MenuBar();
-		displayedSubAttributeDropdown.setId("displayedSubAttribute");
+		MenuBar displayedSubAttributeMenuBar = new MenuBar();
+		displayedSubAttributeMenuBar.setId("displayedSubAttribute");
+		// was CssStyles.FORCE_CAPTION (an empty caption keeps the menu in line with the captioned one)
+		displayedSubAttributeDropdown = StatisticsFilterComponent.withCaption(new Span(), displayedSubAttributeMenuBar);
 		CssStyles.style(displayedSubAttributeDropdown, CssStyles.FORCE_CAPTION);
-		displayedSubAttributeItem = displayedSubAttributeDropdown.addItem(I18nProperties.getCaption(Captions.statisticsSpecifySelection), null);
+		displayedSubAttributeItem = displayedSubAttributeMenuBar.addItem(I18nProperties.getCaption(Captions.statisticsSpecifySelection));
 
 		// Empty selections
-		Command emptyItemCommand = selectedItem -> {
+		ComponentEventListener<ClickEvent<MenuItem>> emptyItemCommand = event -> {
 			attribute = null;
 			subAttribute = null;
 			resetSubAttributeDropdown();
 			displayedAttributeItem.setText(type.getEmptySelectionString(visualizationType));
 			removeSelections(displayedAttributeItem);
 		};
-		emptySelectionItem = displayedAttributeItem.addItem(type.getEmptySelectionString(visualizationType), emptyItemCommand);
+		emptySelectionItem = displayedAttributeItem.getSubMenu().addItem(type.getEmptySelectionString(visualizationType), emptyItemCommand);
 
 		// Add attribute groups
 		for (StatisticsCaseAttributeGroup attributeGroup : StatisticsCaseAttributeGroup.values()) {
-			MenuItem attributeGroupItem = displayedAttributeItem.addItem(attributeGroup.toString(), null);
+			MenuItem attributeGroupItem = displayedAttributeItem.getSubMenu().addItem(attributeGroup.toString());
 			attributeGroupItem.setEnabled(false);
 
 			// Add attributes belonging to the current group
 			for (StatisticsCaseAttribute attribute : attributeGroup.getAttributes()) {
 				if (attribute.isUsedForVisualisation()) {
-					Command attributeCommand = selectedItem -> {
+					ComponentEventListener<ClickEvent<MenuItem>> attributeCommand = event -> {
+						MenuItem selectedItem = event.getSource();
 						resetSubAttributeDropdown();
 						this.attribute = attribute;
 						this.subAttribute = null;
 						displayedAttributeItem.setText(attribute.toString());
 						removeSelections(displayedAttributeItem);
-						selectedItem.setStyleName("selected-filter");
+						StatisticsFilterComponent.setSelectedStyle(selectedItem, true);
 
 						// Build sub attribute dropdown
 						if (attribute.getSubAttributes().length > 0) {
 							for (StatisticsCaseSubAttribute subAttribute : attribute.getSubAttributes()) {
 								if (subAttribute.isUsedForGrouping()) {
-									Command subAttributeCommand = selectedSubItem -> {
+									ComponentEventListener<ClickEvent<MenuItem>> subAttributeCommand = subEvent -> {
+										MenuItem selectedSubItem = subEvent.getSource();
 										this.subAttribute = subAttribute;
 										displayedSubAttributeItem.setText(subAttribute.toString());
 										removeSelections(displayedSubAttributeItem);
-										selectedSubItem.setStyleName("selected-filter");
+										StatisticsFilterComponent.setSelectedStyle(selectedSubItem, true);
 									};
 
-									displayedSubAttributeItem.addItem(subAttribute.toString(), subAttributeCommand);
+									displayedSubAttributeItem.getSubMenu().addItem(subAttribute.toString(), subAttributeCommand);
 								}
 							}
 
@@ -110,7 +120,7 @@ public class StatisticsVisualizationElement extends HorizontalLayout {
 						}
 					};
 
-					displayedAttributeItem.addItem(attribute.toString(), attributeCommand);
+					displayedAttributeItem.getSubMenu().addItem(attribute.toString(), attributeCommand);
 				}
 			}
 		}
@@ -119,13 +129,13 @@ public class StatisticsVisualizationElement extends HorizontalLayout {
 	}
 
 	private void removeSelections(MenuItem parentItem) {
-		for (MenuItem childItem : parentItem.getChildren()) {
-			childItem.setStyleName(null);
+		for (MenuItem childItem : parentItem.getSubMenu().getItems()) {
+			StatisticsFilterComponent.setSelectedStyle(childItem, false);
 		}
 	}
 
 	private void resetSubAttributeDropdown() {
-		displayedSubAttributeItem.removeChildren();
+		displayedSubAttributeItem.getSubMenu().removeAll();
 		displayedSubAttributeItem.setText(I18nProperties.getCaption(Captions.statisticsSpecifySelection));
 		remove(displayedSubAttributeDropdown);
 	}
@@ -145,7 +155,7 @@ public class StatisticsVisualizationElement extends HorizontalLayout {
 	public void setType(StatisticsVisualizationElementType type, StatisticsVisualizationType visualizationType) {
 		this.type = type;
 		this.visualizationType = visualizationType;
-		displayedAttributeDropdown.setCaption(type.toString(visualizationType));
+		displayedAttributeCaption.setText(type.toString(visualizationType));
 		emptySelectionItem.setText(type.getEmptySelectionString(visualizationType));
 		if (attribute == null && subAttribute == null) {
 			displayedAttributeItem.setText(type.getEmptySelectionString(visualizationType));

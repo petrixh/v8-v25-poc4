@@ -15,14 +15,11 @@
 
 package de.symeda.sormas.ui.epipulse;
 
-import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import com.vaadin.flow.component.Unit;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Alignment;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.epipulse.EpipulseExportCriteria;
@@ -31,8 +28,10 @@ import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import de.symeda.sormas.ui.utils.ComboBoxHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 public class EpipulseExportGridComponent extends VerticalLayout {
 
@@ -48,13 +47,13 @@ public class EpipulseExportGridComponent extends VerticalLayout {
 	private Span viewTitleLabel;
 	private String originalViewTitle;
 
-	public EpipulseExportGridComponent(Label viewTitleLabel, EpipulseExportView epipulseExportView) {
+	public EpipulseExportGridComponent(Span viewTitleLabel, EpipulseExportView epipulseExportView) {
 		setSizeFull();
 		setPadding(false);
 
 		this.viewTitleLabel = viewTitleLabel;
 		this.epipulseExportView = epipulseExportView;
-		originalViewTitle = viewTitleLabel.getValue();
+		originalViewTitle = viewTitleLabel.getText();
 
 		criteria = ViewModelProviders.of(EpipulseExportView.class).get(EpipulseExportCriteria.class);
 		if (criteria.getRelevanceStatus() == null) {
@@ -127,8 +126,10 @@ public class EpipulseExportGridComponent extends VerticalLayout {
 			}
 		}
 		statusFilterLayout.add(actionButtonsLayout);
-		statusFilterLayout.setComponentAlignment(actionButtonsLayout, Alignment.TOP_RIGHT);
+		// was Alignment.TOP_RIGHT in an expanding slot: the layout grows, its content goes right
+		statusFilterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, actionButtonsLayout);
 		statusFilterLayout.setFlexGrow(1, actionButtonsLayout);
+		actionButtonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
 		return statusFilterLayout;
 	}
@@ -140,7 +141,8 @@ public class EpipulseExportGridComponent extends VerticalLayout {
 		gridLayout.setSizeFull();
 		gridLayout.setFlexGrow(1, grid);
 		gridLayout.addClassNames("crud-main-layout");
-		gridLayout.setMargin(new MarginInfo(false, true, true, true));
+		// was MarginInfo(false, true, true, true) (no top margin): Flow padding is on all sides
+		gridLayout.setPadding(true);
 		gridLayout.addClassName(CssStyles.VSPACE_TOP_4);
 	}
 

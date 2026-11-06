@@ -120,7 +120,7 @@ public class StatisticsFilterJurisdictionElement extends StatisticsFilterElement
 				districtValues.stream()
 					.filter(d -> !regionUuids.contains(districtRegionsMap.get(((DistrictReferenceDto) d.getValue()).getUuid())))
 					.forEach(d -> {
-						districtElement.getTokenField().removeTokenizable(d);
+						districtElement.getTokenField().deselect(d);
 					});
 			}
 		});
@@ -142,7 +142,7 @@ public class StatisticsFilterJurisdictionElement extends StatisticsFilterElement
 					communityValues.stream()
 						.filter(c -> !districtUuids.contains(communityDistrictsMap.get(((CommunityReferenceDto) c.getValue()).getUuid())))
 						.forEach(c -> {
-							communityElement.getTokenField().removeTokenizable(c);
+							communityElement.getTokenField().deselect(c);
 						});
 				}
 				if (facilityElement.getSelectedValues() != null) {
@@ -153,7 +153,7 @@ public class StatisticsFilterJurisdictionElement extends StatisticsFilterElement
 					facilityValues.stream()
 						.filter(f -> !districtUuids.contains(facilityDistrictsMap.get(((FacilityReferenceDto) f.getValue()).getUuid())))
 						.forEach(f -> {
-							facilityElement.getTokenField().removeTokenizable(f);
+							facilityElement.getTokenField().deselect(f);
 						});
 				}
 			}
@@ -173,7 +173,7 @@ public class StatisticsFilterJurisdictionElement extends StatisticsFilterElement
 				facilityValues.stream()
 					.filter(f -> !communityUuids.contains(facilityCommunitiesMap.get(((FacilityReferenceDto) f.getValue()).getUuid())))
 					.forEach(f -> {
-						facilityElement.getTokenField().removeTokenizable(f);
+						facilityElement.getTokenField().deselect(f);
 					});
 			}
 		});
@@ -201,7 +201,7 @@ public class StatisticsFilterJurisdictionElement extends StatisticsFilterElement
 				facilityValues.stream()
 					.filter(f -> !facilityUuids.contains(facilityCommunitiesMap.get(((FacilityReferenceDto) f.getValue()).getUuid())))
 					.forEach(f -> {
-						facilityElement.getTokenField().removeTokenizable(f);
+						facilityElement.getTokenField().deselect(f);
 					});
 			}
 		});

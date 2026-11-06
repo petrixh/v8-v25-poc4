@@ -19,9 +19,8 @@ package de.symeda.sormas.ui.statistics;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.server.ExternalResource;
 import com.vaadin.flow.component.Component;
-import com.vaadin.ui.Link;
+import com.vaadin.flow.component.html.Anchor;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.feature.FeatureType;
@@ -56,7 +55,7 @@ public class AbstractStatisticsView extends AbstractSubNavigationView<Component>
 
 		String sormasStatsUrl = FacadeProvider.getConfigFacade().getSormasStatsUrl();
 		if (StringUtils.isNotBlank(sormasStatsUrl)) {
-			Link sormasStatsLink = new Link(I18nProperties.getCaption(Captions.statisticsOpenSormasStats), new ExternalResource(sormasStatsUrl));
+			Anchor sormasStatsLink = new Anchor(sormasStatsUrl, I18nProperties.getCaption(Captions.statisticsOpenSormasStats));
 			sormasStatsLink.addClassNames(CssStyles.LINK_BUTTON, CssStyles.LINK_BUTTON_PRIMARY);
 			this.addHeaderComponent(sormasStatsLink);
 		}

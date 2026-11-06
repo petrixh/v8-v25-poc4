@@ -20,6 +20,9 @@ package de.symeda.sormas.ui.login;
 import java.io.IOException;
 
 import jakarta.inject.Inject;
+import jakarta.security.enterprise.AuthenticationStatus;
+import jakarta.security.enterprise.SecurityContext;
+import jakarta.security.enterprise.authentication.mechanism.http.AuthenticationParameters;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
@@ -43,6 +46,7 @@ import com.vaadin.flow.server.VaadinSession;
 
 import de.symeda.sormas.api.AuthProvider;
 import de.symeda.sormas.api.FacadeProvider;
+import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.SormasErrorHandler;
 import de.symeda.sormas.ui.SormasUI;
 import fish.payara.security.openid.api.OpenIdContext;
@@ -148,9 +152,54 @@ public final class LoginUI {
 	}
 
 	/**
-	 * Registers the OIDC logout servlet when Keycloak is the authentication provider. The SORMAS login servlet of
-	 * Vaadin 8 is gone (the login is a route of the main servlet). No servlet security element: any URL constraint in
-	 * this web module makes Payara 7 refuse the main servlet's root (E001).
+	 * Keycloak (OIDC) login, at {@value #PATH}: asks the authentication mechanism to authenticate the request
+	 * ({@link SecurityContext#authenticate}). Under Keycloak that is the OpenID mechanism, which answers with a
+	 * redirect to the provider's login page; after the login the provider sends the browser to {@code /Callback}.
+	 * In Vaadin 8 the container constraint on the main servlet triggered the mechanism; there is no URL constraint any
+	 * more (E001), so the login route sends the browser here ({@link LoginView}). A plain servlet, not the Vaadin
+	 * request: a redirect in answer to a Vaadin XHR request would not reach the browser window.
+	 */
+	public static class OidcLoginServlet extends HttpServlet {
+
+		private static final long serialVersionUID = 1L;
+
+		public static final String PATH = "oidc-login";
+
+		@Inject
+		private SecurityContext securityContext;
+
+		public OidcLoginServlet() {
+			// created by the servlet container
+		}
+
+		OidcLoginServlet(SecurityContext securityContext) {
+			this.securityContext = securityContext;
+		}
+
+		@Override
+		protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+			AuthenticationStatus status = securityContext.authenticate(request, response, AuthenticationParameters.withParams());
+			if (status == AuthenticationStatus.SEND_CONTINUE || response.isCommitted()) {
+				// the mechanism answered: the redirect to the provider
+				return;
+			}
+			if (status == AuthenticationStatus.SUCCESS) {
+				if (request.isUserInRole(UserRight.SORMAS_UI.name())) {
+					response.sendRedirect(request.getContextPath() + "/");
+				} else {
+					// what the Vaadin 8 container constraint answered to a user without the web UI right
+					response.sendError(HttpServletResponse.SC_FORBIDDEN);
+				}
+				return;
+			}
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+		}
+	}
+
+	/**
+	 * Registers the OIDC login and logout servlets when Keycloak is the authentication provider. The SORMAS login
+	 * servlet of Vaadin 8 is gone (the login is a route of the main servlet). No servlet security element: any URL
+	 * constraint in this web module makes Payara 7 refuse the main servlet's root (E001).
 	 */
 	@WebListener
 	public static class ServletStartupListener implements ServletContextListener {
@@ -168,6 +217,10 @@ public final class LoginUI {
 				servletRegistration.addMapping("/logout/*");
 				servletRegistration.setAsyncSupported(true);
 				logger.debug("OIDC logout servlet enabled");
+				ServletRegistration.Dynamic loginRegistration = ctx.addServlet("OidcLoginServlet", OidcLoginServlet.class);
+				loginRegistration.addMapping("/" + OidcLoginServlet.PATH);
+				loginRegistration.setAsyncSupported(true);
+				logger.debug("OIDC login servlet enabled");
 			}
 		}
 	}

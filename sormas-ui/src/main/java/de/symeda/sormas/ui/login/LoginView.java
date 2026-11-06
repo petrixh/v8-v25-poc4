@@ -18,7 +18,9 @@ package de.symeda.sormas.ui.login;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.HasDynamicTitle;
+import com.vaadin.flow.server.VaadinServletRequest;
 
+import de.symeda.sormas.api.AuthProvider;
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.ui.login.LoginScreen.LoginListener;
 
@@ -26,6 +28,9 @@ import de.symeda.sormas.ui.login.LoginScreen.LoginListener;
  * The login page, route {@value #ROUTE} of every session (registered by {@link LoginUI#init}). It shows the
  * {@link LoginScreen} as the Vaadin 8 login UI did; after a successful login (and the default password dialogs) the
  * browser loads the address the user asked for, or the start page.
+ * <p>
+ * With Keycloak as the authentication provider the page shows nothing and sends the browser to the
+ * {@link LoginUI.OidcLoginServlet}, which redirects to the provider's login page.
  */
 public class LoginView extends Div implements HasDynamicTitle {
 
@@ -36,6 +41,10 @@ public class LoginView extends Div implements HasDynamicTitle {
 	public LoginView() {
 		setSizeFull();
 		UI ui = UI.getCurrent();
+		if (!AuthProvider.getProvider(FacadeProvider.getConfigFacade()).isDefaultProvider()) {
+			ui.getPage().setLocation(VaadinServletRequest.getCurrent().getContextPath() + "/" + LoginUI.OidcLoginServlet.PATH);
+			return;
+		}
 		add(
 			new LoginScreen(
 				DefaultPasswordUIHelper

@@ -17,7 +17,7 @@ package de.symeda.sormas.ui.configuration.infrastructure.components;
 
 import java.util.function.BiConsumer;
 
-import com.vaadin.v7.shared.ui.combobox.FilteringMode;
+import de.symeda.sormas.ui.utils.fields.FilteringMode;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -36,7 +36,7 @@ public class CountryCombo extends ComboBoxWithPlaceholder {
 
 		CountryReferenceDto serverCountry = FacadeProvider.getCountryFacade().getServerCountry();
 		addValueChangeListener(e -> {
-			CountryReferenceDto country = (CountryReferenceDto) e.getProperty().getValue();
+			CountryReferenceDto country = (CountryReferenceDto) e.getValue();
 			boolean isServerCountry = country == null || country.equals(serverCountry);
 
 			changeHandler.accept(country, isServerCountry);

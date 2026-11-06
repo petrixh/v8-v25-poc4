@@ -24,8 +24,8 @@ import java.util.function.Consumer;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -189,7 +189,7 @@ public class InfrastructureController {
 			@Override
 			public void onCommit() {
 				FacadeProvider.getFacilityFacade().save(editForm.getValue());
-				Notification.show(I18nProperties.getString(Strings.messageEntryCreated), Type.ASSISTIVE_NOTIFICATION);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageEntryCreated), Type.ASSISTIVE_NOTIFICATION);
 				SormasUI.get().getNavigator().navigateTo(FacilitiesView.VIEW_NAME);
 			}
 		});
@@ -221,7 +221,7 @@ public class InfrastructureController {
 
 		editComponent.addCommitListener(() -> {
 			FacadeProvider.getAreaFacade().save(editForm.getValue());
-			Notification.show(I18nProperties.getString(Strings.messageEntryCreated), Type.ASSISTIVE_NOTIFICATION);
+			NotificationHelper.show(I18nProperties.getString(Strings.messageEntryCreated), Type.ASSISTIVE_NOTIFICATION);
 			SormasUI.get().getNavigator().navigateTo(AreasView.VIEW_NAME);
 		});
 
@@ -252,7 +252,7 @@ public class InfrastructureController {
 
 		editView.addCommitListener(() -> {
 			FacadeProvider.getContinentFacade().save(editForm.getValue());
-			Notification.show(I18nProperties.getString(Strings.messageEntryCreated), Type.ASSISTIVE_NOTIFICATION);
+			NotificationHelper.show(I18nProperties.getString(Strings.messageEntryCreated), Type.ASSISTIVE_NOTIFICATION);
 			SormasUI.get().getNavigator().navigateTo(ContinentsView.VIEW_NAME);
 		});
 
@@ -283,7 +283,7 @@ public class InfrastructureController {
 
 		editView.addCommitListener(() -> {
 			FacadeProvider.getSubcontinentFacade().save(editForm.getValue());
-			Notification.show(I18nProperties.getString(Strings.messageEntryCreated), Type.ASSISTIVE_NOTIFICATION);
+			NotificationHelper.show(I18nProperties.getString(Strings.messageEntryCreated), Type.ASSISTIVE_NOTIFICATION);
 			SormasUI.get().getNavigator().navigateTo(SubcontinentsView.VIEW_NAME);
 		});
 
@@ -315,7 +315,7 @@ public class InfrastructureController {
 
 		editView.addCommitListener(() -> {
 			FacadeProvider.getCountryFacade().save(editForm.getValue());
-			Notification.show(I18nProperties.getString(Strings.messageEntryCreated), Type.ASSISTIVE_NOTIFICATION);
+			NotificationHelper.show(I18nProperties.getString(Strings.messageEntryCreated), Type.ASSISTIVE_NOTIFICATION);
 			SormasUI.get().getNavigator().navigateTo(CountriesView.VIEW_NAME);
 		});
 
@@ -347,7 +347,7 @@ public class InfrastructureController {
 
 		editView.addCommitListener(() -> {
 			FacadeProvider.getRegionFacade().save(editForm.getValue());
-			Notification.show(I18nProperties.getString(Strings.messageEntryCreated), Type.ASSISTIVE_NOTIFICATION);
+			NotificationHelper.show(I18nProperties.getString(Strings.messageEntryCreated), Type.ASSISTIVE_NOTIFICATION);
 			SormasUI.get().getNavigator().navigateTo(RegionsView.VIEW_NAME);
 		});
 
@@ -382,7 +382,7 @@ public class InfrastructureController {
 			@Override
 			public void onCommit() {
 				FacadeProvider.getDistrictFacade().save(editForm.getValue());
-				Notification.show(I18nProperties.getString(Strings.messageEntryCreated), Type.ASSISTIVE_NOTIFICATION);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageEntryCreated), Type.ASSISTIVE_NOTIFICATION);
 				SormasUI.get().getNavigator().navigateTo(DistrictsView.VIEW_NAME);
 			}
 		});
@@ -418,7 +418,7 @@ public class InfrastructureController {
 			@Override
 			public void onCommit() {
 				FacadeProvider.getCommunityFacade().save(editForm.getValue());
-				Notification.show(I18nProperties.getString(Strings.messageEntryCreated), Type.ASSISTIVE_NOTIFICATION);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageEntryCreated), Type.ASSISTIVE_NOTIFICATION);
 				SormasUI.get().getNavigator().navigateTo(CommunitiesView.VIEW_NAME);
 			}
 		});
@@ -450,7 +450,7 @@ public class InfrastructureController {
 			form.getFieldGroup());
 		view.addCommitListener(() -> {
 			FacadeProvider.getPointOfEntryFacade().save(form.getValue());
-			Notification.show(I18nProperties.getString(Strings.messageEntryCreated), Type.ASSISTIVE_NOTIFICATION);
+			NotificationHelper.show(I18nProperties.getString(Strings.messageEntryCreated), Type.ASSISTIVE_NOTIFICATION);
 			SormasUI.get().getNavigator().navigateTo(PointsOfEntryView.VIEW_NAME);
 		});
 

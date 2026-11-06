@@ -18,18 +18,18 @@ package de.symeda.sormas.ui.configuration.infrastructure;
 import java.util.Collections;
 import java.util.Set;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.StreamResource;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
+import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;
@@ -108,32 +108,32 @@ public class CommunitiesView extends AbstractConfigurationView {
 		gridLayout.setSpacing(false);
 		gridLayout.setExpandRatio(grid, 1);
 		gridLayout.setSizeFull();
-		gridLayout.setStyleName("crud-main-layout");
+		gridLayout.setClassName("crud-main-layout");
 
 		boolean infrastructureDataEditable = UiUtil.enabled(FeatureType.EDIT_INFRASTRUCTURE_DATA);
 
 		if (UiUtil.permitted(infrastructureDataEditable, UserRight.INFRASTRUCTURE_IMPORT)) {
-			importButton = ButtonHelper.createIconButton(Captions.actionImport, VaadinIcons.UPLOAD, e -> {
-				Window window = VaadinUiUtil.showPopupWindow(new InfrastructureImportLayout(InfrastructureType.COMMUNITY));
+			importButton = ButtonHelper.createIconButton(Captions.actionImport, VaadinIcon.UPLOAD, e -> {
+				Dialog window = VaadinUiUtil.showPopupWindow(new InfrastructureImportLayout(InfrastructureType.COMMUNITY));
 				window.setCaption(I18nProperties.getString(Strings.headingImportCommunities));
 				window.addCloseListener(c -> grid.reload());
-			}, ValoTheme.BUTTON_PRIMARY);
+			}, CssStyles.BUTTON_PRIMARY);
 
 			addHeaderComponent(importButton);
 		} else if (!infrastructureDataEditable) {
-			Label infrastructureDataLocked = new Label();
+			Span infrastructureDataLocked = new Span();
 			infrastructureDataLocked.setCaption(I18nProperties.getString(Strings.headingInfrastructureLocked));
 			infrastructureDataLocked.setValue(I18nProperties.getString(Strings.messageInfrastructureLocked));
-			infrastructureDataLocked.setIcon(VaadinIcons.WARNING);
+			infrastructureDataLocked.setIcon(VaadinIcon.WARNING);
 			addHeaderComponent(infrastructureDataLocked);
 		}
 
 		if (UiUtil.permitted(UserRight.INFRASTRUCTURE_EXPORT)) {
-			Button exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcons.TABLE, null, ValoTheme.BUTTON_PRIMARY);
+			Button exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcon.TABLE, null, CssStyles.BUTTON_PRIMARY);
 			exportButton.setDescription(I18nProperties.getDescription(Descriptions.descExportButton));
 			addHeaderComponent(exportButton);
 
-			StreamResource streamResource = GridExportStreamResource
+			DownloadHandler streamResource = GridExportStreamResource
 				.createStreamResourceWithSelectedItems(grid, this::getSelectedRows, ExportEntityName.COMMUNITIES, CommunitiesGrid.ACTION_BTN_ID);
 			IgnoreCancelDownloader fileDownloader = new IgnoreCancelDownloader(streamResource);
 			fileDownloader.extend(exportButton);
@@ -142,20 +142,20 @@ public class CommunitiesView extends AbstractConfigurationView {
 		if (UiUtil.permitted(infrastructureDataEditable, UserRight.INFRASTRUCTURE_CREATE)) {
 			createButton = ButtonHelper.createIconButton(
 				Captions.actionNewEntry,
-				VaadinIcons.PLUS_CIRCLE,
+				VaadinIcon.PLUS_CIRCLE,
 				e -> ControllerProvider.getInfrastructureController().createCommunity(),
-				ValoTheme.BUTTON_PRIMARY);
+				CssStyles.BUTTON_PRIMARY);
 
 			addHeaderComponent(createButton);
 		}
 
 		if (UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS)) {
-			Button btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcons.CHECK_SQUARE_O, null);
+			Button btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcon.CHECK_SQUARE_O, null);
 			btnEnterBulkEditMode.setVisible(!viewConfiguration.isInEagerMode());
 			addHeaderComponent(btnEnterBulkEditMode);
 
 			Button btnLeaveBulkEditMode =
-				ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcons.CLOSE, null, ValoTheme.BUTTON_PRIMARY);
+				ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcon.CLOSE, null, CssStyles.BUTTON_PRIMARY);
 			btnLeaveBulkEditMode.setVisible(viewConfiguration.isInEagerMode());
 			addHeaderComponent(btnLeaveBulkEditMode);
 
@@ -205,7 +205,7 @@ public class CommunitiesView extends AbstractConfigurationView {
 			grid.reload();
 		}, regionFilter);
 		countryFilter.addValueChangeListener(country -> {
-			CountryReferenceDto countryReferenceDto = (CountryReferenceDto) country.getProperty().getValue();
+			CountryReferenceDto countryReferenceDto = (CountryReferenceDto) country.getValue();
 			criteria.country(countryReferenceDto);
 			navigateTo(criteria);
 			FieldHelper.updateItems(
@@ -220,7 +220,7 @@ public class CommunitiesView extends AbstractConfigurationView {
 		regionFilter.setCaption(I18nProperties.getPrefixCaption(DistrictDto.I18N_PREFIX, DistrictDto.REGION));
 		regionFilter.addItems(FacadeProvider.getRegionFacade().getAllActiveAsReference());
 		regionFilter.addValueChangeListener(e -> {
-			RegionReferenceDto region = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto region = (RegionReferenceDto) e.getValue();
 			criteria.region(region);
 			navigateTo(criteria);
 			FieldHelper
@@ -234,7 +234,7 @@ public class CommunitiesView extends AbstractConfigurationView {
 		districtFilter.setWidth(140, Unit.PIXELS);
 		districtFilter.setCaption(I18nProperties.getPrefixCaption(CommunityDto.I18N_PREFIX, CommunityDto.DISTRICT));
 		districtFilter.addValueChangeListener(e -> {
-			criteria.district((DistrictReferenceDto) e.getProperty().getValue());
+			criteria.district((DistrictReferenceDto) e.getValue());
 			navigateTo(criteria);
 		});
 		filterLayout.addComponent(districtFilter);
@@ -270,7 +270,7 @@ public class CommunitiesView extends AbstractConfigurationView {
 				}
 
 				relevanceStatusFilter.addValueChangeListener(e -> {
-					criteria.relevanceStatus((EntityRelevanceStatus) e.getProperty().getValue());
+					criteria.relevanceStatus((EntityRelevanceStatus) e.getValue());
 					navigateTo(criteria);
 				});
 				actionButtonsLayout.addComponent(relevanceStatusFilter);
@@ -281,7 +281,7 @@ public class CommunitiesView extends AbstractConfigurationView {
 						Captions.bulkActions,
 						new MenuBarHelper.MenuBarItem(
 							I18nProperties.getCaption(Captions.actionArchiveInfrastructure),
-							VaadinIcons.ARCHIVE,
+							VaadinIcon.ARCHIVE,
 							selectedItem -> ControllerProvider.getInfrastructureController()
 								.archiveOrDearchiveAllSelectedItems(
 									true,
@@ -292,7 +292,7 @@ public class CommunitiesView extends AbstractConfigurationView {
 							UiUtil.permitted(UserRight.INFRASTRUCTURE_ARCHIVE) && EntityRelevanceStatus.ACTIVE.equals(criteria.getRelevanceStatus())),
 						new MenuBarHelper.MenuBarItem(
 							I18nProperties.getCaption(Captions.actionDearchiveInfrastructure),
-							VaadinIcons.ARCHIVE,
+							VaadinIcon.ARCHIVE,
 							selectedItem -> ControllerProvider.getInfrastructureController()
 								.archiveOrDearchiveAllSelectedItems(
 									false,

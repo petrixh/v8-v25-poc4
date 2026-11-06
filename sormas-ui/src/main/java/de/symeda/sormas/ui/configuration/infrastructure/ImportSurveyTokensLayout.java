@@ -18,7 +18,7 @@ package de.symeda.sormas.ui.configuration.infrastructure;
 import com.opencsv.exceptions.CsvValidationException;
 import com.vaadin.server.ClassResource;
 import com.vaadin.server.Page;
-import com.vaadin.ui.Notification;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
@@ -58,7 +58,7 @@ public class ImportSurveyTokensLayout extends AbstractImportLayout {
 				new Notification(
 						I18nProperties.getString(Strings.headingImportFailed),
 						I18nProperties.getString(Strings.messageImportFailed),
-						Notification.Type.ERROR_MESSAGE,
+						NotificationHelper.Type.ERROR_MESSAGE,
 						false).show(Page.getCurrent());
 			}
 		}));

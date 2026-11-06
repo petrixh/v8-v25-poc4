@@ -5,10 +5,10 @@ import java.io.IOException;
 import com.opencsv.exceptions.CsvValidationException;
 import com.vaadin.server.ClassResource;
 import com.vaadin.server.Page;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.v7.ui.DateField;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
+import de.symeda.sormas.ui.utils.fields.DateField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -32,11 +32,11 @@ public class InfrastructureImportLayout extends AbstractImportLayout {
 
 		DateField dfCollectionDate = new DateField();
 		if (infrastructureType == InfrastructureType.POPULATION_DATA) {
-			Label lblCollectionDateInfo = new Label(I18nProperties.getString(Strings.infoPopulationCollectionDate));
+			Span lblCollectionDateInfo = new Span(I18nProperties.getString(Strings.infoPopulationCollectionDate));
 			addComponent(lblCollectionDateInfo);
 			addComponent(dfCollectionDate);
 			dfCollectionDate.setRequired(true);
-			dfCollectionDate.addValueChangeListener(e -> upload.setEnabled(e.getProperty().getValue() != null));
+			dfCollectionDate.addValueChangeListener(e -> upload.setEnabled(e.getValue() != null));
 		}
 
 		String templateFilePath;

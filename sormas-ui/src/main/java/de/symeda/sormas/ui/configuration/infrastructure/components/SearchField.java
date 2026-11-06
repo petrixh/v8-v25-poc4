@@ -1,6 +1,6 @@
 package de.symeda.sormas.ui.configuration.infrastructure.components;
 
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;

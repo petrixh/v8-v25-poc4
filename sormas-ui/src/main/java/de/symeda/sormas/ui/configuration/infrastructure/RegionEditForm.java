@@ -23,9 +23,9 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.feature.FeatureType;
@@ -108,7 +108,7 @@ public class RegionEditForm extends AbstractEditForm<RegionDto> {
 	}
 
 	@Override
-	public void setValue(RegionDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(RegionDto newFieldValue) {
 		super.setValue(newFieldValue);
 
 		getField(RegionDto.COUNTRY).setReadOnly(newFieldValue.getCountry() != null);

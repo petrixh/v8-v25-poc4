@@ -22,9 +22,9 @@ import java.nio.file.Paths;
 
 import com.opencsv.exceptions.CsvValidationException;
 import com.vaadin.server.Page;
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Notification;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -49,7 +49,7 @@ public abstract class AbstractImportDefaultCsvLayout extends AbstractImportLayou
 				new Notification(
 					I18nProperties.getString(Strings.headingImportFailed),
 					I18nProperties.getString(Strings.messageImportFailed),
-					Notification.Type.ERROR_MESSAGE,
+					NotificationHelper.Type.ERROR_MESSAGE,
 					false).show(Page.getCurrent());
 			}
 		});

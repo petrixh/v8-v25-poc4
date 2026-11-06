@@ -20,9 +20,9 @@ package de.symeda.sormas.ui.configuration.infrastructure;
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.feature.FeatureType;
@@ -76,15 +76,15 @@ public class CommunityEditForm extends AbstractEditForm<CommunityDto> {
 		setRequired(true, CommunityDto.NAME, CommunityDto.REGION, CommunityDto.DISTRICT);
 
 		region.addValueChangeListener(e -> {
-			RegionReferenceDto regionDto = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto regionDto = (RegionReferenceDto) e.getValue();
 			FieldHelper
 				.updateItems(district, regionDto != null ? FacadeProvider.getDistrictFacade().getAllActiveByRegion(regionDto.getUuid()) : null);
 		});
 
 		district.addValueChangeListener(e -> {
-			if (e.getProperty().getValue() != null && region.getValue() == null) {
+			if (e.getValue() != null && region.getValue() == null) {
 				DistrictDto communityDistrict =
-					FacadeProvider.getDistrictFacade().getByUuid(((DistrictReferenceDto) e.getProperty().getValue()).getUuid());
+					FacadeProvider.getDistrictFacade().getByUuid(((DistrictReferenceDto) e.getValue()).getUuid());
 				region.setValue(communityDistrict.getRegion());
 			}
 		});

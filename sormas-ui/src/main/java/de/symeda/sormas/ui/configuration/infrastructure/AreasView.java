@@ -2,18 +2,18 @@ package de.symeda.sormas.ui.configuration.infrastructure;
 
 import static com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
+import de.symeda.sormas.ui.utils.CssStyles;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;
@@ -76,34 +76,34 @@ public class AreasView extends AbstractConfigurationView {
 		gridLayout.setSpacing(false);
 		gridLayout.setExpandRatio(grid, 1);
 		gridLayout.setSizeFull();
-		gridLayout.setStyleName("crud-main-layout");
+		gridLayout.setClassName("crud-main-layout");
 
 		boolean infrastructureDataEditable = UiUtil.enabled(FeatureType.EDIT_INFRASTRUCTURE_DATA);
 
 		if (UiUtil.permitted(infrastructureDataEditable, UserRight.INFRASTRUCTURE_IMPORT)) {
-			btnImport = ButtonHelper.createIconButton(Captions.actionImport, VaadinIcons.UPLOAD, e -> {
-				Window window = VaadinUiUtil.showPopupWindow(new InfrastructureImportLayout(InfrastructureType.AREA));
+			btnImport = ButtonHelper.createIconButton(Captions.actionImport, VaadinIcon.UPLOAD, e -> {
+				Dialog window = VaadinUiUtil.showPopupWindow(new InfrastructureImportLayout(InfrastructureType.AREA));
 				window.setCaption(I18nProperties.getString(Strings.headingImportAreas));
 				window.addCloseListener(c -> {
 					grid.reload();
 				});
-			}, ValoTheme.BUTTON_PRIMARY);
+			}, CssStyles.BUTTON_PRIMARY);
 
 			addHeaderComponent(btnImport);
 		} else if (!infrastructureDataEditable) {
-			Label infrastructureDataLocked = new Label();
+			Span infrastructureDataLocked = new Span();
 			infrastructureDataLocked.setCaption(I18nProperties.getString(Strings.headingInfrastructureLocked));
 			infrastructureDataLocked.setValue(I18nProperties.getString(Strings.messageInfrastructureLocked));
-			infrastructureDataLocked.setIcon(VaadinIcons.WARNING);
+			infrastructureDataLocked.setIcon(VaadinIcon.WARNING);
 			addHeaderComponent(infrastructureDataLocked);
 		}
 
 		if (UiUtil.permitted(UserRight.INFRASTRUCTURE_EXPORT)) {
-			Button btnExport = ButtonHelper.createIconButton(Captions.export, VaadinIcons.TABLE, null, ValoTheme.BUTTON_PRIMARY);
+			Button btnExport = ButtonHelper.createIconButton(Captions.export, VaadinIcon.TABLE, null, CssStyles.BUTTON_PRIMARY);
 			btnExport.setDescription(I18nProperties.getDescription(Descriptions.descExportButton));
 			addHeaderComponent(btnExport);
 
-			StreamResource streamResource = GridExportStreamResource.createStreamResource(grid, ExportEntityName.AREAS, AreasGrid.ACTION_BTN_ID);
+			DownloadHandler streamResource = GridExportStreamResource.createStreamResource(grid, ExportEntityName.AREAS, AreasGrid.ACTION_BTN_ID);
 			FileDownloader fileDownloader = new FileDownloader(streamResource);
 			fileDownloader.extend(btnExport);
 		}
@@ -111,20 +111,20 @@ public class AreasView extends AbstractConfigurationView {
 		if (UiUtil.permitted(infrastructureDataEditable, UserRight.INFRASTRUCTURE_CREATE)) {
 			btnCreate = ButtonHelper.createIconButton(
 				Captions.actionNewEntry,
-				VaadinIcons.PLUS_CIRCLE,
+				VaadinIcon.PLUS_CIRCLE,
 				e -> ControllerProvider.getInfrastructureController().createArea(),
-				ValoTheme.BUTTON_PRIMARY);
+				CssStyles.BUTTON_PRIMARY);
 
 			addHeaderComponent(btnCreate);
 		}
 
 		if (UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS)) {
-			Button btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcons.CHECK_SQUARE_O, null);
+			Button btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcon.CHECK_SQUARE_O, null);
 			btnEnterBulkEditMode.setVisible(!viewConfiguration.isInEagerMode());
 			addHeaderComponent(btnEnterBulkEditMode);
 
 			Button btnLeaveBulkEditMode =
-				ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcons.CLOSE, null, ValoTheme.BUTTON_PRIMARY);
+				ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcon.CLOSE, null, CssStyles.BUTTON_PRIMARY);
 			btnLeaveBulkEditMode.setVisible(viewConfiguration.isInEagerMode());
 			addHeaderComponent(btnLeaveBulkEditMode);
 
@@ -202,7 +202,7 @@ public class AreasView extends AbstractConfigurationView {
 						Captions.bulkActions,
 						new MenuBarHelper.MenuBarItem(
 							I18nProperties.getCaption(Captions.actionArchiveInfrastructure),
-							VaadinIcons.ARCHIVE,
+							VaadinIcon.ARCHIVE,
 							selectedItem -> ControllerProvider.getInfrastructureController()
 								.archiveOrDearchiveAllSelectedItems(
 									true,
@@ -213,7 +213,7 @@ public class AreasView extends AbstractConfigurationView {
 							UiUtil.permitted(UserRight.INFRASTRUCTURE_ARCHIVE) && EntityRelevanceStatus.ACTIVE.equals(criteria.getRelevanceStatus())),
 						new MenuBarHelper.MenuBarItem(
 							I18nProperties.getCaption(Captions.actionDearchiveInfrastructure),
-							VaadinIcons.ARCHIVE,
+							VaadinIcon.ARCHIVE,
 							selectedItem -> ControllerProvider.getInfrastructureController()
 								.archiveOrDearchiveAllSelectedItems(
 									false,

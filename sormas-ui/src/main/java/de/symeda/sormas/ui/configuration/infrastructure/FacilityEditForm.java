@@ -21,8 +21,8 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 
 import com.vaadin.v7.data.util.converter.Converter;
 import com.vaadin.v7.data.validator.EmailValidator;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -130,14 +130,14 @@ public class FacilityEditForm extends AbstractEditForm<FacilityDto> {
 		});
 
 		region.addValueChangeListener(e -> {
-			RegionReferenceDto regionDto = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto regionDto = (RegionReferenceDto) e.getValue();
 			FieldHelper
 				.updateItems(district, regionDto != null ? FacadeProvider.getDistrictFacade().getAllActiveByRegion(regionDto.getUuid()) : null);
 		});
 
 		district.addValueChangeListener(e -> {
 			FieldHelper.removeItems(community);
-			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getProperty().getValue();
+			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getValue();
 			FieldHelper.updateItems(
 				community,
 				districtDto != null ? FacadeProvider.getCommunityFacade().getAllActiveByDistrict(districtDto.getUuid()) : null);
@@ -145,13 +145,13 @@ public class FacilityEditForm extends AbstractEditForm<FacilityDto> {
 
 		community.addValueChangeListener(e -> {
 			@SuppressWarnings("unused")
-			CommunityReferenceDto communityDto = (CommunityReferenceDto) e.getProperty().getValue();
+			CommunityReferenceDto communityDto = (CommunityReferenceDto) e.getValue();
 		});
 		region.addItems(FacadeProvider.getRegionFacade().getAllActiveAsReference());
 	}
 
 	@Override
-	public void setValue(FacilityDto facilityDto) throws com.vaadin.v7.data.Property.ReadOnlyException, Converter.ConversionException {
+	public void setValue(FacilityDto facilityDto) {
 		if (facilityDto.getType() != null) {
 			typeGroup.setValue(facilityDto.getType().getFacilityTypeGroup());
 		}

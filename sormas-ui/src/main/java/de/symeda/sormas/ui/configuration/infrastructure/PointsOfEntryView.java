@@ -18,19 +18,19 @@ package de.symeda.sormas.ui.configuration.infrastructure;
 import java.util.Collections;
 import java.util.Set;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.HorizontalLayout;
-import com.vaadin.v7.ui.VerticalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.dialog.Dialog;
+import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;
@@ -111,34 +111,34 @@ public class PointsOfEntryView extends AbstractConfigurationView {
 		gridLayout.setSpacing(false);
 		gridLayout.setExpandRatio(grid, 1);
 		gridLayout.setSizeFull();
-		gridLayout.setStyleName("crud-main-layout");
+		gridLayout.setClassName("crud-main-layout");
 
 		boolean infrastructureDataEditable = UiUtil.enabled(FeatureType.EDIT_INFRASTRUCTURE_DATA);
 
 		if (UiUtil.permitted(infrastructureDataEditable, UserRight.INFRASTRUCTURE_IMPORT)) {
-			Button importButton = ButtonHelper.createIconButton(Captions.actionImport, VaadinIcons.UPLOAD, e -> {
-				Window window = VaadinUiUtil.showPopupWindow(new InfrastructureImportLayout(InfrastructureType.POINT_OF_ENTRY));
+			Button importButton = ButtonHelper.createIconButton(Captions.actionImport, VaadinIcon.UPLOAD, e -> {
+				Dialog window = VaadinUiUtil.showPopupWindow(new InfrastructureImportLayout(InfrastructureType.POINT_OF_ENTRY));
 				window.setCaption(I18nProperties.getString(Strings.headingImportPointsOfEntry));
 				window.addCloseListener(c -> {
 					grid.reload();
 				});
-			}, ValoTheme.BUTTON_PRIMARY);
+			}, CssStyles.BUTTON_PRIMARY);
 
 			addHeaderComponent(importButton);
 		} else if (!infrastructureDataEditable) {
-			Label infrastructureDataLocked = new Label();
+			Span infrastructureDataLocked = new Span();
 			infrastructureDataLocked.setCaption(I18nProperties.getString(Strings.headingInfrastructureLocked));
 			infrastructureDataLocked.setValue(I18nProperties.getString(Strings.messageInfrastructureLocked));
-			infrastructureDataLocked.setIcon(VaadinIcons.WARNING);
+			infrastructureDataLocked.setIcon(VaadinIcon.WARNING);
 			addHeaderComponent(infrastructureDataLocked);
 		}
 
 		if (UiUtil.permitted(UserRight.INFRASTRUCTURE_EXPORT)) {
-			Button exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcons.TABLE, null, ValoTheme.BUTTON_PRIMARY);
+			Button exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcon.TABLE, null, CssStyles.BUTTON_PRIMARY);
 			exportButton.setDescription(I18nProperties.getDescription(Descriptions.descExportButton));
 			addHeaderComponent(exportButton);
 
-			StreamResource streamResource = GridExportStreamResource.createStreamResourceWithSelectedItems(
+			DownloadHandler streamResource = GridExportStreamResource.createStreamResourceWithSelectedItems(
 				grid,
 				this::getSelectedRows,
 				ExportEntityName.POINTS_OF_ENTRY,
@@ -150,21 +150,21 @@ public class PointsOfEntryView extends AbstractConfigurationView {
 		if (UiUtil.permitted(infrastructureDataEditable, UserRight.INFRASTRUCTURE_CREATE)) {
 			createButton = ButtonHelper.createIconButton(
 				Captions.actionNewEntry,
-				VaadinIcons.PLUS_CIRCLE,
+				VaadinIcon.PLUS_CIRCLE,
 				e -> ControllerProvider.getInfrastructureController().createPointOfEntry(),
-				ValoTheme.BUTTON_PRIMARY);
+				CssStyles.BUTTON_PRIMARY);
 
 			addHeaderComponent(createButton);
 		}
 
 		if (UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS)) {
-			Button btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcons.CHECK_SQUARE_O, null);
+			Button btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcon.CHECK_SQUARE_O, null);
 			btnEnterBulkEditMode.setVisible(!viewConfiguration.isInEagerMode());
 			addHeaderComponent(btnEnterBulkEditMode);
 
-			Button btnLeaveBulkEditMode = ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcons.CLOSE, null);
+			Button btnLeaveBulkEditMode = ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcon.CLOSE, null);
 			btnLeaveBulkEditMode.setVisible(viewConfiguration.isInEagerMode());
-			btnLeaveBulkEditMode.setStyleName(ValoTheme.BUTTON_PRIMARY);
+			btnLeaveBulkEditMode.setClassName(CssStyles.BUTTON_PRIMARY);
 			addHeaderComponent(btnLeaveBulkEditMode);
 
 			btnEnterBulkEditMode.addClickListener(e -> {
@@ -214,7 +214,7 @@ public class PointsOfEntryView extends AbstractConfigurationView {
 			grid.reload();
 		}, regionFilter);
 		countryFilter.addValueChangeListener(country -> {
-			CountryReferenceDto countryReferenceDto = (CountryReferenceDto) country.getProperty().getValue();
+			CountryReferenceDto countryReferenceDto = (CountryReferenceDto) country.getValue();
 			criteria.country(countryReferenceDto);
 			navigateTo(criteria);
 			FieldHelper.updateItems(
@@ -229,7 +229,7 @@ public class PointsOfEntryView extends AbstractConfigurationView {
 		regionFilter.setCaption(I18nProperties.getPrefixCaption(PointOfEntryDto.I18N_PREFIX, PointOfEntryDto.REGION));
 		regionFilter.addItems(FacadeProvider.getRegionFacade().getAllActiveAsReference());
 		regionFilter.addValueChangeListener(e -> {
-			RegionReferenceDto region = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto region = (RegionReferenceDto) e.getValue();
 			criteria.region(region);
 			navigateTo(criteria);
 			FieldHelper
@@ -242,7 +242,7 @@ public class PointsOfEntryView extends AbstractConfigurationView {
 		districtFilter.setWidth(140, Unit.PIXELS);
 		districtFilter.setCaption(I18nProperties.getPrefixCaption(PointOfEntryDto.I18N_PREFIX, PointOfEntryDto.DISTRICT));
 		districtFilter.addValueChangeListener(e -> {
-			criteria.district((DistrictReferenceDto) e.getProperty().getValue());
+			criteria.district((DistrictReferenceDto) e.getValue());
 			navigateTo(criteria);
 		});
 		filterLayout.addComponent(districtFilter);
@@ -253,7 +253,7 @@ public class PointsOfEntryView extends AbstractConfigurationView {
 		typeFilter.setCaption(I18nProperties.getPrefixCaption(PointOfEntryDto.I18N_PREFIX, PointOfEntryDto.POINT_OF_ENTRY_TYPE));
 		typeFilter.addItems(PointOfEntryType.values());
 		typeFilter.addValueChangeListener(e -> {
-			criteria.type((PointOfEntryType) e.getProperty().getValue());
+			criteria.type((PointOfEntryType) e.getValue());
 			navigateTo(criteria);
 		});
 		filterLayout.addComponent(typeFilter);
@@ -267,7 +267,7 @@ public class PointsOfEntryView extends AbstractConfigurationView {
 		activeFilter.setItemCaption(Boolean.TRUE, DataHelper.stringifyBoolean(Boolean.TRUE));
 		activeFilter.setItemCaption(Boolean.FALSE, DataHelper.stringifyBoolean(Boolean.FALSE));
 		activeFilter.addValueChangeListener(e -> {
-			criteria.active((Boolean) e.getProperty().getValue());
+			criteria.active((Boolean) e.getValue());
 			navigateTo(criteria);
 		});
 		filterLayout.addComponent(activeFilter);
@@ -304,7 +304,7 @@ public class PointsOfEntryView extends AbstractConfigurationView {
 				}
 
 				relevanceStatusFilter.addValueChangeListener(e -> {
-					criteria.relevanceStatus((EntityRelevanceStatus) e.getProperty().getValue());
+					criteria.relevanceStatus((EntityRelevanceStatus) e.getValue());
 					navigateTo(criteria);
 				});
 				actionButtonsLayout.addComponent(relevanceStatusFilter);
@@ -315,7 +315,7 @@ public class PointsOfEntryView extends AbstractConfigurationView {
 						Captions.bulkActions,
 						new MenuBarHelper.MenuBarItem(
 							I18nProperties.getCaption(Captions.actionArchiveInfrastructure),
-							VaadinIcons.ARCHIVE,
+							VaadinIcon.ARCHIVE,
 							selectedItem -> ControllerProvider.getInfrastructureController()
 								.archiveOrDearchiveAllSelectedItems(
 									true,
@@ -326,7 +326,7 @@ public class PointsOfEntryView extends AbstractConfigurationView {
 							UiUtil.permitted(UserRight.INFRASTRUCTURE_ARCHIVE) && EntityRelevanceStatus.ACTIVE.equals(criteria.getRelevanceStatus())),
 						new MenuBarHelper.MenuBarItem(
 							I18nProperties.getCaption(Captions.actionDearchiveInfrastructure),
-							VaadinIcons.ARCHIVE,
+							VaadinIcon.ARCHIVE,
 							selectedItem -> ControllerProvider.getInfrastructureController()
 								.archiveOrDearchiveAllSelectedItems(
 									false,

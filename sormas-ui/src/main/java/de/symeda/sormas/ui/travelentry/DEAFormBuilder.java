@@ -36,7 +36,12 @@ public class DEAFormBuilder {
 		ArrayList<DeaContentEntry> deaContentValueEntries = new ArrayList<>(this.deaContentEntries);
 		for (int i = 0; i < deaContentValueEntries.size(); i++) {
 			Field<?> field = fields.get(i);
-			deaContentValueEntries.get(i).setValue((String) field.getValue());
+			String value = (String) field.getValue();
+			// Vaadin 7 kept null for an entry that was shown empty and left untouched; the Flow text field reports ""
+			if (!isCreate && "".equals(value) && deaContentValueEntries.get(i).getValue() == null) {
+				value = null;
+			}
+			deaContentValueEntries.get(i).setValue(value);
 		}
 		return deaContentValueEntries;
 	}

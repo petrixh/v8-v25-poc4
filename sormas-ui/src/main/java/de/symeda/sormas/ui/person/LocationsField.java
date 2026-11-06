@@ -1,10 +1,9 @@
 package de.symeda.sormas.ui.person;
 
+import java.util.Collection;
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Window;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.Table;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -44,9 +43,9 @@ public class LocationsField extends AbstractTableField<LocationDto> {
 
 		final CommitDiscardWrapperComponent<LocationEditForm> editView =
 			new CommitDiscardWrapperComponent<>(editForm, isEditAllowed, editForm.getFieldGroup());
-		editView.getCommitButton().setCaption(I18nProperties.getString(Strings.done));
+		editView.getCommitButton().setText(I18nProperties.getString(Strings.done));
 
-		Window popupWindow = VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getCaption(LocationDto.I18N_PREFIX));
+		Dialog popupWindow = VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getCaption(LocationDto.I18N_PREFIX));
 
 		if (isEditAllowed) {
 			editView.addCommitListener(() -> {
@@ -166,9 +165,10 @@ public class LocationsField extends AbstractTableField<LocationDto> {
 		return location;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
-	public void setPropertyDataSource(Property newDataSource) {
-		super.setPropertyDataSource(newDataSource);
+	public void setValue(Collection newDataSource) {
+		super.setValue(newDataSource);
 		getAddButton().setVisible(isEditAllowed);
 	}
 }

@@ -1,15 +1,13 @@
 package de.symeda.sormas.ui.person;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Window;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.Table;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -23,8 +21,10 @@ import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.caze.AbstractTableField;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.ConfirmationComponent;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.FieldAccessCellStyleGenerator;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class PersonContactDetailsField extends AbstractTableField<PersonContactDetailDto> {
 
@@ -66,9 +66,9 @@ public class PersonContactDetailsField extends AbstractTableField<PersonContactD
 
 		final CommitDiscardWrapperComponent<PersonContactDetailEditForm> editView =
 			new CommitDiscardWrapperComponent<>(editForm, isEditAllowed, editForm.getFieldGroup());
-		editView.getCommitButton().setCaption(I18nProperties.getString(Strings.done));
+		editView.getCommitButton().setText(I18nProperties.getString(Strings.done));
 
-		Window popupWindow = VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getString(Strings.entityPersonContactDetail));
+		Dialog popupWindow = VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getString(Strings.entityPersonContactDetail));
 
 		if (isEditAllowed) {
 			editView.addCommitListener(() -> {
@@ -86,7 +86,7 @@ public class PersonContactDetailsField extends AbstractTableField<PersonContactD
 						if (existingPrimaryContactDetails.isPresent()) {
 							VaadinUiUtil.showConfirmationPopup(
 								I18nProperties.getString(Strings.headingUpdatePersonContactDetails),
-								new Label(I18nProperties.getString(Strings.messagePersonContactDetailsPrimaryDuplicate)),
+								new Span(I18nProperties.getString(Strings.messagePersonContactDetailsPrimaryDuplicate)),
 								questionWindow -> {
 									ConfirmationComponent confirmationComponent = new ConfirmationComponent(false) {
 
@@ -107,8 +107,8 @@ public class PersonContactDetailsField extends AbstractTableField<PersonContactD
 										}
 									};
 
-									confirmationComponent.getConfirmButton().setCaption(I18nProperties.getCaption(Captions.actionConfirm));
-									confirmationComponent.getCancelButton().setCaption(I18nProperties.getCaption(Captions.actionCancel));
+									confirmationComponent.getConfirmButton().setText(I18nProperties.getCaption(Captions.actionConfirm));
+									confirmationComponent.getCancelButton().setText(I18nProperties.getCaption(Captions.actionCancel));
 
 									return confirmationComponent;
 								},
@@ -141,7 +141,8 @@ public class PersonContactDetailsField extends AbstractTableField<PersonContactD
 
 		table.addGeneratedColumn(COLUMN_PRIMARY, (Table.ColumnGenerator) (source, itemId, columnId) -> {
 			PersonContactDetailDto personContactDetailDto = (PersonContactDetailDto) itemId;
-			return new Label(personContactDetailDto.isPrimaryContact() ? VaadinIcons.CHECK_CIRCLE.getHtml() : "", ContentMode.HTML);
+			return VaadinUiUtil
+				.createLabel(personContactDetailDto.isPrimaryContact() ? HtmlRenderer.iconHtml(VaadinIcon.CHECK_CIRCLE) : "", ContentMode.HTML);
 		});
 		table.addGeneratedColumn(COLUMN_OWNER, (Table.ColumnGenerator) (source, itemId, columnId) -> {
 			PersonContactDetailDto personContactDetailDto = (PersonContactDetailDto) itemId;
@@ -206,9 +207,10 @@ public class PersonContactDetailsField extends AbstractTableField<PersonContactD
 		this.thisPerson = thisPerson;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
-	public void setPropertyDataSource(Property newDataSource) {
-		super.setPropertyDataSource(newDataSource);
+	public void setValue(Collection newDataSource) {
+		super.setValue(newDataSource);
 		getAddButton().setVisible(isEditAllowed);
 	}
 }

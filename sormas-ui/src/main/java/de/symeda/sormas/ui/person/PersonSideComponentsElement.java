@@ -4,8 +4,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.CustomLayout;
+import com.vaadin.flow.component.Unit;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -35,6 +34,7 @@ import de.symeda.sormas.ui.samples.sampleLink.SampleListComponentLayout;
 import de.symeda.sormas.ui.travelentry.travelentrylink.TravelEntryListComponent;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.DetailSubComponentWrapper;
 import de.symeda.sormas.ui.utils.LayoutUtil;
 import de.symeda.sormas.ui.utils.components.sidecomponent.SideComponentLayout;
@@ -66,8 +66,9 @@ public interface PersonSideComponentsElement {
 	default DetailSubComponentWrapper addComponentWrapper(CommitDiscardWrapperComponent<PersonEditForm> personComponent) {
 
 		DetailSubComponentWrapper container = new DetailSubComponentWrapper(() -> personComponent);
-		container.setWidth(100, Sizeable.Unit.PERCENTAGE);
-		container.setMargin(true);
+		container.setWidth(100, Unit.PERCENTAGE);
+		// was setMargin(true): the Vaadin 8 margin is the padding in Flow
+		container.setPadding(true);
 		return container;
 	}
 
@@ -76,13 +77,13 @@ public interface PersonSideComponentsElement {
 		CustomLayout layout = new CustomLayout();
 		layout.addStyleName(CssStyles.ROOT_COMPONENT);
 		layout.setTemplateContents(getHtmlLayout());
-		layout.setWidth(100, Sizeable.Unit.PERCENTAGE);
+		layout.setWidth(100, Unit.PERCENTAGE);
 		layout.setHeightUndefined();
-		container.addComponent(layout);
-		personComponent.setMargin(false);
-		personComponent.setWidth(100, Sizeable.Unit.PERCENTAGE);
-		personComponent.getWrappedComponent().setWidth(100, Sizeable.Unit.PERCENTAGE);
-		personComponent.addStyleName(CssStyles.MAIN_COMPONENT);
+		container.add(layout);
+		personComponent.setPadding(false);
+		personComponent.setWidth(100, Unit.PERCENTAGE);
+		personComponent.getWrappedComponent().setWidth(100, Unit.PERCENTAGE);
+		personComponent.addClassName(CssStyles.MAIN_COMPONENT);
 		layout.addComponent(personComponent, PERSON_LOC);
 		return layout;
 	}

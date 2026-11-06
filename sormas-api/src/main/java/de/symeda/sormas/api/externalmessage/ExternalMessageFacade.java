@@ -4,9 +4,9 @@ import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nullable;
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 import javax.naming.NamingException;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import de.symeda.sormas.api.PermanentlyDeletableFacade;
 import de.symeda.sormas.api.ReferenceDto;

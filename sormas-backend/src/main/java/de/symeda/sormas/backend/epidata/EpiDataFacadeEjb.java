@@ -24,9 +24,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.activityascase.ActivityAsCaseDto;

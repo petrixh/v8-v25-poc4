@@ -2,10 +2,10 @@ package de.symeda.sormas.backend.clinicalcourse;
 
 import static de.symeda.sormas.api.utils.FieldConstraints.CHARACTER_LIMIT_BIG;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 import de.symeda.sormas.api.clinicalcourse.ComplianceWithTreatment;
 import de.symeda.sormas.api.utils.YesNoUnknown;

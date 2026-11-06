@@ -2,7 +2,7 @@ package de.symeda.sormas.backend.patch.customizablefield.mappers;
 
 import java.util.Set;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.customizablefield.CustomizableFieldType;
 import de.symeda.sormas.api.customizablefield.CustomizableFieldValueDto;

@@ -1,6 +1,6 @@
 package de.symeda.sormas.backend.patch.partial_retrieval;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.utils.OrderedRegisterable;
 

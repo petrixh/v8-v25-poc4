@@ -2,9 +2,9 @@ package de.symeda.sormas.backend.sormastosormas.entities.externalmessage;
 
 import static de.symeda.sormas.backend.sormastosormas.ValidationHelper.buildExternalMessageValidationGroupName;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 import de.symeda.sormas.api.externalmessage.ExternalMessageDto;
 import de.symeda.sormas.api.i18n.Captions;

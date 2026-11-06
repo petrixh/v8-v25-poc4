@@ -27,9 +27,9 @@ import org.keycloak.adapters.spi.HttpFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.util.Optional;
 

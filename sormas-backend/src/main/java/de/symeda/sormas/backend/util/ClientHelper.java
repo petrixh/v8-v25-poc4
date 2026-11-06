@@ -21,7 +21,7 @@ package de.symeda.sormas.backend.util;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.ClientBuilder;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 

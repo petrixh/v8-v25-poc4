@@ -91,7 +91,7 @@ import static de.symeda.sormas.api.Disease.YELLOW_FEVER;
 
 import java.util.Date;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.ImportIgnore;

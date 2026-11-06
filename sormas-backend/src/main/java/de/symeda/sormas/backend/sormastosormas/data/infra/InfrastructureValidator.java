@@ -18,9 +18,9 @@ import java.io.Serializable;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
 
 import de.symeda.sormas.api.InfrastructureDataReferenceDto;
 import de.symeda.sormas.api.i18n.Validations;

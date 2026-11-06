@@ -2,9 +2,9 @@ package de.symeda.sormas.backend.sormastosormas.entities.event;
 
 import static de.symeda.sormas.backend.sormastosormas.ValidationHelper.buildEventValidationGroupName;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 import de.symeda.sormas.api.event.EventDto;
 import de.symeda.sormas.api.i18n.Captions;

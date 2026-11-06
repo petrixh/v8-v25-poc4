@@ -2,9 +2,9 @@ package de.symeda.sormas.backend.therapy;
 
 import java.sql.Timestamp;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.validation.constraints.NotNull;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.therapy.TherapyDto;
 import de.symeda.sormas.api.therapy.TherapyFacade;

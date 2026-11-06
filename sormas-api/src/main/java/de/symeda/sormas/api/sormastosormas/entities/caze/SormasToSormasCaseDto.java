@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.api.sormastosormas.entities.caze;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import de.symeda.sormas.api.caze.CaseDataDto;
 import de.symeda.sormas.api.person.PersonDto;

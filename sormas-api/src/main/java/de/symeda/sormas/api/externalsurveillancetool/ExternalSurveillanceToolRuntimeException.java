@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.api.externalsurveillancetool;
 
-import javax.ejb.ApplicationException;
+import jakarta.ejb.ApplicationException;
 
 @ApplicationException(rollback = false)
 public class ExternalSurveillanceToolRuntimeException extends RuntimeException {

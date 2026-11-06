@@ -1,6 +1,6 @@
 package de.symeda.sormas.api.i18n;
 
-import javax.annotation.Generated;
+import jakarta.annotation.Generated;
 
 @Generated(value = "de.symeda.sormas.api.i18n.I18nConstantGenerator")
 public interface Strings {

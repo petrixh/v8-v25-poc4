@@ -21,7 +21,7 @@ import de.symeda.sormas.api.feature.FeatureType;
 import de.symeda.sormas.api.utils.DependingOnFeatureType;
 import java.util.Date;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 
 import de.symeda.sormas.api.i18n.Validations;
 import de.symeda.sormas.api.utils.DataHelper;

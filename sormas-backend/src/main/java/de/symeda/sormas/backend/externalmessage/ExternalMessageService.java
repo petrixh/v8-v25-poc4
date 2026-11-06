@@ -3,9 +3,9 @@ package de.symeda.sormas.backend.externalmessage;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import javax.ejb.*;
-import javax.persistence.Tuple;
-import javax.persistence.criteria.*;
+import jakarta.ejb.*;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.criteria.*;
 
 import org.apache.commons.lang3.StringUtils;
 

@@ -19,10 +19,10 @@ package de.symeda.sormas.api.visit;
 
 import java.util.Date;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.VisitOrigin;

@@ -23,13 +23,13 @@ import java.lang.reflect.Proxy;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.ejb.Singleton;
-import javax.ejb.Stateful;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
-import javax.enterprise.inject.spi.configurator.AnnotatedTypeConfigurator;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Stateful;
+import jakarta.ejb.Stateless;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.spi.Extension;
+import jakarta.enterprise.inject.spi.ProcessAnnotatedType;
+import jakarta.enterprise.inject.spi.configurator.AnnotatedTypeConfigurator;
 
 import de.hilling.junit.cdi.annotations.BypassTestInterceptor;
 

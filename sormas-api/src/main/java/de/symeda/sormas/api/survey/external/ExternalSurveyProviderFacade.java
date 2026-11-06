@@ -1,6 +1,6 @@
 package de.symeda.sormas.api.survey.external;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import de.symeda.sormas.api.survey.external.views.ExternalSurveyView;
 

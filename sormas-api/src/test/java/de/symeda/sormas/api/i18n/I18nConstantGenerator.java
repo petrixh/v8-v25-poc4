@@ -124,7 +124,7 @@ public class I18nConstantGenerator {
 		Enumeration<?> e = properties.propertyNames();
 
 		writer.append("package de.symeda.sormas.api.i18n;").append(sep + sep);
-		writer.append("import javax.annotation.Generated;").append(sep + sep);
+		writer.append("import jakarta.annotation.Generated;").append(sep + sep);
 		writer.append("@Generated(value = \"" + getClass().getCanonicalName() + "\")").append(sep);
 		writer.append("public interface " + outputClassName + " {").append(sep + sep);
 		writer.append("\t/*")

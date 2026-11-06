@@ -18,7 +18,7 @@ package de.symeda.sormas.api.externalmessage;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface ExternalMessageAdapterFacade {

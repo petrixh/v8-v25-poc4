@@ -18,7 +18,7 @@ package de.symeda.sormas.api.sormastosormas;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import de.symeda.sormas.api.sormastosormas.entities.caze.SormasToSormasCaseDto;
 import de.symeda.sormas.api.sormastosormas.entities.contact.SormasToSormasContactDto;

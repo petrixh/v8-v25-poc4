@@ -17,8 +17,8 @@ package de.symeda.sormas.api.sormastosormas.entities.externalmessage;
 
 import java.util.List;
 
-import javax.ejb.Remote;
-import javax.validation.Valid;
+import jakarta.ejb.Remote;
+import jakarta.validation.Valid;
 
 import de.symeda.sormas.api.sormastosormas.SormasToSormasEncryptedDataDto;
 import de.symeda.sormas.api.sormastosormas.SormasToSormasException;

@@ -17,7 +17,7 @@ package de.symeda.sormas.ui.specialcaseaccess;
 
 import java.util.List;
 
-import javax.validation.constraints.Null;
+import jakarta.validation.constraints.Null;
 
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;

@@ -18,12 +18,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.security.PermitAll;
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.common.Page;
 import de.symeda.sormas.api.i18n.Strings;

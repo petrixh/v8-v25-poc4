@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.backend.sormastosormas;
 
-import javax.enterprise.inject.Produces;
+import jakarta.enterprise.inject.Produces;
 
 import de.symeda.sormas.backend.central.EtcdCentralClient;
 import de.symeda.sormas.backend.common.ConfigFacadeEjb;

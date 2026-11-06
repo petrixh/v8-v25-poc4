@@ -1,6 +1,6 @@
 package de.symeda.sormas.backend.campaign;
 
-import javax.persistence.criteria.From;
+import jakarta.persistence.criteria.From;
 
 import de.symeda.sormas.backend.common.QueryJoins;
 

@@ -4,7 +4,7 @@ import de.symeda.sormas.api.EntityDto;
 import de.symeda.sormas.api.patch.partial_retrieval.FieldInfo;
 import de.symeda.sormas.api.utils.OrderedRegisterable;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;

@@ -3,7 +3,7 @@ package de.symeda.sormas.api.document;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.i18n.Validations;
 import de.symeda.sormas.api.utils.criteria.BaseCriteria;

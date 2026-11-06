@@ -17,7 +17,7 @@ package de.symeda.sormas.api.share;
 
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface ExternalShareInfoFacade {

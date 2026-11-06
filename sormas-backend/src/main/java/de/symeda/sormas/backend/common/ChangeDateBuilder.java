@@ -1,6 +1,6 @@
 package de.symeda.sormas.backend.common;
 
-import javax.persistence.criteria.From;
+import jakarta.persistence.criteria.From;
 
 public interface ChangeDateBuilder<T extends ChangeDateBuilder> {
 

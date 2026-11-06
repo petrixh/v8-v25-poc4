@@ -17,9 +17,9 @@ package de.symeda.sormas.backend.adverseeventsfollowingimmunization;
 
 import java.util.List;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 
 import de.symeda.sormas.backend.adverseeventsfollowingimmunization.entity.Aefi;
 import de.symeda.sormas.backend.adverseeventsfollowingimmunization.entity.AefiJoins;

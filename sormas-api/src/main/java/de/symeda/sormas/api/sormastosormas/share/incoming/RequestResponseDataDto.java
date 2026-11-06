@@ -20,8 +20,8 @@ package de.symeda.sormas.api.sormastosormas.share.incoming;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import de.symeda.sormas.api.uuid.HasUuid;
 import de.symeda.sormas.api.i18n.Validations;

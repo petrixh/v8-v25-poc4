@@ -17,7 +17,7 @@ package de.symeda.sormas.api.epipulse;
 
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import de.symeda.sormas.api.DeletableFacade;
 import de.symeda.sormas.api.common.Page;

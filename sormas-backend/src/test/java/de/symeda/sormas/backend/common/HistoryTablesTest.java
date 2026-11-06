@@ -17,9 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Test;

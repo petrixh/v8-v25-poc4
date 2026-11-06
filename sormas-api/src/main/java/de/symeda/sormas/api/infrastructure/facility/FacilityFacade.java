@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import de.symeda.sormas.api.common.Page;
 import de.symeda.sormas.api.infrastructure.InfrastructureFacade;

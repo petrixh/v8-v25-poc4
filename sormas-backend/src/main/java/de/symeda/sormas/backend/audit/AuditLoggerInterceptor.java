@@ -17,11 +17,11 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.AroundTimeout;
-import javax.interceptor.InvocationContext;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.AroundTimeout;
+import jakarta.interceptor.InvocationContext;
 
 import org.apache.commons.collections4.SetUtils;
 import org.hl7.fhir.r4.model.AuditEvent;

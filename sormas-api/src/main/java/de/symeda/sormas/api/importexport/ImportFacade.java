@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import de.symeda.sormas.api.feature.FeatureConfigurationDto;
 

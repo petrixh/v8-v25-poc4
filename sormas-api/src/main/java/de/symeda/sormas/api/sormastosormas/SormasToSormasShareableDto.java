@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.api.sormastosormas;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import de.symeda.sormas.api.ImportIgnore;
 import de.symeda.sormas.api.MappingException;

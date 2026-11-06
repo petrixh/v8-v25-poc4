@@ -18,7 +18,7 @@ package de.symeda.sormas.api.sormastosormas.entities.sample;
 import java.util.Collections;
 import java.util.List;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import de.symeda.sormas.api.sample.AdditionalTestDto;
 import de.symeda.sormas.api.sample.PathogenTestDto;

@@ -2,9 +2,9 @@ package de.symeda.sormas.backend.sormastosormas.entities.contact;
 
 import static de.symeda.sormas.backend.sormastosormas.ValidationHelper.buildContactValidationGroupName;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 import de.symeda.sormas.api.contact.ContactDto;
 import de.symeda.sormas.api.i18n.Captions;

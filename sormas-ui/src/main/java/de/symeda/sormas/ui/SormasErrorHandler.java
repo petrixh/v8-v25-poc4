@@ -20,7 +20,7 @@ package de.symeda.sormas.ui;
 import java.net.SocketException;
 import java.util.stream.Collectors;
 
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;

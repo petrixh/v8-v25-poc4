@@ -3,8 +3,8 @@ package de.symeda.sormas.backend.common;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Selection;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Selection;
 
 /**
  * Service that provide several jurisdictions flags.

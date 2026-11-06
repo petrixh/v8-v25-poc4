@@ -20,7 +20,7 @@ package de.symeda.sormas.api.sormastosormas.share.incoming;
 
 import java.io.Serializable;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import de.symeda.sormas.api.uuid.HasUuid;
 import de.symeda.sormas.api.event.EventReferenceDto;

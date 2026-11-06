@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.ejb.EJB;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.ejb.EJB;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;

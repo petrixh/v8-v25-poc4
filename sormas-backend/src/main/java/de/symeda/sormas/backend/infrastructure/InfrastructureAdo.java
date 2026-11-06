@@ -15,8 +15,8 @@
 
 package de.symeda.sormas.backend.infrastructure;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
 
 import de.symeda.sormas.backend.common.AbstractDomainObject;
 

@@ -6,7 +6,7 @@ import static de.symeda.sormas.api.utils.FieldConstraints.CHARACTER_LIMIT_SMALL;
 import java.io.Serializable;
 import java.util.Objects;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 
 import de.symeda.sormas.api.i18n.Validations;
 

@@ -17,7 +17,7 @@
  *******************************************************************************/
 package de.symeda.sormas.api.location;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface LocationFacade {

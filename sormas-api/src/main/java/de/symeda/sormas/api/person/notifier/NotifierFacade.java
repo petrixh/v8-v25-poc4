@@ -18,9 +18,9 @@ package de.symeda.sormas.api.person.notifier;
 import java.time.Instant;
 import java.util.Date;
 
-import javax.ejb.Remote;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import jakarta.ejb.Remote;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.BaseFacade;
 

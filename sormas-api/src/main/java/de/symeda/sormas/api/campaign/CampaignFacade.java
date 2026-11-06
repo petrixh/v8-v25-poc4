@@ -2,7 +2,7 @@ package de.symeda.sormas.api.campaign;
 
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import de.symeda.sormas.api.CoreFacade;
 import de.symeda.sormas.api.campaign.diagram.CampaignDashboardElement;

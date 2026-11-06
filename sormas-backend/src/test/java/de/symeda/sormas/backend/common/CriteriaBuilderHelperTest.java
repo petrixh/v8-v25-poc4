@@ -10,9 +10,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Selection;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Selection;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;

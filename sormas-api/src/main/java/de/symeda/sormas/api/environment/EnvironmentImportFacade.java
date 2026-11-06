@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.api.environment;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import de.symeda.sormas.api.importexport.ImportLineResultDto;
 

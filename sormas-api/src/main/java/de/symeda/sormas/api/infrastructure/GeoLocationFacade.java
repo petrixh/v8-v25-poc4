@@ -4,7 +4,7 @@ import de.symeda.sormas.api.EntityDto;
 import de.symeda.sormas.api.InfrastructureDataReferenceDto;
 import de.symeda.sormas.api.utils.criteria.BaseCriteria;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 import java.io.Serializable;
 import java.util.List;
 

@@ -3,8 +3,7 @@ package de.symeda.sormas.ui.campaign.importer;
 import java.io.IOException;
 
 import com.opencsv.exceptions.CsvValidationException;
-import com.vaadin.server.Page;
-import com.vaadin.ui.Notification;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.campaign.CampaignReferenceDto;
@@ -43,11 +42,11 @@ public class CampaignFormDataImportLayout extends AbstractImportLayout {
 					(ValueSeparator) separator.getValue());
 				importer.startImport(this::extendDownloadErrorReportButton, currentUI, false);
 			} catch (IOException | CsvValidationException e) {
-				new Notification(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.headingImportFailed),
 					I18nProperties.getString(Strings.messageImportFailed),
-					Notification.Type.ERROR_MESSAGE,
-					false).show(Page.getCurrent());
+					NotificationHelper.Type.ERROR_MESSAGE,
+					false);
 			}
 		}));
 		addDownloadErrorReportComponent(3);

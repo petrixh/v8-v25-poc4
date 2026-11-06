@@ -4,17 +4,18 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.data.Binder;
-import com.vaadin.server.SerializablePredicate;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import com.vaadin.flow.component.textfield.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.campaign.diagram.CampaignDashboardElement;
@@ -29,7 +30,7 @@ public class CampaignDashboardElementsGridComponent extends AbstractEditableGrid
 
 	public CampaignDashboardElementsGridComponent(List<CampaignDashboardElement> savedElements, List<CampaignDashboardElement> allElements) {
 		super(savedElements, allElements);
-		setWidth(100, Unit.PERCENTAGE);
+		setWidthFull();
 	}
 
 	protected Binder<CampaignDashboardElement> addColumnsBinder(List<CampaignDashboardElement> allElements) {
@@ -39,9 +40,11 @@ public class CampaignDashboardElementsGridComponent extends AbstractEditableGrid
 		final Map<String, String> diagramIdCaptionMap = campaignDiagramDefinitionDtos.stream()
 				.collect(Collectors.toMap(CampaignDiagramDefinitionDto::getDiagramId, CampaignDiagramDefinitionDto::getDiagramCaption));
 
-		ComboBox<String> diagramIdCaptionCombo = new ComboBox<>(Captions.campaignDashboardChart, diagramIdCaptionMap.keySet());
-		diagramIdCaptionCombo.setItemCaptionGenerator(diagramId -> diagramIdCaptionMap.get(diagramId));
-		diagramIdCaptionCombo.setEmptySelectionAllowed(false);
+		// The editor fields were created with a caption (a Captions key), which the Vaadin 8 grid editor did not show; a Flow
+		// field shows its label in the editor cell, so the fields here have none
+		ComboBox<String> diagramIdCaptionCombo = new ComboBox<>(null, diagramIdCaptionMap.keySet());
+		diagramIdCaptionCombo.setItemLabelGenerator(diagramId -> diagramIdCaptionMap.get(diagramId));
+		keepValueOnClientClear(diagramIdCaptionCombo);
 
 		Binder.Binding<CampaignDashboardElement, String> diagramIdCaptionBind = binder.bind(
 			diagramIdCaptionCombo,
@@ -61,11 +64,10 @@ public class CampaignDashboardElementsGridComponent extends AbstractEditableGrid
 			.filter(s -> StringUtils.isNotEmpty(s))
 			.distinct()
 			.collect(Collectors.toList());
-		final ComboBox<String> tabIdCombo = new ComboBox<>(Captions.campaignDashboardTabName, existingTabIds);
+		final ComboBox<String> tabIdCombo = new ComboBox<>(null, existingTabIds);
 
-		tabIdCombo.setEmptySelectionAllowed(false);
-		tabIdCombo.setTextInputAllowed(true);
-		tabIdCombo.setNewItemProvider((ComboBox.NewItemProvider<String>) s -> Optional.of(s));
+		keepValueOnClientClear(tabIdCombo);
+		allowNewItems(tabIdCombo);
 
 		final Binder.Binding<CampaignDashboardElement, String> tabIdBind =
 			binder.bind(tabIdCombo, CampaignDashboardElement::getTabId, CampaignDashboardElement::setTabId);
@@ -79,11 +81,11 @@ public class CampaignDashboardElementsGridComponent extends AbstractEditableGrid
 			.filter(s -> StringUtils.isNotEmpty(s))
 			.distinct()
 			.collect(Collectors.toList());
-		final ComboBox<String> subTabIdCombo = new ComboBox<>(Captions.campaignDashboardSubTabName, existingSubTabIds);
+		final ComboBox<String> subTabIdCombo = new ComboBox<>(null, existingSubTabIds);
 
-		subTabIdCombo.setEmptySelectionAllowed(true);
-		subTabIdCombo.setTextInputAllowed(true);
-		subTabIdCombo.setNewItemProvider((ComboBox.NewItemProvider<String>) s -> Optional.of(s));
+		// was setEmptySelectionAllowed(true): the value can be cleared
+		subTabIdCombo.setClearButtonVisible(true);
+		allowNewItems(subTabIdCombo);
 
 		final Binder.Binding<CampaignDashboardElement, String> subTabIdBind =
 			binder.bind(subTabIdCombo, CampaignDashboardElement::getSubTabId, CampaignDashboardElement::setSubTabId);
@@ -92,7 +94,7 @@ public class CampaignDashboardElementsGridComponent extends AbstractEditableGrid
 				.setCaption(I18nProperties.getCaption(Captions.campaignDashboardSubTabName));
 		subTabIdColumn.setEditorBinding(subTabIdBind);
 
-		TextField width = new TextField(Captions.campaignDashboardChartWidth);
+		TextField width = new TextField();
 		Binder.Binding<CampaignDashboardElement, String> widthBind = binder.forField(width)
 			.withValidator(percentValidator(), I18nProperties.getValidationError(Validations.campaignDashboardChartPercentage))
 			.bind(campaignDashboardElement -> intToString(campaignDashboardElement.getWidth()), (c, s) -> c.setWidth(new Integer(s)));
@@ -101,7 +103,7 @@ public class CampaignDashboardElementsGridComponent extends AbstractEditableGrid
 				.setCaption(I18nProperties.getCaption(Captions.campaignDashboardChartWidth));
 		widthColumn.setEditorBinding(widthBind);
 
-		TextField height = new TextField(Captions.campaignDashboardChartHeight);
+		TextField height = new TextField();
 		Binder.Binding<CampaignDashboardElement, String> heightBind = binder.forField(height)
 			.withValidator(percentValidator(), I18nProperties.getValidationError(Validations.campaignDashboardChartPercentage))
 			.bind(campaignDashboardElement -> intToString(campaignDashboardElement.getHeight()), (c, s) -> c.setHeight(new Integer(s)));
@@ -110,7 +112,7 @@ public class CampaignDashboardElementsGridComponent extends AbstractEditableGrid
 				.setCaption(I18nProperties.getCaption(Captions.campaignDashboardChartHeight));
 		heightColumn.setEditorBinding(heightBind);
 
-		TextField order = new TextField(Captions.campaignDashboardOrder);
+		TextField order = new TextField();
 		order.setEnabled(false);
 		Binder.Binding<CampaignDashboardElement, String> orderBind =
 			binder.bind(order, campaignDashboardElement -> intToString(campaignDashboardElement.getOrder()), (c, s) -> c.setOrder(new Integer(s)));
@@ -121,7 +123,7 @@ public class CampaignDashboardElementsGridComponent extends AbstractEditableGrid
 		return binder;
 	}
 
-	protected Button.ClickListener newRowEvent() {
+	protected ComponentEventListener<ClickEvent<Button>> newRowEvent() {
 		return event -> {
 			final CampaignDashboardElement campaignDashboardElement = new CampaignDashboardElement();
 			final ArrayList<CampaignDashboardElement> gridItems = getItems();
@@ -129,6 +131,26 @@ public class CampaignDashboardElementsGridComponent extends AbstractEditableGrid
 			campaignDashboardElement.setOrder(gridItems.indexOf(campaignDashboardElement));
 			grid.setItems(gridItems);
 		};
+	}
+
+	/**
+	 * Was {@code setEmptySelectionAllowed(false)}: a value the user clears is restored.
+	 */
+	private static void keepValueOnClientClear(ComboBox<String> comboBox) {
+		comboBox.addValueChangeListener(e -> {
+			if (e.isFromClient() && e.getValue() == null && e.getOldValue() != null) {
+				comboBox.setValue(e.getOldValue());
+			}
+		});
+	}
+
+	/**
+	 * Was {@code setTextInputAllowed(true)} with a new item provider returning the typed text: the typed text becomes the
+	 * value (it is not added to the items, as in Vaadin 8).
+	 */
+	private static void allowNewItems(ComboBox<String> comboBox) {
+		comboBox.setAllowCustomValue(true);
+		comboBox.addCustomValueSetListener(e -> comboBox.setValue(e.getDetail()));
 	}
 
 	private SerializablePredicate<String> percentValidator() {

@@ -17,9 +17,9 @@ package de.symeda.sormas.ui.campaign.campaigns;
 
 import java.util.Date;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.renderers.DateRenderer;
-import com.vaadin.ui.renderers.HtmlRenderer;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
@@ -61,7 +61,8 @@ public class CampaignGrid extends FilteredGrid<CampaignIndexDto, CampaignCriteri
 		}
 
 		final boolean canEditCampaigns = UiUtil.permitted(UserRight.CAMPAIGN_EDIT);
-		final String navigateToCampaignColumnIcon = canEditCampaigns ? VaadinIcons.EDIT.getHtml() : VaadinIcons.EYE.getHtml();
+		final String navigateToCampaignColumnIcon =
+			canEditCampaigns ? HtmlRenderer.iconHtml(VaadinIcon.EDIT) : HtmlRenderer.iconHtml(VaadinIcon.EYE);
 		final Column<CampaignIndexDto, String> navigateToCampaignColumn = addColumn(entry -> navigateToCampaignColumnIcon, new HtmlRenderer());
 		final String navigateToCampaignColumnId = canEditCampaigns ? ACTION_BTN_ID : OPEN_BTN_ID;
 		navigateToCampaignColumn.setId(navigateToCampaignColumnId);
@@ -78,8 +79,8 @@ public class CampaignGrid extends FilteredGrid<CampaignIndexDto, CampaignCriteri
 		((Column<CampaignIndexDto, Date>) getColumn(CampaignIndexDto.END_DATE))
 			.setRenderer(new DateRenderer(DateHelper.getLocalDateFormat(userLanguage)));
 
-		for (Column<?, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(CampaignIndexDto.I18N_PREFIX, column.getId(), column.getCaption()));
+		for (Column<?, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(CampaignIndexDto.I18N_PREFIX, column.getKey(), column.getCaption()));
 		}
 		getColumn(navigateToCampaignColumnId).setWidth(40).setStyleGenerator(item -> CssStyles.GRID_CELL_LINK);
 	}

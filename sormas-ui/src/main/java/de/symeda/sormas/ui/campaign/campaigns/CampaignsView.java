@@ -15,16 +15,17 @@
 
 package de.symeda.sormas.ui.campaign.campaigns;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.symeda.sormas.ui.utils.fields.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;
@@ -38,6 +39,7 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.campaign.AbstractCampaignView;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
 
 @SuppressWarnings("serial")
@@ -53,7 +55,7 @@ public class CampaignsView extends AbstractCampaignView {
 
 	// Filter
 	private TextField searchField;
-	private com.vaadin.v7.ui.ComboBox relevanceStatusFilter;
+	private de.symeda.sormas.ui.utils.fields.ComboBox relevanceStatusFilter;
 
 	public CampaignsView() {
 
@@ -68,29 +70,29 @@ public class CampaignsView extends AbstractCampaignView {
 
 		grid = new CampaignGrid(criteria);
 		gridLayout = new VerticalLayout();
-		gridLayout.addComponent(createFilterBar());
-		gridLayout.addComponent(grid);
-		gridLayout.setMargin(true);
+		gridLayout.add(createFilterBar());
+		gridLayout.add(grid);
+		gridLayout.setPadding(true);
 		gridLayout.setSpacing(false);
 		gridLayout.setSizeFull();
-		gridLayout.setExpandRatio(grid, 1);
-		gridLayout.setStyleName("crud-main-layout");
+		gridLayout.setFlexGrow(1, grid);
+		gridLayout.setClassName("crud-main-layout");
 
 		addComponent(gridLayout);
 
 		if (UiUtil.permitted(UserRight.CAMPAIGN_EDIT)) {
-			validateFormsButton = ButtonHelper.createIconButton(Captions.campaignValidateForms, VaadinIcons.CHECK_CIRCLE, e -> {
+			validateFormsButton = ButtonHelper.createIconButton(Captions.campaignValidateForms, VaadinIcon.CHECK_CIRCLE, e -> {
 				FacadeProvider.getCampaignFormMetaFacade().validateAllFormMetas();
-				Notification.show(I18nProperties.getString(Strings.messageAllCampaignFormsValid), Type.TRAY_NOTIFICATION);
-			}, ValoTheme.BUTTON_PRIMARY);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageAllCampaignFormsValid), Type.TRAY_NOTIFICATION);
+			}, CssStyles.BUTTON_PRIMARY);
 
 			addHeaderComponent(validateFormsButton);
 
 			createButton = ButtonHelper.createIconButton(
 				Captions.campaignNewCampaign,
-				VaadinIcons.PLUS_CIRCLE,
+				VaadinIcon.PLUS_CIRCLE,
 				e -> ControllerProvider.getCampaignController().createOrEditCampaign(null),
-				ValoTheme.BUTTON_PRIMARY);
+				CssStyles.BUTTON_PRIMARY);
 
 			addHeaderComponent(createButton);
 		}
@@ -99,7 +101,7 @@ public class CampaignsView extends AbstractCampaignView {
 	private HorizontalLayout createFilterBar() {
 
 		HorizontalLayout filterLayout = new HorizontalLayout();
-		filterLayout.setWidth(100, Unit.PERCENTAGE);
+		filterLayout.setWidthFull();
 		filterLayout.setSpacing(true);
 
 		searchField = new TextField();
@@ -109,14 +111,19 @@ public class CampaignsView extends AbstractCampaignView {
 		searchField.setNullRepresentation("");
 		searchField.setInputPrompt(I18nProperties.getString(Strings.promptCampaignSearch));
 		searchField.setImmediate(true);
-		searchField.addTextChangeListener(e -> {
-			criteria.freeText(e.getText());
+		// was a V7 text change listener (lazy, user input only)
+		searchField.setValueChangeMode(ValueChangeMode.LAZY);
+		searchField.addValueChangeListener(e -> {
+			if (!e.isFromClient()) {
+				return;
+			}
+			criteria.freeText(e.getValue());
 			grid.reload();
 		});
-		filterLayout.addComponent(searchField);
+		filterLayout.add(searchField);
 
 		// Show active/archived/all dropdown
-		relevanceStatusFilter = new com.vaadin.v7.ui.ComboBox();
+		relevanceStatusFilter = new de.symeda.sormas.ui.utils.fields.ComboBox();
 		relevanceStatusFilter.setId("relevanceStatus");
 		relevanceStatusFilter.setWidth(160, Unit.PIXELS);
 		relevanceStatusFilter.setNullSelectionAllowed(false);
@@ -139,12 +146,13 @@ public class CampaignsView extends AbstractCampaignView {
 		}
 
 		relevanceStatusFilter.addValueChangeListener(e -> {
-			criteria.relevanceStatus((EntityRelevanceStatus) e.getProperty().getValue());
+			criteria.relevanceStatus((EntityRelevanceStatus) e.getValue());
 			navigateTo(criteria);
 		});
-		filterLayout.addComponent(relevanceStatusFilter);
-		filterLayout.setComponentAlignment(relevanceStatusFilter, Alignment.MIDDLE_RIGHT);
-		filterLayout.setExpandRatio(relevanceStatusFilter, 1);
+		filterLayout.add(relevanceStatusFilter);
+		// was Alignment.MIDDLE_RIGHT in an expanding slot: the free space goes before the filter, which keeps its width
+		filterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, relevanceStatusFilter);
+		relevanceStatusFilter.getStyle().set("margin-left", "auto");
 
 		return filterLayout;
 	}

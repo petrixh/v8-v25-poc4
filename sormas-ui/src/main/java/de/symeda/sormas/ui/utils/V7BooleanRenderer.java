@@ -17,23 +17,21 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.utils;
 
-import com.vaadin.v7.ui.renderers.HtmlRenderer;
-
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
-import elemental.json.JsonValue;
+import de.symeda.sormas.ui.utils.grid.renderers.ConvertingHtmlRenderer;
 
 @SuppressWarnings("serial")
-public class V7BooleanRenderer extends HtmlRenderer {
+public class V7BooleanRenderer extends ConvertingHtmlRenderer {
 
 	@Override
-	public JsonValue encode(String value) {
+	protected String encodeString(String value) {
 
 		if (value != null && !value.isEmpty()) {
 			if (value.equals("true")) {
-				return super.encode(I18nProperties.getString(Strings.yes));
+				return I18nProperties.getString(Strings.yes);
 			} else {
-				return super.encode(I18nProperties.getString(Strings.no));
+				return I18nProperties.getString(Strings.no);
 			}
 		} else {
 			return null;

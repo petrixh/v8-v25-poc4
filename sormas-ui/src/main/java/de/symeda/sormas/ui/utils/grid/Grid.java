@@ -1,0 +1,514 @@
+/*
+ * SORMAS® - Surveillance Outbreak Response Management & Analysis System
+ * Copyright © 2016-2026 SORMAS Foundation gGmbH
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+package de.symeda.sormas.ui.utils.grid;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.function.ValueProvider;
+
+import de.symeda.sormas.ui.utils.FieldAccessCellStyleGenerator;
+import de.symeda.sormas.ui.utils.grid.renderers.ValueRenderer;
+
+/**
+ * Flow {@code Grid} with the column API SORMAS grids used on Vaadin 8 (and, where it fits, Vaadin 7), so that grid
+ * classes mostly change imports:
+ * <ul>
+ * <li>Columns are {@link Column}{@code <T, V>} with their value type, created by a bean property name (all bean
+ * properties for {@link #Grid(Class)}), {@link #addColumn(ValueProvider)} or
+ * {@link #addColumn(ValueProvider, ValueRenderer)}; {@link #getColumn(String)}, {@link #getAllColumns()},
+ * {@link #removeColumn(String)} and {@link #setColumns(String...)} with Vaadin 8 semantics.</li>
+ * <li>Value renderers ({@code utils.grid.renderers}) render the column's value, as Vaadin 8 renderers did.</li>
+ * <li>Sorting as in Vaadin 8: every column is sortable unless {@code setSortable(false)}; in memory by the value, with a
+ * lazy data provider by the sort properties, which default to the column key (Vaadin 8: the column id).</li>
+ * <li>Height by rows ({@link #setHeightByRows(double)}, {@link HeightMode}), row and cell style generators (as part
+ * names), description generators (as tooltips).</li>
+ * </ul>
+ * Not kept: {@code getColumns()} returns Flow columns (use {@link #getAllColumns()}); {@code Column.getId()} is the
+ * component id ({@code Optional}; use {@link Column#getKey()}); {@code Column.setId} is void (chain with
+ * {@link Column#setKey(String)}).
+ */
+public class Grid<T> extends com.vaadin.flow.component.grid.Grid<T> {
+
+	private static final long serialVersionUID = 1L;
+
+	/** Vaadin 8 default for {@code getHeightByRows()}. */
+	private static final double DEFAULT_HEIGHT_BY_ROWS = 10;
+
+	private HeightMode heightMode = HeightMode.CSS;
+	private double heightByRows = DEFAULT_HEIGHT_BY_ROWS;
+
+	public Grid() {
+		super();
+		initSorting();
+	}
+
+	/**
+	 * A grid with a column for every property of the bean type, keyed by the property name (Vaadin 8
+	 * {@code Grid(Class)}).
+	 */
+	public Grid(Class<T> beanType) {
+		super(beanType);
+		initSorting();
+	}
+
+	/**
+	 * Vaadin 7/8: a click on a header sorts by that column, a shift-click adds it as a further sort column.
+	 */
+	private void initSorting() {
+		setMultiSort(true, MultiSortPriority.APPEND, true);
+	}
+
+	@Override
+	protected Column<T, ?> createColumn(Renderer<T> renderer, String columnId) {
+		return new Column<>(this, columnId, renderer);
+	}
+
+	@Override
+	protected <C extends com.vaadin.flow.component.grid.Grid.Column<T>> C addColumn(
+		ValueProvider<T, ?> valueProvider,
+		BiFunction<Renderer<T>, String, C> columnFactory) {
+		C column = super.addColumn(valueProvider, columnFactory);
+		GridSupport.initValueColumn(column, valueProvider);
+		return column;
+	}
+
+	/**
+	 * Returns the raw column type, so that callers can assign it to {@code Column<T, V>} with their value type as in
+	 * Vaadin 8 (Flow's method returns {@code Grid.Column<T>}).
+	 */
+	@Override
+	@SuppressWarnings("rawtypes")
+	public Column addColumn(ValueProvider<T, ?> valueProvider) {
+		return (Column) super.addColumn(valueProvider);
+	}
+
+	/**
+	 * Adds a column for the bean property; sortable as in Vaadin 8, whatever the property type.
+	 */
+	@Override
+	@SuppressWarnings("rawtypes")
+	public Column addColumn(String propertyName) {
+		Column column = (Column) super.addColumn(propertyName);
+		column.setSortable(true);
+		return column;
+	}
+
+	/**
+	 * Vaadin 8 {@code addColumn(ValueProvider, Renderer)}.
+	 */
+	@SuppressWarnings("unchecked")
+	public <V> Column<T, V> addColumn(ValueProvider<T, V> valueProvider, ValueRenderer<? super V> renderer) {
+		Column<T, V> column = addColumn(valueProvider);
+		column.setRenderer(renderer);
+		return column;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <V extends Component> Column<T, V> addComponentColumn(ValueProvider<T, V> componentProvider) {
+		return (Column<T, V>) super.addComponentColumn(componentProvider);
+	}
+
+	/**
+	 * @return the column with this key (Vaadin 8: id), or {@code null}
+	 */
+	@SuppressWarnings("unchecked")
+	public Column<T, ?> getColumn(String columnId) {
+		return (Column<T, ?>) getColumnByKey(columnId);
+	}
+
+	/**
+	 * Vaadin 8 {@code getColumns()}: all columns in their order, as {@link Column}s.
+	 */
+	@SuppressWarnings("unchecked")
+	public List<Column<T, ?>> getAllColumns() {
+		return getColumns().stream().map(column -> (Column<T, ?>) column).collect(Collectors.toList());
+	}
+
+	/**
+	 * Vaadin 8 {@code removeColumn(String)}.
+	 */
+	public void removeColumn(String columnId) {
+		removeColumnByKey(columnId);
+	}
+
+	/**
+	 * Vaadin 8 semantics: the columns with these keys in this order; columns of bean properties are added when missing,
+	 * all other columns are removed. (Flow's {@code setColumns} removes every column and adds property columns only.)
+	 */
+	@Override
+	public void setColumns(String... columnIds) {
+		GridSupport.setColumns(this, columnIds);
+	}
+
+	/**
+	 * Vaadin 8 row style generator: the class names become part names of the row.
+	 */
+	public void setStyleGenerator(SerializableFunction<T, String> styleGenerator) {
+		setPartNameGenerator(styleGenerator);
+	}
+
+	/**
+	 * Vaadin 8 row description generator: shown as the rows' tooltip.
+	 */
+	public void setDescriptionGenerator(SerializableFunction<T, String> descriptionGenerator) {
+		setTooltipGenerator(descriptionGenerator);
+	}
+
+	/**
+	 * Vaadin 7 {@code setCellStyleGenerator} for the field access styles: applied to the columns the grid has now.
+	 */
+	public void setCellStyleGenerator(FieldAccessCellStyleGenerator cellStyleGenerator) {
+		getAllColumns().forEach(column -> column.setStyleGenerator(cellStyleGenerator.forColumn(column.getKey())));
+	}
+
+	/**
+	 * Vaadin 8 {@code getSelectionModel().isUserSelectionAllowed()} / Vaadin 7 {@code HasUserSelectionAllowed}.
+	 */
+	public boolean isUserSelectionAllowed() {
+		return getSelectionMode() != SelectionMode.NONE;
+	}
+
+	public HeightMode getHeightMode() {
+		return heightMode;
+	}
+
+	public void setHeightMode(HeightMode heightMode) {
+		this.heightMode = heightMode;
+		switch (heightMode) {
+		case UNDEFINED:
+			setAllRowsVisible(true);
+			break;
+		case ROW:
+			setAllRowsVisible(false);
+			setHeight(GridSupport.heightByRows(heightByRows));
+			break;
+		case CSS:
+		default:
+			setAllRowsVisible(false);
+		}
+	}
+
+	public double getHeightByRows() {
+		return heightByRows;
+	}
+
+	/**
+	 * Vaadin 8: the grid is as high as this many rows plus the header, and its height mode becomes {@link HeightMode#ROW}.
+	 */
+	public void setHeightByRows(double rows) {
+		this.heightByRows = rows;
+		setHeightMode(HeightMode.ROW);
+	}
+
+	/**
+	 * Vaadin 8: as high as its rows ({@link HeightMode#UNDEFINED}).
+	 */
+	public void setHeightUndefined() {
+		setHeightMode(HeightMode.UNDEFINED);
+	}
+
+	@Override
+	protected void onDataProviderChange() {
+		super.onDataProviderChange();
+		getAllColumns().forEach(Column::updateSortable);
+	}
+
+	/**
+	 * A grid column with the Vaadin 8 column API (and the Vaadin 7 names where they differ).
+	 *
+	 * @param <T>
+	 *            the row type
+	 * @param <V>
+	 *            the type of the column's value
+	 */
+	public static class Column<T, V> extends com.vaadin.flow.component.grid.Grid.Column<T> {
+
+		private static final long serialVersionUID = 1L;
+
+		private ValueProvider<T, V> valueProvider;
+		private ValueRenderer<?> valueRenderer;
+		private String caption;
+		private boolean sortable = true;
+		private boolean sortPropertySet;
+		/** Set while Flow's own sort setters run: they call {@link #setSortable(boolean)}, which is the user's switch here. */
+		private boolean flowSortUpdate;
+		private double maximumWidth = -1;
+
+		public Column(com.vaadin.flow.component.grid.Grid<T> grid, String columnId, Renderer<T> renderer) {
+			super(grid, columnId, renderer);
+		}
+
+		@SuppressWarnings("unchecked")
+		void initValueProvider(ValueProvider<T, ?> valueProvider) {
+			this.valueProvider = (ValueProvider<T, V>) valueProvider;
+			updateSortable();
+		}
+
+		/**
+		 * @return the provider of the column's value ({@code null} for component and renderer columns)
+		 */
+		public ValueProvider<T, V> getValueProvider() {
+			return valueProvider;
+		}
+
+		/**
+		 * The column's identifier (Vaadin 8 {@code setId}); also the default sort property, as in Vaadin 8.
+		 */
+		@Override
+		public Column<T, V> setKey(String key) {
+			super.setKey(key);
+			if (!sortPropertySet && key != null) {
+				flowSortUpdate = true;
+				try {
+					super.setSortProperty(key);
+				} finally {
+					flowSortUpdate = false;
+				}
+			}
+			updateSortable();
+			return this;
+		}
+
+		/**
+		 * Vaadin 8 {@code setId}: sets the column key ({@link #setKey(String)}), not a DOM id. Flow's {@code Component.setId}
+		 * returns nothing, so chained calls use {@link #setKey(String)}.
+		 */
+		@Override
+		public void setId(String id) {
+			setKey(id);
+		}
+
+		/**
+		 * @deprecated This is the component id ({@code Optional}), not the Vaadin 8 column id: use {@link #getKey()}.
+		 *             {@code "x".equals(column.getId())} compiles but is always {@code false}.
+		 */
+		@Override
+		@Deprecated
+		public Optional<String> getId() {
+			return super.getId();
+		}
+
+		/**
+		 * Vaadin 7 {@code getPropertyId()}: the column key.
+		 */
+		public Object getPropertyId() {
+			return getKey();
+		}
+
+		/**
+		 * Vaadin 8 {@code setCaption}: the header text.
+		 */
+		public Column<T, V> setCaption(String caption) {
+			this.caption = caption;
+			setHeader(caption != null ? caption : "");
+			return this;
+		}
+
+		/**
+		 * @return the caption set, else the header text (bean property columns: the property name made readable, as in
+		 *         Vaadin 8)
+		 */
+		public String getCaption() {
+			return caption != null ? caption : getHeaderText();
+		}
+
+		/**
+		 * Vaadin 7 name of {@link #setCaption(String)}.
+		 */
+		public Column<T, V> setHeaderCaption(String caption) {
+			return setCaption(caption);
+		}
+
+		/**
+		 * Vaadin 7 name of {@link #getCaption()}.
+		 */
+		public String getHeaderCaption() {
+			return getCaption();
+		}
+
+		public Column<T, V> setHidden(boolean hidden) {
+			setVisible(!hidden);
+			return this;
+		}
+
+		public boolean isHidden() {
+			return !isVisible();
+		}
+
+		/**
+		 * Vaadin 8 {@code setRenderer(Renderer)}: renders the column's value with the value renderer.
+		 */
+		public Column<T, V> setRenderer(ValueRenderer<? super V> renderer) {
+			this.valueRenderer = renderer;
+			super.setRenderer(renderer.createRenderer(requireValueProvider()));
+			return this;
+		}
+
+		/**
+		 * Vaadin 8 {@code setRenderer(ValueProvider, Renderer)}: renders the presentation of the column's value.
+		 */
+		public <P> Column<T, V> setRenderer(ValueProvider<V, P> presentationProvider, ValueRenderer<? super P> renderer) {
+			this.valueRenderer = renderer;
+			ValueProvider<T, V> columnValueProvider = requireValueProvider();
+			super.setRenderer(renderer.createRenderer(item -> presentationProvider.apply(columnValueProvider.apply(item))));
+			return this;
+		}
+
+		/**
+		 * @return the value renderer set with {@link #setRenderer(ValueRenderer)}, {@code null} for the default text (Vaadin
+		 *         8: {@code getRenderer()}, which was a {@code TextRenderer} by default)
+		 */
+		public ValueRenderer<?> getValueRenderer() {
+			return valueRenderer;
+		}
+
+		private ValueProvider<T, V> requireValueProvider() {
+			if (valueProvider == null) {
+				throw new IllegalStateException("Column " + getKey() + " has no value provider for a value renderer");
+			}
+			return valueProvider;
+		}
+
+		@Override
+		public Column<T, V> setSortable(boolean sortable) {
+			if (!flowSortUpdate) {
+				this.sortable = sortable;
+				updateSortable();
+			}
+			return this;
+		}
+
+		@Override
+		public Column<T, V> setSortProperty(String... properties) {
+			sortPropertySet = true;
+			flowSortUpdate = true;
+			try {
+				super.setSortProperty(properties);
+			} finally {
+				flowSortUpdate = false;
+			}
+			updateSortable();
+			return this;
+		}
+
+		@Override
+		public Column<T, V> setComparator(Comparator<T> comparator) {
+			flowSortUpdate = true;
+			try {
+				super.setComparator(comparator);
+			} finally {
+				flowSortUpdate = false;
+			}
+			updateSortable();
+			return this;
+		}
+
+		/**
+		 * Vaadin 8 rule: user-sortable if not switched off, and the data is in memory or the column has sort properties.
+		 */
+		@SuppressWarnings("rawtypes")
+		void updateSortable() {
+			DataProvider dataProvider = getGrid() != null ? getGrid().getDataProvider() : null;
+			boolean inMemory = dataProvider == null || dataProvider.isInMemory();
+			boolean hasSortProperties = sortPropertySet || getKey() != null;
+			super.setSortable(sortable && (inMemory || hasSortProperties));
+		}
+
+		/**
+		 * Vaadin 8 cell style generator: the class names become part names of the cells.
+		 */
+		public Column<T, V> setStyleGenerator(SerializableFunction<T, String> styleGenerator) {
+			setPartNameGenerator(styleGenerator);
+			return this;
+		}
+
+		/**
+		 * Vaadin 8 cell description generator: shown as the cells' tooltip.
+		 */
+		public Column<T, V> setDescriptionGenerator(SerializableFunction<T, String> descriptionGenerator) {
+			setTooltipGenerator(descriptionGenerator);
+			return this;
+		}
+
+		/**
+		 * Vaadin 8 fixed width in pixels: the column does not grow.
+		 */
+		public Column<T, V> setWidth(double pixels) {
+			setWidth(GridSupport.pixels(pixels));
+			setFlexGrow(0);
+			return this;
+		}
+
+		/**
+		 * Vaadin 8: width from the content.
+		 */
+		public Column<T, V> setWidthUndefined() {
+			setAutoWidth(true);
+			return this;
+		}
+
+		/**
+		 * Vaadin 8 expand ratio: the flex grow of the column.
+		 */
+		public Column<T, V> setExpandRatio(int expandRatio) {
+			setFlexGrow(expandRatio);
+			return this;
+		}
+
+		/**
+		 * Vaadin 8 minimum width: the column's base width; it still grows with its flex grow.
+		 */
+		public Column<T, V> setMinimumWidth(double pixels) {
+			setWidth(GridSupport.pixels(pixels));
+			return this;
+		}
+
+		/**
+		 * Vaadin 8 maximum width. Flow grid columns have no maximum width: the value is only kept.
+		 */
+		public Column<T, V> setMaximumWidth(double pixels) {
+			this.maximumWidth = pixels;
+			return this;
+		}
+
+		public double getMaximumWidth() {
+			return maximumWidth;
+		}
+
+		@Override
+		public Column<T, V> setResizable(boolean resizable) {
+			super.setResizable(resizable);
+			return this;
+		}
+
+		/**
+		 * Vaadin 8 {@code setEditorBinding}: the binding's field is the column's editor component.
+		 */
+		public Column<T, V> setEditorBinding(Binder.Binding<T, ?> binding) {
+			setEditorComponent((Component) binding.getField());
+			return this;
+		}
+	}
+}

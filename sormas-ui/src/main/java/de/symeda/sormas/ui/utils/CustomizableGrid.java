@@ -16,20 +16,24 @@
 package de.symeda.sormas.ui.utils;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
-import com.vaadin.v7.ui.Grid;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
+import de.symeda.sormas.ui.utils.grid.Grid;
 
-public class CustomizableGrid extends Grid {
+/**
+ * Was a Vaadin 7 grid; now a Flow grid of the bean type, with the columns filtered by the country's field visibility.
+ */
+public class CustomizableGrid<T> extends Grid<T> {
+
+	public CustomizableGrid(Class<T> beanType) {
+		super(beanType);
+	}
 
 	public void setColumns(Class<?> clazz, List<String> propertyIds) {
 
 		FieldVisibilityCheckers fieldVisibilityCheckers = FieldVisibilityCheckers.withCountry(FacadeProvider.getConfigFacade().getCountryLocale());
-		super.setColumns(
-			propertyIds.stream().filter(propertyId -> fieldVisibilityCheckers.isVisible(clazz, propertyId)).collect(Collectors.toList()).toArray());
+		super.setColumns(propertyIds.stream().filter(propertyId -> fieldVisibilityCheckers.isVisible(clazz, propertyId)).toArray(String[]::new));
 	}
 
 	public void setColumns(List<CustomizableGridColumn> columns) {
@@ -38,12 +42,13 @@ public class CustomizableGrid extends Grid {
 		super.setColumns(
 			columns.stream()
 				.filter(column -> fieldVisibilityCheckers.isVisible(column.getClazz(), column.getPropertyId()))
-				.collect(Collectors.toList())
-				.toArray());
+				// Vaadin 7 code passed the column objects as property ids (unused method); the ids are meant
+				.map(CustomizableGridColumn::getPropertyId)
+				.toArray(String[]::new));
 	}
 
 	@Override
-	public void setColumns(Object... propertyIds) {
+	public void setColumns(String... propertyIds) {
 		throw new UnsupportedOperationException("This method should not be used! Please use setColumns of CustomizableGrid!");
 	}
 

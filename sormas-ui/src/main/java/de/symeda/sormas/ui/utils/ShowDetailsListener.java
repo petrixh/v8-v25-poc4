@@ -3,8 +3,8 @@ package de.symeda.sormas.ui.utils;
 import java.time.LocalDateTime;
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Grid.ItemClick;
-import com.vaadin.ui.components.grid.ItemClickListener;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.grid.ItemClickEvent;
 
 /**
  * Opens item details when an item is correctly selected by respective {@code detailsColumn} or by double-click.
@@ -12,7 +12,7 @@ import com.vaadin.ui.components.grid.ItemClickListener;
  * @param <T>
  *            data class of the grid.
  */
-public class ShowDetailsListener<T> implements ItemClickListener<T> {
+public class ShowDetailsListener<T> implements ComponentEventListener<ItemClickEvent<T>> {
 
 	private static final long serialVersionUID = 6288304912712800245L;
 
@@ -74,10 +74,14 @@ public class ShowDetailsListener<T> implements ItemClickListener<T> {
 	}
 
 	@Override
-	public void itemClick(ItemClick<T> event) {
+	public void onComponentEvent(ItemClickEvent<T> event) {
+		itemClick(event);
+	}
+
+	public void itemClick(ItemClickEvent<T> event) {
 		if (event.getItem() != null
-			&& ((event.getColumn() != null && detailsColumnId.equals(event.getColumn().getId()))
-				|| (showOnDoubleClick && event.getMouseEventDetails().isDoubleClick()))) {
+			&& ((event.getColumn() != null && detailsColumnId.equals(event.getColumn().getKey()))
+				|| (showOnDoubleClick && event.getClickCount() > 1))) {
 			// if the last invocation of the itemHandler is less than 1 second ago, ignore the event
 			if (LocalDateTime.now().isAfter(lastHandlingTimestamp.plusSeconds(1))) {
 				lastHandlingTimestamp = LocalDateTime.now();
@@ -87,13 +91,13 @@ public class ShowDetailsListener<T> implements ItemClickListener<T> {
 	}
 
 	/**
-	 * Called by {@link #itemClick(ItemClick)} when an item is correctly selected.<br />
+	 * Called by {@link #itemClick(ItemClickEvent)} when an item is correctly selected.<br />
 	 * This method can be overridden to alter or extend the behavior.
 	 * 
 	 * @param event
-	 *            source event (only called when {@link ItemClick#getItem()} {@code != null}).
+	 *            source event (only called when {@link ItemClickEvent#getItem()} {@code != null}).
 	 */
-	protected void handleItemClick(ItemClick<T> event) {
+	protected void handleItemClick(ItemClickEvent<T> event) {
 
 		itemHandler.accept(event.getItem());
 	}

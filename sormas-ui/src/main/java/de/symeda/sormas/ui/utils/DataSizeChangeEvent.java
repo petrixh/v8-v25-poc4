@@ -15,16 +15,17 @@
 
 package de.symeda.sormas.ui.utils;
 
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
 
-public class DataSizeChangeEvent extends Component.Event {
+public class DataSizeChangeEvent extends ComponentEvent<Component> {
 
 	private static final long serialVersionUID = -4584999224530662763L;
 
 	private final int size;
 
 	public DataSizeChangeEvent(Component source, int size) {
-		super(source);
+		super(source, false);
 		this.size = size;
 	}
 

@@ -3,8 +3,6 @@ package de.symeda.sormas.ui.clinicalcourse;
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 
-import de.symeda.sormas.ui.utils.fields.TextField;
-
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.clinicalcourse.ClinicalVisitDto;
@@ -18,6 +16,7 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.symptoms.SymptomsForm;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.DateTimeField;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class ClinicalVisitForm extends AbstractEditForm<ClinicalVisitDto> {
 
@@ -53,12 +52,12 @@ public class ClinicalVisitForm extends AbstractEditForm<ClinicalVisitDto> {
 	}
 
 	@Override
-	protected void setInternalValue(ClinicalVisitDto newValue) {
+	protected void setPresentationValue(ClinicalVisitDto newValue) {
 
 		if (!disease.equals(newValue.getDisease())) {
 			throw new IllegalArgumentException("Visit's disease doesn't match the form configuration");
 		}
-		super.setInternalValue(newValue);
+		super.setPresentationValue(newValue);
 	}
 
 	@Override

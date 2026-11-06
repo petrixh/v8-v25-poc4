@@ -3,8 +3,6 @@ package de.symeda.sormas.ui.clinicalcourse;
 import java.util.Collection;
 
 import com.vaadin.flow.component.Unit;
-import de.symeda.sormas.ui.utils.NotificationHelper;
-import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
@@ -18,6 +16,8 @@ import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent.CommitListener;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 public class ClinicalCourseController {
@@ -58,8 +58,8 @@ public class ClinicalCourseController {
 
 		Dialog popupWindow = VaadinUiUtil.showModalPopupWindow(view, I18nProperties.getString(Strings.headingCreateNewClinicalVisit));
 		// Clinical visit form is too big for typical screens
-		popupWindow.setWidth(form.getWidth() + 90, Unit.PIXELS);
-		popupWindow.setHeight(80, Unit.PERCENTAGE);
+		popupWindow.setWidth("calc(" + form.getWidth() + " + 90px)");
+		popupWindow.setHeight("80%");
 	}
 
 	public void openClinicalVisitEditForm(
@@ -86,8 +86,8 @@ public class ClinicalCourseController {
 		Dialog popupWindow = VaadinUiUtil.showModalPopupWindow(
 			view,
 			I18nProperties.getString(!isEditAllowed ? Strings.headingViewClinicalVisit : Strings.headingEditClinicalVisit));
-		popupWindow.setWidth(form.getWidth() + 90, Unit.PIXELS);
-		popupWindow.setHeight(80, Unit.PERCENTAGE);
+		popupWindow.setWidth("calc(" + form.getWidth() + " + 90px)");
+		popupWindow.setHeight("80%");
 
 		if (isEditOrDeleteAllowed) {
 			view.addCommitListener(new CommitListener() {
@@ -128,13 +128,13 @@ public class ClinicalCourseController {
 		view.getButtonsPanel().setVisible(isEditOrDeleteAllowed);
 	}
 
-	public void deleteAllSelectedClinicalVisits(Collection<Object> selectedRows, Runnable callback) {
+	public void deleteAllSelectedClinicalVisits(Collection<?> selectedRows, Runnable callback) {
 		if (selectedRows.size() == 0) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingNoClinicalVisitsSelected),
 				I18nProperties.getString(Strings.messageNoClinicalVisitsSelected),
 				Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				false);
 		} else {
 			// todo confirmationDeleteEntity has only one format string so selectedRows.size() is not used
 			VaadinUiUtil
@@ -143,11 +143,11 @@ public class ClinicalCourseController {
 						FacadeProvider.getClinicalVisitFacade().deleteClinicalVisit(((ClinicalVisitIndexDto) selectedRow).getUuid());
 					}
 					callback.run();
-					new Notification(
+					NotificationHelper.show(
 						I18nProperties.getString(Strings.headingClinicalVisitsDeleted),
 						I18nProperties.getString(Strings.messageClinicalVisitsDeleted),
 						Type.HUMANIZED_MESSAGE,
-						false).show(Page.getCurrent());
+						false);
 				});
 		}
 	}

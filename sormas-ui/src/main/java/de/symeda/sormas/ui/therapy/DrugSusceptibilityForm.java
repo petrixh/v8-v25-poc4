@@ -25,9 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
-import de.symeda.sormas.ui.utils.fields.ComboBox;
-import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -44,6 +43,8 @@ import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FieldHelper;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class DrugSusceptibilityForm extends AbstractEditForm<DrugSusceptibilityDto> {
 
@@ -123,7 +124,7 @@ public class DrugSusceptibilityForm extends AbstractEditForm<DrugSusceptibilityD
 
 	public DrugSusceptibilityForm(FieldVisibilityCheckers fieldVisibilityCheckers, UiFieldAccessCheckers fieldAccessCheckers) {
 		super(DrugSusceptibilityDto.class, I18N_PREFIX, true, fieldVisibilityCheckers, fieldAccessCheckers);
-		//this.addClassNames(CssStyles.VIEW_SECTION, CssStyles.VSPACE_2);
+		//this.addStyleNames(CssStyles.VIEW_SECTION, CssStyles.VSPACE_2);
 	}
 
 	@Override
@@ -343,10 +344,7 @@ public class DrugSusceptibilityForm extends AbstractEditForm<DrugSusceptibilityD
 		return field;
 	}
 
-	@Override
-	public void markAsDirty() {
-		super.markAsDirty();
-	}
+	// was an override of the Vaadin 8 markAsDirty() that only called super; Flow has no markAsDirty
 
 	@Override
 	public void commit() {

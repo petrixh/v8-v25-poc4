@@ -65,7 +65,7 @@ public class VaccinationList extends PaginationList<VaccinationListEntryDto> {
 			Span noVaccinationsLabel = new Span(
 				I18nProperties.getCaption(
 					disease != null ? Captions.vaccinationNoVaccinationsForPersonAndDisease : Captions.vaccinationNoVaccinationsForPerson));
-			listLayout.addComponent(noVaccinationsLabel);
+			listLayout.add(noVaccinationsLabel);
 		}
 	}
 
@@ -98,7 +98,7 @@ public class VaccinationList extends PaginationList<VaccinationListEntryDto> {
 			}
 
 			listEntry.setEnabled(isEditAllowed && entryDto.isRelevant());
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 }

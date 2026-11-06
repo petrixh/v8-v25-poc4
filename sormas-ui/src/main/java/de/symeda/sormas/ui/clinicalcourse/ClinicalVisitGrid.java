@@ -1,10 +1,9 @@
 package de.symeda.sormas.ui.clinicalcourse;
 
+import java.util.Date;
 import java.util.List;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
-import de.symeda.sormas.ui.utils.grid.Grid;
-import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
@@ -20,16 +19,20 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.FieldAccessCellStyleGenerator;
 import de.symeda.sormas.ui.utils.V7AbstractGrid;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 @SuppressWarnings("serial")
-public class ClinicalVisitGrid extends Grid implements V7AbstractGrid<ClinicalVisitCriteria> {
+public class ClinicalVisitGrid extends Grid<ClinicalVisitIndexDto> implements V7AbstractGrid<ClinicalVisitCriteria> {
 
 	private static final String ACTION_BTN_ID = "action";
 
 	private ClinicalVisitCriteria clinicalVisitCriteria = new ClinicalVisitCriteria();
 
+	@SuppressWarnings("unchecked")
 	public ClinicalVisitGrid(CaseReferenceDto caseRef, boolean isPseudonymized, boolean isEditAllowed, boolean isDeleteAllowed) {
 
+		super(ClinicalVisitIndexDto.class);
 		setSizeFull();
 
 		if (UiUtil.permitted(isEditAllowed, UserRight.PERFORM_BULK_OPERATIONS)) {
@@ -38,10 +41,7 @@ public class ClinicalVisitGrid extends Grid implements V7AbstractGrid<ClinicalVi
 			setSelectionMode(SelectionMode.NONE);
 		}
 
-		BeanItemContainer<ClinicalVisitIndexDto> container = new BeanItemContainer<>(ClinicalVisitIndexDto.class);
-		GeneratedPropertyContainer generatedContainer = new GeneratedPropertyContainer(container);
-		VaadinUiUtil.addIconColumn(generatedContainer, ACTION_BTN_ID, isEditAllowed ? VaadinIcon.EDIT : VaadinIcon.EYE);
-		setContainerDataSource(generatedContainer);
+		VaadinUiUtil.addIconColumn(this, ACTION_BTN_ID, isEditAllowed ? VaadinIcon.EDIT : VaadinIcon.EYE);
 
 		setColumns(
 			ACTION_BTN_ID,
@@ -55,9 +55,10 @@ public class ClinicalVisitGrid extends Grid implements V7AbstractGrid<ClinicalVi
 		VaadinUiUtil.setupActionColumn(getColumn(ACTION_BTN_ID));
 
 		Language userLanguage = I18nProperties.getUserLanguage();
-		getColumn(ClinicalVisitIndexDto.VISIT_DATE_TIME).setRenderer(new DateRenderer(DateHelper.getLocalDateTimeFormat(userLanguage)));
+		((Column<ClinicalVisitIndexDto, Date>) getColumn(ClinicalVisitIndexDto.VISIT_DATE_TIME))
+			.setRenderer(new DateRenderer(DateHelper.getLocalDateTimeFormat(userLanguage)));
 
-		for (Column column : getColumns()) {
+		for (Column<ClinicalVisitIndexDto, ?> column : getAllColumns()) {
 			column.setHeaderCaption(
 				I18nProperties.getPrefixCaption(ClinicalVisitIndexDto.I18N_PREFIX, column.getPropertyId().toString(), column.getHeaderCaption()));
 		}
@@ -68,34 +69,22 @@ public class ClinicalVisitGrid extends Grid implements V7AbstractGrid<ClinicalVi
 				UiFieldAccessCheckers.forSensitiveData(isPseudonymized, FacadeProvider.getConfigFacade().getCountryLocale())));
 
 		addItemClickListener(e -> {
-			if (ACTION_BTN_ID.equals(e.getPropertyId()) || e.isDoubleClick()) {
+			if ((e.getColumn() != null && ACTION_BTN_ID.equals(e.getColumn().getKey())) || e.getClickCount() > 1) {
 				ControllerProvider.getClinicalCourseController()
-					.openClinicalVisitEditForm(
-						(ClinicalVisitIndexDto) e.getItemId(),
-						caseRef.getUuid(),
-						this::reload,
-						isEditAllowed,
-						isDeleteAllowed);
+					.openClinicalVisitEditForm(e.getItem(), caseRef.getUuid(), this::reload, isEditAllowed, isDeleteAllowed);
 			}
 		});
 	}
 
-	@SuppressWarnings("unchecked")
-	public BeanItemContainer<ClinicalVisitIndexDto> getContainer() {
-		GeneratedPropertyContainer container = (GeneratedPropertyContainer) super.getContainerDataSource();
-		return (BeanItemContainer<ClinicalVisitIndexDto>) container.getWrappedContainer();
-	}
-
 	public void reload() {
-		if (getSelectionModel() instanceof HasUserSelectionAllowed) {
+
+		if (isUserSelectionAllowed()) {
 			deselectAll();
 		}
 
 		List<ClinicalVisitIndexDto> entries = FacadeProvider.getClinicalVisitFacade().getIndexList(clinicalVisitCriteria, null, null, null);
-
-		getContainer().removeAllItems();
-		getContainer().addAll(entries);
-		setHeightByRows(Math.max(1, Math.min(getContainer().size(), 10)));
+		setItems(entries);
+		setHeightByRows(Math.max(1, Math.min(entries.size(), 10)));
 	}
 
 	@Override

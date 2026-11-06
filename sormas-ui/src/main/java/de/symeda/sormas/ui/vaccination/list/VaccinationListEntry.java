@@ -17,11 +17,10 @@ package de.symeda.sormas.ui.vaccination.list;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.caze.Vaccine;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -29,9 +28,12 @@ import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.utils.DataHelper;
 import de.symeda.sormas.api.vaccination.VaccinationDto;
 import de.symeda.sormas.api.vaccination.VaccinationListEntryDto;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.sidecomponent.SideComponentField;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class VaccinationListEntry extends SideComponentField {
 
@@ -49,27 +51,27 @@ public class VaccinationListEntry extends SideComponentField {
 
 	private void buildLayout(boolean showDisease) {
 		HorizontalLayout uuidDateLayout = new HorizontalLayout();
-		uuidDateLayout.setMargin(false);
+		uuidDateLayout.setPadding(false);
 		uuidDateLayout.setSpacing(true);
 		uuidDateLayout.setWidthFull();
 
 		Span uuidLabel = new Span(DataHelper.getShortUuid(vaccination.getUuid()));
-		uuidLabel.setDescription(vaccination.getUuid());
+		uuidLabel.setTitle(vaccination.getUuid());
 		CssStyles.style(uuidLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
-		uuidDateLayout.addComponent(uuidLabel);
-		uuidDateLayout.setComponentAlignment(uuidLabel, FlexComponent.Alignment.CENTER);
+		uuidDateLayout.add(uuidLabel);
+		uuidDateLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, uuidLabel);
 
 		Span dateLabel = new Span(
 			vaccination.getVaccinationDate() != null
 				? DateFormatHelper.formatDate(vaccination.getVaccinationDate())
 				: I18nProperties.getString(Strings.labelNoVaccinationDate));
 		CssStyles.style(dateLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
-		uuidDateLayout.addComponent(dateLabel);
-		uuidDateLayout.setComponentAlignment(dateLabel, FlexComponent.Alignment.CENTER);
+		uuidDateLayout.add(dateLabel);
+		uuidDateLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, dateLabel);
 		addComponentToField(uuidDateLayout);
 
 		HorizontalLayout vaccineNameAndInfoLayout = new HorizontalLayout();
-		vaccineNameAndInfoLayout.setMargin(false);
+		vaccineNameAndInfoLayout.setPadding(false);
 		vaccineNameAndInfoLayout.setSpacing(true);
 		vaccineNameAndInfoLayout.setWidthFull();
 
@@ -80,14 +82,14 @@ public class VaccinationListEntry extends SideComponentField {
 			StringUtils.isNotBlank(vaccine)
 				? I18nProperties.getPrefixCaption(VaccinationDto.I18N_PREFIX, VaccinationDto.VACCINE_NAME) + SEPARATOR + vaccine
 				: I18nProperties.getString(Strings.labelNoVaccineName));
-		vaccineNameAndInfoLayout.addComponent(vaccineLabel);
-		vaccineNameAndInfoLayout.setComponentAlignment(vaccineLabel, FlexComponent.Alignment.CENTER);
+		vaccineNameAndInfoLayout.add(vaccineLabel);
+		vaccineNameAndInfoLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, vaccineLabel);
 
 		if (!vaccination.isRelevant()) {
-			Span vaccinationNotRelevantInfo = new Span(VaadinIcon.INFO_CIRCLE.getHtml(), ContentMode.HTML);
-			vaccinationNotRelevantInfo.setDescription(vaccination.getNonRelevantMessage());
-			vaccineNameAndInfoLayout.addComponent(vaccinationNotRelevantInfo);
-			vaccineNameAndInfoLayout.setComponentAlignment(vaccinationNotRelevantInfo, FlexComponent.Alignment.CENTER);
+			Span vaccinationNotRelevantInfo = VaadinUiUtil.createLabel(HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE), ContentMode.HTML);
+			vaccinationNotRelevantInfo.setTitle(vaccination.getNonRelevantMessage());
+			vaccineNameAndInfoLayout.add(vaccinationNotRelevantInfo);
+			vaccineNameAndInfoLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, vaccinationNotRelevantInfo);
 		}
 
 		addComponentToField(vaccineNameAndInfoLayout);

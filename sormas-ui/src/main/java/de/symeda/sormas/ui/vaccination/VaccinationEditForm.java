@@ -25,8 +25,8 @@ import java.util.Collections;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
-import de.symeda.sormas.ui.utils.fields.Field;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -44,6 +44,7 @@ import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
 import de.symeda.sormas.ui.utils.UserField;
+import de.symeda.sormas.ui.utils.fields.Field;
 
 public class VaccinationEditForm extends AbstractEditForm<VaccinationDto> {
 

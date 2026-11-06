@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -102,7 +102,7 @@ public class VaccinationController {
 
 		final CommitDiscardWrapperComponent<VaccinationEditForm> cdwComponent =
 			new CommitDiscardWrapperComponent<>(form, UiUtil.permitted(UserRight.IMMUNIZATION_CREATE), form.getFieldGroup());
-		cdwComponent.getCommitButton().setCaption(doSave ? I18nProperties.getCaption(Captions.actionSave) : I18nProperties.getString(Strings.done));
+		cdwComponent.getCommitButton().setText(doSave ? I18nProperties.getCaption(Captions.actionSave) : I18nProperties.getString(Strings.done));
 
 		cdwComponent.addCommitListener(() -> {
 			if (!form.getFieldGroup().isModified()) {
@@ -239,7 +239,7 @@ public class VaccinationController {
 
 		final CommitDiscardWrapperComponent<VaccinationEditForm> editComponent =
 			new CommitDiscardWrapperComponent<>(form, isEditOrDeleteAllowed, form.getFieldGroup());
-		editComponent.getCommitButton().setCaption(doSave ? I18nProperties.getCaption(Captions.actionSave) : I18nProperties.getString(Strings.done));
+		editComponent.getCommitButton().setText(doSave ? I18nProperties.getCaption(Captions.actionSave) : I18nProperties.getString(Strings.done));
 
 		if (isEditAllowed) {
 			editComponent.addCommitListener(() -> {

@@ -1,10 +1,9 @@
 package de.symeda.sormas.ui.therapy;
 
+import java.util.Date;
 import java.util.List;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
-import de.symeda.sormas.ui.utils.grid.Grid;
-import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
@@ -19,20 +18,25 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.FieldAccessCellStyleGenerator;
 import de.symeda.sormas.ui.utils.V7AbstractGrid;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 @SuppressWarnings("serial")
-public class TreatmentGrid extends Grid implements V7AbstractGrid<TreatmentCriteria> {
+public class TreatmentGrid extends Grid<TreatmentIndexDto> implements V7AbstractGrid<TreatmentCriteria> {
 
 	private static final String ACTION_BTN_ID = "edit";
 
 	private TreatmentCriteria treatmentCriteria = new TreatmentCriteria();
 
+	@SuppressWarnings("unchecked")
 	public TreatmentGrid(
 		boolean isPseudonymized,
 		boolean isEditAllowed,
 		boolean isDeleteAllowed,
 		boolean isPrescriptionEditAllowed,
 		boolean isPrescriptionDeleteAllowed) {
+
+		super(TreatmentIndexDto.class);
 		setSizeFull();
 
 		if (UiUtil.permitted(isEditAllowed, UserRight.PERFORM_BULK_OPERATIONS)) {
@@ -41,10 +45,7 @@ public class TreatmentGrid extends Grid implements V7AbstractGrid<TreatmentCrite
 			setSelectionMode(SelectionMode.NONE);
 		}
 
-		BeanItemContainer<TreatmentIndexDto> container = new BeanItemContainer<>(TreatmentIndexDto.class);
-		GeneratedPropertyContainer generatedContainer = new GeneratedPropertyContainer(container);
-		VaadinUiUtil.addIconColumn(generatedContainer, ACTION_BTN_ID, isEditAllowed ? VaadinIcon.EDIT : VaadinIcon.EYE);
-		setContainerDataSource(generatedContainer);
+		VaadinUiUtil.addIconColumn(this, ACTION_BTN_ID, isEditAllowed ? VaadinIcon.EDIT : VaadinIcon.EYE);
 
 		setColumns(
 			ACTION_BTN_ID,
@@ -57,12 +58,12 @@ public class TreatmentGrid extends Grid implements V7AbstractGrid<TreatmentCrite
 		VaadinUiUtil.setupActionColumn(getColumn(ACTION_BTN_ID));
 
 		Language userLanguage = I18nProperties.getUserLanguage();
-		getColumn(TreatmentIndexDto.TREATMENT_DATE_TIME).setRenderer(new DateRenderer(DateHelper.getLocalDateTimeFormat(userLanguage)));
+		((Column<TreatmentIndexDto, Date>) getColumn(TreatmentIndexDto.TREATMENT_DATE_TIME))
+			.setRenderer(new DateRenderer(DateHelper.getLocalDateTimeFormat(userLanguage)));
 
-		for (Column column : getColumns()) {
+		for (Column<TreatmentIndexDto, ?> column : getAllColumns()) {
 			column.setHeaderCaption(
 				I18nProperties.getPrefixCaption(TreatmentIndexDto.I18N_PREFIX, column.getPropertyId().toString(), column.getHeaderCaption()));
-
 			setCellStyleGenerator(
 				FieldAccessCellStyleGenerator.withFieldAccessCheckers(
 					TreatmentIndexDto.class,
@@ -70,14 +71,14 @@ public class TreatmentGrid extends Grid implements V7AbstractGrid<TreatmentCrite
 		}
 
 		addItemClickListener(e -> {
-			if (e.getPropertyId() == null) {
+			if (e.getColumn() == null) {
 				return;
 			}
 
-			if (ACTION_BTN_ID.equals(e.getPropertyId()) || e.isDoubleClick()) {
+			if (ACTION_BTN_ID.equals(e.getColumn().getKey()) || e.getClickCount() > 1) {
 				ControllerProvider.getTherapyController()
 					.openTreatmentEditForm(
-						(TreatmentIndexDto) e.getItemId(),
+						e.getItem(),
 						this::reload,
 						isEditAllowed,
 						isDeleteAllowed,
@@ -87,21 +88,14 @@ public class TreatmentGrid extends Grid implements V7AbstractGrid<TreatmentCrite
 		});
 	}
 
-	@SuppressWarnings("unchecked")
-	public BeanItemContainer<TreatmentIndexDto> getContainer() {
-		GeneratedPropertyContainer container = (GeneratedPropertyContainer) super.getContainerDataSource();
-		return (BeanItemContainer<TreatmentIndexDto>) container.getWrappedContainer();
-	}
-
 	public void reload() {
-		if (getSelectionModel() instanceof HasUserSelectionAllowed) {
+
+		if (isUserSelectionAllowed()) {
 			deselectAll();
 		}
 
 		List<TreatmentIndexDto> entries = FacadeProvider.getTreatmentFacade().getIndexList(treatmentCriteria);
-
-		getContainer().removeAllItems();
-		getContainer().addAll(entries);
+		setItems(entries);
 	}
 
 	@Override

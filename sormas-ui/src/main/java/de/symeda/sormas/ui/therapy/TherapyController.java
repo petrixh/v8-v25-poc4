@@ -8,13 +8,10 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import de.symeda.sormas.ui.navigation.Navigator;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Span;
-import de.symeda.sormas.ui.utils.NotificationHelper;
-import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -30,10 +27,13 @@ import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.api.utils.criteria.BaseCriteria;
 import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.UiUtil;
+import de.symeda.sormas.ui.navigation.Navigator;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent.CommitListener;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent.DeleteListener;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 public class TherapyController {
@@ -284,18 +284,18 @@ public class TherapyController {
 				callback.run();
 			});
 
-			view.getButtonsPanel().addComponent(openPrescriptionButton, view.getButtonsPanel().getComponentIndex(view.getDiscardButton()));
-			view.getButtonsPanel().setComponentAlignment(openPrescriptionButton, FlexComponent.Alignment.CENTER);
+			view.getButtonsPanel().addComponentAtIndex(view.getButtonsPanel().indexOf(view.getDiscardButton()), openPrescriptionButton);
+			view.getButtonsPanel().setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, openPrescriptionButton);
 		}
 	}
 
-	public void deleteAllSelectedPrescriptions(Collection<Object> selectedRows, Runnable callback) {
+	public void deleteAllSelectedPrescriptions(Collection<?> selectedRows, Runnable callback) {
 		if (selectedRows.size() == 0) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingNoPrescriptionsSelected),
 				I18nProperties.getString(Strings.messageNoPrescriptionsSelected),
 				Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				false);
 		} else {
 			VaadinUiUtil.showDeleteConfirmationWindow(
 				String.format(I18nProperties.getString(Strings.confirmationDeletePrescriptions), selectedRows.size()),
@@ -318,24 +318,24 @@ public class TherapyController {
 						}
 
 						callback.run();
-						new Notification(
+						NotificationHelper.show(
 							I18nProperties.getString(Strings.headingPrescriptionsDeleted),
 							I18nProperties.getString(Strings.messagePrescriptionsDeleted),
 							Type.HUMANIZED_MESSAGE,
-							false).show(Page.getCurrent());
+							false);
 					}
 				});
 		}
 	}
 
-	public void deleteAllSelectedTreatments(Collection<Object> selectedRows, Runnable callback) {
+	public void deleteAllSelectedTreatments(Collection<?> selectedRows, Runnable callback) {
 
 		if (selectedRows.size() == 0) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingNoTreatmentsSelected),
 				I18nProperties.getString(Strings.messageNoTreatmentsSelected),
 				Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				false);
 		} else {
 			VaadinUiUtil.showDeleteConfirmationWindow(
 				String.format(I18nProperties.getString(Strings.confirmationDeleteTreatments), selectedRows.size()),
@@ -346,11 +346,11 @@ public class TherapyController {
 							FacadeProvider.getTreatmentFacade().deleteTreatment(((TreatmentIndexDto) selectedRow).getUuid());
 						}
 						callback.run();
-						new Notification(
+						NotificationHelper.show(
 							I18nProperties.getString(Strings.headingTreatmentsDeleted),
 							I18nProperties.getString(Strings.messageTreatmentsDeleted),
 							Type.HUMANIZED_MESSAGE,
-							false).show(Page.getCurrent());
+							false);
 					}
 				});
 		}

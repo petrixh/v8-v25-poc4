@@ -15,7 +15,6 @@
 
 package de.symeda.sormas.backend.dashboard.adverseeventsfollowingimmunization;
 
-import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -181,13 +180,13 @@ public class AefiDashboardService {
 
 		int totalInvestigations = 0;
 		for (Object[] result : resultList) {
-			totalInvestigations += ((BigInteger) result[1]).intValue();
+			totalInvestigations += ((Number) result[1]).intValue();
 		}
 
 		int statusTotal;
 		int statusPercent;
 		for (Object[] result : resultList) {
-			statusTotal = ((BigInteger) result[1]).intValue();
+			statusTotal = ((Number) result[1]).intValue();
 			statusPercent = (totalInvestigations == 0) ? 0 : ((int) ((statusTotal * 100.0f) / totalInvestigations));
 			countsByInvestigationStatus.get(AefiInvestigationStatus.valueOf((String) result[0])).put("total", String.valueOf(statusTotal));
 			countsByInvestigationStatus.get(AefiInvestigationStatus.valueOf((String) result[0])).put("percent", String.valueOf(statusPercent));
@@ -261,13 +260,13 @@ public class AefiDashboardService {
 
 		int totalInvestigations = 0;
 		for (Object[] result : resultList) {
-			totalInvestigations += ((BigInteger) result[1]).intValue();
+			totalInvestigations += ((Number) result[1]).intValue();
 		}
 
 		int classificationTotal;
 		int classificationPercent;
 		for (Object[] result : resultList) {
-			classificationTotal = ((BigInteger) result[1]).intValue();
+			classificationTotal = ((Number) result[1]).intValue();
 			classificationPercent = (totalInvestigations == 0) ? 0 : ((int) ((classificationTotal * 100.0f) / totalInvestigations));
 			countsByAefiClassitication.get(AefiClassification.valueOf((String) result[0])).put("total", String.valueOf(classificationTotal));
 			countsByAefiClassitication.get(AefiClassification.valueOf((String) result[0])).put("percent", String.valueOf(classificationPercent));
@@ -337,8 +336,8 @@ public class AefiDashboardService {
 		Map<AefiType, Long> aefiTypeDataMap;
 		for (Object[] result : resultList) {
 			aefiTypeDataMap = new HashMap<>();
-			aefiTypeDataMap.put(AefiType.SERIOUS, ((BigInteger) result[1]).longValue());
-			aefiTypeDataMap.put(AefiType.NON_SERIOUS, ((BigInteger) result[2]).longValue());
+			aefiTypeDataMap.put(AefiType.SERIOUS, ((Number) result[1]).longValue());
+			aefiTypeDataMap.put(AefiType.NON_SERIOUS, ((Number) result[2]).longValue());
 
 			countsByVaccine.put(Vaccine.valueOf((String) result[0]), aefiTypeDataMap);
 		}

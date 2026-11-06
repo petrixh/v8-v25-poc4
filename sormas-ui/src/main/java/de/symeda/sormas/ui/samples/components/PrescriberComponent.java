@@ -19,10 +19,10 @@ package de.symeda.sormas.ui.samples.components;
 
 import static de.symeda.sormas.ui.utils.CssStyles.H3;
 
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -41,7 +41,7 @@ public class PrescriberComponent extends FormComponent<PathogenTestDto> {
 
 	private static final long serialVersionUID = 1L;
 
-	private Label heading;
+	private Span heading;
 	private TextField physicianCode;
 	private TextField firstName;
 	private TextField lastName;
@@ -58,28 +58,28 @@ public class PrescriberComponent extends FormComponent<PathogenTestDto> {
 	}
 
 	private void buildLayout() {
-		heading = new Label(I18nProperties.getCaption(Captions.PathogenTest_prescriber));
-		heading.addStyleName(H3);
-		addComponent(heading);
+		heading = new Span(I18nProperties.getCaption(Captions.PathogenTest_prescriber));
+		heading.addClassName(H3);
+		add(heading);
 
-		physicianCode = createTextField(PathogenTestDto.PRESCRIBER_PHYSICIAN_CODE, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
+		physicianCode = createTextField(PathogenTestDto.PRESCRIBER_PHYSICIAN_CODE, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
 		addRow(physicianCode);
 
-		firstName = createTextField(PathogenTestDto.PRESCRIBER_FIRST_NAME, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
-		lastName = createTextField(PathogenTestDto.PRESCRIBER_LAST_NAME, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
+		firstName = createTextField(PathogenTestDto.PRESCRIBER_FIRST_NAME, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
+		lastName = createTextField(PathogenTestDto.PRESCRIBER_LAST_NAME, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
 		addRow(firstName, lastName);
 
-		phone = createTextField(PathogenTestDto.PRESCRIBER_PHONE_NUMBER, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
+		phone = createTextField(PathogenTestDto.PRESCRIBER_PHONE_NUMBER, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
 		addRow(phone);
 
-		address = createTextField(PathogenTestDto.PRESCRIBER_ADDRESS, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
-		postalCode = createTextField(PathogenTestDto.PRESCRIBER_POSTAL_CODE, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
+		address = createTextField(PathogenTestDto.PRESCRIBER_ADDRESS, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
+		postalCode = createTextField(PathogenTestDto.PRESCRIBER_POSTAL_CODE, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
 		addRow(address, postalCode);
 
-		city = createTextField(PathogenTestDto.PRESCRIBER_CITY, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
+		city = createTextField(PathogenTestDto.PRESCRIBER_CITY, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
 		country = createComboBox(PathogenTestDto.PRESCRIBER_COUNTRY, PathogenTestDto.I18N_PREFIX);
 		country.setItems(FacadeProvider.getCountryFacade().getAllActiveAsReference());
-		country.setItemCaptionGenerator(CountryReferenceDto::getCaption);
+		country.setItemLabelGenerator(CountryReferenceDto::getCaption);
 		addRow(city, country);
 	}
 
@@ -88,7 +88,7 @@ public class PrescriberComponent extends FormComponent<PathogenTestDto> {
 		binder.forField(firstName).bind(PathogenTestDto::getPrescriberFirstName, PathogenTestDto::setPrescriberFirstName);
 		binder.forField(lastName).bind(PathogenTestDto::getPrescriberLastName, PathogenTestDto::setPrescriberLastName);
 		binder.forField(phone)
-			.withValidator(DataHelper::isValidPhoneNumber, I18nProperties.getValidationError(Validations.validPhoneNumber, phone.getCaption()))
+			.withValidator(DataHelper::isValidPhoneNumber, I18nProperties.getValidationError(Validations.validPhoneNumber, phone.getLabel()))
 			.bind(PathogenTestDto::getPrescriberPhoneNumber, PathogenTestDto::setPrescriberPhoneNumber);
 		binder.forField(address).bind(PathogenTestDto::getPrescriberAddress, PathogenTestDto::setPrescriberAddress);
 		binder.forField(postalCode).bind(PathogenTestDto::getPrescriberPostalCode, PathogenTestDto::setPrescriberPostalCode);

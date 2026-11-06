@@ -20,9 +20,9 @@ package de.symeda.sormas.ui.samples.diseasesection;
 import java.util.Arrays;
 import java.util.List;
 
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.TextField;
 
 import de.symeda.sormas.api.sample.PathogenSpecie;
 import de.symeda.sormas.api.sample.PathogenTestDto;
@@ -66,7 +66,7 @@ public class MalariaSectionComponent extends AbstractDiseaseSectionComponent {
 
 	private ComboBox<PathogenSpecie> specieField;
 	private TextField specieTextField;
-	private Label specieTextSpacer;
+	private Span specieTextSpacer;
 
 	private PathogenTestType currentTestType;
 	private PathogenTestResultType currentResult;
@@ -74,7 +74,7 @@ public class MalariaSectionComponent extends AbstractDiseaseSectionComponent {
 	@Override
 	protected void buildLayout() {
 		specieField = createComboBox(PathogenTestDto.SPECIE);
-		specieField.setItemCaptionGenerator(PathogenSpecie::toString);
+		specieField.setItemLabelGenerator(PathogenSpecie::toString);
 		specieField.setVisible(false);
 		updateComboBoxByDiseaseAndTestType(specieField, PathogenSpecie.class, disease, currentTestType);
 

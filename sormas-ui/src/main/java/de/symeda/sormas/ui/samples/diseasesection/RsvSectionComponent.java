@@ -17,7 +17,7 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.samples.diseasesection;
 
-import com.vaadin.ui.ComboBox;
+import com.vaadin.flow.component.combobox.ComboBox;
 
 import de.symeda.sormas.api.sample.PathogenTestDto;
 import de.symeda.sormas.api.sample.PathogenTestResultType;
@@ -40,7 +40,7 @@ public class RsvSectionComponent extends AbstractDiseaseSectionComponent {
 	@Override
 	protected void buildLayout() {
 		rsvSubtypeField = createComboBox(PathogenTestDto.RSV_SUBTYPE);
-		rsvSubtypeField.setItemCaptionGenerator(RsvSubtype::toString);
+		rsvSubtypeField.setItemLabelGenerator(RsvSubtype::toString);
 		rsvSubtypeField.setVisible(false);
 		updateRsvSubtypeItems();
 		addRow(rsvSubtypeField);

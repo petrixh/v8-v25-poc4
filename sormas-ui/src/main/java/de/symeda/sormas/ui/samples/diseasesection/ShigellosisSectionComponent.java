@@ -19,8 +19,8 @@ package de.symeda.sormas.ui.samples.diseasesection;
 
 import java.util.Arrays;
 
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.textfield.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.sample.PathogenSpecie;
@@ -58,7 +58,7 @@ public class ShigellosisSectionComponent extends AbstractDiseaseSectionComponent
 
 		serotypingMethodCBF = createComboBox(PathogenTestDto.SEROTYPING_METHOD);
 		serotypingMethodCBF.setItems(SerotypingMethod.values());
-		serotypingMethodCBF.setItemCaptionGenerator(SerotypingMethod::toString);
+		serotypingMethodCBF.setItemLabelGenerator(SerotypingMethod::toString);
 		serotypingMethodCBF.setVisible(false);
 
 		serotypingMethodTF = createTextField(PathogenTestDto.SERO_TYPING_METHOD_TEXT);
@@ -67,7 +67,7 @@ public class ShigellosisSectionComponent extends AbstractDiseaseSectionComponent
 
 		// Shigellosis species
 		specie = createComboBox(PathogenTestDto.SPECIE);
-		specie.setItemCaptionGenerator(PathogenSpecie::toString);
+		specie.setItemLabelGenerator(PathogenSpecie::toString);
 		specie.setVisible(false);
 		updateComboBoxByDiseaseAndTestType(specie, PathogenSpecie.class, disease, currentTestType);
 

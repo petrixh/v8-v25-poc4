@@ -20,19 +20,14 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.data.TreeData;
-import com.vaadin.data.provider.TreeDataProvider;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.ExternalResource;
-import com.vaadin.server.Page;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Link;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.StyleGenerator;
-import com.vaadin.ui.TreeGrid;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.AnchorTarget;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 
 import de.symeda.sormas.api.MergeFacade;
 import de.symeda.sormas.api.MergeableIndexDto;
@@ -42,7 +37,8 @@ import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.utils.DataHelper;
 import de.symeda.sormas.api.utils.criteria.BaseCriteria;
-import de.symeda.sormas.ui.SormasUI;
+import de.symeda.sormas.ui.navigation.Navigator;
+import de.symeda.sormas.ui.utils.grid.TreeGrid;
 
 public abstract class AbstractMergeGrid<T1 extends MergeableIndexDto, T2 extends BaseCriteria> extends TreeGrid<T1> {
 
@@ -76,12 +72,13 @@ public abstract class AbstractMergeGrid<T1 extends MergeableIndexDto, T2 extends
 
 		setSizeFull();
 		setSelectionMode(SelectionMode.NONE);
+		setDataProvider(new TreeDataProvider<>(new TreeData<>()));
 
 		addComponentColumn(this::buildButtonLayout).setId(COLUMN_ACTIONS);
 
 		addComponentColumn(indexDto -> {
-			Label label =
-				new Label(indexDto.getCompleteness() != null ? new DecimalFormat("#").format(indexDto.getCompleteness() * 100) + " %" : "-");
+			Span label =
+				new Span(indexDto.getCompleteness() != null ? new DecimalFormat("#").format(indexDto.getCompleteness() * 100) + " %" : "-");
 			if (indexDto.getCompleteness() != null) {
 				if (indexDto.getCompleteness() < 0.25f) {
 					CssStyles.style(label, CssStyles.LABEL_CRITICAL);
@@ -96,19 +93,18 @@ public abstract class AbstractMergeGrid<T1 extends MergeableIndexDto, T2 extends
 			return label;
 		}).setId(COLUMN_COMPLETENESS);
 
-		addComponentColumn(indexDto -> {
-			Link link = new Link(
-				DataHelper.getShortUuid(indexDto.getUuid()),
-				new ExternalResource(SormasUI.get().getPage().getLocation().getRawPath() + "#!" + viewName + "/" + indexDto.getUuid()));
-			link.setTargetName("_blank");
+		// Vaadin 8 used the first column as the hierarchy column; the subclasses put the UUID column first
+		addComponentHierarchyColumn(indexDto -> {
+			Anchor link = new Anchor(Navigator.getUrl(viewName + "/" + indexDto.getUuid()), DataHelper.getShortUuid(indexDto.getUuid()));
+			link.setTarget(AnchorTarget.BLANK);
 			return link;
 		}).setId(COLUMN_UUID);
 
 		buildColumns();
 
-		for (Column<?, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(i18nPrefix, column.getId(), column.getCaption()));
-			if (!column.getId().equals(COLUMN_ACTIONS)) {
+		for (Column<?, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(i18nPrefix, column.getKey(), column.getCaption()));
+			if (!column.getKey().equals(COLUMN_ACTIONS)) {
 				column.setMaximumWidth(300);
 			}
 		}
@@ -117,7 +113,7 @@ public abstract class AbstractMergeGrid<T1 extends MergeableIndexDto, T2 extends
 		getColumn(COLUMN_COMPLETENESS).setCaption(I18nProperties.getPrefixCaption(i18nPrefix, COMPLETENESS));
 		getColumn(COLUMN_COMPLETENESS).setSortable(false);
 
-		this.setStyleGenerator((StyleGenerator<T1>) item -> {
+		this.setStyleGenerator(item -> {
 			TreeDataProvider<T1> dataProvider = (TreeDataProvider<T1>) getDataProvider();
 			TreeData<T1> data = dataProvider.getTreeData();
 
@@ -138,10 +134,10 @@ public abstract class AbstractMergeGrid<T1 extends MergeableIndexDto, T2 extends
 
 		HorizontalLayout layout = new HorizontalLayout();
 		layout.setSpacing(false);
-		Button btnMerge = ButtonHelper.createIconButton(Captions.actionMerge, VaadinIcons.COMPRESS_SQUARE, e -> {
+		Button btnMerge = ButtonHelper.createIconButton(Captions.actionMerge, VaadinIcon.COMPRESS_SQUARE, e -> {
 			VaadinUiUtil.showConfirmationPopup(
 				I18nProperties.getString(Strings.headingConfirmChoice),
-				new Label(messages.confirm),
+				new Span(messages.confirm),
 				I18nProperties.getCaption(Captions.actionConfirm),
 				I18nProperties.getCaption(Captions.actionCancel),
 				640,
@@ -152,10 +148,10 @@ public abstract class AbstractMergeGrid<T1 extends MergeableIndexDto, T2 extends
 					}
 				});
 		});
-		Button btnPick = ButtonHelper.createIconButton(Captions.actionPick, VaadinIcons.CHECK, e -> {
+		Button btnPick = ButtonHelper.createIconButton(Captions.actionPick, VaadinIcon.CHECK, e -> {
 			VaadinUiUtil.showConfirmationPopup(
 				I18nProperties.getString(Strings.headingConfirmChoice),
-				new Label(messages.pick),
+				new Span(messages.pick),
 				I18nProperties.getCaption(Captions.actionConfirm),
 				I18nProperties.getCaption(Captions.actionCancel),
 				640,
@@ -170,10 +166,10 @@ public abstract class AbstractMergeGrid<T1 extends MergeableIndexDto, T2 extends
 		Button btnHide = null;
 
 		if (data.getParent(item) == null) {
-			CssStyles.style(btnMerge, CssStyles.HSPACE_RIGHT_5, ValoTheme.BUTTON_PRIMARY);
-			CssStyles.style(btnPick, CssStyles.HSPACE_RIGHT_5, ValoTheme.BUTTON_PRIMARY);
+			CssStyles.style(btnMerge, CssStyles.HSPACE_RIGHT_5, CssStyles.BUTTON_PRIMARY);
+			CssStyles.style(btnPick, CssStyles.HSPACE_RIGHT_5, CssStyles.BUTTON_PRIMARY);
 
-			btnHide = ButtonHelper.createIconButton(Captions.actionHide, VaadinIcons.CLOSE, e -> {
+			btnHide = ButtonHelper.createIconButton(Captions.actionHide, VaadinIcon.CLOSE, e -> {
 				hiddenUuidPairs.add(
 					new String[] {
 						item.getUuid(),
@@ -182,19 +178,19 @@ public abstract class AbstractMergeGrid<T1 extends MergeableIndexDto, T2 extends
 				dataProvider.refreshAll();
 			});
 		} else {
-			CssStyles.style(btnMerge, ValoTheme.BUTTON_LINK);
-			CssStyles.style(btnPick, ValoTheme.BUTTON_LINK);
+			CssStyles.style(btnMerge, CssStyles.BUTTON_LINK);
+			CssStyles.style(btnPick, CssStyles.BUTTON_LINK);
 		}
 
 		if (ignoreRegion) {
 			btnMerge.setEnabled(false);
 			btnPick.setEnabled(false);
 		}
-		layout.addComponent(btnMerge);
-		layout.addComponent(btnPick);
+		layout.add(btnMerge);
+		layout.add(btnPick);
 
 		if (btnHide != null) {
-			layout.addComponent(btnHide);
+			layout.add(btnHide);
 		}
 
 		return layout;
@@ -251,9 +247,9 @@ public abstract class AbstractMergeGrid<T1 extends MergeableIndexDto, T2 extends
 
 		if (deletePerformed && mergeFacade.isDeleted(itemToMergeAndDelete.getUuid())) {
 			reload();
-			new Notification(messages.merged, Notification.Type.TRAY_NOTIFICATION).show(Page.getCurrent());
+			NotificationHelper.show(messages.merged, NotificationHelper.Type.TRAY_NOTIFICATION);
 		} else {
-			new Notification(messages.errorMerging, Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
+			NotificationHelper.show(messages.errorMerging, NotificationHelper.Type.ERROR_MESSAGE);
 		}
 	}
 
@@ -273,9 +269,9 @@ public abstract class AbstractMergeGrid<T1 extends MergeableIndexDto, T2 extends
 
 		if (deletePerformed && mergeFacade.isDeleted(contactToDelete.getUuid())) {
 			reload();
-			new Notification(messages.duplicateDeleted, Notification.Type.TRAY_NOTIFICATION).show(Page.getCurrent());
+			NotificationHelper.show(messages.duplicateDeleted, NotificationHelper.Type.TRAY_NOTIFICATION);
 		} else {
-			new Notification(messages.errorDuplicateDeletion, Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
+			NotificationHelper.show(messages.errorDuplicateDeletion, NotificationHelper.Type.ERROR_MESSAGE);
 		}
 	}
 

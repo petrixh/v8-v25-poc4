@@ -49,9 +49,9 @@ public class ViewModelProviders {
 	@NotNull
 	private static ViewModelProviders getCurrent() {
 
-		UI currentUI = UI.getCurrent();
-		if (currentUI instanceof HasViewModelProviders) {
-			return ((HasViewModelProviders) currentUI).getViewModelProviders();
+		SormasUI currentUI = SormasUI.get();
+		if (currentUI != null) {
+			return currentUI.getViewModelProviders();
 		}
 		throw new IllegalStateException("UI.getCurrent did not an instance that implements HasViewModelProviders");
 	}

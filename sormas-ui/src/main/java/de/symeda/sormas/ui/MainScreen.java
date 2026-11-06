@@ -183,7 +183,7 @@ public class MainScreen extends HorizontalLayout {
 		viewContainer.addClassName("sormas-content");
 
 		// Locations with no registered route are shown by NavigationErrorView, which asks getErrorViewType(..)
-		final Navigator navigator = new Navigator(ui, viewContainer);
+		final Navigator navigator = new Navigator(ui.getUI(), viewContainer);
 
 		menu = new Menu(navigator);
 

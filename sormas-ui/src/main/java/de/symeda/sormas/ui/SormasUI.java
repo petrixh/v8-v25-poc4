@@ -17,7 +17,13 @@
  *******************************************************************************/
 package de.symeda.sormas.ui;
 
+import java.io.Serializable;
+import java.util.concurrent.Future;
+
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.page.Page;
+import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.InitParameters;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinServlet;
@@ -35,30 +41,53 @@ import jakarta.servlet.annotation.WebInitParam;
 import jakarta.servlet.annotation.WebServlet;
 
 /**
- * Main UI class of the application that shows either the login screen or the
- * main view of the application depending on whether a user is signed in.
- *
- * The viewport meta tags (formerly the @Viewport annotation here) are set by
- * {@link SormasAppShell}.
+ * Per-UI state of the main application (user provider, view model providers, navigator, main screen), attached to the
+ * Flow {@link UI}.
+ * <p>
+ * In Vaadin 8 this class was the UI subclass. Flow creates a plain {@link UI} for every browser tab and ignores the
+ * {@code UI} servlet init parameter, so this class is a holder now: {@link SormasUIInitListener} creates one for each
+ * new UI of {@link SormasUIServlet} and runs {@link #init(UI, VaadinRequest)} (what {@code UI.init} did) before the
+ * UI's first navigation. {@link #get()} returns the holder of the current UI; the UI methods that callers used on it
+ * ({@link #getPage()}, {@link #setPollInterval(int)}, {@link #access(Command)}, {@link #getCurrent()}) delegate to
+ * the UI.
+ * <p>
+ * The viewport meta tags (formerly the @Viewport annotation here) are set by {@link SormasAppShell}.
  */
 @SuppressWarnings("serial")
-public class SormasUI extends UI implements HasUserProvider, HasViewModelProviders {
+public class SormasUI implements HasUserProvider, HasViewModelProviders, Serializable {
 
+	private final UI ui;
 	private final UserProvider userProvider = new UserProvider();
 	private final ViewModelProviders viewModelProviders = new ViewModelProviders();
 
 	private Navigator navigator;
 	private MainScreen mainScreen;
 
-	@Override
-	protected void init(VaadinRequest vaadinRequest) {
+	/**
+	 * Creates a holder for the UI without attaching or initialising it ({@link #init(UI, VaadinRequest)} does both).
+	 */
+	public SormasUI(UI ui) {
+		this.ui = ui;
+	}
+
+	/**
+	 * Attaches a new holder to the UI and initialises it, as {@code UI.init} did in Vaadin 8. Called once per UI, before
+	 * its first navigation, so that the routes of the session are registered when the router resolves the location.
+	 */
+	static SormasUI init(UI ui, VaadinRequest vaadinRequest) {
+
+		SormasUI sormasUI = new SormasUI(ui);
+		ComponentUtil.setData(ui, SormasUI.class, sormasUI);
 
 		VaadinSession.getCurrent().setErrorHandler(SormasErrorHandler.get());
-		setLocale(vaadinRequest.getLocale());
+		if (vaadinRequest != null) {
+			ui.setLocale(vaadinRequest.getLocale());
+		}
 
-		getPage().setTitle(FacadeProvider.getConfigFacade().getSormasInstanceName());
+		ui.getPage().setTitle(FacadeProvider.getConfigFacade().getSormasInstanceName());
 
-		initMainScreen();
+		sormasUI.initMainScreen();
+		return sormasUI;
 	}
 
 	/**
@@ -69,8 +98,39 @@ public class SormasUI extends UI implements HasUserProvider, HasViewModelProvide
 		mainScreen = new MainScreen(SormasUI.this);
 	}
 
+	/**
+	 * @return the holder of the current UI, or {@code null} when there is no current UI or it is not a UI of the main
+	 *         application
+	 */
 	public static SormasUI get() {
-		return (SormasUI) UI.getCurrent();
+		UI currentUI = UI.getCurrent();
+		return currentUI != null ? ComponentUtil.getData(currentUI, SormasUI.class) : null;
+	}
+
+	/**
+	 * @return the current Flow UI ({@link UI#getCurrent()}); kept because callers used the inherited static method
+	 */
+	public static UI getCurrent() {
+		return UI.getCurrent();
+	}
+
+	/**
+	 * @return the Flow UI this holder belongs to
+	 */
+	public UI getUI() {
+		return ui;
+	}
+
+	public Page getPage() {
+		return ui.getPage();
+	}
+
+	public void setPollInterval(int intervalInMillis) {
+		ui.setPollInterval(intervalInMillis);
+	}
+
+	public Future<Void> access(Command command) {
+		return ui.access(command);
 	}
 
 	public Navigator getNavigator() {

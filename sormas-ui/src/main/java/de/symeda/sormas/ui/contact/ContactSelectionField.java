@@ -1,6 +1,12 @@
 package de.symeda.sormas.ui.contact;
 
-import com.vaadin.ui.*;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+
 import de.symeda.sormas.api.contact.ContactDto;
 import de.symeda.sormas.api.contact.ContactSimilarityCriteria;
 import de.symeda.sormas.api.contact.SimilarContactDto;
@@ -11,6 +17,7 @@ import de.symeda.sormas.api.person.PersonReferenceDto;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 
 import java.util.function.Consumer;
 
@@ -53,12 +60,12 @@ public class ContactSelectionField extends CustomField<SimilarContactDto> {
 		contactSelectionGrid = new ContactSelectionGrid(criteria);
 
 		contactSelectionGrid.addSelectionListener(e -> {
-			if (e.getSelected().size() > 0) {
+			if (e.getAllSelectedItems().size() > 0) {
 				rbCreateContact.setValue(null);
 			}
 
 			if (selectionChangeCallback != null) {
-				selectionChangeCallback.accept(!e.getSelected().isEmpty());
+				selectionChangeCallback.accept(!e.getAllSelectedItems().isEmpty());
 			}
 		});
 	}
@@ -68,14 +75,14 @@ public class ContactSelectionField extends CustomField<SimilarContactDto> {
 
 		mainLayout = new VerticalLayout();
 		mainLayout.setSpacing(true);
-		mainLayout.setMargin(false);
+		mainLayout.setPadding(false);
 		mainLayout.setSizeUndefined();
-		mainLayout.setWidth(100, Unit.PERCENTAGE);
+		mainLayout.setWidthFull();
 
 		addInfoComponent();
 		addContactDetailsComponent();
 		addSelectContactRadioGroup();
-		mainLayout.addComponent(contactSelectionGrid);
+		mainLayout.add(contactSelectionGrid);
 		addCreateContactRadioGroup();
 
 		rbSelectContact.setValue(SELECT_CONTACT);
@@ -84,7 +91,7 @@ public class ContactSelectionField extends CustomField<SimilarContactDto> {
 	}
 
 	@Override
-	protected void doSetValue(SimilarContactDto similarContactDto) {
+	protected void setPresentationValue(SimilarContactDto similarContactDto) {
 
 		rbSelectContact.setValue(SELECT_CONTACT);
 
@@ -97,20 +104,20 @@ public class ContactSelectionField extends CustomField<SimilarContactDto> {
 	public SimilarContactDto getValue() {
 
 		if (contactSelectionGrid != null) {
-			return (SimilarContactDto) contactSelectionGrid.getSelectedRow();
+			return contactSelectionGrid.getSelectedItems().stream().findFirst().orElse(null);
 		}
 
 		return null;
 	}
 
 	public boolean hasMatches() {
-		return contactSelectionGrid.getContainerDataSource().size() > 0;
+		return contactSelectionGrid.getGenericDataView().getItems().count() > 0;
 	}
 
 	public void selectBestMatch() {
 
-		if (contactSelectionGrid.getContainerDataSource().size() == 1) {
-			setValue((SimilarContactDto) contactSelectionGrid.getContainerDataSource().firstItemId());
+		if (contactSelectionGrid.getGenericDataView().getItems().count() == 1) {
+			setValue(contactSelectionGrid.getGenericDataView().getItems().findFirst().get());
 		} else {
 			setValue(null);
 		}
@@ -124,7 +131,7 @@ public class ContactSelectionField extends CustomField<SimilarContactDto> {
 	}
 
 	private void addInfoComponent() {
-		mainLayout.addComponent(VaadinUiUtil.createInfoComponent(infoText));
+		mainLayout.add(VaadinUiUtil.createInfoComponent(infoText));
 	}
 
 	private void addContactDetailsComponent() {
@@ -132,77 +139,74 @@ public class ContactSelectionField extends CustomField<SimilarContactDto> {
 		HorizontalLayout contactDetailsLayout = new HorizontalLayout();
 		contactDetailsLayout.setSpacing(true);
 
-		final Label lblFirstName = new Label(referenceFirstName);
-		lblFirstName.setCaption(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.FIRST_NAME));
-		lblFirstName.setWidthUndefined();
-		contactDetailsLayout.addComponent(lblFirstName);
+		final Span lblFirstName = new Span(referenceFirstName);
+		contactDetailsLayout.add(withCaption(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.FIRST_NAME), lblFirstName));
 
-		final Label lblLastName = new Label(referenceLastName);
-		lblLastName.setWidthUndefined();
-		lblLastName.setCaption(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.LAST_NAME));
-		contactDetailsLayout.addComponent(lblLastName);
+		final Span lblLastName = new Span(referenceLastName);
+		contactDetailsLayout.add(withCaption(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.LAST_NAME), lblLastName));
 
-		final Label lblCase = new Label(referenceContact.getCaze() != null ? referenceContact.getCaze().getCaption() : "");
-		lblCase.setWidthUndefined();
-		lblCase.setCaption(I18nProperties.getPrefixCaption(ContactDto.I18N_PREFIX, ContactDto.CAZE));
-		contactDetailsLayout.addComponent(lblCase);
+		final Span lblCase = new Span(referenceContact.getCaze() != null ? referenceContact.getCaze().getCaption() : "");
+		contactDetailsLayout.add(withCaption(I18nProperties.getPrefixCaption(ContactDto.I18N_PREFIX, ContactDto.CAZE), lblCase));
 
-		final Label lblCaseIdExternalSystem = new Label(referenceContact.getCaseIdExternalSystem());
-		lblCaseIdExternalSystem.setWidthUndefined();
-		lblCaseIdExternalSystem.setCaption(I18nProperties.getPrefixCaption(ContactDto.I18N_PREFIX, ContactDto.CASE_ID_EXTERNAL_SYSTEM));
-		contactDetailsLayout.addComponent(lblCaseIdExternalSystem);
+		final Span lblCaseIdExternalSystem = new Span(referenceContact.getCaseIdExternalSystem());
+		contactDetailsLayout
+			.add(withCaption(I18nProperties.getPrefixCaption(ContactDto.I18N_PREFIX, ContactDto.CASE_ID_EXTERNAL_SYSTEM), lblCaseIdExternalSystem));
 
-		final Label lblLastContactDate = new Label(DateFormatHelper.formatDate(referenceContact.getLastContactDate()));
-		lblLastContactDate.setWidthUndefined();
-		lblLastContactDate.setCaption(I18nProperties.getPrefixCaption(ContactDto.I18N_PREFIX, ContactDto.LAST_CONTACT_DATE));
-		contactDetailsLayout.addComponent(lblLastContactDate);
+		final Span lblLastContactDate = new Span(DateFormatHelper.formatDate(referenceContact.getLastContactDate()));
+		contactDetailsLayout.add(withCaption(I18nProperties.getPrefixCaption(ContactDto.I18N_PREFIX, ContactDto.LAST_CONTACT_DATE), lblLastContactDate));
 
-		final Label lblContactProximity = new Label(
+		final Span lblContactProximity = new Span(
 			referenceContact.getContactProximities() != null && !referenceContact.getContactProximities().isEmpty()
 				? referenceContact.getContactProximities().stream().map(Object::toString).reduce((a, b) -> a + ", " + b).orElse("")
 				: "");
-		lblContactProximity.setWidthUndefined();
-		lblContactProximity.setCaption(I18nProperties.getPrefixCaption(ContactDto.I18N_PREFIX, ContactDto.CONTACT_PROXIMITIES));
-		contactDetailsLayout.addComponent(lblContactProximity);
+		contactDetailsLayout
+			.add(withCaption(I18nProperties.getPrefixCaption(ContactDto.I18N_PREFIX, ContactDto.CONTACT_PROXIMITIES), lblContactProximity));
 
-		final Label lblContactClassification =
-			new Label(referenceContact.getContactClassification() != null ? referenceContact.getContactClassification().toString() : "");
-		lblContactClassification.setWidthUndefined();
-		lblContactClassification.setCaption(I18nProperties.getPrefixCaption(ContactDto.I18N_PREFIX, ContactDto.CONTACT_CLASSIFICATION));
-		contactDetailsLayout.addComponent(lblContactClassification);
+		final Span lblContactClassification =
+			new Span(referenceContact.getContactClassification() != null ? referenceContact.getContactClassification().toString() : "");
+		contactDetailsLayout
+			.add(withCaption(I18nProperties.getPrefixCaption(ContactDto.I18N_PREFIX, ContactDto.CONTACT_CLASSIFICATION), lblContactClassification));
 
-		final Label lblContactStatus = new Label(referenceContact.getContactStatus() != null ? referenceContact.getContactStatus().toString() : "");
-		lblContactStatus.setWidthUndefined();
-		lblContactStatus.setCaption(I18nProperties.getPrefixCaption(ContactDto.I18N_PREFIX, ContactDto.CONTACT_STATUS));
-		contactDetailsLayout.addComponent(lblContactStatus);
+		final Span lblContactStatus = new Span(referenceContact.getContactStatus() != null ? referenceContact.getContactStatus().toString() : "");
+		contactDetailsLayout.add(withCaption(I18nProperties.getPrefixCaption(ContactDto.I18N_PREFIX, ContactDto.CONTACT_STATUS), lblContactStatus));
 
-		mainLayout.addComponent(new Panel(contactDetailsLayout));
+		// Was a Vaadin 8 Panel (a framed box); Flow has no panel component
+		mainLayout.add(new Div(contactDetailsLayout));
+	}
+
+	/**
+	 * Was a Vaadin 8 label with a caption: the caption is shown above the value, as Vaadin rendered it.
+	 */
+	private static Div withCaption(String caption, Span label) {
+		Span captionLabel = new Span(caption);
+		captionLabel.addClassName("v-caption");
+		return new Div(captionLabel, new Div(label));
 	}
 
 	private void addSelectContactRadioGroup() {
 
 		rbSelectContact = new RadioButtonGroup<>();
 		rbSelectContact.setItems(SELECT_CONTACT);
-		rbSelectContact.setItemCaptionGenerator((item) -> I18nProperties.getCaption(Captions.contactSelect));
+		rbSelectContact.setItemLabelGenerator((item) -> I18nProperties.getCaption(Captions.contactSelect));
 		CssStyles.style(rbSelectContact, CssStyles.VSPACE_NONE);
 		rbSelectContact.addValueChangeListener(e -> {
 			if (e.getValue() != null) {
 				rbCreateContact.setValue(null);
 				contactSelectionGrid.setEnabled(true);
 				if (selectionChangeCallback != null) {
-					selectionChangeCallback.accept(contactSelectionGrid.getSelectedRow() != null);
+					selectionChangeCallback.accept(!contactSelectionGrid.getSelectedItems().isEmpty());
 				}
 			}
 		});
 
-		mainLayout.addComponent(rbSelectContact);
+		mainLayout.add(rbSelectContact);
 	}
 
 	private void addCreateContactRadioGroup() {
 
 		rbCreateContact = new RadioButtonGroup<>();
 		rbCreateContact.setItems(CREATE_CONTACT);
-		rbCreateContact.setItemCaptionGenerator((item) -> I18nProperties.getCaption(Captions.contactCreateNew));
+		rbCreateContact.setItemLabelGenerator((item) -> I18nProperties.getCaption(Captions.contactCreateNew));
 		rbCreateContact.addValueChangeListener(e -> {
 			if (e.getValue() != null) {
 				rbSelectContact.setValue(null);
@@ -214,6 +218,6 @@ public class ContactSelectionField extends CustomField<SimilarContactDto> {
 			}
 		});
 
-		mainLayout.addComponent(rbCreateContact);
+		mainLayout.add(rbCreateContact);
 	}
 }

@@ -27,8 +27,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.Unit;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -43,6 +42,8 @@ import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 public class BulkContactDataForm extends AbstractEditForm<ContactBulkEditData> {
 
@@ -106,7 +107,7 @@ public class BulkContactDataForm extends AbstractEditForm<ContactBulkEditData> {
 			FieldHelper.updateItems(contactOfficer, assignableContactOfficers);
 
 			contactOfficerCheckBox.addValueChangeListener(e -> {
-				contactOfficer.setEnabled((boolean) e.getProperty().getValue());
+				contactOfficer.setEnabled((boolean) e.getValue());
 			});
 		}
 
@@ -114,7 +115,7 @@ public class BulkContactDataForm extends AbstractEditForm<ContactBulkEditData> {
 			.setRequiredWhen(getFieldGroup(), classificationCheckBox, Arrays.asList(ContactBulkEditData.CONTACT_CLASSIFICATION), Arrays.asList(true));
 
 		classificationCheckBox.addValueChangeListener(e -> {
-			contactClassification.setEnabled((boolean) e.getProperty().getValue());
+			contactClassification.setEnabled((boolean) e.getValue());
 		});
 	}
 

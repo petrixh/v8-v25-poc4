@@ -3,17 +3,16 @@ package de.symeda.sormas.ui.configuration.linelisting;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.DateField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -25,6 +24,8 @@ import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.utils.HtmlHelper;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 @SuppressWarnings("serial")
 public class LineListingConfigurationEditLayout extends VerticalLayout {
@@ -32,7 +33,7 @@ public class LineListingConfigurationEditLayout extends VerticalLayout {
 	private Button btnEnableAll;
 	private Button btnDisableAll;
 	private Button btnSetEndDateForAll;
-	private DateField dfEndDate;
+	private DatePicker dfEndDate;
 
 	private HorizontalLayout controlLayout;
 	private LineListingConfigurationsGrid grid;
@@ -61,8 +62,8 @@ public class LineListingConfigurationEditLayout extends VerticalLayout {
 
 	private void buildLayout() {
 
-		Label lblInfo = new Label(
-			VaadinIcons.INFO_CIRCLE.getHtml() + " "
+		Span lblInfo = VaadinUiUtil.createLabel(
+			HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " "
 				+ String.format(
 					I18nProperties.getString(
 						regionName != null ? Strings.infoLineListingConfigurationRegionEdit : Strings.infoLineListingConfigurationNationEdit),
@@ -70,49 +71,49 @@ public class LineListingConfigurationEditLayout extends VerticalLayout {
 					HtmlHelper.cleanHtml(regionName)),
 			ContentMode.HTML);
 		CssStyles.style(lblInfo, CssStyles.VSPACE_4);
-		addComponent(lblInfo);
+		add(lblInfo);
 
 		controlLayout = new HorizontalLayout();
-		controlLayout.setMargin(false);
+		controlLayout.setPadding(false);
 
 		btnEnableAll = ButtonHelper.createButton(Captions.lineListingEnableAll, e -> {
 			grid.enableAll();
-		}, ValoTheme.BUTTON_PRIMARY);
+		}, CssStyles.BUTTON_PRIMARY);
 
-		controlLayout.addComponent(btnEnableAll);
+		controlLayout.add(btnEnableAll);
 
 		btnDisableAll = ButtonHelper.createButton(Captions.lineListingDisableAllShort, e -> {
 			grid.disableAll();
-		}, ValoTheme.BUTTON_PRIMARY, CssStyles.HSPACE_RIGHT_2);
+		}, CssStyles.BUTTON_PRIMARY, CssStyles.HSPACE_RIGHT_2);
 
-		controlLayout.addComponent(btnDisableAll);
+		controlLayout.add(btnDisableAll);
 
-		dfEndDate = new DateField();
+		dfEndDate = new DatePicker();
 		dfEndDate.setId("endDate");
 		dfEndDate.setPlaceholder(I18nProperties.getCaption(Captions.lineListingEndDate));
-		dfEndDate.setRangeStart(LocalDate.now());
-		controlLayout.addComponent(dfEndDate);
+		dfEndDate.setMin(LocalDate.now());
+		controlLayout.add(dfEndDate);
 
 		btnSetEndDateForAll = ButtonHelper.createButton(Captions.lineListingSetEndDateForAll, e -> {
 			grid.setEndDateForAll(dfEndDate.getValue());
-		}, ValoTheme.BUTTON_PRIMARY);
+		}, CssStyles.BUTTON_PRIMARY);
 
-		controlLayout.addComponent(btnSetEndDateForAll);
+		controlLayout.add(btnSetEndDateForAll);
 
-		addComponent(controlLayout);
+		add(controlLayout);
 
 		grid = new LineListingConfigurationsGrid(configurations, regionName == null);
-		grid.setWidth(100, Unit.PERCENTAGE);
-		addComponent(grid);
+		grid.setWidthFull();
+		add(grid);
 
 		HorizontalLayout buttonLayout = buildButtonLayout();
-		addComponent(buttonLayout);
-		setComponentAlignment(buttonLayout, Alignment.MIDDLE_RIGHT);
+		add(buttonLayout);
+		setHorizontalComponentAlignment(Alignment.END, buttonLayout);
 	}
 
 	private HorizontalLayout buildButtonLayout() {
 		HorizontalLayout buttonLayout = new HorizontalLayout();
-		buttonLayout.setMargin(false);
+		buttonLayout.setPadding(false);
 
 		Button btnDiscard = ButtonHelper.createButton(Captions.actionDiscardChanges, e -> {
 			if (discardCallback != null) {
@@ -120,7 +121,7 @@ public class LineListingConfigurationEditLayout extends VerticalLayout {
 			}
 		});
 
-		buttonLayout.addComponent(btnDiscard);
+		buttonLayout.add(btnDiscard);
 
 		Button btnSave = ButtonHelper.createButton(Captions.actionSaveChanges, e -> {
 			if (grid.validateDates()) {
@@ -129,11 +130,11 @@ public class LineListingConfigurationEditLayout extends VerticalLayout {
 					saveCallback.run();
 				}
 			} else {
-				Notification.show(null, I18nProperties.getString(Strings.messageInvalidDatesLineListing), Type.ERROR_MESSAGE);
+				NotificationHelper.show(null, I18nProperties.getString(Strings.messageInvalidDatesLineListing), Type.ERROR_MESSAGE);
 			}
-		}, ValoTheme.BUTTON_PRIMARY);
+		}, CssStyles.BUTTON_PRIMARY);
 
-		buttonLayout.addComponent(btnSave);
+		buttonLayout.add(btnSave);
 
 		return buttonLayout;
 	}

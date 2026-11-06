@@ -18,13 +18,13 @@ package de.symeda.sormas.ui.dashboard.adverseeventsfollowingimmunization.compone
 import java.util.HashMap;
 import java.util.Map;
 
-import com.vaadin.ui.CssLayout;
+import com.vaadin.flow.component.html.Div;
 
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiType;
 import de.symeda.sormas.api.caze.Vaccine;
 import de.symeda.sormas.ui.utils.CssStyles;
 
-public class AefiTypeStatisticsGroupComponent extends CssLayout {
+public class AefiTypeStatisticsGroupComponent extends Div {
 
 	Map<Vaccine, AefiTypeStatisticsComponent> componentMap = new HashMap<>();
 
@@ -36,7 +36,7 @@ public class AefiTypeStatisticsGroupComponent extends CssLayout {
 	public void update(Map<Vaccine, Map<AefiType, Long>> countsByVaccineData) {
 
 		//temporary fix: re-use stored components and hide/unhide if not in new update
-		removeAllComponents();
+		removeAll();
 		componentMap.clear();
 
 		AefiTypeStatisticsComponent statisticsComponent;
@@ -50,10 +50,10 @@ public class AefiTypeStatisticsGroupComponent extends CssLayout {
 				statisticsComponent.hideHeading();
 				statisticsComponent.update(entry.getValue());
 				statisticsComponent
-					.addStyleNames(CssStyles.VIEW_SECTION_WIDTH_AUTO, CssStyles.PADDING_X_8, CssStyles.HSPACE_RIGHT_3, CssStyles.VSPACE_4);
+					.addClassNames(CssStyles.VIEW_SECTION_WIDTH_AUTO, CssStyles.PADDING_X_8, CssStyles.HSPACE_RIGHT_3, CssStyles.VSPACE_4);
 				componentMap.put(entry.getKey(), statisticsComponent);
 
-				addComponent(statisticsComponent);
+				add(statisticsComponent);
 			}
 		}
 	}

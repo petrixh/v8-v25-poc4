@@ -108,7 +108,7 @@ public class QuarantineOrderDocumentsComponent extends AbstractDocumentGeneratio
 		if (isDocGenerationAllowed()) {
 			QuarantineOrderDocumentsComponent docGenerationComponent =
 				new QuarantineOrderDocumentsComponent(rootEntityType, referenceDto, workflow, defaultDisease, sampleCriteria, vaccinationCriteria);
-			docGenerationComponent.addStyleName(CssStyles.SIDE_COMPONENT);
+			docGenerationComponent.addClassName(CssStyles.SIDE_COMPONENT);
 			targetLayout.addSidePanelComponent(docGenerationComponent, QUARANTINE_LOC);
 		}
 	}
@@ -131,7 +131,7 @@ public class QuarantineOrderDocumentsComponent extends AbstractDocumentGeneratio
 				sampleCriteria,
 				vaccinationCriteria,
 				documentListComponent);
-			docGenerationComponent.addStyleName(CssStyles.SIDE_COMPONENT);
+			docGenerationComponent.addClassName(CssStyles.SIDE_COMPONENT);
 			targetLayout.addSidePanelComponent(docGenerationComponent, QUARANTINE_LOC);
 		}
 	}

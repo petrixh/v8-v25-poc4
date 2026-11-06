@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.ui.configuration.system;
 
-import com.vaadin.ui.Grid.Column;
+import de.symeda.sormas.ui.utils.grid.Grid.Column;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -63,16 +63,16 @@ public class SystemConfigurationValuesGrid extends FilteredGrid<SystemConfigurat
 
 		removeColumn(SystemConfigurationValueIndexDto.VALUE_PROPERTY_NAME);
 		addColumn(value -> value.isEncrypted() ? "*".repeat(ENCRYPTED_VALUE_LENGTH) : value.getValue())
-			.setId(SystemConfigurationValueIndexDto.VALUE_PROPERTY_NAME)
-			.setDescriptionGenerator(v -> this.getValueDescription(v));
+			.setKey(SystemConfigurationValueIndexDto.VALUE_PROPERTY_NAME)
+			.setDescriptionGenerator(v -> this.getValueDescription((SystemConfigurationValueIndexDto) v));
 
 		removeColumn(SystemConfigurationValueIndexDto.CATEGORY_NAME_PROPERTY_NAME);
-		addColumn(this::getCategoryCaption).setId(SystemConfigurationValueIndexDto.CATEGORY_NAME_PROPERTY_NAME)
-			.setDescriptionGenerator(v -> this.getValueDescription(v));
+		addColumn(this::getCategoryCaption).setKey(SystemConfigurationValueIndexDto.CATEGORY_NAME_PROPERTY_NAME)
+			.setDescriptionGenerator(v -> this.getValueDescription((SystemConfigurationValueIndexDto) v));
 
 		removeColumn(SystemConfigurationValueIndexDto.DESCRIPTION_PROPERTY_NAME);
-		addColumn(this::getValueDescription).setId(SystemConfigurationValueIndexDto.DESCRIPTION_PROPERTY_NAME)
-			.setDescriptionGenerator(v -> this.getValueDescription(v));
+		addColumn(this::getValueDescription).setKey(SystemConfigurationValueIndexDto.DESCRIPTION_PROPERTY_NAME)
+			.setDescriptionGenerator(v -> this.getValueDescription((SystemConfigurationValueIndexDto) v));
 
 		setColumns(
 			SystemConfigurationValueIndexDto.CATEGORY_NAME_PROPERTY_NAME,
@@ -82,9 +82,9 @@ public class SystemConfigurationValuesGrid extends FilteredGrid<SystemConfigurat
 
 		addEditColumn(e -> ControllerProvider.getSystemConfigurationController().editSystemConfigurationValue(e.getUuid()));
 
-		for (final Column<?, ?> column : getColumns()) {
-			if (!column.getId().equals(SystemConfigurationValueIndexDto.CATEGORY_NAME_PROPERTY_NAME)) {
-				column.setCaption(I18nProperties.getPrefixCaption(SystemConfigurationValueIndexDto.I18N_PREFIX, column.getId(), column.getCaption()));
+		for (final Column<SystemConfigurationValueIndexDto, ?> column : getAllColumns()) {
+			if (!column.getKey().equals(SystemConfigurationValueIndexDto.CATEGORY_NAME_PROPERTY_NAME)) {
+				column.setCaption(I18nProperties.getPrefixCaption(SystemConfigurationValueIndexDto.I18N_PREFIX, column.getKey(), column.getCaption()));
 			}
 		}
 	}

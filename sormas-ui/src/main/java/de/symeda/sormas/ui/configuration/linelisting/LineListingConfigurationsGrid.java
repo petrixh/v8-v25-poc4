@@ -8,12 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.vaadin.server.Page;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.DateField;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.notification.Notification;
+
+import de.symeda.sormas.ui.utils.grid.Grid;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 
 import de.symeda.sormas.api.feature.FeatureConfigurationIndexDto;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -28,7 +29,7 @@ public class LineListingConfigurationsGrid extends Grid<FeatureConfigurationInde
 	private boolean nationLevel;
 	private List<FeatureConfigurationIndexDto> configurations;
 	private Set<FeatureConfigurationIndexDto> changedConfigurations;
-	private Map<FeatureConfigurationIndexDto, DateField> dateFieldMap;
+	private Map<FeatureConfigurationIndexDto, DatePicker> dateFieldMap;
 
 	public LineListingConfigurationsGrid(List<FeatureConfigurationIndexDto> configurations, boolean nationLevel) {
 
@@ -69,7 +70,7 @@ public class LineListingConfigurationsGrid extends Grid<FeatureConfigurationInde
 
 	public boolean validateDates() {
 		for (FeatureConfigurationIndexDto config : configurations) {
-			if (dateFieldMap.get(config) != null && dateFieldMap.get(config).getErrorMessage() != null) {
+			if (dateFieldMap.get(config) != null && dateFieldMap.get(config).isInvalid()) {
 				return false;
 			}
 		}
@@ -89,7 +90,7 @@ public class LineListingConfigurationsGrid extends Grid<FeatureConfigurationInde
 		addColumn(FeatureConfigurationIndexDto::getDistrictName)
 			.setCaption(I18nProperties.getPrefixCaption(FeatureConfigurationIndexDto.I18N_PREFIX, FeatureConfigurationIndexDto.DISTRICT_NAME));
 		addComponentColumn(config -> {
-			CheckBox cbActive = new CheckBox();
+			Checkbox cbActive = new Checkbox();
 			cbActive.setValue(config.isEnabled());
 			cbActive.addValueChangeListener(e -> {
 				config.setEnabled(e.getValue());
@@ -105,22 +106,23 @@ public class LineListingConfigurationsGrid extends Grid<FeatureConfigurationInde
 			return cbActive;
 		}).setCaption(I18nProperties.getPrefixCaption(FeatureConfigurationIndexDto.I18N_PREFIX, FeatureConfigurationIndexDto.ENABLED));
 		addComponentColumn(config -> {
-			DateField dfEndDate = new DateField();
+			DatePicker dfEndDate = new DatePicker();
 			dfEndDate.setValue(UtilDate.toLocalDate(config.getEndDate()));
 			dfEndDate.addValueChangeListener(e -> {
 				if (e.getValue() != null && e.getValue().isBefore(LocalDate.now())) {
-					Notification errorNotification = new Notification(
+					Notification errorNotification = NotificationHelper.createNotification(
 						I18nProperties.getString(Strings.headingInvalidDateEntered),
 						I18nProperties.getValidationError(Validations.noPastDateAllowed),
-						Type.TRAY_NOTIFICATION);
-					errorNotification.setStyleName("tray notification-error");
-					errorNotification.show(Page.getCurrent());
+						Type.TRAY_NOTIFICATION,
+						false);
+					errorNotification.addClassNames("tray", "notification-error");
+					errorNotification.open();
 				} else {
 					config.setEndDate(UtilDate.from(e.getValue()));
 					changedConfigurations.add(config);
 				}
 			});
-			dfEndDate.setRangeStart(LocalDate.now());
+			dfEndDate.setMin(LocalDate.now());
 			dateFieldMap.put(config, dfEndDate);
 			return dfEndDate;
 		}).setCaption(I18nProperties.getPrefixCaption(FeatureConfigurationIndexDto.I18N_PREFIX, FeatureConfigurationIndexDto.END_DATE));

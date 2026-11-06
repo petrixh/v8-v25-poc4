@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.vaadin.ui.AbstractComponent;
+import com.vaadin.flow.component.Component;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiType;
@@ -43,11 +43,11 @@ public class AefiEpiCurveComponent extends AbstractEpiCurveComponent<AefiDashboa
 
 	public AefiEpiCurveComponent(AefiDashboardDataProvider dashboardDataProvider) {
 		super(dashboardDataProvider);
-		epiCurveLabel.setValue(I18nProperties.getString(Strings.headingAefiDashboardEpiCurve));
+		epiCurveLabel.setText(I18nProperties.getString(Strings.headingAefiDashboardEpiCurve));
 	}
 
 	@Override
-	protected AbstractComponent createEpiCurveModeSelector() {
+	protected Component createEpiCurveModeSelector() {
 		return null;
 	}
 

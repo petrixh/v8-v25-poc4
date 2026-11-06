@@ -20,12 +20,11 @@ import static de.symeda.sormas.ui.utils.CssStyles.H3;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -36,22 +35,23 @@ import de.symeda.sormas.api.importexport.ExportType;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.CssStyles;
 
 @SuppressWarnings("serial")
 public class ExportConfigurationsLayout extends VerticalLayout {
 
-	private Label lblDescription;
+	private Span lblDescription;
 	private Button btnNewExportConfiguration;
 	private ExportConfigurationsGrid grid;
 	private ExportConfigurationsGrid gridSharedExportsToPublic;
 
 	public ExportConfigurationsLayout(ExportType exportType, List<ExportPropertyMetaInfo> availableProperties, Runnable closeCallback) {
 
-		lblDescription = new Label(I18nProperties.getString(Strings.infoCustomExport));
-		lblDescription.setWidth(100, Unit.PERCENTAGE);
-		addComponent(lblDescription);
+		lblDescription = new Span(I18nProperties.getString(Strings.infoCustomExport));
+		lblDescription.setWidthFull();
+		add(lblDescription);
 
-		btnNewExportConfiguration = ButtonHelper.createIconButton(Captions.exportNewExportConfiguration, VaadinIcons.PLUS, e -> {
+		btnNewExportConfiguration = ButtonHelper.createIconButton(Captions.exportNewExportConfiguration, VaadinIcon.PLUS, e -> {
 			ExportConfigurationDto newConfig = ExportConfigurationDto.build(UiUtil.getUserReference(), exportType);
 			ControllerProvider.getCustomExportController()
 				.openEditExportConfigurationWindow(
@@ -59,32 +59,32 @@ public class ExportConfigurationsLayout extends VerticalLayout {
 					newConfig,
 					availableProperties,
 					I18nProperties.getCaption(Captions.exportNewExportConfiguration));
-		}, ValoTheme.BUTTON_PRIMARY);
-		addComponent(btnNewExportConfiguration);
-		setComponentAlignment(btnNewExportConfiguration, Alignment.MIDDLE_RIGHT);
+		}, CssStyles.BUTTON_PRIMARY);
+		add(btnNewExportConfiguration);
+		setHorizontalComponentAlignment(Alignment.END, btnNewExportConfiguration);
 
-		Label myExportsLabel = new Label(I18nProperties.getPrefixCaption(ExportConfigurationDto.I18N_PREFIX, Captions.ExportConfiguration_myExports));
-		myExportsLabel.addStyleName(H3);
-		addComponent(myExportsLabel);
+		Span myExportsLabel = new Span(I18nProperties.getPrefixCaption(ExportConfigurationDto.I18N_PREFIX, Captions.ExportConfiguration_myExports));
+		myExportsLabel.addClassName(H3);
+		add(myExportsLabel);
 
 		grid = new ExportConfigurationsGrid(exportType, availableProperties, false);
-		grid.setWidth(100, Unit.PERCENTAGE);
-		addComponent(grid);
+		grid.setWidthFull();
+		add(grid);
 
-		Label sharedExportsLabel =
-			new Label(I18nProperties.getPrefixCaption(ExportConfigurationDto.I18N_PREFIX, Captions.ExportConfiguration_sharedExports));
-		sharedExportsLabel.addStyleName(H3);
+		Span sharedExportsLabel =
+			new Span(I18nProperties.getPrefixCaption(ExportConfigurationDto.I18N_PREFIX, Captions.ExportConfiguration_sharedExports));
+		sharedExportsLabel.addClassName(H3);
 
 		gridSharedExportsToPublic = new ExportConfigurationsGrid(exportType, availableProperties, true);
 		if (gridSharedExportsToPublic.getNbOfSharedExportsToPublic() > 0) {
-			gridSharedExportsToPublic.setWidth(100, Unit.PERCENTAGE);
-			addComponent(sharedExportsLabel);
-			addComponent(gridSharedExportsToPublic);
+			gridSharedExportsToPublic.setWidthFull();
+			add(sharedExportsLabel);
+			add(gridSharedExportsToPublic);
 		}
 
 		Button btnClose = ButtonHelper.createButton(Captions.actionClose, e -> closeCallback.run());
-		addComponent(btnClose);
-		setComponentAlignment(btnClose, Alignment.MIDDLE_RIGHT);
+		add(btnClose);
+		setHorizontalComponentAlignment(Alignment.END, btnClose);
 	}
 
 	public void setExportCallback(Consumer<ExportConfigurationDto> exportCallback) {

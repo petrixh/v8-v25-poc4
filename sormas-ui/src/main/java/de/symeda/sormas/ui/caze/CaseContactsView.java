@@ -232,8 +232,8 @@ public class CaseContactsView extends AbstractCaseView {
 		regionFilter.addValueChangeListener(e -> updateApplyResetButtons());
 		officerFilter.addValueChangeListener(e -> updateApplyResetButtons());
 		districtFilter.addValueChangeListener(e -> updateApplyResetButtons());
-		searchField.addValueChangeListener(e -> updateApplyResetButtons());
-		personLikeField.addValueChangeListener(e -> updateApplyResetButtons());
+		updateApplyResetButtonsOnBlur(searchField);
+		updateApplyResetButtonsOnBlur(personLikeField);
 
 		return topLayout;
 	}
@@ -471,6 +471,27 @@ public class CaseContactsView extends AbstractCaseView {
 			badge.addClassName(CssStyles.BADGE);
 			activeStatusButton.setSuffixComponent(badge);
 		}
+	}
+
+	/**
+	 * V7 fired the value change (which updates the apply/reset buttons) when the text field lost focus with changed text,
+	 * and on setValue; the lazy listeners above only set the criteria while typing.
+	 */
+	private void updateApplyResetButtonsOnBlur(TextField field) {
+		String[] lastValue = {
+			field.getValue() };
+		field.addValueChangeListener(e -> {
+			if (!e.isFromClient()) {
+				lastValue[0] = e.getValue();
+				updateApplyResetButtons();
+			}
+		});
+		field.addBlurListener(e -> {
+			if (!field.getValue().equals(lastValue[0])) {
+				lastValue[0] = field.getValue();
+				updateApplyResetButtons();
+			}
+		});
 	}
 
 	private void updateApplyResetButtons() {

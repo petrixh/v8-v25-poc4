@@ -255,7 +255,12 @@ public class MergeCasesFilterComponent extends VerticalLayout {
 		cbResultLimit.setWidth(200, Unit.PIXELS);
 		cbResultLimit.setLabel(I18nProperties.getCaption(Captions.QueryDetails_resultLimit));
 		cbResultLimit.setItems(50, 100, 500, 1000);
-		// was setEmptySelectionAllowed(false): a Flow combo box has no empty item
+		// was setEmptySelectionAllowed(false): a Flow combo box has no empty item, but the user can clear it
+		cbResultLimit.addValueChangeListener(e -> {
+			if (e.isFromClient() && e.getValue() == null) {
+				cbResultLimit.setValue(e.getOldValue());
+			}
+		});
 		queryDetailsBinder.bind(cbResultLimit, QueryDetails.RESULT_LIMIT);
 		thirdRowLayout.add(cbResultLimit);
 
@@ -295,7 +300,12 @@ public class MergeCasesFilterComponent extends VerticalLayout {
 		relevanceStatusFilter.setId(CaseCriteria.ENTITY_RELEVANCE_STATUS);
 		relevanceStatusFilter.setWidth(210, Unit.PIXELS);
 		relevanceStatusFilter.setEnabled(true);
-		// was setEmptySelectionAllowed(false): a Flow combo box has no empty item
+		// was setEmptySelectionAllowed(false): a Flow combo box has no empty item, but the user can clear it
+		relevanceStatusFilter.addValueChangeListener(e -> {
+			if (e.isFromClient() && e.getValue() == null) {
+				relevanceStatusFilter.setValue(e.getOldValue());
+			}
+		});
 		relevanceStatusFilter.setItems(EntityRelevanceStatus.getAllExceptDeleted());
 		relevanceStatusFilter.setItemLabelGenerator(item -> {
 			switch (item) {

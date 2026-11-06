@@ -196,12 +196,21 @@ public class DocumentMultiFileUpload extends Upload {
 			receivedFiles.clear();
 		}
 
+		// A file whose temporary file could not be written (its receiver showed the error) is not handed on and does not
+		// count as left in the queue, so the last file handed on gets 0: the success notification and the list reload
+		// still happen when the failed file was the last one
+		files.removeIf(file -> {
+			if (file.receiver.hasFile()) {
+				return false;
+			}
+			file.receiver.deleteTempFile();
+			return true;
+		});
+
 		for (int i = 0; i < files.size(); i++) {
 			ReceivedFile file = files.get(i);
 			try (InputStream stream = file.receiver.getStream()) {
-				if (stream != null) {
-					uploadFinishedHandler.handleFile(stream, file.fileName, file.mimeType, file.length, files.size() - i - 1);
-				}
+				uploadFinishedHandler.handleFile(stream, file.fileName, file.mimeType, file.length, files.size() - i - 1);
 			} catch (IOException e) {
 				LOGGER.error("Could not close stream!", e);
 			} catch (RuntimeException e) {

@@ -95,6 +95,14 @@ public class DocumentUploadReceiver implements Serializable {
 		}
 	}
 
+	/**
+	 * @return whether the upload was written to a temporary file that still exists (when it could not be created,
+	 *         {@link #receiveUpload(UI)} wrote to memory and showed an error)
+	 */
+	public boolean hasFile() {
+		return file != null && file.exists();
+	}
+
 	public InputStream getStream() {
 		try {
 			if (file != null) {

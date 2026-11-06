@@ -40,8 +40,11 @@ COPY_DIR=$APP_ENV_STATE_DIR/copies/$APP_ENV_PROJECT
 export APP_ENV_COPY_DIR=$COPY_DIR
 # 1: build and deploy the app (default). 0: the Payara domain, database and mail sink only, no app build and no deploy
 # (while the app does not build or start, e.g. during migration stage 1a). A running copy keeps the mode up.sh started
-# it with (in its state dir), so reset.sh and down.sh need not repeat it.
-if [ -z "${APP_ENV_DEPLOY:-}" ] && [ -s "$COPY_DIR/deploy" ]; then APP_ENV_DEPLOY=$(cat "$COPY_DIR/deploy"); fi
+# it with (in its state dir), so reset.sh and down.sh need not repeat it. Only while its app container exists: a mode
+# file left by an interrupted up.sh does not carry over to the next up.sh.
+if [ -z "${APP_ENV_DEPLOY:-}" ] && [ -s "$COPY_DIR/deploy" ] && docker container inspect "$APP_ENV_CONTAINER" >/dev/null 2>&1; then
+  APP_ENV_DEPLOY=$(cat "$COPY_DIR/deploy")
+fi
 export APP_ENV_DEPLOY=${APP_ENV_DEPLOY:-1}
 [[ "$APP_ENV_DEPLOY" =~ ^[01]$ ]] || { echo "APP_ENV_DEPLOY must be 1 or 0: $APP_ENV_DEPLOY" >&2; exit 2; }
 BASE_URL=http://localhost:$APP_ENV_PORT

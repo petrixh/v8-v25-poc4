@@ -181,6 +181,27 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- CDI tests (cdi-test): the server's implementations, which are Payara modules at run time -->
+		<dependency>
+			<groupId>com.nimbusds</groupId>
+			<artifactId>nimbus-jose-jwt</artifactId>
+			<version>10.4.2</version>
+			<scope>test</scope>
+			<!-- Needed by Soteria's CDI extension (the version Soteria 4.0.2 declares; Payara module on the server) -->
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+			<scope>test</scope>
+			<!-- Jakarta XML Binding runtime for Hibernate in tests (Payara module jaxb-osgi on the server), as sormas-backend -->
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.angus</groupId>
+			<artifactId>angus-mail</artifactId>
+			<scope>test</scope>
+			<!-- Jakarta Mail implementation for tests that create a mail Session (Payara module angus-mail on the server), as sormas-backend -->
+		</dependency>
+
 		<dependency>
 			<groupId>de.hilling.junit.cdi</groupId>
 			<artifactId>cdi-test-core</artifactId>

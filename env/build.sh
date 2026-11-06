@@ -4,8 +4,9 @@
 #      arm64 and amd64). It does not depend on the app, so it is built first and a red app build cannot fail it.
 #   2. on a clone of this checkout's committed HEAD (uncommitted changes are not built): collect the setup files and the
 #      server libs (sormas-serverlibs) into $APP_ENV_STATE_DIR/build/deploy
-#   3. unless APP_ENV_DEPLOY=0: mvn clean install -DskipTests, Maven 3.9 on JDK 21 in a container (default profiles, no
-#      Android app), and collect the ear and the wars. With APP_ENV_DEPLOY=0 the app is not built and not collected.
+#   3. unless APP_ENV_DEPLOY=0: mvn clean install -Dmaven.test.skip=true (tests neither compiled nor run), Maven 3.9 on
+#      JDK 21 in a container (default profiles, no Android app, the Vaadin key by name), and collect the ear and the wars.
+#      With APP_ENV_DEPLOY=0 the app is not built and not collected.
 # Usually run by up.sh. Holds a lock so two copies never build at once.
 set -euo pipefail
 source "$(dirname "$0")/lib.sh"
@@ -34,11 +35,19 @@ git -C "$APP_ROOT" diff --quiet HEAD 2>/dev/null || log "WARNING: uncommitted ch
 [ -d "$SRC/.git" ] || git clone -q --no-checkout "$APP_ROOT" "$SRC"
 git -C "$SRC" fetch -q "$APP_ROOT" HEAD && git -C "$SRC" checkout -q --detach FETCH_HEAD && git -C "$SRC" clean -qfdx
 mounts=(-v "$SRC:$SRC")
+# Vaadin licence key for the production frontend build of sormas-ui (commercial components, e.g. the Rich Text Editor):
+# passed by name only, never by value (docker takes VAADIN_PRO_KEY / VAADIN_OFFLINE_KEY from this shell when set),
+# else ~/.vaadin/proKey mounted read-only. Without a key the UI build fails its licence check.
+keys=(-e VAADIN_PRO_KEY -e VAADIN_OFFLINE_KEY)
+if [ -z "${VAADIN_PRO_KEY:-}" ] && [ -z "${VAADIN_OFFLINE_KEY:-}" ]; then
+  if [ -s "$HOME/.vaadin/proKey" ]; then keys+=(-v "$HOME/.vaadin/proKey:/home/build/.vaadin/proKey:ro")
+  elif [ "$APP_ENV_DEPLOY" = 1 ]; then log "WARNING: no Vaadin key (VAADIN_PRO_KEY, VAADIN_OFFLINE_KEY, ~/.vaadin/proKey): the sormas-ui build fails its licence check"; fi
+fi
 
 mvn_run() { # mvn_run <name> <mvn args...>
   local name=$APP_ENV_PROJECT-mvn-$1; shift
   docker run --rm --name "$name" --label sormas-env.project="$APP_ENV_PROJECT" --user "$(id -u):$(id -g)" \
-    "${mounts[@]}" -v "$APP_ENV_M2_REPO:/m2" -v "$BUILD_DIR/home:/home/build" \
+    "${mounts[@]}" "${keys[@]}" -v "$APP_ENV_M2_REPO:/m2" -v "$BUILD_DIR/home:/home/build" \
     -e HOME=/home/build -e MAVEN_CONFIG=/home/build/.m2 -e MAVEN_OPTS="-Xmx3g -Duser.home=/home/build" \
     -w "$SRC/sormas-base" "$MVN_IMAGE" mvn -B -Dmaven.repo.local=/m2 "$@"
 }
@@ -61,8 +70,9 @@ git -C "$SRC" rev-parse HEAD > "$D/commit" 2>/dev/null || echo unknown > "$D/com
 if [ "$APP_ENV_DEPLOY" = 0 ]; then
   log "build: APP_ENV_DEPLOY=0, the app is not built"
 else
-  log "build: mvn clean install -DskipTests (JDK 21 container; log: $LOG)"
-  mvn_run build clean install -DskipTests >> "$LOG" 2>&1 || die "maven build failed (log: $LOG)"
+  # The env needs the app, not its tests: they are neither compiled nor run here (CI does both)
+  log "build: mvn clean install -Dmaven.test.skip=true (JDK 21 container; log: $LOG)"
+  mvn_run build clean install -Dmaven.test.skip=true >> "$LOG" 2>&1 || die "maven build failed (log: $LOG)"
   for f in sormas-ear/target/sormas-ear.ear sormas-ui/target/sormas-ui.war sormas-rest/target/sormas-rest.war; do
     [ -s "$SRC/$f" ] || die "missing $f after the build"
   done

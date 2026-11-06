@@ -4,10 +4,10 @@ One command starts a copy of SORMAS in a known state: Payara 7.2026.10 on JDK 21
 from a committed snapshot and a local mail sink, in one of two test configurations (C1 default, C2 Germany with optional
 features). Several copies can run side by side, each with its own port, containers, database and configuration.
 
-**Payara 7 runtime, app not deployable yet (migration stage 1a, until ticket 1a-91).** The image is Payara Server 7
-Community 7.2026.10 (Jakarta EE 11) on JDK 21. The app is still being ported to Jakarta EE (stage 1a): until ticket
-1a-91 it does not build or does not deploy on Payara 7. Start copies with `APP_ENV_DEPLOY=0` meanwhile: the domain,
-database (with the snapshot and the reset point) and mail sink, without the app (see "Settings" and "Payara 7 domain").
+**Payara 7 runtime.** The image is Payara Server 7 Community 7.2026.10 (Jakarta EE 11) on JDK 21. Since migration
+ticket 1a-91 the app builds and deploys on it (`APP_ENV_DEPLOY=1`, the default). `APP_ENV_DEPLOY=0` still starts the
+domain, database (with the snapshot and the reset point) and mail sink without the app (see "Settings" and "Payara 7
+domain").
 
 ```sh
 env/up.sh                        # build, start C1 with its snapshot: http://localhost:18080/sormas-ui/
@@ -46,11 +46,12 @@ Each script reads these variables; the defaults start one copy.
 | `APP_ENV_CONFIG` | `C1` | Test configuration, `C1` or `C2` (see "Configurations") |
 | `APP_ENV_PWCHECK` | `off` | `on`: the "Security Alert: default password" dialog after a default-user login (`skipDefaultPasswordCheck=false`) |
 | `APP_ENV_SEED` | `snapshot` | `up.sh` data: `snapshot` (the committed `env/seed/snapshot-<C>.pgdump`) or `rest` (only the small REST seed; `env/seed/generate.sh` uses it) |
-| `APP_ENV_DEPLOY` | `1` | `0`: the domain only. `build.sh` does not build the app, the container does not deploy it, `up.sh` waits for `GET /` (Payara's default page) instead of the login page and takes the reset point right after loading the snapshot. Needs `APP_ENV_SEED=snapshot`. For stage 1a, until the app deploys on Payara 7 (ticket 1a-91) |
+| `APP_ENV_DEPLOY` | `1` | `0`: the domain only. `build.sh` does not build the app, the container does not deploy it, `up.sh` waits for `GET /` (Payara's default page) instead of the login page and takes the reset point right after loading the snapshot. Needs `APP_ENV_SEED=snapshot`. Was used in migration stage 1a while the app did not deploy on Payara 7 (until ticket 1a-91) |
 
 Use the same variables for `up.sh`, `reset.sh` and `down.sh` of one copy. `APP_ENV_CONFIG`, `APP_ENV_PWCHECK`,
 `APP_ENV_SEED` and `APP_ENV_DEPLOY` matter to `up.sh` only: the copy keeps them until `down.sh` (`up.sh` records
-`APP_ENV_DEPLOY` in the copy's state directory for `reset.sh`). Two copies:
+`APP_ENV_DEPLOY` in the copy's state directory for `reset.sh`; it counts only while the copy's app container exists, so
+a record left by an interrupted `up.sh` does not change the next `up.sh`). Two copies:
 
 ```sh
 APP_ENV_PORT=18081 APP_ENV_PROJECT=sormas-new-1 env/up.sh
@@ -74,8 +75,11 @@ These scripts follow the replay runner's env-script contract (`up.sh [--no-build
      built; `up.sh` warns; the files under `env/` are used from the working tree): collects the `sormas-base/setup`
      files and the server libraries (`dependency:copy-dependencies` on `sormas-serverlibs`) into
      `env/.state/build/deploy`.
-   - unless `APP_ENV_DEPLOY=0`: `mvn clean install -DskipTests` with Maven 3.9 on JDK 21 in a container
-     (`maven:3.9-eclipse-temurin-21`), default profiles, and collects the ear and the two wars.
+   - unless `APP_ENV_DEPLOY=0`: `mvn clean install -Dmaven.test.skip=true` (the tests are neither compiled nor run;
+     CI does both) with Maven 3.9 on JDK 21 in a container (`maven:3.9-eclipse-temurin-21`), default profiles, and
+     collects the ear and the two wars. The production frontend build of `sormas-ui` checks the Vaadin commercial
+     licence (Rich Text Editor): `build.sh` passes `VAADIN_PRO_KEY` or `VAADIN_OFFLINE_KEY` to the container by name
+     when set, else mounts `~/.vaadin/proKey` read-only. Without a key the build fails.
    - A lock makes a second build wait for the first. Log: `env/.state/build/build.log`.
 3. Generates a throwaway database password for this copy (`env/.state/copies/<project>/db.env`, mode 600; never in an
    image or a tracked file) and writes the copy's `sormas.properties` (`env/.state/copies/<project>/sormas.properties`,
@@ -106,7 +110,7 @@ state directory. It is safe after a half-finished `up.sh` and when the copy is a
 output and the images stay.
 
 Measured on a 10-CPU arm64 host on the Payara 5 environment of the old app (2026-11-05, three copies at once for the
-snapshot rows); the app rows are measured again on Payara 7 once the app deploys (ticket 1a-91):
+snapshot rows); Payara 7 with the app is in the second table below:
 
 | Step | Time |
 |---|---|
@@ -127,6 +131,14 @@ Payara 7, `APP_ENV_DEPLOY=0` (same host, 2026-11-06, two copies):
 | `up.sh --no-build` (snapshot, C1 or C2) | about 20 s: loading the snapshot 4 s, domain answers after 8 to 9 s, reset point about 10 s |
 | `reset.sh` (`restart`) | about 6 s |
 | Memory per copy | domain about 0.9 to 1.0 GB, database about 0.06 GB |
+
+Payara 7 with the app, `APP_ENV_DEPLOY=1` (same host, 2026-11-06, ticket 1a-91, one copy, C1):
+
+| Step | Time |
+|---|---|
+| Build (warm Maven repository, tests not compiled; frontend production bundle) | about 50 to 60 s |
+| `up.sh` after the build (snapshot, C1) | about 55 s: loading the snapshot 4 s, the app answers after 30 s (deploy of the ear about 15 s), reset point about 25 s; 107 s including the build |
+| Memory per copy | app about 2.3 GB after the first logins (heap limit 4 GB), database about 0.09 GB |
 
 ## Configurations
 
@@ -285,7 +297,8 @@ APP_ENV_PORT=18091 APP_ENV_PROJECT=sormas-new-smoke env/down.sh
 - Build: `env/.state/build/build.log`.
 - Known, from the app (not changed here): on the Payara 5 environment of the old app, deployment logs `SEVERE` lines
   (e.g. `@Lock is only permitted for singleton session beans`, annotation processing of `sormas-backend`) that do not
-  stop the app. On Payara 7 they are checked again once the app deploys (ticket 1a-91).
+  stop the app. Payara 7 logs the same ones (checked in ticket 1a-91), plus a deprecation warning for each
+  `glassfish-web.xml` and, when the domain stops, a `SEVERE` about a ThreadLocal of Payara's ORB left in `/sormas-ui`.
 - `server.log` in a fresh container starts with the image build's own domain start (`WARNING` lines "cannot take effect
   without server restart" for the JVM options set then); they are from the build, not from this start.
 
@@ -315,9 +328,11 @@ Differences to the Payara 5 environment of the old app (`sormas-old-env-payara:5
   mail resource uses Eclipse Angus Mail.
 - EJB pool: 128 as `server-setup.sh` intends. The old environment's `set` of it failed (no `get` before it) and the
   pool stayed at Payara's default of 32.
+- A failed setup command fails the image build, the EJB pool `set` included. The old environment only warned when that
+  `set` failed (`WARN: ejb-container max-pool-size not set`) and built the image anyway.
 - The domain lib holds today's server library list (`sormas-serverlibs/pom.xml` at HEAD). Migration ticket 1a-02
-  changes that list to Jakarta EE 11 artefacts; `build.sh` collects whatever the pom says, so nothing changes here, but
-  1a-91 checks the list against the deployed app.
+  changes that list to Jakarta EE 11 artefacts; `build.sh` collects whatever the pom says, so nothing changes here.
+  Ticket 1a-91 deployed the app with it: no missing class at deploy or on the screens it opened.
 - `APP_ENV_DEPLOY=0` (new): the domain without the app.
 - Payara 7's own defaults differ from Payara 5's (e.g. its default JVM options with `--add-opens` for JDK 21); the
   setup does not change them.

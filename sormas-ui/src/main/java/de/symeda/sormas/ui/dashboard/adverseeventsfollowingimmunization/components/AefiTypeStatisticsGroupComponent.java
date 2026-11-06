@@ -36,7 +36,7 @@ public class AefiTypeStatisticsGroupComponent extends CssLayout {
 	public void update(Map<Vaccine, Map<AefiType, Long>> countsByVaccineData) {
 
 		//temporary fix: re-use stored components and hide/unhide if not in new update
-		removeAllComponents();
+		removeAll();
 		componentMap.clear();
 
 		AefiTypeStatisticsComponent statisticsComponent;
@@ -50,10 +50,10 @@ public class AefiTypeStatisticsGroupComponent extends CssLayout {
 				statisticsComponent.hideHeading();
 				statisticsComponent.update(entry.getValue());
 				statisticsComponent
-					.addStyleNames(CssStyles.VIEW_SECTION_WIDTH_AUTO, CssStyles.PADDING_X_8, CssStyles.HSPACE_RIGHT_3, CssStyles.VSPACE_4);
+					.addClassNames(CssStyles.VIEW_SECTION_WIDTH_AUTO, CssStyles.PADDING_X_8, CssStyles.HSPACE_RIGHT_3, CssStyles.VSPACE_4);
 				componentMap.put(entry.getKey(), statisticsComponent);
 
-				addComponent(statisticsComponent);
+				add(statisticsComponent);
 			}
 		}
 	}

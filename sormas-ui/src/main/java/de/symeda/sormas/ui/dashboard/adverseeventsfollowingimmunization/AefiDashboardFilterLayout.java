@@ -17,7 +17,7 @@ package de.symeda.sormas.ui.dashboard.adverseeventsfollowingimmunization;
 
 import java.util.List;
 
-import com.vaadin.v7.ui.ComboBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -62,7 +62,7 @@ public class AefiDashboardFilterLayout extends DashboardFilterLayout<AefiDashboa
 			.build();
 
 		dateTypeSelectorComponent.addValueChangeListener(e -> {
-			dashboardDataProvider.setDateType((AefiDashboardFilterDateType) e.getProperty().getValue());
+			dashboardDataProvider.setDateType((AefiDashboardFilterDateType) e.getValue());
 		});
 
 		addCustomComponent(dateTypeSelectorComponent, DATE_TYPE_FILTER);

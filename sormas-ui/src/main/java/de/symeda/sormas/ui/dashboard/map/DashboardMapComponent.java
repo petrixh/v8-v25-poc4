@@ -27,20 +27,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.server.ExternalResource;
-import com.vaadin.shared.ui.ContentMode;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.ui.Image;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.ui.Window;
-import com.vaadin.v7.shared.ui.grid.HeightMode;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.OptionGroup;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 import de.symeda.sormas.api.CaseMeasure;
 import de.symeda.sormas.api.Disease;
@@ -247,7 +247,7 @@ public class DashboardMapComponent extends BaseDashboardMapComponent<DashboardCr
 		caseClassificationOptions.addItems((Object[]) MapCaseClassificationOption.values());
 		caseClassificationOptions.setValue(caseClassificationOption);
 		caseClassificationOptions.addValueChangeListener(event -> {
-			caseClassificationOption = (MapCaseClassificationOption) event.getProperty().getValue();
+			caseClassificationOption = (MapCaseClassificationOption) event.getValue();
 			refreshMap(true);
 		});
 
@@ -257,41 +257,41 @@ public class DashboardMapComponent extends BaseDashboardMapComponent<DashboardCr
 		mapCaseDisplayModeSelect.addItems((Object[]) MapCaseDisplayMode.values());
 		mapCaseDisplayModeSelect.setValue(mapCaseDisplayMode);
 		mapCaseDisplayModeSelect.addValueChangeListener(event -> {
-			mapCaseDisplayMode = (MapCaseDisplayMode) event.getProperty().getValue();
+			mapCaseDisplayMode = (MapCaseDisplayMode) event.getValue();
 			refreshMap(true);
 		});
 
 		if (UiUtil.permitted(UserRight.CASE_VIEW)) {
 			HorizontalLayout showCasesLayout = new HorizontalLayout();
 			{
-				showCasesLayout.setMargin(false);
+				showCasesLayout.setPadding(false);
 				showCasesLayout.setSpacing(false);
 				CheckBox showCasesCheckBox = new CheckBox();
 				showCasesCheckBox.setId(Captions.dashboardShowCases);
 				showCasesCheckBox.setCaption(I18nProperties.getCaption(Captions.dashboardShowCases));
 				showCasesCheckBox.setValue(showCases);
 				showCasesCheckBox.addValueChangeListener(e -> {
-					showCases = (boolean) e.getProperty().getValue();
+					showCases = (boolean) e.getValue();
 					mapCaseDisplayModeSelect.setEnabled(showCases);
 					mapCaseDisplayModeSelect.setValue(mapCaseDisplayMode);
 					caseClassificationOptions.setEnabled(showCases);
 					refreshMap(true);
 				});
-				showCasesLayout.addComponent(showCasesCheckBox);
+				showCasesLayout.add(showCasesCheckBox);
 
-				Label infoLabel = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
+				Span infoLabel = new Span(VaadinIcon.INFO_CIRCLE.getHtml(), ContentMode.HTML);
 				infoLabel.setDescription(I18nProperties.getString(Strings.infoCaseMap));
 				CssStyles.style(infoLabel, CssStyles.LABEL_MEDIUM, CssStyles.LABEL_SECONDARY, CssStyles.HSPACE_LEFT_3);
 				infoLabel.setHeightUndefined();
-				showCasesLayout.addComponent(infoLabel);
+				showCasesLayout.add(infoLabel);
 				showCasesLayout.setComponentAlignment(infoLabel, Alignment.TOP_CENTER);
 			}
-			layersLayout.addComponent(showCasesLayout);
+			layersLayout.add(showCasesLayout);
 
-			layersLayout.addComponent(mapCaseDisplayModeSelect);
+			layersLayout.add(mapCaseDisplayModeSelect);
 			mapCaseDisplayModeSelect.setEnabled(showCases);
 
-			layersLayout.addComponent(caseClassificationOptions);
+			layersLayout.add(caseClassificationOptions);
 			caseClassificationOptions.setEnabled(showCases);
 		}
 
@@ -306,31 +306,31 @@ public class DashboardMapComponent extends BaseDashboardMapComponent<DashboardCr
 			showContactsCheckBox.setCaption(I18nProperties.getCaption(Captions.dashboardShowContacts));
 			showContactsCheckBox.setValue(showContacts);
 			showContactsCheckBox.addValueChangeListener(e -> {
-				showContacts = (boolean) e.getProperty().getValue();
+				showContacts = (boolean) e.getValue();
 				showConfirmedContactsCheckBox.setEnabled(showContacts);
 				showConfirmedContactsCheckBox.setValue(true);
 				showUnconfirmedContactsCheckBox.setEnabled(showContacts);
 				showUnconfirmedContactsCheckBox.setValue(true);
 				refreshMap(true);
 			});
-			layersLayout.addComponent(showContactsCheckBox);
+			layersLayout.add(showContactsCheckBox);
 
 			showConfirmedContactsCheckBox.setCaption(I18nProperties.getCaption(Captions.dashboardShowConfirmedContacts));
 			showConfirmedContactsCheckBox.setValue(showConfirmedContacts);
 			showConfirmedContactsCheckBox.addValueChangeListener(e -> {
-				showConfirmedContacts = (boolean) e.getProperty().getValue();
+				showConfirmedContacts = (boolean) e.getValue();
 				refreshMap(true);
 			});
-			layersLayout.addComponent(showConfirmedContactsCheckBox);
+			layersLayout.add(showConfirmedContactsCheckBox);
 
 			CssStyles.style(showUnconfirmedContactsCheckBox, CssStyles.VSPACE_3);
 			showUnconfirmedContactsCheckBox.setCaption(I18nProperties.getCaption(Captions.dashboardShowUnconfirmedContacts));
 			showUnconfirmedContactsCheckBox.setValue(showUnconfirmedContacts);
 			showUnconfirmedContactsCheckBox.addValueChangeListener(e -> {
-				showUnconfirmedContacts = (boolean) e.getProperty().getValue();
+				showUnconfirmedContacts = (boolean) e.getValue();
 				refreshMap(true);
 			});
-			layersLayout.addComponent(showUnconfirmedContactsCheckBox);
+			layersLayout.add(showUnconfirmedContactsCheckBox);
 
 			showConfirmedContactsCheckBox.setEnabled(showContacts);
 			showUnconfirmedContactsCheckBox.setEnabled(showContacts);
@@ -343,10 +343,10 @@ public class DashboardMapComponent extends BaseDashboardMapComponent<DashboardCr
 			showEventsCheckBox.setCaption(I18nProperties.getCaption(Captions.dashboardShowEvents));
 			showEventsCheckBox.setValue(showEvents);
 			showEventsCheckBox.addValueChangeListener(e -> {
-				showEvents = (boolean) e.getProperty().getValue();
+				showEvents = (boolean) e.getValue();
 				refreshMap(true);
 			});
-			layersLayout.addComponent(showEventsCheckBox);
+			layersLayout.add(showEventsCheckBox);
 		}
 
 		if (UiUtil.hasNationJurisdictionLevel() && UiUtil.permitted(UserRight.CASE_VIEW)) {
@@ -355,35 +355,35 @@ public class DashboardMapComponent extends BaseDashboardMapComponent<DashboardCr
 			regionMapVisualizationSelect.addItems((Object[]) CaseMeasure.values());
 			regionMapVisualizationSelect.setValue(caseMeasure);
 			regionMapVisualizationSelect.addValueChangeListener(event -> {
-				caseMeasure = (CaseMeasure) event.getProperty().getValue();
+				caseMeasure = (CaseMeasure) event.getValue();
 				refreshMap(true);
 			});
 
 			HorizontalLayout showRegionsLayout = new HorizontalLayout();
 			{
-				showRegionsLayout.setMargin(false);
+				showRegionsLayout.setPadding(false);
 				showRegionsLayout.setSpacing(false);
 				CheckBox showRegionsCheckBox = new CheckBox();
 				showRegionsCheckBox.setId(Captions.dashboardShowRegions);
 				showRegionsCheckBox.setCaption(I18nProperties.getCaption(Captions.dashboardShowRegions));
 				showRegionsCheckBox.setValue(showRegions);
 				showRegionsCheckBox.addValueChangeListener(e -> {
-					showRegions = (boolean) e.getProperty().getValue();
+					showRegions = (boolean) e.getValue();
 					regionMapVisualizationSelect.setEnabled(showRegions);
 					regionMapVisualizationSelect.setValue(caseMeasure);
 					refreshMap(true);
 				});
-				showRegionsLayout.addComponent(showRegionsCheckBox);
+				showRegionsLayout.add(showRegionsCheckBox);
 
-				Label infoLabel = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
+				Span infoLabel = new Span(VaadinIcon.INFO_CIRCLE.getHtml(), ContentMode.HTML);
 				infoLabel.setDescription(I18nProperties.getString(Strings.infoCaseIncidence));
 				CssStyles.style(infoLabel, CssStyles.LABEL_MEDIUM, CssStyles.LABEL_SECONDARY, CssStyles.HSPACE_LEFT_3);
 				infoLabel.setHeightUndefined();
-				showRegionsLayout.addComponent(infoLabel);
+				showRegionsLayout.add(infoLabel);
 				showRegionsLayout.setComponentAlignment(infoLabel, Alignment.TOP_CENTER);
 			}
-			layersLayout.addComponent(showRegionsLayout);
-			layersLayout.addComponent(regionMapVisualizationSelect);
+			layersLayout.add(showRegionsLayout);
+			layersLayout.add(regionMapVisualizationSelect);
 			regionMapVisualizationSelect.setEnabled(showRegions);
 		}
 
@@ -392,21 +392,21 @@ public class DashboardMapComponent extends BaseDashboardMapComponent<DashboardCr
 		hideOtherCountriesCheckBox.setCaption(I18nProperties.getCaption(Captions.dashboardHideOtherCountries));
 		hideOtherCountriesCheckBox.setValue(hideOtherCountries);
 		hideOtherCountriesCheckBox.addValueChangeListener(e -> {
-			hideOtherCountries = (boolean) e.getProperty().getValue();
+			hideOtherCountries = (boolean) e.getValue();
 			refreshMap(true);
 		});
 		CssStyles.style(hideOtherCountriesCheckBox, CssStyles.VSPACE_3);
-		layersLayout.addComponent(hideOtherCountriesCheckBox);
+		layersLayout.add(hideOtherCountriesCheckBox);
 
 		CheckBox showCurrentEpiSituationCB = new CheckBox();
 		showCurrentEpiSituationCB.setId(Captions.dashboardMapShowEpiSituation);
 		showCurrentEpiSituationCB.setCaption(I18nProperties.getCaption(Captions.dashboardMapShowEpiSituation));
 		showCurrentEpiSituationCB.setValue(false);
 		showCurrentEpiSituationCB.addValueChangeListener(e -> {
-			showCurrentEpiSituation = (boolean) e.getProperty().getValue();
+			showCurrentEpiSituation = (boolean) e.getValue();
 			refreshMap(true);
 		});
-		layersLayout.addComponent(showCurrentEpiSituationCB);
+		layersLayout.add(showCurrentEpiSituationCB);
 	}
 
 	@Override
@@ -415,32 +415,32 @@ public class DashboardMapComponent extends BaseDashboardMapComponent<DashboardCr
 		// Cases
 		if (showCases) {
 			if (mapCaseDisplayMode == MapCaseDisplayMode.FACILITY || mapCaseDisplayMode == MapCaseDisplayMode.FACILITY_OR_CASE_ADDRESS) {
-				Label facilitiesKeyLabel = new Label(I18nProperties.getCaption(Captions.dashboardFacilities));
+				Span facilitiesKeyLabel = new Span(I18nProperties.getCaption(Captions.dashboardFacilities));
 				CssStyles.style(facilitiesKeyLabel, CssStyles.H4, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_NONE);
 				legendComponents.add(facilitiesKeyLabel);
 
 				HorizontalLayout facilitiesKeyLayout = new HorizontalLayout();
 				{
 					facilitiesKeyLayout.setSpacing(false);
-					facilitiesKeyLayout.setMargin(false);
+					facilitiesKeyLayout.setPadding(false);
 					HorizontalLayout legendEntry =
 						buildMarkerLegendEntry(MarkerIcon.FACILITY_UNCLASSIFIED, I18nProperties.getCaption(Captions.dashboardNotYetClassifiedOnly));
 					CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-					facilitiesKeyLayout.addComponent(legendEntry);
+					facilitiesKeyLayout.add(legendEntry);
 					legendEntry = buildMarkerLegendEntry(MarkerIcon.FACILITY_SUSPECT, I18nProperties.getCaption(Captions.dashboardGt1SuspectCases));
 					CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-					facilitiesKeyLayout.addComponent(legendEntry);
+					facilitiesKeyLayout.add(legendEntry);
 					legendEntry = buildMarkerLegendEntry(MarkerIcon.FACILITY_PROBABLE, I18nProperties.getCaption(Captions.dashboardGt1ProbableCases));
 					CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-					facilitiesKeyLayout.addComponent(legendEntry);
+					facilitiesKeyLayout.add(legendEntry);
 					legendEntry =
 						buildMarkerLegendEntry(MarkerIcon.FACILITY_CONFIRMED, I18nProperties.getCaption(Captions.dashboardGt1ConfirmedCases));
-					facilitiesKeyLayout.addComponent(legendEntry);
+					facilitiesKeyLayout.add(legendEntry);
 				}
 				legendComponents.add(facilitiesKeyLayout);
 			}
 
-			Label casesKeyLabel = new Label(I18nProperties.getString(Strings.entityCases));
+			Span casesKeyLabel = new Span(I18nProperties.getString(Strings.entityCases));
 			if (mapCaseDisplayMode == MapCaseDisplayMode.FACILITY || mapCaseDisplayMode == MapCaseDisplayMode.FACILITY_OR_CASE_ADDRESS) {
 				CssStyles.style(casesKeyLabel, CssStyles.H4, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_3);
 			} else {
@@ -451,26 +451,26 @@ public class DashboardMapComponent extends BaseDashboardMapComponent<DashboardCr
 			HorizontalLayout casesKeyLayout = new HorizontalLayout();
 			{
 				casesKeyLayout.setSpacing(false);
-				casesKeyLayout.setMargin(false);
+				casesKeyLayout.setPadding(false);
 				HorizontalLayout legendEntry =
 					buildMarkerLegendEntry(MarkerIcon.CASE_UNCLASSIFIED, I18nProperties.getCaption(Captions.dashboardNotYetClassified));
 				CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-				casesKeyLayout.addComponent(legendEntry);
+				casesKeyLayout.add(legendEntry);
 				legendEntry = buildMarkerLegendEntry(MarkerIcon.CASE_SUSPECT, I18nProperties.getCaption(Captions.dashboardSuspect));
 				CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-				casesKeyLayout.addComponent(legendEntry);
+				casesKeyLayout.add(legendEntry);
 				legendEntry = buildMarkerLegendEntry(MarkerIcon.CASE_PROBABLE, I18nProperties.getCaption(Captions.dashboardProbable));
 				CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-				casesKeyLayout.addComponent(legendEntry);
+				casesKeyLayout.add(legendEntry);
 				legendEntry = buildMarkerLegendEntry(MarkerIcon.CASE_CONFIRMED, I18nProperties.getCaption(Captions.dashboardConfirmed));
-				casesKeyLayout.addComponent(legendEntry);
+				casesKeyLayout.add(legendEntry);
 			}
 			legendComponents.add(casesKeyLayout);
 		}
 
 		// Contacts
 		if (showContacts) {
-			Label contactsKeyLabel = new Label(I18nProperties.getString(Strings.entityContacts));
+			Span contactsKeyLabel = new Span(I18nProperties.getString(Strings.entityContacts));
 			if (showCases) {
 				CssStyles.style(contactsKeyLabel, CssStyles.H4, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_3);
 			} else {
@@ -481,23 +481,23 @@ public class DashboardMapComponent extends BaseDashboardMapComponent<DashboardCr
 			HorizontalLayout contactsKeyLayout = new HorizontalLayout();
 			{
 				contactsKeyLayout.setSpacing(false);
-				contactsKeyLayout.setMargin(false);
+				contactsKeyLayout.setPadding(false);
 				HorizontalLayout legendEntry =
 					buildMarkerLegendEntry(MarkerIcon.CONTACT_OK, I18nProperties.getCaption(Captions.dashboardNotAContact));
 				CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-				contactsKeyLayout.addComponent(legendEntry);
+				contactsKeyLayout.add(legendEntry);
 				legendEntry = buildMarkerLegendEntry(MarkerIcon.CONTACT_OVERDUE, I18nProperties.getCaption(Captions.dashboardUnconfirmedContact));
 				CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-				contactsKeyLayout.addComponent(legendEntry);
+				contactsKeyLayout.add(legendEntry);
 				legendEntry = buildMarkerLegendEntry(MarkerIcon.CONTACT_LONG_OVERDUE, I18nProperties.getCaption(Captions.dashboardConfirmedContact));
-				contactsKeyLayout.addComponent(legendEntry);
+				contactsKeyLayout.add(legendEntry);
 			}
 			legendComponents.add(contactsKeyLayout);
 		}
 
 		// Events
 		if (showEvents) {
-			Label eventsKeyLabel = new Label(I18nProperties.getString(Strings.entityEvents));
+			Span eventsKeyLabel = new Span(I18nProperties.getString(Strings.entityEvents));
 			if (showCases || showContacts) {
 				CssStyles.style(eventsKeyLabel, CssStyles.H4, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_3);
 			} else {
@@ -508,19 +508,19 @@ public class DashboardMapComponent extends BaseDashboardMapComponent<DashboardCr
 			HorizontalLayout eventsKeyLayout = new HorizontalLayout();
 			{
 				eventsKeyLayout.setSpacing(false);
-				eventsKeyLayout.setMargin(false);
+				eventsKeyLayout.setPadding(false);
 				HorizontalLayout legendEntry = buildMarkerLegendEntry(MarkerIcon.EVENT_RUMOR, EventStatus.SIGNAL.toString());
 				CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-				eventsKeyLayout.addComponent(legendEntry);
+				eventsKeyLayout.add(legendEntry);
 				legendEntry = buildMarkerLegendEntry(MarkerIcon.EVENT_OUTBREAK, EventStatus.EVENT.toString());
-				eventsKeyLayout.addComponent(legendEntry);
+				eventsKeyLayout.add(legendEntry);
 			}
 			legendComponents.add(eventsKeyLayout);
 		}
 
 		// Districts
 		if (showRegions && districtValuesLowerQuartile != null && districtValuesMedian != null && districtValuesUpperQuartile != null) {
-			Label districtsKeyLabel = new Label(I18nProperties.getString(Strings.entityDistricts));
+			Span districtsKeyLabel = new Span(I18nProperties.getString(Strings.entityDistricts));
 			if (showCases || showContacts || showEvents) {
 				CssStyles.style(districtsKeyLabel, CssStyles.H4, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_3);
 			} else {
@@ -537,7 +537,7 @@ public class DashboardMapComponent extends BaseDashboardMapComponent<DashboardCr
 					districtValuesUpperQuartile,
 					InfrastructureHelper.CASE_INCIDENCE_DIVISOR));
 
-			Label descLabel = new Label(I18nProperties.getString(Strings.infoDashboardIncidence));
+			Span descLabel = new Span(I18nProperties.getString(Strings.infoDashboardIncidence));
 			CssStyles.style(descLabel, CssStyles.LABEL_SMALL);
 			legendComponents.add(descLabel);
 		}
@@ -583,7 +583,7 @@ public class DashboardMapComponent extends BaseDashboardMapComponent<DashboardCr
 		default:
 			throw new IllegalArgumentException(caseMeasure.toString());
 		}
-		regionLegendLayout.addComponent(legendEntry);
+		regionLegendLayout.add(legendEntry);
 
 		if (districtShapesLowerQuartile.compareTo(districtShapesMedian) < 0) {
 			switch (caseMeasure) {
@@ -606,7 +606,7 @@ public class DashboardMapComponent extends BaseDashboardMapComponent<DashboardCr
 				throw new IllegalArgumentException(caseMeasure.toString());
 			}
 
-			regionLegendLayout.addComponent(legendEntry);
+			regionLegendLayout.add(legendEntry);
 		}
 
 		if (districtShapesMedian.compareTo(districtShapesUpperQuartile) < 0) {
@@ -630,7 +630,7 @@ public class DashboardMapComponent extends BaseDashboardMapComponent<DashboardCr
 				throw new IllegalArgumentException(caseMeasure.toString());
 			}
 
-			regionLegendLayout.addComponent(legendEntry);
+			regionLegendLayout.add(legendEntry);
 		}
 
 		switch (caseMeasure) {
@@ -648,11 +648,11 @@ public class DashboardMapComponent extends BaseDashboardMapComponent<DashboardCr
 		default:
 			throw new IllegalArgumentException(caseMeasure.toString());
 		}
-		regionLegendLayout.addComponent(legendEntry);
+		regionLegendLayout.add(legendEntry);
 
 		if (caseMeasure == CaseMeasure.CASE_INCIDENCE && emptyPopulationDistrictPresent) {
 			legendEntry = buildMapIconLegendEntry("no-population-region-small", I18nProperties.getCaption(Captions.dashboardNoPopulationData));
-			regionLegendLayout.addComponent(legendEntry);
+			regionLegendLayout.add(legendEntry);
 		}
 
 		return regionLegendLayout;
@@ -1023,8 +1023,8 @@ public class DashboardMapComponent extends BaseDashboardMapComponent<DashboardCr
 				Window window = VaadinUiUtil.showPopupWindow(layout);
 				CasePopupGrid caseGrid = new CasePopupGrid(window, facility, DashboardMapComponent.this);
 				caseGrid.setHeightMode(HeightMode.ROW);
-				layout.addComponent(caseGrid);
-				layout.setMargin(true);
+				layout.add(caseGrid);
+				layout.setPadding(true);
 				FacilityDto facilityDto = FacadeProvider.getFacilityFacade().getByUuid(facility.getUuid());
 				window.setCaption(I18nProperties.getCaption(Captions.dashboardCasesIn) + " " + facilityDto.buildCaption());
 			} else {

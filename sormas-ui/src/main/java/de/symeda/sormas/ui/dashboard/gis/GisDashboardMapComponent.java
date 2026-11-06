@@ -26,21 +26,21 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.server.ExternalResource;
-import com.vaadin.shared.ui.ContentMode;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.ui.Image;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.ui.Window;
-import com.vaadin.v7.shared.ui.grid.HeightMode;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.OptionGroup;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 import de.symeda.sormas.api.CaseMeasure;
 import de.symeda.sormas.api.Disease;
@@ -172,13 +172,13 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 
 		super.addComponents();
 
-		setMargin(false);
+		setPadding(false);
 		setSpacing(false);
 
 		map.setZoom(5);
 
 		mapHeaderLayout.setWidthUndefined();
-		mapHeaderLayout.removeAllComponents();
+		mapHeaderLayout.removeAll();
 		CssStyles.style(mapHeaderLayout, CssStyles.GIS_DASHBOARD_MAP_HEADER);
 	}
 
@@ -321,25 +321,25 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 	@Override
 	protected void addLayerOptions(VerticalLayout layersLayout) {
 		HorizontalLayout mainLayersLayout = new HorizontalLayout();
-		mainLayersLayout.setMargin(false);
+		mainLayersLayout.setPadding(false);
 		mainLayersLayout.setSpacing(true);
 
 		//cases layers
 		VerticalLayout casesLayers = new VerticalLayout();
 		{
-			casesLayers.setMargin(false);
+			casesLayers.setPadding(false);
 			casesLayers.setSpacing(false);
 
-			Label casesLayersLabel = new Label(I18nProperties.getString(Strings.entityCases));
+			Span casesLayersLabel = new Span(I18nProperties.getString(Strings.entityCases));
 			CssStyles.style(casesLayersLabel, CssStyles.H4, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_NONE);
-			casesLayers.addComponent(casesLayersLabel);
+			casesLayers.add(casesLayersLabel);
 
 			//case classifications
 			OptionGroup caseClassificationOptions = new OptionGroup();
 			caseClassificationOptions.addItems((Object[]) MapCaseClassificationOption.values());
 			caseClassificationOptions.setValue(caseClassificationOption);
 			caseClassificationOptions.addValueChangeListener(event -> {
-				caseClassificationOption = (MapCaseClassificationOption) event.getProperty().getValue();
+				caseClassificationOption = (MapCaseClassificationOption) event.getValue();
 				loadCases = true;
 				refreshMap(true);
 			});
@@ -350,7 +350,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 			mapCaseDisplayModeSelect.addItems((Object[]) MapCaseDisplayMode.values());
 			mapCaseDisplayModeSelect.setValue(mapCaseDisplayMode);
 			mapCaseDisplayModeSelect.addValueChangeListener(event -> {
-				mapCaseDisplayMode = (MapCaseDisplayMode) event.getProperty().getValue();
+				mapCaseDisplayMode = (MapCaseDisplayMode) event.getValue();
 				loadCases = true;
 				refreshMap(true);
 			});
@@ -361,7 +361,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 			caseSexCombobox.setInputPrompt(I18nProperties.getString(Strings.promptCaseSex));
 			caseSexCombobox.addItems((Object[]) Sex.values());
 			caseSexCombobox.addValueChangeListener(event -> {
-				dashboardDataProvider.setSex((Sex) event.getProperty().getValue());
+				dashboardDataProvider.setSex((Sex) event.getValue());
 				loadCases = true;
 				refreshMap(true);
 			});
@@ -369,7 +369,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 			if (UiUtil.permitted(UserRight.CASE_VIEW)) {
 				HorizontalLayout showCasesLayout = new HorizontalLayout();
 				{
-					showCasesLayout.setMargin(false);
+					showCasesLayout.setPadding(false);
 					showCasesLayout.setSpacing(false);
 
 					showCasesCheckBox = new CheckBox();
@@ -377,7 +377,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 					showCasesCheckBox.setCaption(I18nProperties.getCaption(Captions.dashboardShowCases));
 					showCasesCheckBox.setValue(showCases);
 					showCasesCheckBox.addValueChangeListener(e -> {
-						showCases = (boolean) e.getProperty().getValue();
+						showCases = (boolean) e.getValue();
 						mapCaseDisplayModeSelect.setEnabled(showCases);
 						mapCaseDisplayModeSelect.setValue(mapCaseDisplayMode);
 						caseClassificationOptions.setEnabled(showCases);
@@ -385,24 +385,24 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 						loadCases = true;
 						refreshMap(true);
 					});
-					showCasesLayout.addComponent(showCasesCheckBox);
+					showCasesLayout.add(showCasesCheckBox);
 
-					Label infoLabel = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
+					Span infoLabel = new Span(VaadinIcon.INFO_CIRCLE.getHtml(), ContentMode.HTML);
 					infoLabel.setDescription(I18nProperties.getString(Strings.infoCaseMap));
 					CssStyles.style(infoLabel, CssStyles.LABEL_MEDIUM, CssStyles.LABEL_SECONDARY, CssStyles.HSPACE_LEFT_3);
 					infoLabel.setHeightUndefined();
-					showCasesLayout.addComponent(infoLabel);
+					showCasesLayout.add(infoLabel);
 					showCasesLayout.setComponentAlignment(infoLabel, Alignment.TOP_CENTER);
 				}
-				casesLayers.addComponent(showCasesLayout);
+				casesLayers.add(showCasesLayout);
 
-				casesLayers.addComponent(mapCaseDisplayModeSelect);
+				casesLayers.add(mapCaseDisplayModeSelect);
 				mapCaseDisplayModeSelect.setEnabled(showCases);
 
-				casesLayers.addComponent(caseClassificationOptions);
+				casesLayers.add(caseClassificationOptions);
 				caseClassificationOptions.setEnabled(showCases);
 
-				casesLayers.addComponent(caseSexCombobox);
+				casesLayers.add(caseSexCombobox);
 				caseSexCombobox.setEnabled(showCases);
 			}
 		}
@@ -410,9 +410,9 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 		//contact layers
 		{
 			if (UiUtil.permitted(UserRight.CONTACT_VIEW)) {
-				Label contactsLayersLabel = new Label(I18nProperties.getString(Strings.entityContacts));
+				Span contactsLayersLabel = new Span(I18nProperties.getString(Strings.entityContacts));
 				CssStyles.style(contactsLayersLabel, CssStyles.H4, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_3);
-				casesLayers.addComponent(contactsLayersLabel);
+				casesLayers.add(contactsLayersLabel);
 
 				CheckBox showConfirmedContactsCheckBox = new CheckBox();
 				showConfirmedContactsCheckBox.setId(Captions.dashboardShowConfirmedContacts);
@@ -424,7 +424,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 				showContactsCheckBox.setCaption(I18nProperties.getCaption(Captions.dashboardShowContacts));
 				showContactsCheckBox.setValue(showContacts);
 				showContactsCheckBox.addValueChangeListener(e -> {
-					showContacts = (boolean) e.getProperty().getValue();
+					showContacts = (boolean) e.getValue();
 					showConfirmedContactsCheckBox.setEnabled(showContacts);
 					showConfirmedContactsCheckBox.setValue(true);
 					showUnconfirmedContactsCheckBox.setEnabled(showContacts);
@@ -432,26 +432,26 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 					loadContacts = true;
 					refreshMap(true);
 				});
-				casesLayers.addComponent(showContactsCheckBox);
+				casesLayers.add(showContactsCheckBox);
 
 				showConfirmedContactsCheckBox.setCaption(I18nProperties.getCaption(Captions.dashboardShowConfirmedContacts));
 				showConfirmedContactsCheckBox.setValue(showConfirmedContacts);
 				showConfirmedContactsCheckBox.addValueChangeListener(e -> {
-					showConfirmedContacts = (boolean) e.getProperty().getValue();
+					showConfirmedContacts = (boolean) e.getValue();
 					loadContacts = true;
 					refreshMap(true);
 				});
-				casesLayers.addComponent(showConfirmedContactsCheckBox);
+				casesLayers.add(showConfirmedContactsCheckBox);
 
 				CssStyles.style(showUnconfirmedContactsCheckBox, CssStyles.VSPACE_3);
 				showUnconfirmedContactsCheckBox.setCaption(I18nProperties.getCaption(Captions.dashboardShowUnconfirmedContacts));
 				showUnconfirmedContactsCheckBox.setValue(showUnconfirmedContacts);
 				showUnconfirmedContactsCheckBox.addValueChangeListener(e -> {
-					showUnconfirmedContacts = (boolean) e.getProperty().getValue();
+					showUnconfirmedContacts = (boolean) e.getValue();
 					loadContacts = true;
 					refreshMap(true);
 				});
-				casesLayers.addComponent(showUnconfirmedContactsCheckBox);
+				casesLayers.add(showUnconfirmedContactsCheckBox);
 
 				showConfirmedContactsCheckBox.setEnabled(showContacts);
 				showUnconfirmedContactsCheckBox.setEnabled(showContacts);
@@ -461,12 +461,12 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 		//samples layers
 		VerticalLayout samplesLayers = new VerticalLayout();
 		{
-			samplesLayers.setMargin(false);
+			samplesLayers.setPadding(false);
 			samplesLayers.setSpacing(false);
 
-			Label sampleLayersLabel = new Label(I18nProperties.getString(Strings.entitySamples));
+			Span sampleLayersLabel = new Span(I18nProperties.getString(Strings.entitySamples));
 			CssStyles.style(sampleLayersLabel, CssStyles.H4, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_NONE);
-			samplesLayers.addComponent(sampleLayersLabel);
+			samplesLayers.add(sampleLayersLabel);
 
 			if (UiUtil.permitted(UserRight.CASE_VIEW)) {
 				showCaseSamplesCheckBox = new CheckBox();
@@ -474,7 +474,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 				showCaseSamplesCheckBox.setCaption(I18nProperties.getCaption(Captions.sampleDashboardShowCaseSamples));
 				showCaseSamplesCheckBox.setValue(shouldShowCaseSamples());
 				showCaseSamplesCheckBox.addValueChangeListener(e -> {
-					if ((boolean) e.getProperty().getValue()) {
+					if ((boolean) e.getValue()) {
 						displayedHumanSamples.add(SampleAssociationType.CASE);
 					} else {
 						displayedHumanSamples.remove(SampleAssociationType.CASE);
@@ -483,7 +483,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 					loadSamples = true;
 					refreshMap(true);
 				});
-				samplesLayers.addComponent(showCaseSamplesCheckBox);
+				samplesLayers.add(showCaseSamplesCheckBox);
 			}
 
 			if (UiUtil.permitted(UserRight.CONTACT_VIEW)) {
@@ -492,7 +492,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 				showContactSamplesCheckBox.setCaption(I18nProperties.getCaption(Captions.sampleDashboardShowContactSamples));
 				showContactSamplesCheckBox.setValue(shouldShowContactSamples());
 				showContactSamplesCheckBox.addValueChangeListener(e -> {
-					if ((boolean) e.getProperty().getValue()) {
+					if ((boolean) e.getValue()) {
 						displayedHumanSamples.add(SampleAssociationType.CONTACT);
 					} else {
 						displayedHumanSamples.remove(SampleAssociationType.CONTACT);
@@ -501,7 +501,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 					loadSamples = true;
 					refreshMap(true);
 				});
-				samplesLayers.addComponent(showContactSamplesCheckBox);
+				samplesLayers.add(showContactSamplesCheckBox);
 			}
 
 			if (UiUtil.permitted(UserRight.EVENTPARTICIPANT_VIEW)) {
@@ -510,7 +510,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 				showEventParticipantSamplesCheckBox.setCaption(I18nProperties.getCaption(Captions.sampleDashboardShowEventParticipantSamples));
 				showEventParticipantSamplesCheckBox.setValue(shouldShowEventParticipantSamples());
 				showEventParticipantSamplesCheckBox.addValueChangeListener(e -> {
-					if ((boolean) e.getProperty().getValue()) {
+					if ((boolean) e.getValue()) {
 						displayedHumanSamples.add(SampleAssociationType.EVENT_PARTICIPANT);
 					} else {
 						displayedHumanSamples.remove(SampleAssociationType.EVENT_PARTICIPANT);
@@ -519,7 +519,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 					loadSamples = true;
 					refreshMap(true);
 				});
-				samplesLayers.addComponent(showEventParticipantSamplesCheckBox);
+				samplesLayers.add(showEventParticipantSamplesCheckBox);
 			}
 
 			if (UiUtil.permitted(UserRight.ENVIRONMENT_VIEW)) {
@@ -528,7 +528,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 				showEnvironmentSamplesCheckBox.setCaption(I18nProperties.getCaption(Captions.sampleDashboardShowEnvironmentSamples));
 				showEnvironmentSamplesCheckBox.setValue(showEnvironmentalSamples);
 				showEnvironmentSamplesCheckBox.addValueChangeListener(e -> {
-					if ((boolean) e.getProperty().getValue()) {
+					if ((boolean) e.getValue()) {
 						showEnvironmentalSamples = true;
 					} else {
 						showEnvironmentalSamples = false;
@@ -537,16 +537,16 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 					loadSamples = true;
 					refreshMap(true);
 				});
-				samplesLayers.addComponent(showEnvironmentSamplesCheckBox);
+				samplesLayers.add(showEnvironmentSamplesCheckBox);
 			}
 		}
 
 		//aefi layers
 		{
 			if (UiUtil.permitted(UserRight.ADVERSE_EVENTS_FOLLOWING_IMMUNIZATION_VIEW)) {
-				Label aefiLayersLabel = new Label(I18nProperties.getString(Strings.entityAdverseEvent));
+				Span aefiLayersLabel = new Span(I18nProperties.getString(Strings.entityAdverseEvent));
 				CssStyles.style(aefiLayersLabel, CssStyles.H4, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_3);
-				samplesLayers.addComponent(aefiLayersLabel);
+				samplesLayers.add(aefiLayersLabel);
 
 				showSeriousAefiCheckBox = new CheckBox();
 				showSeriousAefiCheckBox.setId(Captions.aefiDashboardShowSeriousAefi);
@@ -556,7 +556,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 					loadAefi = true;
 					refreshMap(true);
 				});
-				samplesLayers.addComponent(showSeriousAefiCheckBox);
+				samplesLayers.add(showSeriousAefiCheckBox);
 
 				showNonSeriousAefiCheckBox = new CheckBox();
 				showNonSeriousAefiCheckBox.setId(Captions.aefiDashboardShowNonSeriousAefi);
@@ -566,15 +566,15 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 					loadAefi = true;
 					refreshMap(true);
 				});
-				samplesLayers.addComponent(showNonSeriousAefiCheckBox);
+				samplesLayers.add(showNonSeriousAefiCheckBox);
 			}
 		}
 
 		//other layers
 		{
-			Label otherLayersLabel = new Label(I18nProperties.getCaption(Captions.dashboardOtherLabel));
+			Span otherLayersLabel = new Span(I18nProperties.getCaption(Captions.dashboardOtherLabel));
 			CssStyles.style(otherLayersLabel, CssStyles.H4, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_3);
-			samplesLayers.addComponent(otherLayersLabel);
+			samplesLayers.add(otherLayersLabel);
 
 			if (UiUtil.permitted(UserRight.EVENT_VIEW)) {
 				showEventsCheckBox = new CheckBox();
@@ -583,11 +583,11 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 				showEventsCheckBox.setCaption(I18nProperties.getCaption(Captions.dashboardShowEvents));
 				showEventsCheckBox.setValue(showEvents);
 				showEventsCheckBox.addValueChangeListener(e -> {
-					showEvents = (boolean) e.getProperty().getValue();
+					showEvents = (boolean) e.getValue();
 					loadEvents = true;
 					refreshMap(true);
 				});
-				samplesLayers.addComponent(showEventsCheckBox);
+				samplesLayers.add(showEventsCheckBox);
 				showEventsCheckBox.setVisible(true);
 			}
 
@@ -597,36 +597,36 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 				regionMapVisualizationSelect.addItems((Object[]) CaseMeasure.values());
 				regionMapVisualizationSelect.setValue(caseMeasure);
 				regionMapVisualizationSelect.addValueChangeListener(event -> {
-					caseMeasure = (CaseMeasure) event.getProperty().getValue();
+					caseMeasure = (CaseMeasure) event.getValue();
 					loadCases = true;
 					refreshMap(true);
 				});
 
 				HorizontalLayout showRegionsLayout = new HorizontalLayout();
 				{
-					showRegionsLayout.setMargin(false);
+					showRegionsLayout.setPadding(false);
 					showRegionsLayout.setSpacing(false);
 					CheckBox showRegionsCheckBox = new CheckBox();
 					showRegionsCheckBox.setId(Captions.dashboardShowRegions);
 					showRegionsCheckBox.setCaption(I18nProperties.getCaption(Captions.dashboardShowRegions));
 					showRegionsCheckBox.setValue(showRegions);
 					showRegionsCheckBox.addValueChangeListener(e -> {
-						showRegions = (boolean) e.getProperty().getValue();
+						showRegions = (boolean) e.getValue();
 						regionMapVisualizationSelect.setEnabled(showRegions);
 						regionMapVisualizationSelect.setValue(caseMeasure);
 						refreshMap(true);
 					});
-					showRegionsLayout.addComponent(showRegionsCheckBox);
+					showRegionsLayout.add(showRegionsCheckBox);
 
-					Label infoLabel = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
+					Span infoLabel = new Span(VaadinIcon.INFO_CIRCLE.getHtml(), ContentMode.HTML);
 					infoLabel.setDescription(I18nProperties.getString(Strings.infoCaseIncidence));
 					CssStyles.style(infoLabel, CssStyles.LABEL_MEDIUM, CssStyles.LABEL_SECONDARY, CssStyles.HSPACE_LEFT_3);
 					infoLabel.setHeightUndefined();
-					showRegionsLayout.addComponent(infoLabel);
+					showRegionsLayout.add(infoLabel);
 					showRegionsLayout.setComponentAlignment(infoLabel, Alignment.TOP_CENTER);
 				}
-				samplesLayers.addComponent(showRegionsLayout);
-				samplesLayers.addComponent(regionMapVisualizationSelect);
+				samplesLayers.add(showRegionsLayout);
+				samplesLayers.add(regionMapVisualizationSelect);
 				regionMapVisualizationSelect.setEnabled(showRegions);
 			}
 
@@ -635,27 +635,27 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 			hideOtherCountriesCheckBox.setCaption(I18nProperties.getCaption(Captions.dashboardHideOtherCountries));
 			hideOtherCountriesCheckBox.setValue(hideOtherCountries);
 			hideOtherCountriesCheckBox.addValueChangeListener(e -> {
-				hideOtherCountries = (boolean) e.getProperty().getValue();
+				hideOtherCountries = (boolean) e.getValue();
 				refreshMap(true);
 			});
 			CssStyles.style(hideOtherCountriesCheckBox, CssStyles.VSPACE_3);
-			samplesLayers.addComponent(hideOtherCountriesCheckBox);
+			samplesLayers.add(hideOtherCountriesCheckBox);
 
 			CheckBox showCurrentEpiSituationCB = new CheckBox();
 			showCurrentEpiSituationCB.setId(Captions.dashboardMapShowEpiSituation);
 			showCurrentEpiSituationCB.setCaption(I18nProperties.getCaption(Captions.dashboardMapShowEpiSituation));
 			showCurrentEpiSituationCB.setValue(false);
 			showCurrentEpiSituationCB.addValueChangeListener(e -> {
-				showCurrentEpiSituation = (boolean) e.getProperty().getValue();
+				showCurrentEpiSituation = (boolean) e.getValue();
 				refreshMap(true);
 			});
-			samplesLayers.addComponent(showCurrentEpiSituationCB);
+			samplesLayers.add(showCurrentEpiSituationCB);
 		}
 
-		mainLayersLayout.addComponent(casesLayers);
-		mainLayersLayout.addComponent(samplesLayers);
+		mainLayersLayout.add(casesLayers);
+		mainLayersLayout.add(samplesLayers);
 
-		layersLayout.addComponent(mainLayersLayout);
+		layersLayout.add(mainLayersLayout);
 	}
 
 	@Override
@@ -665,52 +665,52 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 		// Cases
 		{
 			{
-				Label facilitiesKeyLabel = new Label(I18nProperties.getCaption(Captions.dashboardFacilities));
+				Span facilitiesKeyLabel = new Span(I18nProperties.getCaption(Captions.dashboardFacilities));
 				CssStyles.style(facilitiesKeyLabel, CssStyles.H4, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_NONE);
 				legendComponents.add(facilitiesKeyLabel);
 
 				HorizontalLayout facilitiesKeyLayout = new HorizontalLayout();
 				{
 					facilitiesKeyLayout.setSpacing(false);
-					facilitiesKeyLayout.setMargin(false);
+					facilitiesKeyLayout.setPadding(false);
 					HorizontalLayout legendEntry =
 						buildMarkerLegendEntry(MarkerIcon.FACILITY_UNCLASSIFIED, I18nProperties.getCaption(Captions.dashboardNotYetClassifiedOnly));
 					CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-					facilitiesKeyLayout.addComponent(legendEntry);
+					facilitiesKeyLayout.add(legendEntry);
 					legendEntry = buildMarkerLegendEntry(MarkerIcon.FACILITY_SUSPECT, I18nProperties.getCaption(Captions.dashboardGt1SuspectCases));
 					CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-					facilitiesKeyLayout.addComponent(legendEntry);
+					facilitiesKeyLayout.add(legendEntry);
 					legendEntry = buildMarkerLegendEntry(MarkerIcon.FACILITY_PROBABLE, I18nProperties.getCaption(Captions.dashboardGt1ProbableCases));
 					CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-					facilitiesKeyLayout.addComponent(legendEntry);
+					facilitiesKeyLayout.add(legendEntry);
 					legendEntry =
 						buildMarkerLegendEntry(MarkerIcon.FACILITY_CONFIRMED, I18nProperties.getCaption(Captions.dashboardGt1ConfirmedCases));
-					facilitiesKeyLayout.addComponent(legendEntry);
+					facilitiesKeyLayout.add(legendEntry);
 				}
 				legendComponents.add(facilitiesKeyLayout);
 			}
 
 			{
-				Label casesKeyLabel = new Label(I18nProperties.getString(Strings.entityCases));
+				Span casesKeyLabel = new Span(I18nProperties.getString(Strings.entityCases));
 				CssStyles.style(casesKeyLabel, CssStyles.H4, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_3);
 				legendComponents.add(casesKeyLabel);
 
 				HorizontalLayout casesKeyLayout = new HorizontalLayout();
 				{
 					casesKeyLayout.setSpacing(false);
-					casesKeyLayout.setMargin(false);
+					casesKeyLayout.setPadding(false);
 					HorizontalLayout legendEntry =
 						buildMarkerLegendEntry(MarkerIcon.CASE_UNCLASSIFIED, I18nProperties.getCaption(Captions.dashboardNotYetClassified));
 					CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-					casesKeyLayout.addComponent(legendEntry);
+					casesKeyLayout.add(legendEntry);
 					legendEntry = buildMarkerLegendEntry(MarkerIcon.CASE_SUSPECT, I18nProperties.getCaption(Captions.dashboardSuspect));
 					CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-					casesKeyLayout.addComponent(legendEntry);
+					casesKeyLayout.add(legendEntry);
 					legendEntry = buildMarkerLegendEntry(MarkerIcon.CASE_PROBABLE, I18nProperties.getCaption(Captions.dashboardProbable));
 					CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-					casesKeyLayout.addComponent(legendEntry);
+					casesKeyLayout.add(legendEntry);
 					legendEntry = buildMarkerLegendEntry(MarkerIcon.CASE_CONFIRMED, I18nProperties.getCaption(Captions.dashboardConfirmed));
-					casesKeyLayout.addComponent(legendEntry);
+					casesKeyLayout.add(legendEntry);
 				}
 				legendComponents.add(casesKeyLayout);
 			}
@@ -718,23 +718,23 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 
 		// Contacts
 		{
-			Label contactsKeyLabel = new Label(I18nProperties.getString(Strings.entityContacts));
+			Span contactsKeyLabel = new Span(I18nProperties.getString(Strings.entityContacts));
 			CssStyles.style(contactsKeyLabel, CssStyles.H4, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_3);
 			legendComponents.add(contactsKeyLabel);
 
 			HorizontalLayout contactsKeyLayout = new HorizontalLayout();
 			{
 				contactsKeyLayout.setSpacing(false);
-				contactsKeyLayout.setMargin(false);
+				contactsKeyLayout.setPadding(false);
 				HorizontalLayout legendEntry =
 					buildMarkerLegendEntry(MarkerIcon.CONTACT_OK, I18nProperties.getCaption(Captions.dashboardNotAContact));
 				CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-				contactsKeyLayout.addComponent(legendEntry);
+				contactsKeyLayout.add(legendEntry);
 				legendEntry = buildMarkerLegendEntry(MarkerIcon.CONTACT_OVERDUE, I18nProperties.getCaption(Captions.dashboardUnconfirmedContact));
 				CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-				contactsKeyLayout.addComponent(legendEntry);
+				contactsKeyLayout.add(legendEntry);
 				legendEntry = buildMarkerLegendEntry(MarkerIcon.CONTACT_LONG_OVERDUE, I18nProperties.getCaption(Captions.dashboardConfirmedContact));
-				contactsKeyLayout.addComponent(legendEntry);
+				contactsKeyLayout.add(legendEntry);
 			}
 			legendComponents.add(contactsKeyLayout);
 		}
@@ -742,7 +742,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 		// Districts
 		{
 			if (showRegions && districtValuesLowerQuartile != null && districtValuesMedian != null && districtValuesUpperQuartile != null) {
-				Label districtsKeyLabel = new Label(I18nProperties.getString(Strings.entityDistricts));
+				Span districtsKeyLabel = new Span(I18nProperties.getString(Strings.entityDistricts));
 				CssStyles.style(districtsKeyLabel, CssStyles.H4, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_3);
 				legendComponents.add(districtsKeyLabel);
 				legendComponents.add(
@@ -755,7 +755,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 						districtValuesUpperQuartile,
 						InfrastructureHelper.CASE_INCIDENCE_DIVISOR));
 
-				Label descLabel = new Label(I18nProperties.getString(Strings.infoDashboardIncidence));
+				Span descLabel = new Span(I18nProperties.getString(Strings.infoDashboardIncidence));
 				CssStyles.style(descLabel, CssStyles.LABEL_SMALL);
 				legendComponents.add(descLabel);
 			}
@@ -763,75 +763,75 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 
 		//samples
 		{
-			Label samplesKeyLabel = new Label(I18nProperties.getString(Strings.entitySample));
+			Span samplesKeyLabel = new Span(I18nProperties.getString(Strings.entitySample));
 			CssStyles.style(samplesKeyLabel, CssStyles.H4, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_3);
 			legendComponents.add(samplesKeyLabel);
 
 			HorizontalLayout samplesLegendLayout = new HorizontalLayout();
 			samplesLegendLayout.setSpacing(false);
-			samplesLegendLayout.setMargin(false);
+			samplesLegendLayout.setPadding(false);
 
 			HorizontalLayout caseSampleslegendEntry =
 				buildMarkerLegendEntry(MarkerIcon.SAMPLE_CASE, I18nProperties.getCaption(Captions.sampleDashboardCaseSamples));
 			CssStyles.style(caseSampleslegendEntry, CssStyles.HSPACE_RIGHT_3);
-			samplesLegendLayout.addComponent(caseSampleslegendEntry);
+			samplesLegendLayout.add(caseSampleslegendEntry);
 
 			HorizontalLayout contactSamplesLegendEntry =
 				buildMarkerLegendEntry(MarkerIcon.SAMPLE_CONTACT, I18nProperties.getCaption(Captions.sampleDashboardContactSamples));
 			CssStyles.style(contactSamplesLegendEntry, CssStyles.HSPACE_RIGHT_3);
-			samplesLegendLayout.addComponent(contactSamplesLegendEntry);
+			samplesLegendLayout.add(contactSamplesLegendEntry);
 
 			HorizontalLayout eventParticipantSamplesLegendEntry = buildMarkerLegendEntry(
 				MarkerIcon.SAMPLE_EVENT_PARTICIPANT,
 				I18nProperties.getCaption(Captions.sampleDashboardEventParticipantSamples));
 			CssStyles.style(eventParticipantSamplesLegendEntry, CssStyles.HSPACE_RIGHT_3);
-			samplesLegendLayout.addComponent(eventParticipantSamplesLegendEntry);
+			samplesLegendLayout.add(eventParticipantSamplesLegendEntry);
 
 			HorizontalLayout environmentSamplesLegendEntry =
 				buildMarkerLegendEntry(MarkerIcon.SAMPLE_ENVIRONMENT, I18nProperties.getCaption(Captions.sampleDashboardEnvironmentsSamples));
-			samplesLegendLayout.addComponent(environmentSamplesLegendEntry);
+			samplesLegendLayout.add(environmentSamplesLegendEntry);
 
 			legendComponents.add(samplesLegendLayout);
 		}
 
 		//aefi
 		{
-			Label aefiKeyLabel = new Label(I18nProperties.getString(Strings.entityAdverseEvent));
+			Span aefiKeyLabel = new Span(I18nProperties.getString(Strings.entityAdverseEvent));
 			CssStyles.style(aefiKeyLabel, CssStyles.H4, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_3);
 			legendComponents.add(aefiKeyLabel);
 
 			HorizontalLayout aefiLegendLayout = new HorizontalLayout();
 			aefiLegendLayout.setSpacing(false);
-			aefiLegendLayout.setMargin(false);
+			aefiLegendLayout.setPadding(false);
 
 			HorizontalLayout seriousLegendEntry =
 				buildMarkerLegendEntry(MarkerIcon.AEFI_SERIOUS, I18nProperties.getCaption(Captions.aefiDashboardSeriousAefi));
 			CssStyles.style(seriousLegendEntry, CssStyles.HSPACE_RIGHT_3);
-			aefiLegendLayout.addComponent(seriousLegendEntry);
+			aefiLegendLayout.add(seriousLegendEntry);
 
 			HorizontalLayout nonSeriousLegendEntry =
 				buildMarkerLegendEntry(MarkerIcon.AEFI_NON_SERIOUS, I18nProperties.getCaption(Captions.aefiDashboardNonSeriousAefi));
 			CssStyles.style(nonSeriousLegendEntry, CssStyles.HSPACE_RIGHT_3);
-			aefiLegendLayout.addComponent(nonSeriousLegendEntry);
+			aefiLegendLayout.add(nonSeriousLegendEntry);
 
 			legendComponents.add(aefiLegendLayout);
 		}
 
 		// Events
 		{
-			Label eventsKeyLabel = new Label(I18nProperties.getString(Strings.entityEvents));
+			Span eventsKeyLabel = new Span(I18nProperties.getString(Strings.entityEvents));
 			CssStyles.style(eventsKeyLabel, CssStyles.H4, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_3);
 			legendComponents.add(eventsKeyLabel);
 
 			HorizontalLayout eventsKeyLayout = new HorizontalLayout();
 			{
 				eventsKeyLayout.setSpacing(false);
-				eventsKeyLayout.setMargin(false);
+				eventsKeyLayout.setPadding(false);
 				HorizontalLayout legendEntry = buildMarkerLegendEntry(MarkerIcon.EVENT_RUMOR, EventStatus.SIGNAL.toString());
 				CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-				eventsKeyLayout.addComponent(legendEntry);
+				eventsKeyLayout.add(legendEntry);
 				legendEntry = buildMarkerLegendEntry(MarkerIcon.EVENT_OUTBREAK, EventStatus.EVENT.toString());
-				eventsKeyLayout.addComponent(legendEntry);
+				eventsKeyLayout.add(legendEntry);
 			}
 			legendComponents.add(eventsKeyLayout);
 		}
@@ -877,7 +877,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 		default:
 			throw new IllegalArgumentException(caseMeasure.toString());
 		}
-		regionLegendLayout.addComponent(legendEntry);
+		regionLegendLayout.add(legendEntry);
 
 		if (districtShapesLowerQuartile.compareTo(districtShapesMedian) < 0) {
 			switch (caseMeasure) {
@@ -900,7 +900,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 				throw new IllegalArgumentException(caseMeasure.toString());
 			}
 
-			regionLegendLayout.addComponent(legendEntry);
+			regionLegendLayout.add(legendEntry);
 		}
 
 		if (districtShapesMedian.compareTo(districtShapesUpperQuartile) < 0) {
@@ -924,7 +924,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 				throw new IllegalArgumentException(caseMeasure.toString());
 			}
 
-			regionLegendLayout.addComponent(legendEntry);
+			regionLegendLayout.add(legendEntry);
 		}
 
 		switch (caseMeasure) {
@@ -942,11 +942,11 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 		default:
 			throw new IllegalArgumentException(caseMeasure.toString());
 		}
-		regionLegendLayout.addComponent(legendEntry);
+		regionLegendLayout.add(legendEntry);
 
 		if (caseMeasure == CaseMeasure.CASE_INCIDENCE && emptyPopulationDistrictPresent) {
 			legendEntry = buildMapIconLegendEntry("no-population-region-small", I18nProperties.getCaption(Captions.dashboardNoPopulationData));
-			regionLegendLayout.addComponent(legendEntry);
+			regionLegendLayout.add(legendEntry);
 		}
 
 		return regionLegendLayout;
@@ -1422,8 +1422,8 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 				Window window = VaadinUiUtil.showPopupWindow(layout);
 				CasePopupGrid caseGrid = new CasePopupGrid(window, facility, GisDashboardMapComponent.this);
 				caseGrid.setHeightMode(HeightMode.ROW);
-				layout.addComponent(caseGrid);
-				layout.setMargin(true);
+				layout.add(caseGrid);
+				layout.setPadding(true);
 				FacilityDto facilityDto = FacadeProvider.getFacilityFacade().getByUuid(facility.getUuid());
 				window.setCaption(I18nProperties.getCaption(Captions.dashboardCasesIn) + " " + facilityDto.buildCaption());
 			} else {

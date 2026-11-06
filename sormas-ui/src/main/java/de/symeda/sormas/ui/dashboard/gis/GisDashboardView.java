@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.ui.dashboard.gis;
 
-import org.vaadin.hene.popupbutton.PopupButton;
+import de.symeda.sormas.ui.utils.PopupButton;
 
 import com.vaadin.ui.Alignment;
 
@@ -45,11 +45,11 @@ public class GisDashboardView extends AbstractDashboardView {
 		mapComponent.setSizeFull();
 
 		PopupButton filterDropdown = ButtonHelper.createPopupButton(Captions.dashboardGisMapFilter, filterLayout, CssStyles.BUTTON_SUBTLE);
-		mapComponent.getMapHeaderLayout().addComponent(filterDropdown);
+		mapComponent.getMapHeaderLayout().add(filterDropdown);
 		mapComponent.getMapHeaderLayout().setComponentAlignment(filterDropdown, Alignment.MIDDLE_LEFT);
 
-		dashboardLayout.addComponent(mapComponent);
-		dashboardLayout.setExpandRatio(mapComponent, 1);
+		dashboardLayout.add(mapComponent);
+		dashboardLayout.setFlexGrow(1, mapComponent);
 	}
 
 	@Override

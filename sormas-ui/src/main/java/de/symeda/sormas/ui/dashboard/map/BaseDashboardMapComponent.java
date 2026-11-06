@@ -20,18 +20,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import org.vaadin.hene.popupbutton.PopupButton;
+import de.symeda.sormas.ui.utils.PopupButton;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.Component;
 import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 import de.symeda.sormas.api.FacadeProvider;
@@ -62,12 +62,12 @@ public abstract class BaseDashboardMapComponent<C extends BaseDashboardCriteria<
 	private final String headingInfoTag;
 	private CssLayout overlayBackground;
 	private VerticalLayout overlayLayout;
-	private Label overlayMessageLabel;
+	private Span overlayMessageLabel;
 	protected HorizontalLayout mapFooterLayout;
 	protected boolean gisDashboard;
 	private PopupButton legendDropdown;
 
-	private Label headingInfoIcon;
+	private Span headingInfoIcon;
 
 	private Consumer<Boolean> externalExpandListener;
 
@@ -81,17 +81,17 @@ public abstract class BaseDashboardMapComponent<C extends BaseDashboardCriteria<
 		this.dashboardDataProvider = dashboardDataProvider;
 		this.headingInfoTag = headingInfoTag;
 
-		setMargin(false);
+		setPadding(false);
 		setSpacing(false);
 		setSizeFull();
 
-		this.setMargin(true);
+		this.setPadding(true);
 
 		addComponents();
 	}
 
 	protected static HorizontalLayout buildMarkerLegendEntry(MarkerIcon icon, String labelCaption) {
-		return buildLegendEntry(new Label(icon.getHtmlElement("16px"), ContentMode.HTML), labelCaption);
+		return buildLegendEntry(new Span(icon.getHtmlElement("16px"), ContentMode.HTML), labelCaption);
 	}
 
 	protected void refreshMap(boolean forced) {
@@ -146,48 +146,48 @@ public abstract class BaseDashboardMapComponent<C extends BaseDashboardCriteria<
 		mapHeaderLayout.setSpacing(true);
 		CssStyles.style(mapHeaderLayout, CssStyles.VSPACE_4);
 
-		Label mapLabel = new Label(I18nProperties.getString(headingStringTag));
+		Span mapLabel = new Span(I18nProperties.getString(headingStringTag));
 
 		mapLabel.setSizeUndefined();
 		CssStyles.style(mapLabel, CssStyles.H2, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_NONE);
 
 		Component mapLabelComponent = mapLabel;
 
-		headingInfoIcon = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
+		headingInfoIcon = new Span(VaadinIcon.INFO_CIRCLE.getHtml(), ContentMode.HTML);
 		CssStyles.style(headingInfoIcon, CssStyles.H3, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_NONE, CssStyles.HSPACE_LEFT_4);
 
 		if (headingInfoTag != null) {
 			headingInfoIcon.setDescription(I18nProperties.getString(headingInfoTag));
 			HorizontalLayout mapLabelLayout = new HorizontalLayout(mapLabel, headingInfoIcon);
-			mapLabelLayout.setMargin(false);
+			mapLabelLayout.setPadding(false);
 			mapLabelLayout.setSpacing(false);
 
 			mapLabelComponent = mapLabelLayout;
 		}
 
-		mapHeaderLayout.addComponent(mapLabelComponent);
+		mapHeaderLayout.add(mapLabelComponent);
 		mapHeaderLayout.setComponentAlignment(mapLabelComponent, Alignment.BOTTOM_LEFT);
-		mapHeaderLayout.setExpandRatio(mapLabelComponent, 1);
+		mapHeaderLayout.setFlexGrow(1, mapLabelComponent);
 
 		// "Expand" and "Collapse" buttons
 		Button expandMapButton =
-			ButtonHelper.createIconButtonWithCaption("expandMap", "", VaadinIcons.EXPAND, null, CssStyles.BUTTON_SUBTLE, CssStyles.VSPACE_NONE);
+			ButtonHelper.createIconButtonWithCaption("expandMap", "", VaadinIcon.EXPAND, null, CssStyles.BUTTON_SUBTLE, CssStyles.VSPACE_NONE);
 		Button collapseMapButton =
-			ButtonHelper.createIconButtonWithCaption("collapseMap", "", VaadinIcons.COMPRESS, null, CssStyles.BUTTON_SUBTLE, CssStyles.VSPACE_NONE);
+			ButtonHelper.createIconButtonWithCaption("collapseMap", "", VaadinIcon.COMPRESS, null, CssStyles.BUTTON_SUBTLE, CssStyles.VSPACE_NONE);
 
 		expandMapButton.addClickListener(e -> {
 			externalExpandListener.accept(true);
-			mapHeaderLayout.removeComponent(expandMapButton);
-			mapHeaderLayout.addComponent(collapseMapButton);
+			mapHeaderLayout.remove(expandMapButton);
+			mapHeaderLayout.add(collapseMapButton);
 			mapHeaderLayout.setComponentAlignment(collapseMapButton, Alignment.MIDDLE_RIGHT);
 		});
 		collapseMapButton.addClickListener(e -> {
 			externalExpandListener.accept(false);
-			mapHeaderLayout.removeComponent(collapseMapButton);
-			mapHeaderLayout.addComponent(expandMapButton);
+			mapHeaderLayout.remove(collapseMapButton);
+			mapHeaderLayout.add(expandMapButton);
 			mapHeaderLayout.setComponentAlignment(expandMapButton, Alignment.MIDDLE_RIGHT);
 		});
-		mapHeaderLayout.addComponent(expandMapButton);
+		mapHeaderLayout.add(expandMapButton);
 		mapHeaderLayout.setComponentAlignment(expandMapButton, Alignment.MIDDLE_RIGHT);
 
 		return mapHeaderLayout;
@@ -203,14 +203,14 @@ public abstract class BaseDashboardMapComponent<C extends BaseDashboardCriteria<
 		legendDropdown = ButtonHelper.createPopupButton(Captions.dashboardMapKey, null, CssStyles.BUTTON_SUBTLE);
 		legendDropdown.setContent(createLegend());
 
-		mapFooterLayout.addComponent(legendDropdown);
+		mapFooterLayout.add(legendDropdown);
 		mapFooterLayout.setComponentAlignment(legendDropdown, Alignment.MIDDLE_RIGHT);
-		mapFooterLayout.setExpandRatio(legendDropdown, 1);
+		mapFooterLayout.setFlexGrow(1, legendDropdown);
 
 		// Layers dropdown button
 		VerticalLayout layersLayout = new VerticalLayout();
 		{
-			layersLayout.setMargin(true);
+			layersLayout.setPadding(true);
 			layersLayout.setSpacing(false);
 			layersLayout.setSizeUndefined();
 
@@ -220,7 +220,7 @@ public abstract class BaseDashboardMapComponent<C extends BaseDashboardCriteria<
 		if (layersLayout.getComponentCount() > 0) {
 			PopupButton layersDropdown = ButtonHelper.createPopupButton(Captions.dashboardMapLayers, layersLayout, CssStyles.BUTTON_SUBTLE);
 
-			mapFooterLayout.addComponent(layersDropdown);
+			mapFooterLayout.add(layersDropdown);
 			mapFooterLayout.setComponentAlignment(layersDropdown, Alignment.MIDDLE_RIGHT);
 		}
 
@@ -232,7 +232,7 @@ public abstract class BaseDashboardMapComponent<C extends BaseDashboardCriteria<
 	private VerticalLayout createLegend() {
 		VerticalLayout legendLayout = new VerticalLayout();
 		legendLayout.setSpacing(false);
-		legendLayout.setMargin(true);
+		legendLayout.setPadding(true);
 		legendLayout.setSizeUndefined();
 
 		List<Component> legendComponents = getLegendComponents();
@@ -255,11 +255,11 @@ public abstract class BaseDashboardMapComponent<C extends BaseDashboardCriteria<
 		entry.setSpacing(false);
 		entry.setSizeUndefined();
 		CssStyles.style(icon, CssStyles.HSPACE_RIGHT_4);
-		entry.addComponent(icon);
-		Label label = new Label(labelCaption);
+		entry.add(icon);
+		Span label = new Span(labelCaption);
 		label.setSizeUndefined();
-		label.addStyleName(ValoTheme.LABEL_SMALL);
-		entry.addComponent(label);
+		label.addClassName(ValoTheme.LABEL_SMALL);
+		entry.add(label);
 		return entry;
 	}
 
@@ -293,46 +293,46 @@ public abstract class BaseDashboardMapComponent<C extends BaseDashboardCriteria<
 		map.setZoom(FacadeProvider.getConfigFacade().getMapZoom());
 
 		// Add components
-		addComponent(createHeader());
+		add(createHeader());
 
 		CssLayout mapLayout = new CssLayout();
 		mapLayout.setSizeFull();
-		mapLayout.setStyleName(DashboardCssStyles.MAP_CONTAINER);
+		mapLayout.setClassName(DashboardCssStyles.MAP_CONTAINER);
 
-		map.addStyleName(DashboardCssStyles.MAP_COMPONENT);
-		mapLayout.addComponent(map);
+		map.addClassName(DashboardCssStyles.MAP_COMPONENT);
+		mapLayout.add(map);
 
 		overlayBackground = new CssLayout();
-		overlayBackground.setStyleName(DashboardCssStyles.MAP_OVERLAY_BACKGROUND);
+		overlayBackground.setClassName(DashboardCssStyles.MAP_OVERLAY_BACKGROUND);
 		overlayBackground.setVisible(false);
-		mapLayout.addComponent(overlayBackground);
+		mapLayout.add(overlayBackground);
 
-		overlayMessageLabel = new Label();
-		overlayMessageLabel.addStyleNames(CssStyles.ALIGN_CENTER, CssStyles.LABEL_WHITE, CssStyles.LABEL_WHITE_SPACE_NORMAL);
+		overlayMessageLabel = new Span();
+		overlayMessageLabel.addClassNames(CssStyles.ALIGN_CENTER, CssStyles.LABEL_WHITE, CssStyles.LABEL_WHITE_SPACE_NORMAL);
 
 		Button button = ButtonHelper.createButton(Captions.showPlacesOnMap, (e) -> refreshMap(true));
 
 		overlayLayout = new VerticalLayout(overlayMessageLabel, button);
-		overlayLayout.setStyleName(DashboardCssStyles.MAP_OVERLAY);
+		overlayLayout.setClassName(DashboardCssStyles.MAP_OVERLAY);
 		overlayLayout.setHeightFull();
 		overlayLayout.setComponentAlignment(overlayMessageLabel, Alignment.MIDDLE_CENTER);
-		overlayLayout.setExpandRatio(overlayMessageLabel, 0);
+		overlayLayout.setFlexGrow(0, overlayMessageLabel);
 		overlayLayout.setComponentAlignment(button, Alignment.MIDDLE_CENTER);
-		overlayLayout.setExpandRatio(button, 0);
+		overlayLayout.setFlexGrow(0, button);
 		overlayLayout.setVisible(false);
-		mapLayout.addComponent(overlayLayout);
+		mapLayout.add(overlayLayout);
 
 		if (gisDashboard) {
-			mapLayout.addComponent(createFooter());
+			mapLayout.add(createFooter());
 			mapFooterLayout.setWidthUndefined();
 			CssStyles.style(mapFooterLayout, CssStyles.GIS_DASHBOARD_MAP_FOOTER);
 		}
 
-		addComponent(mapLayout);
-		setExpandRatio(mapLayout, 1);
+		add(mapLayout);
+		setFlexGrow(1, mapLayout);
 
 		if (!gisDashboard) {
-			addComponent(createFooter());
+			add(createFooter());
 		}
 	}
 

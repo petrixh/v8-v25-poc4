@@ -25,12 +25,12 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -44,8 +44,8 @@ public class AefiCountTilesComponent<T extends Enum<?>> extends VerticalLayout {
 	private boolean withPercentage;
 	private String groupLabelStyle;
 
-	private final Label title;
-	private Label infoIcon;
+	private final Span title;
+	private Span infoIcon;
 	private final HorizontalLayout countsLayout;
 	private String[] titleStyleNames = new String[] {
 		CssStyles.H3 };
@@ -58,38 +58,38 @@ public class AefiCountTilesComponent<T extends Enum<?>> extends VerticalLayout {
 		this.groupType = groupType;
 		this.tileBackgroundFactory = tileBackgroundFactory;
 
-		setMargin(false);
+		setPadding(false);
 		setSpacing(false);
 		setWidthFull();
 
 		HorizontalLayout titleLayout = new HorizontalLayout();
-		titleLayout.setMargin(false);
+		titleLayout.setPadding(false);
 		titleLayout.setSpacing(false);
-		addComponent(titleLayout);
+		add(titleLayout);
 
-		title = new Label(I18nProperties.getCaption(titleCaption));
-		title.addStyleNames(titleStyleNames);
+		title = new Span(I18nProperties.getCaption(titleCaption));
+		title.addClassNames(titleStyleNames);
 
-		titleLayout.addComponent(title);
+		titleLayout.add(title);
 
 		if (StringUtils.isNotBlank(descriptionTag)) {
-			infoIcon = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
+			infoIcon = new Span(VaadinIcon.INFO_CIRCLE.getHtml(), ContentMode.HTML);
 			infoIcon.setDescription(I18nProperties.getDescription(descriptionTag));
-			infoIcon.addStyleName(CssStyles.HSPACE_LEFT_4);
-			infoIcon.addStyleNames(titleStyleNames);
+			infoIcon.addClassName(CssStyles.HSPACE_LEFT_4);
+			infoIcon.addClassNames(titleStyleNames);
 
-			titleLayout.addComponent(infoIcon);
+			titleLayout.add(infoIcon);
 		}
 
 		titleLayout.setVisible(false);
 
 		countsLayout = new HorizontalLayout();
 		countsLayout.setWidthFull();
-		addComponent(countsLayout);
+		add(countsLayout);
 	}
 
 	public void update(Map<T, Long> counts) {
-		countsLayout.removeAllComponents();
+		countsLayout.removeAll();
 
 		Long total = null;
 		if (withPercentage) {
@@ -123,17 +123,17 @@ public class AefiCountTilesComponent<T extends Enum<?>> extends VerticalLayout {
 		TileComponent<T> tile = new TileComponent<>(groupCaption, count, percentage, groupLabelStyle, tileBackgroundFactory.apply(group));
 		tile.setWidthFull();
 
-		countsLayout.addComponent(tile);
-		countsLayout.setExpandRatio(tile, 1);
+		countsLayout.add(tile);
+		countsLayout.setFlexGrow(1, tile);
 	}
 
 	public void setTitleStyleNames(String... styleNames) {
-		title.removeStyleNames(titleStyleNames);
-		title.addStyleNames(styleNames);
+		title.removeClassNames(titleStyleNames);
+		title.addClassNames(styleNames);
 
 		if (infoIcon != null) {
-			infoIcon.removeStyleNames(titleStyleNames);
-			infoIcon.addStyleNames(styleNames);
+			infoIcon.removeClassNames(titleStyleNames);
+			infoIcon.addClassNames(styleNames);
 		}
 
 		this.titleStyleNames = styleNames;
@@ -153,32 +153,32 @@ public class AefiCountTilesComponent<T extends Enum<?>> extends VerticalLayout {
 
 		TileComponent(String group, Long count, @Nullable BigDecimal percentage, String groupLabelStyle, String backgroundStyle) {
 			setSpacing(false);
-			setMargin(false);
+			setPadding(false);
 
 			VerticalLayout numbersLayout = new VerticalLayout();
 			numbersLayout.setWidthFull();
-			numbersLayout.setMargin(false);
+			numbersLayout.setPadding(false);
 			numbersLayout.setSpacing(false);
-			numbersLayout.addStyleNames(backgroundStyle, CssStyles.ROUNDED_BORDER_TOP);
-			addComponent(numbersLayout);
+			numbersLayout.addClassNames(backgroundStyle, CssStyles.ROUNDED_BORDER_TOP);
+			add(numbersLayout);
 
-			Label countLabel = new Label(count.toString());
+			Span countLabel = new Span(count.toString());
 			countLabel
-				.addStyleNames(CssStyles.LABEL_WHITE, CssStyles.LABEL_BOLD, CssStyles.LABEL_LARGE, CssStyles.ALIGN_CENTER, CssStyles.VSPACE_TOP_4);
+				.addClassNames(CssStyles.LABEL_WHITE, CssStyles.LABEL_BOLD, CssStyles.LABEL_LARGE, CssStyles.ALIGN_CENTER, CssStyles.VSPACE_TOP_4);
 
-			numbersLayout.addComponent(countLabel);
+			numbersLayout.add(countLabel);
 			numbersLayout.setComponentAlignment(countLabel, Alignment.TOP_CENTER);
 
 			if (percentage != null) {
-				Label percentageLabel = new Label(percentage + "%");
-				percentageLabel.addStyleNames(CssStyles.LABEL_WHITE, CssStyles.ALIGN_CENTER, CssStyles.VSPACE_4);
+				Span percentageLabel = new Span(percentage + "%");
+				percentageLabel.addClassNames(CssStyles.LABEL_WHITE, CssStyles.ALIGN_CENTER, CssStyles.VSPACE_4);
 
-				numbersLayout.addComponent(percentageLabel);
+				numbersLayout.add(percentageLabel);
 				numbersLayout.setComponentAlignment(percentageLabel, Alignment.MIDDLE_CENTER);
 			}
 
-			Label groupLabel = new Label(group);
-			groupLabel.addStyleNames(
+			Span groupLabel = new Span(group);
+			groupLabel.addClassNames(
 				CssStyles.LABEL_WHITE,
 				CssStyles.LABEL_BOLD,
 				CssStyles.VSPACE_TOP_4,
@@ -187,17 +187,17 @@ public class AefiCountTilesComponent<T extends Enum<?>> extends VerticalLayout {
 				CssStyles.HSPACE_RIGHT_4);
 
 			if (groupLabelStyle != null) {
-				groupLabel.addStyleName(groupLabelStyle);
+				groupLabel.addClassName(groupLabelStyle);
 			}
 
 			VerticalLayout groupLabelLayout = new VerticalLayout();
-			groupLabelLayout.setMargin(false);
+			groupLabelLayout.setPadding(false);
 			groupLabelLayout.setSpacing(false);
-			groupLabelLayout.addStyleNames(backgroundStyle, CssStyles.BACKGROUND_DARKER, CssStyles.ROUNDED_BORDER_BOTTOM);
-			groupLabelLayout.addComponent(groupLabel);
+			groupLabelLayout.addClassNames(backgroundStyle, CssStyles.BACKGROUND_DARKER, CssStyles.ROUNDED_BORDER_BOTTOM);
+			groupLabelLayout.add(groupLabel);
 			groupLabelLayout.setComponentAlignment(groupLabel, Alignment.TOP_CENTER);
 
-			addComponent(groupLabelLayout);
+			add(groupLabelLayout);
 		}
 	}
 }

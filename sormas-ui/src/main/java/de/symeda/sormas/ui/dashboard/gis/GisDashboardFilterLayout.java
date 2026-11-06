@@ -17,7 +17,7 @@ package de.symeda.sormas.ui.dashboard.gis;
 
 import java.util.List;
 
-import com.vaadin.v7.ui.ComboBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;

@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.dashboard.adverseeventsfollowingimmunization.AefiChartData;
 import de.symeda.sormas.api.dashboard.adverseeventsfollowingimmunization.AefiChartSeries;
@@ -35,15 +35,15 @@ public class AefiByVaccineDoseChart extends VerticalLayout {
 
 	public AefiByVaccineDoseChart() {
 
-		setMargin(false);
+		setPadding(false);
 		setSpacing(false);
 		setSizeFull();
 
 		chart = new HighChart();
 		chart.setSizeFull();
 
-		addComponent(chart);
-		setExpandRatio(chart, 1);
+		add(chart);
+		setFlexGrow(1, chart);
 	}
 
 	public void update(AefiChartData chartData) {

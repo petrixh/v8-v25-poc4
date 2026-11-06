@@ -20,7 +20,7 @@ package de.symeda.sormas.ui.dashboard.adverseeventsfollowingimmunization.compone
 
 import java.util.Map;
 
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiType;
 import de.symeda.sormas.api.i18n.Captions;
@@ -43,9 +43,9 @@ public class AefiTypeStatisticsComponent extends DiseaseSectionStatisticsCompone
 		setWidthUndefined();
 
 		if (subtitleCaption != null) {
-			Label subTitleLabel = new Label(I18nProperties.getCaption(subtitleCaption));
+			Span subTitleLabel = new Span(I18nProperties.getCaption(subtitleCaption));
 			CssStyles.style(subTitleLabel, CssStyles.H3, CssStyles.VSPACE_TOP_5);
-			addComponent(subTitleLabel);
+			add(subTitleLabel);
 		}
 
 		// Count layout
@@ -84,17 +84,17 @@ public class AefiTypeStatisticsComponent extends DiseaseSectionStatisticsCompone
 
 	public void setTitleStyleNamesOnTitleLabel(String... styleNames) {
 		DashboardHeadingComponent dashboardHeadingComponent = this.getHeading();
-		Label titleLabel = dashboardHeadingComponent.getTitleLabel();
+		Span titleLabel = dashboardHeadingComponent.getTitleLabel();
 
-		titleLabel.removeStyleNames(dashboardHeadingComponent.getTitleStyleNames());
-		titleLabel.addStyleNames(styleNames);
+		titleLabel.removeClassNames(dashboardHeadingComponent.getTitleStyleNames());
+		titleLabel.addClassNames(styleNames);
 	}
 
 	public void setTitleStyleNamesOnTotalLabel(String... styleNames) {
 		DashboardHeadingComponent dashboardHeadingComponent = this.getHeading();
-		Label totalLabel = dashboardHeadingComponent.getTotalLabel();
+		Span totalLabel = dashboardHeadingComponent.getTotalLabel();
 
-		totalLabel.removeStyleNames(dashboardHeadingComponent.getTotalLabelStyleNames());
-		totalLabel.addStyleNames(styleNames);
+		totalLabel.removeClassNames(dashboardHeadingComponent.getTotalLabelStyleNames());
+		totalLabel.addClassNames(styleNames);
 	}
 }

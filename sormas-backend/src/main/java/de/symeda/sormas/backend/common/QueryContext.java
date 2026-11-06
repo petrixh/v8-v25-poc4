@@ -4,7 +4,6 @@ import static de.symeda.sormas.backend.ExtendedPostgreSQL94Dialect.ARRAY_AGG;
 import static de.symeda.sormas.backend.ExtendedPostgreSQL94Dialect.ARRAY_TO_STRING;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -97,7 +96,7 @@ public abstract class QueryContext<ADO extends AbstractDomainObject, J extends Q
 			.when(cb.equal(pcdRoot.get(PersonContactDetail.PERSON_CONTACT_DETAIL_TYPE), PersonContactDetailType.OTHER), infoWithTypeOther)
 			.otherwise(infoWithType);
 		pcdSubQuery
-			.select(cb.function(ARRAY_TO_STRING, String.class, cb.function(ARRAY_AGG, List.class, otherContactDetailsExpression), cb.literal(", ")));
+			.select(cb.function(ARRAY_TO_STRING, String.class, cb.function(ARRAY_AGG, String[].class, otherContactDetailsExpression), cb.literal(", ")));
 		return pcdSubQuery;
 	}
 

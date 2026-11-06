@@ -194,7 +194,7 @@ public class ExternalShareInfoService extends AdoServiceWithUserFilterAndJurisdi
 			Subquery<Long> survToolShareSubQuery = cq.subquery(Long.class);
 			Root<ExternalShareInfo> survToolShareRoot = survToolShareSubQuery.from(ExternalShareInfo.class);
 			survToolShareSubQuery.select(survToolShareRoot.get(ExternalShareInfo.ID));
-			survToolShareSubQuery.where(cb.equal(survToolShareRoot.join(associatedObjectName), from.get(AbstractDomainObject.ID)));
+			survToolShareSubQuery.where(cb.equal(survToolShareRoot.join(associatedObjectName).get(AbstractDomainObject.ID), from.get(AbstractDomainObject.ID)));
 
 			filter = CriteriaBuilderHelper.and(cb, filter, cb.not(cb.exists(survToolShareSubQuery)));
 		}
@@ -203,7 +203,7 @@ public class ExternalShareInfoService extends AdoServiceWithUserFilterAndJurisdi
 			Subquery<Long> survToolShareSubQuery = cq.subquery(Long.class);
 			Root<ExternalShareInfo> survToolShareRoot = survToolShareSubQuery.from(ExternalShareInfo.class);
 			survToolShareSubQuery.select(survToolShareRoot.get(ExternalShareInfo.ID));
-			survToolShareSubQuery.where(cb.equal(survToolShareRoot.join(associatedObjectName), from.get(AbstractDomainObject.ID)));
+			survToolShareSubQuery.where(cb.equal(survToolShareRoot.join(associatedObjectName).get(AbstractDomainObject.ID), from.get(AbstractDomainObject.ID)));
 
 			filter = CriteriaBuilderHelper.and(cb, filter, cb.exists(survToolShareSubQuery));
 		}
@@ -242,7 +242,7 @@ public class ExternalShareInfoService extends AdoServiceWithUserFilterAndJurisdi
 		Path<Object> associatedObjectId = associatedObject.get(AbstractDomainObject.ID);
 
 		survToolShareSubQuery.select(associatedObjectId);
-		survToolShareSubQuery.where(cb.equal(associatedObject, from.get(AbstractDomainObject.ID)));
+		survToolShareSubQuery.where(cb.equal(associatedObjectId, from.get(AbstractDomainObject.ID)));
 		survToolShareSubQuery.groupBy(associatedObjectId);
 		survToolShareSubQuery.having(shareDatePredicateBuilder.apply(latestShareDate));
 

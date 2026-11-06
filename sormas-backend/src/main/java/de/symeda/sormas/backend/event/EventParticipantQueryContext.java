@@ -31,7 +31,7 @@ public class EventParticipantQueryContext extends QueryContext<EventParticipant,
 			samples.on(
 				cb.and(
 					cb.isFalse(samples.get(DeletableAdo.DELETED)),
-					cb.equal(samples.get(Sample.ASSOCIATED_EVENT_PARTICIPANT), eventParticipant.get(AbstractDomainObject.ID))));
+					cb.equal(samples.get(Sample.ASSOCIATED_EVENT_PARTICIPANT).get(AbstractDomainObject.ID), eventParticipant.get(AbstractDomainObject.ID))));
 		}
 		return samples;
 	}

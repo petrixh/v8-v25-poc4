@@ -47,17 +47,17 @@ public class SymptomsService extends BaseAdoService<Symptoms> {
 
 		Subquery<Long> visitSubquery = cq.subquery(Long.class);
 		Root<Visit> visitSubqueryRoot = visitSubquery.from(Visit.class);
-		visitSubquery.where(cb.equal(visitSubqueryRoot.get(Visit.SYMPTOMS), symptomsRoot.get(Symptoms.ID)));
+		visitSubquery.where(cb.equal(visitSubqueryRoot.get(Visit.SYMPTOMS).get(Symptoms.ID), symptomsRoot.get(Symptoms.ID)));
 		visitSubquery.select(visitSubqueryRoot.get(Visit.ID));
 
 		Subquery<Long> caseSubquery = cq.subquery(Long.class);
 		Root<Case> caseSubqueryRoot = caseSubquery.from(Case.class);
-		caseSubquery.where(cb.equal(caseSubqueryRoot.get(Case.SYMPTOMS), symptomsRoot.get(Symptoms.ID)));
+		caseSubquery.where(cb.equal(caseSubqueryRoot.get(Case.SYMPTOMS).get(Symptoms.ID), symptomsRoot.get(Symptoms.ID)));
 		caseSubquery.select(caseSubqueryRoot.get(Case.ID));
 
 		Subquery<Long> clinicalVisitSubquery = cq.subquery(Long.class);
 		Root<ClinicalVisit> clinicalVisitRoot = clinicalVisitSubquery.from(ClinicalVisit.class);
-		clinicalVisitSubquery.where(cb.equal(clinicalVisitRoot.get(ClinicalVisit.SYMPTOMS), symptomsRoot.get(Symptoms.ID)));
+		clinicalVisitSubquery.where(cb.equal(clinicalVisitRoot.get(ClinicalVisit.SYMPTOMS).get(Symptoms.ID), symptomsRoot.get(Symptoms.ID)));
 		clinicalVisitSubquery.select(clinicalVisitRoot.get(Case.ID));
 
 		cq.where(cb.not(cb.or(cb.exists(visitSubquery), cb.exists(caseSubquery), cb.exists(clinicalVisitSubquery))));

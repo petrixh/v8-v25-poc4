@@ -701,7 +701,7 @@ public class ImmunizationService extends AbstractCoreAdoService<Immunization, Im
 
 		Join<Object, Object> requestsJoin = shareInfoFrom.join(SormasToSormasShareInfo.REQUESTS);
 		sharesQuery.where(
-			cb.equal(shareInfoFrom.get(SormasToSormasShareInfo.IMMUNIZATION), from.get(Immunization.ID)),
+			cb.equal(shareInfoFrom.get(SormasToSormasShareInfo.IMMUNIZATION).get(Immunization.ID), from.get(Immunization.ID)),
 			cb.equal(shareInfoFrom.get(SormasToSormasShareInfo.OWNERSHIP_HANDED_OVER), true),
 			cb.equal(
 				requestsJoin.on(cb.equal(requestsJoin.get(ShareRequestInfo.CREATION_DATE), latestRequestDateQuery))

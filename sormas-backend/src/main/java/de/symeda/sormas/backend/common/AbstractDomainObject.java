@@ -131,7 +131,7 @@ public abstract class AbstractDomainObject implements Serializable, Cloneable, H
 	}
 
 	@Version
-	@Column(nullable = false, columnDefinition = "TIMESTAMP(3) not null")
+	@Column(nullable = false, columnDefinition = "TIMESTAMP(3) not null", secondPrecision = 3)
 	public Timestamp getChangeDate() {
 		return changeDate;
 	}

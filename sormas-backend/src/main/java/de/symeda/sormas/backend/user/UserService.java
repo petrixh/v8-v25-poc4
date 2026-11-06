@@ -735,7 +735,7 @@ public class UserService extends AdoServiceWithUserFilterAndJurisdiction<User> {
 			logger.debug("Requested user rights: [{}]", userRights);
 			Join<User, UserRole> rolesJoin = from.join(User.USER_ROLES, JoinType.LEFT);
 			Join<UserRole, UserRight> rightsJoin = rolesJoin.join(UserRole.USER_RIGHTS, JoinType.LEFT);
-			return rightsJoin.in(Collections.singletonList(userRights));
+			return rightsJoin.in(userRights);
 		}
 
 		return null;

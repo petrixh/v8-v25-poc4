@@ -19,11 +19,12 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
-import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.flow.component.Unit;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.ActiveRelevanceStatus;
 import de.symeda.sormas.api.Disease;
@@ -61,28 +62,28 @@ public class DiseaseConfigurationView extends AbstractConfigurationView {
 		criteria = ViewModelProviders.of(DiseaseConfigurationView.class).get(DiseaseConfigurationCriteria.class, new DiseaseConfigurationCriteria());
 		grid = new DiseaseConfigurationGrid(criteria);
 		VerticalLayout gridLayout = new VerticalLayout();
-		gridLayout.addComponent(createFilterBar());
+		gridLayout.add(createFilterBar());
 
 		rowCount = new RowCount(Strings.labelNumberOfDiseaseConfigurations, grid.getDataSize());
-		rowCount.addStyleName(CssStyles.VSPACE_NONE);
+		rowCount.addClassName(CssStyles.VSPACE_NONE);
 		grid.addDataSizeChangeListener(e -> rowCount.update(grid.getDataSize()));
 
 		setUpRelevanceStatusFilter();
 
 		HorizontalLayout relevanceStatusLayout = new HorizontalLayout();
-		relevanceStatusLayout.setMargin(false);
-		relevanceStatusLayout.addComponent(rowCount);
-		relevanceStatusLayout.addComponent(relevanceStatusFilter);
+		relevanceStatusLayout.setPadding(false);
+		relevanceStatusLayout.add(rowCount);
+		relevanceStatusLayout.add(relevanceStatusFilter);
 		relevanceStatusLayout.setDefaultComponentAlignment(Alignment.MIDDLE_RIGHT);
 
-		gridLayout.addComponent(relevanceStatusLayout);
+		gridLayout.add(relevanceStatusLayout);
 		gridLayout.setComponentAlignment(relevanceStatusLayout, Alignment.MIDDLE_RIGHT);
-		gridLayout.addComponent(grid);
-		gridLayout.setMargin(true);
+		gridLayout.add(grid);
+		gridLayout.setPadding(true);
 		gridLayout.setSpacing(false);
-		gridLayout.setExpandRatio(grid, 1);
+		gridLayout.setFlexGrow(1, grid);
 		gridLayout.setSizeFull();
-		gridLayout.setStyleName("crud-main-layout");
+		gridLayout.setClassName("crud-main-layout");
 
 		addComponent(gridLayout);
 	}
@@ -90,7 +91,7 @@ public class DiseaseConfigurationView extends AbstractConfigurationView {
 	private HorizontalLayout createFilterBar() {
 
 		HorizontalLayout filterLayout = new HorizontalLayout();
-		filterLayout.setMargin(false);
+		filterLayout.setPadding(false);
 		filterLayout.setSpacing(true);
 
 		reportingTypeFilter = new ComboBox<>(
@@ -100,7 +101,7 @@ public class DiseaseConfigurationView extends AbstractConfigurationView {
 			criteria.reportingType(e.getValue());
 			grid.reload();
 		});
-		filterLayout.addComponent(reportingTypeFilter);
+		filterLayout.add(reportingTypeFilter);
 
 		diseaseFilter = new ComboBox<>(
 			I18nProperties.getPrefixCaption(CustomizableEnumValueIndexDto.I18N_PREFIX, CustomizableEnumValueIndexDto.DISEASES),
@@ -109,9 +110,9 @@ public class DiseaseConfigurationView extends AbstractConfigurationView {
 			criteria.disease(e.getValue());
 			grid.reload();
 		});
-		filterLayout.addComponent(diseaseFilter);
+		filterLayout.add(diseaseFilter);
 
-		filterLayout.addComponent(ButtonHelper.createButton(Captions.actionResetFilters, event -> {
+		filterLayout.add(ButtonHelper.createButton(Captions.actionResetFilters, event -> {
 			ViewModelProviders.of(DiseaseConfigurationView.class).remove(DiseaseConfigurationCriteria.class);
 			navigateTo(null);
 		}, CssStyles.FORCE_CAPTION));
@@ -126,7 +127,7 @@ public class DiseaseConfigurationView extends AbstractConfigurationView {
 		relevanceStatusFilter.setWidth(210, Unit.PIXELS);
 		relevanceStatusFilter.setEmptySelectionAllowed(false);
 		relevanceStatusFilter.setItems(ActiveRelevanceStatus.values());
-		relevanceStatusFilter.setItemCaptionGenerator(ActiveRelevanceStatus::toString);
+		relevanceStatusFilter.setItemLabelGenerator(ActiveRelevanceStatus::toString);
 		relevanceStatusFilter.addValueChangeListener(e -> {
 			criteria.relevanceStatus(e.getValue());
 			navigateTo(criteria);

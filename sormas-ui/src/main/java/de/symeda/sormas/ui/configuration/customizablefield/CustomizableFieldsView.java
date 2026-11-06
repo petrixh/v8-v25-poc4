@@ -18,10 +18,10 @@ package de.symeda.sormas.ui.configuration.customizablefield;
 import java.util.Arrays;
 import java.util.Objects;
 
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.customizablefield.CustomizableFieldContext;
 import de.symeda.sormas.api.customizablefield.CustomizableFieldMetadataCriteria;
@@ -66,13 +66,13 @@ public class CustomizableFieldsView extends AbstractConfigurationView {
         grid = new CustomizableFieldsGrid(criteria);
 
         final VerticalLayout gridLayout = new VerticalLayout();
-        gridLayout.addComponent(createFilterBar());
-        gridLayout.addComponent(grid);
-        gridLayout.setMargin(true);
+        gridLayout.add(createFilterBar());
+        gridLayout.add(grid);
+        gridLayout.setPadding(true);
         gridLayout.setSpacing(false);
-        gridLayout.setExpandRatio(grid, 1);
+        gridLayout.setFlexGrow(1, grid);
         gridLayout.setSizeFull();
-        gridLayout.setStyleName("crud-main-layout");
+        gridLayout.setClassName("crud-main-layout");
 
         addComponent(gridLayout);
     }
@@ -80,7 +80,7 @@ public class CustomizableFieldsView extends AbstractConfigurationView {
     private HorizontalLayout createFilterBar() {
 
         final HorizontalLayout filterLayout = new HorizontalLayout();
-        filterLayout.setMargin(false);
+        filterLayout.setPadding(false);
         filterLayout.setSpacing(true);
 
         searchField = new SearchField();
@@ -89,27 +89,27 @@ public class CustomizableFieldsView extends AbstractConfigurationView {
             criteria.freeTextFilter(e.getText());
             grid.reload();
         });
-        filterLayout.addComponent(searchField);
+        filterLayout.add(searchField);
 
         contextFilter = new ComboBox<>(
             I18nProperties.getPrefixCaption(CustomizableFieldMetadataDto.I18N_PREFIX, CustomizableFieldMetadataDto.CONTEXT_CLASS),
             Arrays.asList(CustomizableFieldContext.values()));
-        contextFilter.setItemCaptionGenerator(Objects::toString);
+        contextFilter.setItemLabelGenerator(Objects::toString);
         contextFilter.addValueChangeListener(e -> {
             criteria.setContextClass(e.getValue());
             grid.reload();
         });
-        filterLayout.addComponent(contextFilter);
+        filterLayout.add(contextFilter);
 
         fieldTypeFilter = new ComboBox<>(
             I18nProperties.getPrefixCaption(CustomizableFieldMetadataDto.I18N_PREFIX, CustomizableFieldMetadataDto.FIELD_TYPE),
             Arrays.asList(CustomizableFieldType.values()));
-        fieldTypeFilter.setItemCaptionGenerator(Objects::toString);
+        fieldTypeFilter.setItemLabelGenerator(Objects::toString);
         fieldTypeFilter.addValueChangeListener(e -> {
             criteria.setFieldType(e.getValue());
             grid.reload();
         });
-        filterLayout.addComponent(fieldTypeFilter);
+        filterLayout.add(fieldTypeFilter);
 
         activeFilter = new ComboBox<>(I18nProperties.getPrefixCaption(CustomizableFieldMetadataDto.I18N_PREFIX, CustomizableFieldMetadataDto.ACTIVE));
         activeFilter.setItems(
@@ -127,14 +127,14 @@ public class CustomizableFieldsView extends AbstractConfigurationView {
             }
             grid.reload();
         });
-        filterLayout.addComponent(activeFilter);
+        filterLayout.add(activeFilter);
 
-        filterLayout.addComponent(ButtonHelper.createButton(Captions.actionResetFilters, event -> {
+        filterLayout.add(ButtonHelper.createButton(Captions.actionResetFilters, event -> {
             ViewModelProviders.of(CustomizableFieldsView.class).remove(CustomizableFieldMetadataCriteria.class);
             navigateTo((BaseCriteria[]) null);
         }, CssStyles.FORCE_CAPTION));
 
-        filterLayout.addComponent(
+        filterLayout.add(
             ButtonHelper.createButton(
                 Captions.actionCreate,
                 event -> ControllerProvider.getCustomizableFieldsController().createField(),

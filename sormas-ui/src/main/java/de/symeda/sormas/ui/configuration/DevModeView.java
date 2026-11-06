@@ -41,20 +41,22 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.data.Binder;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.DateField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.EntityDto;
@@ -135,7 +137,7 @@ public class DevModeView extends AbstractConfigurationView {
 		Arrays.asList(PathogenTestResultType.POSITIVE, PathogenTestResultType.NEGATIVE, PathogenTestResultType.PENDING);
 
 	private TextField seedField;
-	private CheckBox useManualSeedCheckbox;
+	private Checkbox useManualSeedCheckbox;
 	private static boolean useManualSeed = false;
 	private static long manualSeed = 0;
 
@@ -157,26 +159,26 @@ public class DevModeView extends AbstractConfigurationView {
 		super(VIEW_NAME);
 
 		contentLayout = new VerticalLayout();
-		contentLayout.setMargin(true);
+		contentLayout.setPadding(true);
 		contentLayout.setSpacing(true);
 		contentLayout.setWidth(100, Unit.PERCENTAGE);
-		contentLayout.setStyleName("crud-main-layout");
+		contentLayout.setClassName("crud-main-layout");
 
-		contentLayout.addComponent(
-			new Label(VaadinIcons.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoDeveloperOptions), ContentMode.HTML));
-		contentLayout.addComponent(
-			new Label(
-				VaadinIcons.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoDeveloperOptionsContactGeneration),
+		contentLayout.add(
+			new Span(HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " " + I18nProperties.getString(Strings.infoDeveloperOptions), ContentMode.HTML));
+		contentLayout.add(
+			new Span(
+				HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " " + I18nProperties.getString(Strings.infoDeveloperOptionsContactGeneration),
 				ContentMode.HTML));
-		contentLayout.addComponent(
-			new Label(VaadinIcons.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoDeveloperOptionsSeedUsage), ContentMode.HTML));
+		contentLayout.add(
+			new Span(HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " " + I18nProperties.getString(Strings.infoDeveloperOptionsSeedUsage), ContentMode.HTML));
 
-		contentLayout.addComponent(createSeedSettingsLayout());
-		contentLayout.addComponent(createCaseGeneratorLayout());
-		contentLayout.addComponent(createContactGeneratorLayout());
-		contentLayout.addComponent(createEventsGeneratorLayout());
-		contentLayout.addComponent(createSamplesGeneratorLayout());
-		contentLayout.addComponent(createDevButtonsLayout());
+		contentLayout.add(createSeedSettingsLayout());
+		contentLayout.add(createCaseGeneratorLayout());
+		contentLayout.add(createContactGeneratorLayout());
+		contentLayout.add(createEventsGeneratorLayout());
+		contentLayout.add(createSamplesGeneratorLayout());
+		contentLayout.add(createDevButtonsLayout());
 
 		addComponent(contentLayout);
 	}
@@ -188,7 +190,7 @@ public class DevModeView extends AbstractConfigurationView {
 
 		Button btnResetEnumCache =
 			ButtonHelper.createButton((Captions.actionResetEnumCache), e -> FacadeProvider.getCustomizableEnumFacade().loadData());
-		horizontalLayout.addComponent(btnResetEnumCache);
+		horizontalLayout.add(btnResetEnumCache);
 
 		Button btnExecuteAutomaticDeletion = ButtonHelper.createButton((Captions.actionExecuteAutomaticDeletion), e -> {
 			VaadinUiUtil.showSimplePopupWindow(
@@ -198,13 +200,13 @@ public class DevModeView extends AbstractConfigurationView {
 				640);
 			FacadeProvider.getDeletionConfigurationFacade().startAutomaticDeletion();
 		});
-		horizontalLayout.addComponent(btnExecuteAutomaticDeletion);
+		horizontalLayout.add(btnExecuteAutomaticDeletion);
 
 		Button btnClearCaseVaccinationStatuses = ButtonHelper.createButton(
 			"clearCaseVaccinationStatuses",
 			"Clear case vaccination statuses",
 			e -> showClearVaccinationStatusesPopup("Clear case vaccination statuses", FacadeProvider.getCaseFacade()::deleteVaccinationStatuses));
-		horizontalLayout.addComponent(btnClearCaseVaccinationStatuses);
+		horizontalLayout.add(btnClearCaseVaccinationStatuses);
 
 		Button btnClearContactVaccinationStatuses = ButtonHelper.createButton(
 			"clearContactVaccinationStatuses",
@@ -212,7 +214,7 @@ public class DevModeView extends AbstractConfigurationView {
 			e -> showClearVaccinationStatusesPopup(
 				"Clear contact vaccination statuses",
 				FacadeProvider.getContactFacade()::deleteVaccinationStatuses));
-		horizontalLayout.addComponent(btnClearContactVaccinationStatuses);
+		horizontalLayout.add(btnClearContactVaccinationStatuses);
 
 		Button btnClearEventParticipantVaccinationStatuses = ButtonHelper.createButton(
 			"clearEventParticipantVaccinationStatuses",
@@ -220,7 +222,7 @@ public class DevModeView extends AbstractConfigurationView {
 			e -> showClearVaccinationStatusesPopup(
 				"Clear event participant vaccination statuses",
 				FacadeProvider.getEventParticipantFacade()::deleteVaccinationStatuses));
-		horizontalLayout.addComponent(btnClearEventParticipantVaccinationStatuses);
+		horizontalLayout.add(btnClearEventParticipantVaccinationStatuses);
 
 		return horizontalLayout;
 	}
@@ -228,13 +230,13 @@ public class DevModeView extends AbstractConfigurationView {
 	private void showClearVaccinationStatusesPopup(String caption, Consumer<ImmunizationReferenceDto> clearAction) {
 
 		VerticalLayout content = new VerticalLayout();
-		content.setMargin(false);
+		content.setPadding(false);
 		content.setSpacing(true);
 
-		Label infoLabel = new Label("Enter the immunization UUID whose derived vaccination statuses should be cleared.");
+		Span infoLabel = new Span("Enter the immunization UUID whose derived vaccination statuses should be cleared.");
 		TextField immunizationUuidField = new TextField("Immunization UUID");
 		immunizationUuidField.setWidth(100, Unit.PERCENTAGE);
-		content.addComponents(infoLabel, immunizationUuidField);
+		content.add(infoLabel, immunizationUuidField);
 
 		VaadinUiUtil.showConfirmationPopup(caption, content, "Clear", "Cancel", 520, result -> {
 			if (!result) {
@@ -243,23 +245,23 @@ public class DevModeView extends AbstractConfigurationView {
 
 			String immunizationUuid = immunizationUuidField.getValue() != null ? immunizationUuidField.getValue().trim() : "";
 			if (immunizationUuid.isEmpty()) {
-				Notification.show("Please enter an immunization UUID.", Notification.Type.WARNING_MESSAGE);
+				NotificationHelper.show("Please enter an immunization UUID.", NotificationHelper.Type.WARNING_MESSAGE);
 				return false;
 			}
 
 			try {
 				ImmunizationDto immunization = FacadeProvider.getImmunizationFacade().getByUuid(immunizationUuid);
 				if (immunization == null) {
-					Notification.show("No immunization found for the provided UUID.", Notification.Type.WARNING_MESSAGE);
+					NotificationHelper.show("No immunization found for the provided UUID.", NotificationHelper.Type.WARNING_MESSAGE);
 					return false;
 				}
 
 				clearAction.accept(immunization.toReference());
-				Notification.show("Vaccination statuses cleared.", Notification.Type.HUMANIZED_MESSAGE);
+				NotificationHelper.show("Vaccination statuses cleared.", NotificationHelper.Type.HUMANIZED_MESSAGE);
 				return true;
 			} catch (RuntimeException ex) {
 				logger.error("Could not clear vaccination statuses for immunization {}", immunizationUuid, ex);
-				Notification.show("Could not clear vaccination statuses.", ex.getMessage(), Notification.Type.ERROR_MESSAGE);
+				NotificationHelper.show("Could not clear vaccination statuses.", ex.getMessage(), NotificationHelper.Type.ERROR_MESSAGE);
 				return false;
 			}
 		});
@@ -268,12 +270,12 @@ public class DevModeView extends AbstractConfigurationView {
 	private HorizontalLayout createSeedSettingsLayout() {
 		HorizontalLayout horizontalLayout = new HorizontalLayout();
 		VerticalLayout verticalLayout = new VerticalLayout();
-		verticalLayout.setMargin(false);
+		verticalLayout.setPadding(false);
 		verticalLayout.setSpacing(false);
 
-		Label seedLabel = new Label(I18nProperties.getString(Strings.labelActualLongSeed) + " " + manualSeed);
+		Span seedLabel = new Span(I18nProperties.getString(Strings.labelActualLongSeed) + " " + manualSeed);
 		seedField = new TextField();
-		seedField.setCaption(I18nProperties.getCaption(Captions.devModeGeneratorSeed));
+		seedField.setLabel(I18nProperties.getCaption(Captions.devModeGeneratorSeed));
 		seedField.setValue(Long.toString(manualSeed, 36));
 		seedField.setMaxLength(11);
 		seedField.addValueChangeListener(e -> {
@@ -285,7 +287,7 @@ public class DevModeView extends AbstractConfigurationView {
 			seedLabel.setValue(I18nProperties.getString(Strings.labelActualLongSeed) + " " + manualSeed);
 		});
 
-		useManualSeedCheckbox = new CheckBox(I18nProperties.getCaption(Captions.devModeUseSeed));
+		useManualSeedCheckbox = new Checkbox(I18nProperties.getCaption(Captions.devModeUseSeed));
 		useManualSeedCheckbox.setValue(useManualSeed);
 		useManualSeedCheckbox.addValueChangeListener(e -> {
 			useManualSeed = e.getValue();
@@ -342,12 +344,12 @@ public class DevModeView extends AbstractConfigurationView {
 			sampleGeneratorConfigBinder.readBean(sampleGenerationConfig);
 		}, CssStyles.FORCE_CAPTION);
 
-		verticalLayout.addComponent(seedLabel);
-		verticalLayout.addComponent(useManualSeedCheckbox);
-		horizontalLayout.addComponent(seedField);
-		horizontalLayout.addComponent(verticalLayout);
-		horizontalLayout.addComponent(performanceConfigButton);
-		horizontalLayout.addComponent(defaultConfigButton);
+		verticalLayout.add(seedLabel);
+		verticalLayout.add(useManualSeedCheckbox);
+		horizontalLayout.add(seedField);
+		horizontalLayout.add(verticalLayout);
+		horizontalLayout.add(performanceConfigButton);
+		horizontalLayout.add(defaultConfigButton);
 		horizontalLayout.setComponentAlignment(verticalLayout, Alignment.MIDDLE_LEFT);
 
 		return horizontalLayout;
@@ -356,53 +358,53 @@ public class DevModeView extends AbstractConfigurationView {
 	private VerticalLayout createCaseGeneratorLayout() {
 
 		VerticalLayout caseGeneratorLayout = new VerticalLayout();
-		caseGeneratorLayout.setMargin(false);
+		caseGeneratorLayout.setPadding(false);
 		caseGeneratorLayout.setSpacing(false);
 
-		Label heading = new Label(I18nProperties.getString(Strings.headingGenerateCases));
+		Span heading = new Span(I18nProperties.getString(Strings.headingGenerateCases));
 		CssStyles.style(heading, CssStyles.H2);
-		caseGeneratorLayout.addComponent(heading);
+		caseGeneratorLayout.add(heading);
 
 		HorizontalLayout caseOptionsLayout = new HorizontalLayout();
 
 		TextField caseCountField = new TextField();
-		caseCountField.setCaption(I18nProperties.getCaption(Captions.devModeCaseCount));
+		caseCountField.setLabel(I18nProperties.getCaption(Captions.devModeCaseCount));
 		caseGeneratorConfigBinder.forField(caseCountField)
 			.withValidator(new StringToNumberValidator("Must be a positive number", true))
 			.bind(CaseGenerationConfig::getEntityCount, CaseGenerationConfig::setEntityCount);
-		caseOptionsLayout.addComponent(caseCountField);
+		caseOptionsLayout.add(caseCountField);
 
-		DateField startDateField = new DateField();
-		startDateField.setCaption(I18nProperties.getCaption(Captions.devModeCaseStartDate));
+		DatePicker startDateField = new DatePicker();
+		startDateField.setLabel(I18nProperties.getCaption(Captions.devModeCaseStartDate));
 		startDateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
 		startDateField.setLenient(true);
 		caseGeneratorConfigBinder.bind(startDateField, CaseGenerationConfig::getStartDate, CaseGenerationConfig::setStartDate);
-		caseOptionsLayout.addComponent(startDateField);
+		caseOptionsLayout.add(startDateField);
 
-		DateField endDateField = new DateField();
-		endDateField.setCaption(I18nProperties.getCaption(Captions.devModeCaseEndDate));
+		DatePicker endDateField = new DatePicker();
+		endDateField.setLabel(I18nProperties.getCaption(Captions.devModeCaseEndDate));
 		endDateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
 		endDateField.setLenient(true);
 		caseGeneratorConfigBinder.bind(endDateField, CaseGenerationConfig::getEndDate, CaseGenerationConfig::setEndDate);
-		caseOptionsLayout.addComponent(endDateField);
+		caseOptionsLayout.add(endDateField);
 
 		ComboBox<Disease> diseaseField = new ComboBox<>(null, FacadeProvider.getDiseaseConfigurationFacade().getAllDiseases(true, true, true));
-		diseaseField.setCaption(I18nProperties.getCaption(Captions.devModeCaseDisease));
+		diseaseField.setLabel(I18nProperties.getCaption(Captions.devModeCaseDisease));
 		caseGeneratorConfigBinder.bind(diseaseField, CaseGenerationConfig::getDisease, CaseGenerationConfig::setDisease);
-		caseOptionsLayout.addComponent(diseaseField);
+		caseOptionsLayout.add(diseaseField);
 
 		List<RegionReferenceDto> regions = FacadeProvider.getRegionFacade().getAllActiveByServerCountry();
 		ComboBox<RegionReferenceDto> regionField = new ComboBox<RegionReferenceDto>(null, regions);
-		regionField.setItemCaptionGenerator(item -> item.buildCaption());
-		regionField.setCaption(I18nProperties.getCaption(Captions.devModeCaseRegion));
+		regionField.setItemLabelGenerator(item -> item.buildCaption());
+		regionField.setLabel(I18nProperties.getCaption(Captions.devModeCaseRegion));
 		caseGeneratorConfigBinder.bind(regionField, CaseGenerationConfig::getRegion, CaseGenerationConfig::setRegion);
-		caseOptionsLayout.addComponent(regionField);
+		caseOptionsLayout.add(regionField);
 
 		ComboBox<DistrictReferenceDto> districtField = new ComboBox<DistrictReferenceDto>();
-		districtField.setCaption(I18nProperties.getCaption(Captions.devModeCaseDistrict));
-		districtField.setItemCaptionGenerator(item -> item.buildCaption());
+		districtField.setLabel(I18nProperties.getCaption(Captions.devModeCaseDistrict));
+		districtField.setItemLabelGenerator(item -> item.buildCaption());
 		caseGeneratorConfigBinder.bind(districtField, CaseGenerationConfig::getDistrict, CaseGenerationConfig::setDistrict);
-		caseOptionsLayout.addComponent(districtField);
+		caseOptionsLayout.add(districtField);
 
 		regionField.addValueChangeListener(event -> {
 			RegionReferenceDto region = event.getValue();
@@ -414,9 +416,9 @@ public class DevModeView extends AbstractConfigurationView {
 		});
 
 		Button generateButton = ButtonHelper.createButton(Captions.devModeGenerateCases, e -> generateCases(), CssStyles.FORCE_CAPTION);
-		caseOptionsLayout.addComponent(generateButton);
+		caseOptionsLayout.add(generateButton);
 
-		caseGeneratorLayout.addComponent(caseOptionsLayout);
+		caseGeneratorLayout.add(caseOptionsLayout);
 
 		if (!regions.isEmpty()) {
 			caseGenerationConfig.setRegion(regions.get(0));
@@ -429,53 +431,53 @@ public class DevModeView extends AbstractConfigurationView {
 	private VerticalLayout createContactGeneratorLayout() {
 
 		VerticalLayout contactGeneratorLayout = new VerticalLayout();
-		contactGeneratorLayout.setMargin(false);
+		contactGeneratorLayout.setPadding(false);
 		contactGeneratorLayout.setSpacing(false);
 
-		Label heading = new Label(I18nProperties.getString(Strings.headingGenerateContacts));
+		Span heading = new Span(I18nProperties.getString(Strings.headingGenerateContacts));
 		CssStyles.style(heading, CssStyles.H2);
-		contactGeneratorLayout.addComponent(heading);
+		contactGeneratorLayout.add(heading);
 
 		HorizontalLayout contactOptionsFirstLineLayout = new HorizontalLayout();
 
 		TextField contactCountField = new TextField();
-		contactCountField.setCaption(I18nProperties.getCaption(Captions.devModeContactCount));
+		contactCountField.setLabel(I18nProperties.getCaption(Captions.devModeContactCount));
 		contactGeneratorConfigBinder.forField(contactCountField)
 			.withValidator(new StringToNumberValidator("Must be a positive number", true))
 			.bind(ContactGenerationConfig::getEntityCount, ContactGenerationConfig::setEntityCount);
-		contactOptionsFirstLineLayout.addComponent(contactCountField);
+		contactOptionsFirstLineLayout.add(contactCountField);
 
-		DateField startDateField = new DateField();
-		startDateField.setCaption(I18nProperties.getCaption(Captions.devModeContactStartDate));
+		DatePicker startDateField = new DatePicker();
+		startDateField.setLabel(I18nProperties.getCaption(Captions.devModeContactStartDate));
 		startDateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
 		startDateField.setLenient(true);
 		contactGeneratorConfigBinder.bind(startDateField, ContactGenerationConfig::getStartDate, ContactGenerationConfig::setStartDate);
-		contactOptionsFirstLineLayout.addComponent(startDateField);
+		contactOptionsFirstLineLayout.add(startDateField);
 
-		DateField endDateField = new DateField();
-		endDateField.setCaption(I18nProperties.getCaption(Captions.devModeContactEndDate));
+		DatePicker endDateField = new DatePicker();
+		endDateField.setLabel(I18nProperties.getCaption(Captions.devModeContactEndDate));
 		endDateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
 		endDateField.setLenient(true);
 		contactGeneratorConfigBinder.bind(endDateField, ContactGenerationConfig::getEndDate, ContactGenerationConfig::setEndDate);
-		contactOptionsFirstLineLayout.addComponent(endDateField);
+		contactOptionsFirstLineLayout.add(endDateField);
 
 		ComboBox<Disease> diseaseField = new ComboBox<>(null, FacadeProvider.getDiseaseConfigurationFacade().getAllDiseases(true, true, true));
-		diseaseField.setCaption(I18nProperties.getCaption(Captions.devModeContactDisease));
+		diseaseField.setLabel(I18nProperties.getCaption(Captions.devModeContactDisease));
 		contactGeneratorConfigBinder.bind(diseaseField, ContactGenerationConfig::getDisease, ContactGenerationConfig::setDisease);
-		contactOptionsFirstLineLayout.addComponent(diseaseField);
+		contactOptionsFirstLineLayout.add(diseaseField);
 
 		List<RegionReferenceDto> regions = FacadeProvider.getRegionFacade().getAllActiveByServerCountry();
 		ComboBox<RegionReferenceDto> regionField = new ComboBox<RegionReferenceDto>(null, regions);
-		regionField.setCaption(I18nProperties.getCaption(Captions.devModeContactRegion));
-		regionField.setItemCaptionGenerator(item -> item.buildCaption());
+		regionField.setLabel(I18nProperties.getCaption(Captions.devModeContactRegion));
+		regionField.setItemLabelGenerator(item -> item.buildCaption());
 		contactGeneratorConfigBinder.bind(regionField, ContactGenerationConfig::getRegion, ContactGenerationConfig::setRegion);
-		contactOptionsFirstLineLayout.addComponent(regionField);
+		contactOptionsFirstLineLayout.add(regionField);
 
 		ComboBox<DistrictReferenceDto> districtField = new ComboBox<DistrictReferenceDto>();
-		districtField.setItemCaptionGenerator(item -> item.buildCaption());
-		districtField.setCaption(I18nProperties.getCaption(Captions.devModeContactDistrict));
+		districtField.setItemLabelGenerator(item -> item.buildCaption());
+		districtField.setLabel(I18nProperties.getCaption(Captions.devModeContactDistrict));
 		contactGeneratorConfigBinder.bind(districtField, ContactGenerationConfig::getDistrict, ContactGenerationConfig::setDistrict);
-		contactOptionsFirstLineLayout.addComponent(districtField);
+		contactOptionsFirstLineLayout.add(districtField);
 
 		regionField.addValueChangeListener(event -> {
 			RegionReferenceDto region = event.getValue();
@@ -487,33 +489,33 @@ public class DevModeView extends AbstractConfigurationView {
 		});
 
 		Button generateButton = ButtonHelper.createButton(Captions.devModeGenerateContacts, e -> generateContacts(), CssStyles.FORCE_CAPTION);
-		contactOptionsFirstLineLayout.addComponent(generateButton);
+		contactOptionsFirstLineLayout.add(generateButton);
 
-		contactGeneratorLayout.addComponent(contactOptionsFirstLineLayout);
+		contactGeneratorLayout.add(contactOptionsFirstLineLayout);
 
 		HorizontalLayout contactOptionsSecondLineLayout = new HorizontalLayout();
 
-		CheckBox createWithoutSourceCasesField = new CheckBox(I18nProperties.getCaption(Captions.devModeContactCreateWithoutSourceCases));
+		Checkbox createWithoutSourceCasesField = new Checkbox(I18nProperties.getCaption(Captions.devModeContactCreateWithoutSourceCases));
 		contactGeneratorConfigBinder.bind(
 			createWithoutSourceCasesField,
 			ContactGenerationConfig::isCreateWithoutSourceCases,
 			ContactGenerationConfig::setCreateWithoutSourceCases);
-		contactOptionsSecondLineLayout.addComponent(createWithoutSourceCasesField);
+		contactOptionsSecondLineLayout.add(createWithoutSourceCasesField);
 
-		CheckBox createMultipleContactsPerPersonField =
-			new CheckBox(I18nProperties.getCaption(Captions.devModeContactCreateMultipleContactsPerPerson));
+		Checkbox createMultipleContactsPerPersonField =
+			new Checkbox(I18nProperties.getCaption(Captions.devModeContactCreateMultipleContactsPerPerson));
 		contactGeneratorConfigBinder.bind(
 			createMultipleContactsPerPersonField,
 			ContactGenerationConfig::isCreateMultipleContactsPerPerson,
 			ContactGenerationConfig::setCreateMultipleContactsPerPerson);
-		contactOptionsSecondLineLayout.addComponent(createMultipleContactsPerPersonField);
+		contactOptionsSecondLineLayout.add(createMultipleContactsPerPersonField);
 
-		CheckBox createWithVisitsField = new CheckBox(I18nProperties.getCaption(Captions.devModeContactCreateWithVisits));
+		Checkbox createWithVisitsField = new Checkbox(I18nProperties.getCaption(Captions.devModeContactCreateWithVisits));
 		contactGeneratorConfigBinder
 			.bind(createWithVisitsField, ContactGenerationConfig::isCreateWithVisits, ContactGenerationConfig::setCreateWithVisits);
-		contactOptionsSecondLineLayout.addComponent(createWithVisitsField);
+		contactOptionsSecondLineLayout.add(createWithVisitsField);
 
-		contactGeneratorLayout.addComponent(contactOptionsSecondLineLayout);
+		contactGeneratorLayout.add(contactOptionsSecondLineLayout);
 
 		if (!regions.isEmpty()) {
 			contactGenerationConfig.setRegion(regions.get(0));
@@ -525,53 +527,53 @@ public class DevModeView extends AbstractConfigurationView {
 
 	private VerticalLayout createEventsGeneratorLayout() {
 		VerticalLayout eventGeneratorLayout = new VerticalLayout();
-		eventGeneratorLayout.setMargin(false);
+		eventGeneratorLayout.setPadding(false);
 		eventGeneratorLayout.setSpacing(false);
 
-		Label heading = new Label(I18nProperties.getCaption(Captions.devModeGenerateEvents));
+		Span heading = new Span(I18nProperties.getCaption(Captions.devModeGenerateEvents));
 		CssStyles.style(heading, CssStyles.H2);
-		eventGeneratorLayout.addComponent(heading);
+		eventGeneratorLayout.add(heading);
 
 		HorizontalLayout eventOptionsFirstLineLayout = new HorizontalLayout();
 
 		TextField eventCountField = new TextField();
-		eventCountField.setCaption(I18nProperties.getCaption(Captions.devModeEventCount));
+		eventCountField.setLabel(I18nProperties.getCaption(Captions.devModeEventCount));
 		eventGeneratorConfigBinder.forField(eventCountField)
 			.withValidator(new StringToNumberValidator("Must be a positive number", true))
 			.bind(EventGenerationConfig::getEntityCount, EventGenerationConfig::setEntityCount);
-		eventOptionsFirstLineLayout.addComponent(eventCountField);
+		eventOptionsFirstLineLayout.add(eventCountField);
 
-		DateField startDateField = new DateField();
-		startDateField.setCaption(I18nProperties.getCaption(Captions.devModeEventStartDate));
+		DatePicker startDateField = new DatePicker();
+		startDateField.setLabel(I18nProperties.getCaption(Captions.devModeEventStartDate));
 		startDateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
 		startDateField.setLenient(true);
 		eventGeneratorConfigBinder.bind(startDateField, EventGenerationConfig::getStartDate, EventGenerationConfig::setStartDate);
-		eventOptionsFirstLineLayout.addComponent(startDateField);
+		eventOptionsFirstLineLayout.add(startDateField);
 
-		DateField endDateField = new DateField();
-		endDateField.setCaption(I18nProperties.getCaption(Captions.devModeEventEndDate));
+		DatePicker endDateField = new DatePicker();
+		endDateField.setLabel(I18nProperties.getCaption(Captions.devModeEventEndDate));
 		endDateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
 		endDateField.setLenient(true);
 		eventGeneratorConfigBinder.bind(endDateField, EventGenerationConfig::getEndDate, EventGenerationConfig::setEndDate);
-		eventOptionsFirstLineLayout.addComponent(endDateField);
+		eventOptionsFirstLineLayout.add(endDateField);
 
 		ComboBox<Disease> diseaseField = new ComboBox<>(null, FacadeProvider.getDiseaseConfigurationFacade().getAllDiseases(true, true, true));
-		diseaseField.setCaption(I18nProperties.getCaption(Captions.devModeEventDisease));
+		diseaseField.setLabel(I18nProperties.getCaption(Captions.devModeEventDisease));
 		eventGeneratorConfigBinder.bind(diseaseField, EventGenerationConfig::getDisease, EventGenerationConfig::setDisease);
-		eventOptionsFirstLineLayout.addComponent(diseaseField);
+		eventOptionsFirstLineLayout.add(diseaseField);
 
 		List<RegionReferenceDto> regions = FacadeProvider.getRegionFacade().getAllActiveAsReference();
 		ComboBox<RegionReferenceDto> regionField = new ComboBox<RegionReferenceDto>(null, regions);
-		regionField.setItemCaptionGenerator(item -> item.buildCaption());
-		regionField.setCaption(I18nProperties.getCaption(Captions.devModeEventRegion));
+		regionField.setItemLabelGenerator(item -> item.buildCaption());
+		regionField.setLabel(I18nProperties.getCaption(Captions.devModeEventRegion));
 		eventGeneratorConfigBinder.bind(regionField, EventGenerationConfig::getRegion, EventGenerationConfig::setRegion);
-		eventOptionsFirstLineLayout.addComponent(regionField);
+		eventOptionsFirstLineLayout.add(regionField);
 
 		ComboBox<DistrictReferenceDto> districtField = new ComboBox<DistrictReferenceDto>();
-		districtField.setCaption(I18nProperties.getCaption(Captions.devModeEventDistrict));
-		districtField.setItemCaptionGenerator(item -> item.buildCaption());
+		districtField.setLabel(I18nProperties.getCaption(Captions.devModeEventDistrict));
+		districtField.setItemLabelGenerator(item -> item.buildCaption());
 		eventGeneratorConfigBinder.bind(districtField, EventGenerationConfig::getDistrict, EventGenerationConfig::setDistrict);
-		eventOptionsFirstLineLayout.addComponent(districtField);
+		eventOptionsFirstLineLayout.add(districtField);
 
 		regionField.addValueChangeListener(event -> {
 			RegionReferenceDto region = event.getValue();
@@ -584,48 +586,48 @@ public class DevModeView extends AbstractConfigurationView {
 
 		Button generateButton =
 			ButtonHelper.createButton(I18nProperties.getCaption(Captions.devModeGenerateEvents), e -> generateEvents(), CssStyles.FORCE_CAPTION);
-		eventOptionsFirstLineLayout.addComponent(generateButton);
+		eventOptionsFirstLineLayout.add(generateButton);
 
-		eventGeneratorLayout.addComponent(eventOptionsFirstLineLayout);
+		eventGeneratorLayout.add(eventOptionsFirstLineLayout);
 
 		HorizontalLayout eventOptionsSecondLineLayout = new HorizontalLayout();
 
 		TextField minParticipantsPerEventField = new TextField();
-		minParticipantsPerEventField.setCaption(I18nProperties.getCaption(Captions.devModeEventMinParticipants));
+		minParticipantsPerEventField.setLabel(I18nProperties.getCaption(Captions.devModeEventMinParticipants));
 		eventGeneratorConfigBinder.forField(minParticipantsPerEventField)
 			.withValidator(new StringToNumberValidator("Must be a positive number", true))
 			.bind(EventGenerationConfig::getMinParticipantsPerEvent, EventGenerationConfig::setMinParticipantsPerEvent);
-		eventOptionsSecondLineLayout.addComponent(minParticipantsPerEventField);
+		eventOptionsSecondLineLayout.add(minParticipantsPerEventField);
 
 		TextField maxParticipantsPerEventField = new TextField();
-		maxParticipantsPerEventField.setCaption(I18nProperties.getCaption(Captions.devModeEventMaxParticipants));
+		maxParticipantsPerEventField.setLabel(I18nProperties.getCaption(Captions.devModeEventMaxParticipants));
 		eventGeneratorConfigBinder.forField(maxParticipantsPerEventField)
 			.withValidator(new StringToNumberValidator("Must be a positive number", true))
 			.bind(EventGenerationConfig::getMaxParticipantsPerEvent, EventGenerationConfig::setMaxParticipantsPerEvent);
-		eventOptionsSecondLineLayout.addComponent(maxParticipantsPerEventField);
+		eventOptionsSecondLineLayout.add(maxParticipantsPerEventField);
 
 		TextField minContactsPerParticipantField = new TextField();
-		minContactsPerParticipantField.setCaption(I18nProperties.getCaption(Captions.devModeEventMinContacts));
+		minContactsPerParticipantField.setLabel(I18nProperties.getCaption(Captions.devModeEventMinContacts));
 		eventGeneratorConfigBinder.forField(minContactsPerParticipantField)
 			.withValidator(new StringToNumberValidator("Must be a positive number", true))
 			.bind(EventGenerationConfig::getMinContactsPerParticipant, EventGenerationConfig::setMinContactsPerParticipant);
-		eventOptionsSecondLineLayout.addComponent(minContactsPerParticipantField);
+		eventOptionsSecondLineLayout.add(minContactsPerParticipantField);
 
 		TextField maxContactsPerParticipantField = new TextField();
-		maxContactsPerParticipantField.setCaption(I18nProperties.getCaption(Captions.devModeEventMaxContacts));
+		maxContactsPerParticipantField.setLabel(I18nProperties.getCaption(Captions.devModeEventMaxContacts));
 		eventGeneratorConfigBinder.forField(maxContactsPerParticipantField)
 			.withValidator(new StringToNumberValidator("Must be a positive number", true))
 			.bind(EventGenerationConfig::getMaxContactsPerParticipant, EventGenerationConfig::setMaxContactsPerParticipant);
-		eventOptionsSecondLineLayout.addComponent(maxContactsPerParticipantField);
+		eventOptionsSecondLineLayout.add(maxContactsPerParticipantField);
 
 		TextField percentageOfCasesField = new TextField();
-		percentageOfCasesField.setCaption(I18nProperties.getCaption(Captions.devModeEventCasePercentage));
+		percentageOfCasesField.setLabel(I18nProperties.getCaption(Captions.devModeEventCasePercentage));
 		eventGeneratorConfigBinder.forField(percentageOfCasesField)
 			.withValidator(new StringToNumberValidator("Must be a positive number", true))
 			.bind(EventGenerationConfig::getPercentageOfCases, EventGenerationConfig::setPercentageOfCases);
-		eventOptionsSecondLineLayout.addComponent(percentageOfCasesField);
+		eventOptionsSecondLineLayout.add(percentageOfCasesField);
 
-		eventGeneratorLayout.addComponent(eventOptionsSecondLineLayout);
+		eventGeneratorLayout.add(eventOptionsSecondLineLayout);
 		eventGenerationConfig.setRegion(regions.get(0));
 		List<DistrictReferenceDto> allActiveDistrictsByRegion =
 			FacadeProvider.getDistrictFacade().getAllActiveByRegion(eventGenerationConfig.getRegion().getUuid());
@@ -639,54 +641,54 @@ public class DevModeView extends AbstractConfigurationView {
 
 	private VerticalLayout createSamplesGeneratorLayout() {
 		VerticalLayout sampleGeneratorLayout = new VerticalLayout();
-		sampleGeneratorLayout.setMargin(false);
+		sampleGeneratorLayout.setPadding(false);
 		sampleGeneratorLayout.setSpacing(false);
 
-		Label heading = new Label(I18nProperties.getCaption(Captions.devModeGenerateSamples));
+		Span heading = new Span(I18nProperties.getCaption(Captions.devModeGenerateSamples));
 		CssStyles.style(heading, CssStyles.H2);
-		sampleGeneratorLayout.addComponent(heading);
+		sampleGeneratorLayout.add(heading);
 
 		HorizontalLayout sampleOptionsFirstLineLayout = new HorizontalLayout();
 
 		TextField sampleCountField = new TextField();
-		sampleCountField.setCaption(I18nProperties.getCaption(Captions.devModeSampleCount));
+		sampleCountField.setLabel(I18nProperties.getCaption(Captions.devModeSampleCount));
 		sampleGeneratorConfigBinder.forField(sampleCountField)
 			.withValidator(new StringToNumberValidator("Must be a positive number", true))
 			.bind(SampleGenerationConfig::getEntityCount, SampleGenerationConfig::setEntityCount);
-		sampleOptionsFirstLineLayout.addComponent(sampleCountField);
+		sampleOptionsFirstLineLayout.add(sampleCountField);
 
-		DateField startDateField = new DateField();
-		startDateField.setCaption(I18nProperties.getCaption(Captions.devModeSampleStartDate));
+		DatePicker startDateField = new DatePicker();
+		startDateField.setLabel(I18nProperties.getCaption(Captions.devModeSampleStartDate));
 		startDateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
 		startDateField.setLenient(true);
 		sampleGeneratorConfigBinder.bind(startDateField, SampleGenerationConfig::getStartDate, SampleGenerationConfig::setStartDate);
-		sampleOptionsFirstLineLayout.addComponent(startDateField);
+		sampleOptionsFirstLineLayout.add(startDateField);
 
-		DateField endDateField = new DateField();
-		endDateField.setCaption(I18nProperties.getCaption(Captions.devModeSampleEndDate));
+		DatePicker endDateField = new DatePicker();
+		endDateField.setLabel(I18nProperties.getCaption(Captions.devModeSampleEndDate));
 		endDateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
 		endDateField.setLenient(true);
 		sampleGeneratorConfigBinder.bind(endDateField, SampleGenerationConfig::getEndDate, SampleGenerationConfig::setEndDate);
-		sampleOptionsFirstLineLayout.addComponent(endDateField);
+		sampleOptionsFirstLineLayout.add(endDateField);
 
 		ComboBox<Disease> diseaseField = new ComboBox<>(null, FacadeProvider.getDiseaseConfigurationFacade().getAllDiseases(true, true, true));
-		diseaseField.setCaption(I18nProperties.getCaption(Captions.devModeSampleDisease));
+		diseaseField.setLabel(I18nProperties.getCaption(Captions.devModeSampleDisease));
 		sampleGeneratorConfigBinder.bind(diseaseField, SampleGenerationConfig::getDisease, SampleGenerationConfig::setDisease);
 		diseaseField.setRequiredIndicatorVisible(true);
-		sampleOptionsFirstLineLayout.addComponent(diseaseField);
+		sampleOptionsFirstLineLayout.add(diseaseField);
 
 		List<RegionReferenceDto> regions = FacadeProvider.getRegionFacade().getAllActiveByServerCountry();
 		ComboBox<RegionReferenceDto> regionField = new ComboBox<>(null, regions);
-		regionField.setCaption(I18nProperties.getCaption(Captions.devModeSampleRegion));
-		regionField.setItemCaptionGenerator(item -> item.buildCaption());
+		regionField.setLabel(I18nProperties.getCaption(Captions.devModeSampleRegion));
+		regionField.setItemLabelGenerator(item -> item.buildCaption());
 		sampleGeneratorConfigBinder.bind(regionField, SampleGenerationConfig::getRegion, SampleGenerationConfig::setRegion);
-		sampleOptionsFirstLineLayout.addComponent(regionField);
+		sampleOptionsFirstLineLayout.add(regionField);
 
 		ComboBox<DistrictReferenceDto> districtField = new ComboBox<>();
-		districtField.setCaption(I18nProperties.getCaption(Captions.devModeSampleDistrict));
-		districtField.setItemCaptionGenerator(item -> item.buildCaption());
+		districtField.setLabel(I18nProperties.getCaption(Captions.devModeSampleDistrict));
+		districtField.setItemLabelGenerator(item -> item.buildCaption());
 		sampleGeneratorConfigBinder.bind(districtField, SampleGenerationConfig::getDistrict, SampleGenerationConfig::setDistrict);
-		sampleOptionsFirstLineLayout.addComponent(districtField);
+		sampleOptionsFirstLineLayout.add(districtField);
 
 		regionField.addValueChangeListener(event -> {
 			RegionReferenceDto region = event.getValue();
@@ -699,58 +701,58 @@ public class DevModeView extends AbstractConfigurationView {
 
 		Button generateButton =
 			ButtonHelper.createButton(I18nProperties.getCaption(Captions.devModeGenerateSamples), e -> generateSamples(), CssStyles.FORCE_CAPTION);
-		sampleOptionsFirstLineLayout.addComponent(generateButton);
+		sampleOptionsFirstLineLayout.add(generateButton);
 
-		sampleGeneratorLayout.addComponent(sampleOptionsFirstLineLayout);
+		sampleGeneratorLayout.add(sampleOptionsFirstLineLayout);
 
 		HorizontalLayout sampleOptionsSecondLineLayout = new HorizontalLayout();
 
 		ComboBox<SampleMaterial> sampleMaterial = new ComboBox(null, Arrays.asList(SampleMaterial.values()));
-		sampleMaterial.setCaption(I18nProperties.getCaption(Captions.devModeSampleMaterial));
+		sampleMaterial.setLabel(I18nProperties.getCaption(Captions.devModeSampleMaterial));
 		sampleGeneratorConfigBinder.bind(sampleMaterial, SampleGenerationConfig::getSampleMaterial, SampleGenerationConfig::setSampleMaterial);
 		sampleMaterial.setRequiredIndicatorVisible(true);
-		sampleOptionsSecondLineLayout.addComponent(sampleMaterial);
+		sampleOptionsSecondLineLayout.add(sampleMaterial);
 
 		ComboBox<FacilityReferenceDto> laboratory = new ComboBox(null, FacadeProvider.getFacilityFacade().getAllActiveLaboratories(true));
-		laboratory.setItemCaptionGenerator(item -> item.buildCaption());
-		laboratory.setCaption(I18nProperties.getCaption(Captions.devModeSampleLaboratory));
+		laboratory.setItemLabelGenerator(item -> item.buildCaption());
+		laboratory.setLabel(I18nProperties.getCaption(Captions.devModeSampleLaboratory));
 		sampleGeneratorConfigBinder.bind(laboratory, SampleGenerationConfig::getLaboratory, SampleGenerationConfig::setLaboratory);
 		laboratory.setRequiredIndicatorVisible(true);
-		sampleOptionsSecondLineLayout.addComponent(laboratory);
+		sampleOptionsSecondLineLayout.add(laboratory);
 
-		sampleGeneratorLayout.addComponent(sampleOptionsSecondLineLayout);
+		sampleGeneratorLayout.add(sampleOptionsSecondLineLayout);
 
 		HorizontalLayout sampleOptionsThirdLineLayout = new HorizontalLayout();
 
-		CheckBox externalLabTesting = new CheckBox(I18nProperties.getCaption(Captions.devModeSampleExternalLabTesting));
+		Checkbox externalLabTesting = new Checkbox(I18nProperties.getCaption(Captions.devModeSampleExternalLabTesting));
 		sampleGeneratorConfigBinder.bind(
 			externalLabTesting,
 			SampleGenerationConfig::isExternalLabOrInternalInHouseTesting,
 			SampleGenerationConfig::setExternalLabOrInternalInHouseTesting);
 		externalLabTesting.setValue(true);
-		sampleOptionsThirdLineLayout.addComponent(externalLabTesting);
+		sampleOptionsThirdLineLayout.add(externalLabTesting);
 
-		CheckBox requestPathogenTestsToBePerformed = new CheckBox(I18nProperties.getCaption(Captions.devModeSamplePathogenTestsToBePerformed));
+		Checkbox requestPathogenTestsToBePerformed = new Checkbox(I18nProperties.getCaption(Captions.devModeSamplePathogenTestsToBePerformed));
 		sampleGeneratorConfigBinder.bind(
 			requestPathogenTestsToBePerformed,
 			SampleGenerationConfig::isRequestPathogenTestsToBePerformed,
 			SampleGenerationConfig::setRequestPathogenTestsToBePerformed);
-		sampleOptionsThirdLineLayout.addComponent(requestPathogenTestsToBePerformed);
+		sampleOptionsThirdLineLayout.add(requestPathogenTestsToBePerformed);
 
-		CheckBox requestAdditionalTestsToBePerformed = new CheckBox(I18nProperties.getCaption(Captions.devModeSampleAdditionalTestsToBePerformed));
+		Checkbox requestAdditionalTestsToBePerformed = new Checkbox(I18nProperties.getCaption(Captions.devModeSampleAdditionalTestsToBePerformed));
 		sampleGeneratorConfigBinder.bind(
 			requestAdditionalTestsToBePerformed,
 			SampleGenerationConfig::isRequestAdditionalTestsToBePerformed,
 			SampleGenerationConfig::setRequestAdditionalTestsToBePerformed);
-		sampleOptionsThirdLineLayout.addComponent(requestAdditionalTestsToBePerformed);
+		sampleOptionsThirdLineLayout.add(requestAdditionalTestsToBePerformed);
 
-		CheckBox sendDispatch = new CheckBox(I18nProperties.getCaption(Captions.devModeSampleSendDispatch));
+		Checkbox sendDispatch = new Checkbox(I18nProperties.getCaption(Captions.devModeSampleSendDispatch));
 		sampleGeneratorConfigBinder.bind(sendDispatch, SampleGenerationConfig::isSendDispatch, SampleGenerationConfig::setSendDispatch);
-		sampleOptionsThirdLineLayout.addComponent(sendDispatch);
+		sampleOptionsThirdLineLayout.add(sendDispatch);
 
-		CheckBox received = new CheckBox(I18nProperties.getCaption(Captions.devModeSampleReceived));
+		Checkbox received = new Checkbox(I18nProperties.getCaption(Captions.devModeSampleReceived));
 		sampleGeneratorConfigBinder.bind(received, SampleGenerationConfig::isReceived, SampleGenerationConfig::setReceived);
-		sampleOptionsThirdLineLayout.addComponent(received);
+		sampleOptionsThirdLineLayout.add(received);
 
 		externalLabTesting.addValueChangeListener(event -> {
 			if (externalLabTesting.getValue()) {
@@ -768,7 +770,7 @@ public class DevModeView extends AbstractConfigurationView {
 			}
 		});
 
-		sampleGeneratorLayout.addComponent(sampleOptionsThirdLineLayout);
+		sampleGeneratorLayout.add(sampleOptionsThirdLineLayout);
 
 		if (!regions.isEmpty()) {
 			sampleGenerationConfig.setRegion(regions.get(0));
@@ -1118,7 +1120,7 @@ public class DevModeView extends AbstractConfigurationView {
 		String msg = String
 			.format("Generating %,d cases took %,d  ms (%,d ms per case)", config.getEntityCountAsNumber(), dt / 1_000_000, perCase / 1_000_000);
 		logger.info(msg);
-		Notification.show("", msg, Notification.Type.TRAY_NOTIFICATION);
+		NotificationHelper.show("", msg, NotificationHelper.Type.TRAY_NOTIFICATION);
 	}
 
 	private void generateSamples() {
@@ -1258,11 +1260,11 @@ public class DevModeView extends AbstractConfigurationView {
 				(double) dt / 1_000_000_000,
 				(double) perSample / 1_000_000);
 			logger.info(msg);
-			Notification.show("", msg, Notification.Type.TRAY_NOTIFICATION);
+			NotificationHelper.show("", msg, NotificationHelper.Type.TRAY_NOTIFICATION);
 		} else {
 			String msg = "No samples generated: no cases found for the selected region/district/disease.";
 			logger.info(msg);
-			Notification.show("", msg, Notification.Type.TRAY_NOTIFICATION);
+			NotificationHelper.show("", msg, NotificationHelper.Type.TRAY_NOTIFICATION);
 		}
 	}
 
@@ -1400,7 +1402,7 @@ public class DevModeView extends AbstractConfigurationView {
 
 		if (disease == null) {
 			disease = random(diseases);
-			Notification.show("", "Automatically chosen disease: " + disease.getName(), Notification.Type.TRAY_NOTIFICATION);
+			NotificationHelper.show("", "Automatically chosen disease: " + disease.getName(), NotificationHelper.Type.TRAY_NOTIFICATION);
 		}
 		List<String> personUuids = new ArrayList<>();
 		List<CaseReferenceDto> cases = null;
@@ -1419,7 +1421,7 @@ public class DevModeView extends AbstractConfigurationView {
 					contactGenerationConfig.getEntityCountAsNumber() * 2,
 					random());
 			if (cases == null) {
-				Notification.show("Error", I18nProperties.getString(Strings.messageMissingCases), Notification.Type.ERROR_MESSAGE);
+				NotificationHelper.show("Error", I18nProperties.getString(Strings.messageMissingCases), NotificationHelper.Type.ERROR_MESSAGE);
 				return;
 			}
 		}
@@ -1547,7 +1549,7 @@ public class DevModeView extends AbstractConfigurationView {
 			dt / 1_000_000,
 			perContact / 1_000_000);
 		logger.info(msg);
-		Notification.show("", msg, Notification.Type.TRAY_NOTIFICATION);
+		NotificationHelper.show("", msg, NotificationHelper.Type.TRAY_NOTIFICATION);
 	}
 
 	private void generateEvents() {
@@ -1734,7 +1736,7 @@ public class DevModeView extends AbstractConfigurationView {
 			(double) dt / 1_000_000_000,
 			(double) perCase / 1_000_000);
 		logger.info(msg);
-		Notification.show("", msg, Notification.Type.TRAY_NOTIFICATION);
+		NotificationHelper.show("", msg, NotificationHelper.Type.TRAY_NOTIFICATION);
 	}
 
 	private LocalDateTime getReferenceDateTime(int i, int count, float baseOffset, Disease disease, LocalDate startDate, int daysBetween) {

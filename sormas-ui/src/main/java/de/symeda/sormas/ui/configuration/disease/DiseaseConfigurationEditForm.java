@@ -21,11 +21,12 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocsCss;
 import java.util.Arrays;
 import java.util.Collections;
 
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.RichTextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Unit;
+import de.symeda.sormas.ui.utils.CustomLayout;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.SormasRichTextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.disease.DiseaseConfigurationDto;
 import de.symeda.sormas.api.exposure.ExposureCategory;
@@ -137,7 +138,7 @@ public class DiseaseConfigurationEditForm extends AbstractEditForm<DiseaseConfig
 
 		tfAutomaticSampleAssignmentThreshold = addField(generalLayout, DiseaseConfigurationDto.AUTOMATIC_SAMPLE_ASSIGNMENT_THRESHOLD);
 
-		RichTextArea caseDefinitionText = addField(caseDefinitionLayout, DiseaseConfigurationDto.CASE_DEFINITION_TEXT, RichTextArea.class);
+		SormasRichTextArea caseDefinitionText = addField(caseDefinitionLayout, DiseaseConfigurationDto.CASE_DEFINITION_TEXT, SormasRichTextArea.class);
 		caseDefinitionText.setNullRepresentation("");
 		caseDefinitionText.setImmediate(true);
 

@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.ui.configuration.customizableenum;
 
-import com.vaadin.ui.Notification;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.customizableenum.CustomizableEnumValueDto;
@@ -36,7 +36,7 @@ public class CustomizableEnumController {
 			new CommitDiscardWrapperComponent<>(createForm, createForm.getFieldGroup());
 		cdw.addCommitListener(() -> {
 			FacadeProvider.getCustomizableEnumFacade().save(createForm.getValue());
-			Notification.show(I18nProperties.getString(Strings.messageEntryCreated), Notification.Type.ASSISTIVE_NOTIFICATION);
+			NotificationHelper.show(I18nProperties.getString(Strings.messageEntryCreated), NotificationHelper.Type.ASSISTIVE_NOTIFICATION);
 			SormasUI.get().getNavigator().navigateTo(CustomizableEnumValuesView.VIEW_NAME);
 		});
 
@@ -53,7 +53,7 @@ public class CustomizableEnumController {
 			new CommitDiscardWrapperComponent<>(editForm, editForm.getFieldGroup());
 		cdw.addCommitListener(() -> {
 			FacadeProvider.getCustomizableEnumFacade().save(editForm.getValue());
-			Notification.show(I18nProperties.getString(Strings.messageCustomizableEnumValueSaved), Notification.Type.ASSISTIVE_NOTIFICATION);
+			NotificationHelper.show(I18nProperties.getString(Strings.messageCustomizableEnumValueSaved), NotificationHelper.Type.ASSISTIVE_NOTIFICATION);
 			SormasUI.get().getNavigator().navigateTo(CustomizableEnumValuesView.VIEW_NAME);
 		});
 

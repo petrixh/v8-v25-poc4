@@ -22,14 +22,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Language;
 import de.symeda.sormas.api.customizablefield.CustomizableFieldMetadataDto;
@@ -53,7 +54,7 @@ public class CustomizableFieldTranslationsComponent extends VerticalLayout {
 
 	private final VerticalLayout rowsLayout;
 	private final List<TranslationRow> rows = new ArrayList<>();
-	private final Label lblNoTranslations;
+	private final Span lblNoTranslations;
 
 	public CustomizableFieldTranslationsComponent() {
 
@@ -62,17 +63,17 @@ public class CustomizableFieldTranslationsComponent extends VerticalLayout {
 		setSpacing(false);
 		CssStyles.style(this, CssStyles.VSPACE_TOP_4);
 
-		lblNoTranslations = new Label(I18nProperties.getString(Strings.infoNoCustomizableFieldTranslations));
+		lblNoTranslations = new Span(I18nProperties.getString(Strings.infoNoCustomizableFieldTranslations));
 		addComponent(lblNoTranslations);
 
 		rowsLayout = new VerticalLayout();
 		rowsLayout.setWidthFull();
-		rowsLayout.setMargin(false);
+		rowsLayout.setPadding(false);
 		rowsLayout.setSpacing(false);
 		addComponent(rowsLayout);
 
 		Button btnAdd =
-			ButtonHelper.createIconButtonWithCaption(null, null, VaadinIcons.PLUS, e -> addRow(null, null, null, true), CssStyles.VSPACE_TOP_5);
+			ButtonHelper.createIconButtonWithCaption(null, null, VaadinIcon.PLUS, e -> addRow(null, null, null, true), CssStyles.VSPACE_TOP_5);
 		btnAdd.setHeight(25, Unit.PIXELS);
 		btnAdd.setWidthFull();
 		addComponent(btnAdd);
@@ -81,7 +82,7 @@ public class CustomizableFieldTranslationsComponent extends VerticalLayout {
 	public void setValue(Map<String, Map<String, String>> translations) {
 
 		rows.clear();
-		rowsLayout.removeAllComponents();
+		rowsLayout.removeAll();
 
 		if (translations != null) {
 			translations.forEach((localeStr, translationMap) -> {
@@ -90,7 +91,7 @@ public class CustomizableFieldTranslationsComponent extends VerticalLayout {
 				String description = translationMap != null ? translationMap.get(CustomizableFieldMetadataDto.DESCRIPTION) : null;
 				addRow(lang, name, description, false);
 			});
-			rows.forEach(rowsLayout::addComponent);
+			rows.forEach(rowsLayout::add);
 		}
 
 		updateNoTranslationsLabelVisibility();
@@ -141,13 +142,13 @@ public class CustomizableFieldTranslationsComponent extends VerticalLayout {
 		TranslationRow row = new TranslationRow(language, name, description);
 		row.setDeleteCallback(() -> {
 			rows.remove(row);
-			rowsLayout.removeComponent(row);
+			rowsLayout.remove(row);
 			updateNoTranslationsLabelVisibility();
 		});
 		rows.add(row);
 		updateNoTranslationsLabelVisibility();
 		if (render) {
-			rowsLayout.addComponent(row);
+			rowsLayout.add(row);
 		}
 	}
 
@@ -171,7 +172,7 @@ public class CustomizableFieldTranslationsComponent extends VerticalLayout {
 
 			cbLanguage = new ComboBox<>();
 			cbLanguage.setItems(Language.values());
-			cbLanguage.setItemCaptionGenerator(Language::toString);
+			cbLanguage.setItemLabelGenerator(Language::toString);
 			cbLanguage.setWidth(220, Unit.PIXELS);
 			cbLanguage.setPlaceholder(I18nProperties.getString(Strings.promptCustomizableEnumTranslationLanguage));
 			if (language != null) {
@@ -195,7 +196,7 @@ public class CustomizableFieldTranslationsComponent extends VerticalLayout {
 
 			CssStyles.style(CssStyles.VSPACE_NONE, cbLanguage, tfName, tfDescription);
 
-			Button btnDelete = ButtonHelper.createIconButtonWithCaption(null, null, VaadinIcons.TRASH, e -> deleteCallback.run());
+			Button btnDelete = ButtonHelper.createIconButtonWithCaption(null, null, VaadinIcon.TRASH, e -> deleteCallback.run());
 
 			addComponent(cbLanguage);
 			addComponent(tfName);

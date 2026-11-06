@@ -17,14 +17,14 @@ package de.symeda.sormas.ui.configuration.customizableenum;
 
 import java.util.Arrays;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -64,18 +64,18 @@ public class CustomizableEnumValuesView extends AbstractConfigurationView {
 		criteria = ViewModelProviders.of(CustomizableEnumValuesView.class).get(CustomizableEnumCriteria.class, new CustomizableEnumCriteria());
 		grid = new CustomizableEnumValuesGrid(criteria);
 		VerticalLayout gridLayout = new VerticalLayout();
-		gridLayout.addComponent(createFilterBar());
+		gridLayout.add(createFilterBar());
 		setUpRelevanceStatusFilter();
-		gridLayout.addComponent(relevanceStatusFilter);
+		gridLayout.add(relevanceStatusFilter);
 		gridLayout.setComponentAlignment(relevanceStatusFilter, Alignment.MIDDLE_RIGHT);
-		gridLayout.addComponent(grid);
-		gridLayout.setMargin(true);
+		gridLayout.add(grid);
+		gridLayout.setPadding(true);
 		gridLayout.setSpacing(false);
-		gridLayout.setExpandRatio(grid, 1);
+		gridLayout.setFlexGrow(1, grid);
 		gridLayout.setSizeFull();
-		gridLayout.setStyleName("crud-main-layout");
+		gridLayout.setClassName("crud-main-layout");
 
-		addHeaderComponent(ButtonHelper.createIconButton(null, VaadinIcons.INFO_CIRCLE, e -> {
+		addHeaderComponent(ButtonHelper.createIconButton(null, VaadinIcon.INFO_CIRCLE, e -> {
 			VaadinUiUtil.showSimplePopupWindow(
 				I18nProperties.getString(Strings.headingCustomizableEnumConfigurationInfo),
 				I18nProperties.getString(Strings.infoCustomizableEnumConfigurationInfo),
@@ -86,9 +86,9 @@ public class CustomizableEnumValuesView extends AbstractConfigurationView {
 		addHeaderComponent(
 			ButtonHelper.createIconButton(
 				Captions.actionNewEntry,
-				VaadinIcons.PLUS_CIRCLE,
+				VaadinIcon.PLUS_CIRCLE,
 				e -> ControllerProvider.getCustomizableEnumController().createCustomizableEnumValue(),
-				ValoTheme.BUTTON_PRIMARY));
+				CssStyles.BUTTON_PRIMARY));
 
 		addComponent(gridLayout);
 	}
@@ -96,7 +96,7 @@ public class CustomizableEnumValuesView extends AbstractConfigurationView {
 	private HorizontalLayout createFilterBar() {
 
 		HorizontalLayout filterLayout = new HorizontalLayout();
-		filterLayout.setMargin(false);
+		filterLayout.setPadding(false);
 		filterLayout.setSpacing(true);
 
 		searchField = new SearchField();
@@ -105,7 +105,7 @@ public class CustomizableEnumValuesView extends AbstractConfigurationView {
 			criteria.freeTextFilter(e.getText());
 			grid.reload();
 		});
-		filterLayout.addComponent(searchField);
+		filterLayout.add(searchField);
 
 		dataTypeFilter = new ComboBox<>(
 			I18nProperties.getPrefixCaption(CustomizableEnumValueIndexDto.I18N_PREFIX, CustomizableEnumValueIndexDto.DATA_TYPE),
@@ -114,7 +114,7 @@ public class CustomizableEnumValuesView extends AbstractConfigurationView {
 			criteria.dataType(e.getValue());
 			grid.reload();
 		});
-		filterLayout.addComponent(dataTypeFilter);
+		filterLayout.add(dataTypeFilter);
 
 		diseaseFilter = new ComboBox<>(
 			I18nProperties.getPrefixCaption(CustomizableEnumValueIndexDto.I18N_PREFIX, CustomizableEnumValueIndexDto.DISEASES),
@@ -123,9 +123,9 @@ public class CustomizableEnumValuesView extends AbstractConfigurationView {
 			criteria.disease(e.getValue());
 			grid.reload();
 		});
-		filterLayout.addComponent(diseaseFilter);
+		filterLayout.add(diseaseFilter);
 
-		filterLayout.addComponent(ButtonHelper.createButton(Captions.actionResetFilters, event -> {
+		filterLayout.add(ButtonHelper.createButton(Captions.actionResetFilters, event -> {
 			ViewModelProviders.of(CustomizableEnumValuesView.class).remove(CustomizableEnumCriteria.class);
 			navigateTo(null);
 		}, CssStyles.FORCE_CAPTION));
@@ -140,7 +140,7 @@ public class CustomizableEnumValuesView extends AbstractConfigurationView {
 		relevanceStatusFilter.setWidth(210, Unit.PIXELS);
 		relevanceStatusFilter.setEmptySelectionAllowed(false);
 		relevanceStatusFilter.setItems(Boolean.TRUE, Boolean.FALSE);
-		relevanceStatusFilter.setItemCaptionGenerator(
+		relevanceStatusFilter.setItemLabelGenerator(
 			item -> I18nProperties.getCaption(item ? Captions.customizableEnumValueActiveValues : Captions.customizableEnumValueInactiveValues));
 		relevanceStatusFilter.addValueChangeListener(e -> {
 			criteria.active(e.getValue());

@@ -15,8 +15,8 @@
 
 package de.symeda.sormas.ui.configuration.customizablefield;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.renderers.HtmlRenderer;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.customizablefield.CustomizableFieldMetadataCriteria;
@@ -66,17 +66,17 @@ public class CustomizableFieldsGrid extends FilteredGrid<CustomizableFieldMetada
 
 		addEditColumn(e -> ControllerProvider.getCustomizableFieldsController().editField(e.getUuid()));
 
-		addColumn(e -> VaadinIcons.COPY.getHtml(), new HtmlRenderer()).setId(CLONE_COLUMN_ID)
+		addColumn(e -> HtmlRenderer.iconHtml(VaadinIcon.COPY), new HtmlRenderer()).setId(CLONE_COLUMN_ID)
 			.setCaption(I18nProperties.getCaption(Captions.actionClone))
 			.setSortable(false)
 			.setWidth(40);
 
-		addColumn(e -> e.isActive() ? VaadinIcons.CLOSE.getHtml() : VaadinIcons.CHECK.getHtml(), new HtmlRenderer()).setId(TOGGLE_ACTIVE_COLUMN_ID)
+		addColumn(e -> e.isActive() ? HtmlRenderer.iconHtml(VaadinIcon.CLOSE) : HtmlRenderer.iconHtml(VaadinIcon.CHECK), new HtmlRenderer()).setId(TOGGLE_ACTIVE_COLUMN_ID)
 			.setCaption(I18nProperties.getCaption(Captions.actionEnable) + "/" + I18nProperties.getCaption(Captions.actionDisable))
 			.setSortable(false)
 			.setWidth(55);
 
-		addColumn(e -> VaadinIcons.TRASH.getHtml(), new HtmlRenderer()).setId(DELETE_COLUMN_ID)
+		addColumn(e -> HtmlRenderer.iconHtml(VaadinIcon.TRASH), new HtmlRenderer()).setId(DELETE_COLUMN_ID)
 			.setCaption(I18nProperties.getCaption(Captions.actionDelete))
 			.setSortable(false)
 			.setWidth(40);
@@ -91,8 +91,8 @@ public class CustomizableFieldsGrid extends FilteredGrid<CustomizableFieldMetada
 				false,
 				e -> ControllerProvider.getCustomizableFieldsController().deleteField(e.getUuid(), this)));
 
-		for (Column<?, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(CustomizableFieldMetadataDto.I18N_PREFIX, column.getId(), column.getCaption()));
+		for (Column<?, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(CustomizableFieldMetadataDto.I18N_PREFIX, column.getKey(), column.getCaption()));
 		}
 	}
 

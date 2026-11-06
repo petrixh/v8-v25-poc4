@@ -30,20 +30,21 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import com.vaadin.data.Binder;
-import com.vaadin.data.BinderValidationStatus;
-import com.vaadin.data.Converter;
-import com.vaadin.data.Result;
-import com.vaadin.data.ValidationException;
-import com.vaadin.data.converter.StringToIntegerConverter;
-import com.vaadin.data.validator.StringLengthValidator;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.DateField;
-import com.vaadin.ui.DateTimeField;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.BinderValidationStatus;
+import com.vaadin.flow.data.converter.Converter;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.converter.StringToIntegerConverter;
+import com.vaadin.flow.data.validator.StringLengthValidator;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
+import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.TextField;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -113,10 +114,10 @@ public class CustomizableFieldEditForm extends CustomLayout {
     private final ComboBox<String> defaultValueCombo;
     private final ComboBox<Boolean> defaultValueCheckboxCombo;
     private final ComboBox<YesNoUnknown> defaultValueYesNoUnknownCombo;
-    private final DateField defaultValueDateField;
-    private final DateTimeField defaultValueDateTimeField;
+    private final DatePicker defaultValueDateField;
+    private final DateTimePicker defaultValueDateTimeField;
     private final CustomizableFieldOptionsComponent optionsComponent;
-    private final Label optionsHeading;
+    private final Span optionsHeading;
     private final CustomizableFieldTranslationsComponent translationsComponent;
 
     private CustomizableFieldMetadataDto dto;
@@ -127,16 +128,16 @@ public class CustomizableFieldEditForm extends CustomLayout {
         setWidth(840, Unit.PIXELS);
 
         // Section headings
-        Label basicsHeading = new Label(I18nProperties.getString(Strings.headingCustomizableFieldBasics));
-        basicsHeading.addStyleName(H3);
+        Span basicsHeading = new Span(I18nProperties.getString(Strings.headingCustomizableFieldBasics));
+        basicsHeading.addClassName(H3);
         addComponent(basicsHeading, BASICS_HEADING_LOC);
 
-        Label placementHeading = new Label(I18nProperties.getString(Strings.headingCustomizableFieldPlacement));
-        placementHeading.addStyleName(H3);
+        Span placementHeading = new Span(I18nProperties.getString(Strings.headingCustomizableFieldPlacement));
+        placementHeading.addClassName(H3);
         addComponent(placementHeading, PLACEMENT_HEADING_LOC);
 
-        Label behaviorHeading = new Label(I18nProperties.getString(Strings.headingCustomizableFieldBehavior));
-        behaviorHeading.addStyleName(H3);
+        Span behaviorHeading = new Span(I18nProperties.getString(Strings.headingCustomizableFieldBehavior));
+        behaviorHeading.addClassName(H3);
         addComponent(behaviorHeading, BEHAVIOR_HEADING_LOC);
 
         // --- BASICS ---
@@ -157,7 +158,7 @@ public class CustomizableFieldEditForm extends CustomLayout {
         fieldTypeCombo.setWidth(100, Unit.PERCENTAGE);
         fieldTypeCombo.setEmptySelectionAllowed(false);
         fieldTypeCombo.setItems(CustomizableFieldType.values());
-        fieldTypeCombo.setItemCaptionGenerator(I18nProperties::getEnumCaption);
+        fieldTypeCombo.setItemLabelGenerator(I18nProperties::getEnumCaption);
         fieldTypeCombo.setRequiredIndicatorVisible(true);
         if (isEdit) {
             fieldTypeCombo.setEnabled(false);
@@ -194,24 +195,24 @@ public class CustomizableFieldEditForm extends CustomLayout {
         defaultValueCheckboxCombo.setWidth(100, Unit.PERCENTAGE);
         defaultValueCheckboxCombo.setEmptySelectionAllowed(true);
         defaultValueCheckboxCombo.setItems(Boolean.TRUE, Boolean.FALSE);
-        defaultValueCheckboxCombo.setItemCaptionGenerator(value -> Boolean.TRUE.equals(value) ? "True" : "False");
+        defaultValueCheckboxCombo.setItemLabelGenerator(value -> Boolean.TRUE.equals(value) ? "True" : "False");
 
         defaultValueYesNoUnknownCombo = new ComboBox<>(defaultValueCaption);
         defaultValueYesNoUnknownCombo.setWidth(100, Unit.PERCENTAGE);
         defaultValueYesNoUnknownCombo.setEmptySelectionAllowed(true);
         defaultValueYesNoUnknownCombo.setItems(YesNoUnknown.values());
-        defaultValueYesNoUnknownCombo.setItemCaptionGenerator(I18nProperties::getEnumCaption);
+        defaultValueYesNoUnknownCombo.setItemLabelGenerator(I18nProperties::getEnumCaption);
 
-        defaultValueDateField = new DateField(defaultValueCaption);
+        defaultValueDateField = new DatePicker(defaultValueCaption);
         defaultValueDateField.setWidth(100, Unit.PERCENTAGE);
         defaultValueDateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
 
-        defaultValueDateTimeField = new DateTimeField(defaultValueCaption);
+        defaultValueDateTimeField = new DateTimePicker(defaultValueCaption);
         defaultValueDateTimeField.setWidth(100, Unit.PERCENTAGE);
         defaultValueDateTimeField.setDateFormat(DateHelper.getLocalDateTimeFormat(I18nProperties.getUserLanguage()).toPattern());
 
-        optionsHeading = new Label(I18nProperties.getString(Strings.labelCustomizableFieldOptions));
-        optionsHeading.addStyleName(CssStyles.VAADIN_CAPTION);
+        optionsHeading = new Span(I18nProperties.getString(Strings.labelCustomizableFieldOptions));
+        optionsHeading.addClassName(CssStyles.VAADIN_CAPTION);
         optionsHeading.setVisible(false);
         addComponent(optionsHeading, OPTIONS_HEADING_LOC);
 
@@ -231,7 +232,7 @@ public class CustomizableFieldEditForm extends CustomLayout {
         contextCombo.setWidth(100, Unit.PERCENTAGE);
         contextCombo.setEmptySelectionAllowed(false);
         contextCombo.setItems(CustomizableFieldContext.values());
-        contextCombo.setItemCaptionGenerator(I18nProperties::getEnumCaption);
+        contextCombo.setItemLabelGenerator(I18nProperties::getEnumCaption);
         contextCombo.setRequiredIndicatorVisible(true);
         addComponent(contextCombo, CustomizableFieldMetadataDto.CONTEXT_CLASS);
         binder.forField(contextCombo)
@@ -241,7 +242,7 @@ public class CustomizableFieldEditForm extends CustomLayout {
         groupCombo = new ComboBox<>(caption(CustomizableFieldMetadataDto.UI_GROUP));
         groupCombo.setWidth(100, Unit.PERCENTAGE);
         groupCombo.setEmptySelectionAllowed(false);
-        groupCombo.setItemCaptionGenerator(I18nProperties::getEnumCaption);
+        groupCombo.setItemLabelGenerator(I18nProperties::getEnumCaption);
         groupCombo.setRequiredIndicatorVisible(true);
         addComponent(groupCombo, CustomizableFieldMetadataDto.UI_GROUP);
         binder.forField(groupCombo)
@@ -283,22 +284,22 @@ public class CustomizableFieldEditForm extends CustomLayout {
 
         // --- BEHAVIOR ---
 
-        CheckBox activeBox = new CheckBox(caption(CustomizableFieldMetadataDto.ACTIVE));
+        Checkbox activeBox = new Checkbox(caption(CustomizableFieldMetadataDto.ACTIVE));
         addComponent(activeBox, CustomizableFieldMetadataDto.ACTIVE);
         binder.forField(activeBox).bind(d -> d.isActive(), (d, v) -> d.setActive(Boolean.TRUE.equals(v)));
 
-        CheckBox readOnlyBox = new CheckBox(caption(CustomizableFieldMetadataDto.READ_ONLY));
+        Checkbox readOnlyBox = new Checkbox(caption(CustomizableFieldMetadataDto.READ_ONLY));
         addComponent(readOnlyBox, CustomizableFieldMetadataDto.READ_ONLY);
         binder.forField(readOnlyBox).bind(d -> d.isReadOnly(), (d, v) -> d.setReadOnly(Boolean.TRUE.equals(v)));
 
-        CheckBox mandatoryBox = new CheckBox(caption(CustomizableFieldMetadataDto.MANDATORY));
+        Checkbox mandatoryBox = new Checkbox(caption(CustomizableFieldMetadataDto.MANDATORY));
         addComponent(mandatoryBox, CustomizableFieldMetadataDto.MANDATORY);
         binder.forField(mandatoryBox).bind(d -> d.isMandatory(), (d, v) -> d.setMandatory(Boolean.TRUE.equals(v)));
 
         // --- VISIBILITY ---
 
-        Label visibilityHeading = new Label(I18nProperties.getString(Strings.headingCustomizableFieldVisibility));
-        visibilityHeading.addStyleName(H3);
+        Span visibilityHeading = new Span(I18nProperties.getString(Strings.headingCustomizableFieldVisibility));
+        visibilityHeading.addClassName(H3);
         addComponent(visibilityHeading, VISIBILITY_HEADING_LOC);
 
         cbsDiseases = new CheckboxSet<>();
@@ -311,8 +312,8 @@ public class CustomizableFieldEditForm extends CustomLayout {
 
         // --- TRANSLATIONS ---
 
-        Label translationsHeading = new Label(I18nProperties.getString(Strings.headingCustomizableFieldTranslations));
-        translationsHeading.addStyleName(H3);
+        Span translationsHeading = new Span(I18nProperties.getString(Strings.headingCustomizableFieldTranslations));
+        translationsHeading.addClassName(H3);
         addComponent(translationsHeading, TRANSLATIONS_HEADING_LOC);
 
         translationsComponent = new CustomizableFieldTranslationsComponent();
@@ -562,7 +563,7 @@ public class CustomizableFieldEditForm extends CustomLayout {
         return new Converter<String, Float>() {
 
             @Override
-            public Result<Float> convertToModel(String value, com.vaadin.data.ValueContext context) {
+            public Result<Float> convertToModel(String value, com.vaadin.flow.data.binder.ValueContext context) {
                 if (value == null || value.trim().isEmpty()) {
                     return Result.ok(null);
                 }
@@ -574,7 +575,7 @@ public class CustomizableFieldEditForm extends CustomLayout {
             }
 
             @Override
-            public String convertToPresentation(Float value, com.vaadin.data.ValueContext context) {
+            public String convertToPresentation(Float value, com.vaadin.flow.data.binder.ValueContext context) {
                 return value == null ? "" : value.toString();
             }
         };

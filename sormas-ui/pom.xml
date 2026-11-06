@@ -141,6 +141,16 @@
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-rich-text-editor-flow</artifactId>
 		</dependency>
+		<!-- Vaadin commercial components (M0 D8, D10), same licence check as above: Charts for the Highcharts diagrams (highcharts/HighChart),
+			Map for the maps (map/LeafletMap) -->
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin-charts-flow</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin-map-flow</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-cdi</artifactId>

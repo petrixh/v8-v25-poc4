@@ -200,7 +200,7 @@ snapshot has the same row counts and UUIDs (checked for two C1 copies), and `res
 ## Smoke check
 
 `env/smoke.cjs` checks a running copy: each web test user in `env/smoke-users.json` (`admin`, `SurvSup`, `NatUser`,
-`SurvOff`, `LabOff`, `HospInf`, `PoeSup`) logs in, and the first view must load with no console or page error, no HTTP
+`SurvOff`, `LabOff`, `HospInf`, `PoeSup`, `NatClin`) logs in, and the first view must load with no console or page error, no HTTP
 response of 400 or more and no collapsed layout (a scroll height over 4 window heights). `PoeInf` must be refused by the
 web login ("Your user account does not have access to the web application"): its role has no web UI right. CI runs it
 after every build (`CI.md`).

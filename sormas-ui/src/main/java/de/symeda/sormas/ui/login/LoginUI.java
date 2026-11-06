@@ -18,6 +18,7 @@
 package de.symeda.sormas.ui.login;
 
 import java.io.IOException;
+import java.util.function.BooleanSupplier;
 
 import jakarta.inject.Inject;
 import jakarta.security.enterprise.AuthenticationStatus;
@@ -46,7 +47,6 @@ import com.vaadin.flow.server.VaadinSession;
 
 import de.symeda.sormas.api.AuthProvider;
 import de.symeda.sormas.api.FacadeProvider;
-import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.SormasErrorHandler;
 import de.symeda.sormas.ui.SormasUI;
 import fish.payara.security.openid.api.OpenIdContext;
@@ -168,12 +168,21 @@ public final class LoginUI {
 		@Inject
 		private SecurityContext securityContext;
 
+		/**
+		 * Whether the logged-in caller has the web UI right ({@code SORMAS_UI}): read through the backend
+		 * ({@link LoginHelper#currentUserHasWebUiRight()}), not with {@code isUserInRole}, which fails on Payara 7
+		 * (migration ticket 1a-30e).
+		 */
+		private final transient BooleanSupplier webUiRight;
+
 		public OidcLoginServlet() {
 			// created by the servlet container
+			this.webUiRight = LoginHelper::currentUserHasWebUiRight;
 		}
 
-		OidcLoginServlet(SecurityContext securityContext) {
+		OidcLoginServlet(SecurityContext securityContext, BooleanSupplier webUiRight) {
 			this.securityContext = securityContext;
+			this.webUiRight = webUiRight;
 		}
 
 		@Override
@@ -184,7 +193,7 @@ public final class LoginUI {
 				return;
 			}
 			if (status == AuthenticationStatus.SUCCESS) {
-				if (request.isUserInRole(UserRight.SORMAS_UI.name())) {
+				if (webUiRight.getAsBoolean()) {
 					response.sendRedirect(request.getContextPath() + "/");
 				} else {
 					// what the Vaadin 8 container constraint answered to a user without the web UI right

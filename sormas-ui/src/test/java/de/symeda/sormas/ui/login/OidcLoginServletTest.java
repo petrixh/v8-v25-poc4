@@ -39,7 +39,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import de.symeda.sormas.api.user.UserRight;
 
 /**
  * {@link LoginUI.OidcLoginServlet} with a stub of the OpenID mechanism behind {@link SecurityContext#authenticate}: it
@@ -54,9 +53,21 @@ public class OidcLoginServletTest {
 	private HttpServletRequest request;
 	private HttpServletResponse response;
 	private Principal caller;
+	/** the web UI right of the logged-in caller, as the backend reports it */
+	private Boolean webUiRight;
+	private int webUiRightChecks;
+
+	private LoginUI.OidcLoginServlet servlet() {
+		return new LoginUI.OidcLoginServlet(securityContext, () -> {
+			webUiRightChecks++;
+			return webUiRight;
+		});
+	}
 
 	@BeforeEach
 	public void setUp() throws Exception {
+		webUiRight = null;
+		webUiRightChecks = 0;
 		securityContext = mock(SecurityContext.class);
 		request = mock(HttpServletRequest.class);
 		response = mock(HttpServletResponse.class);
@@ -78,7 +89,7 @@ public class OidcLoginServletTest {
 	public void testNotLoggedInRedirectsToProvider() throws Exception {
 		caller = null;
 
-		new LoginUI.OidcLoginServlet(securityContext).doGet(request, response);
+		servlet().doGet(request, response);
 
 		ArgumentCaptor<AuthenticationParameters> parameters = ArgumentCaptor.forClass(AuthenticationParameters.class);
 		verify(securityContext).authenticate(same(request), same(response), parameters.capture());
@@ -88,39 +99,46 @@ public class OidcLoginServletTest {
 		verify(response).sendRedirect(PROVIDER_LOGIN);
 		verify(response, never()).sendRedirect("/sormas-ui/");
 		verify(response, never()).sendError(anyInt());
+		assertEquals(0, webUiRightChecks);
 	}
 
 	@Test
 	public void testLoggedInWithWebRightGoesToApp() throws Exception {
 		caller = () -> "natuser";
-		when(request.isUserInRole(UserRight.SORMAS_UI.name())).thenReturn(true);
+		webUiRight = true;
 
-		new LoginUI.OidcLoginServlet(securityContext).doGet(request, response);
+		servlet().doGet(request, response);
 
 		verify(response).sendRedirect("/sormas-ui/");
 		verify(response, never()).sendError(anyInt());
+		// the right comes from the backend, not from the container role check (fails on Payara 7)
+		assertEquals(1, webUiRightChecks);
+		verify(request, never()).isUserInRole(anyString());
 	}
 
 	@Test
 	public void testLoggedInWithoutWebRightIsForbiddenNotRedirected() throws Exception {
 		caller = () -> "poeinf";
-		when(request.isUserInRole(UserRight.SORMAS_UI.name())).thenReturn(false);
+		webUiRight = false;
 
-		new LoginUI.OidcLoginServlet(securityContext).doGet(request, response);
+		servlet().doGet(request, response);
 
 		// no redirect back to the app, so no loop between the app and this servlet
 		verify(response, never()).sendRedirect(anyString());
 		verify(response).sendError(HttpServletResponse.SC_FORBIDDEN);
+		assertEquals(1, webUiRightChecks);
+		verify(request, never()).isUserInRole(anyString());
 	}
 
 	@Test
 	public void testMechanismFailureIsUnauthorized() throws Exception {
 		doReturn(AuthenticationStatus.SEND_FAILURE).when(securityContext).authenticate(any(), any(), any());
 
-		new LoginUI.OidcLoginServlet(securityContext).doGet(request, response);
+		servlet().doGet(request, response);
 
 		verify(response, never()).sendRedirect(anyString());
 		verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
+		assertEquals(0, webUiRightChecks);
 	}
 
 	@Test

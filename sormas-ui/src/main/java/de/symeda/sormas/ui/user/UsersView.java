@@ -17,17 +17,19 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.user;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.data.value.ValueChangeMode;
+
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -82,7 +84,7 @@ public class UsersView extends AbstractUserView {
 	private ComboBox regionFilter;
 	private ComboBox districtFilter;
 	private TextField searchField;
-	private CheckBox showOnlyRestrictedAccessToAssignedEntities;
+	private Checkbox showOnlyRestrictedAccessToAssignedEntities;
 
 	private RowCount rowsCount;
 
@@ -97,19 +99,19 @@ public class UsersView extends AbstractUserView {
 		grid = new UserGrid();
 		grid.setCriteria(criteria);
 		gridLayout = new VerticalLayout();
-		gridLayout.addComponent(createFilterBar());
-		gridLayout.addComponent(createActionsBar());
+		gridLayout.add(createFilterBar());
+		gridLayout.add(createActionsBar());
 
 		rowsCount = new RowCount(Strings.labelNumberOfUsers, grid.getDataSize());
 		grid.addDataSizeChangeListener(e -> rowsCount.update(grid.getDataSize()));
-		gridLayout.addComponent(rowsCount);
+		gridLayout.add(rowsCount);
 
-		gridLayout.addComponent(grid);
-		gridLayout.setMargin(true);
+		gridLayout.add(grid);
+		gridLayout.setPadding(true);
 		gridLayout.setSpacing(false);
 		gridLayout.setSizeFull();
-		gridLayout.setExpandRatio(grid, 1);
-		gridLayout.setStyleName("crud-main-layout");
+		gridLayout.setFlexGrow(1, grid);
+		gridLayout.setClassName("crud-main-layout");
 
 		addComponent(gridLayout);
 
@@ -117,27 +119,27 @@ public class UsersView extends AbstractUserView {
 			&& FacadeProvider.getFeatureConfigurationFacade().isFeatureDisabled(FeatureType.AUTH_PROVIDER_TO_SORMAS_USER_SYNC)) {
 			createButton = ButtonHelper.createIconButton(
 				Captions.userNewUser,
-				VaadinIcons.PLUS_CIRCLE,
+				VaadinIcon.PLUS_CIRCLE,
 				e -> ControllerProvider.getUserController().create(),
-				ValoTheme.BUTTON_PRIMARY);
+				CssStyles.BUTTON_PRIMARY);
 
 			addHeaderComponent(createButton);
 		}
 
 		if (FacadeProvider.getUserFacade().isSyncEnabled()) {
-			syncButton = ButtonHelper.createIconButton(Captions.syncUsers, VaadinIcons.REFRESH, e -> ControllerProvider.getUserController().sync());
+			syncButton = ButtonHelper.createIconButton(Captions.syncUsers, VaadinIcon.REFRESH, e -> ControllerProvider.getUserController().sync());
 
 			addHeaderComponent(syncButton);
 		}
 
 		if (UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS)) {
-			Button btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcons.CHECK_SQUARE_O, null);
+			Button btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcon.CHECK_SQUARE_O, null);
 			btnEnterBulkEditMode.setVisible(!ViewModelProviders.of(UsersView.class).get(ViewConfiguration.class).isInEagerMode());
 
 			addHeaderComponent(btnEnterBulkEditMode);
 
 			Button btnLeaveBulkEditMode =
-				ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcons.CLOSE, null, ValoTheme.BUTTON_PRIMARY);
+				ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcon.CLOSE, null, CssStyles.BUTTON_PRIMARY);
 			btnLeaveBulkEditMode.setVisible(ViewModelProviders.of(UsersView.class).get(ViewConfiguration.class).isInEagerMode());
 
 			addHeaderComponent(btnLeaveBulkEditMode);
@@ -162,7 +164,7 @@ public class UsersView extends AbstractUserView {
 	public HorizontalLayout createFilterBar() {
 
 		HorizontalLayout filterLayout = new HorizontalLayout();
-		filterLayout.setMargin(false);
+		filterLayout.setPadding(false);
 		filterLayout.setSpacing(true);
 		filterLayout.setSizeUndefined();
 
@@ -174,12 +176,12 @@ public class UsersView extends AbstractUserView {
 		activeFilter.addItems(ACTIVE_FILTER, INACTIVE_FILTER);
 		activeFilter.addValueChangeListener(e -> {
 			criteria.active(
-				ACTIVE_FILTER.equals(e.getProperty().getValue())
+				ACTIVE_FILTER.equals(e.getValue())
 					? Boolean.TRUE
-					: INACTIVE_FILTER.equals(e.getProperty().getValue()) ? Boolean.FALSE : null);
+					: INACTIVE_FILTER.equals(e.getValue()) ? Boolean.FALSE : null);
 			navigateTo(criteria);
 		});
-		filterLayout.addComponent(activeFilter);
+		filterLayout.add(activeFilter);
 
 		userRolesFilter = ComboBoxHelper.createComboBoxV7();
 		userRolesFilter.setId(UserDto.USER_ROLES);
@@ -188,10 +190,10 @@ public class UsersView extends AbstractUserView {
 		userRolesFilter.setDescription(I18nProperties.getPrefixCaption(UserDto.I18N_PREFIX, UserDto.USER_ROLES));
 		userRolesFilter.addItems(FacadeProvider.getUserRoleFacade().getAllActiveAsReference());
 		userRolesFilter.addValueChangeListener(e -> {
-			criteria.userRole((UserRoleReferenceDto) e.getProperty().getValue());
+			criteria.userRole((UserRoleReferenceDto) e.getValue());
 			navigateTo(criteria);
 		});
-		filterLayout.addComponent(userRolesFilter);
+		filterLayout.add(userRolesFilter);
 
 		UserDto user = UiUtil.getUser();
 
@@ -204,7 +206,7 @@ public class UsersView extends AbstractUserView {
 			regionFilter.setDescription(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.REGION));
 			regionFilter.addItems(FacadeProvider.getRegionFacade().getAllActiveByServerCountry());
 			regionFilter.addValueChangeListener(e -> {
-				RegionReferenceDto region = (RegionReferenceDto) e.getProperty().getValue();
+				RegionReferenceDto region = (RegionReferenceDto) e.getValue();
 
 				if (!DataHelper.equal(region, criteria.getRegion())) {
 					criteria.district(null);
@@ -213,7 +215,7 @@ public class UsersView extends AbstractUserView {
 				criteria.region(region);
 				navigateTo(criteria);
 			});
-			filterLayout.addComponent(regionFilter);
+			filterLayout.add(regionFilter);
 		}
 
 		districtFilter = ComboBoxHelper.createComboBoxV7();
@@ -222,11 +224,11 @@ public class UsersView extends AbstractUserView {
 		districtFilter.setInputPrompt(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.DISTRICT));
 		districtFilter.setDescription(I18nProperties.getDescription(Descriptions.descDistrictFilter));
 		districtFilter.addValueChangeListener(e -> {
-			DistrictReferenceDto district = (DistrictReferenceDto) e.getProperty().getValue();
+			DistrictReferenceDto district = (DistrictReferenceDto) e.getValue();
 			criteria.district(district);
 			navigateTo(criteria);
 		});
-		filterLayout.addComponent(districtFilter);
+		filterLayout.add(districtFilter);
 
 		searchField = new TextField();
 		searchField.setId("search");
@@ -235,22 +237,27 @@ public class UsersView extends AbstractUserView {
 		searchField.setInputPrompt(I18nProperties.getString(Strings.promptUserSearch));
 		searchField.setDescription(I18nProperties.getString(Strings.promptUserSearch));
 		searchField.setImmediate(true);
-		searchField.addTextChangeListener(e -> {
-			criteria.freeText(e.getText());
+		// was a V7 text change listener (lazy, user input only)
+		searchField.setValueChangeMode(ValueChangeMode.LAZY);
+		searchField.addValueChangeListener(e -> {
+			if (!e.isFromClient()) {
+				return;
+			}
+			criteria.freeText(e.getValue());
 			grid.reload();
 			rowsCount.update(grid.getDataSize());
 		});
-		filterLayout.addComponent(searchField);
+		filterLayout.add(searchField);
 
-		showOnlyRestrictedAccessToAssignedEntities = new CheckBox();
+		showOnlyRestrictedAccessToAssignedEntities = new Checkbox();
 		showOnlyRestrictedAccessToAssignedEntities.setId("showOnly");
-		showOnlyRestrictedAccessToAssignedEntities.setCaption(I18nProperties.getCaption(Captions.userRoleShowOnlyRestrictedAccessToAssignCases));
-		showOnlyRestrictedAccessToAssignedEntities.addStyleName(CssStyles.CHECKBOX_FILTER_INLINE);
+		showOnlyRestrictedAccessToAssignedEntities.setLabel(I18nProperties.getCaption(Captions.userRoleShowOnlyRestrictedAccessToAssignCases));
+		showOnlyRestrictedAccessToAssignedEntities.addClassName(CssStyles.CHECKBOX_FILTER_INLINE);
 		showOnlyRestrictedAccessToAssignedEntities.addValueChangeListener(e -> {
 			criteria.setShowOnlyRestrictedAccessToAssignedEntities(e.getValue());
 			navigateTo(criteria);
 		});
-		filterLayout.addComponent(showOnlyRestrictedAccessToAssignedEntities);
+		filterLayout.add(showOnlyRestrictedAccessToAssignedEntities);
 
 		return filterLayout;
 	}
@@ -259,9 +266,9 @@ public class UsersView extends AbstractUserView {
 
 		HorizontalLayout statusFilterLayout = new HorizontalLayout();
 		statusFilterLayout.setSpacing(true);
-		statusFilterLayout.setMargin(false);
-		statusFilterLayout.setWidth(100, Unit.PERCENTAGE);
-		statusFilterLayout.addStyleName(CssStyles.VSPACE_3);
+		statusFilterLayout.setPadding(false);
+		statusFilterLayout.setWidthFull();
+		statusFilterLayout.addClassName(CssStyles.VSPACE_3);
 
 		// Bulk operation dropdown
 		if (UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS)) {
@@ -270,19 +277,20 @@ public class UsersView extends AbstractUserView {
 
 			bulkOperationsDropdown = MenuBarHelper.createDropDown(
 				Captions.bulkActions,
-				new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.actionEnable), VaadinIcons.CHECK_SQUARE_O, selectedItem -> {
+				new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.actionEnable), VaadinIcon.CHECK_SQUARE_O, selectedItem -> {
 					ControllerProvider.getUserController().enableAllSelectedItems(grid.asMultiSelect().getSelectedItems(), grid);
 				}, UiUtil.permitted(UserRight.USER_EDIT)),
-				new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.actionDisable), VaadinIcons.THIN_SQUARE, selectedItem -> {
+				new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.actionDisable), VaadinIcon.THIN_SQUARE, selectedItem -> {
 					ControllerProvider.getUserController().disableAllSelectedItems(grid.asMultiSelect().getSelectedItems(), grid);
 				}, UiUtil.permitted(UserRight.USER_EDIT)));
 
 			bulkOperationsDropdown.setVisible(ViewModelProviders.of(UsersView.class).get(ViewConfiguration.class).isInEagerMode());
-			actionButtonsLayout.addComponent(bulkOperationsDropdown);
+			actionButtonsLayout.add(bulkOperationsDropdown);
 
-			statusFilterLayout.addComponent(actionButtonsLayout);
-			statusFilterLayout.setComponentAlignment(actionButtonsLayout, Alignment.TOP_RIGHT);
-			statusFilterLayout.setExpandRatio(actionButtonsLayout, 1);
+			statusFilterLayout.add(actionButtonsLayout);
+			// was Alignment.TOP_RIGHT: the layout grows, its content goes right
+			actionButtonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+			statusFilterLayout.setFlexGrow(1, actionButtonsLayout);
 		}
 
 		return statusFilterLayout;

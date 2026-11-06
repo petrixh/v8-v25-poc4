@@ -34,13 +34,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.ui.Label;
-import com.vaadin.v7.data.Validator;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.OptionGroup;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -68,6 +67,7 @@ import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.UserPhoneNumberValidator;
 import de.symeda.sormas.ui.utils.components.CheckboxSet;
+import de.symeda.sormas.ui.utils.fields.Field;
 
 public class UserEditForm extends AbstractEditForm<UserDto> {
 
@@ -139,16 +139,16 @@ public class UserEditForm extends AbstractEditForm<UserDto> {
         TextField externalId = addField(UserDto.EXTERNAL_ID, TextField.class);
         externalId.setReadOnly(true);
 
-        Label personDataHeadingLabel = new Label(I18nProperties.getString(Strings.headingPersonData));
-        personDataHeadingLabel.addStyleName(H3);
+        Span personDataHeadingLabel = new Span(I18nProperties.getString(Strings.headingPersonData));
+        personDataHeadingLabel.addClassName(H3);
         getContent().addComponent(personDataHeadingLabel, PERSON_DATA_HEADING_LOC);
 
-        Label addressHeadingLabel = new Label(I18nProperties.getString(Strings.address));
-        addressHeadingLabel.addStyleName(H3);
+        Span addressHeadingLabel = new Span(I18nProperties.getString(Strings.address));
+        addressHeadingLabel.addClassName(H3);
         getContent().addComponent(addressHeadingLabel, ADDRESS_HEADING_LOC);
 
-		Label userDataHeadingLabel = new Label(I18nProperties.getString(Strings.headingUserData));
-		userDataHeadingLabel.addStyleName(H3);
+		Span userDataHeadingLabel = new Span(I18nProperties.getString(Strings.headingUserData));
+		userDataHeadingLabel.addClassName(H3);
 		getContent().addComponent(userDataHeadingLabel, USER_DATA_HEADING_LOC);
 
         addField(UserDto.FIRST_NAME, TextField.class);
@@ -158,12 +158,12 @@ public class UserEditForm extends AbstractEditForm<UserDto> {
         phone.addValidator(new UserPhoneNumberValidator(I18nProperties.getValidationError(Validations.phoneNumberValidation)));
         
         if (FacadeProvider.getFeatureConfigurationFacade().isFeatureEnabled(FeatureType.AGGREGATE_REPORTING) || FacadeProvider.getFeatureConfigurationFacade().isFeatureEnabled(FeatureType.EVENT_SURVEILLANCE) || FacadeProvider.getFeatureConfigurationFacade().isFeatureEnabled(FeatureType.WEEKLY_REPORTING) || FacadeProvider.getFeatureConfigurationFacade().isFeatureEnabled(FeatureType.CASE_SURVEILANCE)) {
-            Label limitedDiseasesHeadingLabel = new Label(I18nProperties.getString(Strings.headingLimitedDiseases));
-            limitedDiseasesHeadingLabel.addStyleName(H3);
+            Span limitedDiseasesHeadingLabel = new Span(I18nProperties.getString(Strings.headingLimitedDiseases));
+            limitedDiseasesHeadingLabel.addClassName(H3);
             getContent().addComponent(limitedDiseasesHeadingLabel, LIMITED_DISEASES_HEADING_LOC);
 
-            Label restrictDiseasesDescriptionLabel = new Label(I18nProperties.getString(Strings.infoRestrictDiseasesDescription));
-            restrictDiseasesDescriptionLabel.addStyleNames(CssStyles.LABEL_ITALIC, CssStyles.VSPACE_TOP_3);
+            Span restrictDiseasesDescriptionLabel = new Span(I18nProperties.getString(Strings.infoRestrictDiseasesDescription));
+            restrictDiseasesDescriptionLabel.addClassNames(CssStyles.LABEL_ITALIC, CssStyles.VSPACE_TOP_3);
             restrictDiseasesDescriptionLabel.setVisible(false);
             getContent().addComponent(restrictDiseasesDescriptionLabel, RESTRICT_DISEASES_DESCRIPTION_LOC);
 
@@ -174,7 +174,7 @@ public class UserEditForm extends AbstractEditForm<UserDto> {
 
             restrictDiseasesCheckbox = addCustomField(RESTRICT_DISEASES_CHECKBOX_LOC, I18nProperties.getCaption(Captions.userRestrictDiseases), Boolean.class, CheckBox.class);
             restrictDiseasesCheckbox.addValueChangeListener(e -> {
-                boolean restrictDiseases = (boolean) e.getProperty().getValue();
+                boolean restrictDiseases = (boolean) e.getValue();
                 if (restrictDiseases) {
                     restrictDiseasesDescriptionLabel.setVisible(true);
                     diseasesCheckboxSet.setVisible(true);
@@ -186,10 +186,10 @@ public class UserEditForm extends AbstractEditForm<UserDto> {
             });
         }
 
-        Label userEmailDesc = new Label(I18nProperties.getString(Strings.infoUserEmail));
+        Span userEmailDesc = new Span(I18nProperties.getString(Strings.infoUserEmail));
         getContent().addComponent(userEmailDesc, USER_EMAIL_DESC_LOC);
         userEmailDesc.setWidthFull();
-        Label userPhoneDesc = new Label(I18nProperties.getString(Strings.infoUserPhoneNumber));
+        Span userPhoneDesc = new Span(I18nProperties.getString(Strings.infoUserPhoneNumber));
         userPhoneDesc.setWidthFull();
         getContent().addComponent(userPhoneDesc, USER_PHONE_DESC_LOC);
 
@@ -214,7 +214,7 @@ public class UserEditForm extends AbstractEditForm<UserDto> {
         ComboBox district = addInfrastructureField(UserDto.DISTRICT);
         region.addValueChangeListener(e -> {
             FieldHelper.removeItems(community);
-            RegionReferenceDto regionDto = (RegionReferenceDto) e.getProperty().getValue();
+            RegionReferenceDto regionDto = (RegionReferenceDto) e.getValue();
             FieldHelper
                     .updateItems(district, regionDto != null ? FacadeProvider.getDistrictFacade().getAllActiveByRegion(regionDto.getUuid()) : null);
         });
@@ -228,7 +228,7 @@ public class UserEditForm extends AbstractEditForm<UserDto> {
             FieldHelper.removeItems(healthFacility);
             FieldHelper.removeItems(associatedOfficer);
             FieldHelper.removeItems(cbPointOfEntry);
-            DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getProperty().getValue();
+            DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getValue();
             FieldHelper.updateItems(
                     community,
                     districtDto != null ? FacadeProvider.getCommunityFacade().getAllActiveByDistrict(districtDto.getUuid()) : null);
@@ -258,7 +258,8 @@ public class UserEditForm extends AbstractEditForm<UserDto> {
 
         if (FacadeProvider.getFeatureConfigurationFacade().isFeatureEnabled(FeatureType.AUTH_PROVIDER_TO_SORMAS_USER_SYNC)) {
             this.getFieldGroup().getFields().forEach(userField ->{
-                if (!excludedFields.contains(userField.getId())) {
+                // Flow: getId() is an Optional
+                if (!excludedFields.contains(userField.getId().orElse(null))) {
                     userField.setEnabled(false);
                 }
             });
@@ -266,7 +267,7 @@ public class UserEditForm extends AbstractEditForm<UserDto> {
     }
 
 	@Override
-	public void setValue(UserDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(UserDto newFieldValue) {
 		final OptionGroup userRolesField = (OptionGroup)getFieldGroup().getField(UserDto.USER_ROLES);
 		FieldHelper.updateItems(userRolesField, getFilteredUserRoles(newFieldValue.getUserRoles()));
         
@@ -382,15 +383,15 @@ public class UserEditForm extends AbstractEditForm<UserDto> {
         return HTML_LAYOUT;
     }
 
-    class UserNameValidator implements Validator {
+    class UserNameValidator implements Field.ValueValidator<Object> {
 
         private static final long serialVersionUID = 1L;
 
         @Override
-        public void validate(Object value) throws InvalidValueException {
+        public void validate(Object value) throws Field.InvalidValueException {
             UserDto dto = getValue();
             if (!(value instanceof String && ControllerProvider.getUserController().isLoginUnique(dto.getUuid(), (String) value)))
-                throw new InvalidValueException(I18nProperties.getValidationError(Validations.userNameNotUnique));
+                throw new Field.InvalidValueException(I18nProperties.getValidationError(Validations.userNameNotUnique));
         }
     }
 }

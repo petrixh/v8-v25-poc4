@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.ui.user;
 
-import com.vaadin.navigator.ViewChangeListener;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
@@ -44,11 +44,11 @@ public class UserRoleNotificationsView extends AbstractUserRoleView {
 		userRoleTemplateSelectionField.setUserRoleNotificationsForm(wrappedComponent);
 
 		DetailSubComponentWrapper container = new DetailSubComponentWrapper(() -> editComponent);
-		container.setWidth(100, Unit.PERCENTAGE);
-		container.setMargin(true);
+		container.setWidthFull();
+		container.setPadding(true);
 		setSubComponent(container);
 
-		container.addComponent(editComponent);
+		container.add(editComponent);
 	}
 
 	@Override

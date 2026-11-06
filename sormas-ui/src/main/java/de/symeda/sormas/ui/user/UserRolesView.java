@@ -7,19 +7,20 @@ import java.nio.file.Files;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.Page;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
+
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -48,6 +49,8 @@ public class UserRolesView extends AbstractUserView {
 	public static final String DISABLED_FILTER = I18nProperties.getString(Strings.disabled);
 	public static final String ALL_FILTER = I18nProperties.getString(Strings.all);
 
+	private static final String XLSX_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
 	private UserRoleCriteria criteria;
 
 	private UserRoleGrid grid;
@@ -56,7 +59,7 @@ public class UserRolesView extends AbstractUserView {
 	private ComboBox userRightsFilter;
 	private ComboBox jurisdictionFilter;
 	private ComboBox enabledFilter;
-	private CheckBox showOnlyRestrictedAccessToAssignedEntities;
+	private Checkbox showOnlyRestrictedAccessToAssignedEntities;
 
 	private VerticalLayout gridLayout;
 
@@ -68,42 +71,44 @@ public class UserRolesView extends AbstractUserView {
 		grid = new UserRoleGrid();
 		grid.setCriteria(criteria);
 		gridLayout = new VerticalLayout();
-		gridLayout.addComponent(createFilterBar());
-		gridLayout.addComponent(createStatusFilterBar());
-		gridLayout.addComponent(grid);
-		gridLayout.setMargin(true);
+		gridLayout.add(createFilterBar());
+		gridLayout.add(createStatusFilterBar());
+		gridLayout.add(grid);
+		gridLayout.setPadding(true);
 		gridLayout.setSpacing(false);
 		gridLayout.setSizeFull();
-		gridLayout.setExpandRatio(grid, 1);
-		gridLayout.setStyleName("crud-main-layout");
+		gridLayout.setFlexGrow(1, grid);
+		gridLayout.setClassName("crud-main-layout");
 
 		addComponent(gridLayout);
 
-		Button exportUserRightsButton = ButtonHelper.createIconButton(Captions.exportUserRoles, VaadinIcons.DOWNLOAD, null, ValoTheme.BUTTON_PRIMARY);
+		Button exportUserRightsButton = ButtonHelper.createIconButton(Captions.exportUserRoles, VaadinIcon.DOWNLOAD, null, CssStyles.BUTTON_PRIMARY);
 
-		new FileDownloader(new StreamResource(() -> new DownloadUtil.DelayedInputStream((out) -> {
+		// was a FileDownloader extending the button: Flow downloads through a link around it. The download runs
+		// without the session lock, so its error notification goes through the UI (was shown directly)
+		UI currentUI = UI.getCurrent();
+		String exportFileName = createFileNameWithCurrentDate(ExportEntityName.USER_ROLES, ".xlsx");
+		addHeaderComponent(DownloadUtil.createDownloadLink(exportUserRightsButton, DownloadHandler.fromInputStream(event -> new DownloadResponse(new DownloadUtil.DelayedInputStream((out) -> {
 			try {
 				String documentPath = FacadeProvider.getUserRoleFacade().generateUserRolesDocument();
 				IOUtils.copy(Files.newInputStream(new File(documentPath).toPath()), out);
 			} catch (IOException e) {
 				LoggerFactory.getLogger(DownloadUtil.class).error(e.getMessage(), e);
-				new Notification(
+				NotificationHelper.showAsync(
+					currentUI,
 					I18nProperties.getString(Strings.headingExportUserRightsFailed),
 					I18nProperties.getString(Strings.messageUserRightsExportFailed),
-					Notification.Type.ERROR_MESSAGE,
-					false).show(Page.getCurrent());
+					NotificationHelper.Type.ERROR_MESSAGE);
 			}
 		}, (e) -> {
-		}), createFileNameWithCurrentDate(ExportEntityName.USER_ROLES, ".xlsx"))).extend(exportUserRightsButton);
-
-		addHeaderComponent(exportUserRightsButton);
+		}), exportFileName, XLSX_MIME_TYPE, -1))));
 
 		if (UiUtil.permitted(UserRight.USER_ROLE_EDIT)) {
 			createButton = ButtonHelper.createIconButton(
 				Captions.userRoleNewUserRole,
-				VaadinIcons.PLUS_CIRCLE,
+				VaadinIcon.PLUS_CIRCLE,
 				e -> ControllerProvider.getUserRoleController().create(),
-				ValoTheme.BUTTON_PRIMARY);
+				CssStyles.BUTTON_PRIMARY);
 
 			addHeaderComponent(createButton);
 		}
@@ -112,9 +117,9 @@ public class UserRolesView extends AbstractUserView {
 	public HorizontalLayout createStatusFilterBar() {
 		HorizontalLayout statusFilterLayout = new HorizontalLayout();
 		statusFilterLayout.setSpacing(true);
-		statusFilterLayout.setMargin(false);
-		statusFilterLayout.setWidth(100, Unit.PERCENTAGE);
-		statusFilterLayout.addStyleName(CssStyles.VSPACE_3);
+		statusFilterLayout.setPadding(false);
+		statusFilterLayout.setWidthFull();
+		statusFilterLayout.addClassName(CssStyles.VSPACE_3);
 
 		HorizontalLayout actionButtonsLayout = new HorizontalLayout();
 		actionButtonsLayout.setSpacing(true);
@@ -126,22 +131,23 @@ public class UserRolesView extends AbstractUserView {
 		enabledFilter.addItems(ALL_FILTER, ENABLED_FILTER, DISABLED_FILTER);
 		enabledFilter.addValueChangeListener(e -> {
 			criteria.enabled(
-				ENABLED_FILTER.equals(e.getProperty().getValue())
+				ENABLED_FILTER.equals(e.getValue())
 					? Boolean.TRUE
-					: DISABLED_FILTER.equals(e.getProperty().getValue()) ? Boolean.FALSE : null);
+					: DISABLED_FILTER.equals(e.getValue()) ? Boolean.FALSE : null);
 			navigateTo(criteria);
 		});
-		actionButtonsLayout.addComponent(enabledFilter);
-		statusFilterLayout.addComponent(actionButtonsLayout);
-		statusFilterLayout.setComponentAlignment(actionButtonsLayout, Alignment.TOP_RIGHT);
-		statusFilterLayout.setExpandRatio(actionButtonsLayout, 1);
+		actionButtonsLayout.add(enabledFilter);
+		statusFilterLayout.add(actionButtonsLayout);
+		// was Alignment.TOP_RIGHT: the layout grows, its content goes right
+		actionButtonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+		statusFilterLayout.setFlexGrow(1, actionButtonsLayout);
 
 		return statusFilterLayout;
 	}
 
 	public HorizontalLayout createFilterBar() {
 		HorizontalLayout filterLayout = new HorizontalLayout();
-		filterLayout.setMargin(false);
+		filterLayout.setPadding(false);
 		filterLayout.setSpacing(true);
 		filterLayout.setSizeUndefined();
 
@@ -151,10 +157,10 @@ public class UserRolesView extends AbstractUserView {
 		userRightsFilter.setInputPrompt(I18nProperties.getPrefixCaption(UserRoleDto.I18N_PREFIX, UserRoleDto.USER_RIGHTS));
 		userRightsFilter.addItems((Object[]) UserRight.values());
 		userRightsFilter.addValueChangeListener(e -> {
-			criteria.userRight((UserRight) e.getProperty().getValue());
+			criteria.userRight((UserRight) e.getValue());
 			navigateTo(criteria);
 		});
-		filterLayout.addComponent(userRightsFilter);
+		filterLayout.add(userRightsFilter);
 
 		jurisdictionFilter = ComboBoxHelper.createComboBoxV7();
 		jurisdictionFilter.setId(UserRoleDto.JURISDICTION_LEVEL);
@@ -162,20 +168,20 @@ public class UserRolesView extends AbstractUserView {
 		jurisdictionFilter.setInputPrompt(I18nProperties.getPrefixCaption(UserRoleDto.I18N_PREFIX, UserRoleDto.JURISDICTION_LEVEL));
 		jurisdictionFilter.addItems((Object[]) JurisdictionLevel.values());
 		jurisdictionFilter.addValueChangeListener(e -> {
-			criteria.jurisdictionLevel((JurisdictionLevel) e.getProperty().getValue());
+			criteria.jurisdictionLevel((JurisdictionLevel) e.getValue());
 			navigateTo(criteria);
 		});
-		filterLayout.addComponent(jurisdictionFilter);
+		filterLayout.add(jurisdictionFilter);
 
-		showOnlyRestrictedAccessToAssignedEntities = new CheckBox();
+		showOnlyRestrictedAccessToAssignedEntities = new Checkbox();
 		showOnlyRestrictedAccessToAssignedEntities.setId(UserRoleDto.RESTRICT_ACCESS_TO_ASSIGNED_ENTITIES);
-		showOnlyRestrictedAccessToAssignedEntities.setCaption(I18nProperties.getCaption(Captions.userRoleShowOnlyRestrictedAccessToAssignCases));
-		showOnlyRestrictedAccessToAssignedEntities.addStyleName(CssStyles.CHECKBOX_FILTER_INLINE);
+		showOnlyRestrictedAccessToAssignedEntities.setLabel(I18nProperties.getCaption(Captions.userRoleShowOnlyRestrictedAccessToAssignCases));
+		showOnlyRestrictedAccessToAssignedEntities.addClassName(CssStyles.CHECKBOX_FILTER_INLINE);
 		showOnlyRestrictedAccessToAssignedEntities.addValueChangeListener(e -> {
 			criteria.setShowOnlyRestrictedAccessToAssignedEntities(e.getValue());
 			navigateTo(criteria);
 		});
-		filterLayout.addComponent(showOnlyRestrictedAccessToAssignedEntities);
+		filterLayout.add(showOnlyRestrictedAccessToAssignedEntities);
 
 		return filterLayout;
 	}

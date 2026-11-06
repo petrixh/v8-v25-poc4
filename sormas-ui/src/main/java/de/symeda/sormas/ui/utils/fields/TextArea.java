@@ -43,6 +43,15 @@ public class TextArea extends com.vaadin.flow.component.textfield.TextArea imple
 		// nothing to do
 	}
 
+	/**
+	 * V7 behaviour: {@code null} shows the {@link #getNullRepresentation() null representation} (Flow rejects
+	 * {@code null}).
+	 */
+	@Override
+	public void setValue(String value) {
+		super.setValue(value != null ? value : getNullRepresentation());
+	}
+
 	// Flow implements these as interface defaults; declared here because Field declares them too
 
 	@Override

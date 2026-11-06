@@ -31,8 +31,9 @@ public class ValidationUtils {
 	private static final String DATA_LISTENER_REGISTRATION = "sormas.componentErrorValidator";
 
 	/**
-	 * V8 {@code com.vaadin.shared.ui.ErrorLevel} for {@link #initComponentErrorValidator}. Flow has one invalid state:
-	 * both levels show the message as the field's error message.
+	 * V8 {@code com.vaadin.shared.ui.ErrorLevel} for {@link #initComponentErrorValidator}. {@link #ERROR} shows the
+	 * message as the field's error (red invalid state, as the V8 error indicator); {@link #WARNING} shows it as the
+	 * field's helper text without the invalid state (V8 showed a non-red warning indicator). Neither blocks saving.
 	 */
 	public enum ErrorLevel {
 		ERROR,
@@ -71,12 +72,21 @@ public class ValidationUtils {
 
 		Function<String, Void> validateExternalToken = (String value) -> {
 			if (field.isVisible() && !StringUtils.isEmpty(value) && isInvlaid.apply(value)) {
-				field.setErrorMessage(I18nProperties.getValidationError(validationMessageTag));
-				field.setInvalid(true);
+				String message = I18nProperties.getValidationError(validationMessageTag);
+				if (errorLevel == ErrorLevel.WARNING) {
+					field.setHelperText(message);
+				} else {
+					field.setErrorMessage(message);
+					field.setInvalid(true);
+				}
 				warningLabel.setVisible(true);
 			} else {
-				field.setErrorMessage(null);
-				field.setInvalid(false);
+				if (errorLevel == ErrorLevel.WARNING) {
+					field.setHelperText(null);
+				} else {
+					field.setErrorMessage(null);
+					field.setInvalid(false);
+				}
 				warningLabel.setVisible(false);
 			}
 

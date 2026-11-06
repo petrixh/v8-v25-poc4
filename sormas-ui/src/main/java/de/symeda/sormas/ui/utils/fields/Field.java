@@ -63,6 +63,7 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 	String DATA_VALIDATION_VISIBLE = "sormas.validationVisible";
 	String DATA_INVALID_COMMITTED = "sormas.invalidCommitted";
 	String DATA_DESCRIPTION = "sormas.description";
+	String DATA_NULL_REPRESENTATION = "sormas.nullRepresentation";
 
 	// Value methods, implemented by the Flow HasValue superclass
 
@@ -197,10 +198,21 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 	}
 
 	/**
-	 * No-op: Flow text fields show an empty value as an empty string.
+	 * V7 null representation: the text a text field ({@link TextField}, {@link TextArea}, {@link PasswordField}) shows
+	 * when its value is set to {@code null}. Default {@code ""}, which every SORMAS text field set in V7 (the field
+	 * factory and all direct uses); the V7 component default {@code "null"} is not copied.
+	 */
+	default String getNullRepresentation() {
+		String nullRepresentation = (String) ComponentUtil.getData(asComponent(), DATA_NULL_REPRESENTATION);
+		return nullRepresentation != null ? nullRepresentation : "";
+	}
+
+	/**
+	 * V7 null representation, see {@link #getNullRepresentation()}. Flow text fields do not accept a {@code null}
+	 * value; the SORMAS text fields show this text instead. It has no effect on other fields.
 	 */
 	default void setNullRepresentation(String nullRepresentation) {
-		// nothing to do
+		ComponentUtil.setData(asComponent(), DATA_NULL_REPRESENTATION, nullRepresentation);
 	}
 
 	default void addStyleName(String styleName) {

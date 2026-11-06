@@ -192,6 +192,7 @@ public abstract class DataImporter {
 
 				// Display a window presenting the import result
 				currentUI.access(() -> {
+					try {
 					VaadinUiUtil.setClosable(window, true);
 					ProgressResult progressResult;
 					String newInfoText;
@@ -222,27 +223,35 @@ public abstract class DataImporter {
 							errorReportConsumer.accept(streamResource);
 						}
 					});
-
-					currentUI.setPollInterval(-1);
+					} finally {
+						// Polling stops even when a line above throws (it ran every 300 ms until the UI closed)
+						currentUI.setPollInterval(-1);
+					}
 				});
 			} catch (InvalidColumnException e) {
 				currentUI.access(() -> {
+					try {
 					VaadinUiUtil.setClosable(window, true);
 					progressLayout.finishProgress(
 						ProgressResult.FAILURE,
 						String.format(I18nProperties.getString(Strings.messageImportInvalidColumn), e.getColumnName()),
 						null,
 						window::close);
-					currentUI.setPollInterval(-1);
+					} finally {
+						currentUI.setPollInterval(-1);
+					}
 				});
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 
 				currentUI.access(() -> {
+					try {
 					VaadinUiUtil.setClosable(window, true);
 					progressLayout
 						.finishProgress(ProgressResult.FAILURE, I18nProperties.getString(Strings.messageImportFailedFull), null, window::close);
-					currentUI.setPollInterval(-1);
+					} finally {
+						currentUI.setPollInterval(-1);
+					}
 				});
 			}
 		});

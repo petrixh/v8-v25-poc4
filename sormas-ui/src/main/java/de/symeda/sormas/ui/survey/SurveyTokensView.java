@@ -1,6 +1,6 @@
 package de.symeda.sormas.ui.survey;
 
-import com.vaadin.navigator.ViewChangeListener;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 
 import de.symeda.sormas.api.survey.SurveyTokenCriteria;
 import de.symeda.sormas.ui.ViewModelProviders;

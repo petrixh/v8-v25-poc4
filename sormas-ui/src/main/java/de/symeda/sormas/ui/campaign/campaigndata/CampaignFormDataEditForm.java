@@ -20,11 +20,8 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 
 import java.util.Objects;
 
-import com.vaadin.ui.GridLayout;
-import com.vaadin.v7.data.Validator;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.campaign.data.CampaignFormDataDto;
@@ -37,6 +34,7 @@ import de.symeda.sormas.api.infrastructure.district.DistrictReferenceDto;
 import de.symeda.sormas.api.infrastructure.region.RegionReferenceDto;
 import de.symeda.sormas.api.user.UserDto;
 import de.symeda.sormas.ui.UiUtil;
+import de.symeda.sormas.ui.campaign.campaigndata.CampaignFormBuilder.GridLayout;
 import de.symeda.sormas.ui.campaign.expressions.ExpressionProcessor;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.CssStyles;
@@ -108,7 +106,7 @@ public class CampaignFormDataEditForm extends AbstractEditForm<CampaignFormDataD
 			setRequired(true, CampaignFormDataEditForm.AREA);
 			cbArea.addItems(FacadeProvider.getAreaFacade().getAllActiveAsReference());
 			cbArea.addValueChangeListener(e -> {
-				AreaReferenceDto area = (AreaReferenceDto) e.getProperty().getValue();
+				AreaReferenceDto area = (AreaReferenceDto) e.getValue();
 
 				if (area == null) {
 					cbRegion.setValue(null);
@@ -121,7 +119,7 @@ public class CampaignFormDataEditForm extends AbstractEditForm<CampaignFormDataD
 						: FacadeProvider.getRegionFacade().getAllActiveByServerCountry());
 			});
 			cbRegion.addValueChangeListener(e -> {
-				RegionReferenceDto region = (RegionReferenceDto) e.getProperty().getValue();
+				RegionReferenceDto region = (RegionReferenceDto) e.getValue();
 				if (Objects.nonNull(region)) {
 					cbArea.setValue(FacadeProvider.getRegionFacade().getByUuid(region.getUuid()).getArea());
 				}
@@ -168,12 +166,12 @@ public class CampaignFormDataEditForm extends AbstractEditForm<CampaignFormDataD
 
 	private void addInfrastructureListeners(ComboBox cbRegion, ComboBox cbDistrict, ComboBox cbCommunity) {
 		cbRegion.addValueChangeListener(e -> {
-			RegionReferenceDto region = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto region = (RegionReferenceDto) e.getValue();
 			FieldHelper.updateItems(cbDistrict, region != null ? FacadeProvider.getDistrictFacade().getAllActiveByRegion(region.getUuid()) : null);
 		});
 
 		cbDistrict.addValueChangeListener(e -> {
-			DistrictReferenceDto district = (DistrictReferenceDto) e.getProperty().getValue();
+			DistrictReferenceDto district = (DistrictReferenceDto) e.getValue();
 			FieldHelper
 				.updateItems(cbCommunity, district != null ? FacadeProvider.getCommunityFacade().getAllActiveByDistrict(district.getUuid()) : null);
 		});
@@ -193,15 +191,18 @@ public class CampaignFormDataEditForm extends AbstractEditForm<CampaignFormDataD
 	}
 
 	@Override
-	public void setValue(CampaignFormDataDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(CampaignFormDataDto newFieldValue) {
 		super.setValue(newFieldValue);
 
 		buildCampaignForm(newFieldValue);
 	}
 
+	/**
+	 * Was {@code validate()} (Vaadin 7): the form's own validation, then the fields of the campaign form.
+	 */
 	@Override
-	public void validate() throws Validator.InvalidValueException {
-		super.validate();
+	public void validateValue() {
+		super.validateValue();
 
 		if (campaignFormBuilder == null) {
 			throw new RuntimeException("Campaign form builder has not been initialized");
@@ -216,7 +217,7 @@ public class CampaignFormDataEditForm extends AbstractEditForm<CampaignFormDataD
 
 	private void buildCampaignForm(CampaignFormDataDto campaignFormData) {
 		GridLayout campaignFormLayout = new GridLayout(12, 1);
-		campaignFormLayout.setWidth(100, Unit.PERCENTAGE);
+		campaignFormLayout.setWidthFull();
 		CssStyles.style(campaignFormLayout, CssStyles.VSPACE_3);
 
 		CampaignFormMetaDto campaignForm =
@@ -243,8 +244,8 @@ public class CampaignFormDataEditForm extends AbstractEditForm<CampaignFormDataD
 	}
 
 	@Override
-	protected void setInternalValue(CampaignFormDataDto newValue) {
-		super.setInternalValue(newValue);
+	protected void setPresentationValue(CampaignFormDataDto newValue) {
+		super.setPresentationValue(newValue);
 
 		if (UiUtil.enabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {
 			hideAndFillJurisdictionFields();

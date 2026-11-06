@@ -2,6 +2,8 @@ package de.symeda.sormas.ui.campaign.campaignstatistics;
 
 import java.util.List;
 
+import com.vaadin.flow.function.ValueProvider;
+
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.campaign.CampaignJurisdictionLevel;
 import de.symeda.sormas.api.campaign.statistics.CampaignStatisticsCriteria;
@@ -10,6 +12,7 @@ import de.symeda.sormas.api.feature.FeatureType;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.FilteredGrid;
+import de.symeda.sormas.ui.utils.GridExportStreamResource;
 
 public class CampaignStatisticsGrid extends FilteredGrid<CampaignStatisticsDto, CampaignStatisticsCriteria> {
 
@@ -35,8 +38,8 @@ public class CampaignStatisticsGrid extends FilteredGrid<CampaignStatisticsDto, 
 			CampaignStatisticsDto.COMMUNITY,
 			CampaignStatisticsDto.FORM_COUNT);
 
-		for (Column<?, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(CampaignStatisticsDto.I18N_PREFIX, column.getId(), column.getCaption()));
+		for (Column<?, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(CampaignStatisticsDto.I18N_PREFIX, column.getKey(), column.getCaption()));
 		}
 	}
 
@@ -64,11 +67,13 @@ public class CampaignStatisticsGrid extends FilteredGrid<CampaignStatisticsDto, 
 	}
 
 	public void addCustomColumn(String property, String caption) {
-		Column<CampaignStatisticsDto, Object> newColumn =
-			addColumn(e -> e.getStatisticsData().stream().filter(v -> v.getId().equals(property)).findFirst().orElse(null));
+		ValueProvider<CampaignStatisticsDto, Object> valueProvider =
+			e -> e.getStatisticsData().stream().filter(v -> v.getId().equals(property)).findFirst().orElse(null);
+		Column<CampaignStatisticsDto, Object> newColumn = addColumn(valueProvider);
 		newColumn.setSortable(false);
 		newColumn.setCaption(caption);
 		newColumn.setId(property);
+		GridExportStreamResource.setExportValueProvider(newColumn, valueProvider);
 	}
 
 	private void setAreaColumnVisible(boolean visible) {

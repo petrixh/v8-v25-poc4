@@ -3,10 +3,13 @@ package de.symeda.sormas.ui.campaign.campaigns;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.data.Binder;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Grid;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import de.symeda.sormas.ui.utils.grid.Grid;
 
 import de.symeda.sormas.api.ReferenceDto;
 import de.symeda.sormas.api.campaign.form.CampaignFormMetaReferenceDto;
@@ -28,7 +31,7 @@ public class CampaignFormsGridComponent extends AbstractEditableGrid<CampaignFor
 	}
 
 	@Override
-	protected Button.ClickListener newRowEvent() {
+	protected ComponentEventListener<ClickEvent<Button>> newRowEvent() {
 		return event -> {
 			final ArrayList<CampaignFormMetaReferenceDto> gridItems = getItems();
 			gridItems.add(new CampaignFormMetaReferenceDto(null, ""));
@@ -43,7 +46,9 @@ public class CampaignFormsGridComponent extends AbstractEditableGrid<CampaignFor
 		// This is a bit hacky: The grid is used here to "select" the whole item instead of editing properties
 		// This is done by replacing uuid and caption of the item
 
-		ComboBox<CampaignFormMetaReferenceDto> formCombo = new ComboBox<>(Strings.entityCampaignDataForm, allElements);
+		// was created with the caption Strings.entityCampaignDataForm, which the Vaadin 8 grid editor did not show; a Flow
+		// field shows its label in the editor cell
+		ComboBox<CampaignFormMetaReferenceDto> formCombo = new ComboBox<>(null, allElements);
 
 		Binder.Binding<CampaignFormMetaReferenceDto, CampaignFormMetaReferenceDto> formBind = binder.forField(formCombo)
 				.withValidator(
@@ -60,8 +65,13 @@ public class CampaignFormsGridComponent extends AbstractEditableGrid<CampaignFor
 							// workarround: grid doesn't refresh itself for unknown reason
 							grid.getDataProvider().refreshAll();
 						});
-		formCombo.setEmptySelectionAllowed(false);
-		formCombo.setItemCaptionGenerator(CampaignFormMetaReferenceDto::getCaption);
+		// was setEmptySelectionAllowed(false): a value the user clears is restored
+		formCombo.addValueChangeListener(e -> {
+			if (e.isFromClient() && e.getValue() == null && e.getOldValue() != null) {
+				formCombo.setValue(e.getOldValue());
+			}
+		});
+		formCombo.setItemLabelGenerator(CampaignFormMetaReferenceDto::getCaption);
 
 		Grid.Column<CampaignFormMetaReferenceDto, String> formColumn =
 				grid.addColumn(ReferenceDto::getCaption)

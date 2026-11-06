@@ -18,11 +18,12 @@ package de.symeda.sormas.ui.selfreport;
 import java.util.HashMap;
 import java.util.Set;
 
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.i18n.Captions;
@@ -33,13 +34,13 @@ import de.symeda.sormas.api.selfreport.SelfReportInvestigationStatus;
 import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
-import de.symeda.sormas.ui.utils.LayoutUtil;
 import de.symeda.sormas.ui.utils.RelevanceStatusFilter;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
 
 public class SelfReportGridComponent extends VerticalLayout {
 
 	private static final long serialVersionUID = 4120247053735846454L;
+	private static final String STATUS_DATA = "status";
 
 	private final SelfReportFilterForm filterForm;
 	private final SelfReportGrid grid;
@@ -64,8 +65,8 @@ public class SelfReportGridComponent extends VerticalLayout {
 
 		HorizontalLayout statusFilterBar = buildStatusFilterBar(criteria, filterChangeHandler);
 
-		addComponents(filterForm, statusFilterBar, grid);
-		setExpandRatio(grid, 1);
+		add(filterForm, statusFilterBar, grid);
+		setFlexGrow(1, grid);
 	}
 
 	public void reload() {
@@ -79,10 +80,10 @@ public class SelfReportGridComponent extends VerticalLayout {
 
 	private HorizontalLayout buildStatusFilterBar(SelfReportCriteria criteria, Runnable filterChangeHandler) {
 		HorizontalLayout statusFilterBar = new HorizontalLayout();
-		statusFilterBar.setMargin(false);
+		statusFilterBar.setPadding(false);
 		statusFilterBar.setSpacing(true);
 		statusFilterBar.setWidthFull();
-		statusFilterBar.addStyleName(CssStyles.VSPACE_3);
+		statusFilterBar.addClassName(CssStyles.VSPACE_3);
 
 		HorizontalLayout buttonFilterLayout = new HorizontalLayout();
 		// investigation status filter
@@ -91,10 +92,9 @@ public class SelfReportGridComponent extends VerticalLayout {
 		Button statusAll = ButtonHelper.createButton(Captions.all, e -> {
 			criteria.setInvestigationStatus(null);
 			filterChangeHandler.run();
-		}, ValoTheme.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER);
-		statusAll.setCaptionAsHtml(true);
+		}, CssStyles.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER);
 
-		buttonFilterLayout.addComponent(statusAll);
+		buttonFilterLayout.add(statusAll);
 		statusButtons.put(statusAll, I18nProperties.getCaption(Captions.all));
 		activeStatusButton = statusAll;
 
@@ -102,18 +102,17 @@ public class SelfReportGridComponent extends VerticalLayout {
 			Button statusButton = ButtonHelper.createButton(status.toString(), e -> {
 				criteria.setInvestigationStatus(status);
 				filterChangeHandler.run();
-			}, ValoTheme.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER, CssStyles.BUTTON_FILTER_LIGHT);
-			statusButton.setData(status);
-			statusButton.setCaptionAsHtml(true);
+			}, CssStyles.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER, CssStyles.BUTTON_FILTER_LIGHT);
+			ComponentUtil.setData(statusButton, STATUS_DATA, status);
 
-			buttonFilterLayout.addComponent(statusButton);
+			buttonFilterLayout.add(statusButton);
 			statusButtons.put(statusButton, status.toString());
 		}
 
-		statusFilterBar.addComponent(buttonFilterLayout);
+		statusFilterBar.add(buttonFilterLayout);
 
 		HorizontalLayout actionButtonsLayout = new HorizontalLayout();
-		actionButtonsLayout.addComponent(
+		actionButtonsLayout.add(
 			RelevanceStatusFilter.createRelevanceStatusFilter(
 				Captions.selfReportActiveEnvironments,
 				Captions.selfReportArchivedEnvironments,
@@ -129,9 +128,11 @@ public class SelfReportGridComponent extends VerticalLayout {
 					filterChangeHandler.run();
 				}));
 
-		statusFilterBar.addComponent(actionButtonsLayout);
-		statusFilterBar.setComponentAlignment(actionButtonsLayout, Alignment.TOP_RIGHT);
-		statusFilterBar.setExpandRatio(actionButtonsLayout, 1);
+		statusFilterBar.add(actionButtonsLayout);
+		// was Alignment.TOP_RIGHT in an expanding slot: the layout grows, its content goes right
+		statusFilterBar.setVerticalComponentAlignment(FlexComponent.Alignment.START, actionButtonsLayout);
+		statusFilterBar.setFlexGrow(1, actionButtonsLayout);
+		actionButtonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
 		return statusFilterBar;
 	}
@@ -139,15 +140,19 @@ public class SelfReportGridComponent extends VerticalLayout {
 	private void updateStatusButtons(SelfReportCriteria criteria) {
 		statusButtons.keySet().forEach(b -> {
 			CssStyles.style(b, CssStyles.BUTTON_FILTER_LIGHT);
-			b.setCaption(statusButtons.get(b));
-			if (b.getData() == criteria.getInvestigationStatus()) {
+			b.setText(statusButtons.get(b));
+			b.setSuffixComponent(null);
+			if (ComponentUtil.getData(b, STATUS_DATA) == criteria.getInvestigationStatus()) {
 				activeStatusButton = b;
 			}
 		});
 		CssStyles.removeStyles(activeStatusButton, CssStyles.BUTTON_FILTER_LIGHT);
 		if (activeStatusButton != null) {
-			activeStatusButton
-				.setCaption(statusButtons.get(activeStatusButton) + LayoutUtil.spanCss(CssStyles.BADGE, String.valueOf(grid.getDataSize())));
+			// was an HTML caption with LayoutUtil.spanCss(BADGE, count): the count is a badge after the text
+			activeStatusButton.setText(statusButtons.get(activeStatusButton));
+			Span badge = new Span(String.valueOf(grid.getDataSize()));
+			badge.addClassName(CssStyles.BADGE);
+			activeStatusButton.setSuffixComponent(badge);
 		}
 	}
 

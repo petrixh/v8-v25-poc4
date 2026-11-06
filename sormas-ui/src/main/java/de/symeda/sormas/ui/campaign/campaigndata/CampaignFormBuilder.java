@@ -24,18 +24,16 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Sets;
-import com.vaadin.server.Page;
-import com.vaadin.server.Page.Styles;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.Validator;
-import com.vaadin.v7.shared.ui.label.ContentMode;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.Label;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+
+import de.symeda.sormas.ui.utils.ContentMode;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.campaign.data.CampaignFormDataEntry;
 import de.symeda.sormas.api.campaign.data.translation.TranslationElement;
@@ -110,12 +108,12 @@ public class CampaignFormBuilder {
 			if (type == CampaignFormElementType.SECTION) {
 				sectionCount++;
 				GridLayout sectionLayout = new GridLayout(12, 1);
-				sectionLayout.setMargin(new MarginInfo(true, true));
+				sectionLayout.setMargin(true);
 				CssStyles.style(
 					sectionLayout,
 					CssStyles.GRID_LAYOUT_SECTION,
 					sectionCount % 2 == 0 ? CssStyles.GRID_LAYOUT_EVEN : CssStyles.GRID_LAYOUT_ODD);
-				sectionLayout.setWidth(100, Unit.PERCENTAGE);
+				sectionLayout.setWidthFull();
 				currentLayout = sectionLayout;
 
 				campaignFormLayout.addComponent(sectionLayout, 0, campaignFormLayout.getRows() - 1, 11, campaignFormLayout.getRows() - 1);
@@ -126,7 +124,7 @@ public class CampaignFormBuilder {
 					currentCol = -1;
 				}
 
-				Label field = new Label(get18nCaption(formElement.getId(), formElement.getCaption()));
+				Span field = new Span(get18nCaption(formElement.getId(), formElement.getCaption()));
 				field.setId(formElement.getId());
 				prepareComponent(field, formElement.getId(), formElement.getCaption(), type, styles);
 
@@ -157,10 +155,11 @@ public class CampaignFormBuilder {
 				setFieldValue(field, type, value);
 				field.setId(formElement.getId());
 				field.setCaption(get18nCaption(formElement.getId(), formElement.getCaption()));
-				field.setSizeFull();
+				// was setSizeFull(): the width is the one prepareComponent sets (a page style rule with !important in Vaadin 8)
+				field.setHeightFull();
 
 				currentLayout.addComponent(
-					field,
+					field.asComponent(),
 					(currentCol + 1),
 					currentLayout.getRows() - 1,
 					(currentCol + 1) + (occupiedColumns - 1),
@@ -176,7 +175,7 @@ public class CampaignFormBuilder {
 				fields.put(formElement.getId(), field);
 
 				if (dependingOnId != null && dependingOnValues != null) {
-					setVisibilityDependency((AbstractComponent) field, dependingOnId, dependingOnValues);
+					setVisibilityDependency(field.asComponent(), dependingOnId, dependingOnValues);
 				}
 			}
 		}
@@ -195,37 +194,57 @@ public class CampaignFormBuilder {
 			field = null;
 		}
 
-		prepareComponent((AbstractComponent) field, fieldId, caption, type, styles);
+		prepareComponent(field.asComponent(), fieldId, caption, type, styles);
 		return field;
 	}
 
-	private <T extends AbstractComponent> void prepareComponent(
-		T field,
-		String fieldId,
-		String caption,
-		CampaignFormElementType type,
-		List<CampaignFormElementStyle> styles) {
-		Styles cssStyles = Page.getCurrent().getStyles();
+	private void prepareComponent(Component field, String fieldId, String caption, CampaignFormElementType type, List<CampaignFormElementStyle> styles) {
 
 		if (type == CampaignFormElementType.LABEL) {
-			((Label) field).setContentMode(ContentMode.HTML);
+			// was a Vaadin 7 Label switched to ContentMode.HTML: the caption is HTML, as before
+			VaadinUiUtil.setLabelValue((Span) field, ((Span) field).getText(), ContentMode.HTML);
 		} else if (type == CampaignFormElementType.YES_NO) {
 			if (!styles.contains(CampaignFormElementStyle.INLINE)) {
-				CssStyles.style(field, ValoTheme.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_CAPTION_INLINE, CssStyles.FLOAT_RIGHT);
+				CssStyles.style(
+					(HasStyle) field,
+					SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL,
+					CssStyles.OPTIONGROUP_CAPTION_INLINE,
+					CssStyles.FLOAT_RIGHT);
 			}
-			CssStyles.style(field, CssStyles.OPTIONGROUP_GRID_LAYOUT);
+			CssStyles.style((HasStyle) field, CssStyles.OPTIONGROUP_GRID_LAYOUT);
 		} else if (type == CampaignFormElementType.TEXT || type == CampaignFormElementType.NUMBER) {
 			if (styles.contains(CampaignFormElementStyle.ROW)) {
-				CssStyles.style(field, CssStyles.TEXTFIELD_ROW, CssStyles.TEXTFIELD_CAPTION_INLINE);
+				CssStyles.style((HasStyle) field, CssStyles.TEXTFIELD_ROW, CssStyles.TEXTFIELD_CAPTION_INLINE);
 			}
 
 			if (type == CampaignFormElementType.NUMBER) {
-				((TextField) field)
-					.addValidator(new NumberNumericValueValidator(I18nProperties.getValidationError(Validations.onlyNumbersAllowed, caption)));
+				TextField textField = (TextField) field;
+				textField.addValidator(new NumberNumericValueValidator(I18nProperties.getValidationError(Validations.onlyNumbersAllowed, caption)));
+				showValidationErrorOnValueChange(textField);
 			}
 		}
 
-		cssStyles.add("#" + fieldId + " { width: " + calculateComponentWidth(type, styles) + "% !important; }");
+		// was a page style rule "#<fieldId> { width: <n>% !important; }"
+		((HasSize) field).setWidth(calculateComponentWidth(type, styles) + "%");
+	}
+
+	/**
+	 * Vaadin 7 showed the validator's message at a field as soon as its value was invalid. These fields are not bound to
+	 * the form's binder, so the field shows the result of its own validators here. Manual validation keeps the Flow
+	 * field's validation (on blur) from clearing it.
+	 */
+	private static void showValidationErrorOnValueChange(TextField textField) {
+		textField.setManualValidation(true);
+		textField.addValueChangeListener(e -> {
+			String message = null;
+			try {
+				textField.validateValue();
+			} catch (Field.InvalidValueException ex) {
+				message = ex.getMessage();
+			}
+			textField.setErrorMessage(message);
+			textField.setInvalid(message != null);
+		});
 	}
 
 	private int getOccupiedColumns(CampaignFormElementType type, List<CampaignFormElementStyle> styles) {
@@ -284,7 +303,7 @@ public class CampaignFormBuilder {
 		}
 	}
 
-	private void setVisibilityDependency(AbstractComponent component, String dependingOnId, Object[] dependingOnValues) {
+	private void setVisibilityDependency(Component component, String dependingOnId, Object[] dependingOnValues) {
 		Field<?> dependingOnField = fields.get(dependingOnId);
 		List<Object> dependingOnValuesList = Arrays.asList(dependingOnValues);
 
@@ -299,7 +318,7 @@ public class CampaignFormBuilder {
 			component.setVisible(visible);
 			if (component instanceof Field) {
 				if (!visible) {
-					((Field<?>) component).setValue(null);
+					((Field) component).setValue(null);
 				}
 			}
 		});
@@ -340,16 +359,22 @@ public class CampaignFormBuilder {
 		}).collect(Collectors.toList());
 	}
 
-	public void validateFields() throws Validator.InvalidValueException {
+	public void validateFields() throws Field.InvalidValueException {
 		fields.forEach((key, value) -> {
-			value.validate();
+			value.validateValue();
 		});
 	}
 
 	public void resetFormValues() {
 		fields.keySet().forEach(key -> {
 			Field<?> field = fields.get(key);
-			((Field<Object>) field).setValue(formValuesMap.get(key));
+			Object value = formValuesMap.get(key);
+			if (field instanceof NullableOptionGroup && value != null) {
+				// Vaadin 7: the yes/no group took only a collection or null as its value and ignored a Boolean, so the
+				// field kept its value; on Flow the Boolean would be taken and break getNullableValue()
+				return;
+			}
+			((Field<Object>) field).setValue(value);
 		});
 	}
 
@@ -359,5 +384,47 @@ public class CampaignFormBuilder {
 
 	public Map<String, Field<?>> getFields() {
 		return fields;
+	}
+
+	/**
+	 * Was a Vaadin 8 {@code GridLayout}: a CSS grid with a fixed number of equal columns. A component is placed in the
+	 * given cells (columns and rows from 0, both ends included, as in Vaadin 8). {@link #insertRow(int)} only adds a row at
+	 * the end, the only use here.
+	 */
+	public static class GridLayout extends Div {
+
+		private static final long serialVersionUID = 1L;
+
+		private int rows;
+
+		public GridLayout(int columns, int rows) {
+			this.rows = rows;
+			getStyle().set("display", "grid");
+			getStyle().set("grid-template-columns", "repeat(" + columns + ", minmax(0, 1fr))");
+		}
+
+		public int getRows() {
+			return rows;
+		}
+
+		public void insertRow(int row) {
+			if (row != rows) {
+				throw new UnsupportedOperationException("Rows can only be added at the end");
+			}
+			rows++;
+		}
+
+		public void addComponent(Component component, int column1, int row1, int column2, int row2) {
+			component.getElement().getStyle().set("grid-column", (column1 + 1) + " / " + (column2 + 2));
+			component.getElement().getStyle().set("grid-row", (row1 + 1) + " / " + (row2 + 2));
+			add(component);
+		}
+
+		/**
+		 * Vaadin 8 {@code setMargin(new MarginInfo(true, true))}: a margin on all sides.
+		 */
+		public void setMargin(boolean margin) {
+			getStyle().set("padding", margin ? "var(--lumo-space-m)" : null);
+		}
 	}
 }

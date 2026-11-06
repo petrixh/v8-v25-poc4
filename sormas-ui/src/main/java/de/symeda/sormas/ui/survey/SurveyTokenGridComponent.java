@@ -1,12 +1,11 @@
 package de.symeda.sormas.ui.survey;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -41,10 +40,10 @@ public class SurveyTokenGridComponent extends VerticalLayout {
 		filterForm.addApplyHandler(e -> filterChangeHandler.run());
 		filterForm.addResetHandler(e -> filterResetHandler.run());
 
-		addComponent(filterForm);
-		addComponent(createSurveyTokenImportButton(criteria));
-		addComponent(grid);
-		setExpandRatio(grid, 1);
+		add(filterForm);
+		add(createSurveyTokenImportButton(criteria));
+		add(grid);
+		setFlexGrow(1, grid);
 	}
 
 	public void reload() {
@@ -60,20 +59,22 @@ public class SurveyTokenGridComponent extends VerticalLayout {
 		HorizontalLayout statusFilterLayout = new HorizontalLayout();
 		statusFilterLayout.setSpacing(true);
 		statusFilterLayout.setWidth("100%");
-		statusFilterLayout.addStyleName(CssStyles.VSPACE_3);
+		statusFilterLayout.addClassName(CssStyles.VSPACE_3);
 
 		if (UiUtil.permitted(UserRight.SURVEY_TOKEN_IMPORT)) {
-			Button importSurveyTokenButton = ButtonHelper.createIconButton(Captions.actionImportSurveyTokens, VaadinIcons.UPLOAD, e -> {
-				Window window = VaadinUiUtil
+			Button importSurveyTokenButton = ButtonHelper.createIconButton(Captions.actionImportSurveyTokens, VaadinIcon.UPLOAD, e -> {
+				Dialog window = VaadinUiUtil
 					.showPopupWindow(new ImportSurveyTokensLayout(FacadeProvider.getSurveyFacade().getByUuid(criteria.getSurvey().getUuid())));
-				window.setCaption(I18nProperties.getString(Strings.headingImportSurveyTokens));
-				window.addCloseListener((event) -> reload());
-			}, ValoTheme.BUTTON_PRIMARY);
+				window.setHeaderTitle(I18nProperties.getString(Strings.headingImportSurveyTokens));
+				VaadinUiUtil.addCloseListener(window, (event) -> reload());
+			}, CssStyles.BUTTON_PRIMARY);
 
-			statusFilterLayout.addComponent(importSurveyTokenButton);
-			statusFilterLayout.setComponentAlignment(importSurveyTokenButton, Alignment.TOP_RIGHT);
+			statusFilterLayout.add(importSurveyTokenButton);
+			// was Alignment.TOP_RIGHT in the only (full-width) slot
+			statusFilterLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+			statusFilterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, importSurveyTokenButton);
 		}
-		statusFilterLayout.addStyleName("top-bar");
+		statusFilterLayout.addClassName("top-bar");
 		return statusFilterLayout;
 	}
 

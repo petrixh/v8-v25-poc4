@@ -2,10 +2,9 @@ package de.symeda.sormas.ui.campaign.campaignstatistics;
 
 import java.util.function.Consumer;
 
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Field;
+import com.vaadin.flow.component.HasValue;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.Field;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.campaign.data.CampaignFormDataDto;
@@ -37,7 +36,7 @@ public class CampaignStatisticsFilterForm extends AbstractFilterForm<CampaignSta
 		formActionButtonsComponent.style(CssStyles.FORCE_CAPTION);
 		formActionButtonsComponent.setSpacing(false);
 		formActionButtonsComponent.setSizeFull();
-		formActionButtonsComponent.setMargin(new MarginInfo(false, false, false, true));
+		// was a left margin only (MarginInfo); spacing details belong to the theme work
 	}
 
 	@Override
@@ -61,7 +60,7 @@ public class CampaignStatisticsFilterForm extends AbstractFilterForm<CampaignSta
 
 		if (formMetaChangedCallback != null) {
 			cbCampaignForm.addValueChangeListener(e -> {
-				formMetaChangedCallback.accept((CampaignFormMetaReferenceDto) e.getProperty().getValue());
+				formMetaChangedCallback.accept((CampaignFormMetaReferenceDto) e.getValue());
 			});
 		}
 
@@ -108,16 +107,16 @@ public class CampaignStatisticsFilterForm extends AbstractFilterForm<CampaignSta
 	@Override
 	protected <T1 extends Field> void formatField(T1 field, String propertyId) {
 		super.formatField(field, propertyId);
-		field.addStyleName(CssStyles.CAPTION_ON_TOP);
+		field.addClassName(CssStyles.CAPTION_ON_TOP);
 	}
 
 	@Override
-	protected void applyDependenciesOnFieldChange(String propertyId, Property.ValueChangeEvent event) {
+	protected void applyDependenciesOnFieldChange(String propertyId, HasValue.ValueChangeEvent<?> event) {
 		super.applyDependenciesOnFieldChange(propertyId, event);
 
 		switch (propertyId) {
 		case CampaignFormDataDto.REGION:
-			RegionReferenceDto region = (RegionReferenceDto) event.getProperty().getValue();
+			RegionReferenceDto region = (RegionReferenceDto) event.getValue();
 			if (region != null) {
 				districtFilter.removeAllItems();
 				districtFilter.addItems(FacadeProvider.getDistrictFacade().getAllActiveByRegion(region.getUuid()));
@@ -127,7 +126,7 @@ public class CampaignStatisticsFilterForm extends AbstractFilterForm<CampaignSta
 			}
 			break;
 		case CampaignFormDataDto.DISTRICT:
-			DistrictReferenceDto district = (DistrictReferenceDto) event.getProperty().getValue();
+			DistrictReferenceDto district = (DistrictReferenceDto) event.getValue();
 
 			if (district != null) {
 				communityFilter.removeAllItems();
@@ -155,7 +154,7 @@ public class CampaignStatisticsFilterForm extends AbstractFilterForm<CampaignSta
 		this.formMetaChangedCallback = formMetaChangedCallback;
 
 		if (cbCampaignForm != null) {
-			cbCampaignForm.addValueChangeListener(e -> formMetaChangedCallback.accept((CampaignFormMetaReferenceDto) e.getProperty().getValue()));
+			cbCampaignForm.addValueChangeListener(e -> formMetaChangedCallback.accept((CampaignFormMetaReferenceDto) e.getValue()));
 		}
 	}
 }

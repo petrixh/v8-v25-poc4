@@ -1,6 +1,6 @@
 package de.symeda.sormas.ui.survey;
 
-import com.vaadin.navigator.ViewChangeListener;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -44,7 +44,7 @@ public class SurveyTokenDataView extends AbstractDetailView<SurveyTokenReference
 
 	@Override
 	protected void initView(String params) {
-		setHeightUndefined();
+		setHeight(null);
 
 		surveyToken = FacadeProvider.getSurveyTokenFacade().getByUuid(getReference().getUuid());
 
@@ -52,13 +52,13 @@ public class SurveyTokenDataView extends AbstractDetailView<SurveyTokenReference
 			ControllerProvider.getSurveyTokenController().getSurveyTokenEditComponent(surveyToken.getUuid(), UserRight.SURVEY_TOKEN_EDIT, true);
 
 		DetailSubComponentWrapper container = new DetailSubComponentWrapper(() -> editComponent);
-		container.setWidth(100, Unit.PERCENTAGE);
-		container.setMargin(true);
+		container.setWidthFull();
+		container.setPadding(true);
 		setSubComponent(container);
 		container.setEnabled(true);
 
 		LayoutWithSidePanel layout = new LayoutWithSidePanel(editComponent);
-		container.addComponent(layout);
+		container.add(layout);
 
 	}
 

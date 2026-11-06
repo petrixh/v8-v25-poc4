@@ -16,9 +16,8 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
-import com.vaadin.ui.AbstractComponent;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.Field;
+import com.vaadin.flow.component.Component;
+import de.symeda.sormas.ui.utils.fields.Field;
 
 import de.symeda.sormas.api.campaign.form.CampaignFormElement;
 import de.symeda.sormas.api.campaign.form.CampaignFormElementType;
@@ -54,7 +53,7 @@ public class ExpressionProcessor {
 			.filter(formElement -> formElement.getExpression() == null)
 			.filter(formElement -> fields.get(formElement.getId()) != null)
 			.forEach(formElement -> {
-				fields.get(formElement.getId()).addValueChangeListener((Property.ValueChangeListener) valueChangeEvent -> checkExpression());
+				fields.get(formElement.getId()).addValueChangeListener(valueChangeEvent -> checkExpression());
 			});
 	}
 
@@ -64,7 +63,7 @@ public class ExpressionProcessor {
 			.stream()
 			.filter(formElement -> formElement.getExpression() != null)
 			.filter(formElement -> fields.get(formElement.getId()) != null)
-			.filter(formElement -> fields.get(formElement.getId()) instanceof AbstractComponent)
+			.filter(formElement -> fields.get(formElement.getId()) instanceof Component)
 			.forEach(this::buildTooltipDescription);
 	}
 
@@ -72,7 +71,7 @@ public class ExpressionProcessor {
 		final Set<String> fieldNamesInExpression = new HashSet<>();
 		final String tooltip = formElement.getExpression();
 		final Map<String, Field<?>> fields = campaignFormBuilder.getFields();
-		final AbstractComponent field = (AbstractComponent) fields.get(formElement.getId());
+		final Field<?> field = fields.get(formElement.getId());
 		campaignFormBuilder.getFormElements().forEach(element -> {
 			if (tooltip.contains(element.getId())) {
 				fieldNamesInExpression.add(campaignFormBuilder.get18nCaption(element.getId(), element.getCaption()));

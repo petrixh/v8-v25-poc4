@@ -46,7 +46,7 @@ import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 
 /**
  * CSV export of a grid that was a Vaadin 7 grid (now a Flow grid): one header row with the column captions, then all
- * items of the grid in their order. Was built on the Vaadin 7 container and its columns.
+ * items of the grid in their displayed order (the user's sort) and with its filter. Was built on the Vaadin 7 container and its columns.
  */
 @SuppressWarnings("serial")
 public class V7GridExportStreamResource extends StreamSourceDownloadHandler {
@@ -77,7 +77,11 @@ public class V7GridExportStreamResource extends StreamSourceDownloadHandler {
 						writer.writeNext(headerRow.toArray(new String[headerRow.size()]));
 
 						DataProvider dataProvider = grid.getDataProvider();
-						((java.util.stream.Stream<Object>) dataProvider.fetch(new Query())).forEach(item -> {
+						// All rows in the order and with the filter the grid shows them, as the V7 container did: the grid's
+						// query carries the back-end sort orders (lazy providers), the in-memory comparator (list providers)
+						// and the grid's in-memory filter.
+						Query query = grid.getDataCommunicator().buildQuery(0, Integer.MAX_VALUE);
+						((java.util.stream.Stream<Object>) dataProvider.fetch(query)).forEach(item -> {
 							List<String> row = new ArrayList<>();
 							valueProviders.forEach(valueProvider -> {
 								Object value = valueProvider.apply(item);

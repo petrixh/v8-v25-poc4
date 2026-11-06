@@ -19,9 +19,7 @@ import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 
-import de.symeda.sormas.ui.navigation.Navigator;
 import com.vaadin.flow.component.Unit;
-import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiDto;
@@ -42,9 +40,11 @@ import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.UserProvider;
 import de.symeda.sormas.ui.adverseeventsfollowingimmunization.components.fields.vaccines.AefiPrimarySuspectVaccinationSelectionField;
+import de.symeda.sormas.ui.navigation.Navigator;
 import de.symeda.sormas.ui.utils.ArchiveHandlers;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.automaticdeletion.DeletionLabel;
 import de.symeda.sormas.ui.utils.components.page.title.RowLayout;

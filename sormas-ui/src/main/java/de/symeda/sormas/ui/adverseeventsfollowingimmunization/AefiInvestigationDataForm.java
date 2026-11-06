@@ -26,13 +26,8 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.locCss;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.html.Span;
-import de.symeda.sormas.ui.utils.fields.DateField;
-import de.symeda.sormas.ui.utils.fields.OptionGroup;
-import de.symeda.sormas.ui.utils.fields.PasswordField;
-import de.symeda.sormas.ui.utils.fields.TextArea;
-import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiDto;
@@ -58,11 +53,17 @@ import de.symeda.sormas.ui.adverseeventsfollowingimmunization.components.fields.
 import de.symeda.sormas.ui.adverseeventsfollowingimmunization.components.form.FormSectionAccordion;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.DateTimeField;
 import de.symeda.sormas.ui.utils.FieldAccessHelper;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
 import de.symeda.sormas.ui.utils.UserField;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.PasswordField;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 @SuppressWarnings("deprecation")
 public class AefiInvestigationDataForm extends AbstractEditForm<AefiInvestigationDto> {
@@ -908,8 +909,8 @@ public class AefiInvestigationDataForm extends AbstractEditForm<AefiInvestigatio
 	}
 
 	@Override
-	public void attach() {
-		super.attach();
+	protected void onAttach(AttachEvent attachEvent) {
+		super.onAttach(attachEvent);
 
 		AefiInvestigationDto dataFormValue = getValue();
 

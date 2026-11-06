@@ -18,7 +18,6 @@ package de.symeda.sormas.ui.adverseeventsfollowingimmunization.aefiinvestigation
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
@@ -60,9 +59,9 @@ public class AefiInvestigationList extends PaginationList<AefiInvestigationListE
 		if (!listEntries.isEmpty()) {
 			showPage(1);
 		} else {
-			listLayout.removeAllComponents();
+			listLayout.removeAll();
 			updatePaginationLayout();
-			listLayout.addComponent(noInvestigationsLabel);
+			listLayout.add(noInvestigationsLabel);
 		}
 	}
 
@@ -80,7 +79,7 @@ public class AefiInvestigationList extends PaginationList<AefiInvestigationListE
 					.navigateToAefiInvestigation(aefiInvestigationUuid));
 
 			listEntry.setEnabled(isEditable);
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 }

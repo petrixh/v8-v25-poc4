@@ -26,14 +26,9 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.ui.themes.ValoTheme;
-import de.symeda.sormas.ui.utils.fields.ComboBox;
-import de.symeda.sormas.ui.utils.fields.DateField;
-import de.symeda.sormas.ui.utils.fields.PasswordField;
-import de.symeda.sormas.ui.utils.fields.TextArea;
-import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiDto;
@@ -56,6 +51,11 @@ import de.symeda.sormas.ui.utils.FieldAccessHelper;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
 import de.symeda.sormas.ui.utils.UserField;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.PasswordField;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 @SuppressWarnings("deprecation")
 public class AefiDataForm extends AbstractEditForm<AefiDto> {
@@ -275,8 +275,8 @@ public class AefiDataForm extends AbstractEditForm<AefiDto> {
 	}
 
 	@Override
-	public void attach() {
-		super.attach();
+	protected void onAttach(AttachEvent attachEvent) {
+		super.onAttach(attachEvent);
 
 		AefiDto dataFormValue = getValue();
 

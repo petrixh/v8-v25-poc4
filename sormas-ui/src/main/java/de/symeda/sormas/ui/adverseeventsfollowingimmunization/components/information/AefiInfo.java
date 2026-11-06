@@ -19,6 +19,7 @@ import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
@@ -47,11 +48,11 @@ public class AefiInfo extends SideComponent {
 		this.aefi = aefi;
 		mainLayout = new VerticalLayout();
 		mainLayout.setWidth(100, Unit.PERCENTAGE);
-		mainLayout.setMargin(false);
+		mainLayout.setPadding(false);
 		mainLayout.setSpacing(false);
 
 		buildMainLayout();
-		addComponent(mainLayout);
+		add(mainLayout);
 	}
 
 	public void buildMainLayout() {
@@ -61,11 +62,11 @@ public class AefiInfo extends SideComponent {
 		if (aefi.getSerious() == YesNoUnknown.YES) {
 			CssStyles.style(labelAefiType, CssStyles.LABEL_CRITICAL);
 		}
-		mainLayout.addComponent(labelAefiType);
+		mainLayout.add(labelAefiType);
 
 		Span labelVaccineName = new Span(aefi.getPrimarySuspectVaccine().getVaccineName().toString());
 		CssStyles.style(labelVaccineName, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
-		mainLayout.addComponent(labelVaccineName);
+		mainLayout.add(labelVaccineName);
 
 		if (!StringUtils.isBlank(aefi.getPrimarySuspectVaccine().getVaccineDose())) {
 			Span labelVaccineDose = new Span(
@@ -73,17 +74,17 @@ public class AefiInfo extends SideComponent {
 					+ SEPARATOR
 					+ aefi.getPrimarySuspectVaccine().getVaccineDose());
 			CssStyles.style(labelVaccineDose, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
-			mainLayout.addComponent(labelVaccineDose);
+			mainLayout.add(labelVaccineDose);
 		}
 
 		Span labelVaccineDate = new Span(
 			I18nProperties.getPrefixCaption(AefiListEntryDto.I18N_PREFIX, AefiListEntryDto.PRIMARY_VACCINE_VACCINATION_DATE)
 				+ SEPARATOR
 				+ DateFormatHelper.formatLocalDate(aefi.getPrimarySuspectVaccine().getVaccinationDate()));
-		mainLayout.addComponent(labelVaccineDate);
+		mainLayout.add(labelVaccineDate);
 
 		Span labelAdverseEvents = new Span(StringUtils.abbreviate(AefiHelper.buildAdverseEventsString(aefi.getAdverseEvents()), 56));
 		CssStyles.style(labelAdverseEvents, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
-		mainLayout.addComponent(labelAdverseEvents);
+		mainLayout.add(labelAdverseEvents);
 	}
 }

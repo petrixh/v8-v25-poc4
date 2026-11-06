@@ -20,21 +20,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import de.symeda.sormas.ui.utils.PopupButton;
-
-import com.vaadin.flow.component.icon.VaadinIcon;
-import de.symeda.sormas.ui.navigation.ViewChangeListener;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
-import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import de.symeda.sormas.ui.utils.fields.ComboBox;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;
@@ -51,13 +44,20 @@ import de.symeda.sormas.ui.UserProvider;
 import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.adverseeventsfollowingimmunization.components.directory.AefiDataLayout;
 import de.symeda.sormas.ui.adverseeventsfollowingimmunization.components.directory.AefiFilterFormLayout;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import de.symeda.sormas.ui.utils.AefiDownloadUtil;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.ComboBoxHelper;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.DownloadUtil;
 import de.symeda.sormas.ui.utils.ExportEntityName;
 import de.symeda.sormas.ui.utils.GridExportStreamResource;
+import de.symeda.sormas.ui.utils.PopupButton;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class AefiView extends AbstractAefiView {
 
@@ -89,7 +89,7 @@ public class AefiView extends AbstractAefiView {
 		if (UserProvider.getCurrent().hasUserRight(UserRight.ADVERSE_EVENTS_FOLLOWING_IMMUNIZATION_EXPORT)) {
 			VerticalLayout exportLayout = new VerticalLayout();
 			exportLayout.setSpacing(true);
-			exportLayout.setMargin(true);
+			exportLayout.setPadding(true);
 			exportLayout.addClassName(CssStyles.LAYOUT_MINIMAL);
 			exportLayout.setWidth(200, Unit.PIXELS);
 
@@ -97,21 +97,20 @@ public class AefiView extends AbstractAefiView {
 			addHeaderComponent(exportButton);
 
 			Button basicExportButton = ButtonHelper.createIconButton(Captions.exportBasic, VaadinIcon.TABLE, null, CssStyles.BUTTON_PRIMARY);
-			basicExportButton.setDescription(I18nProperties.getString(Strings.infoBasicExport));
+			basicExportButton.setTooltipText(I18nProperties.getString(Strings.infoBasicExport));
 			basicExportButton.setWidth(100, Unit.PERCENTAGE);
-			exportLayout.addComponent(basicExportButton);
-			StreamResource streamResource = GridExportStreamResource.createStreamResourceWithSelectedItems(
+			exportLayout.add(basicExportButton);
+			DownloadHandler streamResource = GridExportStreamResource.createStreamResourceWithSelectedItems(
 				dataLayout.getGrid(),
 				() -> viewConfiguration.isInEagerMode() ? dataLayout.getGrid().asMultiSelect().getSelectedItems() : Collections.emptySet(),
 				ExportEntityName.ADVERSE_EVENTS_FOLLOWING_IMMUNIZATION);
-			FileDownloader fileDownloader = new FileDownloader(streamResource);
-			fileDownloader.extend(basicExportButton);
+			DownloadUtil.attachDownloader(basicExportButton, streamResource);
 
-			StreamResource extendedExportStreamResource =
+			DownloadHandler extendedExportStreamResource =
 				AefiDownloadUtil.createAefiExportResource(dataLayout.getGrid().getCriteria(), this::getSelectedRowUuids, null);
 			addExportButton(
 				extendedExportStreamResource,
-				exportButton,
+				exportButton.getPopover(),
 				exportLayout,
 				VaadinIcon.FILE_TEXT,
 				Captions.exportDetailed,
@@ -119,24 +118,25 @@ public class AefiView extends AbstractAefiView {
 		}
 
 		final VerticalLayout mainLayout = new VerticalLayout();
-		mainLayout.addComponent(createFilterBar());
+		mainLayout.add(createFilterBar());
 
 		final VerticalLayout gridLayout = new VerticalLayout();
-		gridLayout.setMargin(false);
+		gridLayout.setPadding(false);
 		gridLayout.setSpacing(false);
 		gridLayout.setSizeFull();
 		//CssStyles.style(gridLayout, CssStyles.VIEW_SECTION, CssStyles.VSPACE_TOP_3);
 
-		gridLayout.addComponent(createStatusFilterBar());
-		gridLayout.addComponent(dataLayout);
-		gridLayout.setExpandRatio(dataLayout, 1);
+		gridLayout.add(createStatusFilterBar());
+		gridLayout.add(dataLayout);
+		gridLayout.setFlexGrow(1, dataLayout);
 
-		mainLayout.addComponent(gridLayout);
+		mainLayout.add(gridLayout);
 
-		mainLayout.setMargin(new MarginInfo(false, true, true, true));
+		// was margins without the top one (MarginInfo); spacing details belong to the theme work
+		mainLayout.setPadding(true);
 		mainLayout.setSpacing(false);
 		mainLayout.setSizeFull();
-		mainLayout.setExpandRatio(gridLayout, 1);
+		mainLayout.setFlexGrow(1, gridLayout);
 		mainLayout.addClassNames("crud-main-layout", CssStyles.VSPACE_TOP_4);
 
 		addComponent(mainLayout);
@@ -173,7 +173,7 @@ public class AefiView extends AbstractAefiView {
 	public HorizontalLayout createStatusFilterBar() {
 		HorizontalLayout statusFilterLayout = new HorizontalLayout();
 		statusFilterLayout.setSpacing(true);
-		statusFilterLayout.setMargin(false);
+		statusFilterLayout.setPadding(false);
 		statusFilterLayout.setWidth(100, Unit.PERCENTAGE);
 		statusFilterLayout.addClassName(CssStyles.VSPACE_3);
 
@@ -194,14 +194,14 @@ public class AefiView extends AbstractAefiView {
 						FeatureTypeProperty.THRESHOLD_IN_DAYS,
 						Integer.class);
 				if (daysAfterAefiEntryGetsArchived > 0) {
-					relevanceStatusInfoLabel = new Span(
-						VaadinIcon.INFO_CIRCLE.getHtml() + " "
+					relevanceStatusInfoLabel = VaadinUiUtil.createLabel(
+						HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " "
 							+ String.format(I18nProperties.getString(Strings.infoArchivedAefiEntries), daysAfterAefiEntryGetsArchived),
 						ContentMode.HTML);
 					relevanceStatusInfoLabel.setVisible(false);
 					relevanceStatusInfoLabel.addClassName(CssStyles.LABEL_VERTICAL_ALIGN_SUPER);
-					actionButtonsLayout.addComponent(relevanceStatusInfoLabel);
-					actionButtonsLayout.setComponentAlignment(relevanceStatusInfoLabel, Alignment.MIDDLE_RIGHT);
+					actionButtonsLayout.add(relevanceStatusInfoLabel);
+					actionButtonsLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, relevanceStatusInfoLabel);
 				}
 			}
 			relevanceStatusFilter = ComboBoxHelper.createComboBoxV7();
@@ -230,13 +230,15 @@ public class AefiView extends AbstractAefiView {
 				criteria.setRelevanceStatus((EntityRelevanceStatus) e.getValue());
 				navigateTo(criteria);
 			});
-			actionButtonsLayout.addComponent(relevanceStatusFilter);
+			actionButtonsLayout.add(relevanceStatusFilter);
 		}
 
 		if (actionButtonsLayout.getComponentCount() > 0) {
-			statusFilterLayout.addComponent(actionButtonsLayout);
-			statusFilterLayout.setComponentAlignment(actionButtonsLayout, Alignment.TOP_RIGHT);
-			statusFilterLayout.setExpandRatio(actionButtonsLayout, 1);
+			statusFilterLayout.add(actionButtonsLayout);
+			// was Alignment.TOP_RIGHT: the layout grows, its content goes right
+			statusFilterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, actionButtonsLayout);
+			statusFilterLayout.setFlexGrow(1, actionButtonsLayout);
+			actionButtonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 		}
 
 		return statusFilterLayout;

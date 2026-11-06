@@ -25,12 +25,8 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import de.symeda.sormas.ui.utils.CustomLayout;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.HasValue;
-import de.symeda.sormas.ui.utils.fields.ComboBox;
-import de.symeda.sormas.ui.utils.fields.Field;
-import de.symeda.sormas.ui.utils.fields.TextField;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiInvestigationCriteria;
@@ -52,9 +48,13 @@ import de.symeda.sormas.api.utils.EpiWeek;
 import de.symeda.sormas.ui.UserProvider;
 import de.symeda.sormas.ui.utils.AbstractFilterForm;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.EpiWeekAndDateFilterComponent;
 import de.symeda.sormas.ui.utils.FieldConfiguration;
 import de.symeda.sormas.ui.utils.FieldHelper;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class AefiInvestigationFilterForm extends AbstractFilterForm<AefiInvestigationCriteria> {
 
@@ -339,7 +339,7 @@ public class AefiInvestigationFilterForm extends AbstractFilterForm<AefiInvestig
 		HorizontalLayout dateFilterLayout = (HorizontalLayout) getMoreFiltersContainer().getComponent(WEEK_AND_DATE_FILTER);
 		@SuppressWarnings("unchecked")
 		EpiWeekAndDateFilterComponent<AefiInvestigationDateType> weekAndDateFilter =
-			(EpiWeekAndDateFilterComponent<AefiInvestigationDateType>) dateFilterLayout.getComponent(0);
+			(EpiWeekAndDateFilterComponent<AefiInvestigationDateType>) dateFilterLayout.getComponentAt(0);
 
 		AefiInvestigationDateType aefiInvestigationDateType = criteria.getAefiInvestigationDateType();
 		weekAndDateFilter.getDateTypeSelector().setValue(aefiInvestigationDateType);
@@ -360,7 +360,7 @@ public class AefiInvestigationFilterForm extends AbstractFilterForm<AefiInvestig
 	protected Stream<Field> streamFieldsForEmptyCheck(CustomLayout layout) {
 		HorizontalLayout dateFilterLayout = (HorizontalLayout) getMoreFiltersContainer().getComponent(WEEK_AND_DATE_FILTER);
 		EpiWeekAndDateFilterComponent<AefiInvestigationDateType> weekAndDateFilter =
-			(EpiWeekAndDateFilterComponent<AefiInvestigationDateType>) dateFilterLayout.getComponent(0);
+			(EpiWeekAndDateFilterComponent<AefiInvestigationDateType>) dateFilterLayout.getComponentAt(0);
 
 		return super.streamFieldsForEmptyCheck(layout).filter(f -> f != weekAndDateFilter.getDateFilterOptionFilter());
 	}
@@ -386,7 +386,7 @@ public class AefiInvestigationFilterForm extends AbstractFilterForm<AefiInvestig
 		dateFilterRowLayout.setSpacing(true);
 		dateFilterRowLayout.setSizeUndefined();
 
-		dateFilterRowLayout.addComponent(weekAndDateFilter);
+		dateFilterRowLayout.add(weekAndDateFilter);
 
 		return dateFilterRowLayout;
 	}

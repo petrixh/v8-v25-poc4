@@ -21,10 +21,8 @@ package de.symeda.sormas.ui.adverseeventsfollowingimmunization.components.fields
 import java.util.List;
 import java.util.function.Consumer;
 
-import de.symeda.sormas.ui.utils.grid.HeightMode;
 import com.vaadin.flow.component.Component;
-import de.symeda.sormas.ui.utils.fields.CustomField;
-import de.symeda.sormas.ui.utils.grid.Grid;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.caze.Vaccine;
@@ -35,6 +33,9 @@ import de.symeda.sormas.api.vaccination.VaccinationDto;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CustomField;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
 
 public class AefiPrimarySuspectVaccinationSelectionField extends CustomField<VaccinationDto> {
 
@@ -54,7 +55,7 @@ public class AefiPrimarySuspectVaccinationSelectionField extends CustomField<Vac
 	}
 
 	private void addInfoComponent() {
-		mainLayout.addComponent(VaadinUiUtil.createInfoComponent(infoAefiSelectPrimarySuspectVaccine));
+		mainLayout.add(VaadinUiUtil.createInfoComponent(infoAefiSelectPrimarySuspectVaccine));
 	}
 
 	public void initializeGrid() {
@@ -107,20 +108,20 @@ public class AefiPrimarySuspectVaccinationSelectionField extends CustomField<Vac
 
 		mainLayout = new VerticalLayout();
 		mainLayout.setSpacing(true);
-		mainLayout.setMargin(false);
+		mainLayout.setPadding(false);
 		mainLayout.setSizeUndefined();
 		mainLayout.setWidth(100, Unit.PERCENTAGE);
 		CssStyles.style(mainLayout, CssStyles.VSPACE_2);
 
 		addInfoComponent();
 
-		mainLayout.addComponent(vaccinationGrid);
+		mainLayout.add(vaccinationGrid);
 
 		return mainLayout;
 	}
 
 	@Override
-	protected void doSetValue(VaccinationDto vaccinationDto) {
+	protected void setPresentationValue(VaccinationDto vaccinationDto) {
 		if (vaccinationDto != null) {
 			vaccinationGrid.select(vaccinationDto);
 		}

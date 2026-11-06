@@ -18,7 +18,6 @@ package de.symeda.sormas.ui.adverseeventsfollowingimmunization.aefilink;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
@@ -59,9 +58,9 @@ public class AefiList extends PaginationList<AefiListEntryDto> {
 		if (!listEntries.isEmpty()) {
 			showPage(1);
 		} else {
-			listLayout.removeAllComponents();
+			listLayout.removeAll();
 			updatePaginationLayout();
-			listLayout.addComponent(noAdverseEventsLabel);
+			listLayout.add(noAdverseEventsLabel);
 		}
 	}
 
@@ -78,7 +77,7 @@ public class AefiList extends PaginationList<AefiListEntryDto> {
 				event -> ControllerProvider.getAefiController().navigateToAefi(aefiUuid));
 
 			listEntry.setEnabled(isEditable);
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 }

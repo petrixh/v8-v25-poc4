@@ -39,12 +39,7 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.locs;
 
 import java.util.Arrays;
 
-import de.symeda.sormas.ui.utils.CustomLayout;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.ui.themes.ValoTheme;
-import de.symeda.sormas.ui.utils.fields.CheckBox;
-import de.symeda.sormas.ui.utils.fields.Field;
-import de.symeda.sormas.ui.utils.fields.TextArea;
 
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AdverseEventState;
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AdverseEventsDto;
@@ -55,8 +50,13 @@ import de.symeda.sormas.api.utils.fieldaccess.UiFieldAccessCheckers;
 import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextArea;
 
 @SuppressWarnings("deprecation")
 public class AdverseEventsForm extends AbstractEditForm<AdverseEventsDto> {
@@ -120,7 +120,7 @@ public class AdverseEventsForm extends AbstractEditForm<AdverseEventsDto> {
 		getContent().addComponent(emptyLabel, EMPTY_LABEL_LOC);
 
 		NullableOptionGroup seizureType = addField(SEIZURE_TYPE, NullableOptionGroup.class);
-		CssStyles.style(seizureType, ValoTheme.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_CAPTION_INLINE);
+		CssStyles.style(seizureType, SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_CAPTION_INLINE);
 
 		TextArea otherAdverseEvents = addField(OTHER_ADVERSE_EVENT_DETAILS, TextArea.class);
 		otherAdverseEvents.setRows(6);

@@ -16,8 +16,8 @@
 package de.symeda.sormas.ui.adverseeventsfollowingimmunization.components.information;
 
 import com.vaadin.flow.component.Unit;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Disease;
@@ -49,36 +49,36 @@ public class AefiPersonInfo extends AbstractInfoLayout<PersonDto> {
 		this.disease = disease;
 
 		setSpacing(true);
-		setMargin(false);
+		setPadding(false);
 		setWidth(100, Unit.PERCENTAGE);
 		updatePersonInfo();
 	}
 
 	private void updatePersonInfo() {
 
-		this.removeAllComponents();
+		this.removeAll();
 
 		VerticalLayout mainLayout = new VerticalLayout();
 		mainLayout.setWidth(100, Unit.PERCENTAGE);
 		CssStyles.style(mainLayout, CssStyles.PADDING_NONE);
 
 		HorizontalLayout componentHeader = new HorizontalLayout();
-		componentHeader.setMargin(false);
+		componentHeader.setPadding(false);
 		componentHeader.setSpacing(false);
 		componentHeader.setWidth(100, Unit.PERCENTAGE);
 
 		Span headingLabel = new Span(I18nProperties.getString(Strings.headingPersonInformation));
 		headingLabel.addClassName(CssStyles.H3);
-		componentHeader.addComponent(headingLabel);
-		componentHeader.setExpandRatio(headingLabel, 1);
+		componentHeader.add(headingLabel);
+		componentHeader.setFlexGrow(1, headingLabel);
 
 		HorizontalLayout infoColumnsLayout = new HorizontalLayout();
-		infoColumnsLayout.setMargin(false);
+		infoColumnsLayout.setPadding(false);
 		infoColumnsLayout.setSpacing(false);
 		infoColumnsLayout.setWidth(100, Unit.PERCENTAGE);
 
 		VerticalLayout leftColumnLayout = new VerticalLayout();
-		leftColumnLayout.setMargin(false);
+		leftColumnLayout.setPadding(false);
 		leftColumnLayout.setSpacing(true);
 		boolean hasUserRightPersonView = UserProvider.getCurrent().hasUserRight(UserRight.PERSON_VIEW);
 		{
@@ -88,13 +88,13 @@ public class AefiPersonInfo extends AbstractInfoLayout<PersonDto> {
 				DataHelper.getShortUuid(personDto.getUuid()),
 				I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.UUID));
 			personIdLabel.setId("personIdLabel");
-			personIdLabel.setDescription(personDto.getUuid());
+			personIdLabel.setTitle(personDto.getUuid());
 
 			if (hasUserRightPersonView) {
 				addDescLabel(leftColumnLayout, PersonDto.LAST_NAME, personDto.buildCaption(), I18nProperties.getCaption(PERSON_FULL_NAME));
 
 				HorizontalLayout ageSexLayout = new HorizontalLayout();
-				ageSexLayout.setMargin(false);
+				ageSexLayout.setPadding(false);
 				ageSexLayout.setSpacing(true);
 				addCustomDescLabel(
 					ageSexLayout,
@@ -108,13 +108,13 @@ public class AefiPersonInfo extends AbstractInfoLayout<PersonDto> {
 					PersonDto.SEX,
 					personDto.getSex(),
 					I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.SEX));
-				leftColumnLayout.addComponent(ageSexLayout);
+				leftColumnLayout.add(ageSexLayout);
 			}
 		}
-		infoColumnsLayout.addComponent(leftColumnLayout);
+		infoColumnsLayout.add(leftColumnLayout);
 
 		VerticalLayout rightColumnLayout = new VerticalLayout();
-		rightColumnLayout.setMargin(false);
+		rightColumnLayout.setPadding(false);
 		rightColumnLayout.setSpacing(true);
 		{
 			addDescLabel(rightColumnLayout, DISEASE, disease, I18nProperties.getPrefixCaption(ImmunizationDto.I18N_PREFIX, ImmunizationDto.DISEASE));
@@ -125,11 +125,11 @@ public class AefiPersonInfo extends AbstractInfoLayout<PersonDto> {
 				personDto.getPhone(),
 				I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.PHONE));
 		}
-		infoColumnsLayout.addComponent(rightColumnLayout);
+		infoColumnsLayout.add(rightColumnLayout);
 
-		mainLayout.addComponent(componentHeader);
-		mainLayout.addComponent(infoColumnsLayout);
+		mainLayout.add(componentHeader);
+		mainLayout.add(infoColumnsLayout);
 
-		this.addComponent(mainLayout);
+		this.add(mainLayout);
 	}
 }

@@ -25,12 +25,12 @@ public class AefiDataLayout extends VerticalLayout {
 
 	public AefiDataLayout(AefiCriteria criteria) {
 		grid = new AefiGrid(criteria);
-		addComponent(grid);
+		add(grid);
 
-		setMargin(false);
+		setPadding(false);
 		setSpacing(false);
 		setSizeFull();
-		setExpandRatio(grid, 1);
+		setFlexGrow(1, grid);
 	}
 
 	public AefiGrid getGrid() {

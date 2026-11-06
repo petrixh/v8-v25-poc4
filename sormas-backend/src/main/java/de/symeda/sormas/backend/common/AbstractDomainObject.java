@@ -41,24 +41,13 @@ import jakarta.persistence.Version;
 import jakarta.validation.constraints.Size;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.TypeDef;
 import org.hibernate.proxy.HibernateProxyHelper;
-
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import com.vladmihalcea.hibernate.type.json.JsonType;
 
 import de.symeda.sormas.api.utils.DataHelper;
 import de.symeda.sormas.api.uuid.HasUuid;
 import de.symeda.sormas.backend.user.CurrentUserService;
 import de.symeda.sormas.backend.user.User;
 
-/**
- * Note: The hibernate-types article suggests to use JsonBinaryType for Postgres, but doesn't explain why.
- * Since JsonBinaryType does not work with H2, we are using JsonStringType instead
- */
-
-@TypeDef(name = "json", typeClass = JsonType.class)
-@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @MappedSuperclass
 @EntityListeners(AbstractDomainObject.AdoListener.class)
 public abstract class AbstractDomainObject implements Serializable, Cloneable, HasUuid {

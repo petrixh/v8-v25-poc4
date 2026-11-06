@@ -17,6 +17,8 @@
  *******************************************************************************/
 package de.symeda.sormas.backend.util;
 
+import org.hibernate.type.SqlTypes;
+
 public interface ModelConstants {
 
 	String PERSISTENCE_UNIT_NAME = "SormasPU";
@@ -42,5 +44,5 @@ public interface ModelConstants {
 	/**
 	 * Hibernate takes care of transforming the given Java model to and from JSON content in the database.
 	 */
-	String HIBERNATE_TYPE_JSON = "json";
+	int HIBERNATE_TYPE_JSON = SqlTypes.JSON;
 }

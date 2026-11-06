@@ -35,7 +35,7 @@ import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 
 import de.symeda.sormas.api.environment.VectorType;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
 
 import de.symeda.sormas.api.environment.environmentsample.EnvironmentSampleMaterial;
 import de.symeda.sormas.api.environment.environmentsample.Pathogen;
@@ -263,7 +263,7 @@ public class EnvironmentSample extends DeletableAdo {
 		this.otherRequestedPathogenTests = otherRequestedPathogenTests;
 	}
 
-	@Type(type = ModelConstants.HIBERNATE_TYPE_JSON)
+	@JdbcTypeCode(ModelConstants.HIBERNATE_TYPE_JSON)
 	@Column(columnDefinition = ModelConstants.COLUMN_DEFINITION_JSON)
 	public Map<WeatherCondition, Boolean> getWeatherConditions() {
 		return weatherConditions;

@@ -11,7 +11,8 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -70,7 +71,7 @@ public class CampaignFormMeta extends AbstractDomainObject {
 	}
 
 	@Lob
-	@Type(type = "org.hibernate.type.TextType")
+	@JdbcTypeCode(SqlTypes.LONGVARCHAR)
 	public String getCampaignFormElements() {
 		return campaignFormElements;
 	}
@@ -115,7 +116,7 @@ public class CampaignFormMeta extends AbstractDomainObject {
 	}
 
 	@Lob
-	@Type(type = "org.hibernate.type.TextType")
+	@JdbcTypeCode(SqlTypes.LONGVARCHAR)
 	public String getCampaignFormTranslations() {
 		return campaignFormTranslations;
 	}

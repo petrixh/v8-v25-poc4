@@ -32,10 +32,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
-import org.hibernate.annotations.TypeDef;
-
-import com.vladmihalcea.hibernate.type.array.ListArrayType;
-
 import de.symeda.sormas.api.sample.PathogenTestResultType;
 import de.symeda.sormas.api.sample.SampleMaterial;
 import de.symeda.sormas.api.sample.SpecimenCondition;
@@ -44,7 +40,6 @@ import de.symeda.sormas.backend.externalmessage.ExternalMessage;
 import de.symeda.sormas.backend.sample.Sample;
 
 @Entity(name = SampleReport.TABLE_NAME)
-@TypeDef(name = "list-array", typeClass = ListArrayType.class)
 public class SampleReport extends AbstractDomainObject {
 
 	private static final long serialVersionUID = -6907634648584998110L;

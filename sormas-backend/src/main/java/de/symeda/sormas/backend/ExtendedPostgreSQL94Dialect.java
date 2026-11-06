@@ -1,11 +1,15 @@
 package de.symeda.sormas.backend;
 
 import org.hibernate.boot.model.FunctionContributions;
+import org.hibernate.boot.model.TypeContributions;
 import org.hibernate.dialect.PostgreSQLDialect;
+import org.hibernate.dialect.type.PostgreSQLCastingJsonJdbcType;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 import org.hibernate.query.sqm.function.SqmFunctionRegistry;
+import org.hibernate.service.ServiceRegistry;
 import org.hibernate.type.BasicType;
 import org.hibernate.type.BasicTypeReference;
+import org.hibernate.type.SqlTypes;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.type.spi.TypeConfiguration;
 
@@ -85,6 +89,16 @@ public class ExtendedPostgreSQL94Dialect extends PostgreSQLDialect {
 		pattern(registry, types, AT_END_OF_DAY, StandardBasicTypes.DATE, "?1::date + interval '1 day' - interval '1 microsecond'", 1);
 		pattern(registry, types, FULLTEXT_SEARCH, StandardBasicTypes.BOOLEAN, "?1 @@ plainto_tsquery('simple', unaccent(?2))", 2);
 		pattern(registry, types, EMPTY_TO_NULL, StandardBasicTypes.STRING, "NULLIF(TRIM(?1), '')", 1);
+	}
+
+	/**
+	 * JSON values are bound as {@code json} instead of Hibernate 7's default {@code jsonb}, as hibernate-types did: {@code json} and
+	 * {@code text} columns keep the JSON text as written (PostgreSQL casts {@code json} to {@code jsonb} or {@code text} on assignment).
+	 */
+	@Override
+	public void contributeTypes(TypeContributions typeContributions, ServiceRegistry serviceRegistry) {
+		super.contributeTypes(typeContributions, serviceRegistry);
+		typeContributions.getTypeConfiguration().getJdbcTypeRegistry().addDescriptor(SqlTypes.JSON, PostgreSQLCastingJsonJdbcType.JSON_INSTANCE);
 	}
 
 	private static void pattern(

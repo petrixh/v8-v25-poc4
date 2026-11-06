@@ -38,7 +38,7 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.disease.DiseaseVariant;
@@ -629,7 +629,7 @@ public class Event extends CoreAdo implements SormasToSormasShareable, HasExtern
 		this.epidemiologicalEvidence = epidemiologicalEvidence;
 	}
 
-	@Type(type = ModelConstants.HIBERNATE_TYPE_JSON)
+	@JdbcTypeCode(ModelConstants.HIBERNATE_TYPE_JSON)
 	@Column(columnDefinition = ModelConstants.COLUMN_DEFINITION_JSON)
 	public Map<EpidemiologicalEvidenceDetail, Boolean> getEpidemiologicalEvidenceDetails() {
 		return epidemiologicalEvidenceDetails;
@@ -648,7 +648,7 @@ public class Event extends CoreAdo implements SormasToSormasShareable, HasExtern
 		this.laboratoryDiagnosticEvidence = laboratoryDiagnosticEvidence;
 	}
 
-	@Type(type = ModelConstants.HIBERNATE_TYPE_JSON)
+	@JdbcTypeCode(ModelConstants.HIBERNATE_TYPE_JSON)
 	@Column(columnDefinition = ModelConstants.COLUMN_DEFINITION_JSON)
 	public Map<LaboratoryDiagnosticEvidenceDetail, Boolean> getLaboratoryDiagnosticEvidenceDetails() {
 		return laboratoryDiagnosticEvidenceDetails;

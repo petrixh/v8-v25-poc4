@@ -1,6 +1,7 @@
 #!/bin/bash
 # Return this copy to the seed state: the database from the seed snapshot taken by up.sh, the mail sink emptied, the
-# uploaded document templates removed (the database rows go with the restore, the files live in the app container).
+# uploaded document templates and documents removed (the database rows go with the restore, the files live in the app
+# container).
 # APP_ENV_RESET_MODE=restart (default): the app's domain is stopped, the database restored, the domain started again,
 #   so no in-memory state survives (sessions, the Hibernate cache of users, roles and infrastructure).
 # APP_ENV_RESET_MODE=db: the database only, the app keeps running (seconds instead of about a minute). Logged-in
@@ -10,8 +11,9 @@ source "$(dirname "$0")/lib.sh"
 t0=$SECONDS
 docker container inspect "$APP_ENV_CONTAINER" >/dev/null 2>&1 || die "copy is not running (no container $APP_ENV_CONTAINER)"
 snapshot_exists || die "no seed snapshot in this copy: run env/up.sh"
-# Document templates are files under <custom.path>/docgeneration (stock /opt/sormas/custom; the seed has none)
-clear_templates() { docker exec "$APP_ENV_CONTAINER" rm -rf /opt/sormas/custom/docgeneration || die "could not remove the document templates"; }
+# Document templates are files under <custom.path>/docgeneration (stock /opt/sormas/custom), uploaded documents (C2, the
+# DOCUMENTS feature) files under documents.path (stock /opt/sormas/documents); the seed has none of either
+clear_templates() { docker exec "$APP_ENV_CONTAINER" rm -rf /opt/sormas/custom/docgeneration /opt/sormas/documents || die "could not remove the document templates and documents"; }
 case "$APP_ENV_RESET_MODE" in
   restart) domain stop; snapshot_restore || die "restore failed"; clear_templates; domain start ;;
   db) snapshot_restore || die "restore failed"; clear_templates ;;

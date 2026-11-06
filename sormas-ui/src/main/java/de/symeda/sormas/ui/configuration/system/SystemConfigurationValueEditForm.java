@@ -17,7 +17,8 @@ package de.symeda.sormas.ui.configuration.system;
 
 import static de.symeda.sormas.ui.utils.LayoutUtil.locs;
 
-import com.vaadin.data.Binder;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.component.html.Span;
 import de.symeda.sormas.ui.utils.fields.PasswordField;
 
@@ -27,6 +28,7 @@ import de.symeda.sormas.api.systemconfiguration.SystemConfigurationValueDto;
 import de.symeda.sormas.api.utils.fieldaccess.UiFieldAccessCheckers;
 import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
+import de.symeda.sormas.ui.utils.CssStyles;
 
 /**
  * Form for editing system configuration values.
@@ -75,7 +77,7 @@ public class SystemConfigurationValueEditForm extends AbstractEditForm<SystemCon
 
 			SystemConfigurationI18nHelper.processI18nString(
 				value.getDescription(),
-				(key) -> descriptionLabel.setValue(I18nProperties.getString(key)));
+				(key) -> descriptionLabel.setText(I18nProperties.getString(key)));
 
 			getContent().addComponent(descriptionLabel, SystemConfigurationValueDto.DESCRIPTION_PROPERTY_NAME);
 		}

@@ -36,6 +36,7 @@ import de.symeda.sormas.api.importexport.ExportPropertyMetaInfo;
 import de.symeda.sormas.api.importexport.ExportType;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.CssStyles;
 
 @SuppressWarnings("serial")
 public class ExportConfigurationsGrid extends Grid<ExportConfigurationDto> {
@@ -66,7 +67,7 @@ public class ExportConfigurationsGrid extends Grid<ExportConfigurationDto> {
 			.setExpandRatio(1);
 
 		addComponentColumn((config) -> this.buildButtonLayout(config, availableProperties, !isPublicExport))
-			.setId(isPublicExport ? COLUMN_ACTIONS_PUBLIC : COLUMN_ACTIONS)
+			.setKey(isPublicExport ? COLUMN_ACTIONS_PUBLIC : COLUMN_ACTIONS)
 			.setCaption("");
 	}
 

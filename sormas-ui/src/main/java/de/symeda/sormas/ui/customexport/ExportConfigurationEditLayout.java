@@ -26,14 +26,15 @@ import java.util.function.Consumer;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.ui.CheckBox;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
 import de.symeda.sormas.ui.utils.NotificationHelper;
 import de.symeda.sormas.ui.utils.NotificationHelper.Type;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
@@ -52,11 +53,11 @@ import de.symeda.sormas.ui.utils.CssStyles;
 public class ExportConfigurationEditLayout extends VerticalLayout {
 
 	private TextField tfName;
-	private CheckBox checkBoxPublicExport;
+	private Checkbox checkBoxPublicExport;
 	private Span lblDescription;
 	private Map<ExportGroupType, Span> groupTypeLabels;
-	private Map<ExportGroupType, List<CheckBox>> checkBoxGroups;
-	private Map<CheckBox, String> checkBoxes;
+	private Map<ExportGroupType, List<Checkbox>> checkBoxGroups;
+	private Map<Checkbox, String> checkBoxes;
 
 	private ExportConfigurationDto exportConfiguration;
 
@@ -88,7 +89,7 @@ public class ExportConfigurationEditLayout extends VerticalLayout {
 		add(buildCheckBoxLayout(totalCheckBoxCount));
 		HorizontalLayout buttonLayout = buildButtonLayout(resultCallback, discardCallback);
 		add(buttonLayout);
-		setComponentAlignment(buttonLayout, Alignment.MIDDLE_RIGHT);
+		setHorizontalComponentAlignment(Alignment.END, buttonLayout);
 	}
 
 	private HorizontalLayout buildConfigNameAndSharedToPublicCheckboxLayout() {
@@ -105,7 +106,7 @@ public class ExportConfigurationEditLayout extends VerticalLayout {
 		configNameAndSharedToPublicCheckboxLayout.add(tfName);
 
 		checkBoxPublicExport =
-			new CheckBox(I18nProperties.getPrefixCaption(ExportConfigurationDto.I18N_PREFIX, Captions.ExportConfiguration_sharedToPublic));
+			new Checkbox(I18nProperties.getPrefixCaption(ExportConfigurationDto.I18N_PREFIX, Captions.ExportConfiguration_sharedToPublic));
 		checkBoxPublicExport.setWidth(350, Unit.PIXELS);
 		checkBoxPublicExport.setValue(this.exportConfiguration.isSharedToPublic());
 		checkBoxPublicExport.setEnabled(hasManagePublicExportRights());
@@ -140,7 +141,7 @@ public class ExportConfigurationEditLayout extends VerticalLayout {
 			}
 
 			String caption = meta.getCaption();
-			CheckBox cb = new CheckBox(caption);
+			Checkbox cb = new Checkbox(caption);
 
 			if (!CollectionUtils.isEmpty(exportConfiguration.getProperties())) {
 				cb.setValue(exportConfiguration.getProperties().contains(property));
@@ -189,7 +190,7 @@ public class ExportConfigurationEditLayout extends VerticalLayout {
 					side = 2;
 				}
 
-				for (CheckBox checkBox : checkBoxGroups.get(groupType)) {
+				for (Checkbox checkBox : checkBoxGroups.get(groupType)) {
 					if (side == 0) {
 						firstColumnLayout.add(checkBox);
 					} else if (side == 1) {
@@ -211,7 +212,7 @@ public class ExportConfigurationEditLayout extends VerticalLayout {
 		selectionButtonLayout.setPadding(false);
 
 		Button btnSelectAll = ButtonHelper.createButton(Captions.actionSelectAll, e -> {
-			for (CheckBox checkBox : checkBoxes.keySet()) {
+			for (Checkbox checkBox : checkBoxes.keySet()) {
 				checkBox.setValue(true);
 			}
 		}, CssStyles.BUTTON_LINK);
@@ -219,7 +220,7 @@ public class ExportConfigurationEditLayout extends VerticalLayout {
 		selectionButtonLayout.add(btnSelectAll);
 
 		Button btnDeselectAll = ButtonHelper.createButton(Captions.actionDeselectAll, e -> {
-			for (CheckBox checkBox : checkBoxes.keySet()) {
+			for (Checkbox checkBox : checkBoxes.keySet()) {
 				checkBox.setValue(false);
 			}
 		}, CssStyles.BUTTON_LINK);
@@ -262,7 +263,7 @@ public class ExportConfigurationEditLayout extends VerticalLayout {
 	private void updateExportConfiguration() {
 
 		Set<String> properties = new HashSet<>();
-		for (CheckBox checkBox : checkBoxes.keySet()) {
+		for (Checkbox checkBox : checkBoxes.keySet()) {
 			if (Boolean.TRUE == checkBox.getValue()) {
 				properties.add(checkBoxes.get(checkBox));
 			}

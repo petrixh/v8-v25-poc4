@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -35,6 +35,7 @@ import de.symeda.sormas.api.importexport.ExportType;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.CssStyles;
 
 @SuppressWarnings("serial")
 public class ExportConfigurationsLayout extends VerticalLayout {
@@ -60,7 +61,7 @@ public class ExportConfigurationsLayout extends VerticalLayout {
 					I18nProperties.getCaption(Captions.exportNewExportConfiguration));
 		}, CssStyles.BUTTON_PRIMARY);
 		add(btnNewExportConfiguration);
-		setComponentAlignment(btnNewExportConfiguration, Alignment.MIDDLE_RIGHT);
+		setHorizontalComponentAlignment(Alignment.END, btnNewExportConfiguration);
 
 		Span myExportsLabel = new Span(I18nProperties.getPrefixCaption(ExportConfigurationDto.I18N_PREFIX, Captions.ExportConfiguration_myExports));
 		myExportsLabel.addClassName(H3);
@@ -83,7 +84,7 @@ public class ExportConfigurationsLayout extends VerticalLayout {
 
 		Button btnClose = ButtonHelper.createButton(Captions.actionClose, e -> closeCallback.run());
 		add(btnClose);
-		setComponentAlignment(btnClose, Alignment.MIDDLE_RIGHT);
+		setHorizontalComponentAlignment(Alignment.END, btnClose);
 	}
 
 	public void setExportCallback(Consumer<ExportConfigurationDto> exportCallback) {

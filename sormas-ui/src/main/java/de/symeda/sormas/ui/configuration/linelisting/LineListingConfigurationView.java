@@ -9,7 +9,8 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
 import de.symeda.sormas.ui.utils.NotificationHelper;
@@ -30,12 +31,14 @@ import de.symeda.sormas.api.infrastructure.region.RegionReferenceDto;
 import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.configuration.AbstractConfigurationView;
+import de.symeda.sormas.ui.navigation.HasViewParameters;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 @SuppressWarnings("serial")
-public class LineListingConfigurationView extends AbstractConfigurationView {
+public class LineListingConfigurationView extends AbstractConfigurationView implements HasViewParameters {
 
 	public static final String VIEW_NAME = ROOT_VIEW_NAME + "/linelisting";
 
@@ -64,17 +67,17 @@ public class LineListingConfigurationView extends AbstractConfigurationView {
 		}
 
 		if (region != null) {
-			getViewSubTitleLabel().setValue(region.buildCaption());
+			getViewSubTitleLabel().setText(region.buildCaption());
 		}
 
 		Span infoTextLabel;
 		if (region != null) {
-			infoTextLabel = new Span(
-				VaadinIcon.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoLineListingConfigurationRegion),
+			infoTextLabel = VaadinUiUtil.createLabel(
+				HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " " + I18nProperties.getString(Strings.infoLineListingConfigurationRegion),
 				ContentMode.HTML);
 		} else {
-			infoTextLabel = new Span(
-				VaadinIcon.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoLineListingConfigurationNation),
+			infoTextLabel = VaadinUiUtil.createLabel(
+				HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " " + I18nProperties.getString(Strings.infoLineListingConfigurationNation),
 				ContentMode.HTML);
 		}
 		CssStyles.style(infoTextLabel, CssStyles.LABEL_MEDIUM);
@@ -140,7 +143,7 @@ public class LineListingConfigurationView extends AbstractConfigurationView {
 					FeatureConfigurationCriteria criteria =
 						new FeatureConfigurationCriteria().disease(disease).region(region).featureType(FeatureType.LINE_LISTING);
 					FacadeProvider.getFeatureConfigurationFacade().deleteAllFeatureConfigurations(criteria);
-					lineListingConfigurationsLayout.removeComponent(diseaseAndDistrictLayout);
+					lineListingConfigurationsLayout.remove(diseaseAndDistrictLayout);
 					addDiseaseLayout.addDiseaseToList(disease);
 					NotificationHelper.show(null, I18nProperties.getString(Strings.messageLineListingDisabled), Type.TRAY_NOTIFICATION);
 				}
@@ -163,7 +166,7 @@ public class LineListingConfigurationView extends AbstractConfigurationView {
 		contentLayout.setFlexGrow(0, diseaseLayout);
 
 		if (configurations != null || region == null) {
-			Component districtsOrRegionsLayout;
+			Div districtsOrRegionsLayout;
 			if (region != null) {
 				districtsOrRegionsLayout = new LineListingActiveDistrictsLayout(configurations);
 			} else {
@@ -223,8 +226,8 @@ public class LineListingConfigurationView extends AbstractConfigurationView {
 		editLayout.setDiscardCallback(() -> editWindow.close());
 
 		editWindow.setWidth(1024, Unit.PIXELS);
-		editWindow.setCaption(I18nProperties.getString(Strings.headingEditLineListing));
-		editWindow.setContent(editLayout);
+		editWindow.setHeaderTitle(I18nProperties.getString(Strings.headingEditLineListing));
+		editWindow.add(editLayout);
 		editWindow.open();
 	}
 }

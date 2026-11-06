@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.function.Function;
 
-import com.vaadin.server.StreamResource;
 import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.Disease;
@@ -36,6 +35,7 @@ import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.ui.document.DocumentListComponent;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
 
 public class EventDocumentLayout extends AbstractDocgenerationLayout {
 
@@ -71,8 +71,8 @@ public class EventDocumentLayout extends AbstractDocgenerationLayout {
 	}
 
 	@Override
-	protected StreamResource createStreamResource(DocumentTemplateDto template, String filename) {
-		return new StreamResource((StreamResource.StreamSource) () -> {
+	protected StreamSourceDownloadHandler createStreamResource(DocumentTemplateDto template, String filename) {
+		return new StreamSourceDownloadHandler(() -> {
 			try {
 				return documentInputStreamSupplier.get(template, readAdditionalVariables(), shouldUploadGeneratedDocument());
 			} catch (Exception e) {

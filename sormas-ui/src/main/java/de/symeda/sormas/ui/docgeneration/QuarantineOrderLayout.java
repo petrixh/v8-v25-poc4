@@ -28,9 +28,7 @@ import javax.annotation.Nullable;
 
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.server.StreamResource;
-import com.vaadin.server.StreamResource.StreamSource;
-import com.vaadin.ui.ComboBox;
+import com.vaadin.flow.component.combobox.ComboBox;
 import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.Disease;
@@ -58,6 +56,7 @@ import de.symeda.sormas.api.vaccination.VaccinationListEntryDto;
 import de.symeda.sormas.api.vaccination.VaccinationReferenceDto;
 import de.symeda.sormas.ui.document.DocumentListComponent;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
 
 public class QuarantineOrderLayout extends AbstractDocgenerationLayout {
 
@@ -136,14 +135,14 @@ public class QuarantineOrderLayout extends AbstractDocgenerationLayout {
 				pathogenTestSelector.setItems(pathogenTests);
 				pathogenTestSelector.setEnabled(!pathogenTests.isEmpty());
 				if (pathogenTests.size() == 1) {
-					pathogenTestSelector.setSelectedItem(pathogenTests.get(0));
+					pathogenTestSelector.setValue(pathogenTests.get(0));
 				}
 			} else {
 				pathogenTestSelector.setEnabled(false);
 			}
 		});
 		if (samples.size() == 1) {
-			sampleSelector.setSelectedItem(samples.get(0));
+			sampleSelector.setValue(samples.get(0));
 		}
 
 		additionalParametersComponent.add(sampleSelector);
@@ -161,7 +160,7 @@ public class QuarantineOrderLayout extends AbstractDocgenerationLayout {
 		vaccinationSelector.setEnabled(!vaccinations.isEmpty());
 
 		if (vaccinations.size() == 1) {
-			vaccinationSelector.setSelectedItem(vaccinations.get(0));
+			vaccinationSelector.setValue(vaccinations.get(0));
 		}
 
 		additionalParametersComponent.add(vaccinationSelector);
@@ -183,8 +182,8 @@ public class QuarantineOrderLayout extends AbstractDocgenerationLayout {
 	}
 
 	@Override
-	protected StreamResource createStreamResource(DocumentTemplateDto template, String filename) {
-		return new StreamResource((StreamSource) () -> {
+	protected StreamSourceDownloadHandler createStreamResource(DocumentTemplateDto template, String filename) {
+		return new StreamSourceDownloadHandler(() -> {
 			SampleReferenceDto sampleReference =
 				sampleSelector != null && sampleSelector.getValue() != null ? sampleSelector.getValue().toReference() : null;
 			PathogenTestReferenceDto pathogenTestReference =

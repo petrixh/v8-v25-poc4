@@ -28,11 +28,11 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import com.vaadin.flow.component.Unit;
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.ui.TextArea;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.dialog.Dialog;
 
@@ -205,9 +205,9 @@ public class DocGenerationController {
 		layout.add(fileTooBig);
 		layout.add(textAreaLayout);
 		layout.add(buttonBar);
-		layout.setComponentAlignment(buttonBar, Alignment.BOTTOM_CENTER);
+		layout.setHorizontalComponentAlignment(Alignment.CENTER, buttonBar);
 
-		window.setCaption(I18nProperties.getCaption(Captions.DocumentTemplate_documentUploadWarning));
+		window.setHeaderTitle(I18nProperties.getCaption(Captions.DocumentTemplate_documentUploadWarning));
 		window.setWidth(1024, Unit.PIXELS);
 	}
 
@@ -243,7 +243,7 @@ public class DocGenerationController {
 	private void showDialog(AbstractDocgenerationLayout docgenerationLayout) {
 		Dialog window = VaadinUiUtil.showPopupWindow(docgenerationLayout);
 		window.setWidth(800, Unit.PIXELS);
-		window.setCaption(I18nProperties.getCaption(docgenerationLayout.getWindowCaption()));
+		window.setHeaderTitle(I18nProperties.getCaption(docgenerationLayout.getWindowCaption()));
 	}
 
 	private String getDocumentFileName(ReferenceDto eventReferenceDto, DocumentTemplateDto template) {

@@ -19,11 +19,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
 
-import com.vaadin.server.Page;
 import com.vaadin.flow.component.Unit;
 import de.symeda.sormas.ui.utils.NotificationHelper;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.server.StreamRegistration;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.contact.ContactCriteria;
@@ -53,11 +55,10 @@ public class CustomExportController {
 				FacadeProvider.getFeatureConfigurationFacade().getActiveServerFeatureConfigurations()),
 			customExportWindow::close);
 		customExportsLayout.setExportCallback(
-			exportConfig -> Page.getCurrent()
-				.open(ContactDownloadUtil.createContactExportResource(contactCriteria, selectedRows, exportConfig), null, true));
+			exportConfig -> openDownload(ContactDownloadUtil.createContactExportResource(contactCriteria, selectedRows, exportConfig)));
 		customExportWindow.setWidth(1024, Unit.PIXELS);
-		customExportWindow.setCaption(I18nProperties.getCaption(Captions.exportCustom));
-		customExportWindow.setContent(customExportsLayout);
+		customExportWindow.setHeaderTitle(I18nProperties.getCaption(Captions.exportCustom));
+		customExportWindow.add(customExportsLayout);
 		customExportWindow.open();
 	}
 
@@ -71,10 +72,10 @@ public class CustomExportController {
 				FacadeProvider.getFeatureConfigurationFacade().getActiveServerFeatureConfigurations()),
 			customExportWindow::close);
 		customExportsLayout.setExportCallback(
-			exportConfig -> Page.getCurrent().open(TaskDownloadUtil.createTaskExportResource(taskCriteria, selectedRows, exportConfig), null, true));
+			exportConfig -> openDownload(TaskDownloadUtil.createTaskExportResource(taskCriteria, selectedRows, exportConfig)));
 		customExportWindow.setWidth(1024, Unit.PIXELS);
-		customExportWindow.setCaption(I18nProperties.getCaption(Captions.exportCustom));
-		customExportWindow.setContent(customExportsLayout);
+		customExportWindow.setHeaderTitle(I18nProperties.getCaption(Captions.exportCustom));
+		customExportWindow.add(customExportsLayout);
 		customExportWindow.open();
 	}
 
@@ -88,10 +89,10 @@ public class CustomExportController {
 				FacadeProvider.getFeatureConfigurationFacade().getActiveServerFeatureConfigurations()),
 			customExportWindow::close);
 		customExportsLayout.setExportCallback(
-			exportConfig -> Page.getCurrent().open(PersonDownloadUtil.createPersonExportResource(personCriteria, exportConfig), null, true));
+			exportConfig -> openDownload(PersonDownloadUtil.createPersonExportResource(personCriteria, exportConfig)));
 		customExportWindow.setWidth(1024, Unit.PIXELS);
-		customExportWindow.setCaption(I18nProperties.getCaption(Captions.exportCustom));
-		customExportWindow.setContent(customExportsLayout);
+		customExportWindow.setHeaderTitle(I18nProperties.getCaption(Captions.exportCustom));
+		customExportWindow.add(customExportsLayout);
 		customExportWindow.open();
 	}
 
@@ -112,8 +113,18 @@ public class CustomExportController {
 			grid.reload(false);
 		});
 		exportWindow.setWidth(1024, Unit.PIXELS);
-		exportWindow.setCaption(caption);
-		exportWindow.setContent(editLayout);
+		exportWindow.setHeaderTitle(caption);
+		exportWindow.add(editLayout);
 		exportWindow.open();
+	}
+
+	/**
+	 * Was {@code Page.getCurrent().open(resource, null, true)}: the download opens in the current window (as in
+	 * {@code CasesView}).
+	 */
+	private static void openDownload(DownloadHandler resource) {
+		StreamRegistration exportRegistration =
+			VaadinSession.getCurrent().getResourceRegistry().registerResource(resource, UI.getCurrent().getElement());
+		UI.getCurrent().getPage().open(exportRegistration.getResourceUri().toString(), "_self");
 	}
 }

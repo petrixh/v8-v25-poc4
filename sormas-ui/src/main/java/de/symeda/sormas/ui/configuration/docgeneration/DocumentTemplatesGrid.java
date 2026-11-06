@@ -18,11 +18,8 @@ package de.symeda.sormas.ui.configuration.docgeneration;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 
-import com.vaadin.data.provider.DataProvider;
-import com.vaadin.data.provider.ListDataProvider;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
 import de.symeda.sormas.ui.utils.grid.HeightMode;
 import com.vaadin.flow.component.button.Button;
 import de.symeda.sormas.ui.utils.grid.Grid;
@@ -38,6 +35,8 @@ import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.DownloadUtil;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 public class DocumentTemplatesGrid extends Grid<DocumentTemplateDto> {
@@ -54,16 +53,15 @@ public class DocumentTemplatesGrid extends Grid<DocumentTemplateDto> {
 		setSizeFull();
 
 		List<DocumentTemplateDto> availableTemplates = FacadeProvider.getDocumentTemplateFacade().getAvailableTemplates(documentTemplateCriteria);
-		ListDataProvider<DocumentTemplateDto> dataProvider = DataProvider.fromStream(availableTemplates.stream());
-		setDataProvider(dataProvider);
+		setItems(availableTemplates);
 
 		setColumns(DocumentTemplateDto.FILE_NAME);
 		if (hasDisease) {
 			addColumn(DocumentTemplateDto.DISEASE);
 		}
 
-		for (Column<?, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(DocumentTemplateDto.I18N_PREFIX, column.getId(), column.getCaption()));
+		for (Column<DocumentTemplateDto, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(DocumentTemplateDto.I18N_PREFIX, column.getKey(), column.getCaption()));
 		}
 
 		addComponentColumn(this::buildActionButtons).setCaption(I18nProperties.getCaption(Captions.eventActionsView))
@@ -102,10 +100,10 @@ public class DocumentTemplatesGrid extends Grid<DocumentTemplateDto> {
 				}));
 	}
 
-	private Button buildViewDocumentButton(DocumentTemplateDto template) {
+	private Component buildViewDocumentButton(DocumentTemplateDto template) {
 		Button viewButton = ButtonHelper.createIconButton(VaadinIcon.DOWNLOAD);
 
-		StreamResource streamResource = new StreamResource((StreamResource.StreamSource) () -> {
+		StreamSourceDownloadHandler streamResource = new StreamSourceDownloadHandler(() -> {
 			try {
 				return new ByteArrayInputStream(FacadeProvider.getDocumentTemplateFacade().getDocumentTemplateContent(template.toReference()));
 			} catch (DocumentTemplateException e) {
@@ -117,11 +115,8 @@ public class DocumentTemplatesGrid extends Grid<DocumentTemplateDto> {
 				return null;
 			}
 		}, template.getFileName());
-		FileDownloader fileDownloader = new FileDownloader(streamResource);
-		fileDownloader.extend(viewButton);
-		fileDownloader.setFileDownloadResource(streamResource);
-
-		return viewButton;
+		// was a FileDownloader on the button: a download link around it
+		return DownloadUtil.createDownloadLink(viewButton, streamResource);
 	}
 
 	private HorizontalLayout buildActionButtons(DocumentTemplateDto template) {

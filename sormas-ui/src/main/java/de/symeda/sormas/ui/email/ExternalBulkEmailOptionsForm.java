@@ -31,7 +31,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import de.symeda.sormas.api.docgeneneration.DocumentTemplateReferenceDto;
-import org.vaadin.hene.popupbutton.PopupButton;
 
 import com.google.common.io.ByteStreams;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -39,9 +38,7 @@ import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import de.symeda.sormas.ui.utils.fields.ComboBox;
-import com.vaadin.v7.ui.Upload;
-import com.wcs.wcslib.vaadin.widget.multifileupload.ui.MultiFileUpload;
-import com.wcs.wcslib.vaadin.widget.multifileupload.ui.UploadStateWindow;
+import com.vaadin.flow.component.upload.Upload;
 
 import de.symeda.sormas.api.DocumentHelper;
 import de.symeda.sormas.api.FacadeProvider;
@@ -65,6 +62,7 @@ import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FieldHelper;
+import de.symeda.sormas.ui.utils.PopupButton;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.MultiSelectFiles;
 
@@ -161,8 +159,8 @@ public class ExternalBulkEmailOptionsForm extends AbstractEditForm<ExternalEmail
 		boolean multipleUpload = UiUtil.enabled(FeatureType.DOCUMENTS_MULTI_UPLOAD);
 		AtomicBoolean limitInfoPopUpShown = new AtomicBoolean(false);
 
-		UploadStateWindow uploadStateWindow = new UploadStateWindow();
-		MultiFileUpload multiFileUpload = new DocumentMultiFileUpload(() -> {
+		// the add-on's state window is gone: the Flow upload shows its files and progress itself (1a-69)
+		DocumentMultiFileUpload multiFileUpload = new DocumentMultiFileUpload(() -> {
 			mainButton.setButtonClickTogglesPopupVisibility(false);
 			mainButton.setClosePopupOnOutsideClick(false);
 		}, (inputStream, fileName, mimeType, length, filesLeftInQueue) -> {
@@ -205,7 +203,7 @@ public class ExternalBulkEmailOptionsForm extends AbstractEditForm<ExternalEmail
 					.showSimplePopupWindow(I18nProperties.getString(Strings.headingBulkEmailWrongFileType), fileNameLabel, ContentMode.HTML, 520);
 			}
 
-		}, uploadStateWindow, multipleUpload);
+		}, multipleUpload);
 		multiFileUpload
 			.setUploadButtonCaptions(I18nProperties.getCaption(Captions.importImportData), I18nProperties.getCaption(Captions.importImportData));
 		multiFileUpload.setAllUploadFinishedHandler(() -> {
@@ -214,7 +212,8 @@ public class ExternalBulkEmailOptionsForm extends AbstractEditForm<ExternalEmail
 			mainButton.setPopupVisible(false);
 		});
 
-		uploadLayout.addComponentsAndExpand(multiFileUpload);
+		uploadLayout.add(multiFileUpload);
+		uploadLayout.setFlexGrow(1, multiFileUpload);
 
 		return mainButton;
 	}

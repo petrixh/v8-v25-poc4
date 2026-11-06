@@ -26,7 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -39,6 +40,7 @@ import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.infrastructure.district.DistrictReferenceDto;
 import de.symeda.sormas.api.infrastructure.region.RegionReferenceDto;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
 
 public class OutbreakRegionConfigurationForm extends VerticalLayout {
 
@@ -84,17 +86,17 @@ public class OutbreakRegionConfigurationForm extends VerticalLayout {
 
 		// Headline and info text
 		Span infoTextLabel = new Span(I18nProperties.getString(Strings.headingDefineOutbreakDistricts));
-		infoTextLabel.setWidthUndefined();
+		infoTextLabel.setWidth(null);
 		style(infoTextLabel, VSPACE_TOP_4);
 		headerLayout.add(infoTextLabel);
 
 		// Number of affected districts and options to toggle outbreak mode for all districts	
 		HorizontalLayout allDistrictsLayout = new HorizontalLayout();
-		allDistrictsLayout.setWidthUndefined();
+		allDistrictsLayout.setWidth(null);
 		allDistrictsLayout.setSpacing(true);
 		{
 			Span allDistrictsLabel = new Span(I18nProperties.getString(Strings.headingSetOutbreakStatus));
-			allDistrictsLabel.setWidthUndefined();
+			allDistrictsLabel.setWidth(null);
 			style(allDistrictsLabel, VSPACE_TOP_4);
 			allDistrictsLayout.add(allDistrictsLabel);
 
@@ -115,15 +117,16 @@ public class OutbreakRegionConfigurationForm extends VerticalLayout {
 				}
 			});
 
-			outbreakToggle.setWidthUndefined();
+			outbreakToggle.setWidth(null);
 			allDistrictsLayout.add(outbreakToggle);
 
 			affectedDistrictsNumberLabel = new Span();
-			affectedDistrictsNumberLabel.setWidthUndefined();
+			affectedDistrictsNumberLabel.setWidth(null);
 			allDistrictsLayout.add(affectedDistrictsNumberLabel);
 		}
 		headerLayout.add(allDistrictsLayout);
-		headerLayout.setComponentAlignment(allDistrictsLayout, Alignment.TOP_RIGHT);
+		// was Alignment.TOP_RIGHT: the info text takes the free width, so this layout sits on the right
+		headerLayout.setVerticalComponentAlignment(Alignment.START, allDistrictsLayout);
 
 		headerLayout.setFlexGrow(1, infoTextLabel);
 
@@ -214,7 +217,7 @@ public class OutbreakRegionConfigurationForm extends VerticalLayout {
 	private void updateAffectedDistrictsNumberLabel() {
 
 		affectedDistrictsNumberLabel
-			.setValue(affectedDistricts.size() + "/" + totalDistricts + " " + I18nProperties.getCaption(Captions.outbreakAffectedDistricts));
+			.setText(affectedDistricts.size() + "/" + totalDistricts + " " + I18nProperties.getCaption(Captions.outbreakAffectedDistricts));
 
 		CssStyles.removeStyles(
 			affectedDistrictsNumberLabel,

@@ -3,7 +3,7 @@ package de.symeda.sormas.ui.configuration.linelisting;
 import java.util.List;
 
 import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.ui.CssLayout;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.feature.FeatureConfigurationIndexDto;
@@ -12,9 +12,10 @@ import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.utils.HtmlHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 @SuppressWarnings("serial")
-public class LineListingActiveDistrictsLayout extends CssLayout {
+public class LineListingActiveDistrictsLayout extends Div {
 
 	private List<FeatureConfigurationIndexDto> configurations;
 
@@ -35,7 +36,7 @@ public class LineListingActiveDistrictsLayout extends CssLayout {
 				captionBuilder.append(I18nProperties.getString(Strings.messageNoEndDate));
 			}
 
-			Span configLabel = new Span(captionBuilder.toString(), ContentMode.HTML);
+			Span configLabel = VaadinUiUtil.createLabel(captionBuilder.toString(), ContentMode.HTML);
 			CssStyles.style(
 				configLabel,
 				CssStyles.LABEL_ROUNDED_CORNERS,

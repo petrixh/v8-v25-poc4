@@ -16,7 +16,7 @@
 package de.symeda.sormas.ui.configuration.system;
 
 import de.symeda.sormas.ui.navigation.ViewChangeListener;
-import com.vaadin.ui.ComboBox;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
@@ -83,8 +83,12 @@ public class SystemConfigurationView extends AbstractConfigurationView {
 
         searchField = new SearchField();
         searchField.setInputPrompt(I18nProperties.getString(Strings.promptSystemConfigurationSearchField));
-        searchField.addTextChangeListener(e -> {
-            criteria.freeTextFilter(e.getText());
+        searchField.addValueChangeListener(e -> {
+            // was a V7 text change listener: user input only (SearchField is lazy, 1a-58)
+            if (!e.isFromClient()) {
+                return;
+            }
+            criteria.freeTextFilter(e.getValue());
             grid.reload();
         });
         filterLayout.add(searchField);

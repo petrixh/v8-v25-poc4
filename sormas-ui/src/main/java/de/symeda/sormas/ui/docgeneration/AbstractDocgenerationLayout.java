@@ -22,21 +22,20 @@ import java.util.function.Function;
 
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Alignment;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
 import com.vaadin.flow.component.Component;
-import com.vaadin.ui.HasComponents;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import de.symeda.sormas.ui.utils.NotificationHelper;
-import com.vaadin.ui.TextField;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.AttachmentType;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -52,6 +51,10 @@ import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.DownloadUtil;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 public abstract class AbstractDocgenerationLayout extends VerticalLayout {
 
@@ -60,9 +63,10 @@ public abstract class AbstractDocgenerationLayout extends VerticalLayout {
 	public ComboBox<DocumentTemplateDto> templateSelector;
 	public final VerticalLayout additionalVariablesComponent;
 	public final VerticalLayout additionalParametersComponent;
-	public FileDownloader fileDownloader;
+	/** Was the {@code FileDownloader} on the create button: the download link around it. */
+	public Anchor fileDownloader;
 	public DocumentVariables documentVariables;
-	public CheckBox checkBoxUploadGeneratedDoc;
+	public Checkbox checkBoxUploadGeneratedDoc;
 	public HorizontalLayout buttonBar;
 	private Disease defaultDisease;
 
@@ -77,11 +81,13 @@ public abstract class AbstractDocgenerationLayout extends VerticalLayout {
 
 		additionalVariablesComponent = new VerticalLayout();
 		additionalVariablesComponent.setSpacing(false);
-		additionalVariablesComponent.setMargin(new MarginInfo(false, false, true, false));
+		// was a bottom margin only (look, ignored in 1a)
+		additionalVariablesComponent.setPadding(false);
 
 		additionalParametersComponent = new VerticalLayout();
 		additionalParametersComponent.setSpacing(false);
-		additionalParametersComponent.setMargin(new MarginInfo(false, false, true, false));
+		// was a bottom margin only (look, ignored in 1a)
+		additionalParametersComponent.setPadding(false);
 
 		hideTextfields();
 		hideAdditionalParameters();
@@ -97,8 +103,8 @@ public abstract class AbstractDocgenerationLayout extends VerticalLayout {
 		}
 
 		createButton = ButtonHelper.createButton(I18nProperties.getCaption(Captions.actionCreate));
-		createButton.addClassName(CssStyles.BUTTON_PRIMARY);
-		createButton.setIcon(VaadinIcon.FILE_TEXT);
+		CssStyles.style(createButton, CssStyles.BUTTON_PRIMARY);
+		ButtonHelper.setIcon(createButton, VaadinIcon.FILE_TEXT);
 		createButton.setEnabled(false);
 
 		cancelButton = ButtonHelper.createButton(I18nProperties.getCaption(Captions.actionCancel));
@@ -110,12 +116,12 @@ public abstract class AbstractDocgenerationLayout extends VerticalLayout {
 		add(additionalParametersComponent);
 		add(additionalVariablesComponent);
 		add(buttonBar);
-		setComponentAlignment(buttonBar, Alignment.BOTTOM_RIGHT);
+		setHorizontalComponentAlignment(Alignment.END, buttonBar);
 	}
 
 	private void addCheckboxUploadButton(boolean isMultiFilesMode) {
 		if (UiUtil.permitted(UserRight.DOCUMENT_UPLOAD)) {
-			checkBoxUploadGeneratedDoc = new CheckBox(
+			checkBoxUploadGeneratedDoc = new Checkbox(
 				I18nProperties.getPrefixCaption(
 					ExportConfigurationDto.I18N_PREFIX,
 					isMultiFilesMode
@@ -131,10 +137,11 @@ public abstract class AbstractDocgenerationLayout extends VerticalLayout {
 
 	private void addDiseaseSelector(Disease defaultDisease) {
 		ComboBox<Disease> diseaseSelector = new ComboBox<>();
-		diseaseSelector.setCaption(I18nProperties.getCaption(Captions.disease));
+		diseaseSelector.setLabel(I18nProperties.getCaption(Captions.disease));
 		diseaseSelector.setItems(FacadeProvider.getDiseaseConfigurationFacade().getAllDiseases(true, true, true));
 		diseaseSelector.setPlaceholder(I18nProperties.getString(Strings.all));
-		diseaseSelector.setEmptySelectionAllowed(true);
+		// was setEmptySelectionAllowed(true): the value can be cleared
+		diseaseSelector.setClearButtonVisible(true);
 		diseaseSelector.setWidthFull();
 		diseaseSelector.setValue(defaultDisease);
 
@@ -156,6 +163,10 @@ public abstract class AbstractDocgenerationLayout extends VerticalLayout {
 			DocumentTemplateDto template = e.getValue();
 			boolean isValidTemplateFile = template != null;
 			createButton.setEnabled(isValidTemplateFile);
+			if (fileDownloader != null) {
+				// a disabled link has no target: a click on the disabled button must not download the previous document
+				fileDownloader.setEnabled(isValidTemplateFile);
+			}
 			additionalVariablesComponent.removeAll();
 			hideTextfields();
 			documentVariables = null;
@@ -167,6 +178,8 @@ public abstract class AbstractDocgenerationLayout extends VerticalLayout {
 						for (String variable : additionalVariables) {
 							TextField variableInput = new TextField(variable);
 							variableInput.setWidthFull();
+							// Vaadin 8 text field default: the value reaches the server while typing, before the download is requested
+							variableInput.setValueChangeMode(ValueChangeMode.LAZY);
 							additionalVariablesComponent.add(variableInput);
 						}
 						showTextfields();
@@ -215,8 +228,8 @@ public abstract class AbstractDocgenerationLayout extends VerticalLayout {
 	}
 
 	private void closeWindow() {
-		HasComponents parent = this.getParent();
-		if (parent instanceof Dialog && ((Dialog) parent).isClosable()) {
+		Component parent = getParent().orElse(null);
+		if (parent instanceof Dialog && VaadinUiUtil.isClosable((Dialog) parent)) {
 			((Dialog) parent).close();
 		}
 	}
@@ -224,7 +237,7 @@ public abstract class AbstractDocgenerationLayout extends VerticalLayout {
 	protected Properties readAdditionalVariables() {
 		Properties properties = new Properties();
 		doForAllVariableInputs(textField -> {
-			properties.setProperty(textField.getCaption(), textField.getValue());
+			properties.setProperty(textField.getLabel(), textField.getValue());
 			return null;
 		});
 		return properties;
@@ -232,7 +245,7 @@ public abstract class AbstractDocgenerationLayout extends VerticalLayout {
 
 	private void doForAllVariableInputs(Function<TextField, Void> function) {
 		for (int i = 0; i < additionalVariablesComponent.getComponentCount(); i++) {
-			Component component = additionalVariablesComponent.getComponent(i);
+			Component component = additionalVariablesComponent.getComponentAt(i);
 			if (component instanceof TextField) {
 				TextField textField = (TextField) component;
 				function.apply(textField);
@@ -241,12 +254,11 @@ public abstract class AbstractDocgenerationLayout extends VerticalLayout {
 	}
 
 	private void setStreamResource(DocumentTemplateDto template, String fileName) {
-		StreamResource streamResource = createStreamResource(template, fileName);
+		StreamSourceDownloadHandler streamResource = createStreamResource(template, fileName);
 		if (fileDownloader == null) {
-			fileDownloader = new FileDownloader(streamResource);
-			fileDownloader.extend(createButton);
+			fileDownloader = DownloadUtil.attachDownloader(createButton, streamResource);
 		} else {
-			fileDownloader.setFileDownloadResource(streamResource);
+			fileDownloader.setHref(streamResource, AttachmentType.DOWNLOAD);
 		}
 	}
 
@@ -263,7 +275,7 @@ public abstract class AbstractDocgenerationLayout extends VerticalLayout {
 	protected abstract DocumentVariables getDocumentVariables(DocumentTemplateReferenceDto templateReference)
 		throws IOException, DocumentTemplateException;
 
-	protected abstract StreamResource createStreamResource(DocumentTemplateDto template, String filename);
+	protected abstract StreamSourceDownloadHandler createStreamResource(DocumentTemplateDto template, String filename);
 
 	protected abstract String getWindowCaption();
 }

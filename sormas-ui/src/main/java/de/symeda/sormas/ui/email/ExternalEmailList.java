@@ -22,7 +22,6 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -75,7 +74,7 @@ public class ExternalEmailList extends PaginationList<ManualMessageLogIndexDto> 
 		for (ManualMessageLogIndexDto messageLog : getDisplayedEntries()) {
 			ListEntry listEntry = new ListEntry(messageLog);
 
-			listEntry.addViewButton("info-email" + messageLog.getUuid(), (Button.ClickListener) event -> {
+			listEntry.addViewButton("info-email" + messageLog.getUuid(), event -> {
 				showEmailDetailsPopup(messageLog);
 			}, VaadinIcon.INFO_CIRCLE);
 

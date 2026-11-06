@@ -1,7 +1,7 @@
 package de.symeda.sormas.ui.docgeneration;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
@@ -35,14 +35,16 @@ public abstract class AbstractDocumentGenerationComponent extends VerticalLayout
 		documentBar.add(labelDocument);
 
 		Button createButton = ButtonHelper.createButton(I18nProperties.getCaption(Captions.actionCreate));
-		createButton.addClassName(CssStyles.BUTTON_PRIMARY);
-		createButton.setIcon(VaadinIcon.FILE_TEXT);
-		createButton.addClickListener((Button.ClickListener) clickEvent -> {
+		CssStyles.style(createButton, CssStyles.BUTTON_PRIMARY);
+		ButtonHelper.setIcon(createButton, VaadinIcon.FILE_TEXT);
+		createButton.addClickListener(clickEvent -> {
 			createHandler.run();
 		});
 
 		documentBar.add(createButton);
-		documentBar.setComponentAlignment(createButton, Alignment.MIDDLE_RIGHT);
+		// was Alignment.MIDDLE_RIGHT: the label takes the free width, so the button sits on the right
+		documentBar.setFlexGrow(1, labelDocument);
+		documentBar.setVerticalComponentAlignment(Alignment.CENTER, createButton);
 	}
 
 	protected String getComponentLabel() {

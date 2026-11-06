@@ -5,9 +5,9 @@ import java.util.List;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
 import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.ui.DateField;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
 import de.symeda.sormas.ui.utils.NotificationHelper;
@@ -24,6 +24,8 @@ import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.utils.HtmlHelper;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 @SuppressWarnings("serial")
 public class LineListingConfigurationEditLayout extends VerticalLayout {
@@ -31,7 +33,7 @@ public class LineListingConfigurationEditLayout extends VerticalLayout {
 	private Button btnEnableAll;
 	private Button btnDisableAll;
 	private Button btnSetEndDateForAll;
-	private DateField dfEndDate;
+	private DatePicker dfEndDate;
 
 	private HorizontalLayout controlLayout;
 	private LineListingConfigurationsGrid grid;
@@ -60,8 +62,8 @@ public class LineListingConfigurationEditLayout extends VerticalLayout {
 
 	private void buildLayout() {
 
-		Span lblInfo = new Span(
-			VaadinIcon.INFO_CIRCLE.getHtml() + " "
+		Span lblInfo = VaadinUiUtil.createLabel(
+			HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " "
 				+ String.format(
 					I18nProperties.getString(
 						regionName != null ? Strings.infoLineListingConfigurationRegionEdit : Strings.infoLineListingConfigurationNationEdit),
@@ -86,10 +88,10 @@ public class LineListingConfigurationEditLayout extends VerticalLayout {
 
 		controlLayout.add(btnDisableAll);
 
-		dfEndDate = new DateField();
+		dfEndDate = new DatePicker();
 		dfEndDate.setId("endDate");
 		dfEndDate.setPlaceholder(I18nProperties.getCaption(Captions.lineListingEndDate));
-		dfEndDate.setRangeStart(LocalDate.now());
+		dfEndDate.setMin(LocalDate.now());
 		controlLayout.add(dfEndDate);
 
 		btnSetEndDateForAll = ButtonHelper.createButton(Captions.lineListingSetEndDateForAll, e -> {
@@ -106,7 +108,7 @@ public class LineListingConfigurationEditLayout extends VerticalLayout {
 
 		HorizontalLayout buttonLayout = buildButtonLayout();
 		add(buttonLayout);
-		setComponentAlignment(buttonLayout, Alignment.MIDDLE_RIGHT);
+		setHorizontalComponentAlignment(Alignment.END, buttonLayout);
 	}
 
 	private HorizontalLayout buildButtonLayout() {

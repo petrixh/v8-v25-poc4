@@ -6,8 +6,6 @@ import java.util.Collections;
 import java.util.List;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -27,6 +25,8 @@ import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.api.utils.DataHelper;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.DownloadUtil;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
@@ -69,7 +69,7 @@ public class DocumentList extends VerticalLayout {
 			add(noActionsLabel);
 		} else {
 			setSpacing(true);
-			addComponents(docs.stream().map(this::toComponent).toArray(Component[]::new));
+			add(docs.stream().map(this::toComponent).toArray(Component[]::new));
 		}
 	}
 
@@ -85,7 +85,7 @@ public class DocumentList extends VerticalLayout {
 		res.add(nameLabel);
 		res.setFlexGrow(1, nameLabel);
 
-		Button downloadButton = buildDownloadButton(document);
+		Component downloadButton = buildDownloadButton(document);
 		res.add(downloadButton);
 		res.setFlexGrow(0, downloadButton);
 
@@ -100,10 +100,10 @@ public class DocumentList extends VerticalLayout {
 		return res;
 	}
 
-	private Button buildDownloadButton(DocumentDto document) {
+	private Component buildDownloadButton(DocumentDto document) {
 		Button viewButton = ButtonHelper.createIconButton(VaadinIcon.DOWNLOAD);
 
-		StreamResource streamResource = new StreamResource((StreamResource.StreamSource) () -> {
+		StreamSourceDownloadHandler streamResource = new StreamSourceDownloadHandler(() -> {
 			DocumentFacade documentFacade = FacadeProvider.getDocumentFacade();
 			try {
 				return new ByteArrayInputStream(documentFacade.getContent(document.getUuid()));
@@ -118,11 +118,8 @@ public class DocumentList extends VerticalLayout {
 		}, document.getName());
 		streamResource.setMIMEType(document.getMimeType());
 
-		FileDownloader fileDownloader = new FileDownloader(streamResource);
-		fileDownloader.extend(viewButton);
-		fileDownloader.setFileDownloadResource(streamResource);
-
-		return viewButton;
+		// was a FileDownloader on the button: a download link around it
+		return DownloadUtil.createDownloadLink(viewButton, streamResource);
 	}
 
 	private Button buildDeleteButton(DocumentDto document, String relatedEntityUuid, DocumentRelatedEntityType relatedEntityType) {

@@ -41,7 +41,7 @@ public class ContactCaseConversionSelectionGrid extends ContactSelectionGrid {
 			SimilarContactDto.CONTACT_STATUS,
 			SimilarContactDto.FOLLOW_UP_STATUS);
 
-		for (Column column : getColumns()) {
+		for (Column<SimilarContactDto, ?> column : getAllColumns()) {
 			column.setHeaderCaption(
 				I18nProperties.findPrefixCaption(
 					column.getPropertyId().toString(),
@@ -51,5 +51,6 @@ public class ContactCaseConversionSelectionGrid extends ContactSelectionGrid {
 		}
 
 		getColumn(SimilarContactDto.UUID).setRenderer(new V7UuidRenderer());
+		setV7ColumnRenderers();
 	}
 }

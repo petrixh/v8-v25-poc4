@@ -1,13 +1,10 @@
 package de.symeda.sormas.ui.contact.components.linelisting;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.caze.CaseReferenceDto;
 import de.symeda.sormas.api.i18n.Captions;
@@ -17,26 +14,32 @@ import de.symeda.sormas.api.utils.DataHelper;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.contact.AdoptAddressLayout;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 
 public class CaseSelector extends CustomField<CaseReferenceDto> {
 
 	private final CaseReferenceDto initialCaseValue;
 
-	private final Label caseInfoLabel;
+	private final Span caseInfoLabel;
 	private CaseReferenceDto selectedCaseValue;
 	private AdoptAddressLayout adoptAddressLayout;
 
 	public CaseSelector(String caseInfoText) {
-		caseInfoLabel = new Label(caseInfoText, ContentMode.HTML);
+		caseInfoLabel = VaadinUiUtil.createLabel(caseInfoText, ContentMode.HTML);
 		initialCaseValue = null;
 	}
 
 	public CaseSelector(CaseReferenceDto selectedCaseValue) {
-		caseInfoLabel = new Label("", ContentMode.HTML);
+		caseInfoLabel = VaadinUiUtil.createLabel("", ContentMode.HTML);
 		initialCaseValue = selectedCaseValue;
 	}
 
+	/**
+	 * Built on first attach, as in Vaadin 8 ({@link CustomField}).
+	 */
 	@Override
 	protected Component initContent() {
 		HorizontalLayout layout = new HorizontalLayout();
@@ -46,16 +49,16 @@ public class CaseSelector extends CustomField<CaseReferenceDto> {
 		if (initialCaseValue != null) {
 			setValue(initialCaseValue);
 			displayLabelForCase(initialCaseValue);
-			layout.addComponent(caseInfoLabel);
+			layout.add(caseInfoLabel);
 			adoptAddressLayout = new AdoptAddressLayout(initialCaseValue);
 			adoptAddressLayout.setAdoptAddress(true);
-			mainLayout.addComponent(adoptAddressLayout);
+			mainLayout.add(adoptAddressLayout);
 		} else {
-			Button chooseCaseButton = ButtonHelper.createButton(Captions.contactChooseCase, null, ValoTheme.BUTTON_PRIMARY, CssStyles.VSPACE_2);
-			Button removeCaseButton = ButtonHelper.createButton(Captions.contactRemoveCase, null, ValoTheme.BUTTON_LINK);
+			Button chooseCaseButton = ButtonHelper.createButton(Captions.contactChooseCase, null, CssStyles.BUTTON_PRIMARY, CssStyles.VSPACE_2);
+			Button removeCaseButton = ButtonHelper.createButton(Captions.contactRemoveCase, null, CssStyles.BUTTON_LINK);
 
 			CssStyles.style(caseInfoLabel, CssStyles.VSPACE_TOP_4);
-			layout.addComponent(caseInfoLabel);
+			layout.add(caseInfoLabel);
 
 			chooseCaseButton.addClickListener(e -> ControllerProvider.getContactController().openSelectCaseForContactWindow(null, selectedCase -> {
 				if (selectedCase != null) {
@@ -63,10 +66,10 @@ public class CaseSelector extends CustomField<CaseReferenceDto> {
 					setValue(selectedCaseReference);
 					displayLabelForCase(selectedCaseReference);
 					removeCaseButton.setVisible(true);
-					chooseCaseButton.setCaption(I18nProperties.getCaption(Captions.contactChangeCase));
+					chooseCaseButton.setText(I18nProperties.getCaption(Captions.contactChangeCase));
 					if (adoptAddressLayout == null) {
 						adoptAddressLayout = new AdoptAddressLayout(selectedCase.toReference());
-						mainLayout.addComponent(adoptAddressLayout);
+						mainLayout.add(adoptAddressLayout);
 					} else {
 						adoptAddressLayout.setCaseReference(selectedCase.toReference());
 					}
@@ -79,20 +82,20 @@ public class CaseSelector extends CustomField<CaseReferenceDto> {
 					}
 				}
 			}));
-			layout.addComponent(chooseCaseButton);
+			layout.add(chooseCaseButton);
 
 			removeCaseButton.addClickListener(e -> {
 				setValue(null);
-				caseInfoLabel.setValue(I18nProperties.getString(Strings.infoNoSourceCaseSelected));
-				caseInfoLabel.addStyleName(CssStyles.VSPACE_TOP_4);
+				VaadinUiUtil.setLabelValue(caseInfoLabel, I18nProperties.getString(Strings.infoNoSourceCaseSelected), ContentMode.HTML);
+				caseInfoLabel.addClassName(CssStyles.VSPACE_TOP_4);
 				removeCaseButton.setVisible(false);
-				chooseCaseButton.setCaption(I18nProperties.getCaption(Captions.contactChooseCase));
+				chooseCaseButton.setText(I18nProperties.getCaption(Captions.contactChooseCase));
 				if (adoptAddressLayout != null) {
 					adoptAddressLayout.setVisible(false);
 					adoptAddressLayout.setAdoptAddress(false);
 				}
 			});
-			layout.addComponent(removeCaseButton);
+			layout.add(removeCaseButton);
 			removeCaseButton.setVisible(false);
 		}
 
@@ -100,9 +103,14 @@ public class CaseSelector extends CustomField<CaseReferenceDto> {
 	}
 
 	@Override
-	protected void doSetValue(CaseReferenceDto caseReferenceDto) {
+	protected void setPresentationValue(CaseReferenceDto caseReferenceDto) {
 		this.selectedCaseValue = caseReferenceDto;
 
+	}
+
+	@Override
+	protected CaseReferenceDto generateModelValue() {
+		return selectedCaseValue;
 	}
 
 	@Override
@@ -111,11 +119,13 @@ public class CaseSelector extends CustomField<CaseReferenceDto> {
 	}
 
 	private void displayLabelForCase(CaseReferenceDto selectedCase) {
-		caseInfoLabel.setValue(
+		VaadinUiUtil.setLabelValue(
+			caseInfoLabel,
 			String.format(
 				I18nProperties.getString(Strings.infoContactCreationSourceCase),
-				selectedCase.getFirstName() + " " + selectedCase.getLastName() + " " + "(" + DataHelper.getShortUuid(selectedCase.getUuid()) + ")"));
-		caseInfoLabel.removeStyleName(CssStyles.VSPACE_TOP_4);
+				selectedCase.getFirstName() + " " + selectedCase.getLastName() + " " + "(" + DataHelper.getShortUuid(selectedCase.getUuid()) + ")"),
+			ContentMode.HTML);
+		caseInfoLabel.removeClassName(CssStyles.VSPACE_TOP_4);
 	}
 
 	public AdoptAddressLayout getAdoptAddressLayout() {

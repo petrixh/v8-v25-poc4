@@ -18,8 +18,7 @@ package de.symeda.sormas.ui.contact;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseReferenceDto;
@@ -55,7 +54,7 @@ public class SourceContactList extends PaginationList<ContactIndexDto> {
 			showPage(1);
 		} else {
 			updatePaginationLayout();
-			listLayout.addComponent(new Label(I18nProperties.getCaption(Captions.epiDataNoSourceContacts)));
+			listLayout.add(new Span(I18nProperties.getCaption(Captions.epiDataNoSourceContacts)));
 		}
 	}
 
@@ -68,11 +67,11 @@ public class SourceContactList extends PaginationList<ContactIndexDto> {
 			SourceContactListEntry listEntry = new SourceContactListEntry(contact);
 			listEntry.addActionButton(
 				String.valueOf(i),
-				(ClickListener) e -> ControllerProvider.getContactController().navigateToData(listEntry.getContact().getUuid()),
+				e -> ControllerProvider.getContactController().navigateToData(listEntry.getContact().getUuid()),
 				isEditAllowed);
 			listEntry.setEnabled(isEditAllowed);
 
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 

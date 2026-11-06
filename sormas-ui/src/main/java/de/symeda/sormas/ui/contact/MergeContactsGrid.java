@@ -3,12 +3,10 @@ package de.symeda.sormas.ui.contact;
 import java.util.Date;
 import java.util.List;
 
-import com.vaadin.data.TreeData;
-import com.vaadin.data.provider.TreeDataProvider;
-import com.vaadin.server.ExternalResource;
-import com.vaadin.ui.Link;
-import com.vaadin.ui.renderers.DateRenderer;
-import com.vaadin.ui.renderers.TextRenderer;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.AnchorTarget;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 
 import de.symeda.sormas.api.DiseaseHelper;
 import de.symeda.sormas.api.FacadeProvider;
@@ -23,10 +21,13 @@ import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.person.PersonHelper;
 import de.symeda.sormas.api.utils.DataHelper;
 import de.symeda.sormas.api.utils.DateHelper;
-import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.caze.CaseDataView;
+import de.symeda.sormas.ui.navigation.Navigator;
 import de.symeda.sormas.ui.utils.AbstractMergeGrid;
+import de.symeda.sormas.ui.utils.GridExportStreamResource;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
 public class MergeContactsGrid extends AbstractMergeGrid<MergeContactIndexDto, ContactCriteria> {
 
@@ -54,14 +55,16 @@ public class MergeContactsGrid extends AbstractMergeGrid<MergeContactIndexDto, C
 			addColumn(contact -> DiseaseHelper.toString(contact.getDisease(), contact.getDiseaseDetails()));
 		diseaseColumn.setId(COLUMN_DISEASE);
 
-		addComponentColumn(indexDto -> {
-			Link link = new Link(
-				DataHelper.getShortUuid(indexDto.getCaze().getUuid()),
-				new ExternalResource(
-					SormasUI.get().getPage().getLocation().getRawPath() + "#!" + CaseDataView.VIEW_NAME + "/" + indexDto.getCaze().getUuid()));
-			link.setTargetName("_blank");
+		Column<MergeContactIndexDto, Anchor> caseColumn = addComponentColumn(indexDto -> {
+			// was a #! link (decision 2026-11-05: routes without #!)
+			Anchor link = new Anchor(
+				Navigator.getUrl(CaseDataView.VIEW_NAME + "/" + indexDto.getCaze().getUuid()),
+				DataHelper.getShortUuid(indexDto.getCaze().getUuid()));
+			link.setTarget(AnchorTarget.BLANK);
 			return link;
-		}).setId(CASE_UUID);
+		});
+		caseColumn.setId(CASE_UUID);
+		GridExportStreamResource.setExportValueProvider(caseColumn, indexDto -> DataHelper.getShortUuid(indexDto.getCaze().getUuid()));
 
 		setColumns(
 			COLUMN_UUID,

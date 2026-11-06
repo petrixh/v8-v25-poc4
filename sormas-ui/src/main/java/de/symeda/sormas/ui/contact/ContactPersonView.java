@@ -17,8 +17,6 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.contact;
 
-import com.vaadin.ui.CustomLayout;
-
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.common.DeletableEntityType;
 import de.symeda.sormas.api.contact.ContactDto;
@@ -30,6 +28,7 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.person.PersonEditForm;
 import de.symeda.sormas.ui.person.PersonSideComponentsElement;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.DetailSubComponentWrapper;
 
 public class ContactPersonView extends AbstractContactView implements PersonSideComponentsElement {

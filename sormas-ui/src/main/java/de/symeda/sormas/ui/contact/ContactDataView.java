@@ -19,15 +19,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.vaadin.server.Page;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -73,9 +70,12 @@ import de.symeda.sormas.ui.sormastosormas.SormasToSormasListComponent;
 import de.symeda.sormas.ui.task.TaskListComponent;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DetailSubComponentWrapper;
 import de.symeda.sormas.ui.utils.LayoutWithSidePanel;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.ViewMode;
 import de.symeda.sormas.ui.utils.components.sidecomponent.SideComponentLayout;
@@ -101,6 +101,7 @@ public class ContactDataView extends AbstractContactView implements HasName {
 	public static final String SELF_REPORT_LOC = "selfReport";
 
 	private CommitDiscardWrapperComponent<ContactDataForm> editComponent;
+	private Component caseInfoComponent;
 
 	//@formatter:off
 	private static final Set<Disease> IMMUNIZATION_EXCLUDED_DISEASES = new HashSet<>(Arrays.asList(
@@ -117,7 +118,7 @@ public class ContactDataView extends AbstractContactView implements HasName {
 	@Override
 	protected void initView(String params) {
 
-		setHeightUndefined();
+		setHeight(null);
 
 		ContactDto contactDto = FacadeProvider.getContactFacade().getByUuid(getContactRef().getUuid());
 
@@ -130,7 +131,7 @@ public class ContactDataView extends AbstractContactView implements HasName {
 
 		DetailSubComponentWrapper container = new DetailSubComponentWrapper(() -> editComponent);
 		container.setWidth(100, Unit.PERCENTAGE);
-		container.setMargin(true);
+		container.setPadding(true);
 		setSubComponent(container);
 		container.setEnabled(true);
 
@@ -149,12 +150,13 @@ public class ContactDataView extends AbstractContactView implements HasName {
 			EXTERNAL_EMAILS_LOC,
 			SELF_REPORT_LOC);
 
-		container.addComponent(layout);
+		container.add(layout);
 
 		CaseDataDto caseDto = null;
 		if (contactDto.getCaze() != null) {
 			caseDto = FacadeProvider.getCaseFacade().getCaseDataByUuid(contactDto.getCaze().getUuid());
-			layout.addSidePanelComponent(createCaseInfoLayout(caseDto), CASE_LOC);
+			caseInfoComponent = createCaseInfoLayout(caseDto);
+			layout.addSidePanelComponent(caseInfoComponent, CASE_LOC);
 		}
 
 		Disease resolvedDisease = contactDto.getDisease();
@@ -171,13 +173,13 @@ public class ContactDataView extends AbstractContactView implements HasName {
 			Button chooseCaseButton = ButtonHelper.createButton(
 				contactDto.getCaze() == null ? Captions.contactChooseSourceCase : Captions.contactChangeCase,
 				null,
-				ValoTheme.BUTTON_PRIMARY,
+				CssStyles.BUTTON_PRIMARY,
 				CssStyles.VSPACE_2);
-			buttonsLayout.addComponent(chooseCaseButton);
-			Button removeCaseButton = ButtonHelper.createButton(Captions.contactRemoveCase, null, ValoTheme.BUTTON_LINK);
+			buttonsLayout.add(chooseCaseButton);
+			Button removeCaseButton = ButtonHelper.createButton(Captions.contactRemoveCase, null, CssStyles.BUTTON_LINK);
 
 			if (contactDto.getCaze() != null) {
-				buttonsLayout.addComponent(removeCaseButton);
+				buttonsLayout.add(removeCaseButton);
 			}
 
 			chooseCaseButton.addClickListener(e -> showUnsavedChangesPopup(() -> {
@@ -188,12 +190,13 @@ public class ContactDataView extends AbstractContactView implements HasName {
 						ContactDto contactToChange = FacadeProvider.getContactFacade().getByUuid(getContactRef().getUuid());
 						contactToChange.setCaze(selectedCase.toReference());
 						FacadeProvider.getContactFacade().save(contactToChange);
-						layout.addComponent(createCaseInfoLayout(selectedCase.getUuid()), CASE_LOC);
+						// was layout.addComponent(.., CASE_LOC) on the outer template (no such slot); the view is reloaded below
+						caseInfoComponent = createCaseInfoLayout(selectedCase.getUuid());
+						layout.addSidePanelComponent(caseInfoComponent, CASE_LOC);
 						removeCaseButton.setVisible(true);
-						chooseCaseButton.setCaption(I18nProperties.getCaption(Captions.contactChangeCase));
+						chooseCaseButton.setText(I18nProperties.getCaption(Captions.contactChangeCase));
 						ControllerProvider.getContactController().navigateToData(uuid);
-						new Notification(null, I18nProperties.getString(Strings.messageContactCaseChanged), Type.TRAY_NOTIFICATION, false)
-							.show(Page.getCurrent());
+						NotificationHelper.show(null, I18nProperties.getString(Strings.messageContactCaseChanged), Type.TRAY_NOTIFICATION, false);
 					}
 				});
 			}));
@@ -206,23 +209,26 @@ public class ContactDataView extends AbstractContactView implements HasName {
 				} else {
 					VaadinUiUtil.showConfirmationPopup(
 						I18nProperties.getString(Strings.headingRemoveCaseFromContact),
-						new Label(I18nProperties.getString(Strings.confirmationContactSourceCaseDiscardUnsavedChanges)),
+						new Span(I18nProperties.getString(Strings.confirmationContactSourceCaseDiscardUnsavedChanges)),
 						I18nProperties.getString(Strings.yes),
 						I18nProperties.getString(Strings.no),
 						480,
 						confirmed -> {
 							if (confirmed) {
 								editComponent.discard();
-								layout.removeComponent(CASE_LOC);
+								// was layout.removeComponent(CASE_LOC); the view is reloaded below
+								if (caseInfoComponent != null) {
+									caseInfoComponent.removeFromParent();
+									caseInfoComponent = null;
+								}
 								editComponent.getWrappedComponent().setSourceCase(null);
 								ContactDto contactToChange = FacadeProvider.getContactFacade().getByUuid(getContactRef().getUuid());
 								contactToChange.setCaze(null);
 								FacadeProvider.getContactFacade().save(contactToChange);
 								removeCaseButton.setVisible(false);
-								chooseCaseButton.setCaption(I18nProperties.getCaption(Captions.contactChooseSourceCase));
+								chooseCaseButton.setText(I18nProperties.getCaption(Captions.contactChooseSourceCase));
 								ControllerProvider.getContactController().navigateToData(uuid);
-								new Notification(null, I18nProperties.getString(Strings.messageContactCaseRemoved), Type.TRAY_NOTIFICATION, false)
-									.show(Page.getCurrent());
+								NotificationHelper.show(null, I18nProperties.getString(Strings.messageContactCaseRemoved), Type.TRAY_NOTIFICATION, false);
 							}
 						});
 				}
@@ -234,7 +240,7 @@ public class ContactDataView extends AbstractContactView implements HasName {
 		if (UiUtil.permitted(FeatureType.TASK_MANAGEMENT, UserRight.TASK_VIEW)) {
 			TaskListComponent taskList =
 				new TaskListComponent(TaskContext.CONTACT, getContactRef(), contactDto.getDisease(), this::showUnsavedChangesPopup, editAllowed);
-			taskList.addStyleName(CssStyles.SIDE_COMPONENT);
+			taskList.addClassName(CssStyles.SIDE_COMPONENT);
 			layout.addSidePanelComponent(taskList, TASKS_LOC);
 		}
 		// Allowing the samples component for LUX Measles.
@@ -255,12 +261,12 @@ public class ContactDataView extends AbstractContactView implements HasName {
 
 		if (UiUtil.permitted(FeatureType.EVENT_SURVEILLANCE, UserRight.EVENT_VIEW)) {
 			VerticalLayout eventsLayout = new VerticalLayout();
-			eventsLayout.setMargin(false);
+			eventsLayout.setPadding(false);
 			eventsLayout.setSpacing(false);
 
 			EventListComponent eventList = new EventListComponent(getContactRef(), this::showUnsavedChangesPopup, editAllowed);
-			eventList.addStyleName(CssStyles.SIDE_COMPONENT);
-			eventsLayout.addComponent(eventList);
+			eventList.addClassName(CssStyles.SIDE_COMPONENT);
+			eventsLayout.add(eventList);
 
 			layout.addSidePanelComponent(eventsLayout, EVENTS_LOC);
 		}
@@ -312,12 +318,12 @@ public class ContactDataView extends AbstractContactView implements HasName {
 			FacadeProvider.getSormasToSormasFacade().isAnyFeatureConfigured(FeatureType.SORMAS_TO_SORMAS_SHARE_CONTACTS);
 		if (sormasToSormasfeatureEnabled || contactDto.getSormasToSormasOriginInfo() != null || contactDto.isOwnershipHandedOver()) {
 			VerticalLayout sormasToSormasLocLayout = new VerticalLayout();
-			sormasToSormasLocLayout.setMargin(false);
+			sormasToSormasLocLayout.setPadding(false);
 			sormasToSormasLocLayout.setSpacing(false);
 
 			SormasToSormasListComponent sormasToSormasListComponent = new SormasToSormasListComponent(contactDto, editAllowed);
-			sormasToSormasListComponent.addStyleNames(CssStyles.SIDE_COMPONENT);
-			sormasToSormasLocLayout.addComponent(sormasToSormasListComponent);
+			sormasToSormasListComponent.addClassNames(CssStyles.SIDE_COMPONENT);
+			sormasToSormasLocLayout.add(sormasToSormasListComponent);
 
 			layout.addSidePanelComponent(sormasToSormasLocLayout, SORMAS_TO_SORMAS_LOC);
 		}
@@ -378,14 +384,14 @@ public class ContactDataView extends AbstractContactView implements HasName {
 										.length();
 								if (finalFollowUpCommentLenght > FieldConstraints.CHARACTER_LIMIT_BIG) {
 									VerticalLayout verticalLayout = new VerticalLayout();
-									Label contentLabel = new Label(
+									Span contentLabel = VaadinUiUtil.createLabel(
 										String.format(
 											I18nProperties.getString(Strings.messageContactConversionFollowUpCommentLarge),
 											I18nProperties.getString(Strings.messageSystemFollowUpCanceled)),
 										ContentMode.HTML);
 									contentLabel.setWidth(100, Unit.PERCENTAGE);
-									verticalLayout.addComponent(contentLabel);
-									verticalLayout.setMargin(false);
+									verticalLayout.add(contentLabel);
+									verticalLayout.setPadding(false);
 
 									VaadinUiUtil.showConfirmationPopup(
 										I18nProperties.getString(Strings.headingContactConversionFollowUpCommentLarge),
@@ -421,7 +427,7 @@ public class ContactDataView extends AbstractContactView implements HasName {
 	private void showVaccinationStatusUpdateDialog(ContactDto contactDto) {
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getCaption(Captions.CaseData_vaccinationStatusUpdate),
-			new Label(I18nProperties.getString(Strings.confirmationVaccinationStatusSync)),
+			new Span(I18nProperties.getString(Strings.confirmationVaccinationStatusSync)),
 			I18nProperties.getString(Strings.yes),
 			I18nProperties.getString(Strings.no),
 			600,
@@ -441,7 +447,7 @@ public class ContactDataView extends AbstractContactView implements HasName {
 	private CaseInfoLayout createCaseInfoLayout(CaseDataDto caseDto) {
 
 		CaseInfoLayout caseInfoLayout = new CaseInfoLayout(caseDto);
-		caseInfoLayout.addStyleName(CssStyles.SIDE_COMPONENT);
+		caseInfoLayout.addClassName(CssStyles.SIDE_COMPONENT);
 
 		return caseInfoLayout;
 	}

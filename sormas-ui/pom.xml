@@ -124,7 +124,7 @@
 			<version>${project.version}</version>
 		</dependency>
 
-		<!-- Vaadin Flow free components only; vaadin-dev (development mode tools) is not packaged in the war -->
+		<!-- Vaadin Flow free components; vaadin-dev (development mode tools) is not packaged in the war -->
 		<dependency>
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-core</artifactId>
@@ -134,6 +134,12 @@
 					<artifactId>vaadin-dev</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<!-- Vaadin commercial component (M0 D10): Rich Text Editor for the rich-text fields (utils/fields/SormasRichTextArea).
+			Needs a Vaadin subscription: the production build checks the licence (pro key locally, VAADIN_OFFLINE_KEY in CI; see CI.md) -->
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin-rich-text-editor-flow</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.vaadin</groupId>
@@ -326,7 +332,8 @@
 				<executions>
 					<execution>
 						<goals>
-							<!-- Production mode: build-frontend uses the prebuilt bundle while only core components are used (no Node download) -->
+							<!-- Production mode. The Rich Text Editor is not in Vaadin's prebuilt bundle, so build-frontend builds the bundle
+								(downloads Node to ~/.vaadin and the npm packages) and checks the commercial licence: it fails without a key -->
 							<goal>prepare-frontend</goal>
 							<goal>build-frontend</goal>
 						</goals>

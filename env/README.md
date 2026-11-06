@@ -77,7 +77,9 @@ These scripts follow the replay runner's env-script contract (`up.sh [--no-build
    database to the template database `sormas_seed` (the reset point), starts the domain again and waits for 200. The
    copy is now in exactly the state `reset.sh` restores.
 
-`reset.sh` restores the database from `sormas_seed` and empties the mail sink. Modes (`APP_ENV_RESET_MODE`):
+`reset.sh` restores the database from `sormas_seed`, empties the mail sink and removes uploaded document templates
+(`/opt/sormas/custom/docgeneration` in the app container: their database rows go with the restore, the files would
+stay). Modes (`APP_ENV_RESET_MODE`):
 - `restart` (default): stops the Payara domain, restores, starts it. Nothing in memory survives: no sessions, no cached
   users, roles or infrastructure (Hibernate second-level cache).
 - `db`: restores the database while the app runs. Logged-in sessions and the cache survive; use it only when tests

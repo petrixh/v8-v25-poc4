@@ -39,6 +39,7 @@ import de.symeda.sormas.api.utils.ApplicableToPathogenTests;
 import de.symeda.sormas.api.utils.Diseases;
 import de.symeda.sormas.api.utils.fieldaccess.UiFieldAccessCheckers;
 import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
+import de.symeda.sormas.ui.utils.fields.KeepValueComboBox;
 
 /**
  * Base class for composable form components that participate in the parent form lifecycle.
@@ -113,8 +114,12 @@ public abstract class FormComponent<T> extends VerticalLayout {
 		return field;
 	}
 
+	/**
+	 * The combo box keeps its value when its items change and the value is still among them (Vaadin 8); see
+	 * {@link KeepValueComboBox}.
+	 */
 	protected <V> ComboBox<V> createComboBox(String propertyId, String i18nPrefix) {
-		ComboBox<V> field = new ComboBox<>();
+		ComboBox<V> field = new KeepValueComboBox<>();
 		field.setId(propertyId);
 		field.setLabel(I18nProperties.getPrefixCaption(i18nPrefix, propertyId));
 		CssStyles.style(field, CssStyles.CAPTION_ON_TOP);
@@ -272,22 +277,20 @@ public abstract class FormComponent<T> extends VerticalLayout {
 
 	/**
 	 * Updates a ComboBox's items to only those enum values visible for the given disease
-	 * (based on {@link Diseases} annotations). Preserves the current selection if still valid.
+	 * (based on {@link Diseases} annotations). Keeps the current selection if still valid, without a
+	 * value change ({@link KeepValueComboBox}, from {@link #createComboBox}); otherwise clears it.
 	 */
 	protected static <E extends Enum<E>> void updateComboBoxByDisease(ComboBox<E> comboBox, Class<E> enumClass, Disease disease) {
-		E currentValue = comboBox.getValue();
 		List<E> filtered = Diseases.DiseasesConfiguration.getVisibleValues(enumClass, disease);
 		filtered.sort(Comparator.comparing(Object::toString));
 		comboBox.setItems(filtered);
-		if (currentValue != null && filtered.contains(currentValue)) {
-			comboBox.setValue(currentValue);
-		}
 	}
 
 	/**
 	 * Updates a ComboBox's items to only those enum values visible for the given disease
 	 * AND applicable to the given pathogen test type (based on {@link Diseases} and
-	 * {@link ApplicableToPathogenTests} annotations). Preserves the current selection if still valid.
+	 * {@link ApplicableToPathogenTests} annotations). Keeps the current selection if still valid, without a
+	 * value change ({@link KeepValueComboBox}, from {@link #createComboBox}); otherwise clears it.
 	 */
 	protected static <E extends Enum<E>> void updateComboBoxByDiseaseAndTestType(
 		ComboBox<E> comboBox,
@@ -295,7 +298,6 @@ public abstract class FormComponent<T> extends VerticalLayout {
 		Disease disease,
 		PathogenTestType testType) {
 
-		E currentValue = comboBox.getValue();
 		List<E> filtered = Diseases.DiseasesConfiguration.getVisibleValues(enumClass, disease).stream().filter(value -> {
 			if (testType == null) {
 				return true;
@@ -309,9 +311,6 @@ public abstract class FormComponent<T> extends VerticalLayout {
 			}
 		}).sorted(Comparator.comparing(Object::toString)).collect(Collectors.toList());
 		comboBox.setItems(filtered);
-		if (currentValue != null && filtered.contains(currentValue)) {
-			comboBox.setValue(currentValue);
-		}
 	}
 
 	/**

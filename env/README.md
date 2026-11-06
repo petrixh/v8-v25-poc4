@@ -50,7 +50,8 @@ Each script reads these variables; the defaults start one copy.
 
 Use the same variables for `up.sh`, `reset.sh` and `down.sh` of one copy. `APP_ENV_CONFIG`, `APP_ENV_PWCHECK`,
 `APP_ENV_SEED` and `APP_ENV_DEPLOY` matter to `up.sh` only: the copy keeps them until `down.sh` (`up.sh` records
-`APP_ENV_DEPLOY` in the copy's state directory for `reset.sh`). Two copies:
+`APP_ENV_DEPLOY` in the copy's state directory for `reset.sh`; it counts only while the copy's app container exists, so
+a record left by an interrupted `up.sh` does not change the next `up.sh`). Two copies:
 
 ```sh
 APP_ENV_PORT=18081 APP_ENV_PROJECT=sormas-new-1 env/up.sh
@@ -318,6 +319,8 @@ Differences to the Payara 5 environment of the old app (`sormas-old-env-payara:5
   mail resource uses Eclipse Angus Mail.
 - EJB pool: 128 as `server-setup.sh` intends. The old environment's `set` of it failed (no `get` before it) and the
   pool stayed at Payara's default of 32.
+- A failed setup command fails the image build, the EJB pool `set` included. The old environment only warned when that
+  `set` failed (`WARN: ejb-container max-pool-size not set`) and built the image anyway.
 - The domain lib holds today's server library list (`sormas-serverlibs/pom.xml` at HEAD). Migration ticket 1a-02
   changes that list to Jakarta EE 11 artefacts; `build.sh` collects whatever the pom says, so nothing changes here, but
   1a-91 checks the list against the deployed app.

@@ -1,6 +1,6 @@
 package de.symeda.sormas.ui.immunization;
 
-import com.vaadin.navigator.ViewChangeListener;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 
 import de.symeda.sormas.api.CoreFacade;
 import de.symeda.sormas.api.FacadeProvider;
@@ -74,7 +74,7 @@ public abstract class AbstractImmunizationView extends AbstractEditAllowedDetail
 
 		ImmunizationDto dto = FacadeProvider.getImmunizationFacade().getByUuid(getReference().getUuid());
 		if (dto.isDeleted()) {
-			newComponent.setEnabled(false);
+			newComponent.getElement().setEnabled(false);
 		}
 	}
 }

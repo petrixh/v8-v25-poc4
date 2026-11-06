@@ -1,13 +1,11 @@
 package de.symeda.sormas.ui.immunization;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;
@@ -25,10 +23,15 @@ import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.immunization.components.grid.ImmunizationGrid;
 import de.symeda.sormas.ui.immunization.components.layout.directory.FilterFormLayout;
 import de.symeda.sormas.ui.immunization.components.layout.directory.ImmunizationDataLayout;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import de.symeda.sormas.ui.utils.AbstractView;
 import de.symeda.sormas.ui.utils.ComboBoxHelper;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.expandablebutton.ExpandableButton;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class ImmunizationsView extends AbstractView {
 
@@ -40,7 +43,7 @@ public class ImmunizationsView extends AbstractView {
 	private final ImmunizationDataLayout immunizationDataLayout;
 
 	// Filters
-	private Label relevanceStatusInfoLabel;
+	private Span relevanceStatusInfoLabel;
 	private ComboBox relevanceStatusFilter;
 
 	public ImmunizationsView() {
@@ -53,15 +56,15 @@ public class ImmunizationsView extends AbstractView {
 		immunizationDataLayout = new ImmunizationDataLayout(criteria);
 
 		final VerticalLayout gridLayout = new VerticalLayout();
-		gridLayout.addComponent(createFilterBar());
-		gridLayout.addComponent(createStatusFilterBar());
-		gridLayout.addComponent(immunizationDataLayout);
+		gridLayout.add(createFilterBar());
+		gridLayout.add(createStatusFilterBar());
+		gridLayout.add(immunizationDataLayout);
 
-		gridLayout.setMargin(true);
+		gridLayout.setPadding(true);
 		gridLayout.setSpacing(false);
 		gridLayout.setSizeFull();
-		gridLayout.setExpandRatio(immunizationDataLayout, 1);
-		gridLayout.setStyleName("crud-main-layout");
+		gridLayout.setFlexGrow(1, immunizationDataLayout);
+		gridLayout.setClassName("crud-main-layout");
 
 		addComponent(gridLayout);
 
@@ -113,9 +116,9 @@ public class ImmunizationsView extends AbstractView {
 	public HorizontalLayout createStatusFilterBar() {
 		HorizontalLayout statusFilterLayout = new HorizontalLayout();
 		statusFilterLayout.setSpacing(true);
-		statusFilterLayout.setMargin(false);
+		statusFilterLayout.setPadding(false);
 		statusFilterLayout.setWidth(100, Unit.PERCENTAGE);
-		statusFilterLayout.addStyleName(CssStyles.VSPACE_3);
+		statusFilterLayout.addClassName(CssStyles.VSPACE_3);
 
 		HorizontalLayout actionButtonsLayout = new HorizontalLayout();
 		actionButtonsLayout.setSpacing(true);
@@ -132,14 +135,14 @@ public class ImmunizationsView extends AbstractView {
 						FeatureTypeProperty.THRESHOLD_IN_DAYS,
 						Integer.class);
 				if (daysAfterTravelEntryGetsArchived > 0) {
-					relevanceStatusInfoLabel = new Label(
-						VaadinIcons.INFO_CIRCLE.getHtml() + " "
+					relevanceStatusInfoLabel = VaadinUiUtil.createLabel(
+						HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " "
 							+ String.format(I18nProperties.getString(Strings.infoArchivedTravelEntries), daysAfterTravelEntryGetsArchived),
 						ContentMode.HTML);
 					relevanceStatusInfoLabel.setVisible(false);
-					relevanceStatusInfoLabel.addStyleName(CssStyles.LABEL_VERTICAL_ALIGN_SUPER);
-					actionButtonsLayout.addComponent(relevanceStatusInfoLabel);
-					actionButtonsLayout.setComponentAlignment(relevanceStatusInfoLabel, Alignment.MIDDLE_RIGHT);
+					relevanceStatusInfoLabel.addClassName(CssStyles.LABEL_VERTICAL_ALIGN_SUPER);
+					actionButtonsLayout.add(relevanceStatusInfoLabel);
+					actionButtonsLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, relevanceStatusInfoLabel);
 				}
 			}
 			relevanceStatusFilter = ComboBoxHelper.createComboBoxV7();
@@ -171,7 +174,7 @@ public class ImmunizationsView extends AbstractView {
 
 			relevanceStatusFilter.addValueChangeListener(e -> {
 				if (relevanceStatusInfoLabel != null) {
-					relevanceStatusInfoLabel.setVisible(EntityRelevanceStatus.ARCHIVED.equals(e.getProperty().getValue()));
+					relevanceStatusInfoLabel.setVisible(EntityRelevanceStatus.ARCHIVED.equals(e.getValue()));
 				}
 
 				ImmunizationGrid grid = immunizationDataLayout.getGrid();
@@ -179,16 +182,18 @@ public class ImmunizationsView extends AbstractView {
 					grid.getColumn(grid.DELETE_REASON_COLUMN).setHidden(!relevanceStatusFilter.getValue().equals(EntityRelevanceStatus.DELETED));
 				}
 
-				criteria.relevanceStatus((EntityRelevanceStatus) e.getProperty().getValue());
+				criteria.relevanceStatus((EntityRelevanceStatus) e.getValue());
 				navigateTo(criteria);
 			});
-			actionButtonsLayout.addComponent(relevanceStatusFilter);
+			actionButtonsLayout.add(relevanceStatusFilter);
 		}
 
 		if (actionButtonsLayout.getComponentCount() > 0) {
-			statusFilterLayout.addComponent(actionButtonsLayout);
-			statusFilterLayout.setComponentAlignment(actionButtonsLayout, Alignment.TOP_RIGHT);
-			statusFilterLayout.setExpandRatio(actionButtonsLayout, 1);
+			statusFilterLayout.add(actionButtonsLayout);
+			// was Alignment.TOP_RIGHT: the layout grows, its content goes right
+			statusFilterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, actionButtonsLayout);
+			statusFilterLayout.setFlexGrow(1, actionButtonsLayout);
+			actionButtonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 		}
 
 		return statusFilterLayout;

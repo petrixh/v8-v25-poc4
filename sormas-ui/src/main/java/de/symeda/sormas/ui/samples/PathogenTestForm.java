@@ -25,14 +25,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.function.Supplier;
 
-import com.vaadin.shared.Registration;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.data.Validator.InvalidValueException;
-import com.vaadin.v7.data.fieldgroup.FieldGroup.CommitEvent;
-import com.vaadin.v7.data.fieldgroup.FieldGroup.CommitException;
-import com.vaadin.v7.data.util.converter.Converter;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.shared.Registration;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -65,13 +63,13 @@ import de.symeda.sormas.ui.utils.FormComponent;
 import de.symeda.sormas.ui.utils.FormEventBus;
 
 /**
- * Component-based PathogenTestForm using Vaadin 8 components.
+ * Component-based PathogenTestForm using Flow components.
  * <p>
  * Extends {@link AbstractEditForm} for compatibility with
  * {@link de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent} and
  * {@link de.symeda.sormas.ui.externalmessage.CorrectionPanel}.
  * <p>
- * Each component owns its own Vaadin 8 Binder and manages its own field
+ * Each component owns its own Flow Binder and manages its own field
  * visibility via value change listeners (no FieldHelper.setVisibleWhen).
  * The FieldGroup from AbstractEditForm is kept hollow — only DrugSusceptibilityForm
  * (in disease sections) binds to it for legacy compatibility.
@@ -95,7 +93,7 @@ public class PathogenTestForm extends AbstractEditForm<PathogenTestDto> {
 	private final List<FormComponent<PathogenTestDto>> formComponents = new ArrayList<>();
 	private final List<Registration> eventRegistrations = new ArrayList<>();
 
-	private Label headingLabel;
+	private Span headingLabel;
 	private TestIdentificationComponent testIdentificationComponent;
 	private TestMethodComponent testMethodComponent;
 	private TestResultComponent testResultComponent;
@@ -166,65 +164,65 @@ public class PathogenTestForm extends AbstractEditForm<PathogenTestDto> {
 		formConfig = PathogenTestFormConfig.fromCurrentConfig();
 
 		VerticalLayout container = new VerticalLayout();
-		container.setWidth(100, Unit.PERCENTAGE);
-		container.setMargin(false);
+		container.setWidthFull();
+		container.setPadding(false);
 		container.setSpacing(true);
 		getContent().addComponent(container, COMPONENT_CONTAINER_LOC);
 
-		headingLabel = new Label();
-		headingLabel.addStyleName(H3);
-		container.addComponent(headingLabel);
+		headingLabel = new Span();
+		headingLabel.addClassName(H3);
+		container.add(headingLabel);
 
 		testIdentificationComponent = new TestIdentificationComponent(eventBus);
 		formComponents.add(testIdentificationComponent);
-		container.addComponent(testIdentificationComponent);
+		container.add(testIdentificationComponent);
 
 		diseaseSelectionComponent = new DiseaseSelectionComponent(eventBus, disease, create, environmentSample != null);
 		formComponents.add(diseaseSelectionComponent);
-		container.addComponent(diseaseSelectionComponent);
+		container.add(diseaseSelectionComponent);
 
 		testMethodComponent = new TestMethodComponent(eventBus, this::getSampleDate, disease);
 		formComponents.add(testMethodComponent);
-		container.addComponent(testMethodComponent);
+		container.add(testMethodComponent);
 
 		testResultComponent = new TestResultComponent(eventBus, formConfig.isLuxembourg, disease, formConfig.resultRequired);
 		formComponents.add(testResultComponent);
-		container.addComponent(testResultComponent);
+		container.add(testResultComponent);
 
 		diseaseVariantComponent = new DiseaseVariantComponent(eventBus, disease);
 		formComponents.add(diseaseVariantComponent);
-		container.addComponent(diseaseVariantComponent);
+		container.add(diseaseVariantComponent);
 
 		FourFoldCtCqComponent fourFoldCtCqComponent = new FourFoldCtCqComponent(eventBus, caseSampleCount, formConfig.isLuxembourg, disease);
 		formComponents.add(fourFoldCtCqComponent);
-		container.addComponent(fourFoldCtCqComponent);
+		container.add(fourFoldCtCqComponent);
 
 		diseaseSectionSlot = new VerticalLayout();
-		diseaseSectionSlot.setWidth(100, Unit.PERCENTAGE);
-		diseaseSectionSlot.setMargin(false);
+		diseaseSectionSlot.setWidthFull();
+		diseaseSectionSlot.setPadding(false);
 		diseaseSectionSlot.setSpacing(false);
-		container.addComponent(diseaseSectionSlot);
+		container.add(diseaseSectionSlot);
 
 		activeSection = DiseaseSectionFactory.forDisease(disease);
 		activeSection.initialize(getFieldGroup(), eventBus, formConfig, disease);
 		activeSection.setVisibilityCallback(visible -> diseaseSectionSlot.setVisible(visible));
-		diseaseSectionSlot.addComponent(activeSection);
+		diseaseSectionSlot.add(activeSection);
 
 		AdditionalTestInfoComponent additionalTestInfoComponent = new AdditionalTestInfoComponent();
 		formComponents.add(additionalTestInfoComponent);
-		container.addComponent(additionalTestInfoComponent);
+		container.add(additionalTestInfoComponent);
 
 		ResultTextComponent resultTextComponent = new ResultTextComponent();
 		formComponents.add(resultTextComponent);
-		container.addComponent(resultTextComponent);
+		container.add(resultTextComponent);
 
 		PrescriberComponent prescriberComponent = new PrescriberComponent();
 		formComponents.add(prescriberComponent);
-		container.addComponent(prescriberComponent);
+		container.add(prescriberComponent);
 
 		deletionComponent = new DeletionComponent();
 		formComponents.add(deletionComponent);
-		container.addComponent(deletionComponent);
+		container.add(deletionComponent);
 
 		wireEvents();
 
@@ -283,12 +281,12 @@ public class PathogenTestForm extends AbstractEditForm<PathogenTestDto> {
 		}
 
 		activeSection.cleanup();
-		diseaseSectionSlot.removeAllComponents();
+		diseaseSectionSlot.removeAll();
 
 		activeSection = newSection;
 		activeSection.initialize(getFieldGroup(), eventBus, formConfig, newDisease);
 		activeSection.setVisibilityCallback(visible -> diseaseSectionSlot.setVisible(visible));
-		diseaseSectionSlot.addComponent(activeSection);
+		diseaseSectionSlot.add(activeSection);
 
 		PathogenTestDto dto = getValue();
 		if (dto != null) {
@@ -328,15 +326,15 @@ public class PathogenTestForm extends AbstractEditForm<PathogenTestDto> {
 	}
 
 	@Override
-	public void preCommit(CommitEvent commitEvent) throws CommitException {
+	public void preCommit(BeanFieldGroup.CommitEvent commitEvent) throws BeanFieldGroup.CommitException {
 		super.preCommit(commitEvent);
 
-		List<InvalidValueException> allCauses = new ArrayList<>();
+		List<de.symeda.sormas.ui.utils.InvalidValueException> allCauses = new ArrayList<>();
 
 		for (FormComponent<PathogenTestDto> comp : formComponents) {
 			try {
 				comp.validate();
-			} catch (InvalidValueException e) {
+			} catch (de.symeda.sormas.ui.utils.InvalidValueException e) {
 				FormComponent.collectCauses(e, allCauses);
 			}
 		}
@@ -344,7 +342,7 @@ public class PathogenTestForm extends AbstractEditForm<PathogenTestDto> {
 		if (activeSection != null) {
 			try {
 				activeSection.validate();
-			} catch (InvalidValueException e) {
+			} catch (de.symeda.sormas.ui.utils.InvalidValueException e) {
 				FormComponent.collectCauses(e, allCauses);
 			}
 		}
@@ -354,11 +352,11 @@ public class PathogenTestForm extends AbstractEditForm<PathogenTestDto> {
 
 	@Override
 	public void setHeading(String heading) {
-		headingLabel.setValue(heading);
+		headingLabel.setText(heading);
 	}
 
 	@Override
-	public void setValue(PathogenTestDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(PathogenTestDto newFieldValue) {
 		super.setValue(newFieldValue);
 
 		for (FormComponent<PathogenTestDto> comp : formComponents) {
@@ -368,8 +366,7 @@ public class PathogenTestForm extends AbstractEditForm<PathogenTestDto> {
 		if (activeSection != null) {
 			activeSection.setDto(newFieldValue);
 		}
-
-		markAsDirty();
+		// V8 markAsDirty() dropped: Flow sends component changes without it
 	}
 
 	/** Reveals the typingId field if the existing test has a preset value. */
@@ -409,13 +406,13 @@ public class PathogenTestForm extends AbstractEditForm<PathogenTestDto> {
 	}
 
 	@Override
-	public void detach() {
+	protected void onDetach(DetachEvent detachEvent) {
 		for (Registration reg : eventRegistrations) {
 			reg.remove();
 		}
 		eventRegistrations.clear();
 
-		super.detach();
+		super.onDetach(detachEvent);
 	}
 
 	@Override
@@ -424,7 +421,7 @@ public class PathogenTestForm extends AbstractEditForm<PathogenTestDto> {
 		if (c instanceof VerticalLayout) {
 			VerticalLayout vl = (VerticalLayout) c;
 			for (int i = 0; i < vl.getComponentCount(); i++) {
-				componentConsumer.accept(vl.getComponent(i));
+				componentConsumer.accept(vl.getComponentAt(i));
 			}
 		}
 	}

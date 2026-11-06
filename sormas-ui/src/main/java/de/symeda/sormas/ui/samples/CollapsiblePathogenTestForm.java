@@ -17,14 +17,15 @@ package de.symeda.sormas.ui.samples;
 
 import java.util.Optional;
 
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.data.fieldgroup.FieldGroup;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.sample.PathogenTestDto;
 import de.symeda.sormas.ui.samples.pathogentestlink.PathogenTestListEntry;
+import de.symeda.sormas.ui.utils.AbstractForm.BeanFieldGroup;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 
 public class CollapsiblePathogenTestForm extends VerticalLayout {
@@ -44,39 +45,43 @@ public class CollapsiblePathogenTestForm extends VerticalLayout {
 		this.deleteOnCancel = deleteOnCancel;
 
 		setSpacing(false);
-		setMargin(false);
+		setPadding(false);
 
 		commitDiscardForm = new CommitDiscardWrapperComponent<>(pathogenTestForm, pathogenTestForm.getFieldGroup());
-		commitDiscardForm.setMargin(false);
+		commitDiscardForm.setPadding(false);
 		commitDiscardForm.setSpacing(false);
 
-		commitDiscardForm.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionDone));
-		commitDiscardForm.getDiscardButton().setCaption(I18nProperties.getCaption(Captions.actionCancel));
+		commitDiscardForm.getCommitButton().setText(I18nProperties.getCaption(Captions.actionDone));
+		commitDiscardForm.getDiscardButton().setText(I18nProperties.getCaption(Captions.actionCancel));
 		commitDiscardForm.getDiscardButton().setId("cancel");
-		commitDiscardForm.getButtonsPanel().setComponentAlignment(commitDiscardForm.getDiscardButton(), Alignment.BOTTOM_LEFT);
+		// was Alignment.BOTTOM_LEFT in the discard button's expanding slot: Cancel at the left, Done at the right
+		Button discardButton = commitDiscardForm.getDiscardButton();
+		discardButton.getStyle().remove("margin-left");
+		discardButton.getStyle().set("margin-right", "auto");
+		commitDiscardForm.getButtonsPanel().setVerticalComponentAlignment(FlexComponent.Alignment.END, discardButton);
 		commitDiscardForm.addDoneListener(this::collapse);
 
 		expandedLayout = new VerticalLayout(commitDiscardForm);
 		expandedLayout.setSpacing(false);
-		expandedLayout.setMargin(false);
+		expandedLayout.setPadding(false);
 
 		collapsedLayout = new VerticalLayout();
 		collapsedLayout.setSpacing(false);
-		collapsedLayout.setMargin(false);
-		collapsedLayout.setWidth(pathogenTestForm.getWidth(), pathogenTestForm.getWidthUnits());
+		collapsedLayout.setPadding(false);
+		collapsedLayout.setWidth(pathogenTestForm.getWidth());
 
-		this.addComponents(collapsedLayout, expandedLayout);
+		this.add(collapsedLayout, expandedLayout);
 
 		resetCollapsedLayout();
-		pathogenTestForm.getFieldGroup().addCommitHandler(new FieldGroup.CommitHandler() {
+		pathogenTestForm.getFieldGroup().addCommitHandler(new BeanFieldGroup.CommitHandler() {
 
 			@Override
-			public void preCommit(FieldGroup.CommitEvent commitEvent) throws FieldGroup.CommitException {
+			public void preCommit(BeanFieldGroup.CommitEvent commitEvent) throws BeanFieldGroup.CommitException {
 
 			}
 
 			@Override
-			public void postCommit(FieldGroup.CommitEvent commitEvent) throws FieldGroup.CommitException {
+			public void postCommit(BeanFieldGroup.CommitEvent commitEvent) throws BeanFieldGroup.CommitException {
 				resetCollapsedLayout();
 			}
 		});
@@ -91,9 +96,9 @@ public class CollapsiblePathogenTestForm extends VerticalLayout {
 	private void resetCollapsedLayout() {
 		PathogenTestDto pathogenTest = Optional.ofNullable(getValue()).orElse(new PathogenTestDto());
 
-		collapsedLayout.removeAllComponents();
+		collapsedLayout.removeAll();
 		PathogenTestListEntry pathogenTestEntry = new PathogenTestListEntry(pathogenTest, false);
-		collapsedLayout.addComponent(pathogenTestEntry);
+		collapsedLayout.add(pathogenTestEntry);
 
 		pathogenTestEntry.addActionButton(pathogenTest.getUuid(), e -> {
 			expand();

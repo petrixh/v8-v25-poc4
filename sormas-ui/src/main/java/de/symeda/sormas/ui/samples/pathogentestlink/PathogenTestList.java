@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.environment.environmentsample.EnvironmentSampleReferenceDto;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -80,10 +80,10 @@ public class PathogenTestList extends PaginationList<PathogenTestDto> {
 		if (CollectionUtils.isNotEmpty(pathogenTests)) {
 			showPage(1);
 		} else {
-			listLayout.removeAllComponents();
+			listLayout.removeAll();
 			updatePaginationLayout();
-			Label noPathogenTestsLabel = new Label(I18nProperties.getString(Strings.infoNoPathogenTests));
-			listLayout.addComponent(noPathogenTestsLabel);
+			Span noPathogenTestsLabel = new Span(I18nProperties.getString(Strings.infoNoPathogenTests));
+			listLayout.add(noPathogenTestsLabel);
 		}
 	}
 
@@ -108,7 +108,7 @@ public class PathogenTestList extends PaginationList<PathogenTestDto> {
 						.edit(pathogenTestUuid, SormasUI::refreshView, isEditableAndHasEditRight, isEditableAndHasDeleteRight)),
 				isEditableAndHasEditRight);
 			listEntry.setEnabled(isEditable);
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 }

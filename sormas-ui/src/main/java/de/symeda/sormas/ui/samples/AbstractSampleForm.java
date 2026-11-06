@@ -15,17 +15,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.AbstractField;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.OptionGroup;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -62,6 +54,13 @@ import de.symeda.sormas.ui.utils.DateTimeField;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
 import de.symeda.sormas.ui.utils.UserField;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public abstract class AbstractSampleForm extends AbstractEditForm<SampleDto> {
 
@@ -247,7 +246,7 @@ public abstract class AbstractSampleForm extends AbstractEditForm<SampleDto> {
 		if (reportingUser != null) {
 			reportInfoText.append(" ").append(I18nProperties.getString(Strings.by)).append(" ");
 		}
-		Label reportInfoLabel = new Label(reportInfoText.toString());
+		Span reportInfoLabel = new Span(reportInfoText.toString());
 		reportInfoLabel.setEnabled(false);
 		getContent().addComponent(reportInfoLabel, REPORT_INFO_LABEL_LOC);
 		UserField reportingUserField = addField(SampleDto.REPORTING_USER, UserField.class);
@@ -255,9 +254,8 @@ public abstract class AbstractSampleForm extends AbstractEditForm<SampleDto> {
 		reportingUserField.setReadOnly(true);
 	}
 
-	protected void updateLabDetailsVisibility(TextField labDetails, Property.ValueChangeEvent event) {
-		if (event.getProperty().getValue() != null
-			&& ((FacilityReferenceDto) event.getProperty().getValue()).getUuid().equals(FacilityDto.OTHER_FACILITY_UUID)) {
+	protected void updateLabDetailsVisibility(TextField labDetails, HasValue.ValueChangeEvent<?> event) {
+		if (event.getValue() != null && ((FacilityReferenceDto) event.getValue()).getUuid().equals(FacilityDto.OTHER_FACILITY_UUID)) {
 			labDetails.setVisible(true);
 			labDetails.setRequired(isEditableAllowed(labDetails));
 		} else {
@@ -316,7 +314,7 @@ public abstract class AbstractSampleForm extends AbstractEditForm<SampleDto> {
 				false,
 				I18nProperties.getValidationError(Validations.afterDate, receivedDate.getCaption(), shipmentDate.getCaption())));
 
-		List<AbstractField<Date>> validatedFields = Arrays.asList(sampleDateField, shipmentDate, receivedDate);
+		List<Field<Date>> validatedFields = Arrays.asList(sampleDateField, shipmentDate, receivedDate);
 		validatedFields.forEach(field -> field.addValueChangeListener(r -> {
 			validatedFields.forEach(otherField -> {
 				otherField.setValidationVisible(!otherField.isValid());
@@ -389,18 +387,18 @@ public abstract class AbstractSampleForm extends AbstractEditForm<SampleDto> {
 	protected void initializeRequestedTestFields() {
 
 		// Information texts for users that can edit the requested tests
-		Label requestedPathogenInfoLabel = new Label(I18nProperties.getString(Strings.infoSamplePathogenTesting));
+		Span requestedPathogenInfoLabel = new Span(I18nProperties.getString(Strings.infoSamplePathogenTesting));
 		getContent().addComponent(requestedPathogenInfoLabel, PATHOGEN_TESTING_INFO_LOC);
-		Label requestedAdditionalInfoLabel = new Label(I18nProperties.getString(Strings.infoSampleAdditionalTesting));
+		Span requestedAdditionalInfoLabel = new Span(I18nProperties.getString(Strings.infoSampleAdditionalTesting));
 		getContent().addComponent(requestedAdditionalInfoLabel, ADDITIONAL_TESTING_INFO_LOC);
 
 		// Yes/No fields for requesting pathogen/additional tests
 		CheckBox pathogenTestingRequestedField = addField(SampleDto.PATHOGEN_TESTING_REQUESTED, CheckBox.class);
-		pathogenTestingRequestedField.setWidthUndefined();
+		pathogenTestingRequestedField.setWidth(null);
 		pathogenTestingRequestedField.addValueChangeListener(e -> updateRequestedTestFields());
 
 		CheckBox additionalTestingRequestedField = addField(SampleDto.ADDITIONAL_TESTING_REQUESTED, CheckBox.class);
-		additionalTestingRequestedField.setWidthUndefined();
+		additionalTestingRequestedField.setWidth(null);
 		additionalTestingRequestedField.addValueChangeListener(e -> updateRequestedTestFields());
 
 		// CheckBox groups to select the requested pathogen/additional tests
@@ -425,11 +423,11 @@ public abstract class AbstractSampleForm extends AbstractEditForm<SampleDto> {
 		TextField requestedOtherAdditionalTests = addField(SampleDto.REQUESTED_OTHER_ADDITIONAL_TESTS, TextField.class);
 
 		// header for read view
-		Label pathogenTestsHeading = new Label(I18nProperties.getString(Strings.headingRequestedPathogenTests));
+		Span pathogenTestsHeading = new Span(I18nProperties.getString(Strings.headingRequestedPathogenTests));
 		CssStyles.style(pathogenTestsHeading, CssStyles.LABEL_BOLD, CssStyles.LABEL_SECONDARY, VSPACE_4);
 		getContent().addComponent(pathogenTestsHeading, PATHOGEN_TESTING_READ_HEADLINE_LOC);
 
-		Label additionalTestsHeading = new Label(I18nProperties.getString(Strings.headingRequestedAdditionalTests));
+		Span additionalTestsHeading = new Span(I18nProperties.getString(Strings.headingRequestedAdditionalTests));
 		CssStyles.style(additionalTestsHeading, CssStyles.LABEL_BOLD, CssStyles.LABEL_SECONDARY, VSPACE_4);
 		getContent().addComponent(additionalTestsHeading, ADDITIONAL_TESTING_READ_HEADLINE_LOC);
 
@@ -468,13 +466,12 @@ public abstract class AbstractSampleForm extends AbstractEditForm<SampleDto> {
 		getContent().getComponent(ADDITIONAL_TESTING_READ_HEADLINE_LOC).setVisible(canOnlyReadRequests && canUseAdditionalTests);
 
 		if (getValue() != null && canOnlyReadRequests && canUseAdditionalTests) {
-			CssLayout requestedAdditionalTestsLayout = new CssLayout();
+			Div requestedAdditionalTestsLayout = new Div();
 			CssStyles.style(requestedAdditionalTestsLayout, VSPACE_3);
 			for (AdditionalTestType testType : getValue().getRequestedAdditionalTests()) {
-				Label testLabel = new Label(testType.toString());
-				testLabel.setWidthUndefined();
+				Span testLabel = new Span(testType.toString());
 				CssStyles.style(testLabel, CssStyles.LABEL_ROUNDED_CORNERS, CssStyles.LABEL_BACKGROUND_FOCUS_LIGHT, VSPACE_4, HSPACE_RIGHT_4);
-				requestedAdditionalTestsLayout.addComponent(testLabel);
+				requestedAdditionalTestsLayout.add(testLabel);
 			}
 			getContent().addComponent(requestedAdditionalTestsLayout, REQUESTED_ADDITIONAL_TESTS_READ_LOC);
 		} else {

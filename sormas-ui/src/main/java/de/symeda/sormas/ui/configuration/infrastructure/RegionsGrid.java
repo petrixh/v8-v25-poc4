@@ -82,8 +82,8 @@ public class RegionsGrid extends FilteredGrid<RegionIndexDto, RegionCriteria> {
 		Optional.ofNullable(((Column<RegionIndexDto, Boolean>) getColumn(RegionIndexDto.DEFAULT_INFRASTRUCTURE)))
 			.ifPresent(c -> c.setRenderer(new BooleanRenderer()));
 
-		for (Column<?, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(RegionIndexDto.I18N_PREFIX, column.getId(), column.getCaption()));
+		for (Column<?, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(RegionIndexDto.I18N_PREFIX, column.getKey(), column.getCaption()));
 		}
 	}
 

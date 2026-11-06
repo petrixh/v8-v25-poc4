@@ -18,19 +18,17 @@ package de.symeda.sormas.ui.configuration.infrastructure;
 import java.util.Collections;
 import java.util.Set;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;
@@ -50,17 +48,20 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.configuration.AbstractConfigurationView;
 import de.symeda.sormas.ui.configuration.infrastructure.components.SearchField;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import de.symeda.sormas.ui.utils.ArchiveHandlers;
 import de.symeda.sormas.ui.utils.ArchiveMessages;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.ComboBoxHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.DownloadUtil;
 import de.symeda.sormas.ui.utils.ExportEntityName;
 import de.symeda.sormas.ui.utils.GridExportStreamResource;
 import de.symeda.sormas.ui.utils.MenuBarHelper;
 import de.symeda.sormas.ui.utils.RowCount;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 public class CountriesView extends AbstractConfigurationView {
 
@@ -96,73 +97,74 @@ public class CountriesView extends AbstractConfigurationView {
 		}
 		grid = new CountriesGrid(criteria);
 		gridLayout = new VerticalLayout();
-		gridLayout.addComponent(createFilterBar());
+		gridLayout.add(createFilterBar());
 		rowCount = new RowCount(Strings.labelNumberOfCountries, 0);
 		grid.addDataSizeChangeListener(e -> rowCount.update(grid.getDataSize()));
-		gridLayout.addComponent(rowCount);
-		gridLayout.addComponent(grid);
-		gridLayout.setMargin(true);
+		gridLayout.add(rowCount);
+		gridLayout.add(grid);
+		gridLayout.setPadding(true);
 		gridLayout.setSpacing(false);
-		gridLayout.setExpandRatio(grid, 1);
+		gridLayout.setFlexGrow(1, grid);
 		gridLayout.setSizeFull();
-		gridLayout.setStyleName("crud-main-layout");
+		gridLayout.setClassName("crud-main-layout");
 
 		boolean infrastructureDataEditable = UiUtil.enabled(FeatureType.EDIT_INFRASTRUCTURE_DATA);
 
 		if (UiUtil.permitted(infrastructureDataEditable, UserRight.INFRASTRUCTURE_IMPORT)) {
-			importButton = ButtonHelper.createIconButton(Captions.actionImport, VaadinIcons.UPLOAD, e -> {
-				Window window = VaadinUiUtil.showPopupWindow(new InfrastructureImportLayout(InfrastructureType.COUNTRY));
-				window.setCaption(I18nProperties.getString(Strings.headingImportCountries));
-				window.addCloseListener(c -> grid.reload());
-			}, ValoTheme.BUTTON_PRIMARY);
+			importButton = ButtonHelper.createIconButton(Captions.actionImport, VaadinIcon.UPLOAD, e -> {
+				Dialog window = VaadinUiUtil.showPopupWindow(new InfrastructureImportLayout(InfrastructureType.COUNTRY));
+				window.setHeaderTitle(I18nProperties.getString(Strings.headingImportCountries));
+				VaadinUiUtil.addCloseListener(window, c -> grid.reload());
+			}, CssStyles.BUTTON_PRIMARY);
 			addHeaderComponent(importButton);
 
-			importDefaultCountriesButton = ButtonHelper.createIconButton(Captions.actionImportAllCountries, VaadinIcons.UPLOAD, e -> {
-				Window window = VaadinUiUtil.showPopupWindow(new ImportDefaultCountriesLayout());
-				window.setCaption(I18nProperties.getString(Strings.headingImportAllCountries));
-				window.addCloseListener(c -> grid.reload());
-			}, ValoTheme.BUTTON_PRIMARY);
+			importDefaultCountriesButton = ButtonHelper.createIconButton(Captions.actionImportAllCountries, VaadinIcon.UPLOAD, e -> {
+				Dialog window = VaadinUiUtil.showPopupWindow(new ImportDefaultCountriesLayout());
+				window.setHeaderTitle(I18nProperties.getString(Strings.headingImportAllCountries));
+				VaadinUiUtil.addCloseListener(window, c -> grid.reload());
+			}, CssStyles.BUTTON_PRIMARY);
 			addHeaderComponent(importDefaultCountriesButton);
 		} else if (!infrastructureDataEditable) {
-			Label infrastructureDataLocked = new Label();
-			infrastructureDataLocked.setCaption(I18nProperties.getString(Strings.headingInfrastructureLocked));
-			infrastructureDataLocked.setValue(I18nProperties.getString(Strings.messageInfrastructureLocked));
-			infrastructureDataLocked.setIcon(VaadinIcons.WARNING);
+			// Flow components have no caption or icon: the caption with the icon goes above the text, as Vaadin 8 rendered it
+			Span infrastructureDataLockedCaption =
+				new Span(VaadinIcon.WARNING.create(), new Span(I18nProperties.getString(Strings.headingInfrastructureLocked)));
+			infrastructureDataLockedCaption.addClassName(CssStyles.VAADIN_CAPTION);
+			Div infrastructureDataLocked =
+				new Div(infrastructureDataLockedCaption, new Div(new Span(I18nProperties.getString(Strings.messageInfrastructureLocked))));
 			addHeaderComponent(infrastructureDataLocked);
 		}
 
 		if (UiUtil.permitted(UserRight.INFRASTRUCTURE_EXPORT)) {
-			Button exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcons.TABLE, null, ValoTheme.BUTTON_PRIMARY);
-			exportButton.setDescription(I18nProperties.getDescription(Descriptions.descExportButton));
+			Button exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcon.TABLE, null, CssStyles.BUTTON_PRIMARY);
+			exportButton.setTooltipText(I18nProperties.getDescription(Descriptions.descExportButton));
 			addHeaderComponent(exportButton);
 
-			StreamResource streamResource = GridExportStreamResource.createStreamResourceWithSelectedItems(
+			DownloadHandler streamResource = GridExportStreamResource.createStreamResourceWithSelectedItems(
 				grid,
 				this::getSelectedRows,
 				ExportEntityName.COUNTRIES,
 				Collections.singletonList(CountriesGrid.ACTION_BTN_ID),
 				Collections.singletonList(CountryIndexDto.DEFAULT_NAME));
-			FileDownloader fileDownloader = new FileDownloader(streamResource);
-			fileDownloader.extend(exportButton);
+			DownloadUtil.attachDownloader(exportButton, streamResource);
 		}
 
 		if (UiUtil.permitted(infrastructureDataEditable, UserRight.INFRASTRUCTURE_CREATE)) {
 			createButton = ButtonHelper.createIconButton(
 				Captions.actionNewEntry,
-				VaadinIcons.PLUS_CIRCLE,
+				VaadinIcon.PLUS_CIRCLE,
 				e -> ControllerProvider.getInfrastructureController().createCountry(),
-				ValoTheme.BUTTON_PRIMARY);
+				CssStyles.BUTTON_PRIMARY);
 
 			addHeaderComponent(createButton);
 		}
 
 		if (UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS)) {
-			Button btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcons.CHECK_SQUARE_O, null);
+			Button btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcon.CHECK_SQUARE_O, null);
 			btnEnterBulkEditMode.setVisible(!viewConfiguration.isInEagerMode());
 			addHeaderComponent(btnEnterBulkEditMode);
 
 			Button btnLeaveBulkEditMode =
-				ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcons.CLOSE, null, ValoTheme.BUTTON_PRIMARY);
+				ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcon.CLOSE, null, CssStyles.BUTTON_PRIMARY);
 			btnLeaveBulkEditMode.setVisible(viewConfiguration.isInEagerMode());
 			addHeaderComponent(btnLeaveBulkEditMode);
 
@@ -196,16 +198,20 @@ public class CountriesView extends AbstractConfigurationView {
 
 	private HorizontalLayout createFilterBar() {
 		filterLayout = new HorizontalLayout();
-		filterLayout.setMargin(false);
+		filterLayout.setPadding(false);
 		filterLayout.setSpacing(true);
 		filterLayout.setWidth(100, Unit.PERCENTAGE);
 
 		searchField = new SearchField();
-		searchField.addTextChangeListener(e -> {
-			criteria.nameCodeLike(e.getText());
+		searchField.addValueChangeListener(e -> {
+			// was a V7 text change listener: user input only
+			if (!e.isFromClient()) {
+				return;
+			}
+			criteria.nameCodeLike(e.getValue());
 			grid.reload();
 		});
-		filterLayout.addComponent(searchField);
+		filterLayout.add(searchField);
 
 		subcontinentFilter = ComboBoxHelper.createComboBoxV7();
 		subcontinentFilter.setId(CountryDto.SUBCONTINENT);
@@ -213,10 +219,10 @@ public class CountriesView extends AbstractConfigurationView {
 		subcontinentFilter.setCaption(I18nProperties.getPrefixCaption(CountryDto.I18N_PREFIX, CountryDto.SUBCONTINENT));
 		subcontinentFilter.addItems(FacadeProvider.getSubcontinentFacade().getAllActiveAsReference());
 		subcontinentFilter.addValueChangeListener(e -> {
-			criteria.subcontinent((SubcontinentReferenceDto) e.getProperty().getValue());
+			criteria.subcontinent((SubcontinentReferenceDto) e.getValue());
 			grid.reload();
 		});
-		filterLayout.addComponent(subcontinentFilter);
+		filterLayout.add(subcontinentFilter);
 
 		resetButton = ButtonHelper.createButton(Captions.actionResetFilters, event -> {
 			ViewModelProviders.of(CountriesView.class).remove(CountryCriteria.class);
@@ -224,7 +230,7 @@ public class CountriesView extends AbstractConfigurationView {
 		}, CssStyles.FORCE_CAPTION);
 		resetButton.setVisible(false);
 
-		filterLayout.addComponent(resetButton);
+		filterLayout.add(resetButton);
 
 		HorizontalLayout actionButtonsLayout = new HorizontalLayout();
 		actionButtonsLayout.setSpacing(true);
@@ -249,10 +255,10 @@ public class CountriesView extends AbstractConfigurationView {
 				}
 
 				relevanceStatusFilter.addValueChangeListener(e -> {
-					criteria.relevanceStatus((EntityRelevanceStatus) e.getProperty().getValue());
+					criteria.relevanceStatus((EntityRelevanceStatus) e.getValue());
 					navigateTo(criteria);
 				});
-				actionButtonsLayout.addComponent(relevanceStatusFilter);
+				actionButtonsLayout.add(relevanceStatusFilter);
 
 				// Bulk operation dropdown
 				if (UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS)) {
@@ -260,7 +266,7 @@ public class CountriesView extends AbstractConfigurationView {
 						Captions.bulkActions,
 						new MenuBarHelper.MenuBarItem(
 							I18nProperties.getCaption(Captions.actionArchiveInfrastructure),
-							VaadinIcons.ARCHIVE,
+							VaadinIcon.ARCHIVE,
 							selectedItem -> {
 								ControllerProvider.getInfrastructureController()
 									.archiveOrDearchiveAllSelectedItems(
@@ -273,7 +279,7 @@ public class CountriesView extends AbstractConfigurationView {
 							UiUtil.permitted(UserRight.INFRASTRUCTURE_ARCHIVE) && EntityRelevanceStatus.ACTIVE.equals(criteria.getRelevanceStatus())),
 						new MenuBarHelper.MenuBarItem(
 							I18nProperties.getCaption(Captions.actionDearchiveInfrastructure),
-							VaadinIcons.ARCHIVE,
+							VaadinIcon.ARCHIVE,
 							selectedItem -> {
 								ControllerProvider.getInfrastructureController()
 									.archiveOrDearchiveAllSelectedItems(
@@ -287,13 +293,15 @@ public class CountriesView extends AbstractConfigurationView {
 								&& EntityRelevanceStatus.ARCHIVED.equals(criteria.getRelevanceStatus())));
 
 					bulkOperationsDropdown.setVisible(isBulkOperationsDropdownVisible());
-					actionButtonsLayout.addComponent(bulkOperationsDropdown);
+					actionButtonsLayout.add(bulkOperationsDropdown);
 				}
 			}
 		}
-		filterLayout.addComponent(actionButtonsLayout);
-		filterLayout.setComponentAlignment(actionButtonsLayout, Alignment.BOTTOM_RIGHT);
-		filterLayout.setExpandRatio(actionButtonsLayout, 1);
+		filterLayout.add(actionButtonsLayout);
+		// was Alignment.BOTTOM_RIGHT: the layout grows, its content goes right
+		filterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.END, actionButtonsLayout);
+		actionButtonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+		filterLayout.setFlexGrow(1, actionButtonsLayout);
 
 		return filterLayout;
 	}

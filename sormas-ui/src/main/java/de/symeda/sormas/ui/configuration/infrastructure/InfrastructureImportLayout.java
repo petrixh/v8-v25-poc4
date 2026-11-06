@@ -3,12 +3,8 @@ package de.symeda.sormas.ui.configuration.infrastructure;
 import java.io.IOException;
 
 import com.opencsv.exceptions.CsvValidationException;
-import com.vaadin.server.ClassResource;
-import com.vaadin.server.Page;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.v7.ui.DateField;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -22,6 +18,9 @@ import de.symeda.sormas.ui.importer.DataImporter;
 import de.symeda.sormas.ui.importer.ImportReceiver;
 import de.symeda.sormas.ui.importer.InfrastructureImporter;
 import de.symeda.sormas.ui.importer.PopulationDataImporter;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
+import de.symeda.sormas.ui.utils.fields.DateField;
 
 @SuppressWarnings("serial")
 public class InfrastructureImportLayout extends AbstractImportLayout {
@@ -32,11 +31,11 @@ public class InfrastructureImportLayout extends AbstractImportLayout {
 
 		DateField dfCollectionDate = new DateField();
 		if (infrastructureType == InfrastructureType.POPULATION_DATA) {
-			Label lblCollectionDateInfo = new Label(I18nProperties.getString(Strings.infoPopulationCollectionDate));
-			addComponent(lblCollectionDateInfo);
-			addComponent(dfCollectionDate);
+			Span lblCollectionDateInfo = new Span(I18nProperties.getString(Strings.infoPopulationCollectionDate));
+			add(lblCollectionDateInfo);
+			add(dfCollectionDate);
 			dfCollectionDate.setRequired(true);
-			dfCollectionDate.addValueChangeListener(e -> upload.setEnabled(e.getProperty().getValue() != null));
+			dfCollectionDate.addValueChangeListener(e -> upload.setEnabled(e.getValue() != null));
 		}
 
 		String templateFilePath;
@@ -98,7 +97,7 @@ public class InfrastructureImportLayout extends AbstractImportLayout {
 			throw new UnsupportedOperationException("Import is currently not implemented for infrastructure type " + infrastructureType.name());
 		}
 
-		addDownloadResourcesComponent(1, new ClassResource("/SORMAS_Infrastructure_Import_Guide.pdf"));
+		addDownloadResourcesComponent(1, DownloadHandler.forClassResource(InfrastructureImportLayout.class, "/SORMAS_Infrastructure_Import_Guide.pdf"));
 		addDownloadImportTemplateComponent(2, templateFilePath, templateFileName);
 
 		if (infrastructureType == InfrastructureType.POPULATION_DATA) {
@@ -110,11 +109,11 @@ public class InfrastructureImportLayout extends AbstractImportLayout {
 						new PopulationDataImporter(file, currentUser, dfCollectionDate.getValue(), (ValueSeparator) separator.getValue());
 					importer.startImport(this::extendDownloadErrorReportButton, currentUI, true);
 				} catch (IOException | CsvValidationException e) {
-					new Notification(
+					NotificationHelper.show(
 						I18nProperties.getString(Strings.headingImportFailed),
 						I18nProperties.getString(Strings.messageImportFailed),
 						Type.ERROR_MESSAGE,
-						false).show(Page.getCurrent());
+						false);
 				}
 			}));
 			upload.setEnabled(false);
@@ -199,11 +198,11 @@ public class InfrastructureImportLayout extends AbstractImportLayout {
 
 					importer.startImport(this::extendDownloadErrorReportButton, currentUI, true);
 				} catch (IOException | CsvValidationException e) {
-					new Notification(
+					NotificationHelper.show(
 						I18nProperties.getString(Strings.headingImportFailed),
 						I18nProperties.getString(Strings.messageImportFailed),
 						Type.ERROR_MESSAGE,
-						false).show(Page.getCurrent());
+						false);
 				}
 			}));
 		}

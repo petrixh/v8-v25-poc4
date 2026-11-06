@@ -27,9 +27,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.Unit;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.ReferenceDto;
@@ -81,8 +81,8 @@ public class ExternalEmailController {
 		CommitDiscardWrapperComponent<ExternalEmailOptionsForm> optionsCommitDiscard =
 			new CommitDiscardWrapperComponent<>(optionsForm, optionsForm.getFieldGroup());
 		optionsCommitDiscard.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionSend));
-		Window optionsPopup = VaadinUiUtil.showPopupWindow(optionsCommitDiscard, I18nProperties.getString(Strings.headingExternalEmailSend));
-		optionsForm.setWidth(600, Sizeable.Unit.PIXELS);
+		Dialog optionsPopup = VaadinUiUtil.showPopupWindow(optionsCommitDiscard, I18nProperties.getString(Strings.headingExternalEmailSend));
+		optionsForm.setWidth(600, Unit.PIXELS);
 
 		optionsCommitDiscard.addCommitListener(() -> {
 			ExternalEmailOptionsDto options = optionsForm.getValue();
@@ -91,14 +91,14 @@ public class ExternalEmailController {
 				FacadeProvider.getExternalEmailFacade().sendEmail(options);
 
 				optionsPopup.close();
-				Notification.show(null, I18nProperties.getString(Strings.notificationExternalEmailSent), Notification.Type.TRAY_NOTIFICATION);
+				NotificationHelper.show(null, I18nProperties.getString(Strings.notificationExternalEmailSent), NotificationHelper.Type.TRAY_NOTIFICATION);
 				callback.run();
 			} catch (DocumentTemplateException | ExternalEmailException e) {
 				logger.error("Email could not be sent", e);
-				Notification.show(I18nProperties.getString(Strings.errorOccurred), e.getMessage(), Notification.Type.ERROR_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(Strings.errorOccurred), e.getMessage(), NotificationHelper.Type.ERROR_MESSAGE);
 			} catch (AttachmentException | ValidationException e) {
 				logger.warn("Email could not be sent", e);
-				Notification.show(I18nProperties.getString(Strings.errorOccurred), e.getMessage(), Notification.Type.WARNING_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(Strings.errorOccurred), e.getMessage(), NotificationHelper.Type.WARNING_MESSAGE);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -125,8 +125,8 @@ public class ExternalEmailController {
 		CommitDiscardWrapperComponent<ExternalBulkEmailOptionsForm> optionsCommitDiscard =
 			new CommitDiscardWrapperComponent<>(optionsForm, optionsForm.getFieldGroup());
 		optionsCommitDiscard.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionSend));
-		Window optionsPopup = VaadinUiUtil.showPopupWindow(optionsCommitDiscard, I18nProperties.getString(Strings.headingExternalEmailSend));
-		optionsForm.setWidth(600, Sizeable.Unit.PIXELS);
+		Dialog optionsPopup = VaadinUiUtil.showPopupWindow(optionsCommitDiscard, I18nProperties.getString(Strings.headingExternalEmailSend));
+		optionsForm.setWidth(600, Unit.PIXELS);
 
 		optionsCommitDiscard.addCommitListener(() -> {
 			ExternalEmailOptionsWithAttachmentsDto options = optionsForm.getValue();
@@ -154,7 +154,7 @@ public class ExternalEmailController {
 				}, selectedEntitiesCpy, bulkOperationDoneCallback);
 
 			optionsPopup.close();
-			Notification.show(null, I18nProperties.getString(Strings.notificationExternalEmailSent), Notification.Type.TRAY_NOTIFICATION);
+			NotificationHelper.show(null, I18nProperties.getString(Strings.notificationExternalEmailSent), NotificationHelper.Type.TRAY_NOTIFICATION);
 		});
 
 		optionsCommitDiscard.addDiscardListener(optionsPopup::close);

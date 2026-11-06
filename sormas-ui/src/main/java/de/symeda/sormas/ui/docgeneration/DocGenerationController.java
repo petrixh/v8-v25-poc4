@@ -27,14 +27,14 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import com.vaadin.server.Sizeable;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.ui.TextArea;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -181,34 +181,34 @@ public class DocGenerationController {
 	private void buildDocumentUploadWarningWindow(List<String> fileSizeLimitExceededCases, long fileSizeLimitMb) {
 
 		VerticalLayout textAreaLayout = new VerticalLayout();
-		Label docsNotUploadedLabel = new Label(I18nProperties.getCaption(Captions.DocumentTemplate_notUploaded));
+		Span docsNotUploadedLabel = new Span(I18nProperties.getCaption(Captions.DocumentTemplate_notUploaded));
 
 		TextArea limitExceededCases = new TextArea();
 		limitExceededCases.setEnabled(false);
-		limitExceededCases.setWidth(906, Sizeable.Unit.PIXELS);
+		limitExceededCases.setWidth(906, Unit.PIXELS);
 		limitExceededCases.setValue(new ArrayList<>(fileSizeLimitExceededCases).toString());
 
-		textAreaLayout.addComponent(docsNotUploadedLabel);
-		textAreaLayout.addComponent(limitExceededCases);
+		textAreaLayout.add(docsNotUploadedLabel);
+		textAreaLayout.add(limitExceededCases);
 
 		HorizontalLayout buttonBar = new HorizontalLayout();
 		Button okButton = ButtonHelper.createButton(I18nProperties.getCaption(Captions.actionOkay));
-		buttonBar.addComponents(okButton);
+		buttonBar.add(okButton);
 
 		HorizontalLayout fileTooBig = new HorizontalLayout();
-		Label fileTooBigLabel = new Label(String.format(I18nProperties.getCaption(Captions.DocumentTemplate_fileTooBig), fileSizeLimitMb));
-		fileTooBig.addComponent(fileTooBigLabel);
+		Span fileTooBigLabel = new Span(String.format(I18nProperties.getCaption(Captions.DocumentTemplate_fileTooBig), fileSizeLimitMb));
+		fileTooBig.add(fileTooBigLabel);
 
 		VerticalLayout layout = new VerticalLayout();
-		Window window = VaadinUiUtil.showPopupWindow(layout);
+		Dialog window = VaadinUiUtil.showPopupWindow(layout);
 		okButton.addClickListener((e) -> window.close());
-		layout.addComponent(fileTooBig);
-		layout.addComponent(textAreaLayout);
-		layout.addComponent(buttonBar);
+		layout.add(fileTooBig);
+		layout.add(textAreaLayout);
+		layout.add(buttonBar);
 		layout.setComponentAlignment(buttonBar, Alignment.BOTTOM_CENTER);
 
 		window.setCaption(I18nProperties.getCaption(Captions.DocumentTemplate_documentUploadWarning));
-		window.setWidth(1024, Sizeable.Unit.PIXELS);
+		window.setWidth(1024, Unit.PIXELS);
 	}
 
 	public void showEventDocumentDialog(EventDto event, DocumentListComponent documentListComponent) {
@@ -241,8 +241,8 @@ public class DocGenerationController {
 	}
 
 	private void showDialog(AbstractDocgenerationLayout docgenerationLayout) {
-		Window window = VaadinUiUtil.showPopupWindow(docgenerationLayout);
-		window.setWidth(800, Sizeable.Unit.PIXELS);
+		Dialog window = VaadinUiUtil.showPopupWindow(docgenerationLayout);
+		window.setWidth(800, Unit.PIXELS);
 		window.setCaption(I18nProperties.getCaption(docgenerationLayout.getWindowCaption()));
 	}
 

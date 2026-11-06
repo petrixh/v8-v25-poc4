@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.ui.configuration.system;
 
-import com.vaadin.ui.Grid.Column;
+import de.symeda.sormas.ui.utils.grid.Grid.Column;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;

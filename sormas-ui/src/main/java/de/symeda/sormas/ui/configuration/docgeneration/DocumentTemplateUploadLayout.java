@@ -17,13 +17,12 @@ package de.symeda.sormas.ui.configuration.docgeneration;
 
 import java.util.Map;
 
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.server.ClassResource;
 import com.vaadin.server.FileDownloader;
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.v7.ui.Upload;
 
 import de.symeda.sormas.api.Disease;
@@ -104,7 +103,7 @@ public class DocumentTemplateUploadLayout extends VerticalLayout {
 			1,
 			I18nProperties.getString(Strings.headingDownloadDocumentTemplateGuide),
 			I18nProperties.getString(Strings.infoDownloadDocumentTemplateImportGuide),
-			VaadinIcons.FILE_PRESENTATION,
+			VaadinIcon.FILE_PRESENTATION,
 			I18nProperties.getCaption(Captions.DocumentTemplate_documentTemplateGuide));
 
 		Button button = importGuideComponent.getButton();
@@ -112,14 +111,14 @@ public class DocumentTemplateUploadLayout extends VerticalLayout {
 
 		addExampleTemplatesQuarantineOrder();
 
-		addDownloadResource(Captions.importDownloadDataDictionary, VaadinIcons.FILE_TABLE, new ClassResource("/doc/SORMAS_Data_Dictionary.xlsx"));
+		addDownloadResource(Captions.importDownloadDataDictionary, VaadinIcon.FILE_TABLE, new ClassResource("/doc/SORMAS_Data_Dictionary.xlsx"));
 
-		addComponent(importGuideComponent);
+		add(importGuideComponent);
 	}
 
 	private void addExampleTemplatesQuarantineOrder() {
 		DocumentTemplateInfoData templateInfo = DocumentTemplateUploadLayout.templateInfoData.get(documentWorkflow);
-		addDownloadResource(templateInfo.captionKey, VaadinIcons.FILE_TEXT, new ClassResource("/" + templateInfo.fileName));
+		addDownloadResource(templateInfo.captionKey, VaadinIcon.FILE_TEXT, new ClassResource("/" + templateInfo.fileName));
 	}
 
 	private void addUploadResourceComponent() {
@@ -127,13 +126,13 @@ public class DocumentTemplateUploadLayout extends VerticalLayout {
 		String infoText = String.format(I18nProperties.getString(Strings.infoUploadDocumentTemplate), documentWorkflow.getFileExtension());
 
 		ImportLayoutComponent uploadTemplateComponent = new ImportLayoutComponent(2, headline, infoText, null, null);
-		addComponent(uploadTemplateComponent);
+		add(uploadTemplateComponent);
 
 		VerticalLayout uploadLatout = new VerticalLayout();
-		uploadLatout.setMargin(false);
+		uploadLatout.setPadding(false);
 		uploadLatout.setSpacing(false);
 		uploadLatout.setSizeFull();
-		addComponent(uploadLatout);
+		add(uploadLatout);
 
 		if (hasDisease) {
 			ComboBox<Disease> diseaseComboBox = new ComboBox<>();
@@ -141,7 +140,7 @@ public class DocumentTemplateUploadLayout extends VerticalLayout {
 			diseaseComboBox.setItems(FacadeProvider.getDiseaseConfigurationFacade().getAllDiseases(true, true, true));
 			diseaseComboBox.setPlaceholder(I18nProperties.getString(Strings.all));
 			diseaseComboBox.setEmptySelectionAllowed(true);
-			uploadLatout.addComponent(diseaseComboBox);
+			uploadLatout.add(diseaseComboBox);
 			documentTemplateReceiver.setDiseaseSupplier(diseaseComboBox::getValue);
 		}
 
@@ -150,13 +149,13 @@ public class DocumentTemplateUploadLayout extends VerticalLayout {
 		CssStyles.style(upload, CssStyles.VSPACE_2);
 		upload.addStartedListener(documentTemplateReceiver);
 		upload.addSucceededListener(documentTemplateReceiver);
-		uploadLatout.addComponent(upload);
+		uploadLatout.add(upload);
 	}
 
-	private void addDownloadResource(String caption, VaadinIcons icon, ClassResource resource) {
-		Button exampleTemplateWordButton = ButtonHelper.createIconButton(caption, icon, null, ValoTheme.BUTTON_PRIMARY, CssStyles.VSPACE_TOP_3);
+	private void addDownloadResource(String caption, VaadinIcon icon, ClassResource resource) {
+		Button exampleTemplateWordButton = ButtonHelper.createIconButton(caption, icon, null, CssStyles.BUTTON_PRIMARY, CssStyles.VSPACE_TOP_3);
 		addFileDownloader(exampleTemplateWordButton, resource);
-		importGuideComponent.addComponent(exampleTemplateWordButton);
+		importGuideComponent.add(exampleTemplateWordButton);
 	}
 
 	private void addFileDownloader(Button button, ClassResource importGuideResource) {

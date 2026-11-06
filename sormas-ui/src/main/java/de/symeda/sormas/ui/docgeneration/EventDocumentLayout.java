@@ -23,9 +23,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.function.Function;
 
-import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Notification;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -77,8 +76,7 @@ public class EventDocumentLayout extends AbstractDocgenerationLayout {
 			try {
 				return documentInputStreamSupplier.get(template, readAdditionalVariables(), shouldUploadGeneratedDocument());
 			} catch (Exception e) {
-				new Notification(I18nProperties.getString(Strings.errorProcessingTemplate), e.getMessage(), Notification.Type.ERROR_MESSAGE)
-					.show(Page.getCurrent());
+				NotificationHelper.show(I18nProperties.getString(Strings.errorProcessingTemplate), e.getMessage(), NotificationHelper.Type.ERROR_MESSAGE);
 				return null;
 			} finally {
 				if (nonNull(documentListComponent)) {

@@ -17,9 +17,9 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.configuration.outbreak;
 
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
@@ -38,19 +38,19 @@ public class OutbreaksView extends AbstractConfigurationView {
 	public OutbreaksView() {
 		super(VIEW_NAME);
 
-		Label infoTextLabel = new Label(I18nProperties.getString(Strings.infoDefineOutbreaks));
+		Span infoTextLabel = new Span(I18nProperties.getString(Strings.infoDefineOutbreaks));
 		CssStyles.style(infoTextLabel, CssStyles.LABEL_MEDIUM);
 
 		grid = new OutbreakOverviewGrid();
 
 		contentLayout = new VerticalLayout();
-		contentLayout.addComponent(infoTextLabel);
-		contentLayout.addComponent(grid);
-		contentLayout.setMargin(true);
+		contentLayout.add(infoTextLabel);
+		contentLayout.add(grid);
+		contentLayout.setPadding(true);
 		contentLayout.setSpacing(true);
 		contentLayout.setSizeFull();
-		contentLayout.setStyleName("crud-main-layout");
-		contentLayout.setExpandRatio(grid, 1);
+		contentLayout.setClassName("crud-main-layout");
+		contentLayout.setFlexGrow(1, grid);
 
 		addComponent(contentLayout);
 	}

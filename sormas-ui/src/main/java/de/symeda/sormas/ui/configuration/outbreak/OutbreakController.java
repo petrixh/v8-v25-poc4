@@ -19,9 +19,9 @@ package de.symeda.sormas.ui.configuration.outbreak;
 
 import java.util.Set;
 
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Window;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -39,7 +39,7 @@ public class OutbreakController {
 		OutbreakRegionConfigurationForm configurationForm = new OutbreakRegionConfigurationForm(diseaseOutbreakInformation);
 		final CommitDiscardWrapperComponent<OutbreakRegionConfigurationForm> configurationComponent =
 			new CommitDiscardWrapperComponent<OutbreakRegionConfigurationForm>(configurationForm);
-		Window popupWindow = VaadinUiUtil.showModalPopupWindow(
+		Dialog popupWindow = VaadinUiUtil.showModalPopupWindow(
 			configurationComponent,
 			disease.toShortString() + " " + I18nProperties.getString(Strings.headingOutbreakIn) + " "
 				+ diseaseOutbreakInformation.getRegion().buildCaption());
@@ -65,7 +65,7 @@ public class OutbreakController {
 				}
 
 				popupWindow.close();
-				Notification.show(I18nProperties.getString(Strings.messageOutbreakSaved), Type.WARNING_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageOutbreakSaved), Type.WARNING_MESSAGE);
 				SormasUI.get().getNavigator().navigateTo(OutbreaksView.VIEW_NAME);
 			}
 		});

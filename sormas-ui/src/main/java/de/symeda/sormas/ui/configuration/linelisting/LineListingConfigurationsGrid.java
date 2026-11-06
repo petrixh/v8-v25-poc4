@@ -11,9 +11,9 @@ import java.util.Set;
 import com.vaadin.server.Page;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.DateField;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 
 import de.symeda.sormas.api.feature.FeatureConfigurationIndexDto;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -109,11 +109,11 @@ public class LineListingConfigurationsGrid extends Grid<FeatureConfigurationInde
 			dfEndDate.setValue(UtilDate.toLocalDate(config.getEndDate()));
 			dfEndDate.addValueChangeListener(e -> {
 				if (e.getValue() != null && e.getValue().isBefore(LocalDate.now())) {
-					Notification errorNotification = new Notification(
+					Notification errorNotification = NotificationHelper.show(
 						I18nProperties.getString(Strings.headingInvalidDateEntered),
 						I18nProperties.getValidationError(Validations.noPastDateAllowed),
 						Type.TRAY_NOTIFICATION);
-					errorNotification.setStyleName("tray notification-error");
+					errorNotification.setClassName("tray notification-error");
 					errorNotification.show(Page.getCurrent());
 				} else {
 					config.setEndDate(UtilDate.from(e.getValue()));

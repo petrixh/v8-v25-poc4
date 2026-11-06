@@ -22,23 +22,21 @@ import java.util.function.Function;
 
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.server.FileDownloader;
-import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.Component;
 import com.vaadin.ui.HasComponents;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -99,19 +97,19 @@ public abstract class AbstractDocgenerationLayout extends VerticalLayout {
 		}
 
 		createButton = ButtonHelper.createButton(I18nProperties.getCaption(Captions.actionCreate));
-		createButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
-		createButton.setIcon(VaadinIcons.FILE_TEXT);
+		createButton.addClassName(CssStyles.BUTTON_PRIMARY);
+		createButton.setIcon(VaadinIcon.FILE_TEXT);
 		createButton.setEnabled(false);
 
 		cancelButton = ButtonHelper.createButton(I18nProperties.getCaption(Captions.actionCancel));
 		cancelButton.addClickListener((e) -> closeWindow());
 
 		buttonBar = new HorizontalLayout();
-		buttonBar.addComponents(cancelButton, createButton);
+		buttonBar.add(cancelButton, createButton);
 
-		addComponent(additionalParametersComponent);
-		addComponent(additionalVariablesComponent);
-		addComponent(buttonBar);
+		add(additionalParametersComponent);
+		add(additionalVariablesComponent);
+		add(buttonBar);
 		setComponentAlignment(buttonBar, Alignment.BOTTOM_RIGHT);
 	}
 
@@ -125,9 +123,9 @@ public abstract class AbstractDocgenerationLayout extends VerticalLayout {
 						: Captions.DocumentTemplate_uploadGeneratedDocumentToEntity));
 			checkBoxUploadGeneratedDoc.setValue(false);
 			checkBoxUploadGeneratedDoc.setEnabled(true);
-			checkBoxUploadGeneratedDoc.setStyleName(CssStyles.FORCE_CAPTION_CHECKBOX);
+			checkBoxUploadGeneratedDoc.setClassName(CssStyles.FORCE_CAPTION_CHECKBOX);
 			checkBoxUploadGeneratedDoc.setWidth(400, Unit.PIXELS);
-			addComponent(checkBoxUploadGeneratedDoc);
+			add(checkBoxUploadGeneratedDoc);
 		}
 	}
 
@@ -137,7 +135,7 @@ public abstract class AbstractDocgenerationLayout extends VerticalLayout {
 		diseaseSelector.setItems(FacadeProvider.getDiseaseConfigurationFacade().getAllDiseases(true, true, true));
 		diseaseSelector.setPlaceholder(I18nProperties.getString(Strings.all));
 		diseaseSelector.setEmptySelectionAllowed(true);
-		diseaseSelector.setWidth(100F, Unit.PERCENTAGE);
+		diseaseSelector.setWidthFull();
 		diseaseSelector.setValue(defaultDisease);
 
 		diseaseSelector.addValueChangeListener(e -> {
@@ -145,20 +143,20 @@ public abstract class AbstractDocgenerationLayout extends VerticalLayout {
 			templateSelector.setValue(null);
 
 			templateSelector.setItems(getAvailableTemplates(disease));
-			templateSelector.setItemCaptionGenerator(DocumentTemplateDto::getFileName);
+			templateSelector.setItemLabelGenerator(DocumentTemplateDto::getFileName);
 		});
 
-		addComponent(diseaseSelector);
+		add(diseaseSelector);
 	}
 
 	private void addTemplateSelector(String captionTemplateSelector, Function<DocumentTemplateDto, String> fileNameFunction) {
 		templateSelector = new ComboBox<>(captionTemplateSelector);
-		templateSelector.setWidth(100F, Unit.PERCENTAGE);
+		templateSelector.setWidthFull();
 		templateSelector.addValueChangeListener(e -> {
 			DocumentTemplateDto template = e.getValue();
 			boolean isValidTemplateFile = template != null;
 			createButton.setEnabled(isValidTemplateFile);
-			additionalVariablesComponent.removeAllComponents();
+			additionalVariablesComponent.removeAll();
 			hideTextfields();
 			documentVariables = null;
 			if (isValidTemplateFile) {
@@ -168,8 +166,8 @@ public abstract class AbstractDocgenerationLayout extends VerticalLayout {
 					if (additionalVariables != null && !additionalVariables.isEmpty()) {
 						for (String variable : additionalVariables) {
 							TextField variableInput = new TextField(variable);
-							variableInput.setWidth(100F, Unit.PERCENTAGE);
-							additionalVariablesComponent.addComponent(variableInput);
+							variableInput.setWidthFull();
+							additionalVariablesComponent.add(variableInput);
 						}
 						showTextfields();
 					}
@@ -179,18 +177,17 @@ public abstract class AbstractDocgenerationLayout extends VerticalLayout {
 					}
 				} catch (IOException | DocumentTemplateException ex) {
 					LoggerFactory.getLogger(getClass()).error("Error while reading document variables.", e);
-					new Notification(I18nProperties.getString(Strings.errorOccurred), ex.getMessage(), Notification.Type.ERROR_MESSAGE, false)
-						.show(Page.getCurrent());
+					NotificationHelper.show(I18nProperties.getString(Strings.errorOccurred), ex.getMessage(), NotificationHelper.Type.ERROR_MESSAGE, false);
 				}
 			}
 		});
 
-		addComponent(templateSelector);
+		add(templateSelector);
 	}
 
 	protected void init() {
 		templateSelector.setItems(getAvailableTemplates(defaultDisease));
-		templateSelector.setItemCaptionGenerator(DocumentTemplateDto::getFileName);
+		templateSelector.setItemLabelGenerator(DocumentTemplateDto::getFileName);
 	}
 
 	private void showTextfields() {
@@ -219,8 +216,8 @@ public abstract class AbstractDocgenerationLayout extends VerticalLayout {
 
 	private void closeWindow() {
 		HasComponents parent = this.getParent();
-		if (parent instanceof Window && ((Window) parent).isClosable()) {
-			((Window) parent).close();
+		if (parent instanceof Dialog && ((Dialog) parent).isClosable()) {
+			((Dialog) parent).close();
 		}
 	}
 

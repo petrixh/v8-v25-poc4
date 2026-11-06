@@ -22,16 +22,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.ui.CheckBoxGroup;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.Component;
 import com.vaadin.ui.CustomField;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.util.ReflectTools;
 
 import de.symeda.sormas.api.systemconfiguration.SystemConfigurationValueDataProvider;
@@ -167,23 +167,23 @@ public class SystemConfigurationValueDynamicInput extends CustomField<SystemConf
         final var mainLayout = new VerticalLayout();
 
         mainLayout.setSpacing(true);
-        mainLayout.setMargin(false);
+        mainLayout.setPadding(false);
         mainLayout.setSizeUndefined();
         mainLayout.setWidthFull();
 
         switch (getValueType()) {
         case DROPDOWN:
-            mainLayout.addComponent(createDropdown());
+            mainLayout.add(createDropdown());
             break;
         case CHECKBOX_GRID:
-            mainLayout.addComponent(createCheckboxGrid());
-            mainLayout.addStyleName(STYLE_NAME_DYNAMIC_INPUT_FIXED_SIZE);
+            mainLayout.add(createCheckboxGrid());
+            mainLayout.addClassName(STYLE_NAME_DYNAMIC_INPUT_FIXED_SIZE);
             break;
         case PASSWORD:
-            mainLayout.addComponent(createPasswordField());
+            mainLayout.add(createPasswordField());
             break;
         default:
-            mainLayout.addComponent(createTextField());
+            mainLayout.add(createTextField());
         }
 
         return mainLayout;
@@ -212,7 +212,7 @@ public class SystemConfigurationValueDynamicInput extends CustomField<SystemConf
 
         final var layout = new HorizontalLayout();
         layout.setWidthFull();
-        layout.addStyleName(STYLE_NAME_TOGGLE_PASSWORD);
+        layout.addClassName(STYLE_NAME_TOGGLE_PASSWORD);
         final var passwordField = new PasswordField();
         passwordField.setValue(getValue().getValue());
         passwordField.setWidthFull();
@@ -224,7 +224,7 @@ public class SystemConfigurationValueDynamicInput extends CustomField<SystemConf
         passwordField.setValue(getValue().getValue());
 
         final var toggleButton = new Button();
-        toggleButton.setIcon(VaadinIcons.EYE_SLASH);
+        toggleButton.setIcon(VaadinIcon.EYE_SLASH);
 
         passwordField.addValueChangeListener(event -> {
             textField.setValue(passwordField.getValue());
@@ -240,16 +240,16 @@ public class SystemConfigurationValueDynamicInput extends CustomField<SystemConf
                 passwordField.setVisible(false);
                 textField.setVisible(true);
                 textField.setValue(passwordField.getValue());
-                toggleButton.setIcon(VaadinIcons.EYE);
+                toggleButton.setIcon(VaadinIcon.EYE);
             } else {
                 passwordField.setVisible(true);
                 textField.setVisible(false);
                 passwordField.setValue(textField.getValue());
-                toggleButton.setIcon(VaadinIcons.EYE_SLASH);
+                toggleButton.setIcon(VaadinIcon.EYE_SLASH);
             }
         });
 
-        layout.addComponents(passwordField, textField, toggleButton);
+        layout.add(passwordField, textField, toggleButton);
         return layout;
     }
 
@@ -282,7 +282,7 @@ public class SystemConfigurationValueDynamicInput extends CustomField<SystemConf
         cbg.setItems(values);
         cbg.select(getValue().getDataProvider().getMappedValues(getValue()).values().toArray(new String[] {}));
         cbg.addValueChangeListener(event -> fireValueChange(cbg));
-        cbg.addStyleName(STYLE_NAME_WRAPPING_CHECKBOX_GROUP);
+        cbg.addClassName(STYLE_NAME_WRAPPING_CHECKBOX_GROUP);
         cbg.setWidthFull();
         return cbg;
     }

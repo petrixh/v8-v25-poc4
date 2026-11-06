@@ -34,12 +34,11 @@ import de.symeda.sormas.api.docgeneneration.DocumentTemplateReferenceDto;
 import org.vaadin.hene.popupbutton.PopupButton;
 
 import com.google.common.io.ByteStreams;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 import com.vaadin.v7.ui.Upload;
 import com.wcs.wcslib.vaadin.widget.multifileupload.ui.MultiFileUpload;
 import com.wcs.wcslib.vaadin.widget.multifileupload.ui.UploadStateWindow;
@@ -136,7 +135,7 @@ public class ExternalBulkEmailOptionsForm extends AbstractEditForm<ExternalEmail
 
 		if (templatesWorkflow != null) {
 			attachDocTemplateLayout = new QuarantineOrderLayout(templatesWorkflow);
-			attachDocTemplateLayout.setMargin(false);
+			attachDocTemplateLayout.setPadding(false);
 			getContent().addComponent(attachDocTemplateLayout, CUSTOM_EMAIL_ATTACHMENT_DOCUMENT);
 		}
 	}
@@ -153,11 +152,11 @@ public class ExternalBulkEmailOptionsForm extends AbstractEditForm<ExternalEmail
 	private Button buildUploadButton() {
 		VerticalLayout uploadLayout = new VerticalLayout();
 		uploadLayout.setSpacing(true);
-		uploadLayout.setMargin(true);
-		uploadLayout.addStyleName(CssStyles.LAYOUT_MINIMAL);
+		uploadLayout.setPadding(true);
+		uploadLayout.addClassName(CssStyles.LAYOUT_MINIMAL);
 
 		mainButton =
-			ButtonHelper.createIconPopupButton(Captions.documentUploadDocument, VaadinIcons.PLUS_CIRCLE, uploadLayout, ValoTheme.BUTTON_PRIMARY);
+			ButtonHelper.createIconPopupButton(Captions.documentUploadDocument, VaadinIcon.PLUS_CIRCLE, uploadLayout, CssStyles.BUTTON_PRIMARY);
 
 		boolean multipleUpload = UiUtil.enabled(FeatureType.DOCUMENTS_MULTI_UPLOAD);
 		AtomicBoolean limitInfoPopUpShown = new AtomicBoolean(false);

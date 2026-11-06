@@ -18,10 +18,9 @@ import static java.util.Objects.nonNull;
 
 import org.vaadin.hene.popupbutton.PopupButton;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.wcs.wcslib.vaadin.widget.multifileupload.ui.MultiFileUpload;
 import com.wcs.wcslib.vaadin.widget.multifileupload.ui.UploadStateWindow;
 
@@ -54,7 +53,7 @@ public class DocumentListComponent extends SideComponent {
 		super(I18nProperties.getString(Strings.entityDocuments));
 
 		documentList = new DocumentList(relatedEntityType, entityRef, editRight, pseudonymized, isEditAllowed, isDeleteAllowed);
-		addComponent(documentList);
+		add(documentList);
 		documentList.reload();
 
 		if (UiUtil.permitted(isEditAllowed, editRight, UserRight.DOCUMENT_UPLOAD)) {
@@ -66,11 +65,11 @@ public class DocumentListComponent extends SideComponent {
 	private Button buildUploadButton(DocumentRelatedEntityType relatedEntityType, ReferenceDto entityRef) {
 		VerticalLayout uploadLayout = new VerticalLayout();
 		uploadLayout.setSpacing(true);
-		uploadLayout.setMargin(true);
-		uploadLayout.addStyleName(CssStyles.LAYOUT_MINIMAL);
+		uploadLayout.setPadding(true);
+		uploadLayout.addClassName(CssStyles.LAYOUT_MINIMAL);
 
 		mainButton =
-			ButtonHelper.createIconPopupButton(Captions.documentUploadDocument, VaadinIcons.PLUS_CIRCLE, uploadLayout, ValoTheme.BUTTON_PRIMARY);
+			ButtonHelper.createIconPopupButton(Captions.documentUploadDocument, VaadinIcon.PLUS_CIRCLE, uploadLayout, CssStyles.BUTTON_PRIMARY);
 
 		boolean multipleUpload = UiUtil.enabled(FeatureType.DOCUMENTS_MULTI_UPLOAD);
 

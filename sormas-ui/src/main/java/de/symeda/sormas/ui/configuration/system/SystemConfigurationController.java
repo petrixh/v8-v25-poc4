@@ -15,8 +15,8 @@
 
 package de.symeda.sormas.ui.configuration.system;
 
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Window;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -48,11 +48,11 @@ public class SystemConfigurationController {
             new CommitDiscardWrapperComponent<>(editForm, editForm.getFieldGroup());
         cdw.addCommitListener(() -> {
             FacadeProvider.getSystemConfigurationValueFacade().save(editForm.getValue());
-            Notification.show(MESSAGE_SYSTEM_CONFIGURATION_VALUE_SAVED, Notification.Type.ASSISTIVE_NOTIFICATION);
+            NotificationHelper.show(MESSAGE_SYSTEM_CONFIGURATION_VALUE_SAVED, NotificationHelper.Type.ASSISTIVE_NOTIFICATION);
             SormasUI.get().getNavigator().navigateTo(SystemConfigurationView.VIEW_NAME);
         });
 
-        Window window = VaadinUiUtil.showModalPopupWindow(cdw, EDIT + " " + systemConfigurationValue.getKey());
+        Dialog window = VaadinUiUtil.showModalPopupWindow(cdw, EDIT + " " + systemConfigurationValue.getKey());
 
     }
 

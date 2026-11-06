@@ -17,14 +17,13 @@ package de.symeda.sormas.ui.configuration.docgeneration;
 
 import static de.symeda.sormas.ui.utils.CssStyles.H3;
 
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.docgeneneration.DocumentTemplateCriteria;
 import de.symeda.sormas.api.docgeneneration.DocumentWorkflow;
@@ -51,23 +50,23 @@ public class DocumentTemplateSection extends VerticalLayout {
 		DocumentTemplatesGrid documentTemplatesGrid = new DocumentTemplatesGrid(documentTemplateCriteria, hasDisease);
 		documentTemplatesGrid.setWidth(700, Unit.PIXELS);
 
-		Label quarantineTemplatesLabel = new Label(documentTemplateCriteria.getDocumentWorkflow().toString());
-		quarantineTemplatesLabel.addStyleName(H3);
+		Span quarantineTemplatesLabel = new Span(documentTemplateCriteria.getDocumentWorkflow().toString());
+		quarantineTemplatesLabel.addClassName(H3);
 		Button uploadButton = buildUploadButton(documentTemplateCriteria.getDocumentWorkflow(), documentTemplatesGrid, hasDisease);
-		sectionHeader.addComponents(quarantineTemplatesLabel, uploadButton);
+		sectionHeader.add(quarantineTemplatesLabel, uploadButton);
 		sectionHeader.setComponentAlignment(uploadButton, Alignment.MIDDLE_RIGHT);
 		sectionHeader.setWidth(700, Unit.PIXELS);
 
-		addComponent(sectionHeader);
-		addComponent(documentTemplatesGrid);
-		setExpandRatio(documentTemplatesGrid, 1F);
+		add(sectionHeader);
+		add(documentTemplatesGrid);
+		setFlexGrow(1, documentTemplatesGrid);
 	}
 
 	private Button buildUploadButton(DocumentWorkflow documentWorkflow, DocumentTemplatesGrid documentTemplatesGrid, boolean hasDisease) {
-		return ButtonHelper.createIconButton(I18nProperties.getCaption(Captions.DocumentTemplate_uploadTemplate), VaadinIcons.UPLOAD, e -> {
-			Window window = VaadinUiUtil.showPopupWindow(new DocumentTemplateUploadLayout(documentWorkflow, hasDisease, documentTemplateReceiver));
+		return ButtonHelper.createIconButton(I18nProperties.getCaption(Captions.DocumentTemplate_uploadTemplate), VaadinIcon.UPLOAD, e -> {
+			Dialog window = VaadinUiUtil.showPopupWindow(new DocumentTemplateUploadLayout(documentWorkflow, hasDisease, documentTemplateReceiver));
 			window.setCaption(String.format(I18nProperties.getCaption(Captions.DocumentTemplate_uploadWorkflowTemplate), documentWorkflow));
 			window.addCloseListener(c -> documentTemplatesGrid.reload());
-		}, ValoTheme.BUTTON_PRIMARY);
+		}, CssStyles.BUTTON_PRIMARY);
 	}
 }

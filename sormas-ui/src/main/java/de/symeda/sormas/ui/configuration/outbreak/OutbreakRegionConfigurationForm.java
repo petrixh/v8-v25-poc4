@@ -27,11 +27,10 @@ import java.util.List;
 import java.util.Set;
 
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.OptionGroup;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -58,11 +57,11 @@ public class OutbreakRegionConfigurationForm extends VerticalLayout {
 	private OptionGroup[] outbreakToggles;
 
 	// UI elements
-	private Label affectedDistrictsNumberLabel;
+	private Span affectedDistrictsNumberLabel;
 
 	public OutbreakRegionConfigurationForm(OutbreakRegionConfiguration regionOutbreakConfiguration) {
 
-		setStyleName("configuration-view");
+		setClassName("configuration-view");
 
 		// Copy the set of affected districts because the CommitDiscardWrapperComponent is not reset when discarding this form
 		affectedDistricts = new HashSet<>(regionOutbreakConfiguration.getAffectedDistricts());
@@ -71,36 +70,36 @@ public class OutbreakRegionConfigurationForm extends VerticalLayout {
 		outbreakToggles = new OptionGroup[regionOutbreakConfiguration.getTotalDistricts()];
 		setWidth(860, Unit.PIXELS);
 
-		addComponent(createHeader());
-		addComponent(createAffectedDistrictsComponent());
+		add(createHeader());
+		add(createAffectedDistrictsComponent());
 		updateAffectedDistrictsNumberLabel();
 	}
 
 	private HorizontalLayout createHeader() {
 
 		HorizontalLayout headerLayout = new HorizontalLayout();
-		headerLayout.setWidth(100, Unit.PERCENTAGE);
+		headerLayout.setWidthFull();
 		headerLayout.setSpacing(true);
 		style(headerLayout, VSPACE_2);
 
 		// Headline and info text
-		Label infoTextLabel = new Label(I18nProperties.getString(Strings.headingDefineOutbreakDistricts));
+		Span infoTextLabel = new Span(I18nProperties.getString(Strings.headingDefineOutbreakDistricts));
 		infoTextLabel.setWidthUndefined();
 		style(infoTextLabel, VSPACE_TOP_4);
-		headerLayout.addComponent(infoTextLabel);
+		headerLayout.add(infoTextLabel);
 
 		// Number of affected districts and options to toggle outbreak mode for all districts	
 		HorizontalLayout allDistrictsLayout = new HorizontalLayout();
 		allDistrictsLayout.setWidthUndefined();
 		allDistrictsLayout.setSpacing(true);
 		{
-			Label allDistrictsLabel = new Label(I18nProperties.getString(Strings.headingSetOutbreakStatus));
+			Span allDistrictsLabel = new Span(I18nProperties.getString(Strings.headingSetOutbreakStatus));
 			allDistrictsLabel.setWidthUndefined();
 			style(allDistrictsLabel, VSPACE_TOP_4);
-			allDistrictsLayout.addComponent(allDistrictsLabel);
+			allDistrictsLayout.add(allDistrictsLabel);
 
 			OptionGroup outbreakToggle = new OptionGroup();
-			style(outbreakToggle, ValoTheme.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_HORIZONTAL_SWITCH_CRITICAL);
+			style(outbreakToggle, SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_HORIZONTAL_SWITCH_CRITICAL);
 			outbreakToggle.addItem(OUTBREAK);
 			outbreakToggle.addItem(NORMAL);
 
@@ -112,21 +111,21 @@ public class OutbreakRegionConfigurationForm extends VerticalLayout {
 
 			outbreakToggle.addValueChangeListener(e -> {
 				for (OptionGroup districtOutbreakToggle : outbreakToggles) {
-					districtOutbreakToggle.setValue(e.getProperty().getValue());
+					districtOutbreakToggle.setValue(e.getValue());
 				}
 			});
 
 			outbreakToggle.setWidthUndefined();
-			allDistrictsLayout.addComponent(outbreakToggle);
+			allDistrictsLayout.add(outbreakToggle);
 
-			affectedDistrictsNumberLabel = new Label();
+			affectedDistrictsNumberLabel = new Span();
 			affectedDistrictsNumberLabel.setWidthUndefined();
-			allDistrictsLayout.addComponent(affectedDistrictsNumberLabel);
+			allDistrictsLayout.add(affectedDistrictsNumberLabel);
 		}
-		headerLayout.addComponent(allDistrictsLayout);
+		headerLayout.add(allDistrictsLayout);
 		headerLayout.setComponentAlignment(allDistrictsLayout, Alignment.TOP_RIGHT);
 
-		headerLayout.setExpandRatio(infoTextLabel, 1);
+		headerLayout.setFlexGrow(1, infoTextLabel);
 
 		return headerLayout;
 	}
@@ -134,45 +133,45 @@ public class OutbreakRegionConfigurationForm extends VerticalLayout {
 	private HorizontalLayout createAffectedDistrictsComponent() {
 
 		HorizontalLayout affectedDistrictsComponent = new HorizontalLayout();
-		affectedDistrictsComponent.setWidth(100, Unit.PERCENTAGE);
-		affectedDistrictsComponent.setMargin(false);
+		affectedDistrictsComponent.setWidthFull();
+		affectedDistrictsComponent.setPadding(false);
 		style(affectedDistrictsComponent, VSPACE_3);
 
 		// Create two columns to display the districts
 		VerticalLayout leftColumn = new VerticalLayout();
-		leftColumn.setMargin(false);
+		leftColumn.setPadding(false);
 		VerticalLayout middleColumn = new VerticalLayout();
-		middleColumn.setMargin(false);
+		middleColumn.setPadding(false);
 		VerticalLayout rightColumn = new VerticalLayout();
-		rightColumn.setMargin(false);
+		rightColumn.setPadding(false);
 
-		affectedDistrictsComponent.addComponent(leftColumn);
+		affectedDistrictsComponent.add(leftColumn);
 		// Add spacer label
-		affectedDistrictsComponent.addComponent(new Label());
-		affectedDistrictsComponent.addComponent(middleColumn);
+		affectedDistrictsComponent.add(new Span());
+		affectedDistrictsComponent.add(middleColumn);
 		// Add spacer label
-		affectedDistrictsComponent.addComponent(new Label());
-		affectedDistrictsComponent.addComponent(rightColumn);
+		affectedDistrictsComponent.add(new Span());
+		affectedDistrictsComponent.add(rightColumn);
 
-		affectedDistrictsComponent.setExpandRatio(leftColumn, 1);
-		affectedDistrictsComponent.setExpandRatio(middleColumn, 1);
-		affectedDistrictsComponent.setExpandRatio(rightColumn, 1);
+		affectedDistrictsComponent.setFlexGrow(1, leftColumn);
+		affectedDistrictsComponent.setFlexGrow(1, middleColumn);
+		affectedDistrictsComponent.setFlexGrow(1, rightColumn);
 
 		List<DistrictReferenceDto> districts = FacadeProvider.getDistrictFacade().getAllActiveByRegion(region.getUuid());
 		int index = 1;
 		for (DistrictReferenceDto district : districts) {
 			OptionGroup outbreakToggle = createOutbreakToggle(district);
-			outbreakToggle.setWidth(100, Unit.PERCENTAGE);
+			outbreakToggle.setWidthFull();
 			outbreakToggles[index - 1] = outbreakToggle;
 
 			// Split districts evenly to all three columns
 			if ((districts.size() % 3 == 0 && index <= districts.size() / 3) || (districts.size() % 3 != 0 && index <= (districts.size() / 3) + 1)) {
-				leftColumn.addComponent(outbreakToggle);
+				leftColumn.add(outbreakToggle);
 			} else if ((districts.size() % 3 == 0 && index <= districts.size() / 1.5f)
 				|| ((districts.size() % 3 == 1 || districts.size() % 3 == 2) && index <= (districts.size() / 1.5f) + 1)) {
-				middleColumn.addComponent(outbreakToggle);
+				middleColumn.add(outbreakToggle);
 			} else {
-				rightColumn.addComponent(outbreakToggle);
+				rightColumn.add(outbreakToggle);
 			}
 
 			index++;
@@ -186,7 +185,7 @@ public class OutbreakRegionConfigurationForm extends VerticalLayout {
 		OptionGroup outbreakToggle = new OptionGroup();
 		style(
 			outbreakToggle,
-			ValoTheme.OPTIONGROUP_HORIZONTAL,
+			SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL,
 			CssStyles.OPTIONGROUP_HORIZONTAL_SWITCH_CRITICAL,
 			CssStyles.OPTIONGROUP_CAPTION_INLINE);
 		outbreakToggle.setCaption(district.buildCaption());
@@ -200,7 +199,7 @@ public class OutbreakRegionConfigurationForm extends VerticalLayout {
 		}
 
 		outbreakToggle.addValueChangeListener(e -> {
-			if (e.getProperty().getValue() == OUTBREAK) {
+			if (e.getValue() == OUTBREAK) {
 				affectedDistricts.add(district);
 			} else {
 				affectedDistricts.remove(district);

@@ -18,9 +18,8 @@ package de.symeda.sormas.ui.configuration.system;
 import static de.symeda.sormas.ui.utils.LayoutUtil.locs;
 
 import com.vaadin.data.Binder;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.PasswordField;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.fields.PasswordField;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -42,7 +41,7 @@ public class SystemConfigurationValueEditForm extends AbstractEditForm<SystemCon
 	/**
 	 * The label for displaying the description of the system configuration value.
 	 */
-	private Label descriptionLabel;
+	private Span descriptionLabel;
 
 	/**
 	 * The dynamic input field for the system configuration value.
@@ -69,10 +68,10 @@ public class SystemConfigurationValueEditForm extends AbstractEditForm<SystemCon
 
 
 		if (value.getDescription() != null && !value.getDescription().isEmpty()) {
-			descriptionLabel = new Label(value.getDescription());
+			descriptionLabel = new Span(value.getDescription());
 
 			descriptionLabel.setWidth(600, Unit.PIXELS);
-			descriptionLabel.addStyleName(ValoTheme.LABEL_H3);
+			descriptionLabel.addClassName(CssStyles.H3);
 
 			SystemConfigurationI18nHelper.processI18nString(
 				value.getDescription(),

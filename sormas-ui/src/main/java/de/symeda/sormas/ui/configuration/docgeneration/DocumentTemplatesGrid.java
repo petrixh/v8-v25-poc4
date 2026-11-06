@@ -20,15 +20,14 @@ import java.util.List;
 
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.data.provider.ListDataProvider;
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.server.FileDownloader;
-import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
-import com.vaadin.shared.ui.grid.HeightMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
+import com.vaadin.flow.component.button.Button;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.docgeneneration.DocumentTemplateCriteria;
@@ -87,34 +86,34 @@ public class DocumentTemplatesGrid extends Grid<DocumentTemplateDto> {
 	private Button buildDeleteButton(DocumentTemplateDto template) {
 		return ButtonHelper.createIconButton(
 			"",
-			VaadinIcons.TRASH,
+			VaadinIcon.TRASH,
 			e -> VaadinUiUtil
 				.showDeleteConfirmationWindow(String.format(I18nProperties.getString(Strings.confirmationDeleteFile), template.getFileName()), () -> {
 					try {
 						FacadeProvider.getDocumentTemplateFacade().deleteDocumentTemplate(template.toReference(), documentWorkflow);
 					} catch (DocumentTemplateException ex) {
-						new Notification(
+						NotificationHelper.show(
 							I18nProperties.getString(Strings.errorDeletingDocumentTemplate),
 							ex.getMessage(),
-							Notification.Type.ERROR_MESSAGE,
-							false).show(Page.getCurrent());
+							NotificationHelper.Type.ERROR_MESSAGE,
+							false);
 					}
 					reload();
 				}));
 	}
 
 	private Button buildViewDocumentButton(DocumentTemplateDto template) {
-		Button viewButton = ButtonHelper.createIconButton(VaadinIcons.DOWNLOAD);
+		Button viewButton = ButtonHelper.createIconButton(VaadinIcon.DOWNLOAD);
 
 		StreamResource streamResource = new StreamResource((StreamResource.StreamSource) () -> {
 			try {
 				return new ByteArrayInputStream(FacadeProvider.getDocumentTemplateFacade().getDocumentTemplateContent(template.toReference()));
 			} catch (DocumentTemplateException e) {
-				new Notification(
+				NotificationHelper.show(
 					String.format(I18nProperties.getString(Strings.errorReadingTemplate), template.getFileName()),
 					e.getMessage(),
-					Notification.Type.ERROR_MESSAGE,
-					false).show(Page.getCurrent());
+					NotificationHelper.Type.ERROR_MESSAGE,
+					false);
 				return null;
 			}
 		}, template.getFileName());
@@ -128,11 +127,11 @@ public class DocumentTemplatesGrid extends Grid<DocumentTemplateDto> {
 	private HorizontalLayout buildActionButtons(DocumentTemplateDto template) {
 		HorizontalLayout horizontalLayout = new HorizontalLayout();
 
-		horizontalLayout.addComponent(buildViewDocumentButton(template));
-		horizontalLayout.addComponent(buildDeleteButton(template));
+		horizontalLayout.add(buildViewDocumentButton(template));
+		horizontalLayout.add(buildDeleteButton(template));
 
 		horizontalLayout.setSpacing(false);
-		horizontalLayout.setMargin(false);
+		horizontalLayout.setPadding(false);
 		horizontalLayout.setWidth("100px");
 
 		return horizontalLayout;

@@ -6,9 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.themes.ValoTheme;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -58,7 +57,7 @@ public class LineListingRegionsLayout extends CssLayout {
 				SormasUI.get()
 					.getNavigator()
 					.navigateTo(LineListingConfigurationView.VIEW_NAME + "/" + regionUuid + "/?disease=" + disease.getName());
-			}, ValoTheme.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER, CssStyles.HSPACE_LEFT_4, CssStyles.VSPACE_4);
+			}, CssStyles.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER, CssStyles.HSPACE_LEFT_4, CssStyles.VSPACE_4);
 			configButton.setCaptionAsHtml(true);
 
 			if (regions.get(regionUuid).size() > 0) {
@@ -67,7 +66,7 @@ public class LineListingRegionsLayout extends CssLayout {
 				CssStyles.style(configButton, CssStyles.BUTTON_FILTER_DISABLED);
 			}
 
-			addComponent(configButton);
+			add(configButton);
 		}
 	}
 }

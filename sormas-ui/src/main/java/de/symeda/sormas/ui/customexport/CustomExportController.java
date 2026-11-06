@@ -20,10 +20,10 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.Unit;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.contact.ContactCriteria;
@@ -44,7 +44,7 @@ import de.symeda.sormas.ui.utils.VaadinUiUtil;
 public class CustomExportController {
 
 	public void openContactExportWindow(ContactCriteria contactCriteria, Supplier<Collection<String>> selectedRows) {
-		Window customExportWindow = VaadinUiUtil.createPopupWindow();
+		Dialog customExportWindow = VaadinUiUtil.createPopupWindow();
 		ExportConfigurationsLayout customExportsLayout = new ExportConfigurationsLayout(
 			ExportType.CONTACT,
 			ImportExportUtils.getContactExportProperties(
@@ -55,14 +55,14 @@ public class CustomExportController {
 		customExportsLayout.setExportCallback(
 			exportConfig -> Page.getCurrent()
 				.open(ContactDownloadUtil.createContactExportResource(contactCriteria, selectedRows, exportConfig), null, true));
-		customExportWindow.setWidth(1024, Sizeable.Unit.PIXELS);
+		customExportWindow.setWidth(1024, Unit.PIXELS);
 		customExportWindow.setCaption(I18nProperties.getCaption(Captions.exportCustom));
 		customExportWindow.setContent(customExportsLayout);
-		UI.getCurrent().addWindow(customExportWindow);
+		customExportWindow.open();
 	}
 
 	public void openTaskExportWindow(TaskCriteria taskCriteria, Supplier<Collection<String>> selectedRows) {
-		Window customExportWindow = VaadinUiUtil.createPopupWindow();
+		Dialog customExportWindow = VaadinUiUtil.createPopupWindow();
 		ExportConfigurationsLayout customExportsLayout = new ExportConfigurationsLayout(
 			ExportType.TASK,
 			ImportExportUtils.getTaskExportProperties(
@@ -72,14 +72,14 @@ public class CustomExportController {
 			customExportWindow::close);
 		customExportsLayout.setExportCallback(
 			exportConfig -> Page.getCurrent().open(TaskDownloadUtil.createTaskExportResource(taskCriteria, selectedRows, exportConfig), null, true));
-		customExportWindow.setWidth(1024, Sizeable.Unit.PIXELS);
+		customExportWindow.setWidth(1024, Unit.PIXELS);
 		customExportWindow.setCaption(I18nProperties.getCaption(Captions.exportCustom));
 		customExportWindow.setContent(customExportsLayout);
-		UI.getCurrent().addWindow(customExportWindow);
+		customExportWindow.open();
 	}
 
 	public void openPersonExportWindow(PersonCriteria personCriteria) {
-		Window customExportWindow = VaadinUiUtil.createPopupWindow();
+		Dialog customExportWindow = VaadinUiUtil.createPopupWindow();
 		ExportConfigurationsLayout customExportsLayout = new ExportConfigurationsLayout(
 			ExportType.PERSON,
 			ImportExportUtils.getPersonExportProperties(
@@ -89,10 +89,10 @@ public class CustomExportController {
 			customExportWindow::close);
 		customExportsLayout.setExportCallback(
 			exportConfig -> Page.getCurrent().open(PersonDownloadUtil.createPersonExportResource(personCriteria, exportConfig), null, true));
-		customExportWindow.setWidth(1024, Sizeable.Unit.PIXELS);
+		customExportWindow.setWidth(1024, Unit.PIXELS);
 		customExportWindow.setCaption(I18nProperties.getCaption(Captions.exportCustom));
 		customExportWindow.setContent(customExportsLayout);
-		UI.getCurrent().addWindow(customExportWindow);
+		customExportWindow.open();
 	}
 
 	public void openEditExportConfigurationWindow(
@@ -101,20 +101,19 @@ public class CustomExportController {
 		List<ExportPropertyMetaInfo> availableProperties,
 		String caption) {
 
-		Window exportWindow = VaadinUiUtil.createPopupWindow();
+		Dialog exportWindow = VaadinUiUtil.createPopupWindow();
 		ExportConfigurationEditLayout editLayout = new ExportConfigurationEditLayout(config, availableProperties, (exportConfiguration) -> {
 			FacadeProvider.getExportFacade().saveExportConfiguration(exportConfiguration);
 			exportWindow.close();
-			new Notification(null, I18nProperties.getString(Strings.messageExportConfigurationSaved), Notification.Type.WARNING_MESSAGE, false)
-				.show(Page.getCurrent());
+			NotificationHelper.show(null, I18nProperties.getString(Strings.messageExportConfigurationSaved), NotificationHelper.Type.WARNING_MESSAGE, false);
 			grid.reload(false);
 		}, () -> {
 			exportWindow.close();
 			grid.reload(false);
 		});
-		exportWindow.setWidth(1024, Sizeable.Unit.PIXELS);
+		exportWindow.setWidth(1024, Unit.PIXELS);
 		exportWindow.setCaption(caption);
 		exportWindow.setContent(editLayout);
-		UI.getCurrent().addWindow(exportWindow);
+		exportWindow.open();
 	}
 }

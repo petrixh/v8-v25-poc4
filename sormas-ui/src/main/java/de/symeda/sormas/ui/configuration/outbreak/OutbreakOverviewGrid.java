@@ -129,7 +129,7 @@ public class OutbreakOverviewGrid extends Grid implements ItemClickListener {
 
 			@Override
 			public String getStyle(CellReference cell) {
-				if (cell.getProperty().getValue() instanceof OutbreakRegionConfiguration) {
+				if (cell.getValue() instanceof OutbreakRegionConfiguration) {
 					return CssStyles.ALIGN_CENTER;
 				}
 				return null;

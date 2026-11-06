@@ -15,10 +15,10 @@
 
 package de.symeda.sormas.ui.configuration.system;
 
-import com.vaadin.navigator.ViewChangeListener;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -56,13 +56,13 @@ public class SystemConfigurationView extends AbstractConfigurationView {
             ViewModelProviders.of(SystemConfigurationView.class).get(SystemConfigurationValueCriteria.class, new SystemConfigurationValueCriteria());
         grid = new SystemConfigurationValuesGrid(criteria);
         final VerticalLayout gridLayout = new VerticalLayout();
-        gridLayout.addComponent(createFilterBar());
-        gridLayout.addComponent(grid);
-        gridLayout.setMargin(true);
+        gridLayout.add(createFilterBar());
+        gridLayout.add(grid);
+        gridLayout.setPadding(true);
         gridLayout.setSpacing(false);
-        gridLayout.setExpandRatio(grid, 1);
+        gridLayout.setFlexGrow(1, grid);
         gridLayout.setSizeFull();
-        gridLayout.setStyleName("crud-main-layout");
+        gridLayout.setClassName("crud-main-layout");
 
         addComponent(gridLayout);
 
@@ -78,7 +78,7 @@ public class SystemConfigurationView extends AbstractConfigurationView {
         final ComboBox<SystemConfigurationCategoryDto> categoryFilter;
 
         final HorizontalLayout filterLayout = new HorizontalLayout();
-        filterLayout.setMargin(false);
+        filterLayout.setPadding(false);
         filterLayout.setSpacing(true);
 
         searchField = new SearchField();
@@ -87,13 +87,13 @@ public class SystemConfigurationView extends AbstractConfigurationView {
             criteria.freeTextFilter(e.getText());
             grid.reload();
         });
-        filterLayout.addComponent(searchField);
+        filterLayout.add(searchField);
 
         categoryFilter = new ComboBox<>(
             I18nProperties.getPrefixCaption(SystemConfigurationValueDto.I18N_PREFIX, SystemConfigurationValueDto.CATEGORY_PROPERTY_NAME),
             FacadeProvider.getSystemConfigurationCategoryFacade().getAllAfter(null));
 
-        categoryFilter.setItemCaptionGenerator(v -> {
+        categoryFilter.setItemLabelGenerator(v -> {
             final StringBuilder caption = new StringBuilder();
             SystemConfigurationI18nHelper.processI18nString(
                 v.getCaption(),
@@ -114,9 +114,9 @@ public class SystemConfigurationView extends AbstractConfigurationView {
             criteria.setCategory(FacadeProvider.getSystemConfigurationCategoryFacade().getReferenceByUuid(e.getValue().getUuid()));
             grid.reload();
         });
-        filterLayout.addComponent(categoryFilter);
+        filterLayout.add(categoryFilter);
 
-        filterLayout.addComponent(ButtonHelper.createButton(Captions.actionResetFilters, event -> {
+        filterLayout.add(ButtonHelper.createButton(Captions.actionResetFilters, event -> {
             ViewModelProviders.of(SystemConfigurationView.class).remove(SystemConfigurationValueCriteria.class);
             navigateTo(null);
         }, CssStyles.FORCE_CAPTION));

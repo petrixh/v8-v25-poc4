@@ -3,10 +3,9 @@ package de.symeda.sormas.ui.configuration.linelisting;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -50,23 +49,23 @@ public class LineListingAddDiseaseLayout extends HorizontalLayout {
 		cbDiseases = new ComboBox<>();
 		cbDiseases.setId("disease");
 		cbDiseases.setItems(diseases);
-		cbDiseases.setItemCaptionGenerator(disease -> disease.toString());
+		cbDiseases.setItemLabelGenerator(disease -> disease.toString());
 		cbDiseases.setPlaceholder(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.DISEASE));
 		cbDiseases.setWidth(200, Unit.PIXELS);
 		cbDiseases.addValueChangeListener(e -> {
 			btnAddDisease.setEnabled(e.getValue() != null);
 		});
-		addComponent(cbDiseases);
+		add(cbDiseases);
 
 		btnAddDisease = ButtonHelper.createButton(Captions.lineListingEnableForDisease, e -> {
 			if (addDiseaseCallback != null) {
 				addDiseaseCallback.accept(cbDiseases.getValue());
 			}
-		}, ValoTheme.BUTTON_PRIMARY);
+		}, CssStyles.BUTTON_PRIMARY);
 		btnAddDisease.setEnabled(false);
 
-		addComponent(btnAddDisease);
+		add(btnAddDisease);
 
-		setExpandRatio(btnAddDisease, 1);
+		setFlexGrow(1, btnAddDisease);
 	}
 }

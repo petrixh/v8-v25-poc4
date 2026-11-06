@@ -5,16 +5,15 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.server.FileDownloader;
-import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.ReferenceDto;
@@ -55,7 +54,7 @@ public class DocumentList extends VerticalLayout {
 		this.isDeleteAllowed = isDeleteAllowed;
 
 		setSpacing(true);
-		setMargin(false);
+		setPadding(false);
 	}
 
 	public void reload() {
@@ -63,11 +62,11 @@ public class DocumentList extends VerticalLayout {
 		if (!pseudonymized) {
 			docs = FacadeProvider.getDocumentFacade().getDocumentsRelatedToEntity(relatedEntityType, entityRef.getUuid());
 		}
-		removeAllComponents();
+		removeAll();
 		if (docs.isEmpty()) {
-			Label noActionsLabel = new Label(String.format(I18nProperties.getCaption(Captions.documentNoDocuments), relatedEntityType.toString()));
+			Span noActionsLabel = new Span(String.format(I18nProperties.getCaption(Captions.documentNoDocuments), relatedEntityType.toString()));
 			setSpacing(false);
-			addComponent(noActionsLabel);
+			add(noActionsLabel);
 		} else {
 			setSpacing(true);
 			addComponents(docs.stream().map(this::toComponent).toArray(Component[]::new));
@@ -77,23 +76,23 @@ public class DocumentList extends VerticalLayout {
 	private Component toComponent(DocumentDto document) {
 		HorizontalLayout res = new HorizontalLayout();
 		res.setSpacing(true);
-		res.setMargin(false);
-		res.setWidth(100, Unit.PERCENTAGE);
+		res.setPadding(false);
+		res.setWidthFull();
 
 		// TODO: show content-type and/or size?
-		Label nameLabel = new Label(DataHelper.toStringNullable(document.getName()));
-		nameLabel.addStyleName(CssStyles.LABEL_CAPTION_TRUNCATED);
-		res.addComponent(nameLabel);
-		res.setExpandRatio(nameLabel, 1);
+		Span nameLabel = new Span(DataHelper.toStringNullable(document.getName()));
+		nameLabel.addClassName(CssStyles.LABEL_CAPTION_TRUNCATED);
+		res.add(nameLabel);
+		res.setFlexGrow(1, nameLabel);
 
 		Button downloadButton = buildDownloadButton(document);
-		res.addComponent(downloadButton);
-		res.setExpandRatio(downloadButton, 0);
+		res.add(downloadButton);
+		res.setFlexGrow(0, downloadButton);
 
 		if (UiUtil.permitted(editRight, UserRight.DOCUMENT_DELETE) && isDeleteAllowed) {
 			Button deleteButton = buildDeleteButton(document, entityRef.getUuid(), relatedEntityType);
-			res.addComponent(deleteButton);
-			res.setExpandRatio(deleteButton, 0);
+			res.add(deleteButton);
+			res.setFlexGrow(0, deleteButton);
 		} else {
 			nameLabel.setEnabled(false);
 		}
@@ -102,18 +101,18 @@ public class DocumentList extends VerticalLayout {
 	}
 
 	private Button buildDownloadButton(DocumentDto document) {
-		Button viewButton = ButtonHelper.createIconButton(VaadinIcons.DOWNLOAD);
+		Button viewButton = ButtonHelper.createIconButton(VaadinIcon.DOWNLOAD);
 
 		StreamResource streamResource = new StreamResource((StreamResource.StreamSource) () -> {
 			DocumentFacade documentFacade = FacadeProvider.getDocumentFacade();
 			try {
 				return new ByteArrayInputStream(documentFacade.getContent(document.getUuid()));
 			} catch (IOException | IllegalArgumentException e) {
-				new Notification(
+				NotificationHelper.show(
 					String.format(I18nProperties.getString(Strings.errorReadingDocument), document),
 					e.getMessage(),
-					Notification.Type.ERROR_MESSAGE,
-					false).show(Page.getCurrent());
+					NotificationHelper.Type.ERROR_MESSAGE,
+					false);
 				return null;
 			}
 		}, document.getName());
@@ -129,17 +128,17 @@ public class DocumentList extends VerticalLayout {
 	private Button buildDeleteButton(DocumentDto document, String relatedEntityUuid, DocumentRelatedEntityType relatedEntityType) {
 		return ButtonHelper.createIconButton(
 			"",
-			VaadinIcons.TRASH,
+			VaadinIcon.TRASH,
 			e -> VaadinUiUtil
 				.showDeleteConfirmationWindow(String.format(I18nProperties.getString(Strings.confirmationDeleteFile), document.getName()), () -> {
 					try {
 						FacadeProvider.getDocumentFacade().deleteDocument(document.getUuid(), relatedEntityUuid, relatedEntityType);
 					} catch (IllegalArgumentException ex) {
-						new Notification(
+						NotificationHelper.show(
 							I18nProperties.getString(Strings.errorDeletingDocument),
 							ex.getMessage(),
-							Notification.Type.ERROR_MESSAGE,
-							false).show(Page.getCurrent());
+							NotificationHelper.Type.ERROR_MESSAGE,
+							false);
 					}
 					reload();
 				}));

@@ -28,11 +28,10 @@ import javax.annotation.Nullable;
 
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Notification;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -111,7 +110,7 @@ public class QuarantineOrderLayout extends AbstractDocgenerationLayout {
 		init();
 		buttonBar.setVisible(false);
 		checkBoxUploadGeneratedDoc.setValue(true);
-		checkBoxUploadGeneratedDoc.setStyleName(CssStyles.VSPACE_3);
+		checkBoxUploadGeneratedDoc.setClassName(CssStyles.VSPACE_3);
 	}
 
 	protected void createSampleSelector(SampleCriteria sampleCriteria) {
@@ -119,15 +118,15 @@ public class QuarantineOrderLayout extends AbstractDocgenerationLayout {
 			.getIndexList(sampleCriteria, 0, 20, Collections.singletonList(new SortProperty("sampleDateTime", false)));
 
 		pathogenTestSelector = new ComboBox<>(I18nProperties.getCaption(Captions.PathogenTest));
-		pathogenTestSelector.setWidth(100F, Unit.PERCENTAGE);
-		pathogenTestSelector.setItemCaptionGenerator(e -> e.buildCaption());
+		pathogenTestSelector.setWidthFull();
+		pathogenTestSelector.setItemLabelGenerator(e -> e.buildCaption());
 		pathogenTestSelector.setEnabled(false);
-		pathogenTestSelector.setItemCaptionGenerator(item -> item.buildCaption());
+		pathogenTestSelector.setItemLabelGenerator(item -> item.buildCaption());
 
 		sampleSelector = new ComboBox<>(I18nProperties.getCaption(Captions.Sample));
-		sampleSelector.setItemCaptionGenerator(item -> item.buildCaption());
-		sampleSelector.setWidth(100F, Unit.PERCENTAGE);
-		sampleSelector.setItemCaptionGenerator(e -> e.getCaption());
+		sampleSelector.setItemLabelGenerator(item -> item.buildCaption());
+		sampleSelector.setWidthFull();
+		sampleSelector.setItemLabelGenerator(e -> e.getCaption());
 		sampleSelector.setItems(samples);
 		sampleSelector.setEnabled(!samples.isEmpty());
 		sampleSelector.addValueChangeListener(e -> {
@@ -147,8 +146,8 @@ public class QuarantineOrderLayout extends AbstractDocgenerationLayout {
 			sampleSelector.setSelectedItem(samples.get(0));
 		}
 
-		additionalParametersComponent.addComponent(sampleSelector);
-		additionalParametersComponent.addComponent(pathogenTestSelector);
+		additionalParametersComponent.add(sampleSelector);
+		additionalParametersComponent.add(pathogenTestSelector);
 	}
 
 	protected void createVaccinationSelector(VaccinationCriteria vaccinationCriteria) {
@@ -156,8 +155,8 @@ public class QuarantineOrderLayout extends AbstractDocgenerationLayout {
 			.getEntriesList(vaccinationCriteria, 0, 20, Collections.singletonList(new SortProperty("vaccinationDate", false)));
 
 		vaccinationSelector = new ComboBox<>(I18nProperties.getCaption(Captions.Vaccination));
-		vaccinationSelector.setWidth(100F, Unit.PERCENTAGE);
-		vaccinationSelector.setItemCaptionGenerator(e -> e.getCaption());
+		vaccinationSelector.setWidthFull();
+		vaccinationSelector.setItemLabelGenerator(e -> e.getCaption());
 		vaccinationSelector.setItems(vaccinations);
 		vaccinationSelector.setEnabled(!vaccinations.isEmpty());
 
@@ -165,7 +164,7 @@ public class QuarantineOrderLayout extends AbstractDocgenerationLayout {
 			vaccinationSelector.setSelectedItem(vaccinations.get(0));
 		}
 
-		additionalParametersComponent.addComponent(vaccinationSelector);
+		additionalParametersComponent.add(vaccinationSelector);
 	}
 
 	@Override
@@ -173,8 +172,7 @@ public class QuarantineOrderLayout extends AbstractDocgenerationLayout {
 		try {
 			return FacadeProvider.getQuarantineOrderFacade().getAvailableTemplates(workflow, disease);
 		} catch (Exception e) {
-			new Notification(I18nProperties.getString(Strings.errorProcessingTemplate), e.getMessage(), Notification.Type.ERROR_MESSAGE)
-				.show(Page.getCurrent());
+			NotificationHelper.show(I18nProperties.getString(Strings.errorProcessingTemplate), e.getMessage(), NotificationHelper.Type.ERROR_MESSAGE);
 			return Collections.emptyList();
 		}
 	}
@@ -204,11 +202,11 @@ public class QuarantineOrderLayout extends AbstractDocgenerationLayout {
 					readAdditionalVariables(),
 					shouldUploadGeneratedDocument());
 
-				new Notification(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.headingDocumentCreated),
 					I18nProperties.getString(Strings.messageQuarantineOrderDocumentCreated),
-					Notification.Type.TRAY_NOTIFICATION,
-					false).show(Page.getCurrent());
+					NotificationHelper.Type.TRAY_NOTIFICATION,
+					false);
 
 				if (nonNull(documentListComponent)) {
 					documentListComponent.reload();
@@ -217,8 +215,7 @@ public class QuarantineOrderLayout extends AbstractDocgenerationLayout {
 				return stream;
 			} catch (DocumentTemplateException e) {
 				LoggerFactory.getLogger(getClass()).error("Error while reading document variables.", e);
-				new Notification(I18nProperties.getString(Strings.errorProcessingTemplate), e.getMessage(), Notification.Type.ERROR_MESSAGE)
-					.show(Page.getCurrent());
+				NotificationHelper.show(I18nProperties.getString(Strings.errorProcessingTemplate), e.getMessage(), NotificationHelper.Type.ERROR_MESSAGE);
 				return null;
 			}
 		}, filename);

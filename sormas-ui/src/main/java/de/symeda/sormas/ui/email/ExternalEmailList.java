@@ -21,11 +21,11 @@ import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -47,13 +47,13 @@ public class ExternalEmailList extends PaginationList<ManualMessageLogIndexDto> 
 	private static final int MAX_DISPLAYED_ENTRIES = 5;
 
 	private final ManualMessageLogCriteria criteria;
-	private final Label placeHolderLabel;
+	private final Span placeHolderLabel;
 
 	public ExternalEmailList(ManualMessageLogCriteria criteria, String placeholderKey) {
 		super(MAX_DISPLAYED_ENTRIES);
 
 		this.criteria = criteria;
-		this.placeHolderLabel = new Label(I18nProperties.getString(placeholderKey));
+		this.placeHolderLabel = new Span(I18nProperties.getString(placeholderKey));
 	}
 
 	@Override
@@ -64,9 +64,9 @@ public class ExternalEmailList extends PaginationList<ManualMessageLogIndexDto> 
 		if (!emails.isEmpty()) {
 			showPage(1);
 		} else {
-			listLayout.removeAllComponents();
+			listLayout.removeAll();
 			updatePaginationLayout();
-			listLayout.addComponent(placeHolderLabel);
+			listLayout.add(placeHolderLabel);
 		}
 	}
 
@@ -77,9 +77,9 @@ public class ExternalEmailList extends PaginationList<ManualMessageLogIndexDto> 
 
 			listEntry.addViewButton("info-email" + messageLog.getUuid(), (Button.ClickListener) event -> {
 				showEmailDetailsPopup(messageLog);
-			}, VaadinIcons.INFO_CIRCLE);
+			}, VaadinIcon.INFO_CIRCLE);
 
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 
@@ -89,26 +89,26 @@ public class ExternalEmailList extends PaginationList<ManualMessageLogIndexDto> 
 
 		public ListEntry(ManualMessageLogIndexDto messageLog) {
 			VerticalLayout layout = new VerticalLayout();
-			layout.setWidth(100, Unit.PERCENTAGE);
-			layout.setMargin(false);
+			layout.setWidthFull();
+			layout.setPadding(false);
 			layout.setSpacing(false);
 
-			layout.addComponent(new Label(DateFormatHelper.formatLocalDateTime(messageLog.getSentDate())));
-			layout.addComponent(new Label(messageLog.getUsedTemplate()));
-			layout.addComponent(buildSendingUserInfo(messageLog.getSendingUser()));
+			layout.add(new Span(DateFormatHelper.formatLocalDateTime(messageLog.getSentDate())));
+			layout.add(new Span(messageLog.getUsedTemplate()));
+			layout.add(buildSendingUserInfo(messageLog.getSendingUser()));
 
 			addComponentToField(layout);
 		}
 
 		private static HorizontalLayout buildSendingUserInfo(UserReferenceDto sendingUser) {
-			Label captionLabel = new Label(I18nProperties.getCaption(Captions.externalEmailSentBy) + " ");
+			Span captionLabel = new Span(I18nProperties.getCaption(Captions.externalEmailSentBy) + " ");
 
-			final Label sendingUserLabel;
+			final Span sendingUserLabel;
 			if (sendingUser != null) {
-				sendingUserLabel = new Label(sendingUser.getShortCaption());
+				sendingUserLabel = new Span(sendingUser.getShortCaption());
 			} else {
-				sendingUserLabel = new Label(I18nProperties.getCaption(Captions.inaccessibleValue));
-				sendingUserLabel.addStyleNames(CssStyles.INACCESSIBLE_LABEL);
+				sendingUserLabel = new Span(I18nProperties.getCaption(Captions.inaccessibleValue));
+				sendingUserLabel.addClassNames(CssStyles.INACCESSIBLE_LABEL);
 			}
 
 			return new HorizontalLayout(captionLabel, sendingUserLabel);
@@ -117,23 +117,23 @@ public class ExternalEmailList extends PaginationList<ManualMessageLogIndexDto> 
 
 	private static void showEmailDetailsPopup(ManualMessageLogIndexDto messageLog) {
 		VerticalLayout verticalLayout = new VerticalLayout();
-		verticalLayout.setMargin(false);
+		verticalLayout.setPadding(false);
 		verticalLayout.setSpacing(false);
 
-		Label sentToCaptionLabel = new Label(I18nProperties.getCaption(Captions.externalEmailSentTo));
-		sentToCaptionLabel.addStyleName(LABEL_BOLD);
+		Span sentToCaptionLabel = new Span(I18nProperties.getCaption(Captions.externalEmailSentTo));
+		sentToCaptionLabel.addClassName(LABEL_BOLD);
 		if (messageLog.isPseudonymized()) {
-			sentToCaptionLabel.addStyleName(CssStyles.INACCESSIBLE_LABEL);
+			sentToCaptionLabel.addClassName(CssStyles.INACCESSIBLE_LABEL);
 		}
-		verticalLayout.addComponent(new HorizontalLayout(sentToCaptionLabel, new Label(messageLog.getEmailAddress())));
+		verticalLayout.add(new HorizontalLayout(sentToCaptionLabel, new Span(messageLog.getEmailAddress())));
 
-		Label attachmentsCaptionLabel = new Label(I18nProperties.getCaption(Captions.externalEmailAttachedDocuments));
-		attachmentsCaptionLabel.addStyleName(LABEL_BOLD);
+		Span attachmentsCaptionLabel = new Span(I18nProperties.getCaption(Captions.externalEmailAttachedDocuments));
+		attachmentsCaptionLabel.addClassName(LABEL_BOLD);
 		List<String> attachedDocuments = messageLog.getAttachedDocuments();
 		String attachmentsValue = CollectionUtils.isNotEmpty(attachedDocuments)
 			? String.join(", ", attachedDocuments)
 			: I18nProperties.getString(Strings.messageExternalEmailNoAttachments);
-		verticalLayout.addComponents(attachmentsCaptionLabel, new MultilineLabel(attachmentsValue));
+		verticalLayout.add(attachmentsCaptionLabel, new MultilineLabel(attachmentsValue));
 
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getString(Strings.headingExternalEmailDetails),

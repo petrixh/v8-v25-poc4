@@ -25,11 +25,10 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
@@ -73,8 +72,8 @@ public class AefiCountTilesComponent<T extends Enum<?>> extends VerticalLayout {
 		titleLayout.add(title);
 
 		if (StringUtils.isNotBlank(descriptionTag)) {
-			infoIcon = new Span(VaadinIcon.INFO_CIRCLE.getHtml(), ContentMode.HTML);
-			infoIcon.setDescription(I18nProperties.getDescription(descriptionTag));
+			infoIcon = new Span(VaadinIcon.INFO_CIRCLE.create());
+			infoIcon.setTitle(I18nProperties.getDescription(descriptionTag));
 			infoIcon.addClassName(CssStyles.HSPACE_LEFT_4);
 			infoIcon.addClassNames(titleStyleNames);
 
@@ -167,14 +166,14 @@ public class AefiCountTilesComponent<T extends Enum<?>> extends VerticalLayout {
 				.addClassNames(CssStyles.LABEL_WHITE, CssStyles.LABEL_BOLD, CssStyles.LABEL_LARGE, CssStyles.ALIGN_CENTER, CssStyles.VSPACE_TOP_4);
 
 			numbersLayout.add(countLabel);
-			numbersLayout.setComponentAlignment(countLabel, Alignment.TOP_CENTER);
+			numbersLayout.setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, countLabel);
 
 			if (percentage != null) {
 				Span percentageLabel = new Span(percentage + "%");
 				percentageLabel.addClassNames(CssStyles.LABEL_WHITE, CssStyles.ALIGN_CENTER, CssStyles.VSPACE_4);
 
 				numbersLayout.add(percentageLabel);
-				numbersLayout.setComponentAlignment(percentageLabel, Alignment.MIDDLE_CENTER);
+				numbersLayout.setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, percentageLabel);
 			}
 
 			Span groupLabel = new Span(group);
@@ -187,7 +186,8 @@ public class AefiCountTilesComponent<T extends Enum<?>> extends VerticalLayout {
 				CssStyles.HSPACE_RIGHT_4);
 
 			if (groupLabelStyle != null) {
-				groupLabel.addClassName(groupLabelStyle);
+				// may hold several space-separated names (V8 addStyleName split them; Flow addClassName does not)
+				CssStyles.style(groupLabel, groupLabelStyle);
 			}
 
 			VerticalLayout groupLabelLayout = new VerticalLayout();
@@ -195,7 +195,7 @@ public class AefiCountTilesComponent<T extends Enum<?>> extends VerticalLayout {
 			groupLabelLayout.setSpacing(false);
 			groupLabelLayout.addClassNames(backgroundStyle, CssStyles.BACKGROUND_DARKER, CssStyles.ROUNDED_BORDER_BOTTOM);
 			groupLabelLayout.add(groupLabel);
-			groupLabelLayout.setComponentAlignment(groupLabel, Alignment.TOP_CENTER);
+			groupLabelLayout.setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, groupLabel);
 
 			add(groupLabelLayout);
 		}

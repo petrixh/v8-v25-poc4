@@ -18,13 +18,13 @@ package de.symeda.sormas.ui.dashboard.adverseeventsfollowingimmunization.compone
 import java.util.HashMap;
 import java.util.Map;
 
-import com.vaadin.ui.CssLayout;
+import com.vaadin.flow.component.html.Div;
 
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiType;
 import de.symeda.sormas.api.caze.Vaccine;
 import de.symeda.sormas.ui.utils.CssStyles;
 
-public class AefiTypeStatisticsGroupComponent extends CssLayout {
+public class AefiTypeStatisticsGroupComponent extends Div {
 
 	Map<Vaccine, AefiTypeStatisticsComponent> componentMap = new HashMap<>();
 

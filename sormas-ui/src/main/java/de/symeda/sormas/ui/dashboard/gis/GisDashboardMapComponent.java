@@ -26,21 +26,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.server.ExternalResource;
-import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.ui.AbstractOrderedLayout;
-import com.vaadin.ui.Alignment;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.ui.Image;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.ui.Window;
-import de.symeda.sormas.ui.utils.grid.HeightMode;
-import de.symeda.sormas.ui.utils.fields.CheckBox;
-import de.symeda.sormas.ui.utils.fields.ComboBox;
-import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 import de.symeda.sormas.api.CaseMeasure;
 import de.symeda.sormas.api.Disease;
@@ -89,6 +83,10 @@ import de.symeda.sormas.ui.map.MarkerIcon;
 import de.symeda.sormas.ui.utils.ComboBoxHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
 
 public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashboardCriteria, GisDashboardDataProvider>
 	implements HasDashboardCasePopupGrid {
@@ -177,7 +175,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 
 		map.setZoom(5);
 
-		mapHeaderLayout.setWidthUndefined();
+		mapHeaderLayout.setWidth(null);
 		mapHeaderLayout.removeAll();
 		CssStyles.style(mapHeaderLayout, CssStyles.GIS_DASHBOARD_MAP_HEADER);
 	}
@@ -387,12 +385,12 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 					});
 					showCasesLayout.add(showCasesCheckBox);
 
-					Span infoLabel = new Span(VaadinIcon.INFO_CIRCLE.getHtml(), ContentMode.HTML);
-					infoLabel.setDescription(I18nProperties.getString(Strings.infoCaseMap));
+					Span infoLabel = new Span(VaadinIcon.INFO_CIRCLE.create());
+					infoLabel.setTitle(I18nProperties.getString(Strings.infoCaseMap));
 					CssStyles.style(infoLabel, CssStyles.LABEL_MEDIUM, CssStyles.LABEL_SECONDARY, CssStyles.HSPACE_LEFT_3);
-					infoLabel.setHeightUndefined();
+					infoLabel.setHeight(null);
 					showCasesLayout.add(infoLabel);
-					showCasesLayout.setComponentAlignment(infoLabel, Alignment.TOP_CENTER);
+					showCasesLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, infoLabel);
 				}
 				casesLayers.add(showCasesLayout);
 
@@ -618,12 +616,12 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 					});
 					showRegionsLayout.add(showRegionsCheckBox);
 
-					Span infoLabel = new Span(VaadinIcon.INFO_CIRCLE.getHtml(), ContentMode.HTML);
-					infoLabel.setDescription(I18nProperties.getString(Strings.infoCaseIncidence));
+					Span infoLabel = new Span(VaadinIcon.INFO_CIRCLE.create());
+					infoLabel.setTitle(I18nProperties.getString(Strings.infoCaseIncidence));
 					CssStyles.style(infoLabel, CssStyles.LABEL_MEDIUM, CssStyles.LABEL_SECONDARY, CssStyles.HSPACE_LEFT_3);
-					infoLabel.setHeightUndefined();
+					infoLabel.setHeight(null);
 					showRegionsLayout.add(infoLabel);
-					showRegionsLayout.setComponentAlignment(infoLabel, Alignment.TOP_CENTER);
+					showRegionsLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, infoLabel);
 				}
 				samplesLayers.add(showRegionsLayout);
 				samplesLayers.add(regionMapVisualizationSelect);
@@ -840,13 +838,18 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 	}
 
 	public static HorizontalLayout buildMapIconLegendEntry(String iconName, String labelCaption) {
-		Image icon = new Image(null, new ExternalResource("VAADIN/map/marker/" + iconName + ".png"));
+		Image icon = new Image("VAADIN/map/marker/" + iconName + ".png", "");
 		icon.setWidth(12.375f, Unit.PIXELS);
 		icon.setHeight(16.875f, Unit.PIXELS);
 		return buildLegendEntry(icon, labelCaption);
 	}
 
-	public static AbstractOrderedLayout buildRegionLegend(
+	/**
+	 * @return a {@link VerticalLayout} when {@code vertical}, else a {@link HorizontalLayout} (see
+	 *         {@code DashboardMapComponent.buildRegionLegend})
+	 */
+	@SuppressWarnings("unchecked")
+	public static <L extends Component & FlexComponent> L buildRegionLegend(
 		boolean vertical,
 		CaseMeasure caseMeasure,
 		boolean emptyPopulationDistrictPresent,
@@ -854,7 +857,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 		BigDecimal districtShapesMedian,
 		BigDecimal districtShapesUpperQuartile,
 		int caseIncidenceDivisor) {
-		AbstractOrderedLayout regionLegendLayout = vertical ? new VerticalLayout() : new HorizontalLayout();
+		var regionLegendLayout = vertical ? new VerticalLayout() : new HorizontalLayout();
 		regionLegendLayout.setSpacing(true);
 		CssStyles.style(regionLegendLayout, CssStyles.LAYOUT_MINIMAL);
 		regionLegendLayout.setSizeUndefined();
@@ -949,7 +952,7 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 			regionLegendLayout.add(legendEntry);
 		}
 
-		return regionLegendLayout;
+		return (L) regionLegendLayout;
 	}
 
 	private void clearRegionShapes() {
@@ -1419,13 +1422,13 @@ public class GisDashboardMapComponent extends BaseDashboardMapComponent<GisDashb
 			if (markerIndex < markerCaseFacilities.size()) {
 				FacilityReferenceDto facility = markerCaseFacilities.get(markerIndex);
 				VerticalLayout layout = new VerticalLayout();
-				Window window = VaadinUiUtil.showPopupWindow(layout);
+				Dialog window = VaadinUiUtil.showPopupWindow(layout);
 				CasePopupGrid caseGrid = new CasePopupGrid(window, facility, GisDashboardMapComponent.this);
 				caseGrid.setHeightMode(HeightMode.ROW);
 				layout.add(caseGrid);
 				layout.setPadding(true);
 				FacilityDto facilityDto = FacadeProvider.getFacilityFacade().getByUuid(facility.getUuid());
-				window.setCaption(I18nProperties.getCaption(Captions.dashboardCasesIn) + " " + facilityDto.buildCaption());
+				window.setHeaderTitle(I18nProperties.getCaption(Captions.dashboardCasesIn) + " " + facilityDto.buildCaption());
 			} else {
 				markerIndex -= markerCaseFacilities.size();
 				MapCaseDto caze = mapCaseDtos.get(markerIndex);

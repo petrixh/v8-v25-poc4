@@ -40,7 +40,7 @@ public class AefiTypeStatisticsComponent extends DiseaseSectionStatisticsCompone
 	public AefiTypeStatisticsComponent(String titleCaption, String description, String subtitleCaption, boolean showInfoIcon) {
 		super(titleCaption, description, "");
 
-		setWidthUndefined();
+		setWidth(null);
 
 		if (subtitleCaption != null) {
 			Span subTitleLabel = new Span(I18nProperties.getCaption(subtitleCaption));

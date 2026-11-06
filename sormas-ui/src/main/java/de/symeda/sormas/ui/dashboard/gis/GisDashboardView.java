@@ -15,15 +15,14 @@
 
 package de.symeda.sormas.ui.dashboard.gis;
 
-import de.symeda.sormas.ui.utils.PopupButton;
-
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.ui.dashboard.AbstractDashboardView;
 import de.symeda.sormas.ui.dashboard.DashboardType;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.PopupButton;
 
 public class GisDashboardView extends AbstractDashboardView {
 
@@ -46,7 +45,7 @@ public class GisDashboardView extends AbstractDashboardView {
 
 		PopupButton filterDropdown = ButtonHelper.createPopupButton(Captions.dashboardGisMapFilter, filterLayout, CssStyles.BUTTON_SUBTLE);
 		mapComponent.getMapHeaderLayout().add(filterDropdown);
-		mapComponent.getMapHeaderLayout().setComponentAlignment(filterDropdown, Alignment.MIDDLE_LEFT);
+		mapComponent.getMapHeaderLayout().setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, filterDropdown);
 
 		dashboardLayout.add(mapComponent);
 		dashboardLayout.setFlexGrow(1, mapComponent);

@@ -22,9 +22,8 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.locCss;
 
 import java.util.Map;
 
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.flow.component.Component;
-import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
@@ -44,6 +43,7 @@ import de.symeda.sormas.ui.dashboard.adverseeventsfollowingimmunization.componen
 import de.symeda.sormas.ui.dashboard.components.DashboardHeadingComponent;
 import de.symeda.sormas.ui.dashboard.statistics.DashboardStatisticsPercentageElement;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 
 public class AefiDashboardView extends AbstractDashboardView {
 
@@ -89,7 +89,7 @@ public class AefiDashboardView extends AbstractDashboardView {
 		dashboardSwitcher.setValue(DashboardType.ADVERSE_EVENTS);
 		dashboardSwitcher.addValueChangeListener(this::navigateToDashboardView);
 
-		dashboardLayout.setHeightUndefined();
+		dashboardLayout.setHeight(null);
 
 		dataProvider = new AefiDashboardDataProvider();
 		AefiDashboardFilterLayout filterLayout = new AefiDashboardFilterLayout(this, dataProvider);
@@ -135,7 +135,8 @@ public class AefiDashboardView extends AbstractDashboardView {
 		aefiCountsLayout.addComponent(allAefiInvestigationHeading, ALL_AEFI_INVESTIGATION_HEADING_LOC);
 
 		VerticalLayout investigationStatusLayout = new VerticalLayout();
-		investigationStatusLayout.setMargin(new MarginInfo(false, true, false, true));
+		// was MarginInfo(false, true, false, true), a left and right margin only: partial V8 margins become no padding (look only)
+		investigationStatusLayout.setPadding(false);
 		investigationStatusLayout.setSpacing(false);
 
 		investigationStatusDone = new DashboardStatisticsPercentageElement(
@@ -150,7 +151,8 @@ public class AefiDashboardView extends AbstractDashboardView {
 		aefiCountsLayout.addComponent(investigationStatusLayout, INVESTIGATION_STATUS_LOC);
 
 		VerticalLayout aefiClassificationLayout = new VerticalLayout();
-		aefiClassificationLayout.setMargin(new MarginInfo(false, true, false, true));
+		// was MarginInfo(false, true, false, true), a left and right margin only: partial V8 margins become no padding (look only)
+		aefiClassificationLayout.setPadding(false);
 		aefiClassificationLayout.setSpacing(false);
 
 		aefiClassificationVaccineRelated = new DashboardStatisticsPercentageElement(
@@ -279,9 +281,12 @@ public class AefiDashboardView extends AbstractDashboardView {
 		return layout;
 	}
 
-	private void setExpanded(Boolean expanded, Component componentToExpand, Component componentToRemove, int removedComponentIndex) {
+	private void setExpanded(Boolean expanded, VerticalLayout componentToExpand, Component componentToRemove, int removedComponentIndex) {
 		if (expanded) {
-			dashboardLayout.remove(allAefiHeading);
+			// V8 removeComponent ignored a component that is not a child: the heading sits in aefiCountsLayout until the first collapse
+			if (allAefiHeading.getParent().orElse(null) == dashboardLayout) {
+				dashboardLayout.remove(allAefiHeading);
+			}
 			dashboardLayout.remove(aefiCountsLayout);
 			epiCurveAndMapLayout.remove(componentToRemove);
 			setHeight(100, Unit.PERCENTAGE);
@@ -291,15 +296,15 @@ public class AefiDashboardView extends AbstractDashboardView {
 			componentToExpand.setSizeFull();
 			dashboardLayout.setHeightFull();
 		} else {
-			dashboardLayout.addComponent(allAefiHeading, 1);
-			dashboardLayout.addComponent(aefiCountsLayout, 2);
-			epiCurveAndMapLayout.addComponent(componentToRemove, removedComponentIndex);
+			dashboardLayout.addComponentAtIndex(1, allAefiHeading);
+			dashboardLayout.addComponentAtIndex(2, aefiCountsLayout);
+			epiCurveAndMapLayout.addComponentAtIndex(removedComponentIndex, componentToRemove);
 			mapComponent.refreshMap();
 
 			componentToExpand.setHeight(EPI_CURVE_AND_MAP_HEIGHT, Unit.PIXELS);
-			setHeightUndefined();
-			epiCurveAndMapLayout.setHeightUndefined();
-			dashboardLayout.setHeightUndefined();
+			setHeight(null);
+			epiCurveAndMapLayout.setHeight(null);
+			dashboardLayout.setHeight(null);
 		}
 	}
 }

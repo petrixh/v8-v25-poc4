@@ -20,6 +20,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 
+import java.util.HashSet;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -27,6 +29,7 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.dom.Element;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.caze.CaseReferenceDto;
@@ -41,7 +44,9 @@ public class LabMessageUiHelperUnitTest {
 	@Test
 	public void testEstablishFinalCommitButtons() {
 
-		Mockito.mockConstruction(SampleCreateForm.class);
+		// a mocked Flow component has no element, and the wrapper puts the form in a Scroller: give the mocks an element
+		// (a mocked Vaadin 8 component could be added to a layout as it was)
+		Mockito.mockConstruction(SampleCreateForm.class, (mock, context) -> when(mock.getElement()).thenReturn(new Element("div")));
 
 		UserReferenceDto user = new UserReferenceDto();
 		CaseReferenceDto caze = new CaseReferenceDto();
@@ -62,7 +67,9 @@ public class LabMessageUiHelperUnitTest {
 
 		// was getStyleName(): in Flow the style names are the class names and the theme variants
 		assertThat(saveAndOpenEntryButton.getClassName(), equalTo(sampleComponent.getCommitButton().getClassName()));
-		assertThat(saveAndOpenEntryButton.getThemeNames(), equalTo(sampleComponent.getCommitButton().getThemeNames()));
+		assertThat(
+			new HashSet<>(saveAndOpenEntryButton.getThemeNames()),
+			equalTo(new HashSet<>(sampleComponent.getCommitButton().getThemeNames())));
 		assertThat(saveAndOpenEntryButton.getId().orElse(null), equalTo("saveAndOpenEntryButton"));
 
 		// Both commit buttons should do the same, except each one should trigger a different navigation 

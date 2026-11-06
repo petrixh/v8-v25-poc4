@@ -27,15 +27,9 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 
 import de.symeda.sormas.api.EditPermissionType;
 import de.symeda.sormas.api.FacadeProvider;
@@ -60,6 +54,9 @@ import de.symeda.sormas.ui.utils.ArchivingController;
 import de.symeda.sormas.ui.utils.BulkOperationHandler;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
+import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.page.title.TitleLayout;
 
@@ -124,11 +121,11 @@ public class EventGroupController {
 			if (events > 0) {
 				ControllerProvider.getEventGroupController().select(eventReference);
 			} else {
-				new Notification(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.headingEventGroupLinkEventIssue),
 					I18nProperties.getString(Strings.errorNotRequiredRights),
 					Type.ERROR_MESSAGE,
-					false).show(Page.getCurrent());
+					false);
 			}
 		}
 	}
@@ -151,7 +148,7 @@ public class EventGroupController {
 			.map(EventGroupReferenceDto::getUuid)
 			.collect(Collectors.toSet());
 		EventGroupSelectionField selectionField = new EventGroupSelectionField(excludedEventGroupUuids);
-		selectionField.setWidth(1024, Sizeable.Unit.PIXELS);
+		selectionField.setWidth("1024px");
 
 		final CommitDiscardWrapperComponent<EventGroupSelectionField> component = new CommitDiscardWrapperComponent<>(selectionField);
 		component.addCommitListener(() -> {
@@ -176,7 +173,7 @@ public class EventGroupController {
 			.map(EventGroupReferenceDto::getUuid)
 			.collect(Collectors.toSet());
 		EventGroupSelectionField selectionField = new EventGroupSelectionField(excludedEventGroupUuids);
-		selectionField.setWidth(1024, Sizeable.Unit.PIXELS);
+		selectionField.setWidth("1024px");
 
 		final CommitDiscardWrapperComponent<EventGroupSelectionField> component = new CommitDiscardWrapperComponent<>(selectionField);
 		component.addCommitListener(() -> {
@@ -210,7 +207,7 @@ public class EventGroupController {
 				EventGroupDto dto = createForm.getValue();
 				EventGroupFacade eventGroupFacade = FacadeProvider.getEventGroupFacade();
 				dto = eventGroupFacade.saveEventGroup(dto);
-				Notification.show(I18nProperties.getString(Strings.messageEventGroupCreated), Type.WARNING_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageEventGroupCreated), Type.WARNING_MESSAGE);
 
 				linkEventsToGroup(eventReferences, dto.toReference(), callback);
 			}
@@ -223,7 +220,7 @@ public class EventGroupController {
 		FacadeProvider.getEventGroupFacade().unlinkEventGroup(eventReference, eventGroupReference);
 		FacadeProvider.getEventGroupFacade().notifyEventRemovedFromEventGroup(eventGroupReference, Collections.singletonList(eventReference));
 
-		Notification.show(I18nProperties.getString(Strings.messageEventUnlinkedFromEventGroup), Type.TRAY_NOTIFICATION);
+		NotificationHelper.show(I18nProperties.getString(Strings.messageEventUnlinkedFromEventGroup), Type.TRAY_NOTIFICATION);
 	}
 
 	public CommitDiscardWrapperComponent<?> getEventGroupEditComponent(String uuid) {
@@ -242,7 +239,7 @@ public class EventGroupController {
 				if (!eventGroupEditForm.getFieldGroup().isModified()) {
 					EventGroupDto updatedEventGroup = eventGroupEditForm.getValue();
 					FacadeProvider.getEventGroupFacade().saveEventGroup(updatedEventGroup);
-					Notification.show(I18nProperties.getString(Strings.messageEventGroupSaved), Type.WARNING_MESSAGE);
+					NotificationHelper.show(I18nProperties.getString(Strings.messageEventGroupSaved), Type.WARNING_MESSAGE);
 					SormasUI.refreshView();
 				}
 			});
@@ -251,7 +248,7 @@ public class EventGroupController {
 		if (UiUtil.permitted(isEditAllowed, UserRight.EVENTGROUP_DELETE)) {
 			editView.addDeleteListener(() -> {
 				deleteEventGroup(eventGroup);
-				UI.getCurrent().getNavigator().navigateTo(EventsView.VIEW_NAME);
+				SormasUI.get().getNavigator().navigateTo(EventsView.VIEW_NAME);
 			}, I18nProperties.getString(Strings.entityEventGroup));
 		}
 
@@ -262,10 +259,10 @@ public class EventGroupController {
 				ArchivingController.ARCHIVE_DEARCHIVE_BUTTON_ID,
 				I18nProperties.getCaption(archived ? Captions.actionDearchiveCoreEntity : Captions.actionArchiveCoreEntity),
 				e -> archiveOrDearchiveEventGroup(uuid, !archived),
-				ValoTheme.BUTTON_LINK);
+				CssStyles.BUTTON_LINK);
 
 			editView.getButtonsPanel().addComponentAsFirst(archiveEventButton);
-			editView.getButtonsPanel().setComponentAlignment(archiveEventButton, Alignment.BOTTOM_LEFT);
+			editView.getButtonsPanel().setVerticalComponentAlignment(FlexComponent.Alignment.END, archiveEventButton);
 		}
 
 		editView.addDiscardListener(SormasUI::refreshView);
@@ -306,7 +303,7 @@ public class EventGroupController {
 	private void archiveOrDearchiveEventGroup(String uuid, boolean archive) {
 
 		if (archive) {
-			Label contentLabel = new Label(
+			Span contentLabel = new Span(
 				String.format(
 					I18nProperties.getString(Strings.confirmationArchiveEventGroup),
 					I18nProperties.getString(Strings.entityEventGroup).toLowerCase(),
@@ -320,7 +317,7 @@ public class EventGroupController {
 				confirmed -> {
 					if (confirmed) {
 						FacadeProvider.getEventGroupFacade().archiveEventGroup(uuid);
-						Notification.show(
+						NotificationHelper.show(
 							String.format(
 								I18nProperties.getString(Strings.messageEventGroupArchived),
 								I18nProperties.getString(Strings.entityEventGroup)),
@@ -329,7 +326,7 @@ public class EventGroupController {
 					}
 				});
 		} else {
-			Label contentLabel = new Label(
+			Span contentLabel = new Span(
 				String.format(
 					I18nProperties.getString(Strings.confirmationDearchiveEventGroup),
 					I18nProperties.getString(Strings.entityEventGroup).toLowerCase(),
@@ -343,7 +340,7 @@ public class EventGroupController {
 				confirmed -> {
 					if (confirmed) {
 						FacadeProvider.getEventGroupFacade().dearchiveEventGroup(uuid);
-						Notification.show(
+						NotificationHelper.show(
 							String.format(
 								I18nProperties.getString(Strings.messageEventGroupDearchived),
 								I18nProperties.getString(Strings.entityEventGroup)),
@@ -356,11 +353,11 @@ public class EventGroupController {
 
 	public void linkAllToGroup(Set<EventIndexDto> selectedItems, Consumer<List<EventIndexDto>> callback) {
 		if (selectedItems.size() == 0) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingNoEventsSelected),
 				I18nProperties.getString(Strings.messageNoEventsSelected),
 				Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				false);
 			return;
 		}
 
@@ -370,11 +367,11 @@ public class EventGroupController {
 		if (!UiUtil.hasNationJurisdictionLevel()) {
 			for (String eventUuid : eventUuids) {
 				if (!FacadeProvider.getEventFacade().isInJurisdictionOrOwned(eventUuid)) {
-					new Notification(
+					NotificationHelper.show(
 						I18nProperties.getString(Strings.headingEventGroupLinkEventIssue),
 						I18nProperties.getString(Strings.errorEventsFromAnotherJurisdiction),
 						Type.WARNING_MESSAGE,
-						false).show(Page.getCurrent());
+						false);
 					return;
 				}
 			}
@@ -406,11 +403,11 @@ public class EventGroupController {
 			if (eventCount > 0) {
 				select(eventReferences, callbackWrapper);
 			} else {
-				new Notification(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.headingEventGroupLinkEventIssue),
 					I18nProperties.getString(Strings.errorNotRequiredRights),
 					Type.ERROR_MESSAGE,
-					false).show(Page.getCurrent());
+					false);
 			}
 		}
 

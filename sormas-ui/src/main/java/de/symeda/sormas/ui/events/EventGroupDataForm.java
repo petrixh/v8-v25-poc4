@@ -26,14 +26,14 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.locs;
 
 import de.symeda.sormas.api.event.EventGroupDto;
 
-import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.utils.fieldaccess.UiFieldAccessCheckers;
 import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class EventGroupDataForm extends AbstractEditForm<EventGroupDto> {
 
@@ -68,8 +68,8 @@ public class EventGroupDataForm extends AbstractEditForm<EventGroupDto> {
 			return;
 		}
 
-		Label eventDataHeadingLabel = new Label(I18nProperties.getString(Strings.headingEventGroupData));
-		eventDataHeadingLabel.addStyleName(H3);
+		Span eventDataHeadingLabel = new Span(I18nProperties.getString(Strings.headingEventGroupData));
+		eventDataHeadingLabel.addClassName(H3);
 		getContent().addComponent(eventDataHeadingLabel, EVENT_DATA_HEADING_LOC);
 
 		addField(EventGroupDto.UUID, TextField.class);

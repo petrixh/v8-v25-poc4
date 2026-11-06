@@ -18,11 +18,10 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.externalmessage.ExternalMessageType;
@@ -43,7 +42,7 @@ public class EditAssigneeComponentContainer {
 	private final Button assignMeButton;
 	private final ComboBoxWithPlaceholder assigneeComboBox;
 	private final CommitDiscardWrapperComponent<VerticalLayout> wrapperComponent;
-	private final Window window;
+	private final Dialog window;
 
 	public EditAssigneeComponentContainer() {
 
@@ -54,18 +53,18 @@ public class EditAssigneeComponentContainer {
 		assigneeComboBox.setCaption(I18nProperties.getCaption(Captions.ExternalMessage_assignee));
 
 		assigneeComboBox.setNullSelectionAllowed(true);
-		assigneeComboBox.setWidth(300, Sizeable.Unit.PIXELS);
+		assigneeComboBox.setWidth(300, Unit.PIXELS);
 
 		assignMeButton = ButtonHelper.createButton(Captions.assignToMe);
-		CssStyles.style(assignMeButton, ValoTheme.BUTTON_LINK, CssStyles.BUTTON_COMPACT);
+		CssStyles.style(assignMeButton, CssStyles.BUTTON_LINK, CssStyles.BUTTON_COMPACT);
 
-		form.addComponents(assigneeComboBox, assignMeButton);
+		form.add(assigneeComboBox, assignMeButton);
 
 		wrapperComponent = new CommitDiscardWrapperComponent<>(form);
 
 		window = VaadinUiUtil.createPopupWindow();
-		window.setCaption(I18nProperties.getString(Strings.headingEditAssignee));
-		window.setContent(wrapperComponent);
+		window.setHeaderTitle(I18nProperties.getString(Strings.headingEditAssignee));
+		window.add(wrapperComponent);
 
 		wrapperComponent.addDiscardListener(window::close);
 	}
@@ -104,7 +103,7 @@ public class EditAssigneeComponentContainer {
 		return wrapperComponent;
 	}
 
-	public Window getWindow() {
+	public Dialog getWindow() {
 		return window;
 	}
 }

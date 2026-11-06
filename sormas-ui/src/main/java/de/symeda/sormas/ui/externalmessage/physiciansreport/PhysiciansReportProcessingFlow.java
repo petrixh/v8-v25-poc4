@@ -22,7 +22,7 @@ import java.util.concurrent.CompletionStage;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.caze.CaseDataDto;
 import de.symeda.sormas.api.caze.CaseSelectionDto;
@@ -95,7 +95,7 @@ public class PhysiciansReportProcessingFlow extends AbstractPhysiciansReportProc
 		caseComponent.addCommitListener(() -> callback.done(caze));
 		caseComponent.addDiscardListener(callback::cancel);
 
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 		ExternalMessageProcessingUIHelper
 			.showFormWithLabMessage(externalMessage, caseComponent, window, I18nProperties.getString(Strings.headingProcessPhysiciansReport), false);
 	}

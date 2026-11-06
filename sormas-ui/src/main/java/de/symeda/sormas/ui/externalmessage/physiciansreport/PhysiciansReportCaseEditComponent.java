@@ -21,10 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -39,6 +37,7 @@ import de.symeda.sormas.ui.SubMenu;
 import de.symeda.sormas.ui.caze.CaseDataForm;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
+import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DirtyCheckPopup;
 import de.symeda.sormas.ui.utils.ViewMode;
 
@@ -63,7 +62,8 @@ public class PhysiciansReportCaseEditComponent extends CommitDiscardWrapperCompo
 		this.caze = caze;
 		this.externalMessage = externalMessage;
 
-		setMargin(new MarginInfo(false, true));
+		// was MarginInfo(false, true): partial V8 margins become no padding (look only)
+		setPadding(false);
 
 		tabsMenu = new SubMenu();
 		tabConfigs = createTabConfigs();
@@ -86,8 +86,8 @@ public class PhysiciansReportCaseEditComponent extends CommitDiscardWrapperCompo
 					setActiveTab(previousTab);
 				}
 			}
-		}, ValoTheme.BUTTON_PRIMARY);
-		getButtonsPanel().addComponent(backButton, 0);
+		}, CssStyles.BUTTON_PRIMARY);
+		getButtonsPanel().addComponentAtIndex(0, backButton);
 
 		nextButton = ButtonHelper.createButton(Captions.actionNext, (b) -> {
 			if (activeTabIndex <= tabConfigs.size() - 1) {
@@ -96,16 +96,16 @@ public class PhysiciansReportCaseEditComponent extends CommitDiscardWrapperCompo
 					setActiveTab(tabConfigs.get(activeTabIndex + 1).captionTag);
 				}
 			}
-		}, ValoTheme.BUTTON_PRIMARY);
-		getButtonsPanel().addComponent(nextButton);
+		}, CssStyles.BUTTON_PRIMARY);
+		getButtonsPanel().add(nextButton);
 
 		saveAndOpenCaseButton = ButtonHelper.createButton(Captions.actionSaveAndOpenCase, (b) -> {
 			if (commitAndHandle()) {
 				ControllerProvider.getCaseController().navigateToCase(caze.getUuid());
 			}
-		}, ValoTheme.BUTTON_PRIMARY);
+		}, CssStyles.BUTTON_PRIMARY);
 
-		getButtonsPanel().addComponent(saveAndOpenCaseButton, getButtonsPanel().getComponentIndex(getCommitButton()));
+		getButtonsPanel().addComponentAtIndex(getButtonsPanel().indexOf(getCommitButton()), saveAndOpenCaseButton);
 
 		setPrimaryCommitListener(() -> {
 			if (activeTabComponent.isDirty()) {
@@ -131,13 +131,13 @@ public class PhysiciansReportCaseEditComponent extends CommitDiscardWrapperCompo
 			});
 		}
 
-		getWrappedComponent().addComponent(tabsMenu);
+		getWrappedComponent().add(tabsMenu);
 		setActiveTab(Captions.CaseData_hospitalization);
 	}
 
 	private static VerticalLayout createLayout() {
 		VerticalLayout layout = new VerticalLayout();
-		layout.setMargin(false);
+		layout.setPadding(false);
 		layout.setWidthFull();
 
 		return layout;
@@ -188,14 +188,14 @@ public class PhysiciansReportCaseEditComponent extends CommitDiscardWrapperCompo
 
 	private void setActiveTabComponent(CommitDiscardWrapperComponent<?> activeTabComponent, int activeTabIndex) {
 		if (this.activeTabComponent != null) {
-			getWrappedComponent().removeComponent(this.activeTabComponent);
+			getWrappedComponent().remove(this.activeTabComponent);
 		}
 
 		activeTabComponent.setShortcutsEnabled(false);
 		activeTabComponent.setButtonsVisible(false);
 		activeTabComponent.setWidthFull();
 		addProcessedInMeantimeCheck(activeTabComponent, externalMessage, false);
-		getWrappedComponent().addComponent(activeTabComponent);
+		getWrappedComponent().add(activeTabComponent);
 		this.activeTabComponent = activeTabComponent;
 		this.activeTabIndex = activeTabIndex;
 

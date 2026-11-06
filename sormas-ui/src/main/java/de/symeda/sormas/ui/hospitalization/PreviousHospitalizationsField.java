@@ -17,11 +17,10 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.hospitalization;
 
+import java.util.Collection;
 import java.util.function.Consumer;
 
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.Table;
 
 import de.symeda.sormas.api.hospitalization.PreviousHospitalizationDto;
 import de.symeda.sormas.api.i18n.Captions;
@@ -175,7 +174,7 @@ public class PreviousHospitalizationsField extends AbstractTableField<PreviousHo
 				editForm,
 				UiUtil.permitted(isEditAllowed, UserRight.CASE_EDIT),
 				editForm.getFieldGroup());
-		editView.getCommitButton().setCaption(I18nProperties.getString(Strings.done));
+		editView.getCommitButton().setText(I18nProperties.getString(Strings.done));
 
 		Dialog popupWindow = VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getCaption(PreviousHospitalizationDto.I18N_PREFIX));
 
@@ -207,8 +206,8 @@ public class PreviousHospitalizationsField extends AbstractTableField<PreviousHo
 	}
 
 	@Override
-	public void setPropertyDataSource(Property newDataSource) {
-		super.setPropertyDataSource(newDataSource);
+	public void setValue(Collection newDataSource) {
+		super.setValue(newDataSource);
 		getAddButton().setVisible(isEditAllowed);
 	}
 }

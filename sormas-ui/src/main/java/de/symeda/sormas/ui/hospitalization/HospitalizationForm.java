@@ -28,15 +28,8 @@ import java.util.function.BooleanSupplier;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.server.ErrorMessage;
-import com.vaadin.server.UserError;
-import com.vaadin.shared.ui.ErrorLevel;
-import com.vaadin.ui.Label;
-import de.symeda.sormas.ui.utils.fields.ComboBox;
-import de.symeda.sormas.ui.utils.fields.DateField;
-import de.symeda.sormas.ui.utils.fields.Field;
-import de.symeda.sormas.ui.utils.fields.TextArea;
-import de.symeda.sormas.ui.utils.fields.TextField;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.binder.Binder;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -66,6 +59,11 @@ import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
 import de.symeda.sormas.ui.utils.OutbreakFieldVisibilityChecker;
 import de.symeda.sormas.ui.utils.ViewMode;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class HospitalizationForm extends AbstractEditForm<HospitalizationDto> {
 
@@ -124,11 +122,11 @@ public class HospitalizationForm extends AbstractEditForm<HospitalizationDto> {
 			return;
 		}
 
-		Label hospitalizationHeadingLabel = new Label(I18nProperties.getString(Strings.headingHospitalization));
+		Span hospitalizationHeadingLabel = new Span(I18nProperties.getString(Strings.headingHospitalization));
 		hospitalizationHeadingLabel.addClassName(H3);
 		getContent().addComponent(hospitalizationHeadingLabel, HOSPITALIZATION_HEADING_LOC);
 
-		Label previousHospitalizationsHeadingLabel = new Label(I18nProperties.getString(Strings.headingPreviousHospitalizations));
+		Span previousHospitalizationsHeadingLabel = new Span(I18nProperties.getString(Strings.headingPreviousHospitalizations));
 		previousHospitalizationsHeadingLabel.addClassName(H3);
 		getContent().addComponent(previousHospitalizationsHeadingLabel, PREVIOUS_HOSPITALIZATIONS_HEADING_LOC);
 
@@ -341,28 +339,20 @@ public class HospitalizationForm extends AbstractEditForm<HospitalizationDto> {
 		admissionDateField.addValueChangeListener(event -> {
 			if (caze.getSymptoms().getOnsetDate() != null
 				&& DateComparator.getDateInstance().compare(admissionDateField.getValue(), caze.getSymptoms().getOnsetDate()) < 0) {
-				admissionDateField.setComponentError(new ErrorMessage() {
-
-					@Override
-					public ErrorLevel getErrorLevel() {
-						return ErrorLevel.INFO;
-					}
-
-					@Override
-					public String getFormattedHtmlMessage() {
-						return I18nProperties.getValidationError(
-							Validations.afterDateSoft,
-							admissionDateField.getCaption(),
-							I18nProperties.getPrefixCaption(SymptomsDto.I18N_PREFIX, SymptomsDto.ONSET_DATE));
-					}
-				});
+				// was setComponentError(ErrorMessage with ErrorLevel.INFO): a non-blocking hint, so helper text, not the
+				// invalid state
+				admissionDateField.setHelperText(
+					I18nProperties.getValidationError(
+						Validations.afterDateSoft,
+						admissionDateField.getCaption(),
+						I18nProperties.getPrefixCaption(SymptomsDto.I18N_PREFIX, SymptomsDto.ONSET_DATE)));
 			} else {
 				// remove all invalidity-indicators and re-evaluate field
-				admissionDateField.setComponentError(null);
-				admissionDateField.markAsDirty();
+				admissionDateField.setHelperText(null);
+				revalidate(HospitalizationDto.ADMISSION_DATE);
 			}
 			// re-evaluate validity of dischargeDate (necessary because discharge has to be after admission)
-			dischargeDateField.markAsDirty();
+			revalidate(HospitalizationDto.DISCHARGE_DATE);
 		});
 		admissionDateField.addValidator(
 			new DateComparisonValidator(
@@ -378,7 +368,7 @@ public class HospitalizationForm extends AbstractEditForm<HospitalizationDto> {
 				false,
 				false,
 				I18nProperties.getValidationError(Validations.afterDate, dischargeDateField.getCaption(), admissionDateField.getCaption())));
-		dischargeDateField.addValueChangeListener(event -> admissionDateField.markAsDirty()); // re-evaluate admission date for consistent validation of all fields
+		dischargeDateField.addValueChangeListener(event -> revalidate(HospitalizationDto.ADMISSION_DATE)); // re-evaluate admission date for consistent validation of all fields
 
 		// ICU validators + length-of-stay derivation: only diseases that actually render the ICU fields
 		if (List.of(Disease.RESPIRATORY_SYNCYTIAL_VIRUS, Disease.CRYPTOSPORIDIOSIS, Disease.GIARDIASIS).contains(caze.getDisease())) {
@@ -413,14 +403,14 @@ public class HospitalizationForm extends AbstractEditForm<HospitalizationDto> {
 					false,
 					I18nProperties.getValidationError(Validations.beforeDate, intensiveCareUnitEnd.getCaption(), dischargeDateField.getCaption())));
 			intensiveCareUnitStart.addValueChangeListener(event -> {
-				intensiveCareUnitEnd.markAsDirty();
+				revalidate(HospitalizationDto.INTENSIVE_CARE_UNIT_END);
 				boolean hasIcuStartDate = intensiveCareUnitStart.getValue() != null;
 				if (hasIcuStartDate && intensiveCareUnitEnd.getValue() != null) {
 					icuLengthOfStayField.setValue("" + DateHelper.getDaysBetween(intensiveCareUnitStart.getValue(), intensiveCareUnitEnd.getValue()));
 				}
 			});
 			intensiveCareUnitEnd.addValueChangeListener(event -> {
-				intensiveCareUnitStart.markAsDirty();
+				revalidate(HospitalizationDto.INTENSIVE_CARE_UNIT_START);
 				boolean hasIcuEndDate = intensiveCareUnitEnd.getValue() != null;
 				if (hasIcuEndDate && intensiveCareUnitStart.getValue() != null) {
 					icuLengthOfStayField.setValue("" + DateHelper.getDaysBetween(intensiveCareUnitStart.getValue(), intensiveCareUnitEnd.getValue()));
@@ -459,9 +449,13 @@ public class HospitalizationForm extends AbstractEditForm<HospitalizationDto> {
 		if (UiUtil.permitted(UserRight.CASE_EDIT)
 			&& value == YesNoUnknown.YES
 			&& (previousHospitalizations == null || previousHospitalizations.size() == 0)) {
-			hospitalizedPreviouslyField.setComponentError(new UserError(I18nProperties.getValidationError(Validations.softAddEntryToList)));
+			// was setComponentError(new UserError(..)), ErrorLevel.ERROR (the UserError default): the field's red error state, not
+			// helper text; it does not block saving (no validator), as in V8
+			hospitalizedPreviouslyField.setErrorMessage(I18nProperties.getValidationError(Validations.softAddEntryToList));
+			hospitalizedPreviouslyField.setInvalid(true);
 		} else {
-			hospitalizedPreviouslyField.setComponentError(null);
+			hospitalizedPreviouslyField.setErrorMessage(null);
+			hospitalizedPreviouslyField.setInvalid(false);
 		}
 		if (Objects.nonNull(previousHospitalizationsField.getValue())) {
 			hospitalizedPreviouslyField.setEnabled(previousHospitalizationsField.isEmpty());
@@ -469,6 +463,14 @@ public class HospitalizationForm extends AbstractEditForm<HospitalizationDto> {
 			hospitalizedPreviouslyField.setEnabled(true);
 		}
 
+	}
+
+	/**
+	 * Was {@code markAsDirty()} on the field: Vaadin 7 re-evaluated the field's validators when it was repainted. The
+	 * field's binding validates it and shows the result.
+	 */
+	private void revalidate(String propertyId) {
+		getFieldGroup().getBinder().getBinding(propertyId).ifPresent(Binder.Binding::validate);
 	}
 
 	@Override

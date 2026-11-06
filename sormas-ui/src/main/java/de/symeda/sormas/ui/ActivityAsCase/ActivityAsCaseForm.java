@@ -20,7 +20,6 @@
 
 package de.symeda.sormas.ui.ActivityAsCase;
 
-import static com.vaadin.v7.data.fieldgroup.DefaultFieldGroupFieldFactory.CAPTION_PROPERTY_ID;
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidColumn;
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidColumnLoc;
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRow;
@@ -33,15 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.ui.Label;
-import com.vaadin.v7.data.Item;
-import com.vaadin.v7.data.util.converter.Converter;
-import de.symeda.sormas.ui.utils.fields.SelectField;
-import de.symeda.sormas.ui.utils.fields.ComboBox;
-import de.symeda.sormas.ui.utils.fields.DateField;
-import de.symeda.sormas.ui.utils.fields.TextArea;
-import de.symeda.sormas.ui.utils.fields.TextField;
+import com.vaadin.flow.component.Unit;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.FacadeProvider;
@@ -60,8 +51,15 @@ import de.symeda.sormas.api.utils.fieldaccess.UiFieldAccessCheckers;
 import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.location.LocationEditForm;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.DateComparisonValidator;
 import de.symeda.sormas.ui.utils.FieldHelper;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.SelectField;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class ActivityAsCaseForm extends AbstractEditForm<ActivityAsCaseDto> {
 
@@ -152,7 +150,9 @@ public class ActivityAsCaseForm extends AbstractEditForm<ActivityAsCaseDto> {
 
 	private void addHeadingsAndInfoTexts() {
 		getContent().addComponent(
-			new Label(h3(I18nProperties.getPrefixCaption(ActivityAsCaseDto.I18N_PREFIX, ActivityAsCaseDto.LOCATION)), ContentMode.HTML),
+			VaadinUiUtil.createLabel(
+				h3(I18nProperties.getPrefixCaption(ActivityAsCaseDto.I18N_PREFIX, ActivityAsCaseDto.LOCATION)),
+				ContentMode.HTML),
 			LOC_LOCATION_HEADING);
 	}
 
@@ -179,8 +179,8 @@ public class ActivityAsCaseForm extends AbstractEditForm<ActivityAsCaseDto> {
 			field.setCaption(I18nProperties.getCaption(Captions.ActivityAsCase_typeOfPlaceIfSG));
 			field.removeAllItems();
 			for (TypeOfPlace value : TypeOfPlace.FOR_ACTIVITY_AS_CASE_GERMANY) {
-				Item item = field.addItem(value);
-				item.getItemProperty(CAPTION_PROPERTY_ID).setValue(value.toString());
+				field.addItem(value);
+				field.setItemCaption(value, value.toString());
 			}
 			field.addValueChangeListener(e -> {
 				if (TypeOfPlace.FACILITY_23_IFSG.equals(field.getValue())

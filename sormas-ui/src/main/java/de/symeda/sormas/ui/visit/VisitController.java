@@ -24,8 +24,7 @@ import java.util.function.Consumer;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.Disease;
@@ -124,7 +123,7 @@ public class VisitController {
 
 		Dialog window =
 			VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getString(!canEdit ? Strings.headingViewVisit : Strings.headingEditVisit));
-		window.setWidth(editForm.getWidth() + 90, Unit.PIXELS);
+		window.setWidth("calc(" + editForm.getWidth() + " + 90px)");
 		window.setHeight(80, Unit.PERCENTAGE);
 
 		if (isEditOrDeleteAllowed) {
@@ -140,7 +139,7 @@ public class VisitController {
 			if (canDelete) {
 				editView.addDeleteListener(() -> {
 					FacadeProvider.getVisitFacade().delete(visitRef.getUuid());
-					UI.getCurrent().removeWindow(window);
+					window.close();
 					if (doneConsumer != null) {
 						doneConsumer.accept(visitRef);
 					}
@@ -177,7 +176,7 @@ public class VisitController {
 
 		Dialog window = VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getString(Strings.headingCreateNewVisit));
 		// visit form is too big for typical screens
-		window.setWidth(createForm.getWidth() + 64 + 24, Unit.PIXELS);
+		window.setWidth("calc(" + createForm.getWidth() + " + 64px + 24px)");
 		window.setHeight(80, Unit.PERCENTAGE);
 	}
 
@@ -244,7 +243,7 @@ public class VisitController {
 
 			visitGrid.reload();
 			if (CollectionUtils.isNotEmpty(remainingVisits)) {
-				visitGrid.asMultiSelect().selectItems(remainingVisits.toArray(new VisitIndexDto[0]));
+				visitGrid.asMultiSelect().select(remainingVisits.toArray(new VisitIndexDto[0]));
 			} else {
 				noEntriesRemainingCallback.run();
 			}

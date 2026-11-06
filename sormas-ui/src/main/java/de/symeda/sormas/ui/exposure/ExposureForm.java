@@ -34,17 +34,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import de.symeda.sormas.ui.utils.ContentMode;
-import de.symeda.sormas.ui.utils.CustomLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.SelectField.ItemCaptionMode;
-import de.symeda.sormas.ui.utils.fields.ComboBox;
-import de.symeda.sormas.ui.utils.fields.DateField;
-import de.symeda.sormas.ui.utils.fields.OptionGroup;
-import de.symeda.sormas.ui.utils.fields.TextArea;
-import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -82,11 +74,20 @@ import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.adverseeventsfollowingimmunization.components.form.FormSectionAccordion;
 import de.symeda.sormas.ui.location.LocationEditForm;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.DateComparisonValidator;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.CustomizableFieldsGroup;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class ExposureForm extends AbstractEditForm<ExposureDto> {
 
@@ -172,9 +173,9 @@ public class ExposureForm extends AbstractEditForm<ExposureDto> {
 	private CustomLayout exposureDetailsLayout;
 	private CustomLayout locationDetailsLayout;
 
-	private Label exposuresHeading;
-	private Label locationHeading;
-	private Label conclusionHeading;
+	private Span exposuresHeading;
+	private Span locationHeading;
+	private Span conclusionHeading;
 
 	private LocationEditForm locationForm;
 	private Disease disease;
@@ -302,13 +303,14 @@ public class ExposureForm extends AbstractEditForm<ExposureDto> {
 
 	private void addHeadingsAndInfoTexts() {
 
-		exposuresHeading = new Label(h3(I18nProperties.getString(Strings.headingExposures)), ContentMode.HTML);
+		exposuresHeading = VaadinUiUtil.createLabel(h3(I18nProperties.getString(Strings.headingExposures)), ContentMode.HTML);
 		exposureDetailsLayout.addComponent(exposuresHeading, LOC_EXPOSURES_HEADING);
 
-		locationHeading = new Label(h3(I18nProperties.getPrefixCaption(ExposureDto.I18N_PREFIX, ExposureDto.LOCATION)), ContentMode.HTML);
+		locationHeading =
+			VaadinUiUtil.createLabel(h3(I18nProperties.getPrefixCaption(ExposureDto.I18N_PREFIX, ExposureDto.LOCATION)), ContentMode.HTML);
 		locationDetailsLayout.addComponent(locationHeading, LOC_LOCATION_HEADING);
 
-		conclusionHeading = new Label(h3(I18nProperties.getString(Strings.headingEpiConclusion)), ContentMode.HTML);
+		conclusionHeading = VaadinUiUtil.createLabel(h3(I18nProperties.getString(Strings.headingEpiConclusion)), ContentMode.HTML);
 		getContent().addComponent(conclusionHeading, LOC_CONCLUSION_HEADING);
 	}
 
@@ -321,16 +323,17 @@ public class ExposureForm extends AbstractEditForm<ExposureDto> {
 		DateComparisonValidator.addStartEndValidators(startDate, endDate, false);
 
 		exposureTypeField = addField(generalDetailsLayout, ExposureDto.EXPOSURE_TYPE, ComboBox.class);
-		exposureTypeField.setItemCaptionMode(ItemCaptionMode.ID_TOSTRING);
+		// was setItemCaptionMode(ID_TOSTRING): an item without explicit caption shows toString(), and the factory's enum
+		// captions are toString() too
 
 		addField(generalDetailsLayout, ExposureDto.EXPOSURE_TYPE_DETAILS, TextField.class);
 		addField(generalDetailsLayout, ExposureDto.DESCRIPTION, TextArea.class).setRows(5);
 
 		categoryField = addField(exposureDetailsLayout, ExposureDto.EXPOSURE_CATEGORY, ComboBox.class);
-		categoryField.setItemCaptionMode(ItemCaptionMode.ID_TOSTRING);
+		// was setItemCaptionMode(ID_TOSTRING), see above
 
 		settingField = addField(exposureDetailsLayout, ExposureDto.EXPOSURE_SETTING, ComboBox.class);
-		settingField.setItemCaptionMode(ItemCaptionMode.ID_TOSTRING);
+		// was setItemCaptionMode(ID_TOSTRING), see above
 
 		settingDetailsField = addField(exposureDetailsLayout, ExposureDto.EXPOSURE_SETTING_DETAILS, TextField.class);
 		settingDetailsField.setVisible(false);
@@ -826,7 +829,7 @@ public class ExposureForm extends AbstractEditForm<ExposureDto> {
 			finalTypes.add(exposure.getExposureType());
 		}
 
-		FieldHelper.updateItems(exposureTypeField, new ArrayList<>(finalTypes));
+		FieldHelper.updateItems(exposureTypeField, new ArrayList<ExposureType>(finalTypes));
 	}
 
 	private void populateExposureCategories(ExposureDto exposure) {
@@ -856,7 +859,7 @@ public class ExposureForm extends AbstractEditForm<ExposureDto> {
 		}
 
 		// Update the category field items
-		FieldHelper.updateItems(categoryField, new ArrayList<>(categories));
+		FieldHelper.updateItems(categoryField, new ArrayList<ExposureCategory>(categories));
 	}
 
 	public Map<CustomizableFieldMetadataDto, CustomizableFieldValueDto> collectCurrentFieldValues() {
@@ -883,7 +886,7 @@ public class ExposureForm extends AbstractEditForm<ExposureDto> {
 		if (FacadeProvider.getConfigFacade().isConfiguredCountry(CountryHelper.COUNTRY_CODE_GERMANY) && epiDataParentClass == CaseDataDto.class) {
 			HTML_LAYOUT += fluidRowLocs(ExposureDto.PROBABLE_INFECTION_ENVIRONMENT) +
 			(FacadeProvider.getExternalSurveillanceToolFacade().isFeatureEnabled()
-				? VaadinIcon.INFO_CIRCLE.getHtml() + " " + (I18nProperties.getString(Strings.infoCheckProbableInfectionEnvironment)) + "<p>   </p>" : "<p>   </p>");
+				? HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " " + (I18nProperties.getString(Strings.infoCheckProbableInfectionEnvironment)) + "<p>   </p>" : "<p>   </p>");
 		}
 		//@formatter:on
 		return HTML_LAYOUT;

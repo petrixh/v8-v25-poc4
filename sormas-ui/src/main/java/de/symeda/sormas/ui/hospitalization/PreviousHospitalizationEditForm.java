@@ -25,11 +25,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.vaadin.v7.data.util.converter.Converter;
-import de.symeda.sormas.ui.utils.fields.ComboBox;
-import de.symeda.sormas.ui.utils.fields.DateField;
-import de.symeda.sormas.ui.utils.fields.TextArea;
-import de.symeda.sormas.ui.utils.fields.TextField;
+import com.vaadin.flow.component.Unit;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -51,6 +47,10 @@ import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.DateComparisonValidator;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class PreviousHospitalizationEditForm extends AbstractEditForm<PreviousHospitalizationDto> {
 
@@ -317,9 +317,13 @@ public class PreviousHospitalizationEditForm extends AbstractEditForm<PreviousHo
 		return withUnknown;
 	}
 
+	/**
+	 * Was {@code getInternalValue()}, which Vaadin 7 {@code getValue()} returned for this form (it has no data source):
+	 * the "unknown" placeholders become {@code null}.
+	 */
 	@Override
-	protected PreviousHospitalizationDto getInternalValue() {
-		PreviousHospitalizationDto internalValue = super.getInternalValue();
+	public PreviousHospitalizationDto getValue() {
+		PreviousHospitalizationDto internalValue = super.getValue();
 
 		if (internalValue != null) {
 			if (unknownRegion.equals(internalValue.getRegion())) {

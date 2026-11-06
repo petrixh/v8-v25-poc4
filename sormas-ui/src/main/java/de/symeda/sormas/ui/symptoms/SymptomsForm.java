@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -43,29 +44,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
-import com.vaadin.server.ErrorMessage;
-import com.vaadin.server.ThemeResource;
-import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.shared.ui.ErrorLevel;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Alignment;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.Component;
-import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.ui.Image;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.fieldgroup.FieldGroup;
-import com.vaadin.v7.data.util.converter.Converter.ConversionException;
-import com.vaadin.v7.data.util.converter.StringToFloatConverter;
-import com.vaadin.v7.ui.AbstractField;
-import de.symeda.sormas.ui.utils.fields.SelectField;
-import de.symeda.sormas.ui.utils.fields.ComboBox;
-import de.symeda.sormas.ui.utils.fields.DateField;
-import de.symeda.sormas.ui.utils.fields.Field;
-import de.symeda.sormas.ui.utils.fields.OptionGroup;
-import de.symeda.sormas.ui.utils.fields.TextField;
+import com.vaadin.flow.data.converter.StringToFloatConverter;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -100,12 +86,21 @@ import de.symeda.sormas.ui.caze.CaseSymptomSideViewComponent;
 import de.symeda.sormas.ui.hospitalization.HospitalizationView;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.DateComparisonValidator;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
 import de.symeda.sormas.ui.utils.OutbreakFieldVisibilityChecker;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.ViewMode;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.FieldGroup;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 
@@ -278,27 +273,27 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 		}
 
 		// Add fields
-		Label clinicalMeasurementsHeadingLabel =
+		Span clinicalMeasurementsHeadingLabel =
 			createLabel(I18nProperties.getString(Strings.headingClinicalMeasurements), H3, CLINICAL_MEASUREMENTS_HEADING_LOC);
 
-		Label signsAndSymptomsHeadingLabel =
+		Span signsAndSymptomsHeadingLabel =
 			createLabel(I18nProperties.getString(Strings.headingSignsAndSymptoms), H3, SIGNS_AND_SYMPTOMS_HEADING_LOC);
 
-		final Label generalSymptomsHeadingLabel = createLabel(SymptomGroup.GENERAL.toString(), H3, GENERAL_SIGNS_AND_SYMPTOMS_HEADING_LOC);
+		final Span generalSymptomsHeadingLabel = createLabel(SymptomGroup.GENERAL.toString(), H3, GENERAL_SIGNS_AND_SYMPTOMS_HEADING_LOC);
 
 		// final Label warningSymptomsHeadingLabel = createLabel(SymptomGroup.WARNING.toString(), H3, WARNING_SIGNS_AND_SYMPTOMS_HEADING_LOC);
-		final Label respiratorySymptomsHeadingLabel =
+		final Span respiratorySymptomsHeadingLabel =
 			createLabel(SymptomGroup.RESPIRATORY.toString(), H3, RESPIRATORY_SIGNS_AND_SYMPTOMS_HEADING_LOC);
-		final Label cardiovascularSymptomsHeadingLabel =
+		final Span cardiovascularSymptomsHeadingLabel =
 			createLabel(SymptomGroup.CARDIOVASCULAR.toString(), H3, CARDIOVASCULAR_SIGNS_AND_SYMPTOMS_HEADING_LOC);
-		final Label gastrointestinalSymptomsHeadingLabel =
+		final Span gastrointestinalSymptomsHeadingLabel =
 			createLabel(SymptomGroup.GASTROINTESTINAL.toString(), H3, GASTROINTESTINAL_SIGNS_AND_SYMPTOMS_HEADING_LOC);
-		final Label urinarySymptomsHeadingLabel = createLabel(SymptomGroup.URINARY.toString(), H3, URINARY_SIGNS_AND_SYMPTOMS_HEADING_LOC);
-		final Label nervousSystemSymptomsHeadingLabel =
+		final Span urinarySymptomsHeadingLabel = createLabel(SymptomGroup.URINARY.toString(), H3, URINARY_SIGNS_AND_SYMPTOMS_HEADING_LOC);
+		final Span nervousSystemSymptomsHeadingLabel =
 			createLabel(SymptomGroup.NERVOUS_SYSTEM.toString(), H3, NERVOUS_SYSTEM_SIGNS_AND_SYMPTOMS_HEADING_LOC);
-		final Label skinSymptomsHeadingLabel = createLabel(SymptomGroup.SKIN.toString(), H3, SKIN_SIGNS_AND_SYMPTOMS_HEADING_LOC);
-		final Label otherSymptomsHeadingLabel = createLabel(SymptomGroup.OTHER.toString(), H3, OTHER_SIGNS_AND_SYMPTOMS_HEADING_LOC);
-		Label clinicalPresentationHeadingLabel =
+		final Span skinSymptomsHeadingLabel = createLabel(SymptomGroup.SKIN.toString(), H3, SKIN_SIGNS_AND_SYMPTOMS_HEADING_LOC);
+		final Span otherSymptomsHeadingLabel = createLabel(SymptomGroup.OTHER.toString(), H3, OTHER_SIGNS_AND_SYMPTOMS_HEADING_LOC);
+		Span clinicalPresentationHeadingLabel =
 			createLabel(I18nProperties.getString(Strings.headingClinicalPresentation), H3, CLINICAL_PRESENTATION_HEADING);
 
 		DateField onsetDateField = addField(ONSET_DATE, DateField.class);
@@ -308,23 +303,15 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 			onsetDateField.addValueChangeListener(event -> {
 				if (caze.getHospitalization().getAdmissionDate() != null
 					&& DateComparator.getDateInstance().compare(caze.getHospitalization().getAdmissionDate(), onsetDateField.getValue()) < 0) {
-					onsetDateField.setComponentError(new ErrorMessage() {
-
-						@Override
-						public ErrorLevel getErrorLevel() {
-							return ErrorLevel.INFO;
-						}
-
-						@Override
-						public String getFormattedHtmlMessage() {
-							return I18nProperties.getValidationError(
-								Validations.beforeDateSoft,
-								onsetDateField.getCaption(),
-								I18nProperties.getPrefixCaption(HospitalizationDto.I18N_PREFIX, HospitalizationDto.ADMISSION_DATE));
-						}
-					});
+					// was setComponentError(ErrorMessage with ErrorLevel.INFO): a non-blocking hint, so helper text, not the
+					// invalid state
+					onsetDateField.setHelperText(
+						I18nProperties.getValidationError(
+							Validations.beforeDateSoft,
+							onsetDateField.getCaption(),
+							I18nProperties.getPrefixCaption(HospitalizationDto.I18N_PREFIX, HospitalizationDto.ADMISSION_DATE)));
 				} else if (onsetDateField.isValid()) {
-					onsetDateField.setComponentError(null);
+					onsetDateField.setHelperText(null);
 				}
 			});
 		}
@@ -603,7 +590,7 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 		// toggling the onset Symptom and date based on asymptomatic
 		asymptomaticNOG.addValueChangeListener(e -> {
 			boolean isSymptomatic = !SymptomState.YES.equals(asymptomaticNOG.getNullableValue());
-			editableAllowedFields().stream().filter(field -> !field.getId().equals(ASYMPTOMATIC)).forEach(field -> {
+			editableAllowedFields().stream().filter(field -> !ASYMPTOMATIC.equals(field.getId().orElse(null))).forEach(field -> {
 				if (!isSymptomatic) {
 					field.clear();
 				}
@@ -622,10 +609,10 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 
 		CustomLayout skinRashDateLayout = new CustomLayout();
 		skinRashDateLayout.setTemplateContents(SKIN_RASH_ONSET_DATE_LAYOUT);
-		skinRashDateLayout.setStyleName("compliance-padding");
+		skinRashDateLayout.setClassName("compliance-padding");
 		skinRashDateLayout.setVisible(true);
 
-		Label skinRashDateLabel = new Label(I18nProperties.getCaption(Captions.Symptoms_skinRashOnsetDate));
+		Span skinRashDateLabel = new Span(I18nProperties.getCaption(Captions.Symptoms_skinRashOnsetDate));
 		skinRashDateLabel.setVisible(false);
 		skinRashDateLayout.addComponent(skinRashDateLabel, "LBL_SKIN_RASH_ONSET_DATE");
 
@@ -635,7 +622,8 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 				&& isVisibleAllowed(SKIN_RASH_ONSET_DATE));
 		DateField skinRashOnsetDate = addField(skinRashDateLayout, SKIN_RASH_ONSET_DATE, DateField.class);
 		skinRashOnsetDate.setId(SKIN_RASH_ONSET_DATE);
-		skinRashOnsetDate.addClassNames(ValoTheme.DATEFIELD_BORDERLESS, CssStyles.VIEW_SECTION_WIDTH_AUTO, VSPACE_3);
+		// "borderless" was ValoTheme.DATEFIELD_BORDERLESS
+		skinRashOnsetDate.addClassNames("borderless", CssStyles.VIEW_SECTION_WIDTH_AUTO, VSPACE_3);
 		skinRashOnsetDate.setCaption(null);
 		skinRashDateLayout.addComponent(skinRashOnsetDate, SKIN_RASH_ONSET_DATE);
 		getContent().addComponent(skinRashDateLayout, "LAYOUT_SKIN_RASH_ONSET_DATE");
@@ -651,7 +639,9 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 
 		Field<?> parentTimeOffWorkField = addField(PARENT_TIME_OFF_WORK);
 		TextField timeOffWorkDaysField = addField(TIME_OFF_WORK_DAYS, TextField.class);
-		timeOffWorkDaysField.setConverter(new StringToFloatConverter());
+		timeOffWorkDaysField.setConverter(
+			new StringToFloatConverter(
+				I18nProperties.getValidationError(Validations.onlyDecimalNumbersAllowed, timeOffWorkDaysField.getCaption())));
 		timeOffWorkDaysField
 			.setConversionError(I18nProperties.getValidationError(Validations.onlyDecimalNumbersAllowed, timeOffWorkDaysField.getCaption()));
 		Field<?> overNightStayRequiredField = addField(OVERNIGHT_STAY_REQUIRED);
@@ -956,7 +946,7 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 		}
 
 		// Handle visibility of lesions locations caption
-		Label lesionsLocationsCaption = new Label(I18nProperties.getCaption(Captions.symptomsLesionsLocations));
+		Span lesionsLocationsCaption = new Span(I18nProperties.getCaption(Captions.symptomsLesionsLocations));
 		CssStyles.style(lesionsLocationsCaption, VSPACE_3);
 		getContent().addComponent(lesionsLocationsCaption, LESIONS_LOCATIONS_LOC);
 		getContent().getComponent(LESIONS_LOCATIONS_LOC)
@@ -967,7 +957,7 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 		});
 
 		// Symptoms hint text
-		Label symptomsHint = new Label(
+		Span symptomsHint = VaadinUiUtil.createLabel(
 			I18nProperties.getString(symptomsContext == SymptomsContext.CASE ? Strings.messageSymptomsHint : Strings.messageSymptomsVisitHint),
 			ContentMode.HTML);
 		symptomsHint.setWidth(100, Unit.PERCENTAGE);
@@ -1040,22 +1030,22 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 			monkeypoxImageFieldIds.forEach(this::safeClearField);
 			YES_NO_UNKNOWN_SYMPTOM_FIELD_IDS.forEach(this::safeClearField);
 			COMBO_BOX_FIELDS.forEach(this::safeClearField);
-		}, ValoTheme.BUTTON_LINK);
+		}, CssStyles.BUTTON_LINK);
 
 		Button setEmptyToNoButton = createButtonSetClearedToSymptomState(Captions.symptomsSetClearedToNo, SymptomState.NO);
 
 		Button setEmptyToUnknownButton = createButtonSetClearedToSymptomState(Captions.symptomsSetClearedToUnknown, SymptomState.UNKNOWN);
 
-		Label complicationsHeading = new Label(I18nProperties.getString(Strings.headingComplications));
+		Span complicationsHeading = new Span(I18nProperties.getString(Strings.headingComplications));
 		CssStyles.style(complicationsHeading, CssStyles.H3);
 		getContent().addComponent(complicationsHeading, COMPLICATIONS_HEADING);
 
 		HorizontalLayout buttonsLayout = new HorizontalLayout();
-		buttonsLayout.addComponent(clearAllButton);
-		buttonsLayout.addComponent(setEmptyToNoButton);
-		buttonsLayout.addComponent(setEmptyToUnknownButton);
-		buttonsLayout.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
-		buttonsLayout.setMargin(new MarginInfo(true, false, true, true));
+		buttonsLayout.add(clearAllButton);
+		buttonsLayout.add(setEmptyToNoButton);
+		buttonsLayout.add(setEmptyToUnknownButton);
+		buttonsLayout.setDefaultVerticalComponentAlignment(Alignment.CENTER);
+		// was setMargin(new MarginInfo(true, false, true, true)): partial margins are look only (parked for 2a)
 
 		getContent().addComponent(buttonsLayout, BUTTONS_LOC);
 
@@ -1094,7 +1084,7 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 			FieldHelper.setVisibleWhen(getFieldGroup(), SKIN_RASH_ONSET_DATE, SKIN_RASH, Arrays.asList(SymptomState.YES), true);
 		}
 		if (FacadeProvider.getConfigFacade().isConfiguredCountry(CountryHelper.COUNTRY_CODE_LUXEMBOURG) && disease == Disease.TUBERCULOSIS) {
-			Label localisationHeadingLabel = createLabel(I18nProperties.getString(Strings.headingLocalisation), H3, LOCALISATION_HEADING_LOC);
+			Span localisationHeadingLabel = createLabel(I18nProperties.getString(Strings.headingLocalisation), H3, LOCALISATION_HEADING_LOC);
 
 			clinicalPresentationHeadingLabel.setVisible(true);
 			clinicalMeasurementsHeadingLabel.setVisible(false);
@@ -1131,7 +1121,7 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 			FieldHelper.setEnabledWhen(getFieldGroup(), DATE_OF_ONSET_KNOWN, YesNoUnknown.YES, ONSET_DATE, true);
 
 			ComboBox clinicalPresentationStatusField = addField(CLINICAL_PRESENTATION_STATUS, ComboBox.class);
-			clinicalPresentationStatusField.setItemCaptionMode(SelectField.ItemCaptionMode.EXPLICIT_DEFAULTS_ID);
+			// was setItemCaptionMode(EXPLICIT_DEFAULTS_ID): the shim's caption mode (explicit caption, else toString())
 			clinicalPresentationStatusField
 				.setItemCaption(ClinicalPresentationStatus.COMPATIBLE, ClinicalPresentationStatus.COMPATIBLE.buildCaption(disease.toShortString()));
 			getFieldGroup().getField(OTHER_CLINICAL_PRESENTATION_TEXT).setVisible(true);
@@ -1215,29 +1205,20 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 		} else if (temperatureValue != null && temperatureValue < 38.0f && feverValue != SymptomState.NO) {
 			setFeverComponentError(feverField, false);
 		} else {
-			feverField.setComponentError(null);
+			feverField.setHelperText(null);
 		}
 	}
 
 	private void setFeverComponentError(NullableOptionGroup feverField, boolean feverSuggested) {
-		feverField.setComponentError(new ErrorMessage() {
-
-			@Override
-			public ErrorLevel getErrorLevel() {
-				return ErrorLevel.INFO;
-			}
-
-			@Override
-			public String getFormattedHtmlMessage() {
-				return I18nProperties.getValidationError(
-					feverSuggested ? Validations.feverTemperatureAboveThreshold : Validations.feverTemperatureBelowThreshold,
-					I18nProperties.getPrefixCaption(SymptomsDto.I18N_PREFIX, FEVER));
-			}
-		});
+		// was setComponentError(ErrorMessage with ErrorLevel.INFO): a non-blocking hint, so helper text, not the invalid state
+		feverField.setHelperText(
+			I18nProperties.getValidationError(
+				feverSuggested ? Validations.feverTemperatureAboveThreshold : Validations.feverTemperatureBelowThreshold,
+				I18nProperties.getPrefixCaption(SymptomsDto.I18N_PREFIX, FEVER)));
 	}
 
-	private Label createLabel(String text, String h4, String location) {
-		final Label label = new Label(text);
+	private Span createLabel(String text, String h4, String location) {
+		final Span label = new Span(text);
 		label.setId(text);
 		label.addClassName(h4);
 		getContent().addComponent(label, location);
@@ -1324,8 +1305,8 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 
 		for (Object sourcePropertyId : sourcePropertyIds) {
 			Field sourceField = fieldGroup.getField(sourcePropertyId);
-			if (sourceField instanceof AbstractField<?>) {
-				((AbstractField) sourceField).setImmediate(true);
+			if (sourceField != null) {
+				sourceField.setImmediate(true);
 			}
 		}
 
@@ -1420,13 +1401,13 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 		FieldHelper.setVisibleWhen(getFieldGroup(), monkeypoxImageFieldIds, LESIONS, Arrays.asList(SymptomState.YES), true);
 
 		// Set up images
-		Image lesionsImg1 = new Image(null, new ThemeResource("img/monkeypox-lesions-1.png"));
+		Image lesionsImg1 = new Image(VaadinUiUtil.THEME_IMAGE_PATH + "img/monkeypox-lesions-1.png", "");
 		CssStyles.style(lesionsImg1, VSPACE_3);
-		Image lesionsImg2 = new Image(null, new ThemeResource("img/monkeypox-lesions-2.png"));
+		Image lesionsImg2 = new Image(VaadinUiUtil.THEME_IMAGE_PATH + "img/monkeypox-lesions-2.png", "");
 		CssStyles.style(lesionsImg2, VSPACE_3);
-		Image lesionsImg3 = new Image(null, new ThemeResource("img/monkeypox-lesions-3.png"));
+		Image lesionsImg3 = new Image(VaadinUiUtil.THEME_IMAGE_PATH + "img/monkeypox-lesions-3.png", "");
 		CssStyles.style(lesionsImg3, VSPACE_3);
-		Image lesionsImg4 = new Image(null, new ThemeResource("img/monkeypox-lesions-4.png"));
+		Image lesionsImg4 = new Image(VaadinUiUtil.THEME_IMAGE_PATH + "img/monkeypox-lesions-4.png", "");
 		CssStyles.style(lesionsImg4, VSPACE_3);
 		getContent().addComponent(lesionsImg1, MONKEYPOX_LESIONS_IMG1);
 		getContent().addComponent(lesionsImg2, MONKEYPOX_LESIONS_IMG2);
@@ -1459,16 +1440,18 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 		Button button = ButtonHelper.createButton(caption, event -> {
 			for (Object symptomId : unconditionalSymptomFieldIds) {
 				Field<Object> symptom = (Field<Object>) getFieldGroup().getField(symptomId);
-				if (symptom.isVisible() && (Set.class.isAssignableFrom(symptom.getValue().getClass()) && ((Set) symptom.getValue()).size() == 0)) {
-					Set<SymptomState> value = (Set<SymptomState>) symptom.getValue();
+				Object symptomValue = getSymptomValue(symptom);
+				if (symptom.isVisible() && (Set.class.isAssignableFrom(symptomValue.getClass()) && ((Set) symptomValue).size() == 0)) {
+					Set<SymptomState> value = (Set<SymptomState>) symptomValue;
 					value.add(symptomState);
 					symptom.setValue(value);
 				}
 			}
 			for (Object symptomId : conditionalBleedingSymptomFieldIds) {
 				Field<Object> symptom = (Field<Object>) getFieldGroup().getField(symptomId);
-				if (symptom.isVisible() && (Set.class.isAssignableFrom(symptom.getValue().getClass()) && ((Set) symptom.getValue()).size() == 0)) {
-					Set<SymptomState> value = (Set<SymptomState>) symptom.getValue();
+				Object symptomValue = getSymptomValue(symptom);
+				if (symptom.isVisible() && (Set.class.isAssignableFrom(symptomValue.getClass()) && ((Set) symptomValue).size() == 0)) {
+					Set<SymptomState> value = (Set<SymptomState>) symptomValue;
 					value.add(symptomState);
 					symptom.setValue(value);
 				}
@@ -1476,10 +1459,11 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 			for (Object symptomId : lesionsFieldIds) {
 				Field<Object> symptom = (Field<Object>) getFieldGroup().getField(symptomId);
 				if (symptom.isVisible()) {
-					if (symptom.isRequired() && symptom.getValue() == null) {
+					Object symptomValue = getSymptomValue(symptom);
+					if (symptom.isRequired() && symptomValue == null) {
 						symptom.setValue(symptomState);
-					} else if (Set.class.isAssignableFrom(symptom.getValue().getClass()) && ((Set) symptom.getValue()).size() == 0) {
-						Set<SymptomState> value = (Set<SymptomState>) symptom.getValue();
+					} else if (Set.class.isAssignableFrom(symptomValue.getClass()) && ((Set) symptomValue).size() == 0) {
+						Set<SymptomState> value = (Set<SymptomState>) symptomValue;
 						value.add(symptomState);
 						symptom.setValue(value);
 					}
@@ -1488,10 +1472,11 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 			for (Object symptomId : monkeypoxImageFieldIds) {
 				Field<Object> symptom = (Field<Object>) getFieldGroup().getField(symptomId);
 				if (symptom.isVisible()) {
-					if (symptom.isRequired() && symptom.getValue() == null) {
+					Object symptomValue = getSymptomValue(symptom);
+					if (symptom.isRequired() && symptomValue == null) {
 						symptom.setValue(symptomState);
-					} else if (Set.class.isAssignableFrom(symptom.getValue().getClass()) && ((Set) symptom.getValue()).size() == 0) {
-						Set<SymptomState> value = (Set<SymptomState>) symptom.getValue();
+					} else if (Set.class.isAssignableFrom(symptomValue.getClass()) && ((Set) symptomValue).size() == 0) {
+						Set<SymptomState> value = (Set<SymptomState>) symptomValue;
 						value.add(symptomState);
 						symptom.setValue(value);
 					}
@@ -1524,7 +1509,7 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 					return;
 				}
 
-				final Object value = field.getValue();
+				final Object value = getSymptomValue(field);
 				final Set<?> valueSet = value instanceof Set ? (Set<?>) value : null;
 
 				// non empty value within a set
@@ -1547,9 +1532,26 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 				safeSetFieldValue(field, yesNoValue);
 
 			});
-		}, ValoTheme.BUTTON_LINK);
+		}, CssStyles.BUTTON_LINK);
 
 		return button;
+	}
+
+	/**
+	 * The value as Vaadin 7 {@code AbstractSelect.getValue()} returned it: a set the caller may change for a multi-select
+	 * option group, also when the field is empty (Flow holds {@code null} there, V7 returned a new empty set). The
+	 * callers add to the set and set it again, which Flow ignores for the same set instance.
+	 */
+	@SuppressWarnings("unchecked")
+	private static Object getSymptomValue(Field<Object> field) {
+		Object value = field.getValue();
+		if (value instanceof Set) {
+			return new HashSet<>((Set<Object>) value);
+		}
+		if (value == null && field instanceof OptionGroup && ((OptionGroup) field).isMultiSelect()) {
+			return new HashSet<>();
+		}
+		return value;
 	}
 
 	public void setCaseSymptomSideViewComponent(CaseSymptomSideViewComponent caseSymptomSideViewComponent) {

@@ -17,12 +17,8 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.reports;
 
-import java.text.DateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.HeaderRow;
@@ -165,11 +161,8 @@ public class WeeklyReportOfficersGrid extends Grid<WeeklyReportOfficerSummaryDto
 			((Column<WeeklyReportOfficerSummaryDto, Object>) getColumn(columnId)).setRenderer(ConvertingHtmlRenderer::toPresentation, new TextRenderer());
 		}
 
-		UI ui = UI.getCurrent();
-		Locale locale = ui != null ? ui.getLocale() : Locale.getDefault();
-		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale);
-		((Column<WeeklyReportOfficerSummaryDto, Date>) getColumn(WeeklyReportOfficerSummaryDto.OFFICER_REPORT_DATE)).setRenderer(
-			date -> date != null ? dateFormat.format(date) : null,
+		((Column<WeeklyReportOfficerSummaryDto, Object>) getColumn(WeeklyReportOfficerSummaryDto.OFFICER_REPORT_DATE)).setRenderer(
+			ConvertingHtmlRenderer::toPresentation,
 			new HtmlRenderer(I18nProperties.getCaption(Captions.weeklyReportNoReport)));
 	}
 

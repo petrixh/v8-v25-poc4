@@ -17,13 +17,10 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.reports;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
-import com.vaadin.flow.component.UI;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -95,11 +92,8 @@ public class WeeklyReportInformantsGrid extends Grid<WeeklyReportInformantsGrid.
 			((Column<WeeklyReportInformantSummary, Object>) getColumn(columnId)).setRenderer(ConvertingHtmlRenderer::toPresentation, new TextRenderer());
 		}
 
-		UI ui = UI.getCurrent();
-		Locale locale = ui != null ? ui.getLocale() : Locale.getDefault();
-		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale);
-		((Column<WeeklyReportInformantSummary, Date>) getColumn(WeeklyReportInformantSummary.INFORMANT_REPORT_DATE)).setRenderer(
-			date -> date != null ? dateFormat.format(date) : null,
+		((Column<WeeklyReportInformantSummary, Object>) getColumn(WeeklyReportInformantSummary.INFORMANT_REPORT_DATE)).setRenderer(
+			ConvertingHtmlRenderer::toPresentation,
 			new HtmlRenderer(I18nProperties.getCaption(Captions.weeklyReportNoReport)));
 	}
 

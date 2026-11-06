@@ -1,11 +1,7 @@
 package de.symeda.sormas.ui.contact;
 
-import java.text.DateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
-import com.vaadin.flow.component.UI;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseReferenceDto;
@@ -18,7 +14,6 @@ import de.symeda.sormas.ui.utils.V7UuidRenderer;
 import de.symeda.sormas.ui.utils.grid.Grid;
 import de.symeda.sormas.ui.utils.grid.HeightMode;
 import de.symeda.sormas.ui.utils.grid.renderers.ConvertingHtmlRenderer;
-import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
 public class ContactSelectionGrid extends Grid<SimilarContactDto> {
@@ -81,10 +76,8 @@ public class ContactSelectionGrid extends Grid<SimilarContactDto> {
 	protected void setV7ColumnRenderers() {
 		((Column<SimilarContactDto, CaseReferenceDto>) getColumn(SimilarContactDto.CAZE))
 			.setRenderer(ConvertingHtmlRenderer::toPresentation, new TextRenderer());
-		UI ui = UI.getCurrent();
-		Locale locale = ui != null ? ui.getLocale() : Locale.getDefault();
-		((Column<SimilarContactDto, Date>) getColumn(SimilarContactDto.LAST_CONTACT_DATE))
-			.setRenderer(new DateRenderer(DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale)));
+		((Column<SimilarContactDto, Object>) getColumn(SimilarContactDto.LAST_CONTACT_DATE))
+			.setRenderer(ConvertingHtmlRenderer::toPresentation, new TextRenderer());
 	}
 
 	private void loadData(ContactSimilarityCriteria criteria) {

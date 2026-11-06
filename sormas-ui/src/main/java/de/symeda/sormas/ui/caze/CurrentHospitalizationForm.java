@@ -19,7 +19,7 @@ import static de.symeda.sormas.ui.utils.CssStyles.LABEL_WHITE_SPACE_NORMAL;
 import static de.symeda.sormas.ui.utils.CssStyles.VSPACE_3;
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.hospitalization.HospitalizationDto;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -45,8 +45,8 @@ public class CurrentHospitalizationForm extends AbstractEditForm<Hospitalization
 	@Override
 	protected void addFields() {
 		addField(HospitalizationDto.ADMITTED_TO_HEALTH_FACILITY, NullableOptionGroup.class);
-		Label moreDetailsLabel = new Label(I18nProperties.getString(Strings.infoMoreDetailsAboutHospitalization));
-		moreDetailsLabel.addStyleNames(VSPACE_3, LABEL_WHITE_SPACE_NORMAL);
+		Span moreDetailsLabel = new Span(I18nProperties.getString(Strings.infoMoreDetailsAboutHospitalization));
+		moreDetailsLabel.addClassNames(VSPACE_3, LABEL_WHITE_SPACE_NORMAL);
 		moreDetailsLabel.setWidthFull();
 		getContent().addComponent(moreDetailsLabel, MORE_DETAILS_LABEL);
 	}

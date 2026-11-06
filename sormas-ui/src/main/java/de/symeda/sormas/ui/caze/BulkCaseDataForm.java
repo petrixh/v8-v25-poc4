@@ -35,12 +35,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.OptionGroup;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -72,7 +68,12 @@ import de.symeda.sormas.ui.utils.ComboBoxWithPlaceholder;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class BulkCaseDataForm extends AbstractEditForm<CaseBulkEditData> {
 
@@ -229,13 +230,13 @@ public class BulkCaseDataForm extends AbstractEditForm<CaseBulkEditData> {
 		diseaseVariantDetailsField.setVisible(false);
 
 		diseaseVariantField.addValueChangeListener(e -> {
-			DiseaseVariant diseaseVariant = (DiseaseVariant) e.getProperty().getValue();
+			DiseaseVariant diseaseVariant = (DiseaseVariant) e.getValue();
 			diseaseVariantDetailsField.setVisible(diseaseVariant != null && diseaseVariant.matchPropertyValue(DiseaseVariant.HAS_DETAILS, true));
 		});
 		diseaseField.addValueChangeListener(
-			(ValueChangeListener) valueChangeEvent -> updateDiseaseVariantField(
+			valueChangeEvent -> updateDiseaseVariantField(
 				diseaseVariantField,
-				(Disease) valueChangeEvent.getProperty().getValue()));
+				(Disease) valueChangeEvent.getValue()));
 
 		if (diseaseField.getValue() != null) {
 			Disease disease = (Disease) diseaseField.getValue();
@@ -283,7 +284,7 @@ public class BulkCaseDataForm extends AbstractEditForm<CaseBulkEditData> {
 			FieldHelper.updateItems(surveillanceOfficer, assignableCaseResponsibles);
 
 			surveillanceOfficerCheckBox.addValueChangeListener(e -> {
-				surveillanceOfficer.setEnabled((boolean) e.getProperty().getValue());
+				surveillanceOfficer.setEnabled((boolean) e.getValue());
 			});
 		}
 
@@ -302,7 +303,7 @@ public class BulkCaseDataForm extends AbstractEditForm<CaseBulkEditData> {
 		addCustomField(facilityOrHome, FACILITY_OR_HOME_LOC, I18nProperties.getCaption(Captions.casePlaceOfStay));
 		facilityOrHome.setId("facilityOrHome");
 		facilityOrHome.setEnabled(false);
-		CssStyles.style(facilityOrHome, ValoTheme.OPTIONGROUP_HORIZONTAL);
+		CssStyles.style(facilityOrHome, SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL);
 
 		healthFacilityDetails = addField(CaseBulkEditData.HEALTH_FACILITY_DETAILS, TextField.class);
 		healthFacilityDetails.setVisible(false);
@@ -318,7 +319,7 @@ public class BulkCaseDataForm extends AbstractEditForm<CaseBulkEditData> {
 		facility.setImmediate(true);
 		facility.setEnabled(false);
 		region.addValueChangeListener(e -> {
-			RegionReferenceDto regionDto = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto regionDto = (RegionReferenceDto) e.getValue();
 			FieldHelper
 				.updateItems(district, regionDto != null ? FacadeProvider.getDistrictFacade().getAllActiveByRegion(regionDto.getUuid()) : null);
 		});
@@ -326,7 +327,7 @@ public class BulkCaseDataForm extends AbstractEditForm<CaseBulkEditData> {
 			updateFacilityFields(facility, healthFacilityDetails);
 		});
 		district.addValueChangeListener(e -> {
-			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getProperty().getValue();
+			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getValue();
 			FieldHelper.removeItems(community);
 			FieldHelper.updateItems(
 				community,
@@ -346,7 +347,7 @@ public class BulkCaseDataForm extends AbstractEditForm<CaseBulkEditData> {
 			if (!TypeOfPlace.HOME.equals(facilityOrHome.getValue())) {
 				FieldHelper.removeItems(facility);
 
-				CommunityReferenceDto communityDto = (CommunityReferenceDto) e.getProperty().getValue();
+				CommunityReferenceDto communityDto = (CommunityReferenceDto) e.getValue();
 				if (facilityType.getValue() != null) {
 					FieldHelper.updateItems(
 						facility,
@@ -480,7 +481,7 @@ public class BulkCaseDataForm extends AbstractEditForm<CaseBulkEditData> {
 			false,
 			null);
 		diseaseCheckBox.addValueChangeListener(e -> {
-			boolean checked = (boolean) e.getProperty().getValue();
+			boolean checked = (boolean) e.getValue();
 			diseaseField.setEnabled(checked);
 			if (!checked) {
 				diseaseField.setValue(null);
@@ -489,7 +490,7 @@ public class BulkCaseDataForm extends AbstractEditForm<CaseBulkEditData> {
 			updateDiseaseVariantField(diseaseVariantField, null);
 		});
 		diseaseVariantCheckBox.addValueChangeListener(e -> {
-			boolean checked = (boolean) e.getProperty().getValue();
+			boolean checked = (boolean) e.getValue();
 			diseaseVariantField.setEnabled(checked);
 			if (!checked) {
 				diseaseVariantField.setValue(null);
@@ -497,24 +498,24 @@ public class BulkCaseDataForm extends AbstractEditForm<CaseBulkEditData> {
 			}
 		});
 		classificationCheckBox.addValueChangeListener(e -> {
-			caseClassification.setEnabled((boolean) e.getProperty().getValue());
+			caseClassification.setEnabled((boolean) e.getValue());
 		});
 		investigationStatusCheckBox.addValueChangeListener(e -> {
-			investigationStatus.setEnabled((boolean) e.getProperty().getValue());
+			investigationStatus.setEnabled((boolean) e.getValue());
 		});
 		outcomeCheckBox.addValueChangeListener(e -> {
-			outcome.setEnabled((boolean) e.getProperty().getValue());
+			outcome.setEnabled((boolean) e.getValue());
 		});
 		healthFacilityCheckbox.addValueChangeListener(e -> {
-			region.setEnabled((boolean) e.getProperty().getValue());
-			district.setEnabled((boolean) e.getProperty().getValue());
-			community.setEnabled((boolean) e.getProperty().getValue());
-			facilityTypeGroup.setEnabled((boolean) e.getProperty().getValue());
-			facilityOrHome.setEnabled((boolean) e.getProperty().getValue());
-			facilityOrHome.setRequired((boolean) e.getProperty().getValue());
-			healthFacilityDetails.setEnabled((boolean) e.getProperty().getValue());
-			facilityType.setEnabled((boolean) e.getProperty().getValue());
-			facility.setEnabled((boolean) e.getProperty().getValue());
+			region.setEnabled((boolean) e.getValue());
+			district.setEnabled((boolean) e.getValue());
+			community.setEnabled((boolean) e.getValue());
+			facilityTypeGroup.setEnabled((boolean) e.getValue());
+			facilityOrHome.setEnabled((boolean) e.getValue());
+			facilityOrHome.setRequired((boolean) e.getValue());
+			healthFacilityDetails.setEnabled((boolean) e.getValue());
+			facilityType.setEnabled((boolean) e.getValue());
+			facility.setEnabled((boolean) e.getValue());
 		});
 
 		if (UiUtil.enabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {

@@ -95,7 +95,7 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 			checkboxGroup.setReadOnly(isReadOnly());
 			checkboxGroup.addValueChangeListener(e -> {
 				if (e.isFromClient()) {
-					clientValueChanged();
+					clientValueChanged(e.getValue());
 				}
 			});
 			add(checkboxGroup);
@@ -107,7 +107,7 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 			radioGroup.setReadOnly(isReadOnly());
 			radioGroup.addValueChangeListener(e -> {
 				if (e.isFromClient()) {
-					clientValueChanged();
+					clientValueChanged(e.getValue());
 				}
 			});
 			add(radioGroup);
@@ -120,10 +120,9 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 	 * empty selection is ignored (no value change event) and the client shows the kept value again. A programmatic
 	 * {@code setValue} still works, as in V7.
 	 */
-	private void clientValueChanged() {
+	private void clientValueChanged(Object clientValue) {
 		if (!isNullSelectionAllowed()) {
-			Object newValue = generateModelValue();
-			if (newValue == null || (newValue instanceof Collection && ((Collection<?>) newValue).isEmpty())) {
+			if (clientValue == null || (clientValue instanceof Collection && ((Collection<?>) clientValue).isEmpty())) {
 				setPresentationValue(getValue());
 				return;
 			}

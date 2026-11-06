@@ -211,7 +211,7 @@ public class EnvironmentSampleFacadeEjb
 				from.get(EnvironmentSample.OTHER_SAMPLE_MATERIAL),
 				from.get(EnvironmentSample.DELETION_REASON),
 				from.get(EnvironmentSample.OTHER_DELETION_REASON),
-				numberOfTests.getSelection(),
+				numberOfTests,
 				JurisdictionHelper.booleanSelector(cb, service.inJurisdictionOrOwned(queryContext)));
 
 			cq.where(from.get(EnvironmentSample.ID).in(batchedIds));

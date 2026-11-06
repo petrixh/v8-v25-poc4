@@ -199,12 +199,12 @@ public class VaccinationService extends AdoServiceWithUserFilterAndJurisdiction<
 	}
 
 	private Expression<Date> getCaseSymptomsExpression(From<?, Case> casePath, CommonAbstractCriteria cq, CriteriaBuilder cb) {
-		Subquery<Symptoms> symptomsSq = cq.subquery(Symptoms.class);
+		Subquery<Date> symptomsSq = cq.subquery(Date.class);
 		Root<Symptoms> symptomsSqRoot = symptomsSq.from(Symptoms.class);
-		symptomsSq.select(symptomsSqRoot.get(Symptoms.ONSET_DATE));
+		symptomsSq.select(symptomsSqRoot.<Date> get(Symptoms.ONSET_DATE));
 		symptomsSq.where(cb.equal(symptomsSqRoot, casePath.get(Case.SYMPTOMS)));
 
-		return symptomsSq.getSelection().as(Date.class);
+		return symptomsSq;
 	}
 
 	/**

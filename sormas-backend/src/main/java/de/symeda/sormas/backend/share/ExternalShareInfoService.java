@@ -229,7 +229,11 @@ public class ExternalShareInfoService extends AdoServiceWithUserFilterAndJurisdi
 		String associatedObjectName,
 		Function<Expression<Date>, Predicate> shareDatePredicateBuilder) {
 
-		Subquery<Object> survToolShareSubQuery = cq.subquery(Object.class);
+		// The latest share date is a scalar subquery and the predicate is applied in the enclosing query. Hibernate 5 applied it in the
+		// subquery's HAVING (exists ... having <predicate>(max(creationDate))); Hibernate 7 renders the enclosing query's left joins
+		// that the predicate uses as inner joins inside such a subquery. Same rows: with no share, max(...) is null and the
+		// predicate is not true, as the exists was false.
+		Subquery<Date> survToolShareSubQuery = cq.subquery(Date.class);
 		Root<ExternalShareInfo> survToolShareRoot = survToolShareSubQuery.from(ExternalShareInfo.class);
 		Join<ExternalShareInfo, ?> associatedObject = survToolShareRoot.join(associatedObjectName, JoinType.LEFT);
 		@SuppressWarnings({
@@ -241,11 +245,9 @@ public class ExternalShareInfoService extends AdoServiceWithUserFilterAndJurisdi
 
 		Path<Object> associatedObjectId = associatedObject.get(AbstractDomainObject.ID);
 
-		survToolShareSubQuery.select(associatedObjectId);
+		survToolShareSubQuery.select(latestShareDate);
 		survToolShareSubQuery.where(cb.equal(associatedObjectId, from.get(AbstractDomainObject.ID)));
-		survToolShareSubQuery.groupBy(associatedObjectId);
-		survToolShareSubQuery.having(shareDatePredicateBuilder.apply(latestShareDate));
 
-		return cb.exists(survToolShareSubQuery);
+		return shareDatePredicateBuilder.apply(survToolShareSubQuery);
 	}
 }

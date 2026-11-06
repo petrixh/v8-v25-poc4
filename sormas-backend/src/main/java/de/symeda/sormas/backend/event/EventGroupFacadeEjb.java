@@ -204,7 +204,7 @@ public class EventGroupFacadeEjb implements EventGroupFacade {
 			cq.multiselect(
 				Stream
 					.concat(
-						Stream.of(eventGroup.get(EventGroup.UUID), eventGroup.get(EventGroup.NAME), eventCountSubquery.getSelection()),
+						Stream.of(eventGroup.get(EventGroup.UUID), eventGroup.get(EventGroup.NAME), eventCountSubquery),
 						orderList.stream().map(Order::getExpression))
 					.collect(Collectors.toList()));
 			cq.where(eventGroup.get(EventGroup.ID).in(batchedIds));

@@ -3769,7 +3769,7 @@ public class CaseFacadeEjb extends AbstractCoreFacadeEjb<Case, CaseDataDto, Case
 				regexPattern,
 				regexReplacement,
 				regexFlags);
-			filter = cb.and(filter, cb.equal(cb.concat("0", epidNumberSuffixClean).as(Integer.class), suffixNumber));
+			filter = cb.and(filter, cb.equal(cb.concat("0", epidNumberSuffixClean).cast(Integer.class), suffixNumber));
 		} else {
 			filter = cb.and(filter, cb.equal(caze.get(Case.EPID_NUMBER), prefixString));
 		}

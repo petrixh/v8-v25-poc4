@@ -1024,7 +1024,7 @@ public class EventFacadeEjb extends AbstractCoreFacadeEjb<Event, EventDto, Event
 				Root<Event> eventRoot = latestEventCQ.from(Event.class);
 				Join<Event, EventGroup> eventGroupJoin = eventRoot.join(Event.EVENT_GROUPS, JoinType.INNER);
 				isInExportlist = CriteriaBuilderHelper.andInValues(eventUuids, null, cb, eventRoot.get(Event.UUID));
-				latestEventCQ.where(notDeleted, isInExportlist);
+				latestEventCQ.where(cb.isFalse(eventRoot.get(Event.DELETED)), isInExportlist);
 				latestEventCQ.multiselect(
 					eventRoot.get(Event.UUID),
 					CriteriaBuilderHelper.windowFirstValueDesc(

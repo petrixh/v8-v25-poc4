@@ -6,6 +6,7 @@ import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 import org.hibernate.query.sqm.function.SqmFunctionRegistry;
 import org.hibernate.type.BasicType;
 import org.hibernate.type.BasicTypeReference;
+import org.hibernate.type.SqlTypes;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.type.spi.TypeConfiguration;
 
@@ -41,7 +42,8 @@ public class ExtendedH2Dialect extends H2Dialect {
 
 		// needed because of hibernate bug: https://hibernate.atlassian.net/browse/HHH-11938
 		registry.registerNamed("regexp_replace");
-		registry.registerNamed(ARRAY_TO_STRING);
+		// array_to_string returns text; without a type Hibernate 7 gives it the type of its first argument (an array)
+		registry.namedDescriptorBuilder(ARRAY_TO_STRING).setInvariantType(types.getBasicTypeRegistry().resolve(StandardBasicTypes.STRING)).register();
 		registry.namedDescriptorBuilder(CONCAT_FUNCTION, "concat").register();
 		registry.registerNamed(ARRAY_AGG);
 		// The function unaccent is specific to PostgreSQL
@@ -75,6 +77,15 @@ public class ExtendedH2Dialect extends H2Dialect {
 
 		BasicType<?> basicType = types.getBasicTypeRegistry().resolve(type);
 		registry.patternDescriptorBuilder(name, pattern).setInvariantType(basicType).setExactArgumentCount(argumentCount).register();
+	}
+
+	/**
+	 * Hibernate 6+ maps enums without {@code @Enumerated(STRING)} (ordinal) to TINYINT, which H2 does not know in PostgreSQL mode
+	 * (<em>Unknown data type: "TINYINT"</em> while the test schema is created). Hibernate 5 created them as integer columns.
+	 */
+	@Override
+	protected String columnType(int sqlTypeCode) {
+		return sqlTypeCode == SqlTypes.TINYINT ? "integer" : super.columnType(sqlTypeCode);
 	}
 
 	/**

@@ -15,30 +15,29 @@
 
 package de.symeda.sormas.ui.utils;
 
-import java.util.Locale;
 
-import com.vaadin.v7.data.util.converter.Converter;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.converter.Converter;
 
 import de.symeda.sormas.api.utils.HasCaption;
 
 public class V7CaptionConverter implements Converter<String, HasCaption> {
 
 	@Override
-	public HasCaption convertToModel(String s, Class<? extends HasCaption> aClass, Locale locale) throws ConversionException {
+	public Result<HasCaption> convertToModel(String s, ValueContext context) {
         throw new RuntimeException("Not implemented");
 	}
 
 	@Override
-	public String convertToPresentation(HasCaption hasCaption, Class<? extends String> aClass, Locale locale) throws ConversionException {
+	public String convertToPresentation(HasCaption hasCaption, ValueContext context) {
 		return hasCaption.buildCaption();
 	}
 
-	@Override
 	public Class<HasCaption> getModelType() {
 		return HasCaption.class;
 	}
 
-	@Override
 	public Class<String> getPresentationType() {
 		return String.class;
 	}

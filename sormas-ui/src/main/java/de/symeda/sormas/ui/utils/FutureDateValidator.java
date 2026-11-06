@@ -4,8 +4,8 @@ import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.v7.data.validator.AbstractValidator;
-import com.vaadin.v7.ui.Field;
+import de.symeda.sormas.ui.utils.fields.AbstractValidator;
+import de.symeda.sormas.ui.utils.fields.Field;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Validations;

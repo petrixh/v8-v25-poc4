@@ -17,7 +17,7 @@ package de.symeda.sormas.ui.utils;
 
 import java.math.BigDecimal;
 
-import com.vaadin.v7.data.validator.AbstractValidator;
+import de.symeda.sormas.ui.utils.fields.AbstractValidator;
 
 public class NumberValidator extends AbstractValidator<Number> {
 

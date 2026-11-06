@@ -24,22 +24,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HasComponents;
-import com.vaadin.v7.data.Item;
-import com.vaadin.v7.data.fieldgroup.DefaultFieldGroupFieldFactory;
-import com.vaadin.v7.data.fieldgroup.FieldGroup;
-import com.vaadin.v7.ui.AbstractField;
-import com.vaadin.v7.ui.AbstractSelect;
-import com.vaadin.v7.ui.Field;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.combobox.ComboBox;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -52,6 +42,9 @@ import de.symeda.sormas.api.user.UserReferenceDto;
 import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.api.utils.Diseases;
 import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.FieldGroup;
+import de.symeda.sormas.ui.utils.fields.SelectField;
 
 public final class FieldHelper {
 
@@ -80,9 +73,6 @@ public final class FieldHelper {
 		boolean readOnlyWhenNull) {
 
 		Field sourceField = fieldGroup.getField(sourcePropertyId);
-		if (sourceField instanceof AbstractField<?>) {
-			((AbstractField) sourceField).setImmediate(true);
-		}
 
 		// initialize
 		{
@@ -112,7 +102,7 @@ public final class FieldHelper {
 			if (getNullableSourceFieldValue(sourceField) == null) {
 				readOnly = readOnlyWhenNull;
 			} else {
-				readOnly = sourceValues.contains(getNullableSourceFieldValue(((Field) event.getProperty())));
+				readOnly = sourceValues.contains(getNullableSourceFieldValue(((Field) event.getHasValue())));
 			}
 			for (Object targetPropertyId : targetPropertyIds) {
 				Field targetField = fieldGroup.getField(targetPropertyId);
@@ -252,9 +242,6 @@ public final class FieldHelper {
 		Function<Field, Boolean> isVisibleFunction,
 		boolean clearOnHidden) {
 		if (sourceField != null) {
-			if (sourceField instanceof AbstractField<?>) {
-				((AbstractField) sourceField).setImmediate(true);
-			}
 
 			// initialize
 			{
@@ -269,7 +256,7 @@ public final class FieldHelper {
 			}
 
 			sourceField.addValueChangeListener(event -> {
-				boolean visible = isVisibleFunction.apply((Field) event.getProperty());
+				boolean visible = isVisibleFunction.apply((Field) event.getHasValue());
 				targetFields.forEach(targetField -> {
 					targetField.setVisible(visible);
 					if (!visible && clearOnHidden && targetField.getValue() != null) {
@@ -447,9 +434,6 @@ public final class FieldHelper {
 		Disease disease) {
 
 		if (sourceField != null) {
-			if (sourceField instanceof AbstractField<?>) {
-				((AbstractField) sourceField).setImmediate(true);
-			}
 
 			// initialize
 			{
@@ -461,14 +445,14 @@ public final class FieldHelper {
 						continue;
 					}
 
-					if (disease == null || Diseases.DiseasesConfiguration.isDefined(SymptomsDto.class, targetField.getId(), disease)) {
+					if (disease == null || Diseases.DiseasesConfiguration.isDefined(SymptomsDto.class, (String) targetField.getId().orElse(null), disease)) {
 						targetField.setRequired(required);
 					}
 				}
 			}
 
 			sourceField.addValueChangeListener(event -> {
-				boolean required = sourceValues.contains(getNullableSourceFieldValue(((Field) event.getProperty())));
+				boolean required = sourceValues.contains(getNullableSourceFieldValue(((Field) event.getHasValue())));
 				required = required != requiredWhenNot;
 				for (Field targetField : targetFields) {
 					if (!targetField.isVisible()) {
@@ -476,7 +460,7 @@ public final class FieldHelper {
 						continue;
 					}
 
-					if (disease == null || Diseases.DiseasesConfiguration.isDefined(SymptomsDto.class, targetField.getId(), disease)) {
+					if (disease == null || Diseases.DiseasesConfiguration.isDefined(SymptomsDto.class, (String) targetField.getId().orElse(null), disease)) {
 						targetField.setRequired(required);
 					}
 				}
@@ -494,9 +478,6 @@ public final class FieldHelper {
 
 	public static <T> void setValueWhen(Field<?> sourceField, final List<?> sourceValues, Field<T> targetField, T targetValue) {
 
-		if (sourceField instanceof AbstractField<?>) {
-			((AbstractField<?>) sourceField).setImmediate(true);
-		}
 
 		// initialize
 		{
@@ -506,7 +487,7 @@ public final class FieldHelper {
 		}
 
 		sourceField.addValueChangeListener(event -> {
-			if (sourceValues.contains(getNullableSourceFieldValue(((Field) event.getProperty())))) {
+			if (sourceValues.contains(getNullableSourceFieldValue(((Field) event.getHasValue())))) {
 				targetField.setValue(targetValue);
 			}
 		});
@@ -557,9 +538,6 @@ public final class FieldHelper {
 
 	public static void setEnabledWhen(Field<?> sourceField, final List<?> sourceValues, List<Field<?>> targetFields, boolean clearOnDisabled) {
 
-		if (sourceField instanceof AbstractField<?>) {
-			((AbstractField<?>) sourceField).setImmediate(true);
-		}
 
 		// initialize
 		{
@@ -573,7 +551,7 @@ public final class FieldHelper {
 		}
 
 		sourceField.addValueChangeListener(event -> {
-			boolean enabled = sourceValues.contains(getNullableSourceFieldValue(((Field) event.getProperty())));
+			boolean enabled = sourceValues.contains(getNullableSourceFieldValue(((Field) event.getHasValue())));
 			for (Field<?> targetField : targetFields) {
 				targetField.setEnabled(enabled);
 				if (!enabled && clearOnDisabled) {
@@ -585,9 +563,6 @@ public final class FieldHelper {
 
 	public static void setDisabledWhen(Field<?> sourceField, final List<?> sourceValues, List<Field<?>> targetFields, boolean clearOnDisabled) {
 
-		if (sourceField instanceof AbstractField<?>) {
-			((AbstractField<?>) sourceField).setImmediate(true);
-		}
 
 		// initialize
 		{
@@ -601,7 +576,7 @@ public final class FieldHelper {
 		}
 
 		sourceField.addValueChangeListener(event -> {
-			boolean disabled = sourceValues.contains(getNullableSourceFieldValue(((Field) event.getProperty())));
+			boolean disabled = sourceValues.contains(getNullableSourceFieldValue(((Field) event.getHasValue())));
 			for (Field<?> targetField : targetFields) {
 				targetField.setEnabled(!disabled);
 				if (disabled && clearOnDisabled) {
@@ -641,7 +616,7 @@ public final class FieldHelper {
 		}
 	}
 
-	public static void updateItems(AbstractSelect select, List<?> items) {
+	public static void updateItems(SelectField select, List<?> items) {
 		Object value = select.getValue();
 		boolean readOnly = select.isReadOnly();
 		select.setReadOnly(false);
@@ -665,7 +640,7 @@ public final class FieldHelper {
 		select.setReadOnly(readOnly);
 	}
 
-	public static void updateItems(Disease disease, AbstractSelect select, Class<? extends Enum> enumClass) {
+	public static void updateItems(Disease disease, SelectField select, Class<? extends Enum> enumClass) {
 
 		List<? extends Enum> filteredValues = Arrays.stream(enumClass.getEnumConstants()).filter(value -> {
 			try {
@@ -679,7 +654,7 @@ public final class FieldHelper {
 	}
 
 	public static void updateItems(
-		AbstractSelect select,
+		SelectField select,
 		List<?> items,
 		FieldVisibilityCheckers fieldVisibilityCheckers,
 		Class<? extends Enum> enumClass) {
@@ -720,29 +695,38 @@ public final class FieldHelper {
 	@SuppressWarnings({
 		"unchecked",
 		"rawtypes" })
-	public static void updateEnumData(AbstractSelect select, Iterable<? extends Enum> enumData) {
+	public static void updateEnumData(SelectField select, Iterable<? extends Enum> enumData) {
 
 		boolean readOnly = select.isReadOnly();
 		select.setReadOnly(false);
 		Object value = select.getValue();
 		select.removeAllItems();
-		select.addContainerProperty(SormasFieldGroupFieldFactory.CAPTION_PROPERTY_ID, String.class, "");
-		select.setItemCaptionPropertyId((SormasFieldGroupFieldFactory.CAPTION_PROPERTY_ID));
 		if (enumData != null) {
 			for (Object r : enumData) {
-				Item newItem = select.addItem(r);
-				newItem.getItemProperty(DefaultFieldGroupFieldFactory.CAPTION_PROPERTY_ID).setValue(r.toString());
+				select.addItem(r);
+				select.setItemCaption(r, r.toString());
 			}
 		}
 		select.setValue(value);
 		select.setReadOnly(readOnly);
 	}
 
-	public static void removeItems(AbstractSelect select) {
+	public static void removeItems(SelectField select) {
 		boolean readOnly = select.isReadOnly();
 		select.setReadOnly(false);
 		select.removeAllItems();
 		select.setReadOnly(readOnly);
+	}
+
+	/**
+	 * Picks the {@link SelectField} variant for the SORMAS combo box (it is both a SelectField and a Flow ComboBox).
+	 */
+	public static void updateItems(de.symeda.sormas.ui.utils.fields.ComboBox select, List<?> items) {
+		updateItems((SelectField) select, items);
+	}
+
+	public static void removeItems(de.symeda.sormas.ui.utils.fields.ComboBox select) {
+		removeItems((SelectField) select);
 	}
 
 	public static void removeItems(ComboBox<?> select) {
@@ -756,13 +740,7 @@ public final class FieldHelper {
 
 	public static Stream<Component> stream(Component parent) {
 
-		if (parent instanceof HasComponents) {
-			return StreamSupport.stream(Spliterators.spliteratorUnknownSize(((HasComponents) parent).iterator(), Spliterator.ORDERED), false)
-				.map(child -> stream(child))
-				.reduce(Stream.of(parent), (s1, s2) -> Stream.concat(s1, s2));
-		} else {
-			return Stream.of(parent);
-		}
+		return parent.getChildren().map(child -> stream(child)).reduce(Stream.of(parent), (s1, s2) -> Stream.concat(s1, s2));
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -996,9 +974,6 @@ public final class FieldHelper {
 
 		sourcePropertyIdsAndValues.forEach((sourcePropertyId, sourceValues) -> {
 			Field sourceField = fieldGroup.getField(sourcePropertyId);
-			if (sourceField instanceof AbstractField<?>) {
-				((AbstractField) sourceField).setImmediate(true);
-			}
 			sourceField.addValueChangeListener(
 				event -> onValueChangedSetReadOnly(fieldGroup, targetPropertyIds, sourcePropertyIdsAndValues, clearOnReadOnly, readOnlyWhenNull));
 		});
@@ -1023,9 +998,6 @@ public final class FieldHelper {
 
 		onValueChangedSetReadOnly(targetFields, sourceFieldsAndValues, clearOnReadOnly, readOnlyWhenNull);
 		sourceFieldsAndValues.forEach((sourceField, sourceValues) -> {
-			if (sourceField instanceof AbstractField<?>) {
-				((AbstractField) sourceField).setImmediate(true);
-			}
 			sourceField
 				.addValueChangeListener(event -> onValueChangedSetReadOnly(targetFields, sourceFieldsAndValues, clearOnReadOnly, readOnlyWhenNull));
 		});

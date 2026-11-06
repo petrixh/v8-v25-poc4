@@ -22,10 +22,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.function.Supplier;
 
-import com.vaadin.v7.data.Validator;
-import com.vaadin.v7.data.validator.AbstractValidator;
-import com.vaadin.v7.ui.AbstractField;
-import com.vaadin.v7.ui.Field;
+import com.vaadin.flow.data.binder.Validator;
+import de.symeda.sormas.ui.utils.fields.AbstractValidator;
+import de.symeda.sormas.ui.utils.fields.Field;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Validations;
@@ -177,8 +176,8 @@ public class DateComparisonValidator extends AbstractValidator<Date> {
 		addStartEndValidators(startDate, endDate, true);
 	}
 
-	public static void dateFieldDependencyValidationVisibility(AbstractField<Date>... dates) {
-		List<AbstractField<Date>> validatedFields = Arrays.asList(dates);
+	public static void dateFieldDependencyValidationVisibility(Field<Date>... dates) {
+		List<Field<Date>> validatedFields = Arrays.asList(dates);
 		validatedFields.forEach(field -> field.addValueChangeListener(r -> {
 			validatedFields.forEach(otherField -> {
 				otherField.setValidationVisible(!otherField.isValid());

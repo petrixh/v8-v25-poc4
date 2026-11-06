@@ -1,6 +1,6 @@
 package de.symeda.sormas.ui.immunization.components.fields.pickorcreate;
 
-import com.vaadin.v7.ui.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 import de.symeda.sormas.ui.utils.CssStyles;
 

@@ -3,9 +3,9 @@ package de.symeda.sormas.ui.immunization.components.fields.pickorcreate;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.Component;
 import com.vaadin.ui.CustomField;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -68,7 +68,7 @@ public class ImmunizationPickOrCreateField extends CustomField<String> {
 		mainLayout.addComponent(createNewImmunization);
 
 		keepImmunization.addValueChangeListener(e -> {
-			if (e.getProperty().getValue() != null) {
+			if (e.getValue() != null) {
 				overwriteImmunization.setValue(null);
 				createNewImmunization.setValue(null);
 				doSetValue(null);
@@ -79,7 +79,7 @@ public class ImmunizationPickOrCreateField extends CustomField<String> {
 		});
 
 		overwriteImmunization.addValueChangeListener(e -> {
-			if (e.getProperty().getValue() != null) {
+			if (e.getValue() != null) {
 				keepImmunization.setValue(null);
 				createNewImmunization.setValue(null);
 				doSetValue(similarImmunization.getUuid());
@@ -90,7 +90,7 @@ public class ImmunizationPickOrCreateField extends CustomField<String> {
 		});
 
 		createNewImmunization.addValueChangeListener(e -> {
-			if (e.getProperty().getValue() != null) {
+			if (e.getValue() != null) {
 				overwriteImmunization.setValue(null);
 				keepImmunization.setValue(null);
 				doSetValue(newImmunization.getUuid());

@@ -1,9 +1,9 @@
 package de.symeda.sormas.ui.immunization.components.fields.info;
 
 import com.vaadin.server.ThemeResource;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.ui.Image;
-import com.vaadin.v7.shared.ui.label.ContentMode;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.v7.ui.Label;
 
 public class InfoLayout extends HorizontalLayout {

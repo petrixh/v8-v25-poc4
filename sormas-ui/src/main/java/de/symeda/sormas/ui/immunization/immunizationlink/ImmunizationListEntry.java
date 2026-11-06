@@ -1,7 +1,7 @@
 package de.symeda.sormas.ui.immunization.immunizationlink;
 
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.ui.Label;
 
 import de.symeda.sormas.api.i18n.I18nProperties;

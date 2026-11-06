@@ -1,6 +1,6 @@
 package de.symeda.sormas.ui.immunization.components.fields.info;
 
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.v7.ui.Label;
 
 import de.symeda.sormas.ui.utils.CssStyles;

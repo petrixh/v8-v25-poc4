@@ -19,9 +19,9 @@ import java.util.Date;
 import java.util.Objects;
 
 import com.vaadin.server.Sizeable;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.caze.CaseDataDto;
 import de.symeda.sormas.api.caze.VaccinationStatus;
@@ -216,11 +216,11 @@ public class VaccinationStatusPanel extends VerticalLayout {
             vaccinationStatusRow.setVisible(false);
             vaccinationStatusValueLabel.setValue("");
         }
-        vaccinationStatusValueLabel.removeStyleNames(CssStyles.LABEL_POSITIVE, CssStyles.LABEL_CRITICAL);
+        vaccinationStatusValueLabel.removeClassNames(CssStyles.LABEL_POSITIVE, CssStyles.LABEL_CRITICAL);
         if (vaccinationStatus == VaccinationStatus.VACCINATED) {
-            vaccinationStatusValueLabel.addStyleName(CssStyles.LABEL_POSITIVE);
+            vaccinationStatusValueLabel.addClassName(CssStyles.LABEL_POSITIVE);
         } else if (vaccinationStatus == VaccinationStatus.UNVACCINATED) {
-            vaccinationStatusValueLabel.addStyleName(CssStyles.LABEL_CRITICAL);
+            vaccinationStatusValueLabel.addClassName(CssStyles.LABEL_CRITICAL);
         }
 
         String details = data.getVaccinationStatusDetails();
@@ -288,7 +288,7 @@ public class VaccinationStatusPanel extends VerticalLayout {
     public void clear() {
         vaccinationStatusValueLabel.setValue("");
         vaccinationStatusRow.setVisible(false);
-        vaccinationStatusValueLabel.removeStyleNames(CssStyles.LABEL_POSITIVE, CssStyles.LABEL_CRITICAL);
+        vaccinationStatusValueLabel.removeClassNames(CssStyles.LABEL_POSITIVE, CssStyles.LABEL_CRITICAL);
         vaccinationStatusDetailsValueLabel.setValue("");
         vaccinationStatusDetailsRow.setVisible(false);
         numberOfDosesValueLabel.setValue("");

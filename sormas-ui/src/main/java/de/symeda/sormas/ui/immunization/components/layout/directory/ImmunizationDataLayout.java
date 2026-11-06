@@ -1,6 +1,6 @@
 package de.symeda.sormas.ui.immunization.components.layout.directory;
 
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.immunization.ImmunizationCriteria;
 import de.symeda.sormas.ui.immunization.components.grid.ImmunizationGrid;

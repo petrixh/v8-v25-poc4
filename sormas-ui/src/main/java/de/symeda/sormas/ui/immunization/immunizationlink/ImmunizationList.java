@@ -2,7 +2,7 @@ package de.symeda.sormas.ui.immunization.immunizationlink;
 
 import java.util.List;
 
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.ui.Label;
 
 import de.symeda.sormas.api.FacadeProvider;

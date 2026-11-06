@@ -1,6 +1,6 @@
 package de.symeda.sormas.ui.immunization;
 
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.EditPermissionType;
 import de.symeda.sormas.api.FacadeProvider;
@@ -83,7 +83,7 @@ public class ImmunizationDataView extends AbstractImmunizationView {
 			sormasToSormasLocLayout.setSpacing(false);
 
 			SormasToSormasListComponent sormasToSormasListComponent = new SormasToSormasListComponent(immunization);
-			sormasToSormasListComponent.addStyleNames(CssStyles.SIDE_COMPONENT);
+			sormasToSormasListComponent.addClassNames(CssStyles.SIDE_COMPONENT);
 			sormasToSormasLocLayout.addComponent(sormasToSormasListComponent);
 
 			layout.addSidePanelComponent(sormasToSormasLocLayout, SORMAS_TO_SORMAS_LOC);

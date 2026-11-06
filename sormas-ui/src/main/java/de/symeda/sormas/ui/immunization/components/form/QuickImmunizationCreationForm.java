@@ -33,7 +33,7 @@ import com.vaadin.data.converter.StringToIntegerConverter;
 import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.DateField;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 import com.vaadin.v7.data.fieldgroup.FieldGroup.CommitEvent;
@@ -106,7 +106,7 @@ public class QuickImmunizationCreationForm extends AbstractEditForm<Immunization
 	}
 
 	@Override
-	public void setValue(ImmunizationDto newFieldValue) throws com.vaadin.v7.data.Property.ReadOnlyException, Converter.ConversionException {
+	public void setValue(ImmunizationDto newFieldValue) {
 		super.setValue(newFieldValue);
 		fieldsComponent.setDto(newFieldValue);
 	}

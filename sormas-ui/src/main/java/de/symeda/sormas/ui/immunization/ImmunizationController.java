@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.navigator.Navigator;
+import de.symeda.sormas.ui.navigation.Navigator;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.Notification;
 

@@ -29,12 +29,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Window;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.dialog.Dialog;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -103,7 +103,7 @@ public class ImmunizationCreationForm extends AbstractEditForm<ImmunizationDto> 
 	private ComboBox responsibleDistrict;
 	private ComboBox responsibleCommunity;
 	private ComboBox meansOfImmunizationField;
-	private Window warningSimilarPersons;
+	private Dialog warningSimilarPersons;
 
 	public ImmunizationCreationForm() {
 		this(null, null);
@@ -141,7 +141,7 @@ public class ImmunizationCreationForm extends AbstractEditForm<ImmunizationDto> 
 		addField(ImmunizationDto.MEANS_OF_IMMUNIZATION_DETAILS, TextField.class);
 
 		CheckBox overwriteImmunizationManagementStatus = addCustomField(OVERWRITE_IMMUNIZATION_MANAGEMENT_STATUS, Boolean.class, CheckBox.class);
-		overwriteImmunizationManagementStatus.addStyleName(VSPACE_3);
+		overwriteImmunizationManagementStatus.addClassName(VSPACE_3);
 
 		ComboBox managementStatusField =
 			addCustomField(ImmunizationDto.IMMUNIZATION_MANAGEMENT_STATUS, ImmunizationManagementStatus.class, ComboBox.class);
@@ -154,7 +154,7 @@ public class ImmunizationCreationForm extends AbstractEditForm<ImmunizationDto> 
 		immunizationStatusField.setEnabled(false);
 
 		Label jurisdictionHeadingLabel = new Label(I18nProperties.getString(Strings.headingResponsibleJurisdiction));
-		jurisdictionHeadingLabel.addStyleName(H3);
+		jurisdictionHeadingLabel.addClassName(H3);
 		getContent().addComponent(jurisdictionHeadingLabel, RESPONSIBLE_JURISDICTION_HEADING_LOC);
 
 		responsibleRegion = addInfrastructureField(ImmunizationDto.RESPONSIBLE_REGION);
@@ -214,7 +214,7 @@ public class ImmunizationCreationForm extends AbstractEditForm<ImmunizationDto> 
 		});
 
 		diseaseField.addValueChangeListener((ValueChangeListener) valueChangeEvent -> {
-			final Disease selectedDisease = (Disease) valueChangeEvent.getProperty().getValue();
+			final Disease selectedDisease = (Disease) valueChangeEvent.getValue();
 			personCreateForm.updatePresentConditionEnum(selectedDisease);
 
 			// Update means of immunization field based on selected disease using filtered enum data
@@ -247,7 +247,7 @@ public class ImmunizationCreationForm extends AbstractEditForm<ImmunizationDto> 
 			true);
 
 		overwriteImmunizationManagementStatus.addValueChangeListener(e -> {
-			boolean selectedValue = (boolean) e.getProperty().getValue();
+			boolean selectedValue = (boolean) e.getValue();
 			if (!selectedValue) {
 				managementStatusField.setValue(ImmunizationManagementStatus.SCHEDULED);
 			}
@@ -255,7 +255,7 @@ public class ImmunizationCreationForm extends AbstractEditForm<ImmunizationDto> 
 		});
 
 		meansOfImmunizationField.addValueChangeListener(e -> {
-			MeansOfImmunization meansOfImmunization = (MeansOfImmunization) e.getProperty().getValue();
+			MeansOfImmunization meansOfImmunization = (MeansOfImmunization) e.getValue();
 			if (MeansOfImmunization.RECOVERY.equals(meansOfImmunization) || MeansOfImmunization.OTHER.equals(meansOfImmunization)) {
 				managementStatusField.setValue(ImmunizationManagementStatus.COMPLETED);
 			} else {
@@ -271,7 +271,7 @@ public class ImmunizationCreationForm extends AbstractEditForm<ImmunizationDto> 
 		});
 
 		managementStatusField.addValueChangeListener(e -> {
-			ImmunizationManagementStatus managementStatusValue = (ImmunizationManagementStatus) e.getProperty().getValue();
+			ImmunizationManagementStatus managementStatusValue = (ImmunizationManagementStatus) e.getValue();
 			switch (managementStatusValue) {
 			case SCHEDULED:
 			case ONGOING:
@@ -290,7 +290,7 @@ public class ImmunizationCreationForm extends AbstractEditForm<ImmunizationDto> 
 
 		responsibleDistrict.addValueChangeListener(e -> {
 			FieldHelper.removeItems(facilityCombo);
-			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getProperty().getValue();
+			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getValue();
 			if (districtDto != null && facilityType.getValue() != null) {
 				FieldHelper.updateItems(
 					facilityCombo,
@@ -301,7 +301,7 @@ public class ImmunizationCreationForm extends AbstractEditForm<ImmunizationDto> 
 
 		responsibleCommunity.addValueChangeListener(e -> {
 			FieldHelper.removeItems(facilityCombo);
-			CommunityReferenceDto communityDto = (CommunityReferenceDto) e.getProperty().getValue();
+			CommunityReferenceDto communityDto = (CommunityReferenceDto) e.getValue();
 			if (facilityType.getValue() != null) {
 				FieldHelper.updateItems(
 					facilityCombo,
@@ -465,7 +465,7 @@ public class ImmunizationCreationForm extends AbstractEditForm<ImmunizationDto> 
 		}
 	}
 
-	public Window getWarningSimilarPersons() {
+	public Dialog getWarningSimilarPersons() {
 		return warningSimilarPersons;
 	}
 }

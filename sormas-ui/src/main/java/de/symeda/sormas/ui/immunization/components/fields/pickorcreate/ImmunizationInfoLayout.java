@@ -1,6 +1,6 @@
 package de.symeda.sormas.ui.immunization.components.fields.pickorcreate;
 
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.v7.ui.Label;
 
 import de.symeda.sormas.api.Language;

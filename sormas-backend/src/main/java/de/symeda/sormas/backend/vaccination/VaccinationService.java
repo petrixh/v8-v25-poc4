@@ -305,7 +305,7 @@ public class VaccinationService extends AdoServiceWithUserFilterAndJurisdiction<
 		if (vaccination == null) {
 			return cb.conjunction(); // Return a predicate that is always true
 		}
-		return getRelevantVaccinationPredicate(cb, cb.literal(getRelevantVaccineDate(vaccination)), primaryDatePath, fallbackDatePath);
+		return getRelevantVaccinationPredicate(cb, CriteriaBuilderHelper.value(cb, getRelevantVaccineDate(vaccination)), primaryDatePath, fallbackDatePath);
 	}
 
 	/**

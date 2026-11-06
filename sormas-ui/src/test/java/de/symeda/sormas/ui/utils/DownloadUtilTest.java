@@ -96,8 +96,9 @@ public class DownloadUtilTest extends AbstractUiBeanTest {
 
 		String expectedFileName = DownloadUtil.createFileNameWithCurrentDate(ExportEntityName.CONTACT_FOLLOW_UPS, ".csv");
 		assertNotNull(contactVisitsExport);
-		assertEquals(expectedFileName, contactVisitsExport.getStream().getFileName());
-		InputStream stream = contactVisitsExport.getStream().getStream();
+		assertEquals(expectedFileName, contactVisitsExport.getFileName());
+		// was StreamResource.getStream() (a DownloadStream with the file name and the content)
+		InputStream stream = contactVisitsExport.getStreamSource().getStream();
 
 		final String shortDate = DateFormatHelper.formatDate(new Date());
 

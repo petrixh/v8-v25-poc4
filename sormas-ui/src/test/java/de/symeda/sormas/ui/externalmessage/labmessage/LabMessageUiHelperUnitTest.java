@@ -23,15 +23,17 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.caze.CaseReferenceDto;
 import de.symeda.sormas.api.sample.SampleDto;
 import de.symeda.sormas.api.user.UserReferenceDto;
 import de.symeda.sormas.ui.samples.humansample.SampleCreateForm;
+import de.symeda.sormas.ui.utils.AbstractForm.BeanFieldGroup;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 
 public class LabMessageUiHelperUnitTest {
@@ -56,15 +58,17 @@ public class LabMessageUiHelperUnitTest {
 		LabMessageUiHelper.establishCommitButtons(sampleComponent, true);
 
 		HorizontalLayout buttonsPanel = sampleComponent.getButtonsPanel();
-		Button saveAndOpenEntryButton = (Button) buttonsPanel.getComponent(buttonsPanel.getComponentCount() - 2);
+		Button saveAndOpenEntryButton = (Button) buttonsPanel.getComponentAt(buttonsPanel.getComponentCount() - 2);
 
-		assertThat(saveAndOpenEntryButton.getStyleName(), equalTo(sampleComponent.getCommitButton().getStyleName()));
-		assertThat(saveAndOpenEntryButton.getId(), equalTo("saveAndOpenEntryButton"));
+		// was getStyleName(): in Flow the style names are the class names and the theme variants
+		assertThat(saveAndOpenEntryButton.getClassName(), equalTo(sampleComponent.getCommitButton().getClassName()));
+		assertThat(saveAndOpenEntryButton.getThemeNames(), equalTo(sampleComponent.getCommitButton().getThemeNames()));
+		assertThat(saveAndOpenEntryButton.getId().orElse(null), equalTo("saveAndOpenEntryButton"));
 
 		// Both commit buttons should do the same, except each one should trigger a different navigation 
 		assertThat(
-			saveAndOpenEntryButton.getListeners(Button.ClickEvent.class).size(),
-			equalTo(sampleComponent.getCommitButton().getListeners(Button.ClickEvent.class).size()));
+			ComponentUtil.getListeners(saveAndOpenEntryButton, ClickEvent.class).size(),
+			equalTo(ComponentUtil.getListeners(sampleComponent.getCommitButton(), ClickEvent.class).size()));
 
 		// Test for non-last sample
 		createForm = new SampleCreateForm(Disease.CORONAVIRUS);
@@ -77,7 +81,7 @@ public class LabMessageUiHelperUnitTest {
 		buttonsPanel = sampleComponent.getButtonsPanel();
 
 		for (int i = 0; i < buttonsPanel.getComponentCount(); i++) {
-			assertThat(buttonsPanel.getComponent(i).getId(), not(equalTo("saveAndOpenEntryButton")));
+			assertThat(buttonsPanel.getComponentAt(i).getId().orElse(null), not(equalTo("saveAndOpenEntryButton")));
 		}
 	}
 

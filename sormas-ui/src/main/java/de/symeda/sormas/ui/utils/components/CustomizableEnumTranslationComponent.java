@@ -25,18 +25,14 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.data.Validator;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.CustomField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 
 import de.symeda.sormas.api.Language;
 import de.symeda.sormas.api.customizableenum.CustomizableEnumTranslation;
@@ -46,31 +42,38 @@ import de.symeda.sormas.api.i18n.Validations;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 
 public class CustomizableEnumTranslationComponent extends CustomField<List<CustomizableEnumTranslation>> {
 
 	private VerticalLayout rowsLayout;
 	private List<TranslationRow> rows;
-	private Label lblNoTranslations;
+	private Span lblNoTranslations;
 	private List<CustomizableEnumTranslation> translations;
 
+	public CustomizableEnumTranslationComponent() {
+		// V7 FieldGroup commits called validate(); the Flow form binding runs the field's validators instead
+		addValidator(value -> validateTranslations());
+	}
 	@Override
 	protected Component initContent() {
 
 		VerticalLayout layout = new VerticalLayout();
 		layout.setWidthFull();
-		layout.setMargin(new MarginInfo(false, false, true, false));
+		// was MarginInfo(false, false, true, false): bottom margin only (look, parked)
+		layout.setPadding(false);
 		layout.setSpacing(false);
 		CssStyles.style(layout, CssStyles.VSPACE_TOP_4);
 
-		lblNoTranslations = new Label(I18nProperties.getString(Strings.infoNoCustomizableEnumTranslations));
-		layout.addComponent(lblNoTranslations);
+		lblNoTranslations = new Span(I18nProperties.getString(Strings.infoNoCustomizableEnumTranslations));
+		layout.add(lblNoTranslations);
 
 		rowsLayout = new VerticalLayout();
 		rowsLayout.setWidthFull();
-		rowsLayout.setMargin(false);
+		rowsLayout.setPadding(false);
 		rowsLayout.setSpacing(false);
-		layout.addComponent(rowsLayout);
+		layout.add(rowsLayout);
 
 		if (rows != null) {
 			buildRowsLayout();
@@ -78,10 +81,10 @@ public class CustomizableEnumTranslationComponent extends CustomField<List<Custo
 		}
 
 		Button btnAdd = ButtonHelper
-			.createIconButtonWithCaption(null, null, VaadinIcons.PLUS, e -> buildTranslationRow(null, null, true), CssStyles.VSPACE_TOP_5);
+			.createIconButtonWithCaption(null, null, VaadinIcon.PLUS, e -> buildTranslationRow(null, null, true), CssStyles.VSPACE_TOP_5);
 		btnAdd.setHeight(25, Unit.PIXELS);
 		btnAdd.setWidthFull();
-		layout.addComponent(btnAdd);
+		layout.add(btnAdd);
 
 		return layout;
 	}
@@ -98,8 +101,8 @@ public class CustomizableEnumTranslationComponent extends CustomField<List<Custo
 			return;
 		}
 
-		rowsLayout.removeAllComponents();
-		rows.forEach(r -> rowsLayout.addComponent(r));
+		rowsLayout.removeAll();
+		rows.forEach(r -> rowsLayout.add(r));
 	}
 
 	private void buildTranslationRows() {
@@ -119,19 +122,19 @@ public class CustomizableEnumTranslationComponent extends CustomField<List<Custo
 		TranslationRow row = new TranslationRow(language, caption);
 		row.setDeleteCallback(() -> {
 			rows.remove(row);
-			rowsLayout.removeComponent(row);
+			rowsLayout.remove(row);
 			updateNoTranslationsLabelVisibility();
 		});
 		rows.add(row);
 		updateNoTranslationsLabelVisibility();
 
 		if (render) {
-			rowsLayout.addComponent(row);
+			rowsLayout.add(row);
 		}
 	}
 
 	@Override
-	public void setValue(List<CustomizableEnumTranslation> newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(List<CustomizableEnumTranslation> newFieldValue) {
 
 		super.setValue(newFieldValue);
 		this.translations = newFieldValue;
@@ -139,20 +142,29 @@ public class CustomizableEnumTranslationComponent extends CustomField<List<Custo
 		buildRowsLayout();
 	}
 
+	/**
+	 * Was the V7 {@code validate()} override (no required check, no other validators).
+	 */
 	@Override
-	public void validate() throws Validator.InvalidValueException {
+	public void validateValue() {
+		validateTranslations();
+	}
 
+	private void validateTranslations() {
 		if (rows.stream().anyMatch(r -> r.getLanguage() == null || StringUtils.isBlank(r.getCaption()))) {
-			throw new Validator.InvalidValueException(I18nProperties.getValidationError(Validations.customizableEnumValueEmptyTranslations));
+			throw new InvalidValueException(I18nProperties.getValidationError(Validations.customizableEnumValueEmptyTranslations));
 		}
 		Set<Language> selectedLanguages = new HashSet<>();
 		if (rows.stream().anyMatch(r -> !selectedLanguages.add(r.getLanguage()))) {
-			throw new Validator.InvalidValueException(I18nProperties.getValidationError(Validations.customizableEnumValueDuplicateLanguage));
+			throw new InvalidValueException(I18nProperties.getValidationError(Validations.customizableEnumValueDuplicateLanguage));
 		}
 	}
 
+	/**
+	 * Was V7 {@code getInternalValue()}: the value is built from the rows.
+	 */
 	@Override
-	protected List<CustomizableEnumTranslation> getInternalValue() {
+	public List<CustomizableEnumTranslation> getValue() {
 
 		return rows != null
 			? rows.stream()
@@ -193,18 +205,18 @@ public class CustomizableEnumTranslationComponent extends CustomField<List<Custo
 			CssStyles.style(CssStyles.VSPACE_NONE, cbLanguage, tfCaption);
 			CssStyles.style(cbLanguage, CssStyles.COMBO_BOX_WITH_FLAG_ICON);
 			ControllerProvider.getUserController().setFlagIcons(cbLanguage);
-			cbLanguage.addValueChangeListener(e -> tfCaption.setEnabled(e.getProperty().getValue() != null));
+			cbLanguage.addValueChangeListener(e -> tfCaption.setEnabled(e.getValue() != null));
 			if (language != null) {
 				cbLanguage.setValue(language);
 			}
-			Button btnDelete = ButtonHelper.createIconButtonWithCaption(null, null, VaadinIcons.TRASH, e -> deleteCallback.run());
-			addComponent(cbLanguage);
-			addComponent(tfCaption);
-			addComponent(btnDelete);
-			setExpandRatio(tfCaption, 1);
+			Button btnDelete = ButtonHelper.createIconButtonWithCaption(null, null, VaadinIcon.TRASH, e -> deleteCallback.run());
+			add(cbLanguage);
+			add(tfCaption);
+			add(btnDelete);
+			setFlexGrow(1, tfCaption);
 
 			setWidthFull();
-			setMargin(false);
+			setPadding(false);
 			CssStyles.style(this, CssStyles.VSPACE_4);
 		}
 

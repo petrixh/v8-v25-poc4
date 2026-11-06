@@ -3,20 +3,19 @@ package de.symeda.sormas.ui.utils.components.birthdate;
 import java.time.Month;
 import java.util.List;
 
-import com.vaadin.data.Binder;
-import com.vaadin.data.ValidationResult;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.v7.data.Validator;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.ValidationResult;
 
 import de.symeda.sormas.api.caze.BirthDateDto;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.utils.DateHelper;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 
 public class BirthDateField extends CustomField<BirthDateDto> {
 
@@ -32,6 +31,9 @@ public class BirthDateField extends CustomField<BirthDateDto> {
 		dateOfBirthDay = new ComboBox<>();
 	}
 
+	/**
+	 * Built on first attach, as in Vaadin 8 ({@link CustomField}).
+	 */
 	@Override
 	protected Component initContent() {
 		if (getValue() == null) {
@@ -41,42 +43,42 @@ public class BirthDateField extends CustomField<BirthDateDto> {
 		HorizontalLayout layout = new HorizontalLayout();
 
 		dateOfBirthYear.setId("dateOfBirthYear");
-		dateOfBirthYear.setEmptySelectionAllowed(true);
+		dateOfBirthYear.setClearButtonVisible(true);
 		dateOfBirthYear.setItems(DateHelper.getYearsToNow());
-		dateOfBirthYear.setWidth(80, Unit.PIXELS);
-		dateOfBirthYear.addStyleName(CssStyles.CAPTION_OVERFLOW);
+		dateOfBirthYear.setWidth("80px");
+		dateOfBirthYear.addClassName(CssStyles.CAPTION_OVERFLOW);
 		binder.forField(dateOfBirthYear).withValidator((e, context) -> {
 			try {
 				ControllerProvider.getPersonController().validateBirthDate(e, dateOfBirthMonth.getValue(), dateOfBirthDay.getValue());
 				return ValidationResult.ok();
-			} catch (Validator.InvalidValueException ex) {
+			} catch (de.symeda.sormas.ui.utils.InvalidValueException ex) {
 				return ValidationResult.error(ex.getMessage());
 			}
 		}).bind(BirthDateDto.DATE_OF_BIRTH_YYYY);
 
 		dateOfBirthMonth.setId("dateOfBirthMonth");
-		dateOfBirthMonth.setEmptySelectionAllowed(true);
+		dateOfBirthMonth.setClearButtonVisible(true);
 		dateOfBirthMonth.setItems(DateHelper.getMonthsInYear());
-		dateOfBirthMonth.setPageLength(12);
+		// setPageLength(12): the Flow overlay sizes itself
 		setItemCaptionsForMonths(dateOfBirthMonth);
-		dateOfBirthMonth.setWidth(120, Unit.PIXELS);
+		dateOfBirthMonth.setWidth("120px");
 		binder.forField(dateOfBirthMonth).withValidator((e, context) -> {
 			try {
 				ControllerProvider.getPersonController().validateBirthDate(dateOfBirthYear.getValue(), e, dateOfBirthDay.getValue());
 				return ValidationResult.ok();
-			} catch (Validator.InvalidValueException ex) {
+			} catch (de.symeda.sormas.ui.utils.InvalidValueException ex) {
 				return ValidationResult.error(ex.getMessage());
 			}
 		}).bind(BirthDateDto.DATE_OF_BIRTH_MM);
 
 		dateOfBirthDay.setId("dateOfBirthDay");
-		dateOfBirthDay.setEmptySelectionAllowed(true);
-		dateOfBirthDay.setWidth(80, Unit.PIXELS);
+		dateOfBirthDay.setClearButtonVisible(true);
+		dateOfBirthDay.setWidth("80px");
 		binder.forField(dateOfBirthDay).withValidator((e, context) -> {
 			try {
 				ControllerProvider.getPersonController().validateBirthDate(dateOfBirthYear.getValue(), dateOfBirthMonth.getValue(), e);
 				return ValidationResult.ok();
-			} catch (Validator.InvalidValueException ex) {
+			} catch (de.symeda.sormas.ui.utils.InvalidValueException ex) {
 				return ValidationResult.error(ex.getMessage());
 			}
 		}).bind(BirthDateDto.DATE_OF_BIRTH_DD);
@@ -85,32 +87,29 @@ public class BirthDateField extends CustomField<BirthDateDto> {
 		dateOfBirthYear.addValueChangeListener(e -> {
 			getValue().setDateOfBirthYYYY(e.getValue());
 			updateListOfDays(e.getValue(), dateOfBirthMonth.getValue(), dateOfBirthDay);
-			dateOfBirthMonth.markAsDirty();
-			dateOfBirthDay.markAsDirty();
 		});
 		dateOfBirthMonth.addValueChangeListener(e -> {
 			getValue().setDateOfBirthMM(e.getValue());
 			updateListOfDays(dateOfBirthYear.getValue(), e.getValue(), dateOfBirthDay);
-			dateOfBirthYear.markAsDirty();
-			dateOfBirthDay.markAsDirty();
 		});
 		dateOfBirthDay.addValueChangeListener(e -> {
 			getValue().setDateOfBirthDD(e.getValue());
-			dateOfBirthYear.markAsDirty();
-			dateOfBirthMonth.markAsDirty();
 		});
 
-		layout.addComponents(dateOfBirthYear, dateOfBirthMonth, dateOfBirthDay);
-
-		layout.setComponentAlignment(dateOfBirthMonth, Alignment.BOTTOM_LEFT);
-		layout.setComponentAlignment(dateOfBirthDay, Alignment.BOTTOM_LEFT);
+		layout.add(dateOfBirthYear, dateOfBirthMonth, dateOfBirthDay);
+		layout.setVerticalComponentAlignment(FlexComponent.Alignment.END, dateOfBirthMonth, dateOfBirthDay);
 
 		return layout;
 	}
 
 	@Override
-	protected void doSetValue(BirthDateDto birthDateDto) {
+	protected void setPresentationValue(BirthDateDto birthDateDto) {
 		binder.setBean(birthDateDto);
+	}
+
+	@Override
+	protected BirthDateDto generateModelValue() {
+		return binder.getBean();
 	}
 
 	@Override
@@ -127,7 +126,7 @@ public class BirthDateField extends CustomField<BirthDateDto> {
 	}
 
 	private void setItemCaptionsForMonths(ComboBox<Integer> comboBox) {
-		comboBox.setItemCaptionGenerator(item -> I18nProperties.getEnumCaption(Month.of(item)));
+		comboBox.setItemLabelGenerator(item -> I18nProperties.getEnumCaption(Month.of(item)));
 	}
 
 	private void updateListOfDays(Integer selectedYear, Integer selectedMonth, ComboBox<Integer> dateOfBirthDay) {

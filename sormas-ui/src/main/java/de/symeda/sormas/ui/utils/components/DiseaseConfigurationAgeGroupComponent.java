@@ -22,19 +22,14 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.data.Validator;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.CustomField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 
 import de.symeda.sormas.api.disease.DiseaseConfigurationAgeGroup;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -43,31 +38,38 @@ import de.symeda.sormas.api.i18n.Validations;
 import de.symeda.sormas.api.person.ApproximateAgeType;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 
 public class DiseaseConfigurationAgeGroupComponent extends CustomField<List<String>> {
 
 	private VerticalLayout rowsLayout;
 	private List<AgeGroupRow> rows;
-	private Label lblNoAgeGroups;
+	private Span lblNoAgeGroups;
 	private List<DiseaseConfigurationAgeGroup> ageGroups;
 
+	public DiseaseConfigurationAgeGroupComponent() {
+		// V7 FieldGroup commits called validate(); the Flow form binding runs the field's validators instead
+		addValidator(value -> validateAgeGroups());
+	}
 	@Override
 	protected Component initContent() {
 
 		VerticalLayout layout = new VerticalLayout();
 		layout.setWidthFull();
-		layout.setMargin(new MarginInfo(false, false, true, false));
+		// was MarginInfo(false, false, true, false): bottom margin only (look, parked)
+		layout.setPadding(false);
 		layout.setSpacing(false);
 		CssStyles.style(layout, CssStyles.VSPACE_TOP_4);
 
-		lblNoAgeGroups = new Label(I18nProperties.getString(Strings.infoNoDiseaseConfigurationAgeGroups));
-		layout.addComponent(lblNoAgeGroups);
+		lblNoAgeGroups = new Span(I18nProperties.getString(Strings.infoNoDiseaseConfigurationAgeGroups));
+		layout.add(lblNoAgeGroups);
 
 		rowsLayout = new VerticalLayout();
 		rowsLayout.setWidthFull();
-		rowsLayout.setMargin(false);
+		rowsLayout.setPadding(false);
 		rowsLayout.setSpacing(false);
-		layout.addComponent(rowsLayout);
+		layout.add(rowsLayout);
 
 		if (rows != null) {
 			buildRowsLayout();
@@ -75,10 +77,10 @@ public class DiseaseConfigurationAgeGroupComponent extends CustomField<List<Stri
 		}
 
 		Button btnAdd = ButtonHelper
-			.createIconButtonWithCaption(null, null, VaadinIcons.PLUS, e -> buildAgeGroupRow(null, null, null, null, true), CssStyles.VSPACE_TOP_5);
+			.createIconButtonWithCaption(null, null, VaadinIcon.PLUS, e -> buildAgeGroupRow(null, null, null, null, true), CssStyles.VSPACE_TOP_5);
 		btnAdd.setHeight(25, Unit.PIXELS);
 		btnAdd.setWidthFull();
-		layout.addComponent(btnAdd);
+		layout.add(btnAdd);
 
 		return layout;
 	}
@@ -95,8 +97,8 @@ public class DiseaseConfigurationAgeGroupComponent extends CustomField<List<Stri
 			return;
 		}
 
-		rowsLayout.removeAllComponents();
-		rows.forEach(r -> rowsLayout.addComponent(r));
+		rowsLayout.removeAll();
+		rows.forEach(r -> rowsLayout.add(r));
 	}
 
 	private void buildAgeGroupRows() {
@@ -117,19 +119,19 @@ public class DiseaseConfigurationAgeGroupComponent extends CustomField<List<Stri
 		AgeGroupRow row = new AgeGroupRow(startAge, startAgeType, endAge, endAgeType);
 		row.setDeleteCallback(() -> {
 			rows.remove(row);
-			rowsLayout.removeComponent(row);
+			rowsLayout.remove(row);
 			updateNoAgeGroupsLabelVisibility();
 		});
 		rows.add(row);
 		updateNoAgeGroupsLabelVisibility();
 
 		if (render) {
-			rowsLayout.addComponent(row);
+			rowsLayout.add(row);
 		}
 	}
 
 	@Override
-	public void setValue(List<String> newFieldValue) throws Property.ReadOnlyException, Converter.ConversionException {
+	public void setValue(List<String> newFieldValue) {
 
 		super.setValue(newFieldValue);
 
@@ -208,9 +210,15 @@ public class DiseaseConfigurationAgeGroupComponent extends CustomField<List<Stri
 		return ageGroupStringsList;
 	}
 
+	/**
+	 * Was the V7 {@code validate()} override (no required check, no other validators).
+	 */
 	@Override
-	public void validate() throws Validator.InvalidValueException {
+	public void validateValue() {
+		validateAgeGroups();
+	}
 
+	private void validateAgeGroups() {
 		List<String> errorMessages = new ArrayList<>();
 		int rowPosition = 0;
 		for (AgeGroupRow ageGroupRow : rows) {
@@ -247,12 +255,15 @@ public class DiseaseConfigurationAgeGroupComponent extends CustomField<List<Stri
 		}
 
 		if (!errorMessages.isEmpty()) {
-			throw new Validator.InvalidValueException(String.join("\n", errorMessages));
+			throw new InvalidValueException(String.join("\n", errorMessages));
 		}
 	}
 
+	/**
+	 * Was V7 {@code getInternalValue()}: the value is built from the rows.
+	 */
 	@Override
-	protected List<String> getInternalValue() {
+	public List<String> getValue() {
 		return rows != null ? generateStringValue() : null;
 	}
 
@@ -277,7 +288,7 @@ public class DiseaseConfigurationAgeGroupComponent extends CustomField<List<Stri
 
 		public AgeGroupRow(Integer startAge, ApproximateAgeType startAgeType, Integer endAge, ApproximateAgeType endAgeType) {
 
-			Label fromAgeLabel = new Label(I18nProperties.getString(Strings.promptDiseaseConfigurationAgeFrom));
+			Span fromAgeLabel = new Span(I18nProperties.getString(Strings.promptDiseaseConfigurationAgeFrom));
 			fromAgeLabel.setWidthFull();
 
 			tfStartAge = new TextField();
@@ -295,7 +306,7 @@ public class DiseaseConfigurationAgeGroupComponent extends CustomField<List<Stri
 				cbStartAgeType.setValue(startAgeType);
 			}
 
-			Label toAgeLabel = new Label(I18nProperties.getString(Strings.promptDiseaseConfigurationAgeTo));
+			Span toAgeLabel = new Span(I18nProperties.getString(Strings.promptDiseaseConfigurationAgeTo));
 			CssStyles.style(toAgeLabel, CssStyles.HSPACE_LEFT_3, CssStyles.LABEL_TEXT_ALIGN_RIGHT);
 			toAgeLabel.setWidthFull();
 
@@ -314,19 +325,19 @@ public class DiseaseConfigurationAgeGroupComponent extends CustomField<List<Stri
 				cbEndAgeType.setValue(endAgeType);
 			}
 
-			Button btnDelete = ButtonHelper.createIconButtonWithCaption(null, null, VaadinIcons.TRASH, e -> deleteCallback.run());
+			Button btnDelete = ButtonHelper.createIconButtonWithCaption(null, null, VaadinIcon.TRASH, e -> deleteCallback.run());
 			CssStyles.style(CssStyles.HSPACE_LEFT_3, btnDelete);
 
-			addComponent(fromAgeLabel);
-			addComponent(tfStartAge);
-			addComponent(cbStartAgeType);
-			addComponent(toAgeLabel);
-			addComponent(tfEndAge);
-			addComponent(cbEndAgeType);
-			addComponent(btnDelete);
+			add(fromAgeLabel);
+			add(tfStartAge);
+			add(cbStartAgeType);
+			add(toAgeLabel);
+			add(tfEndAge);
+			add(cbEndAgeType);
+			add(btnDelete);
 
 			setWidthFull();
-			setMargin(false);
+			setPadding(false);
 			CssStyles.style(this, CssStyles.VSPACE_4);
 		}
 

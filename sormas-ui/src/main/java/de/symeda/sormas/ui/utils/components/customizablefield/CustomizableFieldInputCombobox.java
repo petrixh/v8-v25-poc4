@@ -18,10 +18,10 @@ package de.symeda.sormas.ui.utils.components.customizablefield;
 import java.util.Collections;
 import java.util.List;
 
-import com.vaadin.data.ValueProvider;
-import com.vaadin.server.Setter;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.data.binder.Setter;
+import com.vaadin.flow.function.ValueProvider;
 
 import de.symeda.sormas.api.customizablefield.CustomizableFieldCustomProperties;
 import de.symeda.sormas.api.customizablefield.CustomizableFieldMetadataDto;
@@ -30,7 +30,7 @@ import de.symeda.sormas.api.customizablefield.CustomizableFieldValueDto;
 /**
  * Concrete {@link CustomizableFieldInput} for {@link de.symeda.sormas.api.customizablefield.CustomizableFieldType#COMBOBOX}.
  * <p>
- * Renders a Vaadin v8 {@link ComboBox} populated with the string options defined in the field's
+ * Renders a Flow {@link ComboBox} populated with the string options defined in the field's
  * {@link CustomizableFieldMetadataDto#getCustomProperties() customProperties} map under the key
  * {@code "options"} (expected to be a {@link List} of {@link String}s). The selected value is
  * stored directly as a {@link String} in {@link CustomizableFieldValueDto#getValue()}.
@@ -41,7 +41,7 @@ public class CustomizableFieldInputCombobox extends CustomizableFieldInput<Strin
 
     private ComboBox<String> comboBox;
     /**
-     * Holds a value that was pushed via {@link #doSetValue(String)} before
+     * Holds a value that was pushed via {@link #setPresentationValue(Object)} before
      * {@link #buildInputComponent()} had a chance to create the {@link ComboBox}.
      * Applied to the combo box on first render.
      */
@@ -68,9 +68,9 @@ public class CustomizableFieldInputCombobox extends CustomizableFieldInput<Strin
     @Override
     protected Component buildInputComponent() {
         comboBox = new ComboBox<>();
-        comboBox.setWidth(100, Unit.PERCENTAGE);
+        comboBox.setWidthFull();
         comboBox.setItems(resolveOptions());
-        comboBox.setEmptySelectionAllowed(true);
+        comboBox.setClearButtonVisible(true);
 
         // Apply any value that arrived before the component was first rendered.
         if (pendingValue != null) {

@@ -15,8 +15,8 @@
 
 package de.symeda.sormas.ui.utils.components.progress;
 
-import com.vaadin.ui.Label;
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -25,9 +25,9 @@ import de.symeda.sormas.ui.utils.CssStyles;
 
 public class BulkProgressLayout extends AbstractProgressLayout<BulkProgressUpdateInfo> {
 
-	private Label successfulEntriesLabel;
+	private Span successfulEntriesLabel;
 	private int successfulEntriesCount;
-	private Label skippedEntriesLabel;
+	private Span skippedEntriesLabel;
 	private int skippedEntriesCount;
 
 	public BulkProgressLayout(UI currentUI, int totalCount, Runnable cancelCallback) {
@@ -37,12 +37,12 @@ public class BulkProgressLayout extends AbstractProgressLayout<BulkProgressUpdat
 
 	protected void initAdditionalProgressStatusComponents() {
 
-		successfulEntriesLabel = new Label(String.format(I18nProperties.getCaption(Captions.bulkSuccessful), 0));
+		successfulEntriesLabel = new Span(String.format(I18nProperties.getCaption(Captions.bulkSuccessful), 0));
 		CssStyles.style(successfulEntriesLabel, CssStyles.LABEL_POSITIVE);
-		progressStatusLayout.addComponent(successfulEntriesLabel);
-		skippedEntriesLabel = new Label(String.format(I18nProperties.getCaption(Captions.bulkSkipped), 0));
+		progressStatusLayout.add(successfulEntriesLabel);
+		skippedEntriesLabel = new Span(String.format(I18nProperties.getCaption(Captions.bulkSkipped), 0));
 		CssStyles.style(skippedEntriesLabel, CssStyles.LABEL_MINOR);
-		progressStatusLayout.addComponent(skippedEntriesLabel);
+		progressStatusLayout.add(skippedEntriesLabel);
 	}
 
 	@Override
@@ -54,9 +54,9 @@ public class BulkProgressLayout extends AbstractProgressLayout<BulkProgressUpdat
 	protected void handleOptionalProgressUpdates(BulkProgressUpdateInfo progressUpdateInfo) {
 
 		successfulEntriesCount += progressUpdateInfo.getSuccessfulEntryCount();
-		successfulEntriesLabel.setValue(String.format(I18nProperties.getCaption(Captions.bulkSuccessful), successfulEntriesCount));
+		successfulEntriesLabel.setText(String.format(I18nProperties.getCaption(Captions.bulkSuccessful), successfulEntriesCount));
 		skippedEntriesCount += progressUpdateInfo.getSkippedEntryCount();
-		skippedEntriesLabel.setValue(String.format(I18nProperties.getCaption(Captions.bulkSkipped), skippedEntriesCount));
+		skippedEntriesLabel.setText(String.format(I18nProperties.getCaption(Captions.bulkSkipped), skippedEntriesCount));
 	}
 
 	@Override

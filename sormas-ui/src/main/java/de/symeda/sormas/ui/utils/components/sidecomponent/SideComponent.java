@@ -3,14 +3,12 @@ package de.symeda.sormas.ui.utils.components.sidecomponent;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.UiUtil;
@@ -29,35 +27,35 @@ public class SideComponent extends VerticalLayout {
 	}
 
 	public SideComponent(String heading, Consumer<Runnable> actionCallback) {
-		setWidth(100, Sizeable.Unit.PERCENTAGE);
-		setMargin(false);
+		setWidthFull();
+		setPadding(false);
 		setSpacing(false);
 
 		componentHeader = new HorizontalLayout();
-		componentHeader.setMargin(false);
+		componentHeader.setPadding(false);
 		componentHeader.setSpacing(false);
-		componentHeader.setWidth(100, Sizeable.Unit.PERCENTAGE);
-		addComponent(componentHeader);
+		componentHeader.setWidthFull();
+		add(componentHeader);
 
-		Label headingLabel = new Label(heading);
-		headingLabel.addStyleName(CssStyles.H3);
-		componentHeader.addComponent(headingLabel);
-		componentHeader.setExpandRatio(headingLabel, 1);
+		Span headingLabel = new Span(heading);
+		headingLabel.addClassName(CssStyles.H3);
+		componentHeader.add(headingLabel);
+		componentHeader.setFlexGrow(1, headingLabel);
 
 		this.actionCallback = actionCallback;
 	}
 
 	protected void addCreateButton(Button button) {
-		componentHeader.addComponent(button);
-		componentHeader.setComponentAlignment(button, Alignment.MIDDLE_RIGHT);
-		componentHeader.setExpandRatio(button, 0);
+		componentHeader.add(button);
+		componentHeader.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, button);
+		componentHeader.setFlexGrow(0, button);
 	}
 
 	protected void addCreateButton(String caption, Runnable callback, UserRight... userRights) {
 		if (userRights.length == 0 || userHasRight(userRights)) {
 			createButton = ButtonHelper.createButton(caption);
-			createButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
-			createButton.setIcon(VaadinIcons.PLUS_CIRCLE);
+			CssStyles.style(createButton, CssStyles.BUTTON_PRIMARY);
+			ButtonHelper.setIcon(createButton, VaadinIcon.PLUS_CIRCLE);
 			createButton.addClickListener(e -> actionCallback.accept(callback));
 			addCreateButton(createButton);
 		}

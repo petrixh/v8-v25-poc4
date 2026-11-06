@@ -1,8 +1,10 @@
 package de.symeda.sormas.ui.utils.components;
 
-import com.vaadin.event.ShortcutAction;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
@@ -20,18 +22,18 @@ public class ApplyResetButtonsComponent extends HorizontalLayout {
 		setSpacing(false);
 
 		applyButton = ButtonHelper.createButton(applyCaptionTag, null, FILTER_ITEM_STYLE);
-		applyButton.setClickShortcut(ShortcutAction.KeyCode.ENTER);
-		addComponent(applyButton);
+		applyButton.addClickShortcut(Key.ENTER);
+		add(applyButton);
 
 		resetButton = ButtonHelper.createButton(resetCaptionTag, null, FILTER_ITEM_STYLE);
-		addComponent(resetButton);
+		add(resetButton);
 	}
 
-	public void addApplyHandler(Button.ClickListener applyHandler) {
+	public void addApplyHandler(ComponentEventListener<ClickEvent<Button>> applyHandler) {
 		applyButton.addClickListener(applyHandler);
 	}
 
-	public void addResetHandler(Button.ClickListener resetHandler) {
+	public void addResetHandler(ComponentEventListener<ClickEvent<Button>> resetHandler) {
 		resetButton.addClickListener(resetHandler);
 	}
 

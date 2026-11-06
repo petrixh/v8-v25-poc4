@@ -8,13 +8,14 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.sample.PathogenSpecie;
@@ -32,42 +33,42 @@ public class SideComponentField extends HorizontalLayout {
 	private final VerticalLayout mainLayout;
 
 	public SideComponentField() {
-		setMargin(false);
+		setPadding(false);
 		setSpacing(true);
-		setWidth(100, Unit.PERCENTAGE);
-		addStyleName(CssStyles.SORMAS_LIST_ENTRY);
+		setWidthFull();
+		addClassName(CssStyles.SORMAS_LIST_ENTRY);
 
 		mainLayout = new VerticalLayout();
-		mainLayout.setWidth(100, Unit.PERCENTAGE);
-		mainLayout.setMargin(false);
+		mainLayout.setWidthFull();
+		mainLayout.setPadding(false);
 		mainLayout.setSpacing(false);
-		addComponent(mainLayout);
-		setExpandRatio(mainLayout, 1);
+		add(mainLayout);
+		setFlexGrow(1, mainLayout);
 	}
 
 	public void addComponentToField(Component component) {
-		mainLayout.addComponent(component);
+		mainLayout.add(component);
 	}
 
-	public void addEditButton(String id, Button.ClickListener editClickListener) {
+	public void addEditButton(String id, ComponentEventListener<ClickEvent<Button>> editClickListener) {
 		Button editButton = ButtonHelper
-			.createIconButtonWithCaption(id, null, VaadinIcons.PENCIL, editClickListener, ValoTheme.BUTTON_LINK, CssStyles.BUTTON_COMPACT);
+			.createIconButtonWithCaption(id, null, VaadinIcon.PENCIL, editClickListener, CssStyles.BUTTON_LINK, CssStyles.BUTTON_COMPACT);
 
-		addComponent(editButton);
-		setComponentAlignment(editButton, Alignment.TOP_RIGHT);
-		setExpandRatio(editButton, 0);
+		add(editButton);
+		setVerticalComponentAlignment(FlexComponent.Alignment.START, editButton);
+		setFlexGrow(0, editButton);
 	}
 
-	public void addViewButton(String id, Button.ClickListener viewClickListener) {
-		addViewButton(id, viewClickListener, VaadinIcons.EYE);
+	public void addViewButton(String id, ComponentEventListener<ClickEvent<Button>> viewClickListener) {
+		addViewButton(id, viewClickListener, VaadinIcon.EYE);
 	}
 
-	public void addViewButton(String id, Button.ClickListener viewClickListener, VaadinIcons icon) {
+	public void addViewButton(String id, ComponentEventListener<ClickEvent<Button>> viewClickListener, VaadinIcon icon) {
 		Button viewButton =
-			ButtonHelper.createIconButtonWithCaption(id, null, icon, viewClickListener, ValoTheme.BUTTON_LINK, CssStyles.BUTTON_COMPACT);
-		addComponent(viewButton);
-		setComponentAlignment(viewButton, Alignment.TOP_RIGHT);
-		setExpandRatio(viewButton, 0);
+			ButtonHelper.createIconButtonWithCaption(id, null, icon, viewClickListener, CssStyles.BUTTON_LINK, CssStyles.BUTTON_COMPACT);
+		add(viewButton);
+		setVerticalComponentAlignment(FlexComponent.Alignment.START, viewButton);
+		setFlexGrow(0, viewButton);
 		viewButton.setEnabled(true);
 	}
 
@@ -76,34 +77,34 @@ public class SideComponentField extends HorizontalLayout {
 		mainLayout.setEnabled(enabled);
 	}
 
-	public void addActionButton(String id, Button.ClickListener actionClickListener, boolean isEditEntry) {
+	public void addActionButton(String id, ComponentEventListener<ClickEvent<Button>> actionClickListener, boolean isEditEntry) {
 		Button actionButton = ButtonHelper.createIconButtonWithCaption(
 			isEditEntry ? "edit" + id : "view" + id,
 			null,
-			isEditEntry ? VaadinIcons.PENCIL : VaadinIcons.EYE,
+			isEditEntry ? VaadinIcon.PENCIL : VaadinIcon.EYE,
 			actionClickListener,
-			ValoTheme.BUTTON_LINK,
+			CssStyles.BUTTON_LINK,
 			CssStyles.BUTTON_COMPACT);
-		addComponent(actionButton);
-		setComponentAlignment(actionButton, Alignment.TOP_RIGHT);
-		setExpandRatio(actionButton, 0);
+		add(actionButton);
+		setVerticalComponentAlignment(FlexComponent.Alignment.START, actionButton);
+		setFlexGrow(0, actionButton);
 	}
 
-	public void addDeleteButton(String id, Button.ClickListener actionClickListener) {
+	public void addDeleteButton(String id, ComponentEventListener<ClickEvent<Button>> actionClickListener) {
 		Button actionButton = ButtonHelper.createIconButtonWithCaption(
 			"delete" + id,
 			null,
-			VaadinIcons.TRASH,
+			VaadinIcon.TRASH,
 			actionClickListener,
-			ValoTheme.BUTTON_LINK,
+			CssStyles.BUTTON_LINK,
 			CssStyles.BUTTON_COMPACT);
-		addComponent(actionButton);
-		setComponentAlignment(actionButton, Alignment.TOP_RIGHT);
-		setExpandRatio(actionButton, 0);
+		add(actionButton);
+		setVerticalComponentAlignment(FlexComponent.Alignment.START, actionButton);
+		setFlexGrow(0, actionButton);
 	}
 
 	public void setActive() {
-		mainLayout.addStyleName(CssStyles.ACTIVE_SIDE_COMPONENT_ELEMENT);
+		mainLayout.addClassName(CssStyles.ACTIVE_SIDE_COMPONENT_ELEMENT);
 	}
 
 	/** Disease -> the test methods whose variant field the side component can show. Invariant, so built once. */

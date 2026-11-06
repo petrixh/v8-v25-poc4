@@ -24,10 +24,10 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.data.HasValue;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.customizablefield.CustomizableFieldGroup;
 import de.symeda.sormas.api.customizablefield.CustomizableFieldMetadataDto;
@@ -65,7 +65,8 @@ public class CustomizableFieldsGroup extends VerticalLayout {
 
 	private final CustomizableFieldGroup group;
 	private final Map<CustomizableFieldMetadataDto, CustomizableFieldInput<?>> fieldComponents;
-	private final List<HasValue.ValueChangeListener<Object>> valueChangeListeners = new ArrayList<>();
+	@SuppressWarnings("rawtypes")
+	private final List<HasValue.ValueChangeListener> valueChangeListeners = new ArrayList<>();
 	private List<CustomizableFieldMetadataDto> fieldsMetadata;
 	private Map<CustomizableFieldMetadataDto, CustomizableFieldValueDto> fieldsValues;
 
@@ -86,10 +87,10 @@ public class CustomizableFieldsGroup extends VerticalLayout {
 		this.group = group;
 		this.fieldComponents = new HashMap<>();
 		this.setSpacing(true);
-		this.setMargin(false);
-		this.setWidth(100, Unit.PERCENTAGE);
-		this.addStyleName(STYLE_NAME_CUSTOMIZABLE_FIELDS_GROUP);
-		this.addStyleName(group.getKey());
+		this.setPadding(false);
+		this.setWidthFull();
+		this.addClassName(STYLE_NAME_CUSTOMIZABLE_FIELDS_GROUP);
+		this.addClassName(group.getKey());
 
 		this.setId(group.getKey());
 	}
@@ -110,12 +111,13 @@ public class CustomizableFieldsGroup extends VerticalLayout {
 	 * @param listener
 	 *            the listener to register
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({
+		"unchecked",
+		"rawtypes" })
 	public void addValueChangeListener(HasValue.ValueChangeListener<?> listener) {
-		HasValue.ValueChangeListener<Object> typed = (HasValue.ValueChangeListener<Object>) listener;
-		valueChangeListeners.add(typed);
+		valueChangeListeners.add(listener);
 		for (CustomizableFieldInput<?> field : fieldComponents.values()) {
-			((CustomizableFieldInput<Object>) field).addValueChangeListener(typed);
+			((HasValue) field).addValueChangeListener(listener);
 		}
 	}
 
@@ -169,7 +171,7 @@ public class CustomizableFieldsGroup extends VerticalLayout {
 	 * </ol>
 	 */
 	public void updateFieldsDisplay() {
-		removeAllComponents();
+		removeAll();
 		fieldComponents.clear();
 
 		if (fieldsMetadata == null || fieldsMetadata.isEmpty()) {
@@ -221,12 +223,14 @@ public class CustomizableFieldsGroup extends VerticalLayout {
 	 * @param lineFields
 	 *            fields to place side-by-side on this row
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({
+		"unchecked",
+		"rawtypes" })
 	private void addLineRow(List<CustomizableFieldMetadataDto> lineFields) {
 		HorizontalLayout row = new HorizontalLayout();
-		row.setWidth(100, Unit.PERCENTAGE);
+		row.setWidthFull();
 		row.setSpacing(true);
-		row.setMargin(false);
+		row.setPadding(false);
 
 		for (CustomizableFieldMetadataDto metadata : lineFields) {
 			CustomizableFieldInput<?> field = CustomizableFieldInputFactory.create(metadata);
@@ -234,14 +238,14 @@ public class CustomizableFieldsGroup extends VerticalLayout {
 			CustomizableFieldValueDto dto = createInitialFieldValue(metadata);
 			field.setFieldValue(dto);
 
-			field.setWidth(100, Unit.PERCENTAGE);
-			row.addComponent(field);
+			field.setWidthFull();
+			row.add(field);
 
 			float expandRatio = metadata.getUiLineWeight() != null ? metadata.getUiLineWeight() : 1.0f;
-			row.setExpandRatio(field, expandRatio);
+			row.setFlexGrow(expandRatio, field);
 
-			for (HasValue.ValueChangeListener<Object> listener : valueChangeListeners) {
-				((CustomizableFieldInput<Object>) field).addValueChangeListener(listener);
+			for (HasValue.ValueChangeListener listener : valueChangeListeners) {
+				((HasValue) field).addValueChangeListener(listener);
 			}
 
 			fieldComponents.put(metadata, field);
@@ -252,13 +256,13 @@ public class CustomizableFieldsGroup extends VerticalLayout {
 		if (lineFields.size() == 1) {
 			CustomizableFieldMetadataDto sole = lineFields.get(0);
 			if (sole.getUiLineWeight() != null && sole.getUiLineWeight() < 1.0f) {
-				Label filler = new Label();
-				row.addComponent(filler);
-				row.setExpandRatio(filler, 1.0f - sole.getUiLineWeight());
+				Span filler = new Span();
+				row.add(filler);
+				row.setFlexGrow(1.0f - sole.getUiLineWeight(), filler);
 			}
 		}
 
-		addComponent(row);
+		add(row);
 	}
 
 	/**

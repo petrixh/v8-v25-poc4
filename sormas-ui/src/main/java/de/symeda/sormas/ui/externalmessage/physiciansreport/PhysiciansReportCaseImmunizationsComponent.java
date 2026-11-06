@@ -27,8 +27,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
 import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
@@ -57,6 +57,7 @@ import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.DeletableUtils;
 import de.symeda.sormas.ui.utils.DirtyCheckPopup;
 import de.symeda.sormas.ui.utils.FieldAccessHelper;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.vaccination.VaccinationEditForm;
 
 @Deprecated
@@ -80,7 +81,7 @@ public class PhysiciansReportCaseImmunizationsComponent extends CommitDiscardWra
 
 		Span immunizationsLabel = new Span(I18nProperties.getString(Strings.entityVaccinations));
 		immunizationsLabel.addClassName(H3);
-		getWrappedComponent().addComponent(immunizationsLabel);
+		getWrappedComponent().add(immunizationsLabel);
 
 		VaccinationCriteria criteria = new VaccinationCriteria.Builder(caze.getPerson()).withDisease(caze.getDisease())
 			.build()
@@ -94,7 +95,7 @@ public class PhysiciansReportCaseImmunizationsComponent extends CommitDiscardWra
 		vaccinationList = new VaccinationList(this::handleDeleteVaccination, (v) -> handleEditVaccination(v, caze));
 		vaccinationList.setVaccinations(vaccinationsToDisplay);
 
-		getWrappedComponent().addComponent(vaccinationList);
+		getWrappedComponent().add(vaccinationList);
 
 		addVaccinationButton = ButtonHelper.createButton(Captions.physiciansReportCaseAddVaccination, e -> {
 			handleAddVaccination(caze);
@@ -102,8 +103,10 @@ public class PhysiciansReportCaseImmunizationsComponent extends CommitDiscardWra
 
 		HorizontalLayout vaccinationListToolbar = new HorizontalLayout(addVaccinationButton);
 		vaccinationListToolbar.setWidthFull();
-		vaccinationListToolbar.setComponentAlignment(addVaccinationButton, Alignment.MIDDLE_RIGHT);
-		getWrappedComponent().addComponent(vaccinationListToolbar);
+		// was Alignment.MIDDLE_RIGHT
+		vaccinationListToolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+		vaccinationListToolbar.setAlignItems(FlexComponent.Alignment.CENTER);
+		getWrappedComponent().add(vaccinationListToolbar);
 
 		setPreCommitListener((callback) -> {
 			if (!handleDirty(callback)) {
@@ -114,7 +117,8 @@ public class PhysiciansReportCaseImmunizationsComponent extends CommitDiscardWra
 
 	private static VerticalLayout createLayout() {
 		VerticalLayout layout = new VerticalLayout();
-		layout.setMargin(new MarginInfo(false, true));
+		// was MarginInfo(false, true): partial V8 margins become no padding (look only)
+		layout.setPadding(false);
 		layout.setWidth(900, Unit.PIXELS);
 
 		return layout;
@@ -174,17 +178,18 @@ public class PhysiciansReportCaseImmunizationsComponent extends CommitDiscardWra
 					vaccinationsToDisplay.add(v);
 					vaccinationList.setVaccinations(vaccinationsToDisplay);
 				}));
-		createVaccinationComponent.getDiscardButton().setCaption(I18nProperties.getCaption(Captions.actionCancel));
-		createVaccinationComponent.getButtonsPanel().setComponentAlignment(createVaccinationComponent.getDiscardButton(), Alignment.BOTTOM_LEFT);
+		createVaccinationComponent.getDiscardButton().setText(I18nProperties.getCaption(Captions.actionCancel));
+		// was Alignment.BOTTOM_LEFT in the discard button's expanding slot: Cancel at the left
+		alignDiscardButtonLeft(createVaccinationComponent);
 
 		createVaccinationComponent.addDoneListener(() -> {
-			getWrappedComponent().removeComponent(createVaccinationComponent);
+			getWrappedComponent().remove(createVaccinationComponent);
 			createVaccinationComponent = null;
 			addVaccinationButton.setVisible(true);
 		});
 
 		addVaccinationButton.setVisible(false);
-		getWrappedComponent().addComponent(createVaccinationComponent);
+		getWrappedComponent().add(createVaccinationComponent);
 	}
 
 	private void handleDeleteVaccination(VaccinationDto vaccination) {
@@ -217,9 +222,8 @@ public class PhysiciansReportCaseImmunizationsComponent extends CommitDiscardWra
 				}
 			}, true, UiUtil.permitted(UserRight.IMMUNIZATION_DELETE));
 
-		currentVaccinationEditComponent.getDiscardButton().setCaption(I18nProperties.getCaption(Captions.actionCancel));
-		currentVaccinationEditComponent.getButtonsPanel()
-			.setComponentAlignment(currentVaccinationEditComponent.getDiscardButton(), Alignment.BOTTOM_LEFT);
+		currentVaccinationEditComponent.getDiscardButton().setText(I18nProperties.getCaption(Captions.actionCancel));
+		alignDiscardButtonLeft(currentVaccinationEditComponent);
 
 		currentVaccinationEditComponent.addDoneListener(() -> {
 			vaccinationList.setVaccinations(vaccinationsToDisplay);
@@ -228,7 +232,14 @@ public class PhysiciansReportCaseImmunizationsComponent extends CommitDiscardWra
 		});
 
 		addVaccinationButton.setVisible(false);
-		vaccinationList.replaceComponent(collapsedComponent, currentVaccinationEditComponent);
+		vaccinationList.replace(collapsedComponent, currentVaccinationEditComponent);
+	}
+
+	private static void alignDiscardButtonLeft(CommitDiscardWrapperComponent<?> component) {
+		Button discardButton = component.getDiscardButton();
+		discardButton.getStyle().remove("margin-left");
+		discardButton.getStyle().set("margin-right", "auto");
+		component.getButtonsPanel().setVerticalComponentAlignment(FlexComponent.Alignment.END, discardButton);
 	}
 
 	private boolean handleDirty(Runnable callback) {
@@ -272,15 +283,15 @@ public class PhysiciansReportCaseImmunizationsComponent extends CommitDiscardWra
 		public void setVaccinations(List<VaccinationDto> vaccinations) {
 			this.vaccinations = vaccinations;
 
-			removeAllComponents();
+			removeAll();
 
 			vaccinations.forEach(v -> {
-				addComponent(new VaccinationListItem(v, () -> deleteHandler.accept(v), () -> editHandler.accept(v)));
+				add(new VaccinationListItem(v, () -> deleteHandler.accept(v), () -> editHandler.accept(v)));
 			});
 		}
 
 		public VaccinationListItem getItemByVaccination(VaccinationDto vaccination) {
-			return (VaccinationListItem) getComponent(vaccinations.indexOf(vaccination));
+			return (VaccinationListItem) getComponentAt(vaccinations.indexOf(vaccination));
 		}
 	}
 
@@ -321,8 +332,8 @@ public class PhysiciansReportCaseImmunizationsComponent extends CommitDiscardWra
 			VerticalLayout vaccineInfoLayout = new VerticalLayout(vaccineLabel, dateLabel);
 			vaccineInfoLayout.setPadding(false);
 			vaccineInfoLayout.setSpacing(false);
-			vaccineLayout.addComponent(vaccineInfoLayout);
-			vaccineLayout.setExpandRatio(vaccineInfoLayout, 1);
+			vaccineLayout.add(vaccineInfoLayout);
+			vaccineLayout.setFlexGrow(1, vaccineInfoLayout);
 
 			Button deleteButton = ButtonHelper.createIconButtonWithCaption("delete-vaccination", null, VaadinIcon.TRASH, (e) -> {
 				deleteHandler.run();
@@ -333,15 +344,16 @@ public class PhysiciansReportCaseImmunizationsComponent extends CommitDiscardWra
 			}, CssStyles.BUTTON_LINK, CssStyles.BUTTON_COMPACT);
 
 			HorizontalLayout buttonsLayout = new HorizontalLayout(deleteButton, editButton);
-			vaccineLayout.addComponent(buttonsLayout);
-			vaccineLayout.setComponentAlignment(buttonsLayout, Alignment.TOP_RIGHT);
-			vaccineLayout.setExpandRatio(buttonsLayout, 0);
+			vaccineLayout.add(buttonsLayout);
+			// was Alignment.TOP_RIGHT; the info layout takes the free space
+			vaccineLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, buttonsLayout);
+			vaccineLayout.setFlexGrow(0, buttonsLayout);
 
-			addComponent(vaccineLayout);
+			add(vaccineLayout);
 
-			Span horizontalRule = new Span("<br><hr /><br>", ContentMode.HTML);
+			Span horizontalRule = VaadinUiUtil.createLabel("<br><hr /><br>", ContentMode.HTML);
 			horizontalRule.setWidthFull();
-			addComponent(horizontalRule);
+			add(horizontalRule);
 		}
 
 		public VaccinationDto getVaccination() {

@@ -24,10 +24,12 @@ import java.util.function.Supplier;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Panel;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
 import de.symeda.sormas.ui.utils.fields.Field;
 
 import de.symeda.sormas.api.i18n.Captions;
@@ -55,11 +57,11 @@ public class CorrectionPanel<T> extends HorizontalLayout {
 		setHeightFull();
 		setMargin(true);
 
-		addStyleName(CssStyles.LAB_MESSAGE_NO_REQUiRED_BORDER);
-		addComponent(createSplitPanel(formSupplier, formData, updatedFormData, originalDataFormHeaderTag, editFormHeaderTag, changedFields));
+		addClassName(CssStyles.LAB_MESSAGE_NO_REQUiRED_BORDER);
+		add(createSplitPanel(formSupplier, formData, updatedFormData, originalDataFormHeaderTag, editFormHeaderTag, changedFields));
 	}
 
-	private Panel createSplitPanel(
+	private Scroller createSplitPanel(
 		Supplier<AbstractEditForm<T>> formSupplier,
 		T formData,
 		T updatedFormData,
@@ -81,13 +83,13 @@ public class CorrectionPanel<T> extends HorizontalLayout {
 		commitDiscardForm = new CommitDiscardWrapperComponent<>(updateForm, updateForm.getFieldGroup());
 		cancelButton = LabMessageUiHelper.addCancelAndUpdateLabels(commitDiscardForm, Captions.actionDiscardAllAndContinue);
 
-		HorizontalSplitPanel splitPanel = new HorizontalSplitPanel(originalDataForm, commitDiscardForm);
+		SplitLayout splitPanel = new SplitLayout(originalDataForm, commitDiscardForm);
 		splitPanel.setSizeFull();
-		splitPanel.setSplitPosition(50, Unit.PERCENTAGE);
+		splitPanel.setSplitterPosition(50);
 
-		Panel panel = new Panel();
+		// was a Panel: scrolls the split panel
+		Scroller panel = new Scroller(splitPanel);
 		panel.setHeightFull();
-		panel.setContent(splitPanel);
 		return panel;
 	}
 
@@ -124,7 +126,7 @@ public class CorrectionPanel<T> extends HorizontalLayout {
 
 		fields.forEach(field -> {
 			String[] fieldPath = new String[] {
-				field.getId() };
+				field.getId().orElse(null) };
 
 			if (AbstractEditForm.class.isAssignableFrom(field.getClass())) {
 				iterateFields((AbstractEditForm) field, (subField, p) -> {
@@ -136,7 +138,7 @@ public class CorrectionPanel<T> extends HorizontalLayout {
 		});
 	}
 
-	public void setCancelListener(Button.ClickListener listener) {
+	public void setCancelListener(ComponentEventListener<ClickEvent<Button>> listener) {
 		cancelButton.addClickListener(listener);
 	}
 

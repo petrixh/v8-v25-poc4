@@ -28,12 +28,10 @@ import javax.naming.CannotProceedException;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
 import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
 import de.symeda.sormas.ui.utils.NotificationHelper;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.dialog.Dialog;
 
@@ -83,13 +81,13 @@ public class RelatedLabMessageHandler extends AbstractRelatedLabMessageHandler {
 
 		Dialog window = VaadinUiUtil.showChooseOptionPopup(
 			I18nProperties.getCaption(Captions.externalMessageRelatedEntriesFound),
-			new Span(message, ContentMode.HTML),
+			VaadinUiUtil.createLabel(message, ContentMode.HTML),
 			I18nProperties.getCaption(Captions.actionYes),
 			I18nProperties.getCaption(Captions.actionNo),
 			null,
 			ret::complete);
 
-		window.addCloseListener(e -> ret.complete(false));
+		VaadinUiUtil.addCloseListener(window, e -> ret.complete(false));
 
 		return ret;
 	}
@@ -102,9 +100,9 @@ public class RelatedLabMessageHandler extends AbstractRelatedLabMessageHandler {
 		Dialog window = VaadinUiUtil.createPopupWindow();
 		Span label = new Span(I18nProperties.getString(Strings.confirmExternalMessageCorrectionThrough));
 		label.addClassName(CssStyles.LABEL_WHITE_SPACE_NORMAL);
-		CommitDiscardWrapperComponent<Label> confirmComponent = new CommitDiscardWrapperComponent<>(label);
-		confirmComponent.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionYes));
-		confirmComponent.getDiscardButton().setCaption(I18nProperties.getCaption(Captions.actionNo));
+		CommitDiscardWrapperComponent<Span> confirmComponent = new CommitDiscardWrapperComponent<>(label);
+		confirmComponent.getCommitButton().setText(I18nProperties.getCaption(Captions.actionYes));
+		confirmComponent.getDiscardButton().setText(I18nProperties.getCaption(Captions.actionNo));
 
 		confirmComponent.addCommitListener(() -> ret.complete(true));
 		confirmComponent.addDiscardListener(() -> ret.complete(false));
@@ -126,7 +124,7 @@ public class RelatedLabMessageHandler extends AbstractRelatedLabMessageHandler {
 
 		return VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getString(Strings.headingExternalMessageCorrection),
-			new Span(I18nProperties.getString(Strings.confirmationExternalMessageCorrection), ContentMode.HTML),
+			VaadinUiUtil.createLabel(I18nProperties.getString(Strings.confirmationExternalMessageCorrection), ContentMode.HTML),
 			I18nProperties.getString(Strings.yes),
 			I18nProperties.getString(Strings.no));
 	}
@@ -237,7 +235,7 @@ public class RelatedLabMessageHandler extends AbstractRelatedLabMessageHandler {
 			window.close();
 		});
 
-		window.addCloseListener(e -> {
+		VaadinUiUtil.addCloseListener(window, e -> {
 			if (!chain.done()) {
 				chain.cancel();
 			}
@@ -296,7 +294,7 @@ public class RelatedLabMessageHandler extends AbstractRelatedLabMessageHandler {
 				window.close();
 			}
 		});
-		window.addCloseListener(e -> {
+		VaadinUiUtil.addCloseListener(window, e -> {
 			if (!chain.done()) {
 				chain.cancel();
 			}
@@ -307,19 +305,20 @@ public class RelatedLabMessageHandler extends AbstractRelatedLabMessageHandler {
 				null,
 				VaadinIcon.EYE,
 				e -> ControllerProvider.getExternalMessageController().showExternalMessage(labMessage.getUuid(), false, null)));
-		toolbar.setMargin(new MarginInfo(true, true, false, true));
+		// was MarginInfo(true, true, false, true): partial V8 margins become no padding (look only)
+		toolbar.setPadding(false);
 
 		VerticalLayout content = new VerticalLayout(toolbar, correctionPanel);
 		content.setPadding(false);
 		content.setSpacing(false);
-		content.setExpandRatio(toolbar, 0);
-		content.setExpandRatio(correctionPanel, 1);
+		content.setFlexGrow(0, toolbar);
+		content.setFlexGrow(1, correctionPanel);
 
 		content.setSizeFull();
 
-		window.setContent(content);
+		window.add(content);
 		window.setSizeFull();
-		window.setCaption(I18nProperties.getString(titleTag));
+		window.setHeaderTitle(I18nProperties.getString(titleTag));
 
 		window.open();
 	}

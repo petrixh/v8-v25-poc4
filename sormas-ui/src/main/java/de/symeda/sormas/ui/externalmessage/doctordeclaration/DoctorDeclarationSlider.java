@@ -38,27 +38,27 @@ public class DoctorDeclarationSlider {
 		this.topRightButton = ButtonHelper.createIconButton("", VaadinIcon.ANGLE_RIGHT, (clickEvent) -> this.next());
 
 		HorizontalLayout topNavigator = new HorizontalLayout();
-		topNavigator.setStyleName(CssStyles.FLOAT_RIGHT);
-		topNavigator.addComponent(topLeftButton);
-		topNavigator.addComponent(topRightButton);
+		topNavigator.setClassName(CssStyles.FLOAT_RIGHT);
+		topNavigator.add(topLeftButton);
+		topNavigator.add(topRightButton);
 
-		layout.addComponent(topNavigator);
+		layout.add(topNavigator);
 
 		ExternalMessageForm form = new ExternalMessageForm();
 		form.setWidth(550, Unit.PIXELS);
 		form.setValue(doctorDeclarations.get(index));
 		this.form = form;
-		layout.addComponent(this.form);
+		layout.add(this.form);
 		layout.addClassName("doctor-declaration-slider");
 
 		this.bottomLeftButton = ButtonHelper.createIconButton("", VaadinIcon.ANGLE_LEFT, (clickEvent) -> this.previous());
 		this.bottomRightButton = ButtonHelper.createIconButton("", VaadinIcon.ANGLE_RIGHT, (clickEvent) -> this.next());
 		HorizontalLayout bottomNavigator = new HorizontalLayout();
-		bottomNavigator.setStyleName(CssStyles.FLOAT_RIGHT);
-		bottomNavigator.addComponent(bottomLeftButton);
-		bottomNavigator.addComponent(bottomRightButton);
+		bottomNavigator.setClassName(CssStyles.FLOAT_RIGHT);
+		bottomNavigator.add(bottomLeftButton);
+		bottomNavigator.add(bottomRightButton);
 
-		layout.addComponent(bottomNavigator);
+		layout.add(bottomNavigator);
 
 		this.enableButtons();
 	}

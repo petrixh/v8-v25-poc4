@@ -23,14 +23,12 @@ import java.util.function.Consumer;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.data.provider.DataProviderListener;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.data.provider.DataProviderListener;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
 import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.Component;
-import de.symeda.sormas.ui.utils.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
 import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
@@ -53,9 +51,13 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.DownloadUtil;
 import de.symeda.sormas.ui.utils.FilteredGrid;
+import de.symeda.sormas.ui.utils.GridExportStreamResource;
 import de.symeda.sormas.ui.utils.ShowDetailsListener;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
 import de.symeda.sormas.ui.utils.UuidRenderer;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
 
 public class ExternalMessageGrid extends FilteredGrid<ExternalMessageIndexDto, ExternalMessageCriteria> {
@@ -92,12 +94,18 @@ public class ExternalMessageGrid extends FilteredGrid<ExternalMessageIndexDto, E
 
 		addShowColumn(e -> ControllerProvider.getExternalMessageController().showExternalMessage(e.getUuid(), true, this::reload));
 
-		addComponentColumn(this::buildAssigneeLayout).setId(EDIT_ASSIGNEE)
+		Column<ExternalMessageIndexDto, HorizontalLayout> assigneeColumn = addComponentColumn(this::buildAssigneeLayout).setKey(EDIT_ASSIGNEE)
 			.setCaption(I18nProperties.getPrefixCaption(ExternalMessageDto.I18N_PREFIX, ExternalMessageDto.ASSIGNEE))
 			.setSortable(false);
+		// component columns export their visible text (BR-27)
+		GridExportStreamResource.setExportValueProvider(assigneeColumn, m -> m.getAssignee() != null ? m.getAssignee().getCaption() : "");
 
-		addComponentColumn(this::buildProcessComponent).setId(COLUMN_PROCESS).setSortable(false);
-		addComponentColumn(this::buildDownloadButton).setId(COLUMN_DOWNLOAD).setSortable(false);
+		Column<ExternalMessageIndexDto, Component> processColumn =
+			addComponentColumn(this::buildProcessComponent).setKey(COLUMN_PROCESS).setSortable(false);
+		GridExportStreamResource.setExportValueProvider(processColumn, m -> "");
+		Column<ExternalMessageIndexDto, Anchor> downloadColumn =
+			addComponentColumn(this::buildDownloadButton).setKey(COLUMN_DOWNLOAD).setSortable(false);
+		GridExportStreamResource.setExportValueProvider(downloadColumn, m -> "");
 
 		String[] columns = new String[] {
 			SHOW_MESSAGE };
@@ -130,8 +138,8 @@ public class ExternalMessageGrid extends FilteredGrid<ExternalMessageIndexDto, E
 		((Column<ExternalMessageIndexDto, Date>) getColumn(ExternalMessageIndexDto.PERSON_BIRTH_DATE))
 			.setRenderer(new DateRenderer(DateHelper.getLocalDateFormat(I18nProperties.getUserLanguage())));
 
-		for (Grid.Column<?, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(ExternalMessageIndexDto.I18N_PREFIX, column.getId(), column.getCaption()));
+		for (Column<ExternalMessageIndexDto, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(ExternalMessageIndexDto.I18N_PREFIX, column.getKey(), column.getCaption()));
 			if (StringUtils.isBlank(column.getCaption())) {
 				column.setCaption("\uFEFF");
 			}
@@ -140,7 +148,7 @@ public class ExternalMessageGrid extends FilteredGrid<ExternalMessageIndexDto, E
 
 	protected void addShowColumn(Consumer<ExternalMessageIndexDto> handler) {
 
-		Column<ExternalMessageIndexDto, String> editColumn = addColumn(entry -> VaadinIcon.EYE.getHtml(), new HtmlRenderer());
+		Column<ExternalMessageIndexDto, String> editColumn = addColumn(entry -> HtmlRenderer.iconHtml(VaadinIcon.EYE), new HtmlRenderer());
 		editColumn.setId(SHOW_MESSAGE);
 		editColumn.setSortable(false);
 		editColumn.setWidth(20);
@@ -157,7 +165,7 @@ public class ExternalMessageGrid extends FilteredGrid<ExternalMessageIndexDto, E
 	}
 
 	public void reload() {
-		if (getSelectionModel().isUserSelectionAllowed()) {
+		if (isUserSelectionAllowed()) {
 			deselectAll();
 		}
 
@@ -177,7 +185,7 @@ public class ExternalMessageGrid extends FilteredGrid<ExternalMessageIndexDto, E
 
 		if (externalMessage.getAssignee() != null) {
 			Span label = new Span(externalMessage.getAssignee().getCaption());
-			layout.addComponent(label);
+			layout.add(label);
 		}
 
 		final boolean canAssignLabMessage =
@@ -193,13 +201,13 @@ public class ExternalMessageGrid extends FilteredGrid<ExternalMessageIndexDto, E
 			Button button = new Button();
 			CssStyles.style(button, CssStyles.BUTTON_LINK, CssStyles.BUTTON_COMPACT);
 			if (externalMessage.getAssignee() == null) {
-				button.setCaption(I18nProperties.getCaption(Captions.assign));
+				button.setText(I18nProperties.getCaption(Captions.assign));
 			} else {
-				button.setIcon((VaadinIcon.ELLIPSIS_DOTS_V));
+				ButtonHelper.setIcon(button, VaadinIcon.ELLIPSIS_DOTS_V);
 				CssStyles.style(button, CssStyles.ALIGN_RIGHT);
 			}
 			button.addClickListener(e -> ControllerProvider.getExternalMessageController().editAssignee(externalMessage.getUuid()));
-			layout.addComponent(button);
+			layout.add(button);
 		}
 		return layout;
 	}
@@ -230,15 +238,13 @@ public class ExternalMessageGrid extends FilteredGrid<ExternalMessageIndexDto, E
 			}, CssStyles.BUTTON_PRIMARY);
 		} else {
 			// build placeholder necessary to circumvent a vaadin scaling issue (see #7681)
-			Span placeholder = new Span(PLACEHOLDER_SPACE);
-			placeholder.setContentMode(ContentMode.HTML);
-			return placeholder;
+			return VaadinUiUtil.createLabel(PLACEHOLDER_SPACE, ContentMode.HTML);
 		}
 	}
 
-	private Button buildDownloadButton(ExternalMessageIndexDto externalMessageIndex) {
-		Button downloadButton = new Button(VaadinIcon.DOWNLOAD);
-		downloadButton.setDescription(I18nProperties.getString(Strings.headingExternalMessageDownload));
+	private Anchor buildDownloadButton(ExternalMessageIndexDto externalMessageIndex) {
+		Button downloadButton = new Button(VaadinIcon.DOWNLOAD.create());
+		downloadButton.setTooltipText(I18nProperties.getString(Strings.headingExternalMessageDownload));
 
 		String fileName;
 		String mimeType;
@@ -253,7 +259,7 @@ public class ExternalMessageGrid extends FilteredGrid<ExternalMessageIndexDto, E
 			mimeType = "application/xml";
 		}
 
-		StreamResource streamResource = new StreamResource(
+		StreamSourceDownloadHandler streamResource = new StreamSourceDownloadHandler(
 			() -> ControllerProvider.getExternalMessageController()
 				.downloadExternalMessageAttachment(externalMessageIndex.getUuid())
 				.map(ByteArrayInputStream::new)
@@ -261,10 +267,7 @@ public class ExternalMessageGrid extends FilteredGrid<ExternalMessageIndexDto, E
 			fileName);
 		streamResource.setMIMEType(mimeType);
 
-		FileDownloader fileDownloader = new FileDownloader(streamResource);
-		fileDownloader.extend(downloadButton);
-		fileDownloader.setFileDownloadResource(streamResource);
-
-		return downloadButton;
+		// was a FileDownloader on the button: the button sits in a download link
+		return DownloadUtil.createDownloadLink(downloadButton, streamResource);
 	}
 }

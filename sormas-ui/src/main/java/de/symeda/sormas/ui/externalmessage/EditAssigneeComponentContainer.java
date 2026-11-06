@@ -63,8 +63,8 @@ public class EditAssigneeComponentContainer {
 		wrapperComponent = new CommitDiscardWrapperComponent<>(form);
 
 		window = VaadinUiUtil.createPopupWindow();
-		window.setCaption(I18nProperties.getString(Strings.headingEditAssignee));
-		window.setContent(wrapperComponent);
+		window.setHeaderTitle(I18nProperties.getString(Strings.headingEditAssignee));
+		window.add(wrapperComponent);
 
 		wrapperComponent.addDiscardListener(window::close);
 	}

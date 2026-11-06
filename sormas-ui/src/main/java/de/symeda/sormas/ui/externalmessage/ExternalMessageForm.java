@@ -23,9 +23,9 @@ import org.slf4j.LoggerFactory;
 import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.flow.component.Component;
 import de.symeda.sormas.ui.utils.CustomLayout;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TabSheet;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
@@ -51,9 +51,11 @@ public class ExternalMessageForm extends AbstractEditForm<ExternalMessageDto> {
 	//@formatter:on
 
 	private TabSheet detailsTabSheet;
-	private Panel structuredViewPanel;
+	// were Panels: scroll their content
+	private Scroller structuredViewPanel;
 	@SuppressWarnings("java:S1450") // referenced in addFields, tab listener and setValue - cannot be local
-	private Panel detailedViewPanel;
+	private Scroller detailedViewPanel;
+	private Tab structuredViewTab;
 	private VerticalLayout structuredViewContainer;
 	private VerticalLayout detailedViewContainer;
 	private boolean structuredViewLoaded;
@@ -74,32 +76,30 @@ public class ExternalMessageForm extends AbstractEditForm<ExternalMessageDto> {
 		structuredViewContainer.setPadding(false);
 		structuredViewContainer.setSizeUndefined();
 
-		structuredViewPanel = new Panel();
+		structuredViewPanel = new Scroller(structuredViewContainer);
 		structuredViewPanel.setSizeFull();
 		structuredViewPanel.addClassName("lab-message-structured-view");
-		structuredViewPanel.setContent(structuredViewContainer);
 
 		detailedViewContainer = new VerticalLayout();
 		detailedViewContainer.setPadding(false);
 		detailedViewContainer.setSizeUndefined();
 
-		detailedViewPanel = new Panel();
+		detailedViewPanel = new Scroller(detailedViewContainer);
 		detailedViewPanel.setSizeFull();
 		detailedViewPanel.addClassName("lab-message-detailed-view");
-		detailedViewPanel.setContent(detailedViewContainer);
 
 		detailsTabSheet = new TabSheet();
 		detailsTabSheet.setSizeFull();
 		detailsTabSheet.addClassName("lab-message-details");
-		detailsTabSheet.addTab(structuredViewPanel, I18nProperties.getCaption(Captions.externalMessage_structuredView));
-		detailsTabSheet.addTab(detailedViewPanel, I18nProperties.getCaption(Captions.externalMessage_detailedView));
+		structuredViewTab = detailsTabSheet.add(I18nProperties.getCaption(Captions.externalMessage_structuredView), structuredViewPanel);
+		detailsTabSheet.add(I18nProperties.getCaption(Captions.externalMessage_detailedView), detailedViewPanel);
 
-		detailsTabSheet.addSelectedTabChangeListener(event -> {
+		detailsTabSheet.addSelectedChangeListener(event -> {
 			ExternalMessageDto msg = getValue();
 			if (msg == null) {
 				return;
 			}
-			Component selected = event.getTabSheet().getSelectedTab();
+			Component selected = detailsTabSheet.getComponent(event.getSelectedTab());
 			if (selected == structuredViewPanel) {
 				loadStructuredView(msg);
 			} else if (selected == detailedViewPanel) {
@@ -124,7 +124,7 @@ public class ExternalMessageForm extends AbstractEditForm<ExternalMessageDto> {
 		structuredViewContainer.removeAll();
 		detailedViewContainer.removeAll();
 		loadStructuredView(externalMessage);
-		detailsTabSheet.setSelectedTab(structuredViewPanel);
+		detailsTabSheet.setSelectedTab(structuredViewTab);
 	}
 
 	private void loadStructuredView(ExternalMessageDto externalMessage) {
@@ -136,13 +136,13 @@ public class ExternalMessageForm extends AbstractEditForm<ExternalMessageDto> {
 			if (result.isSuccess()) {
 				CustomLayout layout = new CustomLayout();
 				layout.setTemplateContents(result.getValue());
-				structuredViewContainer.addComponent(layout);
+				structuredViewContainer.add(layout);
 			} else {
-				structuredViewContainer.addComponent(createXmlDisplay(externalMessage.getExternalMessageDetails()));
+				structuredViewContainer.add(createXmlDisplay(externalMessage.getExternalMessageDetails()));
 				VaadinUiUtil.showWarningPopup(result.getError());
 			}
 		} catch (Exception e) {
-			structuredViewContainer.addComponent(createXmlDisplay(externalMessage.getExternalMessageDetails()));
+			structuredViewContainer.add(createXmlDisplay(externalMessage.getExternalMessageDetails()));
 			logger.error(e.getMessage());
 		}
 		structuredViewLoaded = true;
@@ -157,22 +157,19 @@ public class ExternalMessageForm extends AbstractEditForm<ExternalMessageDto> {
 			if (result.isSuccess()) {
 				CustomLayout layout = new CustomLayout();
 				layout.setTemplateContents(result.getValue());
-				detailedViewContainer.addComponent(layout);
+				detailedViewContainer.add(layout);
 			} else {
-				detailedViewContainer.addComponent(createXmlDisplay(externalMessage.getExternalMessageDetails()));
+				detailedViewContainer.add(createXmlDisplay(externalMessage.getExternalMessageDetails()));
 				VaadinUiUtil.showWarningPopup(result.getError());
 			}
 		} catch (Exception e) {
-			detailedViewContainer.addComponent(createXmlDisplay(externalMessage.getExternalMessageDetails()));
+			detailedViewContainer.add(createXmlDisplay(externalMessage.getExternalMessageDetails()));
 			logger.error(e.getMessage());
 		}
 		detailedViewLoaded = true;
 	}
 
 	private Component createXmlDisplay(String xml) {
-		Span label = new Span();
-		label.setValue(xml);
-		label.setContentMode(ContentMode.PREFORMATTED);
-		return label;
+		return VaadinUiUtil.createLabel(xml, ContentMode.PREFORMATTED);
 	}
 }

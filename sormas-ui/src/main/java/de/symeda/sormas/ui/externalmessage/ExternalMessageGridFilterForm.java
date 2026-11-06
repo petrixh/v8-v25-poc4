@@ -22,8 +22,8 @@ import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.data.Validator;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.data.binder.Validator;
 import de.symeda.sormas.ui.utils.fields.ComboBox;
 import de.symeda.sormas.ui.utils.fields.DateField;
 import de.symeda.sormas.ui.utils.fields.Field;
@@ -155,14 +155,14 @@ public class ExternalMessageGridFilterForm extends AbstractFilterForm<ExternalMe
 	}
 
 	@Override
-	protected void applyDependenciesOnFieldChange(String propertyId, Property.ValueChangeEvent event) {
+	protected void applyDependenciesOnFieldChange(String propertyId, HasValue.ValueChangeEvent<?> event) {
 		super.applyDependenciesOnFieldChange(propertyId, event);
 
 		if (ExternalMessageDto.DISEASE.equals(propertyId)) {
 			ComboBox diseaseVariantField = getField(CaseDataDto.DISEASE_VARIANT);
 			Disease disease = (Disease) event.getValue();
 			if (disease == null) {
-				FieldHelper.updateItems(diseaseVariantField, Collections.emptyList());
+				FieldHelper.updateItems(diseaseVariantField, Collections.<DiseaseVariant> emptyList());
 				FieldHelper.setEnabled(false, diseaseVariantField);
 			} else {
 				List<DiseaseVariant> diseaseVariants =
@@ -180,7 +180,7 @@ public class ExternalMessageGridFilterForm extends AbstractFilterForm<ExternalMe
 		ComboBox diseaseVariantField = getField(ExternalMessageDto.DISEASE_VARIANT);
 		Disease disease = (Disease) diseaseField.getValue();
 		if (disease == null) {
-			FieldHelper.updateItems(diseaseVariantField, Collections.emptyList());
+			FieldHelper.updateItems(diseaseVariantField, Collections.<DiseaseVariant> emptyList());
 			FieldHelper.setEnabled(false, diseaseVariantField);
 		} else {
 			List<DiseaseVariant> diseaseVariants =

@@ -27,7 +27,6 @@ import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
 import de.symeda.sormas.ui.utils.NotificationHelper;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.dialog.Dialog;
 
@@ -293,7 +292,7 @@ public class LabMessageProcessingFlow extends AbstractLabMessageProcessingFlow {
 			callback.done(result);
 		});
 		component.addDiscardListener(callback::cancel);
-		Registration closeListener = window.addCloseListener((e -> component.discard()));
+		Registration closeListener = VaadinUiUtil.addCloseListener(window, e -> component.discard());
 		component.addDoneListener(() -> {
 			closeListener.remove();
 			window.close();
@@ -301,8 +300,8 @@ public class LabMessageProcessingFlow extends AbstractLabMessageProcessingFlow {
 
 		eventSelect.setSelectionChangeCallback(commitAllowed -> component.getCommitButton().setEnabled(commitAllowed));
 
-		window.setContent(component);
-		window.setCaption(I18nProperties.getString(Strings.headingPickOrCreateEvent));
+		window.add(component);
+		window.setHeaderTitle(I18nProperties.getString(Strings.headingPickOrCreateEvent));
 		window.open();
 	}
 
@@ -326,14 +325,14 @@ public class LabMessageProcessingFlow extends AbstractLabMessageProcessingFlow {
 			}
 		});
 		editView.addDiscardListener(callback::cancel);
-		Registration closeListener = window.addCloseListener((e -> editView.discard()));
+		Registration closeListener = VaadinUiUtil.addCloseListener(window, e -> editView.discard());
 		editView.addDoneListener(() -> {
 			closeListener.remove();
 			window.close();
 		});
 
-		window.setContent(editView);
-		window.setCaption(I18nProperties.getString(Strings.headingCreateNewEvent));
+		window.add(editView);
+		window.setHeaderTitle(I18nProperties.getString(Strings.headingCreateNewEvent));
 		window.open();
 	}
 
@@ -379,8 +378,8 @@ public class LabMessageProcessingFlow extends AbstractLabMessageProcessingFlow {
 
 		CommitDiscardWrapperComponent<VerticalLayout> commitDiscardWrapperComponent =
 			new CommitDiscardWrapperComponent<>(new VerticalLayout(new Span(I18nProperties.getString(Strings.infoEventParticipantAlreadyExisting))));
-		commitDiscardWrapperComponent.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionContinue));
-		commitDiscardWrapperComponent.getDiscardButton().setCaption(I18nProperties.getCaption(Captions.actionBack));
+		commitDiscardWrapperComponent.getCommitButton().setText(I18nProperties.getCaption(Captions.actionContinue));
+		commitDiscardWrapperComponent.getDiscardButton().setText(I18nProperties.getCaption(Captions.actionBack));
 
 		commitDiscardWrapperComponent.addCommitListener(() -> ret.complete(true));
 		commitDiscardWrapperComponent.addDiscardListener(() -> ret.complete(false));
@@ -425,7 +424,7 @@ public class LabMessageProcessingFlow extends AbstractLabMessageProcessingFlow {
 		Dialog window = VaadinUiUtil.createPopupWindow();
 
 		final CommitDiscardWrapperComponent<SampleSelectionField> selectionField = new CommitDiscardWrapperComponent<>(selectField);
-		selectionField.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionConfirm));
+		selectionField.getCommitButton().setText(I18nProperties.getCaption(Captions.actionConfirm));
 		selectionField.setWidth(1280, Unit.PIXELS);
 		selectionField.addCommitListener(() -> {
 			PickOrCreateSampleResult result = new PickOrCreateSampleResult();

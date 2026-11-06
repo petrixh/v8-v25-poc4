@@ -37,13 +37,11 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
 import de.symeda.sormas.ui.navigation.Navigator;
-import com.vaadin.server.Page;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
 import de.symeda.sormas.ui.utils.NotificationHelper;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.dialog.Dialog;
 
@@ -144,11 +142,11 @@ public class ExternalMessageController {
 
 		ExternalMessageForm form = new ExternalMessageForm();
 		form.setWidth(550, Unit.PIXELS);
-		layout.addComponent(form);
+		layout.add(form);
 
 		if (withActions && newDto.getStatus().isProcessable()) {
 			layout.addClassName("lab-message-processable");
-			layout.addComponent(getExternalMessageButtonsPanel(newDto, () -> {
+			layout.add(getExternalMessageButtonsPanel(newDto, () -> {
 				window.close();
 				onFormActionPerformed.run();
 			}));
@@ -359,11 +357,11 @@ public class ExternalMessageController {
 
 	public void assignAllSelectedItems(Collection<ExternalMessageIndexDto> selectedRows, Runnable callback) {
 		if (selectedRows.isEmpty()) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingNoExternalMessagesSelected),
 				I18nProperties.getString(Strings.messageNoExternalMessagesSelected),
 				NotificationHelper.Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				false);
 		} else {
 			bulkEditAssignee(selectedRows, callback);
 		}
@@ -410,7 +408,7 @@ public class ExternalMessageController {
 				CssStyles.BUTTON_DANGER,
 				CssStyles.BUTTON_BORDER_NEUTRAL);
 
-			buttonsPanel.addComponent(deleteButton);
+			buttonsPanel.add(deleteButton);
 		}
 
 		if (!FacadeProvider.getConfigFacade().isConfiguredCountry(CountryHelper.COUNTRY_CODE_LUXEMBOURG)) {
@@ -435,7 +433,7 @@ public class ExternalMessageController {
 						}
 					}));
 
-			buttonsPanel.addComponent(unclearButton);
+			buttonsPanel.add(unclearButton);
 
 			Button forwardButton = ButtonHelper.createButton(
 				Captions.actionManualForwardLabMessage,
@@ -458,7 +456,7 @@ public class ExternalMessageController {
 						}
 					}));
 
-			buttonsPanel.addComponent(forwardButton);
+			buttonsPanel.add(forwardButton);
 		}
 
 		if (FacadeProvider.getSormasToSormasFacade().isSharingExternalMessagesEnabledForUser()) {
@@ -467,7 +465,7 @@ public class ExternalMessageController {
 				VaadinIcon.SHARE,
 				e -> ControllerProvider.getSormasToSormasController().shareExternalMessage(externalMessage, callback));
 
-			buttonsPanel.addComponent(shareButton);
+			buttonsPanel.add(shareButton);
 		}
 
 		return buttonsPanel;
@@ -505,19 +503,19 @@ public class ExternalMessageController {
 			if (result.isSuccess()) {
 				return Optional.of(result.getValue());
 			} else {
-				new Notification(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.headingExternalMessageDownload),
 					result.getError(),
 					NotificationHelper.Type.ERROR_MESSAGE,
-					false).show(Page.getCurrent());
+					false);
 			}
 
 		} catch (NamingException e) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingExternalMessageDownload),
 				I18nProperties.getString(Strings.messageExternalLabResultsAdapterNotFound),
 				NotificationHelper.Type.ERROR_MESSAGE,
-				false).show(Page.getCurrent());
+				false);
 			logger.error(e.getMessage());
 		}
 		return Optional.empty();
@@ -528,9 +526,9 @@ public class ExternalMessageController {
 		Dialog popupWindow = VaadinUiUtil.showPopupWindow(warningLayout);
 		Span infoLabel = new Span(I18nProperties.getValidationError(Validations.externalMessageCorrectionsMade));
 		CssStyles.style(infoLabel, CssStyles.LABEL_LARGE, CssStyles.LABEL_WHITE_SPACE_NORMAL);
-		warningLayout.addComponent(infoLabel);
-		popupWindow.addCloseListener(e -> popupWindow.close());
-		popupWindow.setWidth(400, Unit.PIXELS);
+		warningLayout.add(infoLabel);
+		VaadinUiUtil.addCloseListener(popupWindow, e -> popupWindow.close());
+		popupWindow.setWidth("400px");
 	}
 
 	public void editAssignee(String labMessageUuid) {
@@ -615,7 +613,7 @@ public class ExternalMessageController {
 
 			externalMessageGrid.reload();
 			if (CollectionUtils.isNotEmpty(remainingExternalMessages)) {
-				externalMessageGrid.asMultiSelect().selectItems(remainingExternalMessages.toArray(new ExternalMessageIndexDto[0]));
+				externalMessageGrid.asMultiSelect().select(remainingExternalMessages.toArray(new ExternalMessageIndexDto[0]));
 			} else {
 				noEntriesRemainingCallback.run();
 			}

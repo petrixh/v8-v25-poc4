@@ -21,11 +21,11 @@ package de.symeda.sormas.ui.adverseeventsfollowingimmunization.components.fields
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.shared.ui.grid.HeightMode;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.VerticalLayout;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
+import com.vaadin.flow.component.Component;
+import de.symeda.sormas.ui.utils.fields.CustomField;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.caze.Vaccine;
 import de.symeda.sormas.api.caze.VaccineManufacturer;

@@ -20,7 +20,7 @@ package de.symeda.sormas.ui.adverseeventsfollowingimmunization.aefilink;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiListEntryDto;
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiType;
@@ -42,19 +42,19 @@ public class AefiListEntry extends SideComponentField {
 
 		this.aefiListEntryDto = aefiListEntryDto;
 
-		Label labelAefiType = new Label(AefiType.toString(aefiListEntryDto.getSerious()));
+		Span labelAefiType = new Span(AefiType.toString(aefiListEntryDto.getSerious()));
 		CssStyles.style(labelAefiType, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
 		if (aefiListEntryDto.getSerious() == YesNoUnknown.YES) {
 			CssStyles.style(labelAefiType, CssStyles.LABEL_CRITICAL);
 		}
 		addComponentToField(labelAefiType);
 
-		Label labelVaccineName = new Label(aefiListEntryDto.getPrimaryVaccineName().toString());
+		Span labelVaccineName = new Span(aefiListEntryDto.getPrimaryVaccineName().toString());
 		CssStyles.style(labelVaccineName, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
 		addComponentToField(labelVaccineName);
 
 		if (!StringUtils.isBlank(aefiListEntryDto.getPrimaryVaccineDose())) {
-			Label labelVaccineDose = new Label(
+			Span labelVaccineDose = new Span(
 				I18nProperties.getPrefixCaption(VaccinationDto.I18N_PREFIX, VaccinationDto.VACCINE_DOSE)
 					+ SEPARATOR
 					+ aefiListEntryDto.getPrimaryVaccineDose());
@@ -62,13 +62,13 @@ public class AefiListEntry extends SideComponentField {
 			addComponentToField(labelVaccineDose);
 		}
 
-		Label labelVaccineDate = new Label(
+		Span labelVaccineDate = new Span(
 			I18nProperties.getPrefixCaption(AefiListEntryDto.I18N_PREFIX, AefiListEntryDto.PRIMARY_VACCINE_VACCINATION_DATE)
 				+ SEPARATOR
 				+ DateFormatHelper.formatLocalDate(aefiListEntryDto.getPrimaryVaccineVaccinationDate()));
 		addComponentToField(labelVaccineDate);
 
-		Label labelAdverseEvents = new Label(StringUtils.abbreviate(aefiListEntryDto.getAdverseEvents(), 56));
+		Span labelAdverseEvents = new Span(StringUtils.abbreviate(aefiListEntryDto.getAdverseEvents(), 56));
 		CssStyles.style(labelAdverseEvents, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
 		addComponentToField(labelAdverseEvents);
 	}

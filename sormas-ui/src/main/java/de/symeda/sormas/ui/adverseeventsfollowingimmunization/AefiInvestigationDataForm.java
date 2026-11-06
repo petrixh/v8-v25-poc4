@@ -26,14 +26,13 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.locCss;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.OptionGroup;
-import com.vaadin.v7.ui.PasswordField;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.PasswordField;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiDto;
@@ -315,8 +314,8 @@ public class AefiInvestigationDataForm extends AbstractEditForm<AefiInvestigatio
 	@Override
 	protected void addFields() {
 
-		Label formHeadingLabel = new Label(I18nProperties.getString(Strings.headingAefiInvestigationFormSubHeading));
-		formHeadingLabel.addStyleNames(H3, CssStyles.LABEL_CRITICAL, CssStyles.VSPACE_NONE, CssStyles.VSPACE_TOP_NONE);
+		Span formHeadingLabel = new Span(I18nProperties.getString(Strings.headingAefiInvestigationFormSubHeading));
+		formHeadingLabel.addClassNames(H3, CssStyles.LABEL_CRITICAL, CssStyles.VSPACE_NONE, CssStyles.VSPACE_TOP_NONE);
 		getContent().addComponent(formHeadingLabel, FORM_HEADING_LOC);
 
 		FormSectionAccordion accordion = new FormSectionAccordion();
@@ -409,8 +408,8 @@ public class AefiInvestigationDataForm extends AbstractEditForm<AefiInvestigatio
 		familyHistoryOfDiseaseDetails.setCaption(null);
 		familyHistoryOfDiseaseDetails.setInputPrompt(I18nProperties.getString(Strings.promptRemarks));
 
-		Label forInfantsLabel = new Label(I18nProperties.getCaption(Captions.aefiInvestigationForInfants));
-		forInfantsLabel.addStyleName(CssStyles.H4);
+		Span forInfantsLabel = new Span(I18nProperties.getCaption(Captions.aefiInvestigationForInfants));
+		forInfantsLabel.addClassName(CssStyles.H4);
 		relevantPatientInformationLayout.addComponent(forInfantsLabel, FOR_INFANTS_HEADING_LOC);
 
 		addField(relevantPatientInformationLayout, AefiInvestigationDto.BIRTH_TERM, NullableOptionGroup.class);
@@ -424,8 +423,8 @@ public class AefiInvestigationDataForm extends AbstractEditForm<AefiInvestigatio
 		CustomLayout firstExaminationDetailsLayout = new CustomLayout();
 		firstExaminationDetailsLayout.setTemplateContents(FIRST_EXAMINATION_HTML_LAYOUT);
 
-		Label sourceOfInformationLabel = new Label(I18nProperties.getCaption(Captions.aefiInvestigationSourceOfInformation));
-		sourceOfInformationLabel.addStyleName(CssStyles.H4);
+		Span sourceOfInformationLabel = new Span(I18nProperties.getCaption(Captions.aefiInvestigationSourceOfInformation));
+		sourceOfInformationLabel.addClassName(CssStyles.H4);
 		firstExaminationDetailsLayout.addComponent(sourceOfInformationLabel, SOURCE_OF_INFORMATION_HEADING_LOC);
 
 		OptionGroup seriousAefiSourcesOfInformation =
@@ -450,8 +449,8 @@ public class AefiInvestigationDataForm extends AbstractEditForm<AefiInvestigatio
 				.getPrefixDescription(AefiInvestigationDto.I18N_PREFIX, AefiInvestigationDto.SIGNS_AND_SYMPTOMS_FROM_TIME_OF_VACCINATION, "") + "\n"
 				+ I18nProperties.getDescription(Descriptions.descGdpr));
 
-		Label clinicalDetailsOfficerLabel = new Label(I18nProperties.getCaption(Captions.aefiInvestigationClinicalDetailsOfficer));
-		clinicalDetailsOfficerLabel.addStyleName(CssStyles.H4);
+		Span clinicalDetailsOfficerLabel = new Span(I18nProperties.getCaption(Captions.aefiInvestigationClinicalDetailsOfficer));
+		clinicalDetailsOfficerLabel.addClassName(CssStyles.H4);
 		firstExaminationDetailsLayout.addComponent(clinicalDetailsOfficerLabel, CLINICAL_DETAILS_OFFICER_HEADING_LOC);
 
 		addField(firstExaminationDetailsLayout, AefiInvestigationDto.CLINICAL_DETAILS_OFFICER_NAME);
@@ -581,9 +580,9 @@ public class AefiInvestigationDataForm extends AbstractEditForm<AefiInvestigatio
 		CustomLayout immunizationPracticesLayout = new CustomLayout();
 		immunizationPracticesLayout.setTemplateContents(IMMUNIZATION_PRACTICES_HTML_LAYOUT);
 
-		Label syringesAndNeedlesUsedLabel =
-			new Label(I18nProperties.getCaption(Captions.titleAefiInvestigationImmunizationPracticesSyringesAndNeedlesUsed));
-		syringesAndNeedlesUsedLabel.addStyleName(CssStyles.H4);
+		Span syringesAndNeedlesUsedLabel =
+			new Span(I18nProperties.getCaption(Captions.titleAefiInvestigationImmunizationPracticesSyringesAndNeedlesUsed));
+		syringesAndNeedlesUsedLabel.addClassName(CssStyles.H4);
 		immunizationPracticesLayout.addComponent(syringesAndNeedlesUsedLabel, SYRINGES_AND_NEEDLES_HEADING_LOC);
 
 		addField(immunizationPracticesLayout, AefiInvestigationDto.AD_SYRINGES_USED_FOR_IMMUNIZATION, NullableOptionGroup.class);
@@ -597,8 +596,8 @@ public class AefiInvestigationDataForm extends AbstractEditForm<AefiInvestigatio
 			I18nProperties.getPrefixDescription(AefiInvestigationDto.I18N_PREFIX, AefiInvestigationDto.SYRINGES_USED_ADDITIONAL_DETAILS, "") + "\n"
 				+ I18nProperties.getDescription(Descriptions.descGdpr));
 
-		Label reconstitutionLabel = new Label(I18nProperties.getCaption(Captions.titleAefiInvestigationImmunizationPracticesReconstitution));
-		reconstitutionLabel.addStyleName(CssStyles.H4);
+		Span reconstitutionLabel = new Span(I18nProperties.getCaption(Captions.titleAefiInvestigationImmunizationPracticesReconstitution));
+		reconstitutionLabel.addClassName(CssStyles.H4);
 		immunizationPracticesLayout.addComponent(reconstitutionLabel, RECONSTITUTION_HEADING_LOC);
 
 		addField(immunizationPracticesLayout, AefiInvestigationDto.SAME_RECONSTITUTION_SYRINGE_USED_FOR_MULTIPLE_VIALS_OF_SAME_VACCINE);
@@ -614,8 +613,8 @@ public class AefiInvestigationDataForm extends AbstractEditForm<AefiInvestigatio
 			I18nProperties.getPrefixDescription(AefiInvestigationDto.I18N_PREFIX, AefiInvestigationDto.RECONSTITUTION_ADDITIONAL_DETAILS, "") + "\n"
 				+ I18nProperties.getDescription(Descriptions.descGdpr));
 
-		Label injectionTechniqueLabel = new Label(I18nProperties.getCaption(Captions.titleAefiInvestigationImmunizationPracticesInjectionTechnique));
-		injectionTechniqueLabel.addStyleName(CssStyles.H4);
+		Span injectionTechniqueLabel = new Span(I18nProperties.getCaption(Captions.titleAefiInvestigationImmunizationPracticesInjectionTechnique));
+		injectionTechniqueLabel.addClassName(CssStyles.H4);
 		immunizationPracticesLayout.addComponent(injectionTechniqueLabel, INJECTION_TECHNIQUE_HEADING_LOC);
 
 		addField(immunizationPracticesLayout, AefiInvestigationDto.CORRECT_DOSE_OR_ROUTE);
@@ -646,9 +645,9 @@ public class AefiInvestigationDataForm extends AbstractEditForm<AefiInvestigatio
 		CustomLayout coldChainAndTransportLayout = new CustomLayout();
 		coldChainAndTransportLayout.setTemplateContents(COLD_CHAIN_AND_TRANSPORT_HTML_LAYOUT);
 
-		Label lastVaccineStoragePointLabel =
-			new Label(I18nProperties.getCaption(Captions.titleAefiInvestigationColdChainAndTransportLastVaccineStoragePoint));
-		lastVaccineStoragePointLabel.addStyleName(CssStyles.H4);
+		Span lastVaccineStoragePointLabel =
+			new Span(I18nProperties.getCaption(Captions.titleAefiInvestigationColdChainAndTransportLastVaccineStoragePoint));
+		lastVaccineStoragePointLabel.addClassName(CssStyles.H4);
 		coldChainAndTransportLayout.addComponent(lastVaccineStoragePointLabel, VACCINE_STORAGE_POINT_HEADING_LOC);
 
 		addField(coldChainAndTransportLayout, AefiInvestigationDto.VACCINE_STORAGE_REFRIGERATOR_TEMPERATURE_MONITORED);
@@ -675,9 +674,9 @@ public class AefiInvestigationDataForm extends AbstractEditForm<AefiInvestigatio
 			I18nProperties.getPrefixDescription(AefiInvestigationDto.I18N_PREFIX, AefiInvestigationDto.VACCINE_STORAGE_POINT_ADDITIONAL_DETAILS, "")
 				+ "\n" + I18nProperties.getDescription(Descriptions.descGdpr));
 
-		Label vaccineTransportationLabel =
-			new Label(I18nProperties.getCaption(Captions.titleAefiInvestigationColdChainAndTransportVaccineTransportation));
-		vaccineTransportationLabel.addStyleName(CssStyles.H4);
+		Span vaccineTransportationLabel =
+			new Span(I18nProperties.getCaption(Captions.titleAefiInvestigationColdChainAndTransportVaccineTransportation));
+		vaccineTransportationLabel.addClassName(CssStyles.H4);
 		coldChainAndTransportLayout.addComponent(vaccineTransportationLabel, VACCINE_TRANSPORTATION_HEADING_LOC);
 
 		addField(coldChainAndTransportLayout, AefiInvestigationDto.VACCINE_CARRIER_TYPE, NullableOptionGroup.class);
@@ -714,8 +713,8 @@ public class AefiInvestigationDataForm extends AbstractEditForm<AefiInvestigatio
 		numberOfSimilarEventsReportedInSamePeriod.setConversionError(
 			I18nProperties.getValidationError(Validations.onlyIntegerNumbersAllowed, numberOfSimilarEventsReportedInSamePeriod.getCaption()));
 
-		Label thoseAffectedLabelLabel = new Label(I18nProperties.getCaption(Captions.titleAefiInvestigationCommunityInvestigationThoseAffected));
-		thoseAffectedLabelLabel.addStyleName(CssStyles.H4);
+		Span thoseAffectedLabelLabel = new Span(I18nProperties.getCaption(Captions.titleAefiInvestigationCommunityInvestigationThoseAffected));
+		thoseAffectedLabelLabel.addClassName(CssStyles.H4);
 		communityInvestigationLayout.addComponent(thoseAffectedLabelLabel, THOSE_AFFECTED_HEADING_LOC);
 
 		TextField numberOfThoseAffectedVaccinated =
@@ -934,7 +933,7 @@ public class AefiInvestigationDataForm extends AbstractEditForm<AefiInvestigatio
 	}
 
 	@Override
-	public void setValue(AefiInvestigationDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(AefiInvestigationDto newFieldValue) {
 		super.setValue(newFieldValue);
 
 		getValue();

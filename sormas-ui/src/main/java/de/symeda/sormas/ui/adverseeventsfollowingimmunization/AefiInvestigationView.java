@@ -18,21 +18,21 @@ package de.symeda.sormas.ui.adverseeventsfollowingimmunization;
 import java.util.Collections;
 import java.util.Objects;
 
-import org.vaadin.hene.popupbutton.PopupButton;
+import de.symeda.sormas.ui.utils.PopupButton;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.StreamResource;
-import com.vaadin.shared.ui.ContentMode;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.ComboBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;
@@ -65,7 +65,7 @@ public class AefiInvestigationView extends AbstractAefiView {
 	private final AefiInvestigationDataLayout dataLayout;
 
 	// Filters
-	private Label relevanceStatusInfoLabel;
+	private Span relevanceStatusInfoLabel;
 	private ComboBox relevanceStatusFilter;
 	private ViewConfiguration viewConfiguration;
 
@@ -86,13 +86,13 @@ public class AefiInvestigationView extends AbstractAefiView {
 			VerticalLayout exportLayout = new VerticalLayout();
 			exportLayout.setSpacing(true);
 			exportLayout.setMargin(true);
-			exportLayout.addStyleName(CssStyles.LAYOUT_MINIMAL);
+			exportLayout.addClassName(CssStyles.LAYOUT_MINIMAL);
 			exportLayout.setWidth(200, Unit.PIXELS);
 
-			PopupButton exportButton = ButtonHelper.createIconPopupButton(Captions.export, VaadinIcons.DOWNLOAD, exportLayout);
+			PopupButton exportButton = ButtonHelper.createIconPopupButton(Captions.export, VaadinIcon.DOWNLOAD, exportLayout);
 			addHeaderComponent(exportButton);
 
-			Button basicExportButton = ButtonHelper.createIconButton(Captions.exportBasic, VaadinIcons.TABLE, null, ValoTheme.BUTTON_PRIMARY);
+			Button basicExportButton = ButtonHelper.createIconButton(Captions.exportBasic, VaadinIcon.TABLE, null, CssStyles.BUTTON_PRIMARY);
 			basicExportButton.setDescription(I18nProperties.getString(Strings.infoBasicExport));
 			basicExportButton.setWidth(100, Unit.PERCENTAGE);
 			exportLayout.addComponent(basicExportButton);
@@ -123,7 +123,7 @@ public class AefiInvestigationView extends AbstractAefiView {
 		mainLayout.setSpacing(false);
 		mainLayout.setSizeFull();
 		mainLayout.setExpandRatio(gridLayout, 1);
-		mainLayout.addStyleNames("crud-main-layout", CssStyles.VSPACE_TOP_4);
+		mainLayout.addClassNames("crud-main-layout", CssStyles.VSPACE_TOP_4);
 
 		addComponent(mainLayout);
 	}
@@ -161,7 +161,7 @@ public class AefiInvestigationView extends AbstractAefiView {
 		statusFilterLayout.setSpacing(true);
 		statusFilterLayout.setMargin(false);
 		statusFilterLayout.setWidth(100, Unit.PERCENTAGE);
-		statusFilterLayout.addStyleName(CssStyles.VSPACE_3);
+		statusFilterLayout.addClassName(CssStyles.VSPACE_3);
 
 		HorizontalLayout actionButtonsLayout = new HorizontalLayout();
 		actionButtonsLayout.setSpacing(true);
@@ -180,12 +180,12 @@ public class AefiInvestigationView extends AbstractAefiView {
 						FeatureTypeProperty.THRESHOLD_IN_DAYS,
 						Integer.class);
 				if (daysAfterAefiEntryGetsArchived > 0) {
-					relevanceStatusInfoLabel = new Label(
-						VaadinIcons.INFO_CIRCLE.getHtml() + " "
+					relevanceStatusInfoLabel = new Span(
+						VaadinIcon.INFO_CIRCLE.getHtml() + " "
 							+ String.format(I18nProperties.getString(Strings.infoArchivedAefiEntries), daysAfterAefiEntryGetsArchived),
 						ContentMode.HTML);
 					relevanceStatusInfoLabel.setVisible(false);
-					relevanceStatusInfoLabel.addStyleName(CssStyles.LABEL_VERTICAL_ALIGN_SUPER);
+					relevanceStatusInfoLabel.addClassName(CssStyles.LABEL_VERTICAL_ALIGN_SUPER);
 					actionButtonsLayout.addComponent(relevanceStatusInfoLabel);
 					actionButtonsLayout.setComponentAlignment(relevanceStatusInfoLabel, Alignment.MIDDLE_RIGHT);
 				}
@@ -202,7 +202,7 @@ public class AefiInvestigationView extends AbstractAefiView {
 				EntityRelevanceStatus.ACTIVE_AND_ARCHIVED,
 				I18nProperties.getCaption(Captions.aefiAllActiveAndArchivedInvestigations));
 			relevanceStatusFilter.setCaption(null);
-			relevanceStatusFilter.addStyleName(CssStyles.VSPACE_NONE);
+			relevanceStatusFilter.addClassName(CssStyles.VSPACE_NONE);
 
 			if (UserProvider.getCurrent().hasUserRight(UserRight.IMMUNIZATION_DELETE)) {
 				relevanceStatusFilter.setItemCaption(EntityRelevanceStatus.DELETED, I18nProperties.getCaption(Captions.aefiDeletedInvestigations));
@@ -212,9 +212,9 @@ public class AefiInvestigationView extends AbstractAefiView {
 
 			relevanceStatusFilter.addValueChangeListener(e -> {
 				if (relevanceStatusInfoLabel != null) {
-					relevanceStatusInfoLabel.setVisible(EntityRelevanceStatus.ARCHIVED.equals(e.getProperty().getValue()));
+					relevanceStatusInfoLabel.setVisible(EntityRelevanceStatus.ARCHIVED.equals(e.getValue()));
 				}
-				criteria.setRelevanceStatus((EntityRelevanceStatus) e.getProperty().getValue());
+				criteria.setRelevanceStatus((EntityRelevanceStatus) e.getValue());
 				navigateTo(criteria);
 			});
 			actionButtonsLayout.addComponent(relevanceStatusFilter);

@@ -15,9 +15,9 @@
 
 package de.symeda.sormas.ui.adverseeventsfollowingimmunization.components.form;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 import de.symeda.sormas.ui.utils.ButtonHelper;
@@ -42,7 +42,7 @@ public class FormSectionAccordionPanel extends VerticalLayout {
 
 		titleButton = ButtonHelper.createButton(titleButtonCaption, (event) -> {
 			formSectionAccordion.toggleFormSection(FormSectionAccordionPanel.this);
-		}, ValoTheme.BUTTON_LINK, CssStyles.FORM_SECTION_ACCORDION_PANEL_TITLE_BUTTON);
+		}, CssStyles.BUTTON_LINK, CssStyles.FORM_SECTION_ACCORDION_PANEL_TITLE_BUTTON);
 		addComponent(titleButton);
 
 		mainLayout = new VerticalLayout();
@@ -50,7 +50,7 @@ public class FormSectionAccordionPanel extends VerticalLayout {
 		mainLayout.setSpacing(false);
 		//mainLayout.setWidth(100, Unit.PERCENTAGE);
 		mainLayout.setVisible(expanded);
-		mainLayout.addStyleNames(CssStyles.VSPACE_TOP_3);
+		mainLayout.addClassNames(CssStyles.VSPACE_TOP_3);
 
 		addComponent(mainLayout);
 	}

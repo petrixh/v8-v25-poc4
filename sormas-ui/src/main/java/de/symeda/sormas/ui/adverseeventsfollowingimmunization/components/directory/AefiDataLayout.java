@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.ui.adverseeventsfollowingimmunization.components.directory;
 
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiCriteria;
 

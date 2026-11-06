@@ -18,8 +18,8 @@ package de.symeda.sormas.ui.adverseeventsfollowingimmunization.components.form;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 public class FormSectionAccordion extends VerticalLayout {
 

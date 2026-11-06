@@ -26,15 +26,14 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.PasswordField;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.PasswordField;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiDto;
@@ -146,8 +145,8 @@ public class AefiDataForm extends AbstractEditForm<AefiDto> {
 	@Override
 	protected void addFields() {
 
-		Label reportingInformationHeadingLabel = new Label(I18nProperties.getString(Strings.headingAefiReportingInformation));
-		reportingInformationHeadingLabel.addStyleName(H3);
+		Span reportingInformationHeadingLabel = new Span(I18nProperties.getString(Strings.headingAefiReportingInformation));
+		reportingInformationHeadingLabel.addClassName(H3);
 		getContent().addComponent(reportingInformationHeadingLabel, REPORTING_INFORMATION_HEADING_LOC);
 
 		if (isCreateAction) {
@@ -174,21 +173,21 @@ public class AefiDataForm extends AbstractEditForm<AefiDto> {
 
 		// Button to automatically assign a new reporting ID
 		Button assignNewReportingIdNumberButton = ButtonHelper.createButton(Captions.actionAefiAssignNewReportingIdNumber, e -> {
-		}, ValoTheme.BUTTON_DANGER, FORCE_CAPTION);
+		}, CssStyles.BUTTON_DANGER, FORCE_CAPTION);
 
 		getContent().addComponent(assignNewReportingIdNumberButton, ASSIGN_NEW_AEFI_ID_LOC);
 		assignNewReportingIdNumberButton.setVisible(false);
 
-		Label patientsIdentificationHeadingLabel = new Label(I18nProperties.getString(Strings.headingAefiPatientsIdentification));
-		patientsIdentificationHeadingLabel.addStyleName(H3);
+		Span patientsIdentificationHeadingLabel = new Span(I18nProperties.getString(Strings.headingAefiPatientsIdentification));
+		patientsIdentificationHeadingLabel.addClassName(H3);
 		getContent().addComponent(patientsIdentificationHeadingLabel, PATIENTS_IDENTIFICATION_HEADING_LOC);
 
 		addField(AefiDto.PREGNANT, NullableOptionGroup.class);
 		addField(AefiDto.TRIMESTER, NullableOptionGroup.class);
 		addField(AefiDto.LACTATING, NullableOptionGroup.class);
 
-		Label patientsAgeAtOnsetHeadingLabel = new Label(I18nProperties.getString(Strings.headingAefiPatientsAgeAtOnset));
-		patientsAgeAtOnsetHeadingLabel.addStyleName(H4);
+		Span patientsAgeAtOnsetHeadingLabel = new Span(I18nProperties.getString(Strings.headingAefiPatientsAgeAtOnset));
+		patientsAgeAtOnsetHeadingLabel.addClassName(H4);
 		getContent().addComponent(patientsAgeAtOnsetHeadingLabel, PATIENTS_IDENTIFICATION_AGE_AT_ONSET);
 
 		TextField onsetAgeYearsField = addField(AefiDto.ONSET_AGE_YEARS, TextField.class);
@@ -205,8 +204,8 @@ public class AefiDataForm extends AbstractEditForm<AefiDto> {
 
 		addField(AefiDto.AGE_GROUP, ComboBox.class);
 
-		Label vaccinationsHeadingLabel = new Label(I18nProperties.getString(Strings.headingAefiVaccinations));
-		vaccinationsHeadingLabel.addStyleName(H3);
+		Span vaccinationsHeadingLabel = new Span(I18nProperties.getString(Strings.headingAefiVaccinations));
+		vaccinationsHeadingLabel.addClassName(H3);
 		getContent().addComponent(vaccinationsHeadingLabel, VACCINATIONS_HEADING_LOC);
 
 		vaccinationsField = addField(AefiDto.VACCINATIONS, AefiVaccinationsField.class);
@@ -235,15 +234,15 @@ public class AefiDataForm extends AbstractEditForm<AefiDto> {
 			I18nProperties.getPrefixDescription(AefiDto.I18N_PREFIX, AefiDto.PAST_MEDICAL_HISTORY, "") + "\n"
 				+ I18nProperties.getDescription(Descriptions.descGdpr));
 
-		Label firstDecisionLevelHeadingLabel = new Label(I18nProperties.getString(Strings.headingAefiFirstDecisionLevel));
-		firstDecisionLevelHeadingLabel.addStyleName(H3);
+		Span firstDecisionLevelHeadingLabel = new Span(I18nProperties.getString(Strings.headingAefiFirstDecisionLevel));
+		firstDecisionLevelHeadingLabel.addClassName(H3);
 		getContent().addComponent(firstDecisionLevelHeadingLabel, FIRST_DECISION_LEVEL_HEADING_LOC);
 
 		addField(AefiDto.INVESTIGATION_NEEDED, NullableOptionGroup.class);
 		addDateField(AefiDto.INVESTIGATION_PLANNED_DATE, DateField.class, -1);
 
-		Label nationalDecisionLevelHeadingLabel = new Label(I18nProperties.getString(Strings.headingAefiNationalDecisionLevel));
-		nationalDecisionLevelHeadingLabel.addStyleName(H3);
+		Span nationalDecisionLevelHeadingLabel = new Span(I18nProperties.getString(Strings.headingAefiNationalDecisionLevel));
+		nationalDecisionLevelHeadingLabel.addClassName(H3);
 		getContent().addComponent(nationalDecisionLevelHeadingLabel, NATIONAL_DECISION_LEVEL_HEADING_LOC);
 
 		addField(AefiDto.RECEIVED_AT_NATIONAL_LEVEL_DATE, DateField.class);
@@ -300,7 +299,7 @@ public class AefiDataForm extends AbstractEditForm<AefiDto> {
 	}
 
 	@Override
-	public void setValue(AefiDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(AefiDto newFieldValue) {
 		super.setValue(newFieldValue);
 
 		getValue();

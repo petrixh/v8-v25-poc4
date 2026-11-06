@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.ui.adverseeventsfollowingimmunization;
 
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 
 import de.symeda.sormas.api.EditPermissionFacade;
 import de.symeda.sormas.api.FacadeProvider;

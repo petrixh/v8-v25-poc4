@@ -19,9 +19,9 @@ import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.v7.data.util.BeanItemContainer;
 import com.vaadin.v7.ui.Table;
 
@@ -80,9 +80,9 @@ public class AefiVaccinationsField extends AbstractTableField<VaccinationDto> {
 
 		table.addGeneratedColumn(Captions.aefiVaccinationsPrimaryVaccine, (Table.ColumnGenerator) (source, itemId, columnId) -> {
 			VaccinationDto vaccinationDto = (VaccinationDto) itemId;
-			return new Label(
+			return new Span(
 				primarySuspectVaccination != null && StringUtils.equals(vaccinationDto.getUuid(), primarySuspectVaccination.getUuid())
-					? VaadinIcons.CHECK_CIRCLE.getHtml()
+					? VaadinIcon.CHECK_CIRCLE.getHtml()
 					: "",
 				ContentMode.HTML);
 		});

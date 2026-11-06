@@ -18,8 +18,8 @@ package de.symeda.sormas.ui.adverseeventsfollowingimmunization.aefiinvestigation
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiInvestigationListCriteria;
@@ -37,7 +37,7 @@ public class AefiInvestigationList extends PaginationList<AefiInvestigationListE
 	private final AefiInvestigationListCriteria listCriteria;
 	private final Consumer<Runnable> actionCallback;
 	private final boolean isEditable;
-	private final Label noInvestigationsLabel;
+	private final Span noInvestigationsLabel;
 
 	public AefiInvestigationList(AefiInvestigationListCriteria listCriteria, Consumer<Runnable> actionCallback, boolean isEditable) {
 
@@ -47,7 +47,7 @@ public class AefiInvestigationList extends PaginationList<AefiInvestigationListE
 		this.actionCallback = actionCallback;
 		this.isEditable = isEditable;
 
-		noInvestigationsLabel = new Label(I18nProperties.getString(Strings.infoNoAefiInvestigations));
+		noInvestigationsLabel = new Span(I18nProperties.getString(Strings.infoNoAefiInvestigations));
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public class AefiInvestigationList extends PaginationList<AefiInvestigationListE
 			String aefiInvestigationUuid = listEntryDto.getUuid();
 			listEntry.addEditButton(
 				"edit-aefiinvestigation-" + aefiInvestigationUuid,
-				(Button.ClickListener) event -> ControllerProvider.getAefiInvestigationController()
+				event -> ControllerProvider.getAefiInvestigationController()
 					.navigateToAefiInvestigation(aefiInvestigationUuid));
 
 			listEntry.setEnabled(isEditable);

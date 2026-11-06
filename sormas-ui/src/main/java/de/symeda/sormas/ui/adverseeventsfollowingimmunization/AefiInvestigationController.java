@@ -19,9 +19,9 @@ import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.navigator.Navigator;
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Notification;
+import de.symeda.sormas.ui.navigation.Navigator;
+import com.vaadin.flow.component.Unit;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiDto;
@@ -60,7 +60,7 @@ public class AefiInvestigationController {
 
 		AefiPrimarySuspectVaccinationSelectionField selectionField =
 			new AefiPrimarySuspectVaccinationSelectionField(aefiInvestigationDto.getVaccinations(), aefiInvestigationDto.getPrimarySuspectVaccine());
-		selectionField.setWidth(1024, Sizeable.Unit.PIXELS);
+		selectionField.setWidth(1024, Unit.PIXELS);
 
 		final CommitDiscardWrapperComponent<AefiPrimarySuspectVaccinationSelectionField> component =
 			new CommitDiscardWrapperComponent<>(selectionField);
@@ -130,7 +130,7 @@ public class AefiInvestigationController {
 				AefiInvestigationDto aefiInvestigationDataFormValue = aefiInvestigationDataForm.getValue();
 
 				AefiInvestigationDto savedAefiInvestigationDto = FacadeProvider.getAefiInvestigationFacade().save(aefiInvestigationDataFormValue);
-				Notification.show(I18nProperties.getString(Strings.messageAdverseEventInvestigationSaved), Notification.Type.WARNING_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageAdverseEventInvestigationSaved), NotificationHelper.Type.WARNING_MESSAGE);
 
 				if (isCreateAction) {
 					navigateToAefiInvestigation(savedAefiInvestigationDto.getUuid());

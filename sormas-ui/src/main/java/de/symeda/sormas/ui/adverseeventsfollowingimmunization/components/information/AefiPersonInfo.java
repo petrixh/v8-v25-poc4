@@ -15,10 +15,10 @@
 
 package de.symeda.sormas.ui.adverseeventsfollowingimmunization.components.information;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -59,30 +59,30 @@ public class AefiPersonInfo extends AbstractInfoLayout<PersonDto> {
 		this.removeAllComponents();
 
 		VerticalLayout mainLayout = new VerticalLayout();
-		mainLayout.setWidth(100, Sizeable.Unit.PERCENTAGE);
+		mainLayout.setWidth(100, Unit.PERCENTAGE);
 		CssStyles.style(mainLayout, CssStyles.PADDING_NONE);
 
 		HorizontalLayout componentHeader = new HorizontalLayout();
 		componentHeader.setMargin(false);
 		componentHeader.setSpacing(false);
-		componentHeader.setWidth(100, Sizeable.Unit.PERCENTAGE);
+		componentHeader.setWidth(100, Unit.PERCENTAGE);
 
-		Label headingLabel = new Label(I18nProperties.getString(Strings.headingPersonInformation));
-		headingLabel.addStyleName(CssStyles.H3);
+		Span headingLabel = new Span(I18nProperties.getString(Strings.headingPersonInformation));
+		headingLabel.addClassName(CssStyles.H3);
 		componentHeader.addComponent(headingLabel);
 		componentHeader.setExpandRatio(headingLabel, 1);
 
 		HorizontalLayout infoColumnsLayout = new HorizontalLayout();
 		infoColumnsLayout.setMargin(false);
 		infoColumnsLayout.setSpacing(false);
-		infoColumnsLayout.setWidth(100, Sizeable.Unit.PERCENTAGE);
+		infoColumnsLayout.setWidth(100, Unit.PERCENTAGE);
 
 		VerticalLayout leftColumnLayout = new VerticalLayout();
 		leftColumnLayout.setMargin(false);
 		leftColumnLayout.setSpacing(true);
 		boolean hasUserRightPersonView = UserProvider.getCurrent().hasUserRight(UserRight.PERSON_VIEW);
 		{
-			final Label personIdLabel = addDescLabel(
+			final Span personIdLabel = addDescLabel(
 				leftColumnLayout,
 				PersonDto.UUID,
 				DataHelper.getShortUuid(personDto.getUuid()),

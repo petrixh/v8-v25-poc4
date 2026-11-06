@@ -21,9 +21,9 @@ package de.symeda.sormas.ui.adverseeventsfollowingimmunization.components.inform
 import java.util.function.Consumer;
 
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
@@ -60,12 +60,12 @@ public class AefiImmunizationInfo extends SideComponent {
 		uuidReportLayout.setMargin(false);
 		uuidReportLayout.setSpacing(true);
 
-		Label immunizationUuidLabel = new Label(DataHelper.getShortUuid(immunization.getUuid()));
+		Span immunizationUuidLabel = new Span(DataHelper.getShortUuid(immunization.getUuid()));
 		immunizationUuidLabel.setDescription(immunization.getUuid());
 		CssStyles.style(immunizationUuidLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
 		uuidReportLayout.addComponent(immunizationUuidLabel);
 
-		Label diseaseLabel = new Label(DataHelper.toStringNullable(immunization.getDisease()));
+		Span diseaseLabel = new Span(DataHelper.toStringNullable(immunization.getDisease()));
 		CssStyles.style(diseaseLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
 		uuidReportLayout.addComponent(diseaseLabel);
 
@@ -75,7 +75,7 @@ public class AefiImmunizationInfo extends SideComponent {
 		mainLayout.addComponent(uuidReportLayout);
 
 		HorizontalLayout meansOfImmunizationLayout = new HorizontalLayout();
-		Label meansOfImmunizationLabel = new Label(
+		Span meansOfImmunizationLabel = new Span(
 			I18nProperties.getPrefixCaption(ImmunizationListEntryDto.I18N_PREFIX, ImmunizationListEntryDto.MEANS_OF_IMMUNIZATION)
 				+ SEPARATOR
 				+ DataHelper.toStringNullable(immunization.getMeansOfImmunization()));
@@ -83,7 +83,7 @@ public class AefiImmunizationInfo extends SideComponent {
 		mainLayout.addComponent(meansOfImmunizationLayout);
 
 		HorizontalLayout immunizationStatusLayout = new HorizontalLayout();
-		Label immunizationStatusLabel = new Label(
+		Span immunizationStatusLabel = new Span(
 			I18nProperties.getPrefixCaption(ImmunizationListEntryDto.I18N_PREFIX, ImmunizationListEntryDto.IMMUNIZATION_STATUS)
 				+ SEPARATOR
 				+ DataHelper.toStringNullable(immunization.getImmunizationStatus()));
@@ -91,7 +91,7 @@ public class AefiImmunizationInfo extends SideComponent {
 		mainLayout.addComponent(immunizationStatusLayout);
 
 		HorizontalLayout managementStatusLayout = new HorizontalLayout();
-		Label managementStatusLabel = new Label(
+		Span managementStatusLabel = new Span(
 			I18nProperties.getPrefixCaption(ImmunizationListEntryDto.I18N_PREFIX, ImmunizationListEntryDto.IMMUNIZATION_MANAGEMENT_STATUS)
 				+ SEPARATOR
 				+ DataHelper.toStringNullable(immunization.getImmunizationManagementStatus()));
@@ -99,7 +99,7 @@ public class AefiImmunizationInfo extends SideComponent {
 		mainLayout.addComponent(managementStatusLayout);
 
 		HorizontalLayout immunizationPeriodLayout = new HorizontalLayout();
-		Label reportDateLabel = new Label(
+		Span reportDateLabel = new Span(
 			I18nProperties.getPrefixCaption(ImmunizationListEntryDto.I18N_PREFIX, ImmunizationListEntryDto.IMMUNIZATION_PERIOD)
 				+ SEPARATOR
 				+ DateFormatHelper.buildPeriodString(immunization.getStartDate(), immunization.getEndDate()));

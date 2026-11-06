@@ -62,6 +62,7 @@ public class SormasUI implements HasUserProvider, HasViewModelProviders, Seriali
 
 	private Navigator navigator;
 	private MainScreen mainScreen;
+	private String pageTitle;
 
 	/**
 	 * Creates a holder for the UI without attaching or initialising it ({@link #init(UI, VaadinRequest)} does both).
@@ -84,7 +85,8 @@ public class SormasUI implements HasUserProvider, HasViewModelProviders, Seriali
 			ui.setLocale(vaadinRequest.getLocale());
 		}
 
-		ui.getPage().setTitle(FacadeProvider.getConfigFacade().getSormasInstanceName());
+		sormasUI.pageTitle = FacadeProvider.getConfigFacade().getSormasInstanceName();
+		ui.getPage().setTitle(sormasUI.pageTitle);
 
 		sormasUI.initMainScreen();
 		return sormasUI;
@@ -131,6 +133,14 @@ public class SormasUI implements HasUserProvider, HasViewModelProviders, Seriali
 
 	public Future<Void> access(Command command) {
 		return ui.access(command);
+	}
+
+	/**
+	 * @return the page title set when the UI was created (the instance name). Flow sets the title again after every
+	 *         navigation, so {@link de.symeda.sormas.ui.navigation.MainLayout} returns it as its dynamic title.
+	 */
+	public String getPageTitle() {
+		return pageTitle;
 	}
 
 	public Navigator getNavigator() {

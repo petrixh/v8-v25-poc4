@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -102,7 +102,7 @@ public class VaccinationController {
 
 		final CommitDiscardWrapperComponent<VaccinationEditForm> cdwComponent =
 			new CommitDiscardWrapperComponent<>(form, UiUtil.permitted(UserRight.IMMUNIZATION_CREATE), form.getFieldGroup());
-		cdwComponent.getCommitButton().setCaption(doSave ? I18nProperties.getCaption(Captions.actionSave) : I18nProperties.getString(Strings.done));
+		cdwComponent.getCommitButton().setText(doSave ? I18nProperties.getCaption(Captions.actionSave) : I18nProperties.getString(Strings.done));
 
 		cdwComponent.addCommitListener(() -> {
 			if (!form.getFieldGroup().isModified()) {
@@ -139,7 +139,7 @@ public class VaccinationController {
 		final CommitDiscardWrapperComponent<VaccinationEditForm> editComponent =
 			getVaccinationEditComponent(vaccination, disease, fieldAccessCheckers, doSave, commitCallback, isEditAllowed, isDeleteAllowed);
 
-		Window popupWindow = VaadinUiUtil.showModalPopupWindow(
+		Dialog popupWindow = VaadinUiUtil.showModalPopupWindow(
 			editComponent,
 			I18nProperties.getString(!isEditAllowed ? Strings.headingViewVaccination : Strings.headingEditVaccination));
 
@@ -176,7 +176,7 @@ public class VaccinationController {
 	public static void showUpdateStatusConfirmationPopup(List<CaseDataDto> cases) {
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getCaption(Captions.CaseData_vaccinationStatusUpdate),
-			new Label(I18nProperties.getString(Strings.confirmationVaccinationStatusUpdate)),
+			new Span(I18nProperties.getString(Strings.confirmationVaccinationStatusUpdate)),
 			I18nProperties.getString(Strings.yes),
 			I18nProperties.getString(Strings.no),
 			600,
@@ -239,7 +239,7 @@ public class VaccinationController {
 
 		final CommitDiscardWrapperComponent<VaccinationEditForm> editComponent =
 			new CommitDiscardWrapperComponent<>(form, isEditOrDeleteAllowed, form.getFieldGroup());
-		editComponent.getCommitButton().setCaption(doSave ? I18nProperties.getCaption(Captions.actionSave) : I18nProperties.getString(Strings.done));
+		editComponent.getCommitButton().setText(doSave ? I18nProperties.getCaption(Captions.actionSave) : I18nProperties.getString(Strings.done));
 
 		if (isEditAllowed) {
 			editComponent.addCommitListener(() -> {

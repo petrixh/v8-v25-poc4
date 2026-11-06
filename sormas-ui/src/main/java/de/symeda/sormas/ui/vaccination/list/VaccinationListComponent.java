@@ -91,7 +91,7 @@ public class VaccinationListComponent extends SideComponent {
 
 		VaccinationList vaccinationList = new VaccinationList(criteria.getDisease(), entriesListSupplier, actionCallback, isEditAllowed);
 		vaccinationList.setActiveUuid(activeUuid);
-		addComponent(vaccinationList);
+		add(vaccinationList);
 		vaccinationList.reload();
 	}
 

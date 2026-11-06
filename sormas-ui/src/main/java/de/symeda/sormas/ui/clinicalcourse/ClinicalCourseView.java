@@ -17,15 +17,14 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.clinicalcourse;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.shared.ui.grid.HeightMode;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -44,6 +43,7 @@ import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DetailSubComponentWrapper;
 import de.symeda.sormas.ui.utils.MenuBarHelper;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
 
 @SuppressWarnings("serial")
 public class ClinicalCourseView extends AbstractCaseView {
@@ -65,28 +65,28 @@ public class ClinicalCourseView extends AbstractCaseView {
 	private VerticalLayout createClinicalVisitsHeader() {
 
 		VerticalLayout clinicalVisitsHeader = new VerticalLayout();
-		clinicalVisitsHeader.setMargin(false);
+		clinicalVisitsHeader.setPadding(false);
 		clinicalVisitsHeader.setSpacing(false);
 		clinicalVisitsHeader.setWidth(100, Unit.PERCENTAGE);
 
 		HorizontalLayout headlineRow = new HorizontalLayout();
-		headlineRow.setMargin(false);
+		headlineRow.setPadding(false);
 		headlineRow.setSpacing(true);
 		headlineRow.setWidth(100, Unit.PERCENTAGE);
 		{
-			Label clinicalVisitsLabel = new Label(I18nProperties.getString(Strings.entityClinicalVisits));
+			Span clinicalVisitsLabel = new Span(I18nProperties.getString(Strings.entityClinicalVisits));
 			CssStyles.style(clinicalVisitsLabel, CssStyles.H3);
-			headlineRow.addComponent(clinicalVisitsLabel);
-			headlineRow.setExpandRatio(clinicalVisitsLabel, 1);
+			headlineRow.add(clinicalVisitsLabel);
+			headlineRow.setFlexGrow(1, clinicalVisitsLabel);
 
 			if (isEditAllowed()) {
 				// Bulk operations
 				if (UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS, UserRight.CASE_EDIT, UserRight.CLINICAL_COURSE_EDIT)) {
 					MenuBar bulkOperationsDropdown = MenuBarHelper.createDropDown(
 						Captions.bulkActions,
-						new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkDelete), VaadinIcons.TRASH, selectedItem -> {
+						new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkDelete), VaadinIcon.TRASH, selectedItem -> {
 							ControllerProvider.getClinicalCourseController()
-								.deleteAllSelectedClinicalVisits(clinicalVisitGrid.getSelectedRows(), new Runnable() {
+								.deleteAllSelectedClinicalVisits(clinicalVisitGrid.getSelectedItems(), new Runnable() {
 
 									public void run() {
 										clinicalVisitGrid.reload();
@@ -94,8 +94,8 @@ public class ClinicalCourseView extends AbstractCaseView {
 								});
 						}));
 
-					headlineRow.addComponent(bulkOperationsDropdown);
-					headlineRow.setComponentAlignment(bulkOperationsDropdown, Alignment.MIDDLE_RIGHT);
+					headlineRow.add(bulkOperationsDropdown);
+					headlineRow.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, bulkOperationsDropdown);
 				}
 
 				if (UiUtil.permitted(UserRight.CASE_EDIT, UserRight.CLINICAL_VISIT_CREATE)) {
@@ -105,15 +105,15 @@ public class ClinicalCourseView extends AbstractCaseView {
 								clinicalVisitCriteria.getClinicalCourse(),
 								getCaseRef().getUuid(),
 								() -> clinicalVisitGrid.reload());
-					}, ValoTheme.BUTTON_PRIMARY);
+					}, CssStyles.BUTTON_PRIMARY);
 
-					headlineRow.addComponent(newClinicalVisitButton);
+					headlineRow.add(newClinicalVisitButton);
 
-					headlineRow.setComponentAlignment(newClinicalVisitButton, Alignment.MIDDLE_RIGHT);
+					headlineRow.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, newClinicalVisitButton);
 				}
 			}
 		}
-		clinicalVisitsHeader.addComponent(headlineRow);
+		clinicalVisitsHeader.add(headlineRow);
 
 		return clinicalVisitsHeader;
 	}
@@ -137,9 +137,9 @@ public class ClinicalCourseView extends AbstractCaseView {
 
 		DetailSubComponentWrapper container = new DetailSubComponentWrapper(() -> editComponent);
 		container.setWidth(100, Unit.PERCENTAGE);
-		container.setMargin(true);
+		container.setPadding(true);
 
-		container.addComponent(createClinicalVisitsHeader());
+		container.add(createClinicalVisitsHeader());
 
 		clinicalVisitGrid = new ClinicalVisitGrid(
 			getCaseRef(),
@@ -149,11 +149,11 @@ public class ClinicalCourseView extends AbstractCaseView {
 		clinicalVisitGrid.setCriteria(clinicalVisitCriteria);
 		clinicalVisitGrid.setHeightMode(HeightMode.ROW);
 		CssStyles.style(clinicalVisitGrid, CssStyles.VSPACE_3);
-		container.addComponent(clinicalVisitGrid);
+		container.add(clinicalVisitGrid);
 
 		editComponent = ControllerProvider.getCaseController().getClinicalCourseComponent(getCaseRef().getUuid());
-		editComponent.setMargin(false);
-		container.addComponent(editComponent);
+		editComponent.setPadding(false);
+		container.add(editComponent);
 
 		setSubComponent(container);
 

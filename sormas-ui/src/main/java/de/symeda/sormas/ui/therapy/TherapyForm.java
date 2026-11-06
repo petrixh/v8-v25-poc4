@@ -23,19 +23,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.shared.ui.grid.HeightMode;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -63,8 +60,13 @@ import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.ComboBoxHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.FieldAccessHelper;
 import de.symeda.sormas.ui.utils.MenuBarHelper;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
 
 public class TherapyForm extends AbstractEditForm<TherapyDto> {
 
@@ -151,16 +153,16 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 		boolean isLuxembourgServer = FacadeProvider.getConfigFacade().isConfiguredCountry(CountryHelper.COUNTRY_CODE_LUXEMBOURG);
 
 		CheckBox dotField = addField(TherapyDto.DIRECTLY_OBSERVED_TREATMENT, CheckBox.class);
-		dotField.addStyleName(VSPACE_3);
+		dotField.addClassName(VSPACE_3);
 		dotField.setVisible(isLuxembourgServer && disease == Disease.TUBERCULOSIS);
 
 		mdrXdrTuberculosisField = addField(TherapyDto.MDR_XDR_TUBERCULOSIS, CheckBox.class);
-		mdrXdrTuberculosisField.addStyleName(VSPACE_3);
+		mdrXdrTuberculosisField.addClassName(VSPACE_3);
 		mdrXdrTuberculosisField.setVisible(isLuxembourgServer && disease == Disease.TUBERCULOSIS);
 		mdrXdrTuberculosisField.setEnabled(false);
 
 		beijingLineageField = addField(TherapyDto.BEIJING_LINEAGE, CheckBox.class);
-		beijingLineageField.addStyleName(VSPACE_3);
+		beijingLineageField.addClassName(VSPACE_3);
 		beijingLineageField.setVisible(isLuxembourgServer && disease == Disease.TUBERCULOSIS);
 
 		List<SampleDto> samples = FacadeProvider.getSampleFacade().getByCaseUuids(Collections.singletonList(caze.getUuid()));
@@ -188,7 +190,7 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 
 		drugSusceptibilityResultPanel = new DrugSusceptibilityResultPanel(latestAntibioticTest);
 		getContent().addComponent(drugSusceptibilityResultPanel, DRUD_SUSCEPTIBILITY_LOC);
-		drugSusceptibilityResultPanel.addStyleNames(VSPACE_TOP_4, VSPACE_3);
+		drugSusceptibilityResultPanel.addClassNames(VSPACE_TOP_4, VSPACE_3);
 
 		//prescription
 		CustomLayout prescriptionsLayout = new CustomLayout();
@@ -237,26 +239,26 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 	private VerticalLayout createPrescriptionsHeader() {
 
 		VerticalLayout prescriptionsHeader = new VerticalLayout();
-		prescriptionsHeader.setMargin(false);
+		prescriptionsHeader.setPadding(false);
 		prescriptionsHeader.setSpacing(false);
 		prescriptionsHeader.setWidth(100, Unit.PERCENTAGE);
 
 		HorizontalLayout headlineRow = new HorizontalLayout();
-		headlineRow.setMargin(false);
+		headlineRow.setPadding(false);
 		headlineRow.setSpacing(true);
 		headlineRow.setWidth(100, Unit.PERCENTAGE);
 		{
-			Label prescriptionsLabel = new Label(I18nProperties.getString(Strings.entityPrescriptions));
+			Span prescriptionsLabel = new Span(I18nProperties.getString(Strings.entityPrescriptions));
 			CssStyles.style(prescriptionsLabel, CssStyles.H3);
-			headlineRow.addComponent(prescriptionsLabel);
-			headlineRow.setExpandRatio(prescriptionsLabel, 1);
+			headlineRow.add(prescriptionsLabel);
+			headlineRow.setFlexGrow(1, prescriptionsLabel);
 
 			// Bulk operations
 			if (UiUtil.permitted(isEditAllowed(), UserRight.PERFORM_BULK_OPERATIONS, UserRight.CASE_EDIT)) {
 				MenuBar bulkOperationsDropdown = MenuBarHelper.createDropDown(
 					Captions.bulkActions,
-					new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkDelete), VaadinIcons.TRASH, selectedItem -> {
-						ControllerProvider.getTherapyController().deleteAllSelectedPrescriptions(prescriptionGrid.getSelectedRows(), new Runnable() {
+					new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkDelete), VaadinIcon.TRASH, selectedItem -> {
+						ControllerProvider.getTherapyController().deleteAllSelectedPrescriptions(prescriptionGrid.getSelectedItems(), new Runnable() {
 
 							public void run() {
 								reloadPrescriptionGrid();
@@ -264,27 +266,27 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 						});
 					}));
 
-				headlineRow.addComponent(bulkOperationsDropdown);
-				headlineRow.setComponentAlignment(bulkOperationsDropdown, Alignment.MIDDLE_RIGHT);
+				headlineRow.add(bulkOperationsDropdown);
+				headlineRow.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, bulkOperationsDropdown);
 			}
 
 			if (UiUtil.permitted(isEditAllowed(), UserRight.CASE_EDIT)) {
 				Button newPrescriptionButton = ButtonHelper.createButton(Captions.prescriptionNewPrescription, e -> {
 					ControllerProvider.getTherapyController()
 						.openPrescriptionCreateForm(prescriptionCriteria.getTherapy(), this::reloadPrescriptionGrid);
-				}, ValoTheme.BUTTON_PRIMARY);
+				}, CssStyles.BUTTON_PRIMARY);
 				if (!UiUtil.permitted(UserRight.PRESCRIPTION_CREATE)) {
 					newPrescriptionButton.setEnabled(false);
 				}
-				headlineRow.addComponent(newPrescriptionButton);
-				headlineRow.setComponentAlignment(newPrescriptionButton, Alignment.MIDDLE_RIGHT);
+				headlineRow.add(newPrescriptionButton);
+				headlineRow.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, newPrescriptionButton);
 			}
 
 		}
-		prescriptionsHeader.addComponent(headlineRow);
+		prescriptionsHeader.add(headlineRow);
 
 		HorizontalLayout filterRow = new HorizontalLayout();
-		filterRow.setMargin(false);
+		filterRow.setPadding(false);
 		filterRow.setSpacing(true);
 		{
 			prescriptionTypeFilter = ComboBoxHelper.createComboBoxV7();
@@ -292,50 +294,55 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 			prescriptionTypeFilter.setInputPrompt(I18nProperties.getPrefixCaption(PrescriptionDto.I18N_PREFIX, PrescriptionDto.PRESCRIPTION_TYPE));
 			prescriptionTypeFilter.addItems((Object[]) TreatmentType.values());
 			prescriptionTypeFilter.addValueChangeListener(e -> {
-				prescriptionCriteria.prescriptionType(((TreatmentType) e.getProperty().getValue()));
+				prescriptionCriteria.prescriptionType(((TreatmentType) e.getValue()));
 				ControllerProvider.getTherapyController().navigateTo(prescriptionApplyingCriteria, true, prescriptionCriteria);
 
 				prescriptionApplyingCriteria = false;
 			});
-			filterRow.addComponent(prescriptionTypeFilter);
+			filterRow.add(prescriptionTypeFilter);
 
 			prescriptionTextFilter = new TextField();
 			prescriptionTextFilter.setWidth(300, Unit.PIXELS);
 			prescriptionTextFilter.setNullRepresentation("");
 			prescriptionTextFilter.setInputPrompt(I18nProperties.getString(Strings.promptPrescriptionTextFilter));
-			prescriptionTextFilter.addTextChangeListener(e -> {
-				prescriptionCriteria.textFilter(e.getText());
+			// was a V7 text change listener (lazy, user input only)
+			prescriptionTextFilter.setValueChangeMode(ValueChangeMode.LAZY);
+			prescriptionTextFilter.addValueChangeListener(e -> {
+				if (!e.isFromClient()) {
+					return;
+				}
+				prescriptionCriteria.textFilter(e.getValue());
 				reloadPrescriptionGrid();
 			});
-			filterRow.addComponent(prescriptionTextFilter);
+			filterRow.add(prescriptionTextFilter);
 		}
-		prescriptionsHeader.addComponent(filterRow);
+		prescriptionsHeader.add(filterRow);
 
 		return prescriptionsHeader;
 	}
 
 	private VerticalLayout createTreatmentsHeader() {
 		VerticalLayout treatmentsHeader = new VerticalLayout();
-		treatmentsHeader.setMargin(false);
+		treatmentsHeader.setPadding(false);
 		treatmentsHeader.setSpacing(false);
 		treatmentsHeader.setWidth(100, Unit.PERCENTAGE);
 
 		HorizontalLayout headlineRow = new HorizontalLayout();
-		headlineRow.setMargin(false);
+		headlineRow.setPadding(false);
 		headlineRow.setSpacing(true);
 		headlineRow.setWidth(100, Unit.PERCENTAGE);
 		{
-			Label treatmentsLabel = new Label(I18nProperties.getString(Strings.headingTreatments));
+			Span treatmentsLabel = new Span(I18nProperties.getString(Strings.headingTreatments));
 			CssStyles.style(treatmentsLabel, CssStyles.H3);
-			headlineRow.addComponent(treatmentsLabel);
-			headlineRow.setExpandRatio(treatmentsLabel, 1);
+			headlineRow.add(treatmentsLabel);
+			headlineRow.setFlexGrow(1, treatmentsLabel);
 
 			// Bulk operations
 			if (UiUtil.permitted(isEditAllowed(), UserRight.PERFORM_BULK_OPERATIONS, UserRight.CASE_EDIT)) {
 				MenuBar bulkOperationsDropdown = MenuBarHelper.createDropDown(
 					Captions.bulkActions,
-					new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkDelete), VaadinIcons.TRASH, selectedItem -> {
-						ControllerProvider.getTherapyController().deleteAllSelectedTreatments(treatmentGrid.getSelectedRows(), new Runnable() {
+					new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkDelete), VaadinIcon.TRASH, selectedItem -> {
+						ControllerProvider.getTherapyController().deleteAllSelectedTreatments(treatmentGrid.getSelectedItems(), new Runnable() {
 
 							public void run() {
 								reloadTreatmentGrid();
@@ -343,8 +350,8 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 						});
 					}));
 
-				headlineRow.addComponent(bulkOperationsDropdown);
-				headlineRow.setComponentAlignment(bulkOperationsDropdown, Alignment.MIDDLE_RIGHT);
+				headlineRow.add(bulkOperationsDropdown);
+				headlineRow.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, bulkOperationsDropdown);
 			}
 
 			if (UiUtil.permitted(isEditAllowed(), UserRight.CASE_EDIT)) {
@@ -354,15 +361,15 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 				if (!UiUtil.permitted(UserRight.TREATMENT_CREATE)) {
 					newTreatmentButton.setEnabled(false);
 				}
-				headlineRow.addComponent(newTreatmentButton);
-				headlineRow.setComponentAlignment(newTreatmentButton, Alignment.MIDDLE_RIGHT);
+				headlineRow.add(newTreatmentButton);
+				headlineRow.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, newTreatmentButton);
 			}
 
 		}
-		treatmentsHeader.addComponent(headlineRow);
+		treatmentsHeader.add(headlineRow);
 
 		HorizontalLayout filterRow = new HorizontalLayout();
-		filterRow.setMargin(false);
+		filterRow.setPadding(false);
 		filterRow.setSpacing(true);
 		{
 			treatmentTypeFilter = ComboBoxHelper.createComboBoxV7();
@@ -370,24 +377,29 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 			treatmentTypeFilter.setInputPrompt(I18nProperties.getPrefixCaption(TreatmentDto.I18N_PREFIX, TreatmentDto.TREATMENT_TYPE));
 			treatmentTypeFilter.addItems((Object[]) TreatmentType.values());
 			treatmentTypeFilter.addValueChangeListener(e -> {
-				treatmentCriteria.treatmentType(((TreatmentType) e.getProperty().getValue()));
+				treatmentCriteria.treatmentType(((TreatmentType) e.getValue()));
 				ControllerProvider.getTherapyController().navigateTo(treatmentApplyingCriteria, true, treatmentCriteria);
 
 				treatmentApplyingCriteria = false;
 			});
-			filterRow.addComponent(treatmentTypeFilter);
+			filterRow.add(treatmentTypeFilter);
 
 			treatmentTextFilter = new TextField();
 			treatmentTextFilter.setWidth(300, Unit.PIXELS);
 			treatmentTextFilter.setNullRepresentation("");
 			treatmentTextFilter.setInputPrompt(I18nProperties.getString(Strings.promptTreatmentTextFilter));
-			treatmentTextFilter.addTextChangeListener(e -> {
-				treatmentCriteria.textFilter(e.getText());
+			// was a V7 text change listener (lazy, user input only)
+			treatmentTextFilter.setValueChangeMode(ValueChangeMode.LAZY);
+			treatmentTextFilter.addValueChangeListener(e -> {
+				if (!e.isFromClient()) {
+					return;
+				}
+				treatmentCriteria.textFilter(e.getValue());
 				reloadTreatmentGrid();
 			});
-			filterRow.addComponent(treatmentTextFilter);
+			filterRow.add(treatmentTextFilter);
 		}
-		treatmentsHeader.addComponent(filterRow);
+		treatmentsHeader.add(filterRow);
 
 		return treatmentsHeader;
 	}
@@ -417,7 +429,7 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 
 	public void reloadPrescriptionGrid() {
 		prescriptionGrid.reload();
-		prescriptionGrid.setHeightByRows(Math.max(1, Math.min(prescriptionGrid.getContainer().size(), 5)));
+		prescriptionGrid.setHeightByRows(Math.max(1, Math.min(prescriptionGrid.getItemCount(), 5)));
 	}
 
 	public void reloadTreatmentGrid() {
@@ -429,8 +441,8 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 	}
 
 	@Override
-	public void attach() {
-		super.attach();
+	protected void onAttach(AttachEvent attachEvent) {
+		super.onAttach(attachEvent);
 
 		if (getValue() != null) {
 			if (getValue().isMdrXdrTuberculosis()) {

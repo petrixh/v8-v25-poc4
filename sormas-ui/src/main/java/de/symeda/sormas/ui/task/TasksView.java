@@ -21,15 +21,14 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.vaadin.hene.popupbutton.PopupButton;
+import de.symeda.sormas.ui.utils.PopupButton;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -76,17 +75,17 @@ public class TasksView extends AbstractView {
 		if (UiUtil.permitted(UserRight.TASK_EXPORT)) {
 			VerticalLayout exportLayout = new VerticalLayout();
 			exportLayout.setSpacing(true);
-			exportLayout.setMargin(true);
-			exportLayout.addStyleName(CssStyles.LAYOUT_MINIMAL);
+			exportLayout.setPadding(true);
+			exportLayout.addClassName(CssStyles.LAYOUT_MINIMAL);
 			exportLayout.setWidth(200, Unit.PIXELS);
 
-			PopupButton exportButton = ButtonHelper.createIconPopupButton(Captions.export, VaadinIcons.DOWNLOAD, exportLayout);
+			PopupButton exportButton = ButtonHelper.createIconPopupButton(Captions.export, VaadinIcon.DOWNLOAD, exportLayout);
 			addHeaderComponent(exportButton);
 
-			Button basicExportButton = ButtonHelper.createIconButton(Captions.exportBasic, VaadinIcons.TABLE, null, ValoTheme.BUTTON_PRIMARY);
+			Button basicExportButton = ButtonHelper.createIconButton(Captions.exportBasic, VaadinIcon.TABLE, null, CssStyles.BUTTON_PRIMARY);
 			basicExportButton.setDescription(I18nProperties.getString(Strings.infoBasicExport));
-			basicExportButton.setWidth(100, Unit.PERCENTAGE);
-			exportLayout.addComponent(basicExportButton);
+			basicExportButton.setWidthFull();
+			exportLayout.add(basicExportButton);
 			StreamResource streamResource = GridExportStreamResource.createStreamResourceWithSelectedItems(
 				taskListComponent.getGrid(),
 				() -> viewConfiguration.isInEagerMode() ? taskListComponent.getGrid().asMultiSelect().getSelectedItems() : Collections.emptySet(),
@@ -101,27 +100,27 @@ public class TasksView extends AbstractView {
 				extendedExportStreamResource,
 				exportButton,
 				exportLayout,
-				VaadinIcons.FILE_TEXT,
+				VaadinIcon.FILE_TEXT,
 				Captions.exportDetailed,
 				Strings.infoDetailedExport);
 
-			Button btnCustomExport = ButtonHelper.createIconButton(Captions.exportCustom, VaadinIcons.FILE_TEXT, e -> {
+			Button btnCustomExport = ButtonHelper.createIconButton(Captions.exportCustom, VaadinIcon.FILE_TEXT, e -> {
 				ControllerProvider.getCustomExportController().openTaskExportWindow(taskListComponent.getCriteria(), this::getSelectedRowUuids);
 				exportButton.setPopupVisible(false);
-			}, ValoTheme.BUTTON_PRIMARY);
+			}, CssStyles.BUTTON_PRIMARY);
 			btnCustomExport.setDescription(I18nProperties.getString(Strings.infoCustomExport));
-			btnCustomExport.setWidth(100, Unit.PERCENTAGE);
-			exportLayout.addComponent(btnCustomExport);
+			btnCustomExport.setWidthFull();
+			exportLayout.add(btnCustomExport);
 		}
 
 		if (UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS)) {
-			Button btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcons.CHECK_SQUARE_O, null);
+			Button btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcon.CHECK_SQUARE_O, null);
 			btnEnterBulkEditMode.setVisible(!viewConfiguration.isInEagerMode());
 
 			addHeaderComponent(btnEnterBulkEditMode);
 
 			Button btnLeaveBulkEditMode =
-				ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcons.CLOSE, null, ValoTheme.BUTTON_PRIMARY);
+				ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcon.CLOSE, null, CssStyles.BUTTON_PRIMARY);
 			btnLeaveBulkEditMode.setVisible(viewConfiguration.isInEagerMode());
 
 			addHeaderComponent(btnLeaveBulkEditMode);
@@ -145,9 +144,9 @@ public class TasksView extends AbstractView {
 		if (UiUtil.permitted(UserRight.TASK_CREATE)) {
 			Button createButton = ButtonHelper.createIconButton(
 				Captions.taskNewTask,
-				VaadinIcons.PLUS_CIRCLE,
+				VaadinIcon.PLUS_CIRCLE,
 				e -> ControllerProvider.getTaskController().create(TaskContext.GENERAL, null, null, taskListComponent.getGrid()::reload),
-				ValoTheme.BUTTON_PRIMARY);
+				CssStyles.BUTTON_PRIMARY);
 
 			addHeaderComponent(createButton);
 		}

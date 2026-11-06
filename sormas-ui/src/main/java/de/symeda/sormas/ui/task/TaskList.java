@@ -20,7 +20,7 @@ package de.symeda.sormas.ui.task;
 import java.util.List;
 
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.ReferenceDto;
@@ -43,7 +43,7 @@ import de.symeda.sormas.ui.utils.PaginationList;
 public class TaskList extends PaginationList<TaskIndexDto> {
 
 	private final TaskCriteria taskCriteria = new TaskCriteria();
-	private final Label noTasksLabel;
+	private final Span noTasksLabel;
 	private final boolean isEditAllowed;
 
 	public TaskList(TaskContext context, ReferenceDto entityRef, boolean isEditAllowed) {
@@ -68,7 +68,7 @@ public class TaskList extends PaginationList<TaskIndexDto> {
 		default:
 			throw new IndexOutOfBoundsException(context.toString());
 		}
-		noTasksLabel = new Label(String.format(I18nProperties.getCaption(Captions.taskNoTasks), context.toString().toLowerCase()));
+		noTasksLabel = new Span(String.format(I18nProperties.getCaption(Captions.taskNoTasks), context.toString().toLowerCase()));
 		this.isEditAllowed = isEditAllowed;
 	}
 
@@ -80,9 +80,9 @@ public class TaskList extends PaginationList<TaskIndexDto> {
 		if (!tasks.isEmpty()) {
 			showPage(1);
 		} else {
-			listLayout.removeAllComponents();
+			listLayout.removeAll();
 			updatePaginationLayout();
-			listLayout.addComponent(noTasksLabel);
+			listLayout.add(noTasksLabel);
 		}
 	}
 
@@ -102,7 +102,7 @@ public class TaskList extends PaginationList<TaskIndexDto> {
 				hasEditOrDeleteRights());
 
 			listEntry.setEnabled(isEditAllowed);
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 

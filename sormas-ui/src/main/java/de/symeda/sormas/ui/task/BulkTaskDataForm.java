@@ -29,11 +29,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -104,7 +104,7 @@ public class BulkTaskDataForm extends AbstractEditForm<TaskDto> {
 		status.setEnabled(false);
 		FieldHelper.setRequiredWhen(getFieldGroup(), taskStatusCheckbox, Arrays.asList(TaskBulkEditData.TASK_STATUS), Arrays.asList(true));
 		taskStatusCheckbox.addValueChangeListener(e -> {
-			status.setEnabled((boolean) e.getProperty().getValue());
+			status.setEnabled((boolean) e.getValue());
 		});
 
 		priorityCheckbox = new CheckBox(I18nProperties.getCaption(Captions.bulkTaskPriority));
@@ -112,14 +112,14 @@ public class BulkTaskDataForm extends AbstractEditForm<TaskDto> {
 		NullableOptionGroup priority = addField(TaskBulkEditData.PRIORITY, NullableOptionGroup.class);
 		priority.setEnabled(false);
 		FieldHelper.setRequiredWhen(getFieldGroup(), priorityCheckbox, Arrays.asList(TaskBulkEditData.PRIORITY), Arrays.asList(true));
-		priorityCheckbox.addValueChangeListener(e -> priority.setEnabled((boolean) e.getProperty().getValue()));
+		priorityCheckbox.addValueChangeListener(e -> priority.setEnabled((boolean) e.getValue()));
 
 		assigneeCheckbox = new CheckBox(I18nProperties.getCaption(Captions.bulkTaskAssignee));
 		getContent().addComponent(assigneeCheckbox, ASSIGNEE_CHECKBOX);
 		ComboBox assignee = addField(TaskBulkEditData.ASSIGNEE_USER, ComboBox.class);
 		assignee.setEnabled(false);
 
-		Label assigneeHint = new Label();
+		Span assigneeHint = new Span();
 		getContent().addComponent(assigneeHint, ASSIGNEE_HINT);
 		CssStyles.style(assigneeHint, VSPACE_4, VSPACE_TOP_5);
 		assigneeHint.setVisible(false);
@@ -127,7 +127,7 @@ public class BulkTaskDataForm extends AbstractEditForm<TaskDto> {
 		assigneeHint.setContentMode(ContentMode.HTML);
 
 		assigneeCheckbox.addValueChangeListener(e -> {
-			boolean changeAssignee = (boolean) e.getProperty().getValue();
+			boolean changeAssignee = (boolean) e.getValue();
 			assignee.setEnabled(changeAssignee);
 			assignee.setRequired(changeAssignee);
 
@@ -175,7 +175,7 @@ public class BulkTaskDataForm extends AbstractEditForm<TaskDto> {
 
 			if (changeAssignee && lowestCommonJurisdictionLevel.getOrder() < 5 && lowestCommonJurisdictionLevel != JurisdictionLevel.POINT_OF_ENTRY) {
 				assigneeHint.setValue(
-					VaadinIcons.INFO_CIRCLE.getHtml() + " "
+					VaadinIcon.INFO_CIRCLE.getHtml() + " "
 						+ String.format(
 							I18nProperties.getString(Strings.infoTasksWithMultipleJurisdictionsSelected),
 							lowestCommonJurisdictionLevel.toString()));

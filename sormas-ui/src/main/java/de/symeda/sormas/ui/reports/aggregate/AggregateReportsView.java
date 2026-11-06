@@ -2,16 +2,15 @@ package de.symeda.sormas.ui.reports.aggregate;
 
 import java.util.Date;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -62,41 +61,41 @@ public class AggregateReportsView extends AbstractAggregateReportsView {
 
 		gridLayout = new VerticalLayout();
 
-		gridLayout.addComponent(createGroupingBar());
+		gridLayout.add(createGroupingBar());
 
-		gridLayout.addComponent(createFilterBar(user));
+		gridLayout.add(createFilterBar(user));
 
 		grid = new AggregateReportsGrid(criteria);
-		gridLayout.addComponent(grid);
-		gridLayout.setMargin(true);
+		gridLayout.add(grid);
+		gridLayout.setPadding(true);
 		gridLayout.setSpacing(false);
 		gridLayout.setSizeFull();
-		gridLayout.setExpandRatio(grid, 1);
-		gridLayout.setStyleName("crud-main-layout");
+		gridLayout.setFlexGrow(1, grid);
+		gridLayout.setClassName("crud-main-layout");
 
 		addComponent(gridLayout);
 
 		if (UiUtil.permitted(UserRight.AGGREGATE_REPORT_EDIT)) {
 			btnCreate = ButtonHelper.createIconButton(
 				Captions.aggregateReportNewAggregateReport,
-				VaadinIcons.PLUS_CIRCLE,
+				VaadinIcon.PLUS_CIRCLE,
 				e -> ControllerProvider.getAggregateReportController().openEditOrCreateWindow(() -> navigateTo(criteria), false, null),
-				ValoTheme.BUTTON_PRIMARY);
+				CssStyles.BUTTON_PRIMARY);
 
 			addHeaderComponent(btnCreate);
 
 			btnEdit = ButtonHelper.createIconButton(
 				Captions.aggregateReportEditAggregateReport,
-				VaadinIcons.EDIT,
+				VaadinIcon.EDIT,
 				e -> ControllerProvider.getAggregateReportController().openEditOrCreateWindow(() -> navigateTo(criteria), true, null),
-				ValoTheme.BUTTON_PRIMARY);
+				CssStyles.BUTTON_PRIMARY);
 			btnEdit.setVisible(false);
 
 			addHeaderComponent(btnEdit);
 		}
 
 		if (UiUtil.permitted(UserRight.AGGREGATE_REPORT_EXPORT)) {
-			btnExport = ButtonHelper.createIconButton(Captions.export, VaadinIcons.DOWNLOAD, null, ValoTheme.BUTTON_PRIMARY);
+			btnExport = ButtonHelper.createIconButton(Captions.export, VaadinIcon.DOWNLOAD, null, CssStyles.BUTTON_PRIMARY);
 
 			addHeaderComponent(btnExport);
 
@@ -117,12 +116,12 @@ public class AggregateReportsView extends AbstractAggregateReportsView {
 			grid.setColumnsVisibility(groupingValue);
 			grid.reload();
 		});
-		jurisdictionLayout.addComponent(aggregateReportGroupingSelector);
+		jurisdictionLayout.add(aggregateReportGroupingSelector);
 
 		showZeroRows = new CheckBox();
 		showZeroRows.setId(AggregateReportCriteria.SHOW_ZERO_ROWS);
 		showZeroRows.setCaption(I18nProperties.getCaption(Captions.aggregateReportShowZeroRows));
-		showZeroRows.addStyleName(CssStyles.FORCE_CAPTION_CHECKBOX);
+		showZeroRows.addClassName(CssStyles.FORCE_CAPTION_CHECKBOX);
 
 		showZeroRows.setValue(criteria.getShowZeroRows());
 
@@ -131,7 +130,7 @@ public class AggregateReportsView extends AbstractAggregateReportsView {
 			grid.reload();
 		});
 
-		jurisdictionLayout.addComponent(showZeroRows);
+		jurisdictionLayout.add(showZeroRows);
 
 		return jurisdictionLayout;
 	}
@@ -140,8 +139,8 @@ public class AggregateReportsView extends AbstractAggregateReportsView {
 
 		VerticalLayout filterLayout = new VerticalLayout();
 		filterLayout.setSpacing(false);
-		filterLayout.setMargin(false);
-		filterLayout.setWidth(100, Unit.PERCENTAGE);
+		filterLayout.setPadding(false);
+		filterLayout.setWidthFull();
 
 		if (criteria.getRegion() == null) {
 			criteria.setRegion(user.getRegion());
@@ -180,12 +179,12 @@ public class AggregateReportsView extends AbstractAggregateReportsView {
 			} else {
 				NotificationHelper.showNotification(
 					I18nProperties.getString(Strings.messageAggregatedReportEpiWeekFilterNotFilled),
-					Notification.Type.HUMANIZED_MESSAGE,
+					NotificationHelper.Type.HUMANIZED_MESSAGE,
 					10000);
 			}
 		});
 
-		filterLayout.addComponent(aggregateReportsFilterForm);
+		filterLayout.add(aggregateReportsFilterForm);
 
 		return filterLayout;
 	}

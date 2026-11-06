@@ -6,11 +6,11 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 import java.util.Date;
 import java.util.stream.Stream;
 
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.NewCaseDateType;
@@ -75,7 +75,7 @@ public class TaskGridFilterForm extends AbstractFilterForm<TaskCriteria> {
 		final ComboBox typeField = addField(FieldConfiguration.pixelSized(TaskIndexDto.TASK_TYPE, 140));
 
 		contextField.addValueChangeListener(e -> {
-			TaskContext taskContext = (TaskContext) e.getProperty().getValue();
+			TaskContext taskContext = (TaskContext) e.getValue();
 			FieldHelper.updateEnumData(typeField, TaskType.getTaskTypes(taskContext));
 		});
 
@@ -89,7 +89,7 @@ public class TaskGridFilterForm extends AbstractFilterForm<TaskCriteria> {
 				districtField.setEnabled(false);
 
 				regionField.addValueChangeListener(e -> {
-					RegionReferenceDto region = (RegionReferenceDto) e.getProperty().getValue();
+					RegionReferenceDto region = (RegionReferenceDto) e.getValue();
 					boolean hasRegion = null != region;
 					districtField.setEnabled(hasRegion);
 					if (hasRegion) {
@@ -163,7 +163,7 @@ public class TaskGridFilterForm extends AbstractFilterForm<TaskCriteria> {
 		dateFilterRowLayout.setSpacing(true);
 		dateFilterRowLayout.setSizeUndefined();
 
-		dateFilterRowLayout.addComponent(weekAndDateFilter);
+		dateFilterRowLayout.add(weekAndDateFilter);
 
 		return dateFilterRowLayout;
 	}

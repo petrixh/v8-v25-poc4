@@ -5,12 +5,12 @@ import static com.vaadin.v7.data.fieldgroup.DefaultFieldGroupFieldFactory.CAPTIO
 import java.util.List;
 import java.util.Optional;
 
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.v7.data.Property;
 import com.vaadin.v7.data.util.converter.Converter;
 import com.vaadin.v7.ui.AbstractField;
-import com.vaadin.v7.ui.ComboBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -136,7 +136,7 @@ public class AggregateReportsFilterForm extends AbstractFilterForm<AggregateRepo
 
 		switch (propertyId) {
 		case AggregateReportCriteria.REGION: {
-			final RegionReferenceDto region = user.getRegion() != null ? user.getRegion() : (RegionReferenceDto) event.getProperty().getValue();
+			final RegionReferenceDto region = user.getRegion() != null ? user.getRegion() : (RegionReferenceDto) event.getValue();
 			if (region != null) {
 				enableFields(districtFilter);
 				FieldHelper.updateItems(districtFilter, FacadeProvider.getDistrictFacade().getAllActiveByRegion(region.getUuid()));
@@ -152,7 +152,7 @@ public class AggregateReportsFilterForm extends AbstractFilterForm<AggregateRepo
 		}
 
 		case AggregateReportCriteria.DISTRICT: {
-			final DistrictReferenceDto newDistrict = (DistrictReferenceDto) event.getProperty().getValue();
+			final DistrictReferenceDto newDistrict = (DistrictReferenceDto) event.getValue();
 			if (newDistrict != null) {
 				clearAndDisableFields(facilityFilter, pointOfEntryFilter);
 				enableFields(facilityFilter, pointOfEntryFilter);
@@ -169,7 +169,7 @@ public class AggregateReportsFilterForm extends AbstractFilterForm<AggregateRepo
 			break;
 		}
 		case AggregateReportCriteria.HEALTH_FACILITY: {
-			final FacilityReferenceDto facility = (FacilityReferenceDto) event.getProperty().getValue();
+			final FacilityReferenceDto facility = (FacilityReferenceDto) event.getValue();
 
 			if (facility != null) {
 				clearAndDisableFields(pointOfEntryFilter);
@@ -179,7 +179,7 @@ public class AggregateReportsFilterForm extends AbstractFilterForm<AggregateRepo
 			break;
 		}
 		case AggregateReportCriteria.POINT_OF_ENTRY: {
-			final PointOfEntryReferenceDto pointOfEntry = (PointOfEntryReferenceDto) event.getProperty().getValue();
+			final PointOfEntryReferenceDto pointOfEntry = (PointOfEntryReferenceDto) event.getValue();
 
 			if (pointOfEntry != null) {
 				clearAndDisableFields(facilityFilter);
@@ -193,13 +193,13 @@ public class AggregateReportsFilterForm extends AbstractFilterForm<AggregateRepo
 
 	private HorizontalLayout createEpiWeekFilterBar() {
 		hlSecondFilterRow = new HorizontalLayout();
-		hlSecondFilterRow.setMargin(false);
+		hlSecondFilterRow.setPadding(false);
 		hlSecondFilterRow.setSpacing(true);
 		hlSecondFilterRow.setWidthUndefined();
 
-		Label lblFrom = new Label(I18nProperties.getCaption(Captions.from));
+		Span lblFrom = new Span(I18nProperties.getCaption(Captions.from));
 		CssStyles.style(lblFrom, CssStyles.LABEL_BOLD, CssStyles.VSPACE_TOP_4);
-		hlSecondFilterRow.addComponent(lblFrom);
+		hlSecondFilterRow.add(lblFrom);
 
 		cbFromYearFilter = new com.vaadin.ui.ComboBox<>();
 		cbFromYearFilter.setId("yearFrom");
@@ -223,16 +223,16 @@ public class AggregateReportsFilterForm extends AbstractFilterForm<AggregateRepo
 				cbFromEpiWeekFilter.setItems(DateHelper.createEpiWeekList(e.getValue()));
 			}
 		});
-		hlSecondFilterRow.addComponent(cbFromYearFilter);
+		hlSecondFilterRow.add(cbFromYearFilter);
 
 		cbFromEpiWeekFilter.setWidth(200, Unit.PIXELS);
 		cbFromEpiWeekFilter.setPlaceholder(I18nProperties.getString(Strings.epiWeek));
 
-		hlSecondFilterRow.addComponent(cbFromEpiWeekFilter);
+		hlSecondFilterRow.add(cbFromEpiWeekFilter);
 
-		Label lblTo = new Label(I18nProperties.getCaption(Captions.to));
+		Span lblTo = new Span(I18nProperties.getCaption(Captions.to));
 		CssStyles.style(lblTo, CssStyles.LABEL_BOLD, CssStyles.VSPACE_TOP_4);
-		hlSecondFilterRow.addComponent(lblTo);
+		hlSecondFilterRow.add(lblTo);
 
 		cbToYearFilter.setWidth(140, Unit.PIXELS);
 		cbToYearFilter.setPlaceholder(I18nProperties.getString(Strings.year));
@@ -243,11 +243,11 @@ public class AggregateReportsFilterForm extends AbstractFilterForm<AggregateRepo
 				cbToEpiWeekFilter.setItems(DateHelper.createEpiWeekList(e.getValue()));
 			}
 		});
-		hlSecondFilterRow.addComponent(cbToYearFilter);
+		hlSecondFilterRow.add(cbToYearFilter);
 
 		cbToEpiWeekFilter.setWidth(200, Unit.PIXELS);
 		cbToEpiWeekFilter.setPlaceholder(I18nProperties.getString(Strings.epiWeek));
-		hlSecondFilterRow.addComponent(cbToEpiWeekFilter);
+		hlSecondFilterRow.add(cbToEpiWeekFilter);
 
 		return hlSecondFilterRow;
 	}

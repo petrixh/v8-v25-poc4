@@ -22,16 +22,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;
@@ -67,7 +66,7 @@ public class TaskGridComponent extends VerticalLayout {
 
 	MenuBar bulkOperationsDropdown;
 
-	private Label viewTitleLabel;
+	private Span viewTitleLabel;
 	private String originalViewTitle;
 
 	public TaskGridComponent(Label viewTitleLabel, TasksView tasksView) {
@@ -85,20 +84,20 @@ public class TaskGridComponent extends VerticalLayout {
 
 		grid = new TaskGrid(criteria);
 		VerticalLayout gridLayout = new VerticalLayout();
-		gridLayout.addComponent(createFilterBar());
-		gridLayout.addComponent(createAssigneeFilterBar());
-		gridLayout.addComponent(grid);
+		gridLayout.add(createFilterBar());
+		gridLayout.add(createAssigneeFilterBar());
+		gridLayout.add(grid);
 		grid.addDataSizeChangeListener(e -> updateAssigneeFilterButtons());
 
-		gridLayout.setMargin(true);
+		gridLayout.setPadding(true);
 		styleGridLayout(gridLayout);
 
-		addComponent(gridLayout);
+		add(gridLayout);
 	}
 
 	public HorizontalLayout createFilterBar() {
 		HorizontalLayout filterLayout = new HorizontalLayout();
-		filterLayout.setMargin(false);
+		filterLayout.setPadding(false);
 		filterLayout.setSpacing(true);
 		filterLayout.setSizeUndefined();
 
@@ -109,17 +108,17 @@ public class TaskGridComponent extends VerticalLayout {
 		});
 		filterForm.addApplyHandler(e -> grid.reload());
 
-		filterLayout.addComponent(filterForm);
+		filterLayout.add(filterForm);
 
 		return filterLayout;
 	}
 
 	public HorizontalLayout createAssigneeFilterBar() {
 		HorizontalLayout assigneeFilterLayout = new HorizontalLayout();
-		assigneeFilterLayout.setMargin(false);
+		assigneeFilterLayout.setPadding(false);
 		assigneeFilterLayout.setSpacing(true);
-		assigneeFilterLayout.setWidth(100, Unit.PERCENTAGE);
-		assigneeFilterLayout.addStyleName(CssStyles.VSPACE_3);
+		assigneeFilterLayout.setWidthFull();
+		assigneeFilterLayout.addClassName(CssStyles.VSPACE_3);
 
 		statusButtons = new HashMap<>();
 
@@ -127,10 +126,10 @@ public class TaskGridComponent extends VerticalLayout {
 		buttonFilterLayout.setSpacing(true);
 		{
 			Button allTasks =
-				ButtonHelper.createButton(Captions.all, e -> processAssigneeFilterChange(null), ValoTheme.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER);
+				ButtonHelper.createButton(Captions.all, e -> processAssigneeFilterChange(null), CssStyles.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER);
 			allTasks.setCaptionAsHtml(true);
 
-			buttonFilterLayout.addComponent(allTasks);
+			buttonFilterLayout.add(allTasks);
 			statusButtons.put(allTasks, I18nProperties.getCaption(Captions.all));
 
 			createAndAddStatusButton(Captions.taskOfficerTasks, OFFICER_TASKS, buttonFilterLayout);
@@ -143,7 +142,7 @@ public class TaskGridComponent extends VerticalLayout {
 				activeStatusButton = allTasks;
 			}
 		}
-		assigneeFilterLayout.addComponent(buttonFilterLayout);
+		assigneeFilterLayout.add(buttonFilterLayout);
 
 		HorizontalLayout actionButtonsLayout = new HorizontalLayout();
 		actionButtonsLayout.setSpacing(true);
@@ -166,23 +165,23 @@ public class TaskGridComponent extends VerticalLayout {
 				}
 
 				relevanceStatusFilter.addValueChangeListener(e -> {
-					criteria.relevanceStatus((EntityRelevanceStatus) e.getProperty().getValue());
+					criteria.relevanceStatus((EntityRelevanceStatus) e.getValue());
 					tasksView.navigateTo(criteria);
 				});
-				actionButtonsLayout.addComponent(relevanceStatusFilter);
+				actionButtonsLayout.add(relevanceStatusFilter);
 			}
 
 			// Bulk operation dropdown
 			boolean hasBulkOperationsRight = UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS);
 			if (hasBulkOperationsRight) {
-				assigneeFilterLayout.setWidth(100, Unit.PERCENTAGE);
+				assigneeFilterLayout.setWidthFull();
 
 				final List<MenuBarHelper.MenuBarItem> menuBarItems = new ArrayList<>();
 
 				menuBarItems.add(
 					new MenuBarHelper.MenuBarItem(
 						I18nProperties.getCaption(Captions.bulkEdit),
-						VaadinIcons.ELLIPSIS_H,
+						VaadinIcon.ELLIPSIS_H,
 						mi -> ControllerProvider.getTaskController()
 							.showBulkTaskDataEditComponent(this.grid.asMultiSelect().getSelectedItems(), grid, () -> tasksView.navigateTo(criteria)),
 						hasBulkOperationsRight && UiUtil.permitted(UserRight.TASK_EDIT)));
@@ -190,14 +189,14 @@ public class TaskGridComponent extends VerticalLayout {
 					new MenuBarHelper.MenuBarItem(
 						//here
 						I18nProperties.getCaption(Captions.bulkDelete),
-						VaadinIcons.TRASH,
+						VaadinIcon.TRASH,
 						selectedItem -> ControllerProvider.getTaskController()
 							.deleteAllSelectedItems(this.grid.asMultiSelect().getSelectedItems(), grid, () -> tasksView.navigateTo(criteria)),
 						hasBulkOperationsRight && UiUtil.permitted(UserRight.TASK_DELETE)));
 				menuBarItems.add(
 					new MenuBarHelper.MenuBarItem(
 						I18nProperties.getCaption(Captions.actionArchiveCoreEntity),
-						VaadinIcons.ARCHIVE,
+						VaadinIcon.ARCHIVE,
 						mi -> ControllerProvider.getTaskController()
 							.archiveAllSelectedItems(this.grid.asMultiSelect().getSelectedItems(), grid, () -> tasksView.navigateTo(criteria)),
 						hasBulkOperationsRight
@@ -206,7 +205,7 @@ public class TaskGridComponent extends VerticalLayout {
 				menuBarItems.add(
 					new MenuBarHelper.MenuBarItem(
 						I18nProperties.getCaption(Captions.actionDearchiveCoreEntity),
-						VaadinIcons.ARCHIVE,
+						VaadinIcon.ARCHIVE,
 						mi -> ControllerProvider.getTaskController()
 							.dearchiveAllSelectedItems(this.grid.asMultiSelect().getSelectedItems(), grid, () -> tasksView.navigateTo(criteria)),
 						hasBulkOperationsRight
@@ -216,12 +215,12 @@ public class TaskGridComponent extends VerticalLayout {
 				bulkOperationsDropdown = MenuBarHelper.createDropDown(Captions.bulkActions, menuBarItems);
 
 				bulkOperationsDropdown.setVisible(tasksView.getViewConfiguration().isInEagerMode());
-				actionButtonsLayout.addComponent(bulkOperationsDropdown);
+				actionButtonsLayout.add(bulkOperationsDropdown);
 			}
 		}
-		assigneeFilterLayout.addComponent(actionButtonsLayout);
+		assigneeFilterLayout.add(actionButtonsLayout);
 		assigneeFilterLayout.setComponentAlignment(actionButtonsLayout, Alignment.TOP_RIGHT);
-		assigneeFilterLayout.setExpandRatio(actionButtonsLayout, 1);
+		assigneeFilterLayout.setFlexGrow(1, actionButtonsLayout);
 
 		return assigneeFilterLayout;
 	}
@@ -229,8 +228,8 @@ public class TaskGridComponent extends VerticalLayout {
 	private void styleGridLayout(VerticalLayout gridLayout) {
 		gridLayout.setSpacing(false);
 		gridLayout.setSizeFull();
-		gridLayout.setExpandRatio(grid, 1);
-		gridLayout.setStyleName("crud-main-layout");
+		gridLayout.setFlexGrow(1, grid);
+		gridLayout.setClassName("crud-main-layout");
 	}
 
 	private void processAssigneeFilterChange(String assignee) {
@@ -252,13 +251,13 @@ public class TaskGridComponent extends VerticalLayout {
 		Button button = ButtonHelper.createButton(
 			captionKey,
 			e -> processAssigneeFilterChange(status),
-			ValoTheme.BUTTON_BORDERLESS,
+			CssStyles.BUTTON_BORDERLESS,
 			CssStyles.BUTTON_FILTER,
 			CssStyles.BUTTON_FILTER_LIGHT);
 		button.setData(status);
 		button.setCaptionAsHtml(true);
 
-		filterLayout.addComponent(button);
+		filterLayout.add(button);
 		statusButtons.put(button, button.getCaption());
 
 		return button;

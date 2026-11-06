@@ -17,14 +17,13 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.task;
 
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.task.TaskDto;
@@ -47,61 +46,61 @@ public class TaskListEntry extends SideComponentField {
 		this.task = task;
 
 		HorizontalLayout topLayout = new HorizontalLayout();
-		topLayout.setMargin(false);
+		topLayout.setPadding(false);
 		topLayout.setSpacing(false);
-		topLayout.setWidth(100, Unit.PERCENTAGE);
+		topLayout.setWidthFull();
 		addComponentToField(topLayout);
 
 		// TOP LEFT
 		VerticalLayout topLeftLayout = new VerticalLayout();
 
-		topLeftLayout.setMargin(false);
+		topLeftLayout.setPadding(false);
 		topLeftLayout.setSpacing(false);
 
-		Label taskTypeLabel = new Label(DataHelper.toStringNullable(task.getTaskType()));
+		Span taskTypeLabel = new Span(DataHelper.toStringNullable(task.getTaskType()));
 		CssStyles.style(taskTypeLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
-		taskTypeLabel.setWidth(100, Unit.PERCENTAGE);
-		topLeftLayout.addComponent(taskTypeLabel);
+		taskTypeLabel.setWidthFull();
+		topLeftLayout.add(taskTypeLabel);
 
-		Label statusLabel = new Label(DataHelper.toStringNullable(task.getTaskStatus()));
+		Span statusLabel = new Span(DataHelper.toStringNullable(task.getTaskStatus()));
 		CssStyles.style(statusLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
-		topLeftLayout.addComponent(statusLabel);
+		topLeftLayout.add(statusLabel);
 
-		Label priorityLabel = new Label(
+		Span priorityLabel = new Span(
 			DataHelper.toStringNullable(I18nProperties.getPrefixCaption(TaskDto.I18N_PREFIX, TaskDto.PRIORITY) + ": " + task.getPriority()));
 		if (TaskPriority.HIGH == task.getPriority()) {
-			priorityLabel.addStyleName(CssStyles.LABEL_IMPORTANT);
+			priorityLabel.addClassName(CssStyles.LABEL_IMPORTANT);
 		} else if (TaskPriority.NORMAL == task.getPriority()) {
-			priorityLabel.addStyleName(CssStyles.LABEL_NEUTRAL);
+			priorityLabel.addClassName(CssStyles.LABEL_NEUTRAL);
 		}
-		topLeftLayout.addComponent(priorityLabel);
+		topLeftLayout.add(priorityLabel);
 
-		Label suggestedStartLabel = new Label(
+		Span suggestedStartLabel = new Span(
 			I18nProperties.getPrefixCaption(TaskDto.I18N_PREFIX, TaskDto.SUGGESTED_START) + ": "
 				+ DateFormatHelper.formatDate(task.getSuggestedStart()));
-		topLeftLayout.addComponent(suggestedStartLabel);
+		topLeftLayout.add(suggestedStartLabel);
 
-		Label dueDateLabel =
-			new Label(I18nProperties.getPrefixCaption(TaskDto.I18N_PREFIX, TaskDto.DUE_DATE) + ": " + DateFormatHelper.formatDate(task.getDueDate()));
-		topLeftLayout.addComponent(dueDateLabel);
+		Span dueDateLabel =
+			new Span(I18nProperties.getPrefixCaption(TaskDto.I18N_PREFIX, TaskDto.DUE_DATE) + ": " + DateFormatHelper.formatDate(task.getDueDate()));
+		topLeftLayout.add(dueDateLabel);
 
-		topLayout.addComponent(topLeftLayout);
+		topLayout.add(topLeftLayout);
 
 		// TOP RIGHT
 		VerticalLayout topRightLayout = new VerticalLayout();
 		topLayout.setComponentAlignment(topLeftLayout, Alignment.TOP_LEFT);
 
-		topRightLayout.addStyleName(CssStyles.ALIGN_RIGHT);
+		topRightLayout.addClassName(CssStyles.ALIGN_RIGHT);
 		/*
-		 * topRightLayout.setMargin(false);
+		 * topRightLayout.setPadding(false);
 		 * topRightLayout.setSpacing(false);
 		 */
 
-		Label userLabel =
-			new Label(I18nProperties.getPrefixCaption(TaskDto.I18N_PREFIX, TaskDto.ASSIGNEE_USER) + ": " + task.getAssigneeUser().getCaption());
-		topLeftLayout.addComponent(userLabel);
+		Span userLabel =
+			new Span(I18nProperties.getPrefixCaption(TaskDto.I18N_PREFIX, TaskDto.ASSIGNEE_USER) + ": " + task.getAssigneeUser().getCaption());
+		topLeftLayout.add(userLabel);
 
-		topLayout.addComponent(topRightLayout);
+		topLayout.add(topRightLayout);
 		topLayout.setComponentAlignment(topRightLayout, Alignment.TOP_RIGHT);
 
 		String statusStyle;
@@ -121,12 +120,12 @@ public class TaskListEntry extends SideComponentField {
 		}
 
 		if (statusStyle != null) {
-			taskTypeLabel.addStyleName(statusStyle);
-			suggestedStartLabel.addStyleName(statusStyle);
-			dueDateLabel.addStyleName(statusStyle);
-			statusLabel.addStyleName(statusStyle);
-			priorityLabel.addStyleName(statusStyle);
-			userLabel.addStyleName(statusStyle);
+			taskTypeLabel.addClassName(statusStyle);
+			suggestedStartLabel.addClassName(statusStyle);
+			dueDateLabel.addClassName(statusStyle);
+			statusLabel.addClassName(statusStyle);
+			priorityLabel.addClassName(statusStyle);
+			userLabel.addClassName(statusStyle);
 		}
 	}
 
@@ -135,14 +134,14 @@ public class TaskListEntry extends SideComponentField {
 			editButton = ButtonHelper.createIconButtonWithCaption(
 				"edit-task-" + rowIndex,
 				null,
-				VaadinIcons.PENCIL,
+				VaadinIcon.PENCIL,
 				null,
-				ValoTheme.BUTTON_LINK,
+				CssStyles.BUTTON_LINK,
 				CssStyles.BUTTON_COMPACT);
 
-			addComponent(editButton);
+			add(editButton);
 			setComponentAlignment(editButton, Alignment.TOP_RIGHT);
-			setExpandRatio(editButton, 0);
+			setFlexGrow(0, editButton);
 		}
 
 		editButton.addClickListener(editClickListener);

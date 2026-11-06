@@ -22,8 +22,8 @@ import java.util.Date;
 import java.util.List;
 
 import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.ui.Grid;
-import com.vaadin.v7.ui.renderers.HtmlRenderer;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;

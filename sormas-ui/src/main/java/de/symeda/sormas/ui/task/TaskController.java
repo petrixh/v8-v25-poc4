@@ -25,11 +25,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.server.Page;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.EditPermissionType;
@@ -113,7 +112,7 @@ public class TaskController {
 		final CommitDiscardWrapperComponent<TaskEditForm> editView =
 			new CommitDiscardWrapperComponent<TaskEditForm>(form, true, form.getFieldGroup());
 
-		Window popupWindow = VaadinUiUtil.showModalPopupWindow(
+		Dialog popupWindow = VaadinUiUtil.showModalPopupWindow(
 			editView,
 			isEditingAllowed ? I18nProperties.getString(Strings.headingEditTask) : I18nProperties.getString(Strings.headingViewTask));
 
@@ -179,11 +178,11 @@ public class TaskController {
 	public void showBulkTaskDataEditComponent(Collection<TaskIndexDto> selectedTasks, TaskGrid taskGrid, Runnable noEntriesRemainingCallback) {
 
 		if (selectedTasks.isEmpty()) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingNoTasksSelected),
 				I18nProperties.getString(Strings.messageNoTasksSelected),
 				Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				false);
 			return;
 		}
 
@@ -193,7 +192,7 @@ public class TaskController {
 		form.setValue(tempTask);
 		final CommitDiscardWrapperComponent<BulkTaskDataForm> editView = new CommitDiscardWrapperComponent<>(form, form.getFieldGroup());
 
-		Window popupWindow = VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getString(Strings.headingEditTask));
+		Dialog popupWindow = VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getString(Strings.headingEditTask));
 
 		editView.addCommitListener(() -> {
 			TaskDto updatedTempTask = form.getValue();
@@ -215,7 +214,7 @@ public class TaskController {
 		editView.addDiscardListener(popupWindow::close);
 	}
 
-	private Consumer<List<TaskIndexDto>> bulkOperationCallback(TaskGrid taskGrid, Runnable noEntriesRemainingCallback, Window popupWindow) {
+	private Consumer<List<TaskIndexDto>> bulkOperationCallback(TaskGrid taskGrid, Runnable noEntriesRemainingCallback, Dialog popupWindow) {
 		return remainingTasks -> {
 			if (popupWindow != null) {
 				popupWindow.close();

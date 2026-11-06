@@ -19,16 +19,16 @@ package de.symeda.sormas.ui.reports;
 
 import java.util.List;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.v7.data.util.BeanItemContainer;
 import com.vaadin.v7.data.util.GeneratedPropertyContainer;
 import com.vaadin.v7.event.ItemClickEvent;
 import com.vaadin.v7.event.ItemClickEvent.ItemClickListener;
-import com.vaadin.v7.shared.ui.grid.HeightMode;
-import com.vaadin.v7.ui.Grid;
-import com.vaadin.v7.ui.renderers.HtmlRenderer;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -66,7 +66,7 @@ public class WeeklyReportRegionsGrid extends Grid implements ItemClickListener {
 
 			if (WeeklyReportRegionSummaryDto.INFORMANT_REPORT_PERCENTAGE.equals(cell.getPropertyId())
 				|| WeeklyReportRegionSummaryDto.OFFICER_REPORT_PERCENTAGE.equals(cell.getPropertyId())) {
-				Integer reportPercentage = (Integer) cell.getProperty().getValue();
+				Integer reportPercentage = (Integer) cell.getValue();
 				if (reportPercentage >= 90) {
 					css += " " + CssStyles.GRID_CELL_PRIORITY_LOW;
 				} else if (reportPercentage >= 60) {
@@ -85,7 +85,7 @@ public class WeeklyReportRegionsGrid extends Grid implements ItemClickListener {
 		BeanItemContainer<WeeklyReportRegionSummaryDto> container =
 			new BeanItemContainer<WeeklyReportRegionSummaryDto>(WeeklyReportRegionSummaryDto.class);
 		GeneratedPropertyContainer generatedContainer = new GeneratedPropertyContainer(container);
-		VaadinUiUtil.addIconColumn(generatedContainer, VIEW_DETAILS_BTN_ID, VaadinIcons.EYE);
+		VaadinUiUtil.addIconColumn(generatedContainer, VIEW_DETAILS_BTN_ID, VaadinIcon.EYE);
 		setContainerDataSource(generatedContainer);
 
 		setColumns(
@@ -115,10 +115,10 @@ public class WeeklyReportRegionsGrid extends Grid implements ItemClickListener {
 		}
 
 		HeaderRow headerRow = getHeaderRow(0);
-		headerRow.getCell(WeeklyReportRegionSummaryDto.OFFICERS).setStyleName(CssStyles.GRID_CELL_ODD);
-		headerRow.getCell(WeeklyReportRegionSummaryDto.OFFICER_REPORTS).setStyleName(CssStyles.GRID_CELL_ODD);
-		headerRow.getCell(WeeklyReportRegionSummaryDto.OFFICER_REPORT_PERCENTAGE).setStyleName(CssStyles.GRID_CELL_ODD);
-		headerRow.getCell(WeeklyReportRegionSummaryDto.OFFICER_ZERO_REPORTS).setStyleName(CssStyles.GRID_CELL_ODD);
+		headerRow.getCell(WeeklyReportRegionSummaryDto.OFFICERS).setClassName(CssStyles.GRID_CELL_ODD);
+		headerRow.getCell(WeeklyReportRegionSummaryDto.OFFICER_REPORTS).setClassName(CssStyles.GRID_CELL_ODD);
+		headerRow.getCell(WeeklyReportRegionSummaryDto.OFFICER_REPORT_PERCENTAGE).setClassName(CssStyles.GRID_CELL_ODD);
+		headerRow.getCell(WeeklyReportRegionSummaryDto.OFFICER_ZERO_REPORTS).setClassName(CssStyles.GRID_CELL_ODD);
 
 		HeaderRow preHeaderRow = prependHeaderRow();
 		HeaderCell preHeaderCell = preHeaderRow.join(
@@ -127,7 +127,7 @@ public class WeeklyReportRegionsGrid extends Grid implements ItemClickListener {
 			WeeklyReportRegionSummaryDto.OFFICER_REPORT_PERCENTAGE,
 			WeeklyReportRegionSummaryDto.OFFICER_ZERO_REPORTS);
 		preHeaderCell.setHtml(I18nProperties.getCaption(Captions.weeklyReportRegionOfficers));
-		preHeaderCell.setStyleName(CssStyles.GRID_CELL_ODD);
+		preHeaderCell.setClassName(CssStyles.GRID_CELL_ODD);
 
 		preHeaderRow
 			.join(
@@ -173,15 +173,15 @@ public class WeeklyReportRegionsGrid extends Grid implements ItemClickListener {
 			WeeklyReportRegionSummaryDto summaryDto = (WeeklyReportRegionSummaryDto) event.getItemId();
 			VerticalLayout layout = new VerticalLayout();
 			layout.setSizeUndefined();
-			layout.setMargin(true);
-			Window window = VaadinUiUtil.showPopupWindow(layout);
+			layout.setPadding(true);
+			Dialog window = VaadinUiUtil.showPopupWindow(layout);
 
 			WeeklyReportOfficersGrid grid = new WeeklyReportOfficersGrid();
 			grid.reload(summaryDto.getRegion(), year, week);
 			grid.setWidth(1600, Unit.PIXELS);
 			grid.setHeightMode(HeightMode.ROW);
 			grid.setHeightUndefined();
-			layout.addComponent(grid);
+			layout.add(grid);
 			window.setCaption(
 				String.format(I18nProperties.getCaption(Captions.weeklyReportsInDistrict), summaryDto.getRegion().buildCaption()) + " - "
 					+ I18nProperties.getString(Strings.epiWeek) + " " + week + "/" + year);

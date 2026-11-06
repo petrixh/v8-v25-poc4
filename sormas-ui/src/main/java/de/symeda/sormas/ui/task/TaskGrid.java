@@ -20,9 +20,9 @@ package de.symeda.sormas.ui.task;
 import java.util.Date;
 
 import com.vaadin.data.provider.DataProviderListener;
-import com.vaadin.ui.renderers.DateRenderer;
-import com.vaadin.ui.renderers.HtmlRenderer;
-import com.vaadin.ui.renderers.TextRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;

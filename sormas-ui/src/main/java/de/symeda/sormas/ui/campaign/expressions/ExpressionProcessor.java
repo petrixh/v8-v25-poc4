@@ -18,7 +18,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.Field;
+import de.symeda.sormas.ui.utils.fields.Field;
 
 import de.symeda.sormas.api.campaign.form.CampaignFormElement;
 import de.symeda.sormas.api.campaign.form.CampaignFormElementType;

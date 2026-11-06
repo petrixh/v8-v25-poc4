@@ -5,14 +5,14 @@ import static de.symeda.sormas.ui.utils.FilteredGrid.ACTION_BTN_ID;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.vaadin.hene.popupbutton.PopupButton;
+import de.symeda.sormas.ui.utils.PopupButton;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
@@ -66,17 +66,17 @@ public class CampaignStatisticsView extends AbstractCampaignView {
 			VerticalLayout exportLayout = new VerticalLayout();
 			{
 				exportLayout.setSpacing(true);
-				exportLayout.setMargin(true);
-				exportLayout.addStyleName(CssStyles.LAYOUT_MINIMAL);
+				exportLayout.setPadding(true);
+				exportLayout.addClassName(CssStyles.LAYOUT_MINIMAL);
 				exportLayout.setWidth(250, Unit.PIXELS);
 			}
 
-			PopupButton exportPopupButton = ButtonHelper.createIconPopupButton(Captions.export, VaadinIcons.DOWNLOAD, exportLayout);
+			PopupButton exportPopupButton = ButtonHelper.createIconPopupButton(Captions.export, VaadinIcon.DOWNLOAD, exportLayout);
 			addHeaderComponent(exportPopupButton);
 			{
 				StreamResource streamResource =
 					GridExportStreamResource.createStreamResource(grid, ExportEntityName.CAMPAIGN_STATISTICS, ACTION_BTN_ID);
-				addExportButton(streamResource, exportPopupButton, exportLayout, VaadinIcons.TABLE, Captions.export, Strings.infoBasicExport);
+				addExportButton(streamResource, exportPopupButton, exportLayout, VaadinIcon.TABLE, Captions.export, Strings.infoBasicExport);
 			}
 		}
 
@@ -93,30 +93,30 @@ public class CampaignStatisticsView extends AbstractCampaignView {
 				grid.setColumnsVisibility(groupingValue);
 				grid.reload();
 			});
-			jurisdictionLayout.addComponent(jurisdictionSelector);
-			mainLayout.addComponent(jurisdictionLayout);
+			jurisdictionLayout.add(jurisdictionSelector);
+			mainLayout.add(jurisdictionLayout);
 		}
 		HorizontalLayout filtersLayout = new HorizontalLayout();
 
 		filtersLayout.setWidthFull();
-		filtersLayout.setMargin(false);
+		filtersLayout.setPadding(false);
 		filtersLayout.setSpacing(true);
 
 		filterForm = createFilterForm();
-		filtersLayout.addComponent(filterForm);
+		filtersLayout.add(filterForm);
 		filtersLayout.setComponentAlignment(filterForm, Alignment.TOP_LEFT);
-		filtersLayout.setExpandRatio(filterForm, 0.8f);
+		filtersLayout.setFlexGrow(0.8f, filterForm);
 
 		importanceFilterSwitcher = new ImportanceFilterSwitcher();
 		importanceFilterSwitcher.setVisible(false);
-		filtersLayout.addComponent(importanceFilterSwitcher);
+		filtersLayout.add(importanceFilterSwitcher);
 		filtersLayout.setComponentAlignment(importanceFilterSwitcher, Alignment.TOP_RIGHT);
-		filtersLayout.setExpandRatio(importanceFilterSwitcher, 0.2f);
+		filtersLayout.setFlexGrow(0.2f, importanceFilterSwitcher);
 
-		mainLayout.addComponent(filtersLayout);
+		mainLayout.add(filtersLayout);
 
 		filterForm.getField(CampaignStatisticsCriteria.CAMPAIGN_FORM_META).addValueChangeListener(e -> {
-			Object value = e.getProperty().getValue();
+			Object value = e.getValue();
 			importanceFilterSwitcher.setVisible(value != null);
 			grid.setColumnsVisibility(criteria.getGroupingLevel());
 			grid.reload();
@@ -128,12 +128,12 @@ public class CampaignStatisticsView extends AbstractCampaignView {
 				.accept((CampaignFormMetaReferenceDto) filterForm.getField(CampaignStatisticsCriteria.CAMPAIGN_FORM_META).getValue());
 		});
 
-		mainLayout.addComponent(grid);
-		mainLayout.setMargin(true);
+		mainLayout.add(grid);
+		mainLayout.setPadding(true);
 		mainLayout.setSpacing(false);
 		mainLayout.setSizeFull();
-		mainLayout.setExpandRatio(grid, 1);
-		mainLayout.setStyleName("crud-main-layout");
+		mainLayout.setFlexGrow(1, grid);
+		mainLayout.setClassName("crud-main-layout");
 
 		campaignSelector.addValueChangeListener(e -> {
 			criteria.setCampaignFormMeta(null);

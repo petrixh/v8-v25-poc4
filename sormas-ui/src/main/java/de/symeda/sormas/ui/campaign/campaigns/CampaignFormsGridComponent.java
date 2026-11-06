@@ -3,10 +3,10 @@ package de.symeda.sormas.ui.campaign.campaigns;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.data.Binder;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Grid;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import de.symeda.sormas.ui.utils.grid.Grid;
 
 import de.symeda.sormas.api.ReferenceDto;
 import de.symeda.sormas.api.campaign.form.CampaignFormMetaReferenceDto;
@@ -61,7 +61,7 @@ public class CampaignFormsGridComponent extends AbstractEditableGrid<CampaignFor
 							grid.getDataProvider().refreshAll();
 						});
 		formCombo.setEmptySelectionAllowed(false);
-		formCombo.setItemCaptionGenerator(CampaignFormMetaReferenceDto::getCaption);
+		formCombo.setItemLabelGenerator(CampaignFormMetaReferenceDto::getCaption);
 
 		Grid.Column<CampaignFormMetaReferenceDto, String> formColumn =
 				grid.addColumn(ReferenceDto::getCaption)

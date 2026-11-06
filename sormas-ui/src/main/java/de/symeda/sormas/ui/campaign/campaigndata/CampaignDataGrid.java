@@ -17,7 +17,7 @@ package de.symeda.sormas.ui.campaign.campaigndata;
 
 import java.util.Date;
 
-import com.vaadin.ui.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.campaign.data.CampaignFormDataCriteria;

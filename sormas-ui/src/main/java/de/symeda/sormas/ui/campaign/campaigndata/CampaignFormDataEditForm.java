@@ -23,8 +23,8 @@ import java.util.Objects;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.v7.data.Validator;
 import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.campaign.data.CampaignFormDataDto;
@@ -108,7 +108,7 @@ public class CampaignFormDataEditForm extends AbstractEditForm<CampaignFormDataD
 			setRequired(true, CampaignFormDataEditForm.AREA);
 			cbArea.addItems(FacadeProvider.getAreaFacade().getAllActiveAsReference());
 			cbArea.addValueChangeListener(e -> {
-				AreaReferenceDto area = (AreaReferenceDto) e.getProperty().getValue();
+				AreaReferenceDto area = (AreaReferenceDto) e.getValue();
 
 				if (area == null) {
 					cbRegion.setValue(null);
@@ -121,7 +121,7 @@ public class CampaignFormDataEditForm extends AbstractEditForm<CampaignFormDataD
 						: FacadeProvider.getRegionFacade().getAllActiveByServerCountry());
 			});
 			cbRegion.addValueChangeListener(e -> {
-				RegionReferenceDto region = (RegionReferenceDto) e.getProperty().getValue();
+				RegionReferenceDto region = (RegionReferenceDto) e.getValue();
 				if (Objects.nonNull(region)) {
 					cbArea.setValue(FacadeProvider.getRegionFacade().getByUuid(region.getUuid()).getArea());
 				}
@@ -168,12 +168,12 @@ public class CampaignFormDataEditForm extends AbstractEditForm<CampaignFormDataD
 
 	private void addInfrastructureListeners(ComboBox cbRegion, ComboBox cbDistrict, ComboBox cbCommunity) {
 		cbRegion.addValueChangeListener(e -> {
-			RegionReferenceDto region = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto region = (RegionReferenceDto) e.getValue();
 			FieldHelper.updateItems(cbDistrict, region != null ? FacadeProvider.getDistrictFacade().getAllActiveByRegion(region.getUuid()) : null);
 		});
 
 		cbDistrict.addValueChangeListener(e -> {
-			DistrictReferenceDto district = (DistrictReferenceDto) e.getProperty().getValue();
+			DistrictReferenceDto district = (DistrictReferenceDto) e.getValue();
 			FieldHelper
 				.updateItems(cbCommunity, district != null ? FacadeProvider.getCommunityFacade().getAllActiveByDistrict(district.getUuid()) : null);
 		});
@@ -216,7 +216,7 @@ public class CampaignFormDataEditForm extends AbstractEditForm<CampaignFormDataD
 
 	private void buildCampaignForm(CampaignFormDataDto campaignFormData) {
 		GridLayout campaignFormLayout = new GridLayout(12, 1);
-		campaignFormLayout.setWidth(100, Unit.PERCENTAGE);
+		campaignFormLayout.setWidthFull();
 		CssStyles.style(campaignFormLayout, CssStyles.VSPACE_3);
 
 		CampaignFormMetaDto campaignForm =

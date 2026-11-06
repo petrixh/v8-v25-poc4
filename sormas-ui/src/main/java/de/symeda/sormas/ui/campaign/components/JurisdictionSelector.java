@@ -1,6 +1,6 @@
 package de.symeda.sormas.ui.campaign.components;
 
-import com.vaadin.ui.ComboBox;
+import com.vaadin.flow.component.combobox.ComboBox;
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
 

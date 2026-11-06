@@ -9,12 +9,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.data.Binder;
-import com.vaadin.server.SerializablePredicate;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import com.vaadin.flow.component.textfield.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.campaign.diagram.CampaignDashboardElement;
@@ -29,7 +29,7 @@ public class CampaignDashboardElementsGridComponent extends AbstractEditableGrid
 
 	public CampaignDashboardElementsGridComponent(List<CampaignDashboardElement> savedElements, List<CampaignDashboardElement> allElements) {
 		super(savedElements, allElements);
-		setWidth(100, Unit.PERCENTAGE);
+		setWidthFull();
 	}
 
 	protected Binder<CampaignDashboardElement> addColumnsBinder(List<CampaignDashboardElement> allElements) {
@@ -40,7 +40,7 @@ public class CampaignDashboardElementsGridComponent extends AbstractEditableGrid
 				.collect(Collectors.toMap(CampaignDiagramDefinitionDto::getDiagramId, CampaignDiagramDefinitionDto::getDiagramCaption));
 
 		ComboBox<String> diagramIdCaptionCombo = new ComboBox<>(Captions.campaignDashboardChart, diagramIdCaptionMap.keySet());
-		diagramIdCaptionCombo.setItemCaptionGenerator(diagramId -> diagramIdCaptionMap.get(diagramId));
+		diagramIdCaptionCombo.setItemLabelGenerator(diagramId -> diagramIdCaptionMap.get(diagramId));
 		diagramIdCaptionCombo.setEmptySelectionAllowed(false);
 
 		Binder.Binding<CampaignDashboardElement, String> diagramIdCaptionBind = binder.bind(

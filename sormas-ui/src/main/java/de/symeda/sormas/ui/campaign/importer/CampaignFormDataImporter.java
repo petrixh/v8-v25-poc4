@@ -21,10 +21,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.opencsv.exceptions.CsvValidationException;
-import com.vaadin.server.Sizeable;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.server.StreamResource;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.campaign.CampaignReferenceDto;
@@ -296,7 +296,7 @@ public class CampaignFormDataImporter extends DataImporter {
 
 	private void handleDetectedDuplicate(CampaignFormDataDto newData, CampaignFormDataDto existingData, CampaignFormDataImportLock lock) {
 
-		Window popupWindow = VaadinUiUtil.createPopupWindow();
+		Dialog popupWindow = VaadinUiUtil.createPopupWindow();
 
 		currentUI.accessSynchronously(() -> {
 			Runnable cancelCallback = () -> {
@@ -337,7 +337,7 @@ public class CampaignFormDataImporter extends DataImporter {
 
 			popupWindow.setContent(selectionField);
 			popupWindow.setCaption(I18nProperties.getString(Strings.headingCampaignFormDataAlreadyExisting));
-			popupWindow.setWidth(960, Sizeable.Unit.PIXELS);
+			popupWindow.setWidth(960, Unit.PIXELS);
 
 			currentUI.addWindow(popupWindow);
 		});

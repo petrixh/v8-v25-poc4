@@ -1,9 +1,9 @@
 package de.symeda.sormas.ui.campaign.campaigns;
 
-import static com.vaadin.ui.Notification.Type.TRAY_NOTIFICATION;
+import static de.symeda.sormas.ui.utils.NotificationHelper.Type.TRAY_NOTIFICATION;
 
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.ui.Notification;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.EditPermissionType;
 import de.symeda.sormas.api.FacadeProvider;
@@ -56,22 +56,22 @@ public class CampaignView extends AbstractDetailView<CampaignReferenceDto> {
 	@Override
 	protected void initView(String params) {
 		DetailSubComponentWrapper container = new DetailSubComponentWrapper(() -> editComponent);
-		container.setWidth(100, Unit.PERCENTAGE);
-		container.setMargin(true);
+		container.setWidthFull();
+		container.setPadding(true);
 		setSubComponent(container);
 
 		CampaignDto campaignDto = FacadeProvider.getCampaignFacade().getCampaignByUuid(getReference().getUuid());
 		editComponent = ControllerProvider.getCampaignController().getCampaignComponent(campaignDto, () -> {
-			Notification.show(String.format(I18nProperties.getString(Strings.messageCampaignSaved), campaignDto.getName()), TRAY_NOTIFICATION);
+			NotificationHelper.show(String.format(I18nProperties.getString(Strings.messageCampaignSaved), campaignDto.getName()), TRAY_NOTIFICATION);
 		});
-		editComponent.setMargin(false);
-		editComponent.getWrappedComponent().setWidth(100, Unit.PERCENTAGE);
+		editComponent.setPadding(false);
+		editComponent.getWrappedComponent().setWidthFull();
 		editComponent.setHeightUndefined();
-		editComponent.addStyleName(CssStyles.ROOT_COMPONENT);
-		editComponent.setWidth(100, Unit.PERCENTAGE);
+		editComponent.addClassName(CssStyles.ROOT_COMPONENT);
+		editComponent.setWidthFull();
 
 		LayoutWithSidePanel layout = new LayoutWithSidePanel(editComponent);
-		container.addComponent(layout);
+		container.add(layout);
 
 		getViewTitleLabel().setValue(campaignDto.getName());
 

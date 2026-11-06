@@ -26,16 +26,15 @@ import java.util.stream.Collectors;
 import com.google.common.collect.Sets;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.Styles;
-import com.vaadin.server.Sizeable.Unit;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.v7.data.Validator;
-import com.vaadin.v7.shared.ui.label.ContentMode;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.Label;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.ContentMode;
+import de.symeda.sormas.ui.utils.fields.Field;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.campaign.data.CampaignFormDataEntry;
 import de.symeda.sormas.api.campaign.data.translation.TranslationElement;
@@ -115,7 +114,7 @@ public class CampaignFormBuilder {
 					sectionLayout,
 					CssStyles.GRID_LAYOUT_SECTION,
 					sectionCount % 2 == 0 ? CssStyles.GRID_LAYOUT_EVEN : CssStyles.GRID_LAYOUT_ODD);
-				sectionLayout.setWidth(100, Unit.PERCENTAGE);
+				sectionLayout.setWidthFull();
 				currentLayout = sectionLayout;
 
 				campaignFormLayout.addComponent(sectionLayout, 0, campaignFormLayout.getRows() - 1, 11, campaignFormLayout.getRows() - 1);
@@ -126,7 +125,7 @@ public class CampaignFormBuilder {
 					currentCol = -1;
 				}
 
-				Label field = new Label(get18nCaption(formElement.getId(), formElement.getCaption()));
+				Span field = new Span(get18nCaption(formElement.getId(), formElement.getCaption()));
 				field.setId(formElement.getId());
 				prepareComponent(field, formElement.getId(), formElement.getCaption(), type, styles);
 
@@ -211,7 +210,7 @@ public class CampaignFormBuilder {
 			((Label) field).setContentMode(ContentMode.HTML);
 		} else if (type == CampaignFormElementType.YES_NO) {
 			if (!styles.contains(CampaignFormElementStyle.INLINE)) {
-				CssStyles.style(field, ValoTheme.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_CAPTION_INLINE, CssStyles.FLOAT_RIGHT);
+				CssStyles.style(field, SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_CAPTION_INLINE, CssStyles.FLOAT_RIGHT);
 			}
 			CssStyles.style(field, CssStyles.OPTIONGROUP_GRID_LAYOUT);
 		} else if (type == CampaignFormElementType.TEXT || type == CampaignFormElementType.NUMBER) {

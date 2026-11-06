@@ -28,16 +28,16 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.campaign.CampaignDto;
@@ -90,7 +90,7 @@ public class CampaignEditForm extends AbstractEditForm<CampaignDto> {
 		}
 		statusChangeLayout = new VerticalLayout();
 		statusChangeLayout.setSpacing(false);
-		statusChangeLayout.setMargin(false);
+		statusChangeLayout.setPadding(false);
 		getContent().addComponent(statusChangeLayout, STATUS_CHANGE);
 
 		addFields();
@@ -103,8 +103,8 @@ public class CampaignEditForm extends AbstractEditForm<CampaignDto> {
 			return;
 		}
 
-		Label campaignBasicHeadingLabel = new Label(I18nProperties.getString(Strings.headingCampaignBasics));
-		campaignBasicHeadingLabel.addStyleName(H3);
+		Span campaignBasicHeadingLabel = new Span(I18nProperties.getString(Strings.headingCampaignBasics));
+		campaignBasicHeadingLabel.addClassName(H3);
 		getContent().addComponent(campaignBasicHeadingLabel, CAMPAIGN_BASIC_HEADING_LOC);
 
 		addField(CampaignDto.UUID, TextField.class);
@@ -140,10 +140,10 @@ public class CampaignEditForm extends AbstractEditForm<CampaignDto> {
 
 		final HorizontalLayout usageLayout = new HorizontalLayout();
 		usageLayout.setWidthFull();
-		Label usageLabel =
-			new Label(VaadinIcons.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoUsageOfEditableCampaignGrids), ContentMode.HTML);
+		Span usageLabel =
+			new Span(VaadinIcon.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoUsageOfEditableCampaignGrids), ContentMode.HTML);
 		usageLabel.setWidthFull();
-		usageLayout.addComponent(usageLabel);
+		usageLayout.add(usageLabel);
 		usageLayout.setSpacing(true);
 		usageLayout.setMargin(new MarginInfo(true, false, true, false));
 		getContent().addComponent(usageLayout, USAGE_INFO);
@@ -161,7 +161,7 @@ public class CampaignEditForm extends AbstractEditForm<CampaignDto> {
 			campaignDashboardElements);
 		getContent().addComponent(campaignDashboardGridComponent, CAMPAIGN_DASHBOARD_LOC);
 
-		final Label spacer = new Label();
+		final Span spacer = new Span();
 		getContent().addComponent(spacer, SPACE_LOC);
 
 		addField(CampaignDto.DELETION_REASON);

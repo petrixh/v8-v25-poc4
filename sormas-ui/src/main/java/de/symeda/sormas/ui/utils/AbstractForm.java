@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.data.binder.Binder;
@@ -684,7 +685,8 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 		private boolean enabled = true;
 		/**
 		 * Vaadin 7 modified state: set by any value change of a bound field (also a programmatic one, also back to the
-		 * loaded value), cleared when the bean is read, committed or discarded.
+		 * loaded value), cleared when the bean is read, committed or discarded. The changed field is marked too
+		 * ({@link Field#isModified()}).
 		 */
 		private boolean modified;
 
@@ -692,7 +694,28 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 			this.beanType = beanType;
 			this.binder = new Binder<>(beanType);
 			this.propertySet = BeanPropertySet.get(beanType);
-			binder.addValueChangeListener(e -> modified = true);
+			binder.addValueChangeListener(e -> {
+				modified = true;
+				if (bindings.containsKey(e.getHasValue())) {
+					setFieldModified((Field<?>) e.getHasValue(), true);
+				}
+			});
+		}
+
+		private static void setFieldModified(Field<?> field, boolean fieldModified) {
+			ComponentUtil.setData(field.asComponent(), Field.DATA_MODIFIED, fieldModified ? Boolean.TRUE : null);
+		}
+
+		private void clearModified() {
+			modified = false;
+			bindings.keySet().forEach(f -> setFieldModified(f, false));
+		}
+
+		/**
+		 * Vaadin 7 {@code field.discard()} of one bound field: it is no longer {@link Field#isModified() modified}.
+		 */
+		public void clearModified(Field<?> field) {
+			setFieldModified(field, false);
 		}
 
 		public Binder<T> getBinder() {
@@ -835,6 +858,7 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 				throw new IllegalArgumentException("The given field is not bound");
 			}
 			binding.unbind();
+			setFieldModified(field, false);
 			fieldsByPropertyId.values().remove(field);
 			readOnlyPropertyFields.remove(field);
 		}
@@ -879,7 +903,7 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 			} else {
 				binder.setBean(bean);
 			}
-			modified = false;
+			clearModified();
 		}
 
 		/**
@@ -927,7 +951,7 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 					throw new FieldGroupInvalidValueException(invalidFields);
 				}
 				write();
-				modified = false;
+				clearModified();
 			}
 
 			try {
@@ -1015,7 +1039,7 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 			if (buffered && bean != null) {
 				binder.readBean(bean);
 			}
-			modified = false;
+			clearModified();
 		}
 
 		/**

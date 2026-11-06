@@ -468,6 +468,7 @@ public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements
 			if (binding != null && getFieldGroup().getBean() != null) {
 				binding.read(getFieldGroup().getBean());
 			}
+			getFieldGroup().clearModified(field);
 		}
 	}
 

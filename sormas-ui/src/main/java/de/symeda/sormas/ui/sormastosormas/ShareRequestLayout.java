@@ -22,8 +22,8 @@ import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
@@ -47,13 +47,13 @@ public class ShareRequestLayout extends VerticalLayout {
 		boolean isPending = shareRequest.getStatus() == ShareRequestStatus.PENDING;
 
 		if (dataType == ShareRequestDataType.CASE) {
-			Label casesLabel = new Label(I18nProperties.getString(Strings.headingShareRequestCases));
-			casesLabel.addStyleName(H3);
-			addComponent(casesLabel);
+			Span casesLabel = new Span(I18nProperties.getString(Strings.headingShareRequestCases));
+			casesLabel.addClassName(H3);
+			add(casesLabel);
 			List<SormasToSormasCasePreview> cases = shareRequest.getCases();
 			CasePreviewGrid casesGrid = new CasePreviewGrid(cases, isPending);
 			casesGrid.addNavigateListener(this::onNavigateFromGrid);
-			addComponent(casesGrid);
+			add(casesGrid);
 
 			List<SormasToSormasContactPreview> contacts = shareRequest.getContacts();
 
@@ -78,20 +78,20 @@ public class ShareRequestLayout extends VerticalLayout {
 		}
 
 		if (dataType == ShareRequestDataType.EVENT) {
-			Label eventsLabel = new Label(I18nProperties.getString(Strings.headingShareRequestEvents));
-			eventsLabel.addStyleName(H3);
-			addComponent(eventsLabel);
+			Span eventsLabel = new Span(I18nProperties.getString(Strings.headingShareRequestEvents));
+			eventsLabel.addClassName(H3);
+			add(eventsLabel);
 			List<SormasToSormasEventPreview> events = shareRequest.getEvents();
 			EventPreviewGrid eventsGrid = new EventPreviewGrid(events, isPending);
 			eventsGrid.addNavigateListener(this::onNavigateFromGrid);
-			addComponent(eventsGrid);
+			add(eventsGrid);
 
-			Label casesLabel = new Label(I18nProperties.getString(Strings.headingShareRequestEventParticipants));
-			casesLabel.addStyleName(H3);
-			addComponent(casesLabel);
+			Span casesLabel = new Span(I18nProperties.getString(Strings.headingShareRequestEventParticipants));
+			casesLabel.addClassName(H3);
+			add(casesLabel);
 			EventParticipantsPreviewGrid eventParticipantsGrid = new EventParticipantsPreviewGrid(isPending);
 			eventParticipantsGrid.addNavigateListener(this::onNavigateFromGrid);
-			addComponent(eventParticipantsGrid);
+			add(eventParticipantsGrid);
 
 			eventsGrid.getSelectionModel().addSelectionListener(event -> {
 				event.getFirstSelectedItem().ifPresent(eventPreview -> {
@@ -114,12 +114,12 @@ public class ShareRequestLayout extends VerticalLayout {
 	}
 
 	private ContactsPreviewGrid addContactsGrid(List<SormasToSormasContactPreview> contacts, boolean isPending) {
-		Label casesLabel = new Label(I18nProperties.getString(Strings.headingShareRequestContacts));
-		casesLabel.addStyleName(H3);
-		addComponent(casesLabel);
+		Span casesLabel = new Span(I18nProperties.getString(Strings.headingShareRequestContacts));
+		casesLabel.addClassName(H3);
+		add(casesLabel);
 
 		ContactsPreviewGrid contactsGrid = new ContactsPreviewGrid(contacts, isPending);
-		addComponent(contactsGrid);
+		add(contactsGrid);
 
 		return contactsGrid;
 	}

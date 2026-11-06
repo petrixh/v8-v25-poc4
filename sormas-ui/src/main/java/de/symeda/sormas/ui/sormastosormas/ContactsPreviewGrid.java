@@ -22,8 +22,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.ui.Label;
-import com.vaadin.ui.renderers.DateRenderer;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
@@ -63,7 +63,7 @@ public class ContactsPreviewGrid extends BasePreviewGrid<SormasToSormasContactPr
 				diseaseText += " - " + eventPreview.getDiseaseDetails();
 			}
 
-			return new Label(diseaseText);
+			return new Span(diseaseText);
 		}).setId(SormasToSormasContactPreview.DISEASE);
 
 		List<String> columnConfig = new ArrayList<>();

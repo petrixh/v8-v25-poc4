@@ -13,8 +13,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -181,7 +181,7 @@ public class ExternalSurveillanceServiceGateway {
 		if (shouldConfirm) {
 			VaadinUiUtil.showConfirmationPopup(
 				I18nProperties.getCaption(Captions.ExternalSurveillanceToolGateway_confirmSend),
-				new Label(confirmationText),
+				new Span(confirmationText),
 				I18nProperties.getString(Strings.yes),
 				I18nProperties.getString(Strings.no),
 				640,
@@ -204,27 +204,27 @@ public class ExternalSurveillanceServiceGateway {
 			gatewayCall.call();
 
 			if (successMessage != null) {
-				Notification.show(
+				NotificationHelper.show(
 					I18nProperties.getCaption(Captions.ExternalSurveillanceToolGateway_title),
 					successMessage,
-					Notification.Type.HUMANIZED_MESSAGE);
+					NotificationHelper.Type.HUMANIZED_MESSAGE);
 			}
 		} catch (ExternalSurveillanceToolException e) {
 			if (StringUtils.isNotBlank(e.getErrorCode()) && "timeout_anticipated".equals(e.getErrorCode())) {
-				notificationType = Notification.Type.WARNING_MESSAGE;
+				notificationType = NotificationHelper.Type.WARNING_MESSAGE;
 			} else {
-				notificationType = Notification.Type.ERROR_MESSAGE;
+				notificationType = NotificationHelper.Type.ERROR_MESSAGE;
 			}
 			notificationMessage = e.getMessage();
 
-			Notification.show(I18nProperties.getCaption(Captions.ExternalSurveillanceToolGateway_title), notificationMessage, notificationType);
+			NotificationHelper.show(I18nProperties.getCaption(Captions.ExternalSurveillanceToolGateway_title), notificationMessage, notificationType);
 		}
 	}
 
 	public static void deleteInExternalSurveillanceTool(String deletionText, GatewayCall gatewayCall, Runnable callback) {
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getCaption(Captions.ExternalSurveillanceToolGateway_confirmDelete),
-			new Label(deletionText),
+			new Span(deletionText),
 			I18nProperties.getString(Strings.yes),
 			I18nProperties.getString(Strings.no),
 			640,

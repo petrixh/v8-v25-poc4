@@ -21,15 +21,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vaadin.navigator.Navigator;
-import com.vaadin.server.Sizeable;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import de.symeda.sormas.ui.navigation.Navigator;
+import com.vaadin.flow.component.Unit;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.ui.TextArea;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.EntityDto;
 import de.symeda.sormas.api.FacadeProvider;
@@ -140,7 +140,7 @@ public class SormasToSormasController {
 		TextArea commentField = new TextArea(I18nProperties.getCaption(Captions.SormasToSormasOptions_comment));
 		commentField.setWidthFull();
 		VerticalLayout popupContent =
-			new VerticalLayout(new Label(I18nProperties.getString(Strings.confirmationRejectSormasToSormasShareRequest)), commentField);
+			new VerticalLayout(new Span(I18nProperties.getString(Strings.confirmationRejectSormasToSormasShareRequest)), commentField);
 
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getString(Strings.headingRejectSormasToSormasShareRequest),
@@ -318,7 +318,7 @@ public class SormasToSormasController {
 		Runnable callback) {
 		VaadinUiUtil.showThreeOptionsPopup(
 			I18nProperties.getString(Strings.headingSormasToSormasDuplicateDetection),
-			new Label(I18nProperties.getString(messageI18nProperty), ContentMode.HTML),
+			new Span(I18nProperties.getString(messageI18nProperty), ContentMode.HTML),
 			I18nProperties.getCaption(Captions.actionOkay),
 			I18nProperties.getCaption(Captions.actionCancel),
 			I18nProperties.getCaption(thirdActionI18nProperty),
@@ -339,7 +339,7 @@ public class SormasToSormasController {
 	public void revokeShare(String shareInfoUuid, Runnable callback) {
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getString(Strings.headingRevokeSormasToSormasShareRequest),
-			new Label(I18nProperties.getString(Strings.confirmationRevokeSormasToSormasShareRequest)),
+			new Span(I18nProperties.getString(Strings.confirmationRevokeSormasToSormasShareRequest)),
 			I18nProperties.getString(Strings.yes),
 			I18nProperties.getString(Strings.no),
 			640,
@@ -353,7 +353,7 @@ public class SormasToSormasController {
 	public void revokeShareRequest(String requestUuid, Runnable callback) {
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getString(Strings.headingRevokeSormasToSormasShareRequest),
-			new Label(I18nProperties.getString(Strings.confirmationRevokeSormasToSormasShareRequest)),
+			new Span(I18nProperties.getString(Strings.confirmationRevokeSormasToSormasShareRequest)),
 			I18nProperties.getString(Strings.yes),
 			I18nProperties.getString(Strings.no),
 			640,
@@ -378,10 +378,10 @@ public class SormasToSormasController {
 		CommitDiscardWrapperComponent<SormasToSormasOptionsForm> optionsCommitDiscard =
 			new CommitDiscardWrapperComponent<>(optionsForm, optionsForm.getFieldGroup());
 		optionsCommitDiscard.getCommitButton().setCaption(I18nProperties.getCaption(Captions.sormasToSormasShare));
-		optionsCommitDiscard.setWidth(100, Sizeable.Unit.PERCENTAGE);
+		optionsCommitDiscard.setWidthFull();
 
-		Window optionsPopup = VaadinUiUtil.showPopupWindow(optionsCommitDiscard, I18nProperties.getCaption(Captions.sormasToSormasShare));
-		optionsForm.setWidth(600, Sizeable.Unit.PIXELS);
+		Dialog optionsPopup = VaadinUiUtil.showPopupWindow(optionsCommitDiscard, I18nProperties.getCaption(Captions.sormasToSormasShare));
+		optionsForm.setWidth(600, Unit.PIXELS);
 
 		optionsForm.getTargetCombo().addValueChangeListener(e -> optionsCommitDiscard.getCommitButton().setEnabled(optionsForm.isTargetValid()));
 
@@ -408,7 +408,7 @@ public class SormasToSormasController {
 			} else {
 				Component messageComponent =
 					buildShareErrorMessage(ex.getHumanMessage() + " " + I18nProperties.getString(Strings.reloadPageToSeeChanges), ex.getErrors());
-				messageComponent.setWidth(100, Sizeable.Unit.PERCENTAGE);
+				messageComponent.setWidthFull();
 				VaadinUiUtil.showPopupWindowWithWidth(
 					new VerticalLayout(messageComponent),
 					I18nProperties.getCaption(Captions.sormasToSormasErrorDialogTitle),
@@ -416,7 +416,7 @@ public class SormasToSormasController {
 			}
 		} catch (SormasToSormasValidationException ex) {
 			Component messageComponent = buildShareErrorMessage(ex.getMessage(), ex.getErrors());
-			messageComponent.setWidth(100, Sizeable.Unit.PERCENTAGE);
+			messageComponent.setWidthFull();
 			VaadinUiUtil.showPopupWindowWithWidth(
 				new VerticalLayout(messageComponent),
 				I18nProperties.getCaption(Captions.sormasToSormasErrorDialogTitle),
@@ -425,33 +425,33 @@ public class SormasToSormasController {
 	}
 
 	private Component buildShareErrorMessage(String message, List<ValidationErrors> errors) {
-		Label errorMessageLabel = new Label(message, ContentMode.HTML);
-		errorMessageLabel.addStyleName(CssStyles.LABEL_WHITE_SPACE_NORMAL);
+		Span errorMessageLabel = new Span(message, ContentMode.HTML);
+		errorMessageLabel.addClassName(CssStyles.LABEL_WHITE_SPACE_NORMAL);
 
 		if (errors == null || errors.isEmpty()) {
 			return errorMessageLabel;
 		}
 
 		VerticalLayout[] errorLayouts = errors.stream().map(e -> {
-			Label groupLabel = new Label(e.getGroup().getHumanMessage());
-			groupLabel.addStyleNames(CssStyles.LABEL_BOLD);
+			Span groupLabel = new Span(e.getGroup().getHumanMessage());
+			groupLabel.addClassNames(CssStyles.LABEL_BOLD);
 
 			VerticalLayout groupErrorsLayout = new VerticalLayout(formatSubGroupErrors(e));
-			groupErrorsLayout.setMargin(false);
+			groupErrorsLayout.setPadding(false);
 			groupErrorsLayout.setSpacing(false);
-			groupErrorsLayout.setStyleName(CssStyles.HSPACE_LEFT_3);
-			groupErrorsLayout.setWidth(92, Sizeable.Unit.PERCENTAGE);
+			groupErrorsLayout.setClassName(CssStyles.HSPACE_LEFT_3);
+			groupErrorsLayout.setWidth(92, Unit.PERCENTAGE);
 
 			VerticalLayout layout = new VerticalLayout(groupLabel, groupErrorsLayout);
-			layout.setMargin(false);
+			layout.setPadding(false);
 			layout.setSpacing(false);
 
 			return layout;
 		}).toArray(VerticalLayout[]::new);
 
 		VerticalLayout errorsLayout = new VerticalLayout(errorMessageLabel);
-		errorsLayout.addComponents(errorLayouts);
-		errorsLayout.setMargin(false);
+		errorsLayout.add(errorLayouts);
+		errorsLayout.setPadding(false);
 		errorsLayout.setSpacing(false);
 
 		return errorsLayout;
@@ -459,13 +459,13 @@ public class SormasToSormasController {
 
 	private Component[] formatSubGroupErrors(ValidationErrors errors) {
 		return errors.getSubGroups().stream().map(e -> {
-			Label groupLabel = new Label(e.getHumanMessage() + ":");
-			groupLabel.addStyleName(CssStyles.LABEL_BOLD);
-			Label label = new Label(
+			Span groupLabel = new Span(e.getHumanMessage() + ":");
+			groupLabel.addClassName(CssStyles.LABEL_BOLD);
+			Span label = new Span(
 				String.join(", ", e.getMessages().stream().map(ValidationErrorMessage::getHumanMessage).collect(Collectors.toList()).toString()));
 			HorizontalLayout layout = new HorizontalLayout(groupLabel, label);
-			label.addStyleName(CssStyles.LABEL_WHITE_SPACE_NORMAL);
-			layout.setMargin(false);
+			label.addClassName(CssStyles.LABEL_WHITE_SPACE_NORMAL);
+			layout.setPadding(false);
 
 			return layout;
 		}).toArray(Component[]::new);
@@ -477,10 +477,10 @@ public class SormasToSormasController {
 			? FacadeProvider.getSormasToSormasShareRequestFacade().getShareRequestDetails(requestUuid)
 			: FacadeProvider.getShareRequestInfoFacade().getShareRequestDetails(requestUuid);
 		ShareRequestLayout shareRequestLayout = new ShareRequestLayout(shareRequest);
-		shareRequestLayout.setWidth(900, Sizeable.Unit.PIXELS);
-		shareRequestLayout.setMargin(true);
+		shareRequestLayout.setWidth(900, Unit.PIXELS);
+		shareRequestLayout.setPadding(true);
 
-		Window window = VaadinUiUtil.showPopupWindow(shareRequestLayout, I18nProperties.getString(Strings.headingShareRequestDetails));
+		Dialog window = VaadinUiUtil.showPopupWindow(shareRequestLayout, I18nProperties.getString(Strings.headingShareRequestDetails));
 		shareRequestLayout.setNavigateCallback(window::close);
 	}
 

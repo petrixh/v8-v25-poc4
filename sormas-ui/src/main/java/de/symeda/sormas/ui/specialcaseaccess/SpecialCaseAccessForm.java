@@ -17,7 +17,7 @@ package de.symeda.sormas.ui.specialcaseaccess;
 
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 
-import com.vaadin.v7.ui.ComboBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.specialcaseaccess.SpecialCaseAccessDto;

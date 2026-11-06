@@ -33,13 +33,13 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextArea;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextArea;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -358,10 +358,10 @@ public class SormasToSormasOptionsForm extends AbstractEditForm<SormasToSormasOp
 
 			CheckBox handoverOwnership = addField(SormasToSormasOptionsDto.HAND_OVER_OWNERSHIP);
 			CheckBox pseudonymizeData = addField(SormasToSormasOptionsDto.PSEUDONYMIZE_DATA);
-			pseudonymizeData.addStyleNames(CssStyles.VSPACE_3);
+			pseudonymizeData.addClassNames(CssStyles.VSPACE_3);
 
 			targetCombo.addValueChangeListener(e -> {
-				SormasServerDescriptor selectedServer = (SormasServerDescriptor) e.getProperty().getValue();
+				SormasServerDescriptor selectedServer = (SormasServerDescriptor) e.getValue();
 
 				if (selectedServer == null) {
 					getContent().removeComponent(TARGET_VALIDATION_ERROR_LOC);
@@ -373,8 +373,8 @@ public class SormasToSormasOptionsForm extends AbstractEditForm<SormasToSormasOp
 					String validationMessage = targetValidator.apply(selectedServer);
 
 					if (StringUtils.isNoneBlank(validationMessage)) {
-						Label messageLabel = new Label(VaadinIcons.WARNING.getHtml() + " " + validationMessage, ContentMode.HTML);
-						messageLabel.addStyleNames(LABEL_WHITE_SPACE_NORMAL, VSPACE_4, VSPACE_TOP_5);
+						Span messageLabel = new Span(VaadinIcon.WARNING.getHtml() + " " + validationMessage, ContentMode.HTML);
+						messageLabel.addClassNames(LABEL_WHITE_SPACE_NORMAL, VSPACE_4, VSPACE_TOP_5);
 						getContent().addComponent(messageLabel, TARGET_VALIDATION_ERROR_LOC);
 					} else {
 						getContent().removeComponent(TARGET_VALIDATION_ERROR_LOC);
@@ -401,7 +401,7 @@ public class SormasToSormasOptionsForm extends AbstractEditForm<SormasToSormasOp
 			});
 
 			handoverOwnership.addValueChangeListener(e -> {
-				boolean ownershipHandedOver = (boolean) e.getProperty().getValue();
+				boolean ownershipHandedOver = (boolean) e.getValue();
 				pseudonymizeData.setEnabled(!ownershipHandedOver);
 
 				if (ownershipHandedOver) {
@@ -410,7 +410,7 @@ public class SormasToSormasOptionsForm extends AbstractEditForm<SormasToSormasOp
 			});
 
 			pseudonymizeData.addValueChangeListener(e -> {
-				boolean pseudonimyze = (boolean) e.getProperty().getValue();
+				boolean pseudonimyze = (boolean) e.getValue();
 				handoverOwnership.setEnabled(!pseudonimyze);
 				if (pseudonimyze) {
 					handoverOwnership.setValue(false);
@@ -428,9 +428,9 @@ public class SormasToSormasOptionsForm extends AbstractEditForm<SormasToSormasOp
 			}
 
 			if (CollectionUtils.isEmpty(allowedCustomOptions)) {
-				pseudonymizeData.addStyleNames(CssStyles.VSPACE_3);
+				pseudonymizeData.addClassNames(CssStyles.VSPACE_3);
 			} else {
-				getField(allowedCustomOptions.get(allowedCustomOptions.size() - 1)).addStyleNames(CssStyles.VSPACE_3);
+				getField(allowedCustomOptions.get(allowedCustomOptions.size() - 1)).addClassNames(CssStyles.VSPACE_3);
 			}
 		}
 

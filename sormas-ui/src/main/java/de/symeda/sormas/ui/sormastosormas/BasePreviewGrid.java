@@ -23,13 +23,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.vaadin.event.SerializableEventListener;
-import com.vaadin.server.Page;
 import com.vaadin.shared.Registration;
-import com.vaadin.shared.ui.grid.HeightMode;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
+import com.vaadin.flow.component.Component;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 import com.vaadin.util.ReflectTools;
 
 import de.symeda.sormas.api.EntityDto;
@@ -79,12 +78,11 @@ public abstract class BasePreviewGrid<T extends PseudonymizableDto> extends Grid
 				navigateToUuid.accept(uuid);
 				fireEvent(new NavigateEvent(this));
 			} else if (isPendingRequest) {
-				new Notification(I18nProperties.getString(Strings.messageAcceptRequestToNavigate), Notification.Type.TRAY_NOTIFICATION)
-					.show(Page.getCurrent());
+				NotificationHelper.show(I18nProperties.getString(Strings.messageAcceptRequestToNavigate), NotificationHelper.Type.TRAY_NOTIFICATION);
 			} else {
-				new Notification(
+				NotificationHelper.show(
 					String.format(I18nProperties.getString(Strings.messageEntityNotFound), I18nProperties.getCaption(entityCaptionTag).toLowerCase()),
-					Notification.Type.WARNING_MESSAGE).show(Page.getCurrent());
+					NotificationHelper.Type.WARNING_MESSAGE);
 			}
 		}));
 	}
@@ -93,9 +91,9 @@ public abstract class BasePreviewGrid<T extends PseudonymizableDto> extends Grid
 		((Grid.Column<T, ?>) addComponentColumn(previewData -> {
 			SormasToSormasPersonPreview person = getPerson.apply(previewData);
 			if (person.isPseudonymized()) {
-				return new Label(I18nProperties.getCaption(Captions.inaccessibleValue));
+				return new Span(I18nProperties.getCaption(Captions.inaccessibleValue));
 			}
-			return new Label(person.getFirstName() + " " + person.getLastName());
+			return new Span(person.getFirstName() + " " + person.getLastName());
 		})).setId(PERSON_NAME).setStyleGenerator(item -> {
 			if (item.isPseudonymized()) {
 				return CssStyles.INACCESSIBLE_COLUMN;
@@ -104,13 +102,13 @@ public abstract class BasePreviewGrid<T extends PseudonymizableDto> extends Grid
 			return "";
 		});
 		addComponentColumn(
-			previewData -> new Label(
+			previewData -> new Span(
 				DateFormatHelper.formatDate(
 					getPerson.apply(previewData).getBirthdateDD(),
 					getPerson.apply(previewData).getBirthdateMM(),
 					getPerson.apply(previewData).getBirthdateYYYY()))).setId(BIRTH_DATE);
-		addComponentColumn(previewData -> new Label(getPerson.apply(previewData).getSex().toString())).setId(SormasToSormasPersonPreview.SEX);
-		addComponentColumn(previewData -> new Label(LocationHelper.buildLocationString(getPerson.apply(previewData).getAddress())))
+		addComponentColumn(previewData -> new Span(getPerson.apply(previewData).getSex().toString())).setId(SormasToSormasPersonPreview.SEX);
+		addComponentColumn(previewData -> new Span(LocationHelper.buildLocationString(getPerson.apply(previewData).getAddress())))
 			.setId(SormasToSormasPersonPreview.ADDRESS);
 
 		return Arrays.asList(PERSON_NAME, BIRTH_DATE, SormasToSormasPersonPreview.SEX, SormasToSormasPersonPreview.ADDRESS);

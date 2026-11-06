@@ -20,8 +20,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.ui.Label;
-import com.vaadin.ui.renderers.DateRenderer;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
@@ -65,11 +65,11 @@ public class EventPreviewGrid extends BasePreviewGrid<SormasToSormasEventPreview
 					diseaseText += " - " + casePreview.getDiseaseDetails();
 				}
 			}
-			return new Label(diseaseText);
+			return new Span(diseaseText);
 		}).setId(SormasToSormasEventPreview.DISEASE);
 
 		removeColumn(SormasToSormasEventPreview.EVENT_LOCATION);
-		addComponentColumn(previewData -> new Label(LocationHelper.buildLocationString(previewData.getEventLocation())))
+		addComponentColumn(previewData -> new Span(LocationHelper.buildLocationString(previewData.getEventLocation())))
 			.setId(SormasToSormasEventPreview.EVENT_LOCATION);
 
 		setColumns(

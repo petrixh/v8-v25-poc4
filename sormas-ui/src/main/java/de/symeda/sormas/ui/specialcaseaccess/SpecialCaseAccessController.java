@@ -25,11 +25,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseIndexDto;
@@ -67,11 +66,11 @@ public class SpecialCaseAccessController {
 	public void createForSelectedCases(Set<CaseIndexDto> cases, AbstractCaseGrid<?> caseGrid) {
 
 		if (CollectionUtils.isEmpty(cases)) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingNoCasesSelected),
 				I18nProperties.getString(Strings.messageNoCasesSelected),
-				Notification.Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				NotificationHelper.Type.WARNING_MESSAGE,
+				false);
 
 			return;
 		}
@@ -84,7 +83,7 @@ public class SpecialCaseAccessController {
 			if (anyAssignedToUser) {
 				VaadinUiUtil.showConfirmationPopup(
 					I18nProperties.getString(Strings.headingConfirmBulkGrantSpecialAccess),
-					new Label(I18nProperties.getString(Strings.confirmationBulkGrantSpecialAccess)),
+					new Span(I18nProperties.getString(Strings.confirmationBulkGrantSpecialAccess)),
 					I18nProperties.getString(Strings.yes),
 					I18nProperties.getString(Strings.no),
 					640,
@@ -125,7 +124,7 @@ public class SpecialCaseAccessController {
 
 		CommitDiscardWrapperComponent<SpecialCaseAccessForm> editComponent = new CommitDiscardWrapperComponent<>(editForm, editForm.getFieldGroup());
 
-		Window window = VaadinUiUtil.showModalPopupWindow(editComponent, I18nProperties.getString(titleTag));
+		Dialog window = VaadinUiUtil.showModalPopupWindow(editComponent, I18nProperties.getString(titleTag));
 		window.setWidth(600, Unit.PIXELS);
 
 		editComponent.addCommitListener(() -> {

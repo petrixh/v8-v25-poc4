@@ -16,8 +16,6 @@ package de.symeda.sormas.ui.samples.humansample;
 
 import java.util.Date;
 
-import com.vaadin.ui.renderers.DateRenderer;
-
 import de.symeda.sormas.api.ConfigFacade;
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.DiseaseHelper;
@@ -43,6 +41,7 @@ import de.symeda.sormas.ui.utils.ReloadableGrid;
 import de.symeda.sormas.ui.utils.ShowDetailsListener;
 import de.symeda.sormas.ui.utils.UuidRenderer;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 @SuppressWarnings("serial")
 public class HumanSampleGrid extends ReloadableGrid<SampleIndexDto, SampleCriteria> {
@@ -201,10 +200,10 @@ public class HumanSampleGrid extends ReloadableGrid<SampleIndexDto, SampleCriter
 			}
 		}
 
-		for (Column<SampleIndexDto, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(SampleIndexDto.I18N_PREFIX, column.getId(), column.getCaption()));
+		for (Column<SampleIndexDto, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(SampleIndexDto.I18N_PREFIX, column.getKey(), column.getCaption()));
 
-			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getId()));
+			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getKey()));
 
 		}
 
@@ -221,7 +220,7 @@ public class HumanSampleGrid extends ReloadableGrid<SampleIndexDto, SampleCriter
 
 	@Override
 	public void reload() {
-		if (getSelectionModel().isUserSelectionAllowed()) {
+		if (isUserSelectionAllowed()) {
 			deselectAll();
 		}
 

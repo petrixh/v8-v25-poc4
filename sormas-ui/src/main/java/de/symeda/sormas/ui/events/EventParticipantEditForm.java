@@ -20,11 +20,6 @@ package de.symeda.sormas.ui.events;
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
-
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.event.EventDto;
 import de.symeda.sormas.api.event.EventParticipantDto;
@@ -39,6 +34,9 @@ import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.FieldAccessHelper;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.UserField;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class EventParticipantEditForm extends AbstractEditForm<EventParticipantDto> {
 
@@ -85,7 +83,7 @@ public class EventParticipantEditForm extends AbstractEditForm<EventParticipantD
 		district.setDescription(I18nProperties.getPrefixDescription(EventParticipantDto.I18N_PREFIX, EventParticipantDto.DISTRICT));
 
 		region.addValueChangeListener(e -> {
-			RegionReferenceDto regionDto = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto regionDto = (RegionReferenceDto) e.getValue();
 
 			FieldHelper
 				.updateItems(district, regionDto != null ? FacadeProvider.getDistrictFacade().getAllActiveByRegion(regionDto.getUuid()) : null);
@@ -130,13 +128,13 @@ public class EventParticipantEditForm extends AbstractEditForm<EventParticipantD
 	}
 
 	@Override
-	public void setValue(EventParticipantDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(EventParticipantDto newFieldValue) {
 		super.setValue(newFieldValue);
 	}
 
 	@Override
-	protected void setInternalValue(EventParticipantDto newValue) {
-		super.setInternalValue(newValue);
+	protected void setPresentationValue(EventParticipantDto newValue) {
+		super.setPresentationValue(newValue);
 
 		if (UiUtil.enabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {
 			hideJurisdictionFields();

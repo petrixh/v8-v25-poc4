@@ -1,9 +1,6 @@
 package de.symeda.sormas.ui.events;
 
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.HasValue;
 
 import de.symeda.sormas.api.event.EventCriteria;
 import de.symeda.sormas.api.event.EventParticipantCriteria;
@@ -17,6 +14,9 @@ import de.symeda.sormas.ui.utils.AbstractFilterForm;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FieldConfiguration;
 import de.symeda.sormas.ui.utils.FieldHelper;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class EventParticipantsFilterForm extends AbstractFilterForm<EventParticipantCriteria> {
 
@@ -69,12 +69,12 @@ public class EventParticipantsFilterForm extends AbstractFilterForm<EventPartici
 	}
 
 	@Override
-	protected void applyDependenciesOnFieldChange(String propertyId, Property.ValueChangeEvent event) {
+	protected void applyDependenciesOnFieldChange(String propertyId, HasValue.ValueChangeEvent<?> event) {
 		super.applyDependenciesOnFieldChange(propertyId, event);
 
 		switch (propertyId) {
 		case EventParticipantCriteria.BIRTHDATE_MM: {
-			Integer birthMM = (Integer) event.getProperty().getValue();
+			Integer birthMM = (Integer) event.getValue();
 
 			ComboBox birthDayDD = getField(EventParticipantCriteria.BIRTHDATE_DD);
 			birthDayDD.setEnabled(birthMM != null);

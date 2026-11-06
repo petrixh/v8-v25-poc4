@@ -26,15 +26,9 @@ import java.util.function.Consumer;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.navigator.Navigator;
-import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
-import com.vaadin.v7.data.Validator;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.common.DeletionReason;
@@ -61,16 +55,20 @@ import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.events.eventParticipantsLineListing.layout.LineListingLayout;
+import de.symeda.sormas.ui.navigation.Navigator;
 import de.symeda.sormas.ui.utils.ArchiveHandlers;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.DeletableUtils;
 import de.symeda.sormas.ui.utils.DeleteRestoreHandlers;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.automaticdeletion.DeletionLabel;
 import de.symeda.sormas.ui.utils.components.linelisting.model.LineDto;
 import de.symeda.sormas.ui.utils.components.page.title.TitleLayout;
 import de.symeda.sormas.ui.utils.components.page.title.TitleLayoutHelper;
+import de.symeda.sormas.ui.utils.fields.Field;
 
 public class EventParticipantsController {
 
@@ -130,18 +128,17 @@ public class EventParticipantsController {
 							selectedPerson -> {
 								if (selectedPerson != null) {
 									if (FacadeProvider.getEventParticipantFacade().exists(selectedPerson.getUuid(), eventRef.getUuid())) {
-										throw new Validator.InvalidValueException(I18nProperties.getString(Strings.messageAlreadyEventParticipant));
+										throw new Field.InvalidValueException(I18nProperties.getString(Strings.messageAlreadyEventParticipant));
 									} else {
 										dto.setPerson(FacadeProvider.getPersonFacade().getByUuid(selectedPerson.getUuid()));
 										EventParticipantDto savedDto = eventParticipantFacade.save(dto);
 
-										Notification notification = new Notification(
+										NotificationHelper.show(
 											I18nProperties.getString(Strings.messagePersonAddedAsEventParticipant),
 											"",
 											Type.HUMANIZED_MESSAGE);
-										notification.show(Page.getCurrent());
 
-										Notification
+										NotificationHelper
 											.show(I18nProperties.getString(Strings.messageEventParticipantCreated), Type.ASSISTIVE_NOTIFICATION);
 										if (navigateOnCommit) {
 											navigateToData(savedDto.getUuid());
@@ -154,10 +151,10 @@ public class EventParticipantsController {
 							true);
 				} else {
 					if (FacadeProvider.getEventParticipantFacade().exists(dto.getPerson().getUuid(), eventRef.getUuid())) {
-						throw new Validator.InvalidValueException(I18nProperties.getString(Strings.messageAlreadyEventParticipant));
+						throw new Field.InvalidValueException(I18nProperties.getString(Strings.messageAlreadyEventParticipant));
 					}
 					EventParticipantDto savedDto = eventParticipantFacade.save(dto);
-					Notification.show(I18nProperties.getString(Strings.messageEventParticipantCreated), Type.ASSISTIVE_NOTIFICATION);
+					NotificationHelper.show(I18nProperties.getString(Strings.messageEventParticipantCreated), Type.ASSISTIVE_NOTIFICATION);
 					if (navigateOnCommit) {
 						navigateToData(savedDto.getUuid());
 					} else {
@@ -167,8 +164,8 @@ public class EventParticipantsController {
 			}
 		});
 
-		Window window = VaadinUiUtil.showModalPopupWindow(createComponent, I18nProperties.getString(Strings.headingCreateNewEventParticipant));
-		window.addCloseListener(e -> {
+		Dialog window = VaadinUiUtil.showModalPopupWindow(createComponent, I18nProperties.getString(Strings.headingCreateNewEventParticipant));
+		VaadinUiUtil.addCloseListener(window, e -> {
 			doneConsumer.accept(null);
 		});
 
@@ -220,7 +217,7 @@ public class EventParticipantsController {
 					FacadeProvider.getEventParticipantFacade().delete(eventParticipantRef.getUuid(), deleteDetails);
 					callback.run();
 				} else {
-					Notification.show(I18nProperties.getString(Strings.errorOccurred), Type.ERROR_MESSAGE);
+					NotificationHelper.show(I18nProperties.getString(Strings.errorOccurred), Type.ERROR_MESSAGE);
 				}
 			});
 	}
@@ -331,7 +328,7 @@ public class EventParticipantsController {
 					|| responsibleDistrictIsEmpty) {
 					VaadinUiUtil.showConfirmationPopup(
 						I18nProperties.getString(Strings.headingEventParticipantResponsibleJurisdictionUpdated),
-						new Label(I18nProperties.getString(Strings.messageEventParticipantResponsibleJurisdictionUpdated)),
+						new Span(I18nProperties.getString(Strings.messageEventParticipantResponsibleJurisdictionUpdated)),
 						I18nProperties.getString(Strings.yes),
 						I18nProperties.getString(Strings.no),
 						500,
@@ -354,7 +351,7 @@ public class EventParticipantsController {
 	private void savePersonAndEventParticipant(Consumer<EventParticipantReferenceDto> doneConsumer, EventParticipantDto dto) {
 		personFacade.save(dto.getPerson());
 		eventParticipantFacade.save(dto);
-		Notification.show(I18nProperties.getString(Strings.messageEventParticipantSaved), Type.WARNING_MESSAGE);
+		NotificationHelper.show(I18nProperties.getString(Strings.messageEventParticipantSaved), Type.WARNING_MESSAGE);
 		if (doneConsumer != null)
 			doneConsumer.accept(null);
 		SormasUI.refreshView();
@@ -388,7 +385,7 @@ public class EventParticipantsController {
 	private Consumer<List<EventParticipantIndexDto>> bulkOperationCallback(
 		EventParticipantsGrid eventParticipantsGrid,
 		Runnable noEntriesRemainingCallback,
-		Window popupWindow) {
+		Dialog popupWindow) {
 		return remainingEventParticipants -> {
 			if (popupWindow != null) {
 				popupWindow.close();
@@ -396,7 +393,7 @@ public class EventParticipantsController {
 
 			eventParticipantsGrid.reload();
 			if (CollectionUtils.isNotEmpty(remainingEventParticipants)) {
-				eventParticipantsGrid.asMultiSelect().selectItems(remainingEventParticipants.toArray(new EventParticipantIndexDto[0]));
+				eventParticipantsGrid.asMultiSelect().select(remainingEventParticipants.toArray(new EventParticipantIndexDto[0]));
 			} else {
 				noEntriesRemainingCallback.run();
 			}
@@ -405,7 +402,8 @@ public class EventParticipantsController {
 
 	public void openLineListingWindow(EventReferenceDto eventReferenceDto) {
 
-		Window window = new Window(I18nProperties.getString(Strings.headingLineListing));
+		Dialog window = VaadinUiUtil.createPopupWindow();
+		window.setHeaderTitle(I18nProperties.getString(Strings.headingLineListing));
 
 		EventDto eventDto = FacadeProvider.getEventFacade().getByUuid(eventReferenceDto.getUuid());
 
@@ -415,13 +413,13 @@ public class EventParticipantsController {
 
 		lineListingForm.setSaveCallback(eventParticipants -> saveEventParticipantsFromLineListing(lineListingForm, eventParticipants));
 
-		window.setContent(lineListingForm);
+		window.add(lineListingForm);
 		window.setModal(true);
-		window.setPositionX((int) Math.max(0, (Page.getCurrent().getBrowserWindowWidth() - lineListingForm.getWidth())) / 2);
-		window.setPositionY(70);
+		// was centred horizontally by the browser width (the dialog's default) and 70 px from the top
+		window.setTop("70px");
 		window.setResizable(false);
 
-		UI.getCurrent().addWindow(window);
+		window.open();
 
 	}
 
@@ -429,7 +427,7 @@ public class EventParticipantsController {
 		try {
 			lineListingForm.validate();
 		} catch (ValidationRuntimeException e) {
-			Notification.show(I18nProperties.getString(Strings.errorFieldValidationFailed), "", Type.ERROR_MESSAGE);
+			NotificationHelper.show(I18nProperties.getString(Strings.errorFieldValidationFailed), "", Type.ERROR_MESSAGE);
 			return;
 		}
 
@@ -459,7 +457,7 @@ public class EventParticipantsController {
 				.selectOrCreatePerson(newPerson, I18nProperties.getString(Strings.infoSelectOrCreatePersonForEventParticipant), selectedPerson -> {
 					if (selectedPerson != null) {
 						if (FacadeProvider.getEventParticipantFacade().exists(selectedPerson.getUuid(), eventUuid)) {
-							throw new Validator.InvalidValueException(I18nProperties.getString(Strings.messageAlreadyEventParticipant));
+							throw new Field.InvalidValueException(I18nProperties.getString(Strings.messageAlreadyEventParticipant));
 						}
 						newEventParticipant.setPerson(FacadeProvider.getPersonFacade().getByUuid(selectedPerson.getUuid()));
 						eventParticipantFacade.save(newEventParticipant);
@@ -467,21 +465,21 @@ public class EventParticipantsController {
 					saveEventParticipantsList(eventUuid, eventParticipants.subList(1, eventParticipants.size()), region, district);
 				}, true);
 		} else {
-			Notification notification =
-				new Notification(I18nProperties.getString(Strings.messagePersonListAddedAsEventPerticipants), "", Type.HUMANIZED_MESSAGE);
-			notification.setDelayMsec(1000);
-			notification.show(Page.getCurrent());
+			NotificationHelper.showNotification(
+				I18nProperties.getString(Strings.messagePersonListAddedAsEventPerticipants),
+				Type.HUMANIZED_MESSAGE,
+				1000);
 			ControllerProvider.getEventParticipantController().navigateToIndex(eventUuid);
 		}
 	}
 
 	public void sendEmailsToAllSelectedItems(Collection<EventParticipantIndexDto> selectedRows, EventParticipantsGrid eventParticipantsGrid) {
 		if (selectedRows.size() == 0) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingNoEventParticipantsSelected),
 				I18nProperties.getString(Strings.messageNoEventParticipantsSelected),
 				Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				false);
 		} else {
 			ControllerProvider.getExternalEmailController()
 				.<EventParticipantIndexDto> sendBulkEmail(

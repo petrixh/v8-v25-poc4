@@ -10,9 +10,8 @@ import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
-import com.vaadin.shared.MouseEventDetails;
-import com.vaadin.ui.Grid.Column;
-import com.vaadin.ui.Grid.ItemClick;
+import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.component.grid.ItemClickEvent;
 
 import de.symeda.sormas.api.contact.ContactIndexDto;
 
@@ -31,13 +30,13 @@ public class ShowDetailsListenerTest {
 		String detailsColumnId = ContactIndexDto.UUID;
 		ShowDetailsListener<ContactIndexDto> cut = new ShowDetailsListener<>(detailsColumnId, handler);
 
-		ItemClick<ContactIndexDto> event = mock(ItemClick.class);
+		ItemClickEvent<ContactIndexDto> event = mock(ItemClickEvent.class);
 		ContactIndexDto item = mock(ContactIndexDto.class);
 
 		// 1a. ColumnClick
 		Column column = mock(Column.class);
 		when(event.getColumn()).thenReturn(column);
-		when(column.getId()).thenReturn(detailsColumnId);
+		when(column.getKey()).thenReturn(detailsColumnId);
 		cut.itemClick(event);
 		verify(handler, never()).accept(null);
 
@@ -49,9 +48,8 @@ public class ShowDetailsListenerTest {
 		reset(handler, event);
 
 		// 2a. DoubleClick
-		MouseEventDetails mouseEventDetails = mock(MouseEventDetails.class);
-		when(event.getMouseEventDetails()).thenReturn(mouseEventDetails);
-		when(mouseEventDetails.isDoubleClick()).thenReturn(true);
+		// was MouseEventDetails.isDoubleClick(): a Flow item click event carries the click count
+		when(event.getClickCount()).thenReturn(2);
 		cut.itemClick(event);
 		verify(handler, never()).accept(null);
 

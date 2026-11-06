@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.function.Supplier;
 
-import com.vaadin.server.StreamResource;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -34,7 +33,7 @@ public class TaskDownloadUtil {
 		// Hide Utility Class Constructor
 	}
 
-	public static StreamResource createTaskExportResource(
+	public static StreamSourceDownloadHandler createTaskExportResource(
 		TaskCriteria taskCriteria,
 		Supplier<Collection<String>> selectedRows,
 		ExportConfigurationDto exportConfiguration) {

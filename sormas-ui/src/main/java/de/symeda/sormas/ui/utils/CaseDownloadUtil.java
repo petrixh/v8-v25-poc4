@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.function.Supplier;
 
-import com.vaadin.server.StreamResource;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseCriteria;
@@ -38,7 +37,7 @@ import de.symeda.sormas.api.vaccination.VaccinationDto;
 
 public class CaseDownloadUtil {
 
-	public static StreamResource createCaseExportResource(
+	public static StreamSourceDownloadHandler createCaseExportResource(
 		CaseCriteria criteria,
 		Supplier<Collection<String>> selectedRows,
 		CaseExportType exportType,

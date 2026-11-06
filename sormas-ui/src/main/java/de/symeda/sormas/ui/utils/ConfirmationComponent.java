@@ -20,9 +20,10 @@ package de.symeda.sormas.ui.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent.DoneListener;
@@ -47,7 +48,7 @@ public abstract class ConfirmationComponent extends HorizontalLayout {
 	}
 
 	public ConfirmationComponent(boolean inverseOrder) {
-		this(inverseOrder, ValoTheme.BUTTON_PRIMARY);
+		this(inverseOrder, CssStyles.BUTTON_PRIMARY);
 	}
 
 	public ConfirmationComponent(boolean inverseOrder, String cancelButtonStyle) {
@@ -59,22 +60,22 @@ public abstract class ConfirmationComponent extends HorizontalLayout {
 
 		Button discardButton = getCancelButton();
 		if (!inverseOrder)
-			addComponent(discardButton);
+			add(discardButton);
 
 		Button commitButton = getConfirmButton();
-		addComponent(commitButton);
+		add(commitButton);
 
 		if (inverseOrder)
-			addComponent(discardButton);
+			add(discardButton);
 	}
 
-	public void addExtraButton(Button button, Button.ClickListener handler) {
+	public void addExtraButton(Button button, ComponentEventListener<ClickEvent<Button>> handler) {
 		button.addClickListener(e -> {
-			handler.buttonClick(e);
+			handler.onComponentEvent(e);
 			onDone();
 		});
 
-		addComponent(button, inverseOrder ? getComponentCount() - 1 : 0);
+		addComponentAtIndex(inverseOrder ? getComponentCount() - 1 : 0, button);
 	}
 
 	public Button getConfirmButton() {
@@ -82,7 +83,7 @@ public abstract class ConfirmationComponent extends HorizontalLayout {
 			confirmButton = ButtonHelper.createButton(Captions.actionConfirm, false, event -> {
 				onConfirm();
 				onDone();
-			}, ValoTheme.BUTTON_PRIMARY);
+			}, CssStyles.BUTTON_PRIMARY);
 		}
 
 		return confirmButton;

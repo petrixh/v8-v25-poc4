@@ -51,24 +51,20 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.LoggerFactory;
 
 import com.opencsv.CSVWriter;
-import com.vaadin.server.ClassResource;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.Page;
-import com.vaadin.server.StreamResource;
-import com.vaadin.server.StreamResource.StreamSource;
-import com.vaadin.server.VaadinSession;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.Window.CloseListener;
-import com.vaadin.v7.data.Container.Indexed;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.Grid.Column;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasOrderedComponents;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.AttachmentType;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.AgeGroup;
 import de.symeda.sormas.api.FacadeProvider;
@@ -102,6 +98,8 @@ import de.symeda.sormas.api.visit.VisitExportType;
 import de.symeda.sormas.api.visit.VisitSummaryExportDto;
 import de.symeda.sormas.ui.AboutView;
 import de.symeda.sormas.ui.statistics.DatabaseExportView;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler.StreamSource;
 
 public final class DownloadUtil {
 
@@ -111,13 +109,16 @@ public final class DownloadUtil {
 
 	public static final int DETAILED_EXPORT_STEP_SIZE = 50;
 
-	public static StreamResource createDatabaseExportStreamResource(DatabaseExportView databaseExportView, String fileName, String mimeType) {
+	public static StreamSourceDownloadHandler createDatabaseExportStreamResource(
+		DatabaseExportView databaseExportView,
+		String fileName,
+		String mimeType) {
 
-		StreamResource streamResource = new StreamResource(() -> {
-			Map<CheckBox, DatabaseTable> databaseToggles = databaseExportView.getDatabaseTableToggles();
+		StreamSourceDownloadHandler streamResource = new StreamSourceDownloadHandler(() -> {
+			Map<? extends HasValue<?, Boolean>, DatabaseTable> databaseToggles = databaseExportView.getDatabaseTableToggles();
 			List<DatabaseTable> tablesToExport = new ArrayList<>();
-			for (CheckBox checkBox : databaseToggles.keySet()) {
-				if (checkBox.getValue()) {
+			for (HasValue<?, Boolean> checkBox : databaseToggles.keySet()) {
+				if (Boolean.TRUE.equals(checkBox.getValue())) {
 					tablesToExport.add(databaseToggles.get(checkBox));
 				}
 			}
@@ -135,54 +136,57 @@ public final class DownloadUtil {
 				}
 
 			});
-		}, fileName);
-		streamResource.setMIMEType(mimeType);
-		streamResource.setCacheTime(0);
+		}, fileName, mimeType);
 		return streamResource;
 	}
 
-	public static StreamResource createGridExportStreamResource(
-		Indexed container,
-		List<Column> columns,
+	/**
+	 * Was {@code createGridExportStreamResource(Indexed container, List<Column> columns, ..)} for a Vaadin 7 grid: now
+	 * the Flow grid that replaced it.
+	 */
+	public static StreamSourceDownloadHandler createGridExportStreamResource(
+		Grid<?> grid,
 		ExportEntityName entityName,
 		String... ignoredPropertyIds) {
 
 		String fileName = createFileNameWithCurrentDate(entityName, ".csv");
-		return new V7GridExportStreamResource(container, columns, fileName, ignoredPropertyIds);
+		return new V7GridExportStreamResource(grid, fileName, ignoredPropertyIds);
 	}
 
-	public static StreamResource createFileStreamResource(String filePath, String fileName, String mimeType, String errorTitle, String errorText) {
+	public static StreamSourceDownloadHandler createFileStreamResource(
+		String filePath,
+		String fileName,
+		String mimeType,
+		String errorTitle,
+		String errorText) {
 
-		StreamResource streamResource = new StreamResource(() -> {
+		StreamSourceDownloadHandler streamResource = new StreamSourceDownloadHandler(() -> {
 			try {
 				return new BufferedInputStream(Files.newInputStream(new File(filePath).toPath()));
 			} catch (IOException e) {
 				// TODO This currently requires the user to click the "Export" button again or reload the page as the UI
 				// is not automatically updated; this should be changed once Vaadin push is enabled (see #516)
-				new Notification(errorTitle, errorText, Type.ERROR_MESSAGE, false).show(Page.getCurrent());
+				NotificationHelper.show(errorTitle, errorText, Type.ERROR_MESSAGE, false);
 				return null;
 			}
-		}, fileName);
-		streamResource.setMIMEType(mimeType);
-		streamResource.setCacheTime(0);
+		}, fileName, mimeType);
 		return streamResource;
 	}
 
-	public static StreamResource createStringStreamResource(String content, String fileName, String mimeType) {
+	public static StreamSourceDownloadHandler createStringStreamResource(String content, String fileName, String mimeType) {
 		return createByteArrayStreamResource(content.getBytes(StandardCharsets.UTF_8), fileName, mimeType);
 	}
 
-	public static StreamResource createByteArrayStreamResource(byte[] content, String fileName, String mimeType) {
-		StreamResource streamResource = new StreamResource(() -> new ByteArrayInputStream(content), fileName);
-		streamResource.setMIMEType(mimeType);
-		return streamResource;
+	public static StreamSourceDownloadHandler createByteArrayStreamResource(byte[] content, String fileName, String mimeType) {
+		// Vaadin 8 kept the default cache time here
+		return new StreamSourceDownloadHandler(() -> new ByteArrayInputStream(content), fileName, mimeType);
 	}
 
 	@SuppressWarnings("serial")
-	public static StreamResource createPopulationDataExportResource() {
+	public static StreamSourceDownloadHandler createPopulationDataExportResource() {
 
 		String exportFileName = createFileNameWithCurrentDate(ExportEntityName.POPULATION_DATA, ".csv");
-		StreamResource populationDataStreamResource = new StreamResource(new StreamSource() {
+		StreamSourceDownloadHandler populationDataStreamResource = new StreamSourceDownloadHandler(new StreamSource() {
 
 			@Override
 			public InputStream getStream() {
@@ -282,28 +286,26 @@ public final class DownloadUtil {
 				} catch (IOException e) {
 					// TODO This currently requires the user to click the "Export" button again or reload the page as the UI
 					// is not automatically updated; this should be changed once Vaadin push is enabled (see #516)
-					new Notification(
+					NotificationHelper.show(
 						I18nProperties.getString(Strings.headingExportFailed),
 						I18nProperties.getString(Strings.messageExportFailed),
 						Type.ERROR_MESSAGE,
-						false).show(Page.getCurrent());
+						false);
 					return null;
 				}
 			}
-		}, exportFileName);
-		populationDataStreamResource.setMIMEType("text/csv");
-		populationDataStreamResource.setCacheTime(0);
+		}, exportFileName, "text/csv");
 		return populationDataStreamResource;
 	}
 
-	public static StreamResource createCaseManagementExportResource(
+	public static StreamSourceDownloadHandler createCaseManagementExportResource(
 		CaseCriteria criteria,
 		Supplier<Collection<String>> selectedRows,
 		ExportEntityName entityName) {
 		String exportFileName = createFileNameWithCurrentDate(entityName, ".zip");
-		StreamResource casesResource = CaseDownloadUtil.createCaseExportResource(criteria, selectedRows, CaseExportType.CASE_MANAGEMENT, null);
+		StreamSourceDownloadHandler casesResource = CaseDownloadUtil.createCaseExportResource(criteria, selectedRows, CaseExportType.CASE_MANAGEMENT, null);
 
-		StreamResource prescriptionsResource = createCsvExportStreamResource(
+		StreamSourceDownloadHandler prescriptionsResource = createCsvExportStreamResource(
 			PrescriptionExportDto.class,
 			null,
 			(Integer start, Integer max) -> FacadeProvider.getPrescriptionFacade().getExportList(criteria, selectedRows.get(), start, max),
@@ -320,7 +322,7 @@ public final class DownloadUtil {
 			ExportEntityName.PRESCRIPTIONS,
 			null);
 
-		StreamResource treatmentsResource = createCsvExportStreamResource(
+		StreamSourceDownloadHandler treatmentsResource = createCsvExportStreamResource(
 			TreatmentExportDto.class,
 			null,
 			(Integer start, Integer max) -> FacadeProvider.getTreatmentFacade().getExportList(criteria, selectedRows.get(), start, max),
@@ -337,7 +339,7 @@ public final class DownloadUtil {
 			ExportEntityName.PRESCRIPTIONS,
 			null);
 
-		StreamResource clinicalVisitsResource = createCsvExportStreamResource(
+		StreamSourceDownloadHandler clinicalVisitsResource = createCsvExportStreamResource(
 			ClinicalVisitExportDto.class,
 			null,
 			(Integer start, Integer max) -> FacadeProvider.getClinicalVisitFacade().getExportList(criteria, selectedRows.get(), start, max),
@@ -357,7 +359,7 @@ public final class DownloadUtil {
 			ExportEntityName.CLINICAL_VISITS,
 			null);
 
-		StreamResource caseManagementStreamResource = new StreamResource(() -> {
+		StreamSourceDownloadHandler caseManagementStreamResource = new StreamSourceDownloadHandler(() -> {
 			String zipFile = FacadeProvider.getExportFacade()
 				.generateZipArchive(DateHelper.formatDateForExport(new Date()), new Random().nextInt(Integer.MAX_VALUE));
 			try (ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(zipFile)))) {
@@ -371,9 +373,7 @@ public final class DownloadUtil {
 				LoggerFactory.getLogger(DownloadUtil.class).error("Failed to generate a zip file for case management export.");
 				return null;
 			}
-		}, exportFileName);
-		caseManagementStreamResource.setMIMEType("application/zip");
-		caseManagementStreamResource.setCacheTime(0);
+		}, exportFileName, "application/zip");
 		return caseManagementStreamResource;
 	}
 
@@ -474,12 +474,12 @@ public final class DownloadUtil {
 		}
 	}
 
-	public static StreamResource createVisitsExportStreamResource(
+	public static StreamSourceDownloadHandler createVisitsExportStreamResource(
 		ContactCriteria contactCriteria,
 		Supplier<Set<String>> selectedRows,
 		ExportEntityName entityName) {
 		String exportFileName = createFileNameWithCurrentDate(entityName, ".csv");
-		StreamResource extendedStreamResource = new StreamResource(() -> new DelayedInputStream((out) -> {
+		StreamSourceDownloadHandler extendedStreamResource = new StreamSourceDownloadHandler(() -> new DelayedInputStream((out) -> {
 			try (CSVWriter writer = CSVUtils
 				.createCSVWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8.name()), FacadeProvider.getConfigFacade().getCsvSeparator())) {
 
@@ -543,20 +543,16 @@ public final class DownloadUtil {
 				// TODO This currently requires the user to click the "Export" button again or reload the page
 				//  as the UI
 				// is not automatically updated; this should be changed once Vaadin push is enabled (see #516)
-				VaadinSession.getCurrent()
-					.access(
-						() -> new Notification(
-							I18nProperties.getString(Strings.headingExportFailed),
-							I18nProperties.getString(Strings.messageExportFailed),
-							Type.ERROR_MESSAGE,
-							false).show(Page.getCurrent()));
-			}), exportFileName);
-		extendedStreamResource.setMIMEType("text/csv");
-		extendedStreamResource.setCacheTime(0);
+				NotificationHelper.showAsync(
+					UI.getCurrent(),
+					I18nProperties.getString(Strings.headingExportFailed),
+					I18nProperties.getString(Strings.messageExportFailed),
+					Type.ERROR_MESSAGE);
+			}), exportFileName, "text/csv");
 		return extendedStreamResource;
 	}
 
-	public static <T> StreamResource createCsvExportStreamResource(
+	public static <T> StreamSourceDownloadHandler createCsvExportStreamResource(
 		Class<T> exportRowClass,
 		Enum<?> exportType,
 		CsvStreamUtils.SupplierBiFunction<Integer, Integer, List<T>> exportRowsSupplier,
@@ -565,7 +561,7 @@ public final class DownloadUtil {
 		ExportConfigurationDto exportConfiguration) {
 
 		String exportFileName = createFileNameWithCurrentDate(entityName, ".csv");
-		StreamResource extendedStreamResource = new StreamResource(() -> new DelayedInputStream((out) -> {
+		StreamSourceDownloadHandler extendedStreamResource = new StreamSourceDownloadHandler(() -> new DelayedInputStream((out) -> {
 			try {
 				CsvStreamUtils.writeCsvContentToStream(
 					exportRowClass,
@@ -586,16 +582,12 @@ public final class DownloadUtil {
 				// TODO This currently requires the user to click the "Export" button again or reload the page
 				//  as the UI
 				// is not automatically updated; this should be changed once Vaadin push is enabled (see #516)
-				VaadinSession.getCurrent()
-					.access(
-						() -> new Notification(
-							I18nProperties.getString(Strings.headingExportFailed),
-							I18nProperties.getString(Strings.messageExportFailed),
-							Type.ERROR_MESSAGE,
-							false).show(Page.getCurrent()));
-			}), exportFileName);
-		extendedStreamResource.setMIMEType("text/csv");
-		extendedStreamResource.setCacheTime(0);
+				NotificationHelper.showAsync(
+					UI.getCurrent(),
+					I18nProperties.getString(Strings.headingExportFailed),
+					I18nProperties.getString(Strings.messageExportFailed),
+					Type.ERROR_MESSAGE);
+			}), exportFileName, "text/csv");
 		return extendedStreamResource;
 	}
 
@@ -625,9 +617,9 @@ public final class DownloadUtil {
 
 	/**
 	 * <p>
-	 * When downloading a Resource via FileDownloader,
-	 * the Component of the FileDownloader must remain visible in the UI.
-	 * Otherwise the Resource is unregistered and the download may fail.
+	 * When downloading through a download link (was a FileDownloader),
+	 * the link must remain attached and not behind a modal dialog (inert).
+	 * Otherwise the download request is rejected and the download may fail.
 	 * </p>
 	 * <p>
 	 * This method display a modal dialog that includes the exportComponent without actually showing it to the user.
@@ -636,23 +628,57 @@ public final class DownloadUtil {
 	 *
 	 * @param exportComponent
 	 * @param closeListener
+	 *            called when the dialog closes (was a Window.CloseListener)
 	 */
-	public static void showExportWaitDialog(AbstractComponent exportComponent, CloseListener closeListener) {
+	public static void showExportWaitDialog(Component exportComponent, ComponentEventListener<Dialog.OpenedChangeEvent> closeListener) {
+
+		// was the dialog caption: the caption of the export button
+		String caption = exportComponent.getElement().getTextRecursively();
 
 		//the button has to remain in the UI for the download to succeed, but it should not be seen 
-		CustomLayout hidingLayout = new CustomLayout();
-		hidingLayout.setSizeUndefined();
-		hidingLayout.setTemplateContents("");
-		hidingLayout.addComponent(exportComponent);
+		Div hidingLayout = new Div();
+		hidingLayout.getStyle().set("display", "none");
+		hidingLayout.add(exportComponent);
 
-		Label lbl = new Label(I18nProperties.getString(Strings.infoDownloadExport), ContentMode.HTML);
+		Span lbl = VaadinUiUtil.createLabel(I18nProperties.getString(Strings.infoDownloadExport), ContentMode.HTML);
 		HorizontalLayout layout = new HorizontalLayout(lbl, hidingLayout);
-		layout.setMargin(true);
-		layout.setExpandRatio(lbl, 1);
-		Window dialog = VaadinUiUtil.showPopupWindow(layout);
-		dialog.setCaption(exportComponent.getCaption());
+		layout.setPadding(true);
+		layout.setFlexGrow(1, lbl);
+		Dialog dialog = VaadinUiUtil.showPopupWindow(layout);
+		dialog.setHeaderTitle(caption);
 
-		dialog.addCloseListener(closeListener);
+		VaadinUiUtil.addCloseListener(dialog, closeListener);
+	}
+
+	/**
+	 * Was {@code new FileDownloader(resource).extend(target)} for a target that is not in a layout yet: returns a
+	 * download link around {@code target}; add the link where the target would have gone.
+	 */
+	public static Anchor createDownloadLink(Component target, DownloadHandler downloadHandler) {
+		Anchor link = new Anchor();
+		link.setHref(downloadHandler, AttachmentType.DOWNLOAD);
+		link.add(target);
+		return link;
+	}
+
+	/**
+	 * Was {@code new FileDownloader(resource).extend(target)} for a target that is already in a layout: puts a download
+	 * link around {@code target} at its place. If the target has no parent yet, the link is returned for the caller to
+	 * add (see {@link #createDownloadLink}).
+	 */
+	public static Anchor attachDownloader(Component target, DownloadHandler downloadHandler) {
+		Component parent = target.getParent().orElse(null);
+		int index = -1;
+		if (parent instanceof HasOrderedComponents) {
+			index = ((HasOrderedComponents) parent).indexOf(target);
+		}
+		Anchor link = createDownloadLink(target, downloadHandler);
+		if (parent instanceof HasOrderedComponents && index >= 0) {
+			((HasOrderedComponents) parent).addComponentAtIndex(index, link);
+		} else if (parent instanceof HasComponents) {
+			((HasComponents) parent).add(link);
+		}
+		return link;
 	}
 
 	public static String createFileNameWithCurrentDate(ExportEntityName entityName, String fileExtension) {
@@ -663,8 +689,8 @@ public final class DownloadUtil {
 		return String.join("_", processedInstanceName, processedEntityName, exportDate, fileExtension);
 	}
 
-	public static void attachDataDictionaryDownloader(AbstractComponent target) {
-		new FileDownloader(new StreamResource(() -> new DownloadUtil.DelayedInputStream((out) -> {
+	public static Anchor attachDataDictionaryDownloader(Component target) {
+		return attachDownloader(target, new StreamSourceDownloadHandler(() -> new DownloadUtil.DelayedInputStream((out) -> {
 			try {
 				String documentPath = FacadeProvider.getInfoFacade().generateDataDictionary();
 				IOUtils.copy(Files.newInputStream(new File(documentPath).toPath()), out);
@@ -672,10 +698,10 @@ public final class DownloadUtil {
 				LoggerFactory.getLogger(AboutView.class).error("Failed to generate data dictionary", e);
 
 				// fall back to pre-generated document
-				InputStream preGeneratedDocumentStream = new ClassResource("/doc/SORMAS_Data_Dictionary.xlsx").getStream().getStream();
+				InputStream preGeneratedDocumentStream = DownloadUtil.class.getResourceAsStream("/doc/SORMAS_Data_Dictionary.xlsx");
 				IOUtils.copy(preGeneratedDocumentStream, out);
 			}
 		}, (e) -> {
-		}), createFileNameWithCurrentDate(ExportEntityName.DATA_DICTIONARY, ".xlsx"))).extend(target);
+		}), createFileNameWithCurrentDate(ExportEntityName.DATA_DICTIONARY, ".xlsx")));
 	}
 }

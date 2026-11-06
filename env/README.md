@@ -125,7 +125,8 @@ Einreisen, Kampagnen, Self Reports, Surveys); `SurvSup` has all but environments
 `up.sh` loads the configuration's committed snapshot, `env/seed/snapshot-<C>.pgdump` (`pg_dump` custom format of
 `sormas_db`), with its metadata in `env/seed/snapshot-<C>.json`: snapshot date, app commit, generator settings, row
 counts and the dump's sha256. Each snapshot holds the small REST seed, on top of it data from SORMAS's own dev-mode
-generator, and on top of that the seed additions (one record for each detail view the other two leave empty). The new app restores the same files (its schema must match the old app's).
+generator, and on top of that the seed additions (one record for each detail view the other two leave empty). The new
+app restores the same files (its schema must match the old app's).
 
 | Snapshot | Snapshot date | Size | Cases (investigation pending) | Contacts | Events (participants) | Samples (at the lab, result pending) | Tasks (SurvOff / SurvSup) | Persons |
 |---|---|---|---|---|---|---|---|---|
@@ -168,9 +169,9 @@ The seed makes the generator's choices repeatable, but not the whole data set: U
 snapshot is therefore the fixed data set, not the generator run.
 
 **Seed additions** (`env/seed/extend.sh`): records neither the REST seed nor the generator makes, so that every detail
-view has a record to open, and the default infrastructure the app's own buttons load. Made on the snapshot above (same
-snapshot date) through the app: its REST API where it has an endpoint (`env/seed/extend.py`, fixed UUIDs), else its UI as
-a user would (`env/seed/extend.cjs`; the app sets the UUIDs). Dates are fixed days before the snapshot date.
+view has a record to open, and the default infrastructure the app's own buttons load. Made on the snapshot above
+(same snapshot date) through the app: its REST API where it has an endpoint (`env/seed/extend.py`, fixed UUIDs), else
+its UI as a user would (`env/seed/extend.cjs`; the app sets the UUIDs). Dates are fixed days before the snapshot date.
 
 | Record | Values | In |
 |---|---|---|
@@ -209,7 +210,9 @@ snapshot's state; remove it with `down.sh`.
 refuses a copy that already has an event group), stops the app and writes the dump and the metadata again: the snapshot
 date stays, `extendedAt` records when. To add them to the current snapshot without regenerating it, start a copy with
 `up.sh --no-build` and run `extend.sh` on it (about 1 min for C1, 2 min for C2). It needs Node and Playwright as the
-smoke check does.
+smoke check does. Running `extend.sh` again does not reproduce the UUIDs or the creation and change times of the records
+made through the UI (campaign, survey and token, self report, adverse event and investigation): the committed snapshot
+is the fixed seed, not the script run.
 
 Set by the app, not by the seed: creation and change dates, epid numbers and the UUIDs of the default users and of the
 default facility, laboratory and point of entry. They are in the snapshot, so every copy started from the same

@@ -20,12 +20,12 @@ package de.symeda.sormas.ui.action;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.ui.Alignment;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
@@ -53,27 +53,27 @@ public class ActionStatsComponent extends VerticalLayout {
 
 	public ActionStatsComponent(ActionContext context, EventReferenceDto entityRef) {
 		setWidthFull();
-		setMargin(false);
+		setPadding(false);
 		setSpacing(false);
 
 		this.context = context;
 		this.actionCriteria = new ActionCriteria().event(entityRef);
 
 		HorizontalLayout componentHeader = new HorizontalLayout();
-		componentHeader.setMargin(false);
+		componentHeader.setPadding(false);
 		componentHeader.setSpacing(false);
 		componentHeader.setWidthFull();
-		addComponent(componentHeader);
+		add(componentHeader);
 
 		listLayout = new VerticalLayout();
 		listLayout.setSpacing(true);
-		listLayout.setMargin(false);
-		addComponent(listLayout);
+		listLayout.setPadding(false);
+		add(listLayout);
 		reload();
 
 		Span actionsHeader = new Span(I18nProperties.getString(Strings.entityActions));
 		actionsHeader.addClassName(CssStyles.H3);
-		componentHeader.addComponent(actionsHeader);
+		componentHeader.add(actionsHeader);
 
 		if (UiUtil.permitted(UserRight.ACTION_CREATE)) {
 			createButton = ButtonHelper.createIconButton(
@@ -82,44 +82,46 @@ public class ActionStatsComponent extends VerticalLayout {
 				e -> ControllerProvider.getActionController().create(context, entityRef, this::reload),
 				CssStyles.BUTTON_PRIMARY);
 
-			componentHeader.addComponent(createButton);
-			componentHeader.setComponentAlignment(createButton, Alignment.MIDDLE_RIGHT);
+			componentHeader.add(createButton);
+			// was Alignment.MIDDLE_RIGHT
+			componentHeader.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, createButton);
+			createButton.getStyle().set("margin-left", "auto");
 		}
 	}
 
 	private void reload() {
 		List<ActionStatEntry> stats = FacadeProvider.getActionFacade().getActionStats(actionCriteria);
-		listLayout.removeAllComponents();
+		listLayout.removeAll();
 		if (stats.isEmpty()) {
 			Span noActionsLabel = new Span(String.format(I18nProperties.getCaption(Captions.actionNoActions), context.toString()));
 			setSpacing(false);
-			listLayout.addComponent(noActionsLabel);
+			listLayout.add(noActionsLabel);
 		} else {
 			setSpacing(true);
-			listLayout.addComponents(stats.stream().map(this::toComponent).collect(Collectors.toList()).toArray(new Component[0]));
+			listLayout.add(stats.stream().map(this::toComponent).collect(Collectors.toList()).toArray(new Component[0]));
 		}
 	}
 
 	private Component toComponent(ActionStatEntry stat) {
 		HorizontalLayout res = new HorizontalLayout();
 		res.setSpacing(false);
-		res.setMargin(false);
+		res.setPadding(false);
 		res.setWidthFull();
 
 		Span statusLabel = new Span(DataHelper.toStringNullable(stat.getActionStatus()));
-		res.addComponent(statusLabel);
-		res.setExpandRatio(statusLabel, 1);
+		res.add(statusLabel);
+		res.setFlexGrow(1, statusLabel);
 		CssStyles.style(statusLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
 		Span countLabel = new Span();
 		if (stat.getCount() == null) {
-			countLabel.setValue("-");
+			countLabel.setText("-");
 		} else {
-			countLabel.setValue(String.valueOf(stat.getCount()));
+			countLabel.setText(String.valueOf(stat.getCount()));
 			countLabel.addClassNames(CssStyles.BADGE, CssStyles.LABEL_LARGE);
 		}
 		countLabel.addClassName(CssStyles.ALIGN_RIGHT);
-		res.addComponent(countLabel);
-		res.setExpandRatio(countLabel, 0);
+		res.add(countLabel);
+		res.setFlexGrow(0, countLabel);
 
 		return res;
 	}

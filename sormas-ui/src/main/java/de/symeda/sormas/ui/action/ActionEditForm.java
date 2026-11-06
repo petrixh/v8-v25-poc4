@@ -22,11 +22,7 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 import static de.symeda.sormas.ui.utils.LayoutUtil.locs;
 
-import de.symeda.sormas.ui.utils.fields.ComboBox;
 import com.vaadin.flow.component.html.Span;
-import de.symeda.sormas.ui.utils.fields.OptionGroup;
-import de.symeda.sormas.ui.utils.fields.SormasRichTextArea;
-import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.action.ActionContext;
 import de.symeda.sormas.api.action.ActionDto;
@@ -41,6 +37,10 @@ import de.symeda.sormas.ui.utils.DateTimeField;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.SormasRichTextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class ActionEditForm extends AbstractEditForm<ActionDto> {
 
@@ -75,7 +75,7 @@ public class ActionEditForm extends AbstractEditForm<ActionDto> {
 			updateStatusChangeInfo();
 		});
 
-		setWidth(680, Unit.PIXELS);
+		setWidth("680px");
 
 		if (create) {
 			hideValidationUntilNextCommit();
@@ -102,7 +102,7 @@ public class ActionEditForm extends AbstractEditForm<ActionDto> {
 
 		description.setNullRepresentation("");
 		description.setImmediate(true);
-		VaadinUiUtil.addGdprMessageOnClick(description);
+		VaadinUiUtil.addGdprMessageOnValueChange(description);
 
 		SormasRichTextArea reply = addField(ActionDto.REPLY, SormasRichTextArea.class);
 		reply.setNullRepresentation("");

@@ -17,7 +17,6 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.action;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
@@ -97,7 +96,7 @@ public class ActionController {
 		if (UiUtil.permitted(UserRight.ACTION_DELETE)) {
 			editView.addDeleteListener(() -> {
 				FacadeProvider.getActionFacade().deleteAction(newDto);
-				UI.getCurrent().removeWindow(popupWindow);
+				popupWindow.close();
 				callback.run();
 			}, I18nProperties.getString(Strings.entityAction));
 		}

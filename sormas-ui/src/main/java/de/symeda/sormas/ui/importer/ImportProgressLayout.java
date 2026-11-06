@@ -56,20 +56,20 @@ public class ImportProgressLayout extends AbstractProgressLayout<ImportProgressU
 
 		successfulImportsLabel = new Span(String.format(I18nProperties.getCaption(Captions.importImports), 0));
 		CssStyles.style(successfulImportsLabel, CssStyles.LABEL_POSITIVE);
-		progressStatusLayout.addComponent(successfulImportsLabel);
+		progressStatusLayout.add(successfulImportsLabel);
 		failedImportsLabel = new Span(String.format(I18nProperties.getCaption(Captions.importErrors), 0));
 		CssStyles.style(failedImportsLabel, CssStyles.LABEL_CRITICAL);
-		progressStatusLayout.addComponent(failedImportsLabel);
+		progressStatusLayout.add(failedImportsLabel);
 
 		if (showDuplicates) {
 			duplicateImportsLabel = new Span(String.format(I18nProperties.getCaption(Captions.importDuplicates), 0));
 			CssStyles.style(duplicateImportsLabel, CssStyles.LABEL_WARNING);
-			progressStatusLayout.addComponent(duplicateImportsLabel);
+			progressStatusLayout.add(duplicateImportsLabel);
 		}
 		if (showSkips) {
 			skippedImportsLabel = new Span(String.format(I18nProperties.getCaption(Captions.importSkips), 0));
 			CssStyles.style(skippedImportsLabel, CssStyles.LABEL_MINOR);
-			progressStatusLayout.addComponent(skippedImportsLabel);
+			progressStatusLayout.add(skippedImportsLabel);
 		}
 	}
 
@@ -84,16 +84,16 @@ public class ImportProgressLayout extends AbstractProgressLayout<ImportProgressU
 		ImportLineResult result = progressUpdateInfo.getImportLineResult();
 		if (result == ImportLineResult.SUCCESS) {
 			successfulImportsCount++;
-			successfulImportsLabel.setValue(String.format(I18nProperties.getCaption(Captions.importImports), successfulImportsCount));
+			successfulImportsLabel.setText(String.format(I18nProperties.getCaption(Captions.importImports), successfulImportsCount));
 		} else if (result == ImportLineResult.ERROR) {
 			failedImportsCount++;
-			failedImportsLabel.setValue(String.format(I18nProperties.getCaption(Captions.importErrors), failedImportsCount));
+			failedImportsLabel.setText(String.format(I18nProperties.getCaption(Captions.importErrors), failedImportsCount));
 		} else if (result == ImportLineResult.SKIPPED) {
 			skippedImportsCount++;
-			skippedImportsLabel.setValue(String.format(I18nProperties.getCaption(Captions.importSkips), skippedImportsCount));
+			skippedImportsLabel.setText(String.format(I18nProperties.getCaption(Captions.importSkips), skippedImportsCount));
 		} else if (result == ImportLineResult.DUPLICATE) {
 			duplicateImportsCount++;
-			duplicateImportsLabel.setValue(String.format(I18nProperties.getCaption(Captions.importDuplicates), duplicateImportsCount));
+			duplicateImportsLabel.setText(String.format(I18nProperties.getCaption(Captions.importDuplicates), duplicateImportsCount));
 		}
 	}
 

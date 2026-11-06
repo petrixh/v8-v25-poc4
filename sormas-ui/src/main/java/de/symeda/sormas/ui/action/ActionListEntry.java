@@ -18,13 +18,13 @@ import static de.symeda.sormas.api.utils.HtmlHelper.cleanHtml;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.action.ActionDto;
@@ -40,8 +40,10 @@ import de.symeda.sormas.api.utils.HtmlHelper;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.document.DocumentListComponent;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.sidecomponent.SideComponentLayout;
 
 @SuppressWarnings("serial")
@@ -55,57 +57,57 @@ public class ActionListEntry extends HorizontalLayout {
 
 		this.action = action;
 
-		setMargin(false);
+		setPadding(false);
 		setSpacing(true);
 		setWidthFull();
-		addStyleName(CssStyles.SORMAS_LIST_ENTRY);
+		addClassName(CssStyles.SORMAS_LIST_ENTRY);
 
 		VerticalLayout withContentLayout = new VerticalLayout();
-		withContentLayout.setMargin(false);
+		withContentLayout.setPadding(false);
 		withContentLayout.setSpacing(false);
-		addComponent(withContentLayout);
-		setExpandRatio(withContentLayout, 3);
+		add(withContentLayout);
+		setFlexGrow(3, withContentLayout);
 
 		titleLayout = new HorizontalLayout();
-		titleLayout.setMargin(false);
+		titleLayout.setPadding(false);
 		titleLayout.setSpacing(false);
 		Span title = new Span(MoreObjects.firstNonNull(Strings.emptyToNull(action.getTitle()), "-"));
 		title.addClassNames(CssStyles.H3, CssStyles.HSPACE_LEFT_3);
-		titleLayout.addComponent(title);
-		withContentLayout.addComponent(titleLayout);
+		titleLayout.add(title);
+		withContentLayout.add(titleLayout);
 
 		HorizontalLayout topLayout = new HorizontalLayout();
-		topLayout.setMargin(false);
+		topLayout.setPadding(false);
 		topLayout.setSpacing(false);
 		topLayout.setWidthFull();
-		withContentLayout.addComponent(topLayout);
+		withContentLayout.add(topLayout);
 
 		VerticalLayout descReplyLayout = new VerticalLayout();
-		descReplyLayout.setMargin(false);
+		descReplyLayout.setPadding(false);
 		descReplyLayout.setSpacing(false);
 		descReplyLayout.setWidthFull();
 		descReplyLayout.addClassName(CssStyles.RICH_TEXT_CONTENT_CONTAINER);
-		withContentLayout.addComponents(descReplyLayout);
+		withContentLayout.add(descReplyLayout);
 
-		Span description = new Span(cleanHtml(action.getDescription(), HtmlHelper.EVENTACTION_WHITELIST), ContentMode.HTML);
+		Span description = VaadinUiUtil.createLabel(cleanHtml(action.getDescription(), HtmlHelper.EVENTACTION_WHITELIST), ContentMode.HTML);
 		description.setWidthFull();
-		descReplyLayout.addComponent(description);
+		descReplyLayout.add(description);
 		if (!Strings.isNullOrEmpty(action.getReply())) {
-			Span replyLabel = new Span(cleanHtml(action.getReply(), HtmlHelper.EVENTACTION_WHITELIST), ContentMode.HTML);
+			Span replyLabel = VaadinUiUtil.createLabel(cleanHtml(action.getReply(), HtmlHelper.EVENTACTION_WHITELIST), ContentMode.HTML);
 			replyLabel.setWidthFull();
 			replyLabel.addClassName(CssStyles.REPLY);
-			descReplyLayout.addComponent(replyLabel);
+			descReplyLayout.add(replyLabel);
 		}
 
 		// TOP LEFT
 		VerticalLayout topLeftLayout = new VerticalLayout();
 
-		topLeftLayout.setMargin(false);
+		topLeftLayout.setPadding(false);
 		topLeftLayout.setSpacing(false);
 
 		Span dateLabel =
 			new Span(I18nProperties.getPrefixCaption(ActionDto.I18N_PREFIX, ActionDto.DATE) + ": " + DateFormatHelper.formatDate(action.getDate()));
-		topLeftLayout.addComponent(dateLabel);
+		topLeftLayout.add(dateLabel);
 
 		Span creatorLabel = new Span(
 			String.format(
@@ -113,7 +115,7 @@ public class ActionListEntry extends HorizontalLayout {
 				DateFormatHelper.formatDate(action.getCreationDate()),
 				action.getCreatorUser().getCaption()));
 		creatorLabel.addClassName(CssStyles.LABEL_ITALIC);
-		topLeftLayout.addComponent(creatorLabel);
+		topLeftLayout.add(creatorLabel);
 
 		Span lastModifiedByLabel = null;
 		if (action.getLastModifiedBy() != null) {
@@ -123,16 +125,16 @@ public class ActionListEntry extends HorizontalLayout {
 					DateFormatHelper.formatDate(action.getChangeDate()),
 					action.getLastModifiedBy().getCaption()));
 			lastModifiedByLabel.addClassName(CssStyles.LABEL_ITALIC);
-			topLeftLayout.addComponent(lastModifiedByLabel);
+			topLeftLayout.add(lastModifiedByLabel);
 		}
 
-		topLayout.addComponent(topLeftLayout);
+		topLayout.add(topLeftLayout);
 
 		// TOP RIGHT
 		VerticalLayout topRightLayout = new VerticalLayout();
 
 		topRightLayout.addClassName(CssStyles.ALIGN_RIGHT);
-		topRightLayout.setMargin(false);
+		topRightLayout.setPadding(false);
 		topRightLayout.setSpacing(false);
 
 		HorizontalLayout statusContainer = new HorizontalLayout();
@@ -140,16 +142,16 @@ public class ActionListEntry extends HorizontalLayout {
 			I18nProperties.getPrefixCaption(ActionDto.I18N_PREFIX, ActionDto.ACTION_STATUS) + ": "
 				+ DataHelper.toStringNullable(action.getActionStatus()));
 		CssStyles.style(statusLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
-		statusContainer.addComponent(statusLabel);
+		statusContainer.add(statusLabel);
 		Span statusChangeLabel = null;
 		if (action.getStatusChangeDate() != null) {
 			statusChangeLabel = new Span(
 				String.format(I18nProperties.getCaption(Captions.actionStatusChangeDate), DateFormatHelper.formatDate(action.getStatusChangeDate())));
 			statusChangeLabel.addClassName(CssStyles.LABEL_ITALIC);
-			statusContainer.addComponent(statusChangeLabel);
+			statusContainer.add(statusChangeLabel);
 		}
 
-		topRightLayout.addComponent(statusContainer);
+		topRightLayout.add(statusContainer);
 
 		Span priorityLabel = new Span(
 			DataHelper.toStringNullable(I18nProperties.getPrefixCaption(ActionDto.I18N_PREFIX, ActionDto.PRIORITY) + ": " + action.getPriority()));
@@ -158,10 +160,12 @@ public class ActionListEntry extends HorizontalLayout {
 		} else if (ActionPriority.NORMAL == action.getPriority()) {
 			priorityLabel.addClassName(CssStyles.LABEL_NEUTRAL);
 		}
-		topRightLayout.addComponent(priorityLabel);
+		topRightLayout.add(priorityLabel);
 
-		topLayout.addComponent(topRightLayout);
-		topLayout.setComponentAlignment(topRightLayout, Alignment.TOP_RIGHT);
+		topLayout.add(topRightLayout);
+		// was Alignment.TOP_RIGHT
+		topLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, topRightLayout);
+		topRightLayout.getStyle().set("margin-left", "auto");
 
 		String statusStyle = action.getActionStatus() == ActionStatus.DONE ? CssStyles.LABEL_DONE : null;
 		if (statusStyle != null) {
@@ -179,19 +183,19 @@ public class ActionListEntry extends HorizontalLayout {
 
 		if (UiUtil.permitted(FeatureType.DOCUMENTS, UserRight.DOCUMENT_VIEW)) {
 			VerticalLayout documentLayout = new VerticalLayout();
-			documentLayout.setMargin(false);
 			documentLayout.setSpacing(false);
-			addComponent(documentLayout);
-			setExpandRatio(documentLayout, 1);
-			documentLayout.setMargin(new MarginInfo(true, true, false, false));
+			add(documentLayout);
+			setFlexGrow(1, documentLayout);
+			// was a top and right margin (MarginInfo); spacing details belong to the theme work
+			documentLayout.setPadding(false);
 
 			DocumentListComponent documentList =
 				new DocumentListComponent(DocumentRelatedEntityType.ACTION, action.toReference(), UserRight.EVENT_EDIT, false, true, true);
-			documentLayout.addComponent(new SideComponentLayout(documentList));
+			documentLayout.add(new SideComponentLayout(documentList));
 		}
 	}
 
-	public void addEditListener(int rowIndex, Button.ClickListener editClickListener) {
+	public void addEditListener(int rowIndex, ComponentEventListener<ClickEvent<Button>> editClickListener) {
 		if (editButton == null) {
 			editButton = ButtonHelper.createIconButtonWithCaption(
 				"edit-action-" + rowIndex,
@@ -202,10 +206,10 @@ public class ActionListEntry extends HorizontalLayout {
 				CssStyles.BUTTON_COMPACT,
 				CssStyles.LABEL_VERTICAL_ALIGN_TOP);
 
-			titleLayout.addComponent(editButton, 0);
+			titleLayout.addComponentAtIndex(0, editButton);
 			editButton.addClassNames(CssStyles.LABEL_HEADING_TITLE, CssStyles.HSPACE_LEFT_4);
-			titleLayout.setComponentAlignment(editButton, Alignment.TOP_RIGHT);
-			titleLayout.setExpandRatio(editButton, 0);
+			titleLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, editButton);
+			titleLayout.setFlexGrow(0, editButton);
 		}
 
 		editButton.addClickListener(editClickListener);

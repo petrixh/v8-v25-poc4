@@ -19,7 +19,6 @@ package de.symeda.sormas.ui.action;
 
 import java.util.List;
 
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
@@ -52,7 +51,7 @@ public class ActionList extends PaginationList<ActionDto> {
 		showPage(1);
 		if (actions.isEmpty()) {
 			Span noActionsLabel = new Span(String.format(I18nProperties.getCaption(Captions.actionNoActions), context.toString()));
-			listLayout.addComponent(noActionsLabel);
+			listLayout.add(noActionsLabel);
 		}
 	}
 
@@ -66,8 +65,8 @@ public class ActionList extends PaginationList<ActionDto> {
 			ActionListEntry listEntry = new ActionListEntry(action);
 				listEntry.addEditListener(
 					i,
-					(ClickListener) event -> ControllerProvider.getActionController().edit(listEntry.getAction(), ActionList.this::reload));
-			listLayout.addComponent(listEntry);
+					event -> ControllerProvider.getActionController().edit(listEntry.getAction(), ActionList.this::reload));
+			listLayout.add(listEntry);
 		}
 	}
 }

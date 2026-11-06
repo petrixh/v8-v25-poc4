@@ -245,6 +245,32 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 		getValidatorList().add(validator);
 	}
 
+	/**
+	 * Adds a validator written like a V7 validator: it checks the model value and throws an
+	 * {@link de.symeda.sormas.ui.utils.InvalidValueException} (e.g. {@link InvalidValueException}) if it is not valid.
+	 * Lets one-argument lambdas ({@code value -> { if (..) throw new InvalidValueException(..); }}) compile.
+	 */
+	@SuppressWarnings("unchecked")
+	default <V> void addValidator(ValueValidator<V> validator) {
+		addValidator((Validator<Object>) (value, context) -> {
+			try {
+				validator.validate((V) value);
+				return ValidationResult.ok();
+			} catch (de.symeda.sormas.ui.utils.InvalidValueException e) {
+				return ValidationResult.error(e.getMessage() != null ? e.getMessage() : "");
+			}
+		});
+	}
+
+	/**
+	 * V7 {@code Validator} shape: validates a value by throwing.
+	 */
+	@FunctionalInterface
+	interface ValueValidator<V> extends java.io.Serializable {
+
+		void validate(V value) throws de.symeda.sormas.ui.utils.InvalidValueException;
+	}
+
 	default void removeValidator(Validator<?> validator) {
 		getValidatorList().remove(validator);
 	}
@@ -383,18 +409,15 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 	}
 
 	/**
-	 * V7 {@code Validator.InvalidValueException}.
+	 * V7 {@code Validator.InvalidValueException}. Extends the form layer's {@link de.symeda.sormas.ui.utils.InvalidValueException}
+	 * (thrown by commits), so one {@code catch} covers both; {@code getHtmlMessage()} escapes the message as in V7.
 	 */
-	class InvalidValueException extends RuntimeException {
+	class InvalidValueException extends de.symeda.sormas.ui.utils.InvalidValueException {
 
 		private static final long serialVersionUID = 1L;
 
 		public InvalidValueException(String message) {
 			super(message);
-		}
-
-		public String getHtmlMessage() {
-			return getMessage();
 		}
 	}
 }

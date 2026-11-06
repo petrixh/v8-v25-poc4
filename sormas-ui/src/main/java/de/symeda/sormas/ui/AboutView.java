@@ -32,25 +32,22 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.ExternalResource;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.FileResource;
-import com.vaadin.server.StreamResource;
-import com.vaadin.server.VaadinService;
-import com.vaadin.server.VaadinServletRequest;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Link;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.AnchorTarget;
+import com.vaadin.flow.component.html.AttachmentType;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
 
 import de.symeda.sormas.api.ConfigFacade;
 import de.symeda.sormas.api.FacadeProvider;
@@ -60,6 +57,8 @@ import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.utils.HtmlHelper;
 import de.symeda.sormas.api.utils.InfoProvider;
+import de.symeda.sormas.ui.navigation.View;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DownloadUtil;
@@ -70,6 +69,8 @@ public class AboutView extends VerticalLayout implements View {
 
 	public static final String VIEW_NAME = "about";
 
+	private static final String XLSX_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
 	private static final String SORMAS_GITHUB_URL = "https://github.com/SORMAS-Foundation/SORMAS-Project";
 
 	public AboutView() {
@@ -78,34 +79,37 @@ public class AboutView extends VerticalLayout implements View {
 		HorizontalLayout aboutLayout = new HorizontalLayout();
 		{
 			VerticalLayout infoLayout = new VerticalLayout();
-			infoLayout.setMargin(new MarginInfo(true, false, false, false));
-			infoLayout.addComponent(createInfoSection());
+			// was a top margin only (MarginInfo); spacing details belong to the theme work
+			infoLayout.setPadding(false);
+			infoLayout.add(createInfoSection());
 
 			// Documents section
 			if (shouldShowDocumentsSection()) {
-				infoLayout.addComponent(createDocumentsSection());
+				infoLayout.add(createDocumentsSection());
 			}
 
-			aboutLayout.addComponent(infoLayout);
+			aboutLayout.add(infoLayout);
 		}
 
 		// Additional Info section
 		VerticalLayout additionalInfoSection =
 			createCustomHtmlSection(I18nProperties.getCaption(Captions.aboutAdditionalInfo), "additionalinfo.html");
 		if (additionalInfoSection != null) {
-			aboutLayout.addComponent(additionalInfoSection);
+			aboutLayout.add(additionalInfoSection);
 		}
 
 		// Copyright section
 		VerticalLayout copyrightSection = createCustomHtmlSection(I18nProperties.getCaption(Captions.aboutCopyright), "copyrightnotices.html");
 		if (copyrightSection != null) {
-			aboutLayout.addComponent(copyrightSection);
+			aboutLayout.add(copyrightSection);
 		}
 
 		setSizeFull();
-		setStyleName("about-view");
-		addComponent(aboutLayout);
-		setComponentAlignment(aboutLayout, Alignment.MIDDLE_CENTER);
+		setClassName("about-view");
+		add(aboutLayout);
+		// was Alignment.MIDDLE_CENTER
+		setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+		setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, aboutLayout);
 	}
 
 	@Override
@@ -117,30 +121,31 @@ public class AboutView extends VerticalLayout implements View {
 
 		VerticalLayout infoLayout = new VerticalLayout();
 		infoLayout.setSpacing(false);
-		infoLayout.setMargin(false);
+		infoLayout.setPadding(false);
 
-		Label aboutLabel = new Label(I18nProperties.getCaption(Captions.about), ContentMode.HTML);
-		aboutLabel.addStyleName(CssStyles.H1);
-		infoLayout.addComponent(aboutLabel);
+		Span aboutLabel = createHtmlLabel(I18nProperties.getCaption(Captions.about));
+		aboutLabel.addClassName(CssStyles.H1);
+		infoLayout.add(aboutLabel);
 
 		ConfigFacade configFacade = FacadeProvider.getConfigFacade();
 		String infoLabelStr = configFacade.isCustomBranding()
 			? String.format(I18nProperties.getCaption(Captions.aboutBrandedSormasVersion), configFacade.getCustomBrandingName())
 			: "SORMAS";
-		Label infoLabel = new Label(VaadinIcons.INFO_CIRCLE.getHtml() + " " + infoLabelStr, ContentMode.HTML);
-		infoLayout.addComponent(infoLabel);
+		Span infoLabel = new Span(VaadinIcon.INFO_CIRCLE.create(), new Text(" " + infoLabelStr));
+		infoLayout.add(infoLabel);
 
-		Label versionLabel = new Label(I18nProperties.getCaption(Captions.aboutVersion) + ": " + InfoProvider.get().getVersion(), ContentMode.HTML);
+		String versionText = I18nProperties.getCaption(Captions.aboutVersion) + ": " + InfoProvider.get().getVersion();
+		Span versionLabel = createHtmlLabel(versionText);
 		CssStyles.style(versionLabel, CssStyles.VSPACE_3);
-		infoLayout.addComponent(versionLabel);
+		infoLayout.add(versionLabel);
 
 		if (InfoProvider.get().isSnapshotVersion()) {
-			Link commitLink = new Link(
-				String.format("%s (%s)", versionLabel.getValue(), InfoProvider.get().getLastCommitShortId()),
-				new ExternalResource(SORMAS_GITHUB_URL + "/commits/" + InfoProvider.get().getLastCommitShortId()));
-			commitLink.setTargetName("_blank");
+			Anchor commitLink = new Anchor(
+				SORMAS_GITHUB_URL + "/commits/" + InfoProvider.get().getLastCommitShortId(),
+				String.format("%s (%s)", versionText, InfoProvider.get().getLastCommitShortId()),
+				AnchorTarget.BLANK);
 			CssStyles.style(commitLink, CssStyles.VSPACE_3);
-			infoLayout.replaceComponent(versionLabel, commitLink);
+			infoLayout.replace(versionLabel, commitLink);
 		}
 
 		if (FacadeProvider.getFeatureConfigurationFacade().isFeatureEnabled(FeatureType.EXTERNAL_MESSAGES)) {
@@ -157,25 +162,20 @@ public class AboutView extends VerticalLayout implements View {
 				infoLayout);
 		}
 
-		Link whatsNewLink = new Link(
+		Anchor whatsNewLink = new Anchor(
+			SORMAS_GITHUB_URL + "/releases/tag/v" + InfoProvider.get().getBaseVersion(),
 			I18nProperties.getCaption(Captions.aboutWhatsNew),
-			new ExternalResource(SORMAS_GITHUB_URL + "/releases/tag/v" + InfoProvider.get().getBaseVersion()));
-		whatsNewLink.setTargetName("_blank");
-		infoLayout.addComponent(whatsNewLink);
+			AnchorTarget.BLANK);
+		infoLayout.add(whatsNewLink);
 
-		Link sormasWebsiteLink = new Link(I18nProperties.getCaption(Captions.aboutSormasWebsite), new ExternalResource("https://sormas.org/"));
-		sormasWebsiteLink.setTargetName("_blank");
-		infoLayout.addComponent(sormasWebsiteLink);
+		Anchor sormasWebsiteLink = new Anchor("https://sormas.org/", I18nProperties.getCaption(Captions.aboutSormasWebsite), AnchorTarget.BLANK);
+		infoLayout.add(sormasWebsiteLink);
 
-		Link sormasGithubLink = new Link("SORMAS Github", new ExternalResource(SORMAS_GITHUB_URL));
-		sormasGithubLink.setTargetName("_blank");
-		infoLayout.addComponent(sormasGithubLink);
+		Anchor sormasGithubLink = new Anchor(SORMAS_GITHUB_URL, "SORMAS Github", AnchorTarget.BLANK);
+		infoLayout.add(sormasGithubLink);
 
-		Link changelogLink = new Link(
-			I18nProperties.getCaption(Captions.aboutChangelog),
-			new ExternalResource(SORMAS_GITHUB_URL + "/releases"));
-		changelogLink.setTargetName("_blank");
-		infoLayout.addComponent(changelogLink);
+		Anchor changelogLink = new Anchor(SORMAS_GITHUB_URL + "/releases", I18nProperties.getCaption(Captions.aboutChangelog), AnchorTarget.BLANK);
+		infoLayout.add(changelogLink);
 
 		return infoLayout;
 	}
@@ -187,61 +187,65 @@ public class AboutView extends VerticalLayout implements View {
 
 	private void addExternalServiceVersion(String captionTag, ExternalServiceVersionSupplier versionSupplier, VerticalLayout infoLayout) {
 		String version;
-		Label availabilityLabel;
+		Span availabilityLabel;
 
 		try {
 			version = versionSupplier.get();
-			availabilityLabel = new Label(VaadinIcons.CHECK.getHtml(), ContentMode.HTML);
-			availabilityLabel.addStyleName(CssStyles.LABEL_POSITIVE);
+			availabilityLabel = new Span(VaadinIcon.CHECK.create());
+			availabilityLabel.addClassName(CssStyles.LABEL_POSITIVE);
 		} catch (Exception e) {
 			version = I18nProperties.getCaption(Captions.aboutServiceNotAvailable);
-			availabilityLabel = new Label(VaadinIcons.CLOSE.getHtml(), ContentMode.HTML);
-			availabilityLabel.addStyleName(CssStyles.LABEL_CRITICAL);
+			availabilityLabel = new Span(VaadinIcon.CLOSE.create());
+			availabilityLabel.addClassName(CssStyles.LABEL_CRITICAL);
 		}
 
-		availabilityLabel.addStyleName(CssStyles.HSPACE_LEFT_4);
+		availabilityLabel.addClassName(CssStyles.HSPACE_LEFT_4);
 
-		Label caption = new Label(I18nProperties.getCaption(captionTag));
+		Span caption = new Span(I18nProperties.getCaption(captionTag));
 		HorizontalLayout captionLayout = new HorizontalLayout(caption, availabilityLabel);
 		captionLayout.setSpacing(false);
-		infoLayout.addComponent(captionLayout);
+		infoLayout.add(captionLayout);
 
-		Label versionLabel = new Label(I18nProperties.getCaption(Captions.aboutVersion) + ": " + version, ContentMode.HTML);
+		Span versionLabel = createHtmlLabel(I18nProperties.getCaption(Captions.aboutVersion) + ": " + version);
 		CssStyles.style(versionLabel, CssStyles.VSPACE_3);
-		infoLayout.addComponent(versionLabel);
+		infoLayout.add(versionLabel);
 	}
 
 	private VerticalLayout createDocumentsSection() {
 
 		VerticalLayout documentsLayout = new VerticalLayout();
 		documentsLayout.setSpacing(false);
-		documentsLayout.setMargin(new MarginInfo(true, false, false, false));
+		// was a top margin only (MarginInfo)
+		documentsLayout.setPadding(false);
 
-		Label documentsLabel = new Label(I18nProperties.getCaption(Captions.aboutDocuments), ContentMode.HTML);
-		documentsLabel.addStyleName(CssStyles.H1);
-		documentsLayout.addComponent(documentsLabel);
+		Span documentsLabel = createHtmlLabel(I18nProperties.getCaption(Captions.aboutDocuments));
+		documentsLabel.addClassName(CssStyles.H1);
+		documentsLayout.add(documentsLabel);
 
 		List<String> customDocuments = listCustomDocumentsFiles();
 		if (!customDocuments.isEmpty()) {
 			customDocuments.stream().forEach(customDocument -> {
-				Button customDocumentButton = ButtonHelper.createButton(customDocument, null, ValoTheme.BUTTON_LINK, CssStyles.BUTTON_COMPACT);
-				documentsLayout.addComponent(customDocumentButton);
+				Button customDocumentButton = ButtonHelper.createButton(customDocument, null, CssStyles.BUTTON_COMPACT);
+				customDocumentButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
 				String customDocumentPath = getCustomDocumentsPath() + File.separator + customDocument;
-				FileDownloader customDocumentDownloader = new FileDownloader(new FileResource(new File(customDocumentPath)));
-				customDocumentDownloader.extend(customDocumentButton);
+				documentsLayout.add(createDownloadLink(customDocumentButton, DownloadHandler.forFile(new File(customDocumentPath))));
 			});
 		}
 
 		if (shouldShowClassificationDocumentLink()) {
-			Button classificationDocumentButton =
-				ButtonHelper.createButton(Captions.aboutCaseClassificationRules, null, ValoTheme.BUTTON_LINK, CssStyles.BUTTON_COMPACT);
-			documentsLayout.addComponent(classificationDocumentButton);
+			Button classificationDocumentButton = ButtonHelper.createButton(Captions.aboutCaseClassificationRules, null, CssStyles.BUTTON_COMPACT);
+			classificationDocumentButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+			// was a FileDownloader on the button: Flow downloads through a link around it
+			Anchor classificationDocumentLink = new Anchor();
+			classificationDocumentLink.getElement().setAttribute("download", true);
+			classificationDocumentLink.add(classificationDocumentButton);
+			documentsLayout.add(classificationDocumentLink);
 
 			try {
 				String serverUrl =
 					new URL(((VaadinServletRequest) VaadinService.getCurrentRequest()).getHttpServletRequest().getRequestURL().toString())
 						.getAuthority();
-				StreamResource classificationResource = DownloadUtil.createStringStreamResource(
+				classificationDocumentLink.setHref(DownloadUtil.createStringStreamResource(
 					ClassificationHtmlRenderer.createHtmlForDownload(
 						serverUrl,
 						FacadeProvider.getDiseaseConfigurationFacade().getAllDiseases(true, true, true),
@@ -249,25 +253,23 @@ public class AboutView extends VerticalLayout implements View {
 						FacadeProvider.getCaseClassificationFacade(),
 						FacadeProvider.getConfigFacade()),
 					"classification_rules.html",
-					"text/html");
-				new FileDownloader(classificationResource).extend(classificationDocumentButton);
+					"text/html"));
 			} catch (MalformedURLException e) {
 
 			}
 		}
 
 		if (shouldShowDataDictionaryLink()) {
-			Button dataDictionaryButton =
-				ButtonHelper.createButton(Captions.aboutDataDictionary, null, ValoTheme.BUTTON_LINK, CssStyles.BUTTON_COMPACT);
-			documentsLayout.addComponent(dataDictionaryButton);
+			Button dataDictionaryButton = ButtonHelper.createButton(Captions.aboutDataDictionary, null, CssStyles.BUTTON_COMPACT);
+			dataDictionaryButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+			documentsLayout.add(dataDictionaryButton);
 			DownloadUtil.attachDataDictionaryDownloader(dataDictionaryButton);
 		}
 
 		if (FacadeProvider.getInfoFacade().isGenerateDataProtectionDictionaryAllowed()) {
-			Button dataProtectionButton =
-				ButtonHelper.createButton(Captions.aboutDataProtectionDictionary, null, ValoTheme.BUTTON_LINK, CssStyles.BUTTON_COMPACT);
-			documentsLayout.addComponent(dataProtectionButton);
-			attachDataProtectionDictionaryDownloader(dataProtectionButton);
+			Button dataProtectionButton = ButtonHelper.createButton(Captions.aboutDataProtectionDictionary, null, CssStyles.BUTTON_COMPACT);
+			dataProtectionButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+			documentsLayout.add(attachDataProtectionDictionaryDownloader(dataProtectionButton));
 		}
 
 		// This link is hidden until an updated version of the document is provided
@@ -302,17 +304,17 @@ public class AboutView extends VerticalLayout implements View {
 
 		VerticalLayout layout = new VerticalLayout();
 		layout.setSpacing(false);
-		layout.setMargin(new MarginInfo(true, false, false, false));
+		// was a top margin only (MarginInfo)
+		layout.setPadding(false);
 
 		// Header
-		Label headerLabel = new Label(caption, ContentMode.HTML);
-		headerLabel.addStyleName(CssStyles.H1);
-		layout.addComponent(headerLabel);
+		Span headerLabel = createHtmlLabel(caption);
+		headerLabel.addClassName(CssStyles.H1);
+		layout.add(headerLabel);
 
 		// Label, loaded from custom file
-		Label htmlContent = new Label(htmlContentString);
-		htmlContent.setContentMode(ContentMode.HTML);
-		layout.addComponent(htmlContent);
+		Span htmlContent = createHtmlLabel(htmlContentString);
+		layout.add(htmlContent);
 
 		return layout;
 	}
@@ -347,11 +349,34 @@ public class AboutView extends VerticalLayout implements View {
 		return FacadeProvider.getConfigFacade().getCustomFilesPath() + "aboutfiles";
 	}
 
-	public void attachDataProtectionDictionaryDownloader(AbstractComponent target) {
-		new FileDownloader(new StreamResource(() -> new DownloadUtil.DelayedInputStream((out) -> {
+	/**
+	 * @return a download link around {@code target} (was a FileDownloader extending it); add the link to the layout
+	 */
+	public Anchor attachDataProtectionDictionaryDownloader(Component target) {
+		String fileName = DownloadUtil.createFileNameWithCurrentDate(ExportEntityName.DATA_PROTECTION_DICTIONARY, ".xlsx");
+		return createDownloadLink(target, DownloadHandler.fromInputStream(event -> new DownloadResponse(new DownloadUtil.DelayedInputStream((out) -> {
 			String documentPath = FacadeProvider.getInfoFacade().generateDataProtectionDictionary();
 			IOUtils.copy(Files.newInputStream(new File(documentPath).toPath()), out);
 		}, (e) -> {
-		}), DownloadUtil.createFileNameWithCurrentDate(ExportEntityName.DATA_PROTECTION_DICTIONARY, ".xlsx"))).extend(target);
+		}), fileName, XLSX_MIME_TYPE, -1)));
+	}
+
+	/**
+	 * Was a FileDownloader extending the component: Flow downloads through a link around it.
+	 */
+	private static Anchor createDownloadLink(Component target, DownloadHandler downloadHandler) {
+		Anchor link = new Anchor();
+		link.setHref(downloadHandler, AttachmentType.DOWNLOAD);
+		link.add(target);
+		return link;
+	}
+
+	/**
+	 * Was a Label in HTML content mode.
+	 */
+	private static Span createHtmlLabel(String html) {
+		Span label = new Span();
+		label.getElement().setProperty("innerHTML", html);
+		return label;
 	}
 }

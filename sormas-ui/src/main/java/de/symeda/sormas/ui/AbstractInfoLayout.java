@@ -15,9 +15,10 @@
 
 package de.symeda.sormas.ui;
 
-import com.vaadin.ui.AbstractLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -35,16 +36,16 @@ public abstract class AbstractInfoLayout<T> extends HorizontalLayout {
 		this.fieldAccessCheckers = fieldAccessCheckers;
 	}
 
-	protected Label addDescLabel(AbstractLayout layout, String fieldId, Object value, String caption) {
+	protected Span addDescLabel(HasComponents layout, String fieldId, Object value, String caption) {
 		return addCustomDescLabel(layout, dataType, fieldId, value, caption);
 	}
 
-	protected Label addCustomDescLabel(AbstractLayout layout, Class<?> dataType, String fieldId, Object value, String caption) {
+	protected Span addCustomDescLabel(HasComponents layout, Class<?> dataType, String fieldId, Object value, String caption) {
 		if (!fieldAccessCheckers.isAccessible(dataType, fieldId)
 			|| (fieldAccessCheckers.isEmbedded(dataType, fieldId) && !fieldAccessCheckers.hasRight())) {
 
-			Label label = addDescLabel(layout, I18nProperties.getCaption(Captions.inaccessibleValue), caption);
-			label.addStyleName(CssStyles.INACCESSIBLE_LABEL);
+			Span label = addDescLabel(layout, I18nProperties.getCaption(Captions.inaccessibleValue), caption);
+			label.addClassName(CssStyles.INACCESSIBLE_LABEL);
 			label.setId("infoLayout_" + dataType.getSimpleName() + "_" + fieldId);
 
 			return label;
@@ -53,13 +54,21 @@ public abstract class AbstractInfoLayout<T> extends HorizontalLayout {
 		return addDescLabel(layout, value, caption);
 	}
 
-	private Label addDescLabel(AbstractLayout layout, Object content, String caption) {
+	private Span addDescLabel(HasComponents layout, Object content, String caption) {
 
 		String contentString = content != null ? content.toString() : "";
-		Label label = new Label(contentString);
-		label.setCaption(caption);
-		layout.addComponent(label);
+		Span label = new Span(contentString);
 		label.setWidthFull();
+		if (caption != null) {
+			// Flow components have no caption: the caption goes above the label, as Vaadin 8 rendered it
+			Span captionLabel = new Span(caption);
+			captionLabel.addClassName("v-caption");
+			Div captionedLabel = new Div(captionLabel, new Div(label));
+			captionedLabel.setWidthFull();
+			layout.add(captionedLabel);
+		} else {
+			layout.add(label);
+		}
 		return label;
 	}
 }

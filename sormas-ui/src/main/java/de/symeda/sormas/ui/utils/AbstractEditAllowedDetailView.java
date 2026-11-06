@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.ui.utils;
 
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.Component;
 
 import de.symeda.sormas.api.EditPermissionFacade;
 import de.symeda.sormas.api.ReferenceDto;
@@ -44,7 +44,7 @@ public abstract class AbstractEditAllowedDetailView<R extends ReferenceDto> exte
 
 	protected void setEditPermission(Component component) {
 		if (!isEditAllowed()) {
-			component.setEnabled(false);
+			component.getElement().setEnabled(false);
 		}
 	}
 

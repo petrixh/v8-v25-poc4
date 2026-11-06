@@ -22,8 +22,9 @@ import java.util.Map;
 
 import jakarta.validation.constraints.NotNull;
 
-import com.vaadin.navigator.View;
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.UI;
+
+import de.symeda.sormas.ui.navigation.View;
 
 public class ViewModelProviders {
 

@@ -18,11 +18,10 @@ package de.symeda.sormas.ui.environment;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.environment.EnvironmentDto;
@@ -60,7 +59,7 @@ public class EnvironmentSampleListComponent extends SideComponent {
 		}
 
 		environmentSampleList = new EnvironmentSampleList(environment.toReference(), isEditAllowed);
-		addComponent(environmentSampleList);
+		add(environmentSampleList);
 		environmentSampleList.reload();
 	}
 
@@ -91,10 +90,10 @@ public class EnvironmentSampleListComponent extends SideComponent {
 			if (!samples.isEmpty()) {
 				showPage(1);
 			} else {
-				listLayout.removeAllComponents();
+				listLayout.removeAll();
 				updatePaginationLayout();
-				Label noSamplesLabel = new Label(I18nProperties.getString(Strings.infoNoEnvironmentSamples));
-				listLayout.addComponent(noSamplesLabel);
+				Span noSamplesLabel = new Span(I18nProperties.getString(Strings.infoNoEnvironmentSamples));
+				listLayout.add(noSamplesLabel);
 			}
 
 		}
@@ -108,16 +107,16 @@ public class EnvironmentSampleListComponent extends SideComponent {
 				if (UiUtil.permitted(isEditAllowed, UserRight.ENVIRONMENT_SAMPLE_EDIT)) {
 					listEntry.addEditButton(
 						"edit-environment-sample-" + sampleUuid,
-						(Button.ClickListener) event -> ControllerProvider.getEnvironmentSampleController().navigateToSample(sampleUuid));
+						event -> ControllerProvider.getEnvironmentSampleController().navigateToSample(sampleUuid));
 				} else {
 					listEntry.addViewButton(
 						"view-environment-sample" + sampleUuid,
-						(Button.ClickListener) event -> ControllerProvider.getEnvironmentSampleController().navigateToSample(sampleUuid));
+						event -> ControllerProvider.getEnvironmentSampleController().navigateToSample(sampleUuid));
 				}
 
 				listEntry.setEnabled(isEditAllowed);
 
-				listLayout.addComponent(listEntry);
+				listLayout.add(listEntry);
 			}
 		}
 	}
@@ -128,75 +127,75 @@ public class EnvironmentSampleListComponent extends SideComponent {
 
 		public EnvironmentSampleListEntry(EnvironmentSampleIndexDto sampleIndex) {
 			HorizontalLayout topLayout = new HorizontalLayout();
-			topLayout.setWidth(100, Unit.PERCENTAGE);
-			topLayout.setMargin(false);
+			topLayout.setWidthFull();
+			topLayout.setPadding(false);
 			topLayout.setSpacing(false);
 			addComponentToField(topLayout);
 
 			VerticalLayout topLeftLayout = new VerticalLayout();
 
-			topLeftLayout.setMargin(false);
+			topLeftLayout.setPadding(false);
 			topLeftLayout.setSpacing(false);
 
-			Label materialLabel = new Label(DataHelper.toStringNullable(sampleIndex.getSampleMaterial()));
+			Span materialLabel = new Span(DataHelper.toStringNullable(sampleIndex.getSampleMaterial()));
 			CssStyles.style(materialLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
-			materialLabel.setWidth(50, Unit.PERCENTAGE);
-			topLeftLayout.addComponent(materialLabel);
+			materialLabel.setWidth("50%");
+			topLeftLayout.add(materialLabel);
 
 			if (sampleIndex.getSpecimenCondition() == SpecimenCondition.NOT_ADEQUATE) {
-				Label resultLabel = new Label();
+				Span resultLabel = new Span();
 				CssStyles.style(resultLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
 
-				resultLabel.setValue(DataHelper.toStringNullable(sampleIndex.getSpecimenCondition()));
-				resultLabel.addStyleName(CssStyles.LABEL_WARNING);
+				resultLabel.setText(DataHelper.toStringNullable(sampleIndex.getSpecimenCondition()));
+				resultLabel.addClassName(CssStyles.LABEL_WARNING);
 
-				topLeftLayout.addComponent(resultLabel);
+				topLeftLayout.add(resultLabel);
 			}
 
-			Label dispatchReceiveLabel = new Label();
+			Span dispatchReceiveLabel = new Span();
 			CssStyles.style(dispatchReceiveLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
 
 			if (sampleIndex.isReceived()) {
-				dispatchReceiveLabel.setValue(
+				dispatchReceiveLabel.setText(
 					I18nProperties.getCaption(Captions.environmentSampleReceived) + " " + DateFormatHelper.formatDate(sampleIndex.getReceivalDate()));
 			} else if (sampleIndex.isDispatched()) {
-				dispatchReceiveLabel.setValue(
+				dispatchReceiveLabel.setText(
 					I18nProperties.getCaption(Captions.environmentSampleShipped) + " "
 						+ DateFormatHelper.formatDate((sampleIndex.getDispatchDate())));
 			} else {
-				dispatchReceiveLabel.setValue(I18nProperties.getCaption(Captions.environmentSampleNotShipped));
+				dispatchReceiveLabel.setText(I18nProperties.getCaption(Captions.environmentSampleNotShipped));
 			}
 
-			topLeftLayout.addComponent(dispatchReceiveLabel);
+			topLeftLayout.add(dispatchReceiveLabel);
 
-			Label dateTimeLabel = new Label(
+			Span dateTimeLabel = new Span(
 				I18nProperties.getPrefixCaption(EnvironmentSampleIndexDto.I18N_PREFIX, EnvironmentSampleIndexDto.SAMPLE_DATE_TIME) + ": "
 					+ DateFormatHelper.formatDate(sampleIndex.getSampleDateTime()));
-			topLeftLayout.addComponent(dateTimeLabel);
+			topLeftLayout.add(dateTimeLabel);
 
-			Label labLabel = new Label(DataHelper.toStringNullable(sampleIndex.getLaboratory()));
-			topLeftLayout.addComponent(labLabel);
+			Span labLabel = new Span(DataHelper.toStringNullable(sampleIndex.getLaboratory()));
+			topLeftLayout.add(labLabel);
 
-			Label testCountLabel = new Label(
+			Span testCountLabel = new Span(
 				I18nProperties.getPrefixCaption(EnvironmentSampleIndexDto.I18N_PREFIX, EnvironmentSampleIndexDto.NUMBER_OF_TESTS) + ": "
 					+ sampleIndex.getNumberOfTests());
-			topLeftLayout.addComponent(testCountLabel);
+			topLeftLayout.add(testCountLabel);
 
 			if (sampleIndex.getNumberOfTests() > 0) {
 				VerticalLayout latestTestLayout = new VerticalLayout();
-				latestTestLayout.setMargin(false);
+				latestTestLayout.setPadding(false);
 				latestTestLayout.setSpacing(false);
 
-				Label heading = new Label(I18nProperties.getCaption(Captions.latestPathogenTest));
+				Span heading = new Span(I18nProperties.getCaption(Captions.latestPathogenTest));
 				CssStyles.style(heading, CssStyles.LABEL_BOLD);
 
-				Label testDate = new Label(sampleIndex.getLatestPathogenTestResult().toString());
-				latestTestLayout.addComponents(heading, testDate);
-				topLeftLayout.addComponent(latestTestLayout);
+				Span testDate = new Span(sampleIndex.getLatestPathogenTestResult().toString());
+				latestTestLayout.add(heading, testDate);
+				topLeftLayout.add(latestTestLayout);
 			}
 
-			topLayout.addComponent(topLeftLayout);
-			topLayout.setComponentAlignment(topLeftLayout, Alignment.TOP_LEFT);
+			topLayout.add(topLeftLayout);
+			topLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, topLeftLayout);
 		}
 	}
 }

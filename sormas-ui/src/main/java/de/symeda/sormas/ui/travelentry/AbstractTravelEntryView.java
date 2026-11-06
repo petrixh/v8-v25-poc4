@@ -3,8 +3,6 @@ package de.symeda.sormas.ui.travelentry;
 import java.util.Collections;
 import java.util.List;
 
-import com.vaadin.navigator.ViewChangeListener;
-
 import de.symeda.sormas.api.CoreFacade;
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -16,6 +14,7 @@ import de.symeda.sormas.api.travelentry.TravelEntryIndexDto;
 import de.symeda.sormas.api.travelentry.TravelEntryReferenceDto;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.SubMenu;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import de.symeda.sormas.ui.utils.AbstractEditAllowedDetailView;
 import de.symeda.sormas.ui.utils.DirtyStateComponent;
 
@@ -67,7 +66,7 @@ public abstract class AbstractTravelEntryView extends AbstractEditAllowedDetailV
 		super.setSubComponent(newComponent);
 
 		if (FacadeProvider.getTravelEntryFacade().isDeleted(getReference().getUuid())) {
-			newComponent.setEnabled(false);
+			newComponent.getElement().setEnabled(false);
 		}
 	}
 

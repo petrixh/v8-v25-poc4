@@ -2,8 +2,6 @@ package de.symeda.sormas.ui.travelentry;
 
 import java.util.Date;
 
-import com.vaadin.ui.renderers.DateRenderer;
-
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -20,6 +18,7 @@ import de.symeda.sormas.ui.utils.FilteredGrid;
 import de.symeda.sormas.ui.utils.ShowDetailsListener;
 import de.symeda.sormas.ui.utils.UuidRenderer;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 public class TravelEntryGrid extends FilteredGrid<TravelEntryIndexDto, TravelEntryCriteria> {
 
@@ -78,11 +77,11 @@ public class TravelEntryGrid extends FilteredGrid<TravelEntryIndexDto, TravelEnt
 		((Column<TravelEntryIndexDto, Date>) getColumn(TravelEntryIndexDto.QUARANTINE_TO))
 			.setRenderer(new DateRenderer(DateFormatHelper.getDateFormat()));
 
-		for (Column<TravelEntryIndexDto, ?> column : getColumns()) {
+		for (Column<TravelEntryIndexDto, ?> column : getAllColumns()) {
 			column.setCaption(
 				I18nProperties
-					.findPrefixCaptionWithDefault(column.getId(), column.getCaption(), TravelEntryIndexDto.I18N_PREFIX, PersonDto.I18N_PREFIX));
-			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getId()));
+					.findPrefixCaptionWithDefault(column.getKey(), column.getCaption(), TravelEntryIndexDto.I18N_PREFIX, PersonDto.I18N_PREFIX));
+			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getKey()));
 		}
 	}
 
@@ -96,7 +95,7 @@ public class TravelEntryGrid extends FilteredGrid<TravelEntryIndexDto, TravelEnt
 	}
 
 	public void reload() {
-		if (getSelectionModel().isUserSelectionAllowed()) {
+		if (isUserSelectionAllowed()) {
 			deselectAll();
 		}
 

@@ -26,9 +26,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -48,6 +47,7 @@ import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.DateTimeField;
 import de.symeda.sormas.ui.utils.FieldAccessHelper;
 import de.symeda.sormas.ui.utils.FieldHelper;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 public class SampleEditForm extends AbstractSampleForm {
 
@@ -59,7 +59,7 @@ public class SampleEditForm extends AbstractSampleForm {
 
 	private List<PathogenTestReferenceDto> testsToBeRemovedOnCommit;
 
-	private Label laboratorySampleHeadingLabel;
+	private Span laboratorySampleHeadingLabel;
 
 	public SampleEditForm(boolean isPseudonymized, boolean inJurisdiction, Disease disease) {
 		super(SampleDto.class, SampleDto.I18N_PREFIX, disease, FieldAccessHelper.getFieldAccessCheckers(inJurisdiction, isPseudonymized));
@@ -69,8 +69,8 @@ public class SampleEditForm extends AbstractSampleForm {
 	@SuppressWarnings("deprecation")
 	@Override
 	protected void addFields() {
-		laboratorySampleHeadingLabel = new Label(I18nProperties.getString(Strings.headingLaboratorySample));
-		laboratorySampleHeadingLabel.addStyleName(H3);
+		laboratorySampleHeadingLabel = new Span(I18nProperties.getString(Strings.headingLaboratorySample));
+		laboratorySampleHeadingLabel.addClassName(H3);
 		getContent().addComponent(laboratorySampleHeadingLabel, LABORATORY_SAMPLE_HEADING_LOC);
 
 		addCommonFields();
@@ -136,7 +136,7 @@ public class SampleEditForm extends AbstractSampleForm {
 
 	@Override
 	public void setHeading(String heading) {
-		laboratorySampleHeadingLabel.setValue(heading);
+		laboratorySampleHeadingLabel.setText(heading);
 	}
 
 	@Override

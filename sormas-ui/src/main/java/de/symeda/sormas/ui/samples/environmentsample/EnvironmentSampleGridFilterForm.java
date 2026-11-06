@@ -21,11 +21,7 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 import java.util.Date;
 import java.util.stream.Stream;
 
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.HasValue;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.customizableenum.CustomizableEnumType;
@@ -41,8 +37,12 @@ import de.symeda.sormas.api.utils.DateFilterOption;
 import de.symeda.sormas.api.utils.DateHelper;
 import de.symeda.sormas.api.utils.EpiWeek;
 import de.symeda.sormas.ui.utils.AbstractFilterForm;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.EpiWeekAndDateFilterComponent;
 import de.symeda.sormas.ui.utils.FieldConfiguration;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class EnvironmentSampleGridFilterForm extends AbstractFilterForm<EnvironmentSampleCriteria> {
 
@@ -151,10 +151,10 @@ public class EnvironmentSampleGridFilterForm extends AbstractFilterForm<Environm
 	}
 
 	@Override
-	protected void applyDependenciesOnFieldChange(String propertyId, Property.ValueChangeEvent event) {
+	protected void applyDependenciesOnFieldChange(String propertyId, HasValue.ValueChangeEvent<?> event) {
 		switch (propertyId) {
 		case EnvironmentSampleCriteria.REGION:
-			RegionReferenceDto region = (RegionReferenceDto) event.getProperty().getValue();
+			RegionReferenceDto region = (RegionReferenceDto) event.getValue();
 			if (region != null) {
 				applyRegionFilterDependency(region, EnvironmentSampleCriteria.DISTRICT);
 			} else {

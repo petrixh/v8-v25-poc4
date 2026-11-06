@@ -23,22 +23,12 @@ import java.util.function.Consumer;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.navigator.Navigator;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.Buffered.SourceException;
-import com.vaadin.v7.data.Validator.InvalidValueException;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -75,6 +65,7 @@ import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.caze.CaseDataView;
 import de.symeda.sormas.ui.contact.ContactDataView;
 import de.symeda.sormas.ui.events.EventParticipantDataView;
+import de.symeda.sormas.ui.navigation.Navigator;
 import de.symeda.sormas.ui.samples.AbstractSampleForm;
 import de.symeda.sormas.ui.samples.CollapsiblePathogenTestForm;
 import de.symeda.sormas.ui.samples.PathogenTestForm;
@@ -82,13 +73,18 @@ import de.symeda.sormas.ui.samples.SampleViewType;
 import de.symeda.sormas.ui.samples.SamplesView;
 import de.symeda.sormas.ui.samples.SamplesViewConfiguration;
 import de.symeda.sormas.ui.samples.environmentsample.EnvironmentSampleDataView;
+import de.symeda.sormas.ui.utils.Buffered.SourceException;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.ConfirmationComponent;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.DateTimeField;
 import de.symeda.sormas.ui.utils.DeleteRestoreHandlers;
+import de.symeda.sormas.ui.utils.InvalidValueException;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.page.title.TitleLayout;
@@ -206,10 +202,10 @@ public class SampleController {
 		boolean deleteOnCancel,
 		boolean addSeparator) {
 
-		Label separator = new Label("<br/><hr/><br/>", ContentMode.HTML);
+		Span separator = VaadinUiUtil.createLabel("<br/><hr/><br/>", ContentMode.HTML);
 		separator.setWidth(100f, Unit.PERCENTAGE);
 		separator.setVisible(addSeparator);
-		sampleComponent.addComponent(separator, sampleComponent.getComponentCount() - 1);
+		sampleComponent.addComponentAtIndex(sampleComponent.getComponentCount() - 1, separator);
 
 		final Disease pathogenTestFormDisease = disease != null ? disease : sampleComponent.getWrappedComponent().getDisease();
 
@@ -261,8 +257,8 @@ public class SampleController {
 			|| isNull(pathogenTest)
 			|| UiUtil.permitted(pathogenTest.getSample() != null ? UserRight.PATHOGEN_TEST_DELETE : UserRight.ENVIRONMENT_PATHOGEN_TEST_DELETE)) {
 			collapsibleForm.setDeleteHandler(() -> {
-				sampleComponent.removeComponent(separator);
-				sampleComponent.removeComponent(collapsibleForm);
+				sampleComponent.remove(separator);
+				sampleComponent.remove(collapsibleForm);
 				sampleComponent.removeFieldGroups(pathogenTestForm.getFieldGroup());
 				sampleComponent.removeCommitListener(savePathogenTest);
 				pathogenTestForm.discard();
@@ -270,9 +266,9 @@ public class SampleController {
 		}
 
 		// add the pathogenTestForm above the overall discard and commit buttons
-		sampleComponent.addComponent(collapsibleForm, sampleComponent.getComponentCount() - 1);
+		sampleComponent.addComponentAtIndex(sampleComponent.getComponentCount() - 1, collapsibleForm);
 		// add space above the buttons bar
-		sampleComponent.getButtonsPanel().addStyleName(CssStyles.VSPACE_TOP_3);
+		sampleComponent.getButtonsPanel().addClassName(CssStyles.VSPACE_TOP_3);
 
 		return collapsibleForm;
 	}
@@ -300,7 +296,7 @@ public class SampleController {
 					callback.run();
 				}
 
-				Notification.show(I18nProperties.getString(Strings.messageSampleSaved), Type.TRAY_NOTIFICATION);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageSampleSaved), Type.TRAY_NOTIFICATION);
 			}
 		});
 
@@ -329,7 +325,7 @@ public class SampleController {
 				pathogenTestForm.addDetachListener((de) -> deleteCallback.run());
 			}
 		});
-		editView.getButtonsPanel().addComponent(addPathogenTestButton, 0);
+		editView.getButtonsPanel().addComponentAtIndex(0, addPathogenTestButton);
 	}
 
 	public void setViaLimsFieldChecked(PathogenTestForm pathogenTestForm) {
@@ -357,7 +353,7 @@ public class SampleController {
 				updatedSample.setReferredTo(referralSample.toReference());
 				FacadeProvider.getSampleFacade().saveSample(updatedSample);
 
-				Notification.show(I18nProperties.getString(Strings.messageSampleSaved), Type.TRAY_NOTIFICATION);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageSampleSaved), Type.TRAY_NOTIFICATION);
 			}
 		});
 		return createView;
@@ -372,7 +368,8 @@ public class SampleController {
 		String oldViewName) {
 
 		SampleEditForm form = new SampleEditForm(isPseudonymized, inJurisdiction, disease);
-		form.setWidth(form.getWidth() * 10 / 12, Unit.PIXELS);
+		// was getWidth() * 10 / 12 pixels (V8 float); Flow's getWidth() is a CSS string
+		form.setWidth("calc(" + form.getWidth() + " * 10 / 12)");
 		SampleDto dto = FacadeProvider.getSampleFacade().getSampleByUuid(sampleUuid);
 		form.setValue(dto);
 		final CommitDiscardWrapperComponent<SampleEditForm> editView =
@@ -392,7 +389,7 @@ public class SampleController {
 					&& UiUtil.permitted(UserRight.TASK_CREATE)) {
 					requestSampleCollectionTaskCreation(changedDto, form);
 				} else {
-					Notification.show(I18nProperties.getString(Strings.messageSampleSaved), Type.TRAY_NOTIFICATION);
+					NotificationHelper.show(I18nProperties.getString(Strings.messageSampleSaved), Type.TRAY_NOTIFICATION);
 				}
 			}
 		});
@@ -405,7 +402,7 @@ public class SampleController {
 			}, (deletionDetails) -> {
 				FacadeProvider.getSampleFacade().restore(dto.getUuid());
 				updateAssociationsForSample(dto);
-				UI.getCurrent().getNavigator().navigateTo(SamplesView.VIEW_NAME);
+				SormasUI.get().getNavigator().navigateTo(SamplesView.VIEW_NAME);
 			}, I18nProperties.getString(Strings.entitySample), FacadeProvider.getSampleFacade().isDeleted(dto.getUuid()));
 		}
 
@@ -442,10 +439,10 @@ public class SampleController {
 				//sample accessed from Samples directory
 				navigationState = oldViewName;
 			}
-			UI.getCurrent().getNavigator().navigateTo(navigationState);
+			SormasUI.get().getNavigator().navigateTo(navigationState);
 		} else {
 			//the sample is accessed by URL from any other view
-			UI.getCurrent().getNavigator().navigateTo(SamplesView.VIEW_NAME);
+			SormasUI.get().getNavigator().navigateTo(SamplesView.VIEW_NAME);
 		}
 	}
 
@@ -486,19 +483,13 @@ public class SampleController {
 		if (sample.getReferredTo() == null) {
 			if (sample.getSamplePurpose() == SamplePurpose.EXTERNAL && UiUtil.permitted(UserRight.SAMPLE_TRANSFER)) {
 				referOrLinkToOtherLabButton =
-					ButtonHelper.createButton("referOrLinkToOtherLab", I18nProperties.getCaption(Captions.sampleRefer), new ClickListener() {
-
-						private static final long serialVersionUID = 1L;
-
-						@Override
-						public void buttonClick(ClickEvent event) {
-							try {
-								createReferral.accept(disease);
-							} catch (SourceException | InvalidValueException e) {
-								Notification.show(I18nProperties.getString(Strings.messageSampleErrors), Type.ERROR_MESSAGE);
-							}
+					ButtonHelper.createButton("referOrLinkToOtherLab", I18nProperties.getCaption(Captions.sampleRefer), event -> {
+						try {
+							createReferral.accept(disease);
+						} catch (SourceException | InvalidValueException e) {
+							NotificationHelper.show(I18nProperties.getString(Strings.messageSampleErrors), Type.ERROR_MESSAGE);
 						}
-					}, ValoTheme.BUTTON_LINK);
+					}, CssStyles.BUTTON_LINK);
 			}
 		} else {
 			SampleDto referredDto = FacadeProvider.getSampleFacade().getSampleByUuid(sample.getReferredTo().getUuid());
@@ -508,21 +499,14 @@ public class SampleController {
 					+ DateFormatHelper.formatLocalDateTime(referredDto.getSampleDateTime()) + ")"
 				: I18nProperties.getCaption(Captions.sampleReferredTo) + " " + referredDtoLab.buildCaption();
 
-			referOrLinkToOtherLabButton = ButtonHelper.createButton("referOrLinkToOtherLab", referOrLinkToOtherLabButtonCaption, new ClickListener() {
-
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public void buttonClick(ClickEvent event) {
-					openReferredSample.accept(referredDto);
-				}
-
+			referOrLinkToOtherLabButton = ButtonHelper.createButton("referOrLinkToOtherLab", referOrLinkToOtherLabButtonCaption, event -> {
+				openReferredSample.accept(referredDto);
 			});
 		}
 
 		if (referOrLinkToOtherLabButton != null) {
 			editForm.getButtonsPanel().addComponentAsFirst(referOrLinkToOtherLabButton);
-			editForm.getButtonsPanel().setComponentAlignment(referOrLinkToOtherLabButton, Alignment.BOTTOM_LEFT);
+			editForm.getButtonsPanel().setVerticalComponentAlignment(FlexComponent.Alignment.END, referOrLinkToOtherLabButton);
 		}
 	}
 
@@ -543,7 +527,7 @@ public class SampleController {
 					+ DateFormatHelper.formatLocalDateTime(referredFrom.getSampleDateTime()) + ")"
 				: I18nProperties.getCaption(Captions.sampleReferredFrom) + " " + referredFromLab.buildCaption();
 			Button referredButton = ButtonHelper
-				.createButton("referredFrom", referredButtonCaption, event -> navigation.accept(referredFrom), ValoTheme.BUTTON_LINK, VSPACE_NONE);
+				.createButton("referredFrom", referredButtonCaption, event -> navigation.accept(referredFrom), CssStyles.BUTTON_LINK, VSPACE_NONE);
 			editForm.getWrappedComponent().addReferredFromButton(referredButton);
 		}
 	}
@@ -551,45 +535,39 @@ public class SampleController {
 	private void requestSampleCollectionTaskCreation(SampleDto dto, SampleEditForm form) {
 
 		VerticalLayout layout = new VerticalLayout();
-		layout.setMargin(true);
+		layout.setPadding(true);
 
 		ConfirmationComponent requestTaskComponent = VaadinUiUtil.buildYesNoConfirmationComponent();
 
-		Label description = new Label(I18nProperties.getString(Strings.messageCreateCollectionTask), ContentMode.HTML);
+		Span description = VaadinUiUtil.createLabel(I18nProperties.getString(Strings.messageCreateCollectionTask), ContentMode.HTML);
 		description.setWidth(100, Unit.PERCENTAGE);
-		layout.addComponent(description);
-		layout.addComponent(requestTaskComponent);
-		layout.setComponentAlignment(requestTaskComponent, Alignment.BOTTOM_RIGHT);
+		layout.add(description);
+		layout.add(requestTaskComponent);
+		layout.setHorizontalComponentAlignment(FlexComponent.Alignment.END, requestTaskComponent);
 		layout.setSizeUndefined();
 		layout.setSpacing(true);
 
-		Window popupWindow = VaadinUiUtil.showPopupWindow(layout);
+		Dialog popupWindow = VaadinUiUtil.showPopupWindow(layout);
 		popupWindow.setSizeUndefined();
-		popupWindow.setCaption(I18nProperties.getString(Strings.headingCreateNewTaskQuestion));
-		requestTaskComponent.getConfirmButton().addClickListener(new ClickListener() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				popupWindow.close();
-				final CaseReferenceDto associatedCase = dto.getAssociatedCase();
-				final ContactReferenceDto associatedContact = dto.getAssociatedContact();
-				final EventParticipantReferenceDto associatedEventParticipant = dto.getAssociatedEventParticipant();
-				if (associatedCase != null) {
-					final CaseDataDto caseDto = FacadeProvider.getCaseFacade().getCaseDataByUuid(associatedCase.getUuid());
-					ControllerProvider.getTaskController().createSampleCollectionTask(TaskContext.CASE, associatedCase, dto, caseDto.getDisease());
-				} else if (associatedContact != null) {
-					final ContactDto contactDto = FacadeProvider.getContactFacade().getByUuid(associatedContact.getUuid());
-					ControllerProvider.getTaskController()
-						.createSampleCollectionTask(TaskContext.CONTACT, associatedContact, dto, contactDto.getDisease());
-				} else if (associatedEventParticipant != null) {
-					final EventParticipantDto eventParticipantDto =
-						FacadeProvider.getEventParticipantFacade().getEventParticipantByUuid(associatedEventParticipant.getUuid());
-					final EventDto eventDto = FacadeProvider.getEventFacade().getEventByUuid(eventParticipantDto.getEvent().getUuid(), false);
-					ControllerProvider.getTaskController()
-						.createSampleCollectionTask(TaskContext.EVENT, eventParticipantDto.getEvent(), dto, eventDto.getDisease());
-				}
+		popupWindow.setHeaderTitle(I18nProperties.getString(Strings.headingCreateNewTaskQuestion));
+		requestTaskComponent.getConfirmButton().addClickListener(event -> {
+			popupWindow.close();
+			final CaseReferenceDto associatedCase = dto.getAssociatedCase();
+			final ContactReferenceDto associatedContact = dto.getAssociatedContact();
+			final EventParticipantReferenceDto associatedEventParticipant = dto.getAssociatedEventParticipant();
+			if (associatedCase != null) {
+				final CaseDataDto caseDto = FacadeProvider.getCaseFacade().getCaseDataByUuid(associatedCase.getUuid());
+				ControllerProvider.getTaskController().createSampleCollectionTask(TaskContext.CASE, associatedCase, dto, caseDto.getDisease());
+			} else if (associatedContact != null) {
+				final ContactDto contactDto = FacadeProvider.getContactFacade().getByUuid(associatedContact.getUuid());
+				ControllerProvider.getTaskController()
+					.createSampleCollectionTask(TaskContext.CONTACT, associatedContact, dto, contactDto.getDisease());
+			} else if (associatedEventParticipant != null) {
+				final EventParticipantDto eventParticipantDto =
+					FacadeProvider.getEventParticipantFacade().getEventParticipantByUuid(associatedEventParticipant.getUuid());
+				final EventDto eventDto = FacadeProvider.getEventFacade().getEventByUuid(eventParticipantDto.getEvent().getUuid(), false);
+				ControllerProvider.getTaskController()
+					.createSampleCollectionTask(TaskContext.EVENT, eventParticipantDto.getEvent(), dto, eventDto.getDisease());
 			}
 		});
 		requestTaskComponent.getCancelButton().addClickListener(event -> popupWindow.close());
@@ -602,50 +580,38 @@ public class SampleController {
 		Consumer<Boolean> callback) {
 
 		VerticalLayout layout = new VerticalLayout();
-		layout.setMargin(true);
+		layout.setPadding(true);
 
 		ConfirmationComponent confirmationComponent = VaadinUiUtil.buildYesNoConfirmationComponent();
 
-		Label description = new Label(String.format(I18nProperties.getString(Strings.messageChangePathogenTestResult), newResult.toString()));
+		Span description = new Span(String.format(I18nProperties.getString(Strings.messageChangePathogenTestResult), newResult.toString()));
 		description.setWidth(100, Unit.PERCENTAGE);
-		layout.addComponent(description);
-		layout.addComponent(confirmationComponent);
-		layout.setComponentAlignment(confirmationComponent, Alignment.BOTTOM_RIGHT);
+		layout.add(description);
+		layout.add(confirmationComponent);
+		layout.setHorizontalComponentAlignment(FlexComponent.Alignment.END, confirmationComponent);
 		layout.setSizeUndefined();
 		layout.setSpacing(true);
 
-		Window popupWindow = VaadinUiUtil.showPopupWindow(layout);
+		Dialog popupWindow = VaadinUiUtil.showPopupWindow(layout);
 		popupWindow.setSizeUndefined();
-		popupWindow.setCaption(I18nProperties.getString(Strings.headingChangePathogenTestResult));
-		confirmationComponent.getConfirmButton().addClickListener(new ClickListener() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				if (editComponent != null && !SampleCreateForm.class.equals(editComponent.getWrappedComponent().getClass())) {
-					editComponent.commit();
-				}
-				SampleDto sample = FacadeProvider.getSampleFacade().getSampleByUuid(sampleUuid);
-				sample.setPathogenTestResult(newResult);
-				FacadeProvider.getSampleFacade().saveSample(sample);
-				popupWindow.close();
-				SormasUI.refreshView();
-				if (callback != null) {
-					callback.accept(true);
-				}
+		popupWindow.setHeaderTitle(I18nProperties.getString(Strings.headingChangePathogenTestResult));
+		confirmationComponent.getConfirmButton().addClickListener(event -> {
+			if (editComponent != null && !SampleCreateForm.class.equals(editComponent.getWrappedComponent().getClass())) {
+				editComponent.commit();
+			}
+			SampleDto sample = FacadeProvider.getSampleFacade().getSampleByUuid(sampleUuid);
+			sample.setPathogenTestResult(newResult);
+			FacadeProvider.getSampleFacade().saveSample(sample);
+			popupWindow.close();
+			SormasUI.refreshView();
+			if (callback != null) {
+				callback.accept(true);
 			}
 		});
-		confirmationComponent.getCancelButton().addClickListener(new ClickListener() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				popupWindow.close();
-				if (callback != null) {
-					callback.accept(false);
-				}
+		confirmationComponent.getCancelButton().addClickListener(event -> {
+			popupWindow.close();
+			if (callback != null) {
+				callback.accept(false);
 			}
 		});
 	}
@@ -719,7 +685,7 @@ public class SampleController {
 	private Consumer<List<SampleIndexDto>> bulkOperationCallback(
 		HumanSampleGrid sampleGrid,
 		Runnable noEntriesRemainingCallback,
-		Window popupWindow) {
+		Dialog popupWindow) {
 		return remainingSamples -> {
 			if (popupWindow != null) {
 				popupWindow.close();
@@ -727,7 +693,7 @@ public class SampleController {
 
 			sampleGrid.reload();
 			if (CollectionUtils.isNotEmpty(remainingSamples)) {
-				sampleGrid.asMultiSelect().selectItems(remainingSamples.toArray(new SampleIndexDto[0]));
+				sampleGrid.asMultiSelect().select(remainingSamples.toArray(new SampleIndexDto[0]));
 			} else {
 				noEntriesRemainingCallback.run();
 			}

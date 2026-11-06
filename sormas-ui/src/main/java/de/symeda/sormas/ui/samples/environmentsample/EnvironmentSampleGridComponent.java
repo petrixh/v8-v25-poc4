@@ -17,14 +17,15 @@ package de.symeda.sormas.ui.samples.environmentsample;
 
 import java.util.HashMap;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.environment.environmentsample.EnvironmentSampleCriteria;
@@ -40,12 +41,14 @@ import de.symeda.sormas.ui.samples.SamplesView;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.ComboBoxHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
-import de.symeda.sormas.ui.utils.LayoutUtil;
 import de.symeda.sormas.ui.utils.MenuBarHelper;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 public class EnvironmentSampleGridComponent extends SampleGridComponent<EnvironmentSampleIndexDto, EnvironmentSampleCriteria> {
 
 	private static final long serialVersionUID = 4302760792255154403L;
+
+	private static final String STATUS_DATA = "status";
 
 	private static final String NOT_SHIPPED = "notShipped";
 	private static final String SHIPPED = "shipped";
@@ -68,7 +71,7 @@ public class EnvironmentSampleGridComponent extends SampleGridComponent<Environm
 
 	public EnvironmentSampleGridComponent(SamplesView samplesView) {
 		setSizeFull();
-		setMargin(false);
+		setPadding(false);
 
 		this.samplesView = samplesView;
 
@@ -79,15 +82,15 @@ public class EnvironmentSampleGridComponent extends SampleGridComponent<Environm
 
 		grid = new EnvironmentSampleGrid(criteria);
 		VerticalLayout gridLayout = new VerticalLayout();
-		gridLayout.addComponent(createFilterBar());
-		gridLayout.addComponent(createShipmentFilterBar());
-		gridLayout.addComponent(grid);
+		gridLayout.add(createFilterBar());
+		gridLayout.add(createShipmentFilterBar());
+		gridLayout.add(grid);
 		grid.addDataSizeChangeListener(e -> updateStatusButtons());
 
 		styleGridLayout(gridLayout);
-		gridLayout.setMargin(true);
+		gridLayout.setPadding(true);
 
-		addComponent(gridLayout);
+		add(gridLayout);
 	}
 
 	@Override
@@ -123,10 +126,10 @@ public class EnvironmentSampleGridComponent extends SampleGridComponent<Environm
 
 	public HorizontalLayout createFilterBar() {
 		HorizontalLayout filterLayout = new HorizontalLayout();
-		filterLayout.setMargin(false);
+		filterLayout.setPadding(false);
 		filterLayout.setSpacing(true);
 		filterLayout.setSizeUndefined();
-		filterLayout.addStyleName("wrap");
+		filterLayout.addClassName("wrap");
 
 		filterForm = new EnvironmentSampleGridFilterForm();
 		filterForm.addValueChangeListener(e -> {
@@ -139,17 +142,17 @@ public class EnvironmentSampleGridComponent extends SampleGridComponent<Environm
 			samplesView.navigateTo(null, true);
 		});
 		filterForm.addApplyHandler(e -> grid.reload());
-		filterLayout.addComponent(filterForm);
+		filterLayout.add(filterForm);
 
 		return filterLayout;
 	}
 
 	public HorizontalLayout createShipmentFilterBar() {
 		HorizontalLayout shipmentFilterLayout = new HorizontalLayout();
-		shipmentFilterLayout.setMargin(false);
+		shipmentFilterLayout.setPadding(false);
 		shipmentFilterLayout.setSpacing(true);
 		shipmentFilterLayout.setWidth(100, Unit.PERCENTAGE);
-		shipmentFilterLayout.addStyleName(CssStyles.VSPACE_3);
+		shipmentFilterLayout.addClassName(CssStyles.VSPACE_3);
 
 		statusButtons = new HashMap<>();
 
@@ -157,10 +160,9 @@ public class EnvironmentSampleGridComponent extends SampleGridComponent<Environm
 		buttonFilterLayout.setSpacing(true);
 		{
 			Button statusAll =
-				ButtonHelper.createButton(Captions.all, e -> processStatusChange(null), ValoTheme.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER);
-			statusAll.setCaptionAsHtml(true);
+				ButtonHelper.createButton(Captions.all, e -> processStatusChange(null), CssStyles.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER);
 
-			buttonFilterLayout.addComponent(statusAll);
+			buttonFilterLayout.add(statusAll);
 
 			statusButtons.put(statusAll, I18nProperties.getCaption(Captions.all));
 			activeStatusButton = statusAll;
@@ -170,7 +172,7 @@ public class EnvironmentSampleGridComponent extends SampleGridComponent<Environm
 			createAndAddStatusButton(Captions.environmentSampleReceived, RECEIVED, buttonFilterLayout);
 		}
 
-		shipmentFilterLayout.addComponent(buttonFilterLayout);
+		shipmentFilterLayout.add(buttonFilterLayout);
 
 		HorizontalLayout actionButtonsLayout = new HorizontalLayout();
 		actionButtonsLayout.setSpacing(true);
@@ -202,10 +204,10 @@ public class EnvironmentSampleGridComponent extends SampleGridComponent<Environm
 						grid.getColumn(grid.DELETE_REASON_COLUMN).setHidden(!relevanceStatusFilter.getValue().equals(EntityRelevanceStatus.DELETED));
 					}
 
-					criteria.setRelevanceStatus((EntityRelevanceStatus) e.getProperty().getValue());
+					criteria.setRelevanceStatus((EntityRelevanceStatus) e.getValue());
 					samplesView.navigateTo(criteria);
 				});
-				actionButtonsLayout.addComponent(relevanceStatusFilter);
+				actionButtonsLayout.add(relevanceStatusFilter);
 			}
 
 			// Bulk operation dropdown
@@ -217,7 +219,7 @@ public class EnvironmentSampleGridComponent extends SampleGridComponent<Environm
 						Captions.bulkActions,
 						new MenuBarHelper.MenuBarItem(
 							I18nProperties.getCaption(Captions.bulkDelete),
-							VaadinIcons.TRASH,
+							VaadinIcon.TRASH,
 							selectedItem -> ControllerProvider.getEnvironmentSampleController()
 								.deleteAllSelectedItems(grid.asMultiSelect().getSelectedItems(), grid, () -> samplesView.navigateTo(criteria)),
 							UiUtil.permitted(UserRight.ENVIRONMENT_SAMPLE_DELETE)));
@@ -226,7 +228,7 @@ public class EnvironmentSampleGridComponent extends SampleGridComponent<Environm
 						Captions.bulkActions,
 						new MenuBarHelper.MenuBarItem(
 							I18nProperties.getCaption(Captions.bulkRestore),
-							VaadinIcons.ARROW_BACKWARD,
+							VaadinIcon.ARROW_BACKWARD,
 							selectedItem -> ControllerProvider.getEnvironmentSampleController()
 								.restoreSelectedSamples(grid.asMultiSelect().getSelectedItems(), grid, () -> samplesView.navigateTo(criteria)),
 							UiUtil.permitted(UserRight.ENVIRONMENT_SAMPLE_DELETE)));
@@ -234,12 +236,14 @@ public class EnvironmentSampleGridComponent extends SampleGridComponent<Environm
 
 				bulkOperationsDropdown.setVisible(samplesView.getViewConfiguration().isInEagerMode());
 
-				actionButtonsLayout.addComponent(bulkOperationsDropdown);
+				actionButtonsLayout.add(bulkOperationsDropdown);
 			}
 		}
-		shipmentFilterLayout.addComponent(actionButtonsLayout);
-		shipmentFilterLayout.setComponentAlignment(actionButtonsLayout, Alignment.TOP_RIGHT);
-		shipmentFilterLayout.setExpandRatio(actionButtonsLayout, 1);
+		shipmentFilterLayout.add(actionButtonsLayout);
+		// was Alignment.TOP_RIGHT in an expanding slot: the layout grows, its content goes right
+		shipmentFilterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, actionButtonsLayout);
+		shipmentFilterLayout.setFlexGrow(1, actionButtonsLayout);
+		actionButtonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
 		return shipmentFilterLayout;
 	}
@@ -248,16 +252,15 @@ public class EnvironmentSampleGridComponent extends SampleGridComponent<Environm
 		Button button = ButtonHelper.createButton(
 			captionKey,
 			e -> processStatusChange(status),
-			ValoTheme.BUTTON_BORDERLESS,
+			CssStyles.BUTTON_BORDERLESS,
 			CssStyles.BUTTON_FILTER,
 			CssStyles.BUTTON_FILTER_LIGHT);
 
-		button.setData(status);
-		button.setCaptionAsHtml(true);
+		ComponentUtil.setData(button, STATUS_DATA, status);
 
-		filterLayout.addComponent(button);
+		filterLayout.add(button);
 
-		statusButtons.put(button, button.getCaption());
+		statusButtons.put(button, button.getText());
 	}
 
 	private void processStatusChange(String status) {
@@ -281,24 +284,28 @@ public class EnvironmentSampleGridComponent extends SampleGridComponent<Environm
 	private void updateStatusButtons() {
 		statusButtons.keySet().forEach(b -> {
 			CssStyles.style(b, CssStyles.BUTTON_FILTER_LIGHT);
-			b.setCaption(statusButtons.get(b));
-			if ((NOT_SHIPPED.equals(b.getData()) && criteria.getDispatched() == Boolean.FALSE)
-				|| (SHIPPED.equals(b.getData()) && criteria.getDispatched() == Boolean.TRUE)
-				|| (RECEIVED.equals(b.getData()) && criteria.getReceived() == Boolean.TRUE)) {
+			b.setText(statusButtons.get(b));
+			b.setSuffixComponent(null);
+			if ((NOT_SHIPPED.equals(ComponentUtil.getData(b, STATUS_DATA)) && criteria.getDispatched() == Boolean.FALSE)
+				|| (SHIPPED.equals(ComponentUtil.getData(b, STATUS_DATA)) && criteria.getDispatched() == Boolean.TRUE)
+				|| (RECEIVED.equals(ComponentUtil.getData(b, STATUS_DATA)) && criteria.getReceived() == Boolean.TRUE)) {
 				activeStatusButton = b;
 			}
 		});
 		CssStyles.removeStyles(activeStatusButton, CssStyles.BUTTON_FILTER_LIGHT);
 		if (activeStatusButton != null) {
-			activeStatusButton
-				.setCaption(statusButtons.get(activeStatusButton) + LayoutUtil.spanCss(CssStyles.BADGE, String.valueOf(grid.getDataSize())));
+			// was an HTML caption with LayoutUtil.spanCss(BADGE, count): the count is a badge after the text
+			activeStatusButton.setText(statusButtons.get(activeStatusButton));
+			Span badge = new Span(String.valueOf(grid.getDataSize()));
+			badge.addClassName(CssStyles.BADGE);
+			activeStatusButton.setSuffixComponent(badge);
 		}
 	}
 
 	private void styleGridLayout(VerticalLayout gridLayout) {
 		gridLayout.setSpacing(false);
 		gridLayout.setSizeFull();
-		gridLayout.setExpandRatio(grid, 1);
-		gridLayout.setStyleName("crud-main-layout");
+		gridLayout.setFlexGrow(1, grid);
+		gridLayout.setClassName("crud-main-layout");
 	}
 }

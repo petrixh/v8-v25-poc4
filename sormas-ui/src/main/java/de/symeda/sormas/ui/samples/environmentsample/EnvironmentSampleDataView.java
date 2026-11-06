@@ -18,8 +18,7 @@ package de.symeda.sormas.ui.samples.environmentsample;
 import java.util.Arrays;
 import java.util.List;
 
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.flow.component.Unit;
 
 import de.symeda.sormas.api.EditPermissionType;
 import de.symeda.sormas.api.FacadeProvider;
@@ -31,6 +30,8 @@ import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.SubMenu;
 import de.symeda.sormas.ui.environment.EnvironmentDataView;
+import de.symeda.sormas.ui.navigation.View;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import de.symeda.sormas.ui.samples.HasName;
 import de.symeda.sormas.ui.samples.SamplesView;
 import de.symeda.sormas.ui.samples.pathogentestlink.PathogenTestListComponent;
@@ -86,7 +87,7 @@ public class EnvironmentSampleDataView extends AbstractDetailView<EnvironmentSam
 
 	@Override
 	protected void initView(String params) {
-		setHeightUndefined();
+		setHeight(null);
 
 		String sampleUuid = getReference().getUuid();
 		EnvironmentSampleDto sample = FacadeProvider.getEnvironmentSampleFacade().getByUuid(sampleUuid);
@@ -95,10 +96,10 @@ public class EnvironmentSampleDataView extends AbstractDetailView<EnvironmentSam
 
 		DetailSubComponentWrapper container = new DetailSubComponentWrapper(() -> editComponent);
 		container.setWidth(100, Unit.PERCENTAGE);
-		container.setMargin(true);
+		container.setPadding(true);
 
 		LayoutWithSidePanel layout = new LayoutWithSidePanel(editComponent, PATHOGEN_TESTS_LOC);
-		container.addComponent(layout);
+		container.add(layout);
 
 		PathogenTestListComponent pathogenTestListComponent =
 			new PathogenTestListComponent(getReferenceByUuid(sample.getUuid()), this::showUnsavedChangesPopup, isEditAllowed());

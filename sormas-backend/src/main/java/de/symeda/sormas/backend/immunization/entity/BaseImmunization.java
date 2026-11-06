@@ -15,7 +15,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
@@ -319,7 +318,8 @@ public class BaseImmunization extends CoreAdo implements SormasToSormasShareable
 		this.validUntil = validUntil;
 	}
 
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	// Several immunizations may relate to the same case (DataPatcher); Hibernate 7 makes a @OneToOne foreign key unique
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	public Case getRelatedCase() {
 		return relatedCase;
 	}

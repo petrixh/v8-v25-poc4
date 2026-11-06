@@ -1,8 +1,8 @@
 package de.symeda.sormas.ui.caze.caselink;
 
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.caze.CaseDataDto;
 import de.symeda.sormas.api.caze.CaseListEntryDto;
@@ -23,55 +23,57 @@ public class CaseListEntry extends SideComponentField {
 		this.caseListEntryDto = caseListEntryDto;
 
 		HorizontalLayout uuidReportDateLayout = new HorizontalLayout();
-		uuidReportDateLayout.setMargin(false);
+		uuidReportDateLayout.setPadding(false);
 		uuidReportDateLayout.setSpacing(true);
 
-		Label caseUuidLabel = new Label(DataHelper.toStringNullable(DataHelper.getShortUuid(caseListEntryDto.getUuid())));
-		caseUuidLabel.setDescription(caseListEntryDto.getUuid());
-		uuidReportDateLayout.addComponent(caseUuidLabel);
+		Span caseUuidLabel = new Span(DataHelper.toStringNullable(DataHelper.getShortUuid(caseListEntryDto.getUuid())));
+		caseUuidLabel.setTitle(caseListEntryDto.getUuid());
+		uuidReportDateLayout.add(caseUuidLabel);
 
-		Label reportDateLabel = new Label(
+		Span reportDateLabel = new Span(
 			I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.REPORT_DATE)
 				+ SEPARATOR
 				+ DateFormatHelper.formatDate(caseListEntryDto.getReportDate()));
-		uuidReportDateLayout.addComponent(reportDateLabel);
+		uuidReportDateLayout.add(reportDateLabel);
 
 		uuidReportDateLayout.setWidthFull();
-		uuidReportDateLayout.setComponentAlignment(caseUuidLabel, Alignment.MIDDLE_LEFT);
-		uuidReportDateLayout.setComponentAlignment(reportDateLabel, Alignment.MIDDLE_RIGHT);
+		// was each label aligned left and right in its half
+		uuidReportDateLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+		uuidReportDateLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 		addComponentToField(uuidReportDateLayout);
 
 		HorizontalLayout diseaseClassificationLayout = new HorizontalLayout();
-		diseaseClassificationLayout.setMargin(false);
+		diseaseClassificationLayout.setPadding(false);
 		diseaseClassificationLayout.setSpacing(true);
 
-		Label diseaseLabel = new Label(caseListEntryDto.getDisease().toString());
-		diseaseLabel.addStyleNames(CssStyles.LABEL_BOLD);
-		diseaseLabel.setDescription(caseListEntryDto.getDisease().toString());
+		Span diseaseLabel = new Span(caseListEntryDto.getDisease().toString());
+		diseaseLabel.addClassNames(CssStyles.LABEL_BOLD);
+		diseaseLabel.setTitle(caseListEntryDto.getDisease().toString());
 
-		Label classificationLabel = new Label(caseListEntryDto.getCaseClassification().toString());
-		classificationLabel.addStyleNames(CssStyles.LABEL_BOLD);
-		classificationLabel.setDescription(caseListEntryDto.getCaseClassification().toString());
+		Span classificationLabel = new Span(caseListEntryDto.getCaseClassification().toString());
+		classificationLabel.addClassNames(CssStyles.LABEL_BOLD);
+		classificationLabel.setTitle(caseListEntryDto.getCaseClassification().toString());
 
-		diseaseClassificationLayout.addComponent(diseaseLabel);
-		diseaseClassificationLayout.addComponent(classificationLabel);
+		diseaseClassificationLayout.add(diseaseLabel);
+		diseaseClassificationLayout.add(classificationLabel);
 		diseaseClassificationLayout.setWidthFull();
-		diseaseClassificationLayout.setComponentAlignment(diseaseLabel, Alignment.MIDDLE_LEFT);
-		diseaseClassificationLayout.setComponentAlignment(classificationLabel, Alignment.MIDDLE_RIGHT);
+		// was each label aligned left and right in its half
+		diseaseClassificationLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+		diseaseClassificationLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 		addComponentToField(diseaseClassificationLayout);
 
 		if (caseListEntryDto.getSymptomsOnsetDate() != null) {
 			HorizontalLayout symptomsOnsetDateLayout = new HorizontalLayout();
-			uuidReportDateLayout.setMargin(false);
+			uuidReportDateLayout.setPadding(false);
 			uuidReportDateLayout.setSpacing(true);
 
-			Label symptomsOnsetDateLabel = new Label(
+			Span symptomsOnsetDateLabel = new Span(
 				I18nProperties.getPrefixCaption(SymptomsDto.I18N_PREFIX, SymptomsDto.ONSET_DATE)
 					+ SEPARATOR
 					+ DateFormatHelper.formatDate(caseListEntryDto.getSymptomsOnsetDate()));
-			symptomsOnsetDateLayout.addComponent(symptomsOnsetDateLabel);
+			symptomsOnsetDateLayout.add(symptomsOnsetDateLabel);
 
-			symptomsOnsetDateLayout.setComponentAlignment(symptomsOnsetDateLabel, Alignment.MIDDLE_LEFT);
+			symptomsOnsetDateLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 			addComponentToField(symptomsOnsetDateLayout);
 		}
 	}

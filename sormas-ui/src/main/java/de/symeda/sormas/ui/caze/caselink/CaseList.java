@@ -2,8 +2,7 @@ package de.symeda.sormas.ui.caze.caselink;
 
 import java.util.List;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseListEntryDto;
@@ -20,12 +19,12 @@ public class CaseList extends PaginationList<CaseListEntryDto> {
 	private static final int MAX_DISPLAYED_ENTRIES = 5;
 
 	private final String personUuid;
-	private final Label noCaseLabel;
+	private final Span noCaseLabel;
 
 	public CaseList(PersonReferenceDto personReferenceDto) {
 		super(MAX_DISPLAYED_ENTRIES);
 		this.personUuid = personReferenceDto != null ? personReferenceDto.getUuid() : null;
-		noCaseLabel = new Label(I18nProperties.getCaption(Captions.personNoCaseLinkedToPerson));
+		noCaseLabel = new Span(I18nProperties.getCaption(Captions.personNoCaseLinkedToPerson));
 	}
 
 	@Override
@@ -36,9 +35,9 @@ public class CaseList extends PaginationList<CaseListEntryDto> {
 		if (!caseIndexDtos.isEmpty()) {
 			showPage(1);
 		} else {
-			listLayout.removeAllComponents();
+			listLayout.removeAll();
 			updatePaginationLayout();
-			listLayout.addComponent(noCaseLabel);
+			listLayout.add(noCaseLabel);
 		}
 	}
 
@@ -55,10 +54,10 @@ public class CaseList extends PaginationList<CaseListEntryDto> {
 			if (UiUtil.permitted(UserRight.CASE_EDIT) && !isActiveCase) {
 				listEntry.addEditButton(
 					"edit-case-" + i,
-					(Button.ClickListener) event -> ControllerProvider.getCaseController().navigateToCase(listEntry.getCaseListEntryDto().getUuid()));
+					event -> ControllerProvider.getCaseController().navigateToCase(listEntry.getCaseListEntryDto().getUuid()));
 			}
 
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 }

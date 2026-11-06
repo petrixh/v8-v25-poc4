@@ -1,8 +1,8 @@
 package de.symeda.sormas.ui.caze.messaging;
 
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -15,34 +15,34 @@ public class SmsListEntry extends HorizontalLayout {
 
 	public SmsListEntry(ManualMessageLogDto manualMessageLogDto) {
 
-		setMargin(false);
+		setPadding(false);
 		setSpacing(true);
-		setWidth(100, Unit.PERCENTAGE);
-		addStyleName(CssStyles.SORMAS_LIST_ENTRY);
+		setWidthFull();
+		addClassName(CssStyles.SORMAS_LIST_ENTRY);
 
 		VerticalLayout mainLayout = new VerticalLayout();
-		mainLayout.setWidth(100, Unit.PERCENTAGE);
-		mainLayout.setMargin(false);
+		mainLayout.setWidthFull();
+		mainLayout.setPadding(false);
 		mainLayout.setSpacing(false);
-		addComponent(mainLayout);
-		setExpandRatio(mainLayout, 1);
+		add(mainLayout);
+		setFlexGrow(1, mainLayout);
 
 		HorizontalLayout topLayout = new HorizontalLayout();
-		topLayout.setWidth(100, Unit.PERCENTAGE);
-		topLayout.setMargin(false);
+		topLayout.setWidthFull();
+		topLayout.setPadding(false);
 		topLayout.setSpacing(false);
-		mainLayout.addComponent(topLayout);
+		mainLayout.add(topLayout);
 
 		VerticalLayout topLeftLayout = new VerticalLayout();
 		{
-			topLeftLayout.setMargin(false);
+			topLeftLayout.setPadding(false);
 			topLeftLayout.setSpacing(false);
 			final UserReferenceDto sendingUser = manualMessageLogDto.getSendingUser();
-			final Label sendingInfo = new Label(
+			final Span sendingInfo = new Span(
 				I18nProperties.getCaption(Captions.messagesSentBy) + ": " + sendingUser.getFirstName() + " " + sendingUser.getLastName() + " "
 					+ DateFormatHelper.formatLocalDateTime(manualMessageLogDto.getSentDate()));
-			topLeftLayout.addComponent(sendingInfo);
+			topLeftLayout.add(sendingInfo);
 		}
-		topLayout.addComponent(topLeftLayout);
+		topLayout.add(topLeftLayout);
 	}
 }

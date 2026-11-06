@@ -20,10 +20,13 @@ package de.symeda.sormas.ui.caze;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -32,32 +35,29 @@ import org.apache.commons.lang3.exception.CloneFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.Container.ItemSetChangeEvent;
-import com.vaadin.v7.data.Container.ItemSetChangeListener;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.data.Validator.InvalidValueException;
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.data.util.converter.Converter.ConversionException;
-import com.vaadin.v7.event.ItemClickEvent;
-import com.vaadin.v7.event.ItemClickEvent.ItemClickListener;
-import com.vaadin.v7.ui.CustomField;
-import com.vaadin.v7.ui.Table;
-import com.vaadin.v7.ui.Table.ColumnGenerator;
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.binder.BeanPropertySet;
+import com.vaadin.flow.data.binder.PropertyDefinition;
+import com.vaadin.flow.data.binder.PropertySet;
+import com.vaadin.flow.data.provider.ListDataProvider;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.utils.fieldaccess.UiFieldAccessCheckers;
+import de.symeda.sormas.ui.utils.Buffered;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FieldAccessCellStyleGenerator;
+import de.symeda.sormas.ui.utils.GridExportStreamResource;
+import de.symeda.sormas.ui.utils.fields.CustomField;
+import de.symeda.sormas.ui.utils.grid.Grid;
 
 /**
  * TODO replace table with grid?
@@ -69,7 +69,7 @@ import de.symeda.sormas.ui.utils.FieldAccessCellStyleGenerator;
 @SuppressWarnings({
 	"serial",
 	"rawtypes" })
-public abstract class AbstractTableField<E> extends CustomField<Collection> {
+public abstract class AbstractTableField<E> extends CustomField<Collection> implements Buffered {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -88,11 +88,15 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> {
 	}
 
 	private VerticalLayout layout;
-	private Label captionLabel;
+	private Span captionLabel;
 	private Button addButton;
 	private Table table;
 
-	private Property<Collection<E>> dataSource;
+	/**
+	 * The value read from the bound property (Vaadin 7: {@code dataSource.getValue()}). The table shows clones of its
+	 * entries, so the source is changed only by {@link #commit()}.
+	 */
+	private Collection<E> dataSource;
 	private BeanItemContainer<E> container;
 
 	private boolean isEditAllowed;
@@ -129,9 +133,9 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> {
 	protected void applyScrollbarFix() {
 
 		if (table.getPageLength() == 0) {
-			table.addStyleName(SCROLLBAR_FIX_CSS);
+			table.addClassName(SCROLLBAR_FIX_CSS);
 		} else {
-			table.removeStyleName(SCROLLBAR_FIX_CSS);
+			table.removeClassName(SCROLLBAR_FIX_CSS);
 		}
 	}
 
@@ -153,43 +157,44 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> {
 
 		layout = new VerticalLayout();
 		layout.setSpacing(false);
-		layout.setMargin(false);
+		layout.setPadding(false);
 
 		HorizontalLayout headerLayout = new HorizontalLayout();
 		{
-			headerLayout.setWidth(100, Unit.PERCENTAGE);
+			headerLayout.setWidthFull();
+			headerLayout.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.END);
+			headerLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
 
-			captionLabel = new Label(getCaption());
+			captionLabel = new Span(getCaption());
 			captionLabel.setSizeUndefined();
-			headerLayout.addComponent(captionLabel);
-			headerLayout.setComponentAlignment(captionLabel, Alignment.BOTTOM_LEFT);
-			headerLayout.setExpandRatio(captionLabel, 0);
+			headerLayout.add(captionLabel);
 
 			addButton = createAddButton();
-			headerLayout.addComponent(addButton);
-			headerLayout.setComponentAlignment(addButton, Alignment.BOTTOM_RIGHT);
-			headerLayout.setExpandRatio(addButton, 1);
+			headerLayout.add(addButton);
 		}
-		layout.addComponent(headerLayout);
+		layout.add(headerLayout);
 
 		table = createTable();
-		table.addItemSetChangeListener(new ItemSetChangeListener() {
-
-			@Override
-			public void containerItemSetChange(ItemSetChangeEvent event) {
-				applyTablePageLength();
-			}
-		});
-		layout.addComponent(table);
+		table.setItemSetChangeListener(this::applyTablePageLength);
+		layout.add(table);
 
 		return layout;
 	}
 
+	/**
+	 * The caption is shown in the field's own header (Vaadin 7 hid the field caption), not as the Flow field label.
+	 */
 	@Override
 	public void setCaption(String caption) {
 
-		super.setCaption(caption);
-		captionLabel.setValue(caption);
+		if (captionLabel != null) {
+			captionLabel.setText(caption);
+		}
+	}
+
+	@Override
+	public String getCaption() {
+		return captionLabel != null ? captionLabel.getText() : null;
 	}
 
 	@Override
@@ -201,10 +206,8 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> {
 
 	protected Table createTable() {
 
-		final Table table = new Table();
+		final Table table = new Table(getEntryType());
 
-		table.setEditable(false);
-		table.setSelectable(false);
 		table.setSizeFull();
 
 		createActionColumn(table);
@@ -214,7 +217,7 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> {
 
 	protected void createActionColumn(Table table) {
 
-		ColumnGenerator editColumnGenerator = new ColumnGenerator() {
+		Table.ColumnGenerator editColumnGenerator = new Table.ColumnGenerator() {
 
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
@@ -225,16 +228,14 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> {
 		table.setColumnWidth(ACTION_COLUMN_ID, 20);
 		table.setColumnHeader(ACTION_COLUMN_ID, "");
 
-		table.addItemClickListener(new ItemClickListener() {
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public void itemClick(ItemClickEvent event) {
-				if (event.isDoubleClick() || ACTION_COLUMN_ID.equals(event.getPropertyId())) {
-					final E entry = (E) event.getItemId();
-					if (entry != null) {
-						editEntry(entry, false, result -> onEntryChanged(result));
-					}
+		// A click on the action column's button opens the entry through the button (a Flow grid also reports that click
+		// as an item click), so the item click only handles the double click.
+		table.addItemClickListener(event -> {
+			if (event.getClickCount() > 1) {
+				@SuppressWarnings("unchecked")
+				final E entry = (E) event.getItem();
+				if (entry != null) {
+					editEntry(entry, false, result -> onEntryChanged(result));
 				}
 			}
 		});
@@ -243,13 +244,13 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> {
 	@SuppressWarnings("unchecked")
 	protected Object generateEditCell(Object itemId) {
 
-		return ButtonHelper.createIconButtonWithCaption(itemId + "-edit", null, isEditAllowed ? VaadinIcons.EDIT : VaadinIcons.EYE, e -> {
+		return ButtonHelper.createIconButtonWithCaption(itemId + "-edit", null, isEditAllowed ? VaadinIcon.EDIT : VaadinIcon.EYE, e -> {
 			editEntry((E) itemId, false, this::onEntryChanged);
-		}, ValoTheme.BUTTON_BORDERLESS);
+		}, CssStyles.BUTTON_BORDERLESS);
 	}
 
 	protected Button createAddButton() {
-		return ButtonHelper.createButton(Captions.actionNewEntry, event -> addEntry(), ValoTheme.BUTTON_LINK);
+		return ButtonHelper.createButton(Captions.actionNewEntry, event -> addEntry(), CssStyles.BUTTON_LINK);
 	}
 
 	/**
@@ -352,7 +353,7 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> {
 	 * @return Unchanged original entry from the data source
 	 */
 	protected E getUnmodifiedEntry(E entry) {
-		Collection<E> oldEntries = dataSource.getValue();
+		Collection<E> oldEntries = dataSource;
 		for (E oldEntry : oldEntries) {
 			if (oldEntry.equals(entry)) {
 				return oldEntry;
@@ -362,23 +363,20 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> {
 	}
 
 	/**
-	 * Property serves as a source for the items in the table.
+	 * Was {@code setPropertyDataSource(Property)}: the form's binder sets the property's value here when it reads the
+	 * bean. The value serves as a source for the items in the table.
 	 * A copy is created of all entries in the edit, so that the source data is not overwritten until the commit.
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void setPropertyDataSource(Property newDataSource) {
+	public void setValue(Collection newDataSource) {
 
-		if (newDataSource == dataSource || (newDataSource != null && newDataSource.equals(dataSource))) {
-			return;
-		}
-
-		dataSource = newDataSource;
-
-		Collection<E> entries = dataSource.getValue();
+		Collection<E> entries = newDataSource;
 		if (entries == null) {
 			throw new IllegalArgumentException("dataSource cannot be null");
 		}
+
+		dataSource = entries;
 
 		Collection<E> clonedEntries;
 		if (entries instanceof List) {
@@ -399,22 +397,14 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> {
 
 		getContent();
 		Table tbl = getTable();
-		if (tbl.getContainerDataSource() != null) {
-			// keep the visible Columns
-			Object[] visibleColumns = tbl.getVisibleColumns();
-			tbl.setContainerDataSource(container, Arrays.asList(visibleColumns));
-		} else {
-			tbl.setContainerDataSource(container);
-		}
+		// keeps the visible columns
+		tbl.setContainerDataSource(container);
 		applyTablePageLength();
 
 		updateColumns();
 		initInaccessiblePlaceHolders();
 
 		fireValueChange(false);
-
-		// not set, we manage our own dataSource
-		// super.setPropertyDataSource (newDataSource);
 	}
 
 	protected void initInaccessiblePlaceHolders() {
@@ -433,8 +423,11 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> {
 		return fieldAccessCheckers.isAccessible(getEntryType(), columnId.toString());
 	}
 
-	@Override
-	public Property<Collection<E>> getPropertyDataSource() {
+	/**
+	 * Was {@code getPropertyDataSource().getValue()}: the value read from the bound property, or {@code null} before
+	 * the first read.
+	 */
+	public Collection<E> getPropertyDataSource() {
 		return dataSource;
 	}
 
@@ -445,7 +438,7 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> {
 			return false;
 		}
 
-		ArrayList<E> oldEntries = new ArrayList<>(dataSource.getValue());
+		ArrayList<E> oldEntries = new ArrayList<>(dataSource);
 		ArrayList<E> newEntries = new ArrayList<>(getValue());
 
 		// go through "new entries": there is in each case an equal old?!
@@ -525,17 +518,22 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> {
 		return false;
 	}
 
+	/**
+	 * Called by the form's field group before it writes the bean; the field group then writes {@link #getValue()} to
+	 * the bound property. Entries that must not be committed ({@link #preEntryCommit(Object)}) are removed from the
+	 * table first, so they are not written (Vaadin 7 left them in the table and left them out of the property).
+	 */
 	@Override
-	public void commit() throws SourceException, InvalidValueException {
+	public void commit() throws SourceException, de.symeda.sormas.ui.utils.InvalidValueException {
 
-		// write new entries to data source
-		if (dataSource != null && !dataSource.isReadOnly()) {
+		// write new entries to data source (a read-only property is not committed by the field group)
+		if (dataSource != null) {
 			if ((isInvalidCommitted() || isValid())) {
 
 				// creata a copy
 				Collection<E> entries = getValue();
 				Collection<E> entriesCopy;
-				if (dataSource.getValue() instanceof List) {
+				if (dataSource instanceof List) {
 					entriesCopy = new ArrayList<>(entries);
 				} else {
 					// Set
@@ -546,17 +544,18 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> {
 				for (E entry : entries) {
 					if (!preEntryCommit(entry)) {
 						entriesCopy.remove(entry);
+						getTable().removeItem(entry);
 					}
 				}
 
 				// done
-				dataSource.setValue(entriesCopy);
+				dataSource = entriesCopy;
 
 				fireValueChange(false);
 
 			} else {
 				/* An invalid value and we don't allow them, throw the exception */
-				validate();
+				validateValue();
 			}
 		}
 
@@ -567,13 +566,42 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> {
 	public void discard() throws SourceException {
 
 		// just reread the data source
-		Property<Collection<E>> resetDataSource = dataSource;
-		dataSource = null;
-		setPropertyDataSource(resetDataSource);
+		if (dataSource != null) {
+			setValue(dataSource);
+		}
 
 		// super.discard();
 	}
 
+	/**
+	 * Vaadin 7 {@code isValid()}: required check and validators.
+	 */
+	@Override
+	public boolean isValid() {
+		try {
+			validateValue();
+			return true;
+		} catch (de.symeda.sormas.ui.utils.InvalidValueException e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Always buffered (Vaadin 7: the field kept its own copy of the entries).
+	 */
+	@Override
+	public void setBuffered(boolean buffered) {
+		// always buffered
+	}
+
+	@Override
+	public boolean isBuffered() {
+		return true;
+	}
+
+	/**
+	 * All entries of the table, in a collection of the source's type (a list or a set).
+	 */
 	@Override
 	public Collection<E> getValue() {
 
@@ -584,13 +612,18 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> {
 
 		// return all entries from the container
 		Collection<E> entries = container.getItemIds();
-
-		return entries;
+		if (dataSource instanceof Set) {
+			return new LinkedHashSet<>(entries);
+		}
+		return new ArrayList<>(entries);
 	}
 
 	@Override
 	public boolean isEmpty() {
 		Collection<E> entries = getValue();
+		if (entries == null) {
+			return true;
+		}
 		for (E entry : entries) {
 			if (!isEmpty(entry)) {
 				return false;
@@ -599,21 +632,12 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> {
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	protected void setValue(Collection newFieldValue, boolean repaintIsNotNeeded, boolean ignoreReadOnly)
-		throws com.vaadin.v7.data.Property.ReadOnlyException, ConversionException, InvalidValueException {
-
-		BeanItemContainer<E> container = getContainer();
-		if (container == null) {
-			return;
-		}
-
-		container.removeAllItems();
-		container.addAll(newFieldValue);
-		table.refreshRowCache();
-
-		fireValueChange(repaintIsNotNeeded);
+	/**
+	 * Was {@code fireValueChange(boolean)}: notifies the value change listeners (the form's binder included). The old
+	 * value is not known, as in Vaadin 7.
+	 */
+	protected void fireValueChange(boolean repaintIsNotNeeded) {
+		fireEvent(new ComponentValueChangeEvent<>(this, this, null, false));
 	}
 
 	/**
@@ -654,6 +678,308 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> {
 		getAddButton().setVisible(!readOnly);
 		if (readOnly) {
 			getTable().removeContainerProperty(ACTION_COLUMN_ID);
+		}
+	}
+
+	/**
+	 * Was {@code com.vaadin.v7.data.util.BeanItemContainer}: the table's entries. Changes made through it show in the
+	 * table after {@link Table#refreshRowCache()} (or at once with {@link Table#addItem}/{@link Table#removeItem}).
+	 */
+	public static class BeanItemContainer<E> implements java.io.Serializable {
+
+		private static final long serialVersionUID = 1L;
+
+		private final Class<E> type;
+		private final List<E> items = new ArrayList<>();
+		private Runnable itemSetChangeListener;
+
+		public BeanItemContainer(Class<E> type, Collection<E> items) {
+			this.type = type;
+			this.items.addAll(items);
+		}
+
+		public Class<E> getBeanType() {
+			return type;
+		}
+
+		/**
+		 * @return the entries (the live list)
+		 */
+		public List<E> getItemIds() {
+			return items;
+		}
+
+		public int size() {
+			return items.size();
+		}
+
+		public void addItem(E item) {
+			items.add(item);
+			fireItemSetChange();
+		}
+
+		public void addAll(Collection<? extends E> collection) {
+			items.addAll(collection);
+			fireItemSetChange();
+		}
+
+		public boolean removeItem(Object item) {
+			boolean removed = items.remove(item);
+			fireItemSetChange();
+			return removed;
+		}
+
+		public void removeAllItems() {
+			items.clear();
+			fireItemSetChange();
+		}
+
+		void setItemSetChangeListener(Runnable itemSetChangeListener) {
+			this.itemSetChangeListener = itemSetChangeListener;
+		}
+
+		private void fireItemSetChange() {
+			if (itemSetChangeListener != null) {
+				itemSetChangeListener.run();
+			}
+		}
+	}
+
+	/**
+	 * Was the Vaadin 7 {@code Table} of the field: a Flow grid with the Table methods table fields use. Columns are bean
+	 * properties of the entry type or generated columns, shown in the order of {@link #setVisibleColumns(Object...)};
+	 * headers, widths and expand ratios are kept per column id. Page length 0 shows all rows.
+	 */
+	public static class Table extends Grid<Object> {
+
+		private static final long serialVersionUID = 1L;
+
+		private final PropertySet<?> propertySet;
+		private final Map<Object, ColumnGenerator> columnGenerators = new LinkedHashMap<>();
+		private final List<Object> visibleColumns = new ArrayList<>();
+		private final Map<Object, String> columnHeaders = new HashMap<>();
+		private final Map<Object, Integer> columnWidths = new HashMap<>();
+		private final Map<Object, Float> columnExpandRatios = new HashMap<>();
+		private FieldAccessCellStyleGenerator cellStyleGenerator;
+		private BeanItemContainer<?> container;
+		private Runnable itemSetChangeListener;
+		private int pageLength = 15;
+
+		/**
+		 * Was {@code com.vaadin.v7.ui.Table.ColumnGenerator}: the cell of a generated column. A returned component is
+		 * shown as it is, any other value as its text.
+		 */
+		@FunctionalInterface
+		public interface ColumnGenerator extends java.io.Serializable {
+
+			Object generateCell(Table source, Object itemId, Object columnId);
+		}
+
+		public Table(Class<?> entryType) {
+			super();
+			this.propertySet = BeanPropertySet.get(entryType);
+			setSelectionMode(SelectionMode.NONE);
+			setPageLength(pageLength);
+		}
+
+		/**
+		 * Was {@code setContainerDataSource(container[, visibleColumns])}; the visible columns are kept.
+		 */
+		@SuppressWarnings({
+			"unchecked",
+			"rawtypes" })
+		public void setContainerDataSource(BeanItemContainer<?> container) {
+			if (this.container != null) {
+				this.container.setItemSetChangeListener(null);
+			}
+			this.container = container;
+			container.setItemSetChangeListener(this::onItemSetChange);
+			setDataProvider(new ListDataProvider<>((List) container.getItemIds()));
+			onItemSetChange();
+		}
+
+		void setItemSetChangeListener(Runnable itemSetChangeListener) {
+			this.itemSetChangeListener = itemSetChangeListener;
+		}
+
+		private void onItemSetChange() {
+			getDataProvider().refreshAll();
+			if (itemSetChangeListener != null) {
+				itemSetChangeListener.run();
+			}
+		}
+
+		@SuppressWarnings({
+			"unchecked",
+			"rawtypes" })
+		public void addItem(Object item) {
+			((BeanItemContainer) container).addItem(item);
+		}
+
+		public void removeItem(Object item) {
+			container.removeItem(item);
+		}
+
+		public int size() {
+			return container != null ? container.size() : 0;
+		}
+
+		public void refreshRowCache() {
+			getDataProvider().refreshAll();
+		}
+
+		/**
+		 * Vaadin 7: a generated column with this id replaces the property column of the same id; a new id is appended to
+		 * the visible columns.
+		 */
+		public void addGeneratedColumn(Object id, ColumnGenerator generatedColumn) {
+			columnGenerators.put(id, generatedColumn);
+			if (!visibleColumns.contains(id)) {
+				visibleColumns.add(id);
+			}
+			updateColumns();
+		}
+
+		public ColumnGenerator getColumnGenerator(Object columnId) {
+			return columnGenerators.get(columnId);
+		}
+
+		public boolean removeGeneratedColumn(Object columnId) {
+			if (columnGenerators.remove(columnId) == null) {
+				return false;
+			}
+			if (!propertySet.getProperty(columnId.toString()).isPresent()) {
+				visibleColumns.remove(columnId);
+			}
+			updateColumns();
+			return true;
+		}
+
+		/**
+		 * Vaadin 7: hides the column; a generated column keeps its generator and can be shown again.
+		 */
+		public boolean removeContainerProperty(Object propertyId) {
+			visibleColumns.remove(propertyId);
+			columnHeaders.remove(propertyId);
+			updateColumns();
+			return true;
+		}
+
+		public void setVisibleColumns(Object... visibleColumns) {
+			for (Object id : visibleColumns) {
+				if (!columnGenerators.containsKey(id) && !propertySet.getProperty(id.toString()).isPresent()) {
+					throw new IllegalArgumentException("Ids must exist in the Container or as a generated column, missing id: " + id);
+				}
+			}
+			this.visibleColumns.clear();
+			this.visibleColumns.addAll(Arrays.asList(visibleColumns));
+			updateColumns();
+		}
+
+		public Object[] getVisibleColumns() {
+			return visibleColumns.toArray();
+		}
+
+		/**
+		 * The header is text; the Vaadin 7 HTML placeholder {@code &nbsp} becomes an empty header.
+		 */
+		public void setColumnHeader(Object propertyId, String header) {
+			columnHeaders.put(propertyId, header);
+			Column<Object, ?> column = getColumn(propertyId.toString());
+			if (column != null) {
+				column.setHeader(headerText(header));
+			}
+		}
+
+		public void setColumnWidth(Object propertyId, int width) {
+			columnWidths.put(propertyId, width);
+			updateColumns();
+		}
+
+		public void setColumnExpandRatio(Object propertyId, float expandRatio) {
+			columnExpandRatios.put(propertyId, expandRatio);
+			updateColumns();
+		}
+
+		/**
+		 * The field access styles are applied to all visible columns, also after the columns change.
+		 */
+		public void setCellStyleGenerator(FieldAccessCellStyleGenerator cellStyleGenerator) {
+			this.cellStyleGenerator = cellStyleGenerator;
+			updateColumns();
+		}
+
+		public int getPageLength() {
+			return pageLength;
+		}
+
+		/**
+		 * Vaadin 7: 0 shows all rows, otherwise the table is as high as this many rows.
+		 */
+		public void setPageLength(int pageLength) {
+			this.pageLength = pageLength;
+			if (pageLength == 0) {
+				setHeightUndefined();
+			} else {
+				setHeightByRows(pageLength);
+			}
+		}
+
+		private static String headerText(String header) {
+			if (header == null || "&nbsp".equals(header) || "&nbsp;".equals(header)) {
+				return "";
+			}
+			return header;
+		}
+
+		private void updateColumns() {
+
+			removeAllColumns();
+			for (Object id : visibleColumns) {
+				String key = id.toString();
+				Column<Object, ?> column;
+				ColumnGenerator generator = columnGenerators.get(id);
+				if (generator != null) {
+					column = addComponentColumn(item -> toComponent(generator.generateCell(this, item, id)));
+					column.setSortable(false);
+					// a text cell exports its text; a component cell exports empty
+					GridExportStreamResource.setExportValueProvider(column, item -> {
+						Object cell = generator.generateCell(this, item, id);
+						return cell instanceof Component ? null : cell;
+					});
+				} else {
+					PropertyDefinition<?, ?> property = propertySet.getProperty(key).get();
+					column = addColumn(item -> getPropertyValue(property, item));
+				}
+				column.setKey(key);
+				column.setHeader(headerText(columnHeaders.containsKey(id) ? columnHeaders.get(id) : key));
+				if (columnWidths.containsKey(id)) {
+					column.setWidth(columnWidths.get(id));
+				} else {
+					column.setAutoWidth(true);
+				}
+				Float expandRatio = columnExpandRatios.get(id);
+				if (expandRatio != null && expandRatio > 0) {
+					column.setFlexGrow(Math.round(expandRatio));
+				}
+				if (cellStyleGenerator != null) {
+					column.setStyleGenerator(cellStyleGenerator.forColumn(id));
+				}
+			}
+		}
+
+		@SuppressWarnings({
+			"unchecked",
+			"rawtypes" })
+		private static Object getPropertyValue(PropertyDefinition property, Object item) {
+			return property.getGetter().apply(item);
+		}
+
+		private static Component toComponent(Object cell) {
+			if (cell instanceof Component) {
+				return (Component) cell;
+			}
+			return new Span(cell != null ? cell.toString() : "");
 		}
 	}
 }

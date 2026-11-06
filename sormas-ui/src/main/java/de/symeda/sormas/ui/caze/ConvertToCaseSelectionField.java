@@ -18,11 +18,12 @@ package de.symeda.sormas.ui.caze;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.ui.Grid;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.caze.CaseDataDto;
 import de.symeda.sormas.api.contact.SimilarContactDto;
@@ -55,24 +56,26 @@ public class ConvertToCaseSelectionField extends VerticalLayout {
 		this.matchingContacts = matchingContacts;
 		this.matchingEventParticipants = matchingEventParticipants;
 
-		setMargin(true);
+		setPadding(true);
 		setSpacing(true);
 
-		addComponent(VaadinUiUtil.createInfoComponent(I18nProperties.getString(Strings.infoConvertToCaseSelect)));
+		add(VaadinUiUtil.createInfoComponent(I18nProperties.getString(Strings.infoConvertToCaseSelect)));
 		addContactDetailsComponent();
 
 		if (matchingContacts.size() > 0) {
 			contactSelectionGrid = new ContactCaseConversionSelectionGrid(matchingContacts);
 			contactSelectionGrid.setSelectionMode(Grid.SelectionMode.MULTI);
-			contactSelectionGrid.setCaption(I18nProperties.getString(Strings.entityContacts));
-			addComponent(contactSelectionGrid);
+			// was the grid's caption
+			add(createCaption(I18nProperties.getString(Strings.entityContacts)));
+			add(contactSelectionGrid);
 		}
 
 		if (matchingEventParticipants.size() > 0) {
 			eventParticipantSelectionGrid = new EventParticipantCaseConversionSelectionGrid(matchingEventParticipants);
 			eventParticipantSelectionGrid.setSelectionMode(Grid.SelectionMode.MULTI);
-			eventParticipantSelectionGrid.setCaption(I18nProperties.getString(Strings.entityEventParticipants));
-			addComponent(eventParticipantSelectionGrid);
+			// was the grid's caption
+			add(createCaption(I18nProperties.getString(Strings.entityEventParticipants)));
+			add(eventParticipantSelectionGrid);
 		}
 	}
 
@@ -81,45 +84,54 @@ public class ConvertToCaseSelectionField extends VerticalLayout {
 		HorizontalLayout contactDetailsLayout = new HorizontalLayout();
 		contactDetailsLayout.setSpacing(true);
 
-		final Label lblUuid = new Label(DataHelper.getShortUuid(caseDataDto));
-		lblUuid.setCaption(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.UUID));
-		lblUuid.setWidthUndefined();
-		contactDetailsLayout.addComponent(lblUuid);
+		final Span lblUuid = new Span(DataHelper.getShortUuid(caseDataDto));
+		String lblUuidCaption = I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.UUID);
+		lblUuid.setWidth(null);
+		contactDetailsLayout.add(new Div(createCaption(lblUuidCaption), new Div(lblUuid)));
 
-		final Label lblFirstName = new Label(caseDataDto.getPerson().getFirstName());
-		lblFirstName.setWidthUndefined();
-		lblFirstName.setCaption(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.FIRST_NAME));
-		contactDetailsLayout.addComponent(lblFirstName);
+		final Span lblFirstName = new Span(caseDataDto.getPerson().getFirstName());
+		lblFirstName.setWidth(null);
+		String lblFirstNameCaption = I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.FIRST_NAME);
+		contactDetailsLayout.add(new Div(createCaption(lblFirstNameCaption), new Div(lblFirstName)));
 
-		final Label lblLastName = new Label(caseDataDto.getPerson().getLastName());
-		lblLastName.setWidthUndefined();
-		lblLastName.setCaption(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.LAST_NAME));
-		contactDetailsLayout.addComponent(lblLastName);
+		final Span lblLastName = new Span(caseDataDto.getPerson().getLastName());
+		lblLastName.setWidth(null);
+		String lblLastNameCaption = I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.LAST_NAME);
+		contactDetailsLayout.add(new Div(createCaption(lblLastNameCaption), new Div(lblLastName)));
 
 		if (UiUtil.disabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {
-			final Label lblRegion = new Label(caseDataDto.getResponsibleRegion().buildCaption());
-			lblRegion.setWidthUndefined();
-			lblRegion.setCaption(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_REGION));
-			contactDetailsLayout.addComponent(lblRegion);
+			final Span lblRegion = new Span(caseDataDto.getResponsibleRegion().buildCaption());
+			lblRegion.setWidth(null);
+			String lblRegionCaption = I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_REGION);
+			contactDetailsLayout.add(new Div(createCaption(lblRegionCaption), new Div(lblRegion)));
 
-			final Label lblDistrict = new Label(caseDataDto.getResponsibleDistrict().buildCaption());
-			lblDistrict.setWidthUndefined();
-			lblDistrict.setCaption(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_DISTRICT));
-			contactDetailsLayout.addComponent(lblDistrict);
+			final Span lblDistrict = new Span(caseDataDto.getResponsibleDistrict().buildCaption());
+			lblDistrict.setWidth(null);
+			String lblDistrictCaption = I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_DISTRICT);
+			contactDetailsLayout.add(new Div(createCaption(lblDistrictCaption), new Div(lblDistrict)));
 		}
 
-		addComponent(new Panel(contactDetailsLayout));
+		add(new Scroller(contactDetailsLayout));
+	}
+
+	/**
+	 * Was a Vaadin 8 component caption: shown above the component.
+	 */
+	private static Span createCaption(String caption) {
+		Span captionLabel = new Span(caption);
+		captionLabel.addClassName("v-caption");
+		return captionLabel;
 	}
 
 	public List<SimilarContactDto> getSelectedContacts() {
 		return contactSelectionGrid != null
-			? contactSelectionGrid.getSelectedRows().stream().map(item -> (SimilarContactDto) item).collect(Collectors.toList())
+			? contactSelectionGrid.getSelectedItems().stream().map(item -> (SimilarContactDto) item).collect(Collectors.toList())
 			: matchingContacts;
 	}
 
 	public List<SimilarEventParticipantDto> getSelectedEventParticipants() {
 		return eventParticipantSelectionGrid != null
-			? eventParticipantSelectionGrid.getSelectedRows().stream().map(item -> (SimilarEventParticipantDto) item).collect(Collectors.toList())
+			? eventParticipantSelectionGrid.getSelectedItems().stream().map(item -> (SimilarEventParticipantDto) item).collect(Collectors.toList())
 			: matchingEventParticipants;
 	}
 }

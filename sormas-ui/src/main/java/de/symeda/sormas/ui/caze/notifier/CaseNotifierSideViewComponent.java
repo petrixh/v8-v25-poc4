@@ -17,10 +17,9 @@ package de.symeda.sormas.ui.caze.notifier;
 
 import java.util.function.Consumer;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -31,6 +30,7 @@ import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.components.sidecomponent.SideComponent;
 
 /**
@@ -64,19 +64,19 @@ public class CaseNotifierSideViewComponent extends SideComponent {
 		final boolean hasPhoneNotification = phoneNotificationReport != null;
 		final boolean hasNoNotificationReports = oldestDoctorDeclarationReport == null && !hasPhoneNotification;
 
-		setWidth(100, Unit.PERCENTAGE);
-		setMargin(false);
+		setWidthFull();
+		setPadding(false);
 		setSpacing(false);
 
 		if (hasNoNotificationReports || (!hasNotifier && !hasPhoneNotification)) { // if we do not have any relevant notifications or no notifier add the create button
-			addComponent(new Label(I18nProperties.getCaption(Captions.Notification_noNotification)));
+			add(new Span(I18nProperties.getCaption(Captions.Notification_noNotification)));
 			// Create a new notification button
-			Button newNotificationButton = ButtonHelper.createIconButton(Captions.Notification_createNotification, VaadinIcons.PHONE, e -> {
+			Button newNotificationButton = ButtonHelper.createIconButton(Captions.Notification_createNotification, VaadinIcon.PHONE, e -> {
 				actionCallback.accept(() -> controller.createPhoneNotification(cazeRef, () -> {
 					// Refresh the view by navigating back to the same case
 					ControllerProvider.getCaseController().navigateToCase(cazeRef.getUuid());
 				}));
-			}, ValoTheme.BUTTON_PRIMARY);
+			}, CssStyles.BUTTON_PRIMARY);
 			addCreateButton(newNotificationButton);
 
 		} else { // we have either a phone notification or a doctor declaration report
@@ -84,15 +84,15 @@ public class CaseNotifierSideViewComponent extends SideComponent {
 
 				// Add the component
 				final var component = controller.getNotifierComponent(caze, phoneNotificationReport);
-				addComponent(component);
+				add(component);
 
 				// Show edit button when only PHONE_NOTIFICATION exists
-				Button editNotifierButton = ButtonHelper.createIconButton(Captions.edit, VaadinIcons.EDIT, e -> {
+				Button editNotifierButton = ButtonHelper.createIconButton(Captions.edit, VaadinIcon.EDIT, e -> {
 					controller.editPhoneNotification(caze, () -> {
 						// Refresh the view by navigating back to the same case
 						ControllerProvider.getCaseController().navigateToCase(caze.getUuid());
 					}, true); // true = allow editing
-				}, ValoTheme.BUTTON_PRIMARY);
+				}, CssStyles.BUTTON_PRIMARY);
 
 				addCreateButton(editNotifierButton);
 			} else {
@@ -100,10 +100,10 @@ public class CaseNotifierSideViewComponent extends SideComponent {
 
 					// Add the component
 					final var component = controller.getNotifierComponent(caze, oldestDoctorDeclarationReport);
-					addComponent(component);
+					add(component);
 
 					// Show notification button for DOCTOR reports
-					Button notificationButton = ButtonHelper.createIconButton(Captions.Notifier_notification, VaadinIcons.BOOK, e -> {
+					Button notificationButton = ButtonHelper.createIconButton(Captions.Notifier_notification, VaadinIcon.BOOK, e -> {
 						final var oldestReport = controller.getOldestDoctorDeclarationReport(caze);
 						if (oldestReport == null) {
 							return;
@@ -113,7 +113,7 @@ public class CaseNotifierSideViewComponent extends SideComponent {
 							return;
 						}
 						ControllerProvider.getExternalMessageController().showExternalMessage(externalMessage.getUuid(), false, null);
-					}, ValoTheme.BUTTON_PRIMARY);
+					}, CssStyles.BUTTON_PRIMARY);
 
 					addCreateButton(notificationButton);
 				}

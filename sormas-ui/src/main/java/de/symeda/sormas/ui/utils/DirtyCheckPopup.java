@@ -15,18 +15,17 @@
 
 package de.symeda.sormas.ui.utils;
 
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 
 public class DirtyCheckPopup {
 
-	public static Window show(DirtyStateComponent dirtyStateComponent, Runnable callback) {
-		Window warningPopup = VaadinUiUtil.showConfirmationPopup(
+	public static Dialog show(DirtyStateComponent dirtyStateComponent, Runnable callback) {
+		Dialog warningPopup = VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getString(Strings.unsavedChanges_warningTitle),
-			new Label(I18nProperties.getString(Strings.unsavedChanges_warningMessage)),
+			new Span(I18nProperties.getString(Strings.unsavedChanges_warningMessage)),
 			popupWindow -> {
 				ConfirmationComponent confirmationComponent = new ConfirmationComponent(false, null) {
 
@@ -50,22 +49,22 @@ public class DirtyCheckPopup {
 					}
 				};
 
-				confirmationComponent.getConfirmButton().setCaption(I18nProperties.getString(Strings.unsavedChanges_save));
-				confirmationComponent.getCancelButton().setCaption(I18nProperties.getString(Strings.unsavedChanges_discard));
+				confirmationComponent.getConfirmButton().setText(I18nProperties.getString(Strings.unsavedChanges_save));
+				confirmationComponent.getCancelButton().setText(I18nProperties.getString(Strings.unsavedChanges_discard));
 
 				confirmationComponent.addExtraButton(
 					ButtonHelper.createButton(
 						Strings.unsavedChanges_cancel,
 						I18nProperties.getString(Strings.unsavedChanges_cancel),
 						null,
-						ValoTheme.BUTTON_LINK),
+						CssStyles.BUTTON_LINK),
 					buttonEvent -> popupWindow.close());
 
 				return confirmationComponent;
 			},
 			600);
 
-		warningPopup.setClosable(true);
+		VaadinUiUtil.setClosable(warningPopup, true);
 
 		return warningPopup;
 	}

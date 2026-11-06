@@ -18,8 +18,9 @@ package de.symeda.sormas.ui.utils;
 import java.util.Arrays;
 import java.util.Collections;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 
 import de.symeda.sormas.api.Disease;
 
@@ -168,6 +169,17 @@ public final class CssStyles {
 	public static final String BUTTON_FONT_SIZE_LARGE = "font-size-large";
 	public static final String BUTTON_CAPTION_OVERFLOW = "caption-overflow-label";
 	public static final String GEOCODE_BUTTON_HIGHLIGHT = "geocode-button-highlight";
+
+	// Valo button style names (were com.vaadin.ui.themes.ValoTheme.BUTTON_*). On a Flow Button, style(..) applies the
+	// matching Lumo theme variant instead of a class name (see applyButtonVariant)
+	public static final String BUTTON_PRIMARY = "primary";
+	public static final String BUTTON_LINK = "link";
+	public static final String BUTTON_BORDERLESS = "borderless";
+	public static final String BUTTON_DANGER = "danger";
+	public static final String BUTTON_SMALL = "small";
+	public static final String BUTTON_LARGE = "large";
+	public static final String BUTTON_ICON_ONLY = "icon-only";
+	public static final String BUTTON_FRIENDLY = "friendly";
 
 	public static final String YES_NO_UNKNOWN_GROUP = "yes-no-unknown-group";
 	public static final String YES_NO_UNKNOWN_OPTION_SELECTED = "yes-no-unknown-selected";
@@ -352,27 +364,94 @@ public final class CssStyles {
 		return styleBuilder.toString();
 	}
 
-	public static void style(Component component, String... styles) {
+	public static void style(HasStyle component, String... styles) {
 		for (String style : styles)
-			component.addStyleName(style);
+			addStyle(component, style);
 	}
 
-	public static void style(String style, Component... components) {
-		for (Component component : components) {
-			component.addStyleName(style);
+	public static void style(String style, HasStyle... components) {
+		for (HasStyle component : components) {
+			addStyle(component, style);
 		}
 	}
 
-	public static void removeStyles(Component component, String... styles) {
+	public static void removeStyles(HasStyle component, String... styles) {
 		for (String style : styles) {
-			component.removeStyleName(style);
+			for (String name : splitStyleNames(style)) {
+				if (!(component instanceof Button && removeButtonVariant((Button) component, name))) {
+					component.removeClassName(name);
+				}
+			}
 		}
 	}
 
-	public static void stylePrimary(Component component, String primaryStyle, String... styles) {
-		component.setPrimaryStyleName(primaryStyle);
+	/**
+	 * Vaadin 8 replaced the primary style name (the {@code v-<component>} prefix of all its class names); Flow
+	 * components have no primary style name, so the primary style is added as a class name.
+	 */
+	public static void stylePrimary(HasStyle component, String primaryStyle, String... styles) {
+		addStyle(component, primaryStyle);
 		for (String style : styles)
-			component.addStyleName(style);
+			addStyle(component, style);
+	}
+
+	/**
+	 * Vaadin 8 {@code addStyleName}: null or empty is ignored, several names may be separated by spaces.
+	 */
+	private static void addStyle(HasStyle component, String style) {
+		for (String name : splitStyleNames(style)) {
+			if (!(component instanceof Button && applyButtonVariant((Button) component, name))) {
+				component.addClassName(name);
+			}
+		}
+	}
+
+	private static String[] splitStyleNames(String style) {
+		if (style == null || style.trim().isEmpty()) {
+			return new String[0];
+		}
+		return style.trim().split("\\s+");
+	}
+
+	private static ButtonVariant getButtonVariant(String valoButtonStyle) {
+		switch (valoButtonStyle) {
+		case BUTTON_PRIMARY:
+			return ButtonVariant.LUMO_PRIMARY;
+		case BUTTON_LINK:
+			return ButtonVariant.LUMO_TERTIARY_INLINE;
+		case BUTTON_BORDERLESS:
+			return ButtonVariant.LUMO_TERTIARY;
+		case BUTTON_DANGER:
+			return ButtonVariant.LUMO_ERROR;
+		case BUTTON_SMALL:
+			return ButtonVariant.LUMO_SMALL;
+		case BUTTON_LARGE:
+			return ButtonVariant.LUMO_LARGE;
+		case BUTTON_ICON_ONLY:
+			return ButtonVariant.LUMO_ICON;
+		case BUTTON_FRIENDLY:
+			return ButtonVariant.LUMO_SUCCESS;
+		default:
+			return null;
+		}
+	}
+
+	private static boolean applyButtonVariant(Button button, String style) {
+		ButtonVariant variant = getButtonVariant(style);
+		if (variant != null) {
+			button.addThemeVariants(variant);
+			return true;
+		}
+		return false;
+	}
+
+	private static boolean removeButtonVariant(Button button, String style) {
+		ButtonVariant variant = getButtonVariant(style);
+		if (variant != null) {
+			button.removeThemeVariants(variant);
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -400,11 +479,11 @@ public final class CssStyles {
 
 		for (Button button : allOrOtherButtons) {
 			button.setEnabled(true);
-			button.removeStyleName(CssStyles.LINK_ACTIVE);
+			button.removeClassName(CssStyles.LINK_ACTIVE);
 		}
 
 		activeButton.setEnabled(false);
-		activeButton.addStyleName(CssStyles.LINK_ACTIVE);
+		activeButton.addClassName(CssStyles.LINK_ACTIVE);
 	}
 
 	/**

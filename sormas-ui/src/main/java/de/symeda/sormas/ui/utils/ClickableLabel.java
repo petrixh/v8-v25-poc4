@@ -18,9 +18,7 @@
 
 package de.symeda.sormas.ui.utils;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 // There's no way to add a ClickListener on a Label
 // So let's workaround it by using a HorizontalLayout that accept ClickListeners
@@ -32,6 +30,6 @@ public class ClickableLabel extends HorizontalLayout {
     public ClickableLabel(String label, ContentMode contentMode) {
         super();
 
-        addComponent(new Label(label, contentMode));
+        add(VaadinUiUtil.createLabel(label, contentMode));
     }
 }

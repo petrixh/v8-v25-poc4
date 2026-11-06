@@ -15,9 +15,9 @@
 
 package de.symeda.sormas.ui.utils;
 
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.HasElement;
 
-public interface DirtyStateComponent extends Component {
+public interface DirtyStateComponent extends HasElement {
 
 	boolean isDirty();
 

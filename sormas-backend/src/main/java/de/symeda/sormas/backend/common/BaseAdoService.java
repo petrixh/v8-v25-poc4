@@ -483,7 +483,7 @@ public class BaseAdoService<ADO extends AbstractDomainObject> implements AdoServ
 			if (fetchReferences) {
 				final Map<String, Object> hints = new HashMap();
 				final EntityGraph<ADO> entityGraph = getEntityFetchGraph();
-				hints.put("javax.persistence.fetchgraph", entityGraph);
+				hints.put("jakarta.persistence.fetchgraph", entityGraph);
 				return em.find(getElementClass(), id, hints);
 			} else {
 				ADO ado = em.find(getElementClass(), id);

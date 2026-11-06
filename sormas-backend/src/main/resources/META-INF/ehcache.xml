@@ -14,11 +14,28 @@
   ~
   -->
 
-<ehcache>
-    <cache name="de.symeda.sormas.backend.infrastructure.community.Community" maxElementsInMemory="5000"
-           maxEntriesLocalHeap="5000"></cache>
-    <cache name="de.symeda.sormas.backend.infrastructure.pointofentry.PointOfEntry" maxElementsInMemory="5000"
-           maxEntriesLocalHeap="5000"></cache>
-    <cache name="de.symeda.sormas.backend.infrastructure.facility.Facility" maxElementsInMemory="5000"
-           maxEntriesLocalHeap="5000"></cache>
-</ehcache>
+<!--
+  Ehcache 3 (JCache) configuration of the Hibernate second-level cache, read through hibernate.javax.cache.uri in persistence.xml.
+  Every region (cached entities and collections) is created on the fly from the "default" template, which keeps the settings
+  the Ehcache 2 setup used at run time: Ehcache 2 never read the earlier META-INF/ehcache.xml (it looks for /ehcache.xml) and
+  created each region from its failsafe defaultCache: at most 10000 entries on the heap, expired 120 seconds after being stored.
+  That file's 5000-entry settings for Community, PointOfEntry and Facility were therefore never in effect and are not carried over.
+  Not carried over: Ehcache 2's overflow of evicted entries to a temporary disk store; an evicted entry is read from the database again.
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.ehcache.org/v3"
+        xmlns:jsr107="http://www.ehcache.org/v3/jsr107"
+        xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core-3.10.xsd
+                            http://www.ehcache.org/v3/jsr107 http://www.ehcache.org/schema/ehcache-107-ext-3.10.xsd">
+
+    <service>
+        <jsr107:defaults default-template="default"/>
+    </service>
+
+    <cache-template name="default">
+        <expiry>
+            <ttl unit="seconds">120</ttl>
+        </expiry>
+        <heap unit="entries">10000</heap>
+    </cache-template>
+</config>

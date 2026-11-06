@@ -1,6 +1,6 @@
-<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
-	version="2.1">
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_2.xsd"
+	version="3.2">
 
 	<persistence-unit name="beanTestPU" transaction-type="RESOURCE_LOCAL">
 
@@ -105,11 +105,12 @@
 		<validation-mode>CALLBACK</validation-mode>
 		<properties>
       		<property name="hibernate.dialect" value="de.symeda.sormas.backend.ExtendedH2Dialect"/>
-			<property name="hibernate.criteria.literal_handling_mode" value="bind" />
-      		<property name="javax.persistence.jdbc.driver" value="org.h2.Driver" />
-			<property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;NON_KEYWORDS=YEAR,VALUE" />
-	    	<property name="javax.persistence.jdbc.user" value="sa" />
-	    	<property name="javax.persistence.jdbc.password" value="" />
+			<property name="hibernate.criteria.value_handling_mode" value="bind"/>
+			<property name="hibernate.type.json_format_mapper" value="jackson"/>
+      		<property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver" />
+			<property name="jakarta.persistence.jdbc.url" value="jdbc:h2:mem:test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;NON_KEYWORDS=YEAR,VALUE" />
+	    	<property name="jakarta.persistence.jdbc.user" value="sa" />
+	    	<property name="jakarta.persistence.jdbc.password" value="" />
 
 			<!-- No need for hibernate.hbm2ddl.auto - database schema is created before each test by TestDatabaseCleaner class -->
 			<property name="hibernate.temp.use_jdbc_metadata_defaults" value="false"/>
@@ -117,7 +118,9 @@
 			<property name="hibernate.format_sql" value="false" />
 
 			<property name="hibernate.cache.use_second_level_cache" value="true"/>
-			<property name="hibernate.cache.region.factory_class" value="org.hibernate.cache.ehcache.internal.SingletonEhcacheRegionFactory"/>
+			<property name="hibernate.cache.region.factory_class" value="jcache"/>
+			<property name="hibernate.javax.cache.provider" value="org.ehcache.jsr107.EhcacheCachingProvider"/>
+			<property name="hibernate.javax.cache.uri" value="META-INF/ehcache.xml"/>
 
 			<!-- Temporary solution for org.hibernate.LazyInitializationException: failed to lazily initialize a collection of role: de.symeda.sormas.backend.person.Person.addresses, could not initialize proxy - no Session -->
 			<!-- TODO Should be removed when  replacing the testing framework: https://github.com/sormas-foundation/SORMAS-Project/issues/10074 -->

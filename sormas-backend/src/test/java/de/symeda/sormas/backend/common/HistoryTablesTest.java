@@ -53,10 +53,10 @@ public class HistoryTablesTest {
 		start(container);
 
 		Map<String, String> properties = new HashMap<>();
-		properties.put("javax.persistence.jdbc.url", container.getJdbcUrl());
-		properties.put("javax.persistence.jdbc.user", container.getUsername());
-		properties.put("javax.persistence.jdbc.password", container.getPassword());
-		properties.put("javax.persistence.jdbc.driver", container.getDriverClassName());
+		properties.put("jakarta.persistence.jdbc.url", container.getJdbcUrl());
+		properties.put("jakarta.persistence.jdbc.user", container.getUsername());
+		properties.put("jakarta.persistence.jdbc.password", container.getPassword());
+		properties.put("jakarta.persistence.jdbc.driver", container.getDriverClassName());
 		properties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQL94Dialect");
 		properties.put("hibernate.transaction.jta.platform", "org.hibernate.service.jta.platform.internal.SunOneJtaPlatform");
 		properties.put("hibernate.jdbc.batch_size", "100");

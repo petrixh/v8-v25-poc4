@@ -21,8 +21,6 @@ import static de.symeda.sormas.ui.UiUtil.permitted;
 
 import java.util.EnumSet;
 
-import com.vaadin.navigator.Navigator;
-
 import de.symeda.sormas.api.feature.FeatureType;
 import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.dashboard.adverseeventsfollowingimmunization.AefiDashboardView;
@@ -31,6 +29,7 @@ import de.symeda.sormas.ui.dashboard.contacts.ContactsDashboardView;
 import de.symeda.sormas.ui.dashboard.gis.GisDashboardView;
 import de.symeda.sormas.ui.dashboard.sample.SampleDashboardView;
 import de.symeda.sormas.ui.dashboard.surveillance.SurveillanceDashboardView;
+import de.symeda.sormas.ui.navigation.Navigator;
 
 public class DashboardController {
 

@@ -32,35 +32,35 @@ public class DiseaseSummaryComponent extends DashboardStatisticsSubComponent {
 
 	public DiseaseSummaryComponent() {
 		fatalitiesSummaryElementComponent = new FatalitiesSummaryElementComponent();
-		addComponent(fatalitiesSummaryElementComponent);
+		add(fatalitiesSummaryElementComponent);
 
 		boolean jurisdictionFieldsVisible = UiUtil.disabled(FeatureType.HIDE_JURISDICTION_FIELDS);
 		if (jurisdictionFieldsVisible) {
 			lastReportedDistrict =
 				new DiseaseSummaryElementComponent(Strings.headingLastReportedDistrict, I18nProperties.getString(Strings.none).toUpperCase());
-			addComponent(lastReportedDistrict);
+			add(lastReportedDistrict);
 		}
 
 		if (UiUtil.enabled(FeatureType.OUTBREAKS) && jurisdictionFieldsVisible) {
 			outbreakDistrictCount = new DiseaseSummaryElementComponent(Strings.headingOutbreakDistricts);
-			addComponent(outbreakDistrictCount);
+			add(outbreakDistrictCount);
 		}
 
 		casesInQuarantineByDate = new DiseaseSummaryElementComponent(Strings.headingCasesInQuarantine);
-		addComponent(casesInQuarantineByDate);
+		add(casesInQuarantineByDate);
 
 		casesPlacedInQuarantineByDate = new DiseaseSummaryElementComponent(Strings.headingCasesPlacedInQuarantine);
-		addComponent(casesPlacedInQuarantineByDate);
+		add(casesPlacedInQuarantineByDate);
 
 		contactsConvertedToCase = new DiseaseSummaryElementComponent(Strings.headingCasesResultingFromContacts);
-		addComponent(contactsConvertedToCase);
+		add(contactsConvertedToCase);
 
 		if (FacadeProvider.getConfigFacade().isConfiguredCountry(CountryHelper.COUNTRY_CODE_GERMANY)) {
 			casesWithReferenceDefinitionFulfilled = new DiseaseSummaryElementComponent(Strings.headingcasesWithReferenceDefinitionFulfilled);
-			addComponent(casesWithReferenceDefinitionFulfilled);
+			add(casesWithReferenceDefinitionFulfilled);
 		}
 
-		addStyleName(CssStyles.VSPACE_TOP_4);
+		addClassName(CssStyles.VSPACE_TOP_4);
 	}
 
 	public void update(DashboardDataProvider dashboardDataProvider) {

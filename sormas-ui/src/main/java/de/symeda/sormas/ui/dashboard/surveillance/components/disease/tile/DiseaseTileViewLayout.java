@@ -19,27 +19,31 @@ package de.symeda.sormas.ui.dashboard.surveillance.components.disease.tile;
 
 import java.util.List;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CssLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 
 import de.symeda.sormas.api.disease.DiseaseBurdenDto;
 
-public class DiseaseTileViewLayout extends CssLayout {
+public class DiseaseTileViewLayout extends FlexLayout {
 
 	private static final long serialVersionUID = 6582975657305031105L;
 
-	@Override
-	protected String getCss(Component c) {
-		return "margin-left: 18px; margin-bottom: 18px;";
+	/**
+	 * Was a Vaadin 8 {@code CssLayout}: the tiles flow side by side and wrap.
+	 */
+	public DiseaseTileViewLayout() {
+		setFlexWrap(FlexWrap.WRAP);
 	}
 
 	public void refresh(List<DiseaseBurdenDto> diseasesBurden) {
-		this.removeAllComponents();
+		this.removeAll();
 
 		for (DiseaseBurdenDto diseaseBurden : diseasesBurden) {
 			DiseaseTileComponent tile = new DiseaseTileComponent(diseaseBurden);
 			tile.setWidth(230, Unit.PIXELS);
-			addComponent(tile);
+			// was CssLayout.getCss(..) for each tile
+			tile.getStyle().set("margin-left", "18px").set("margin-bottom", "18px");
+			add(tile);
 		}
 	}
 }

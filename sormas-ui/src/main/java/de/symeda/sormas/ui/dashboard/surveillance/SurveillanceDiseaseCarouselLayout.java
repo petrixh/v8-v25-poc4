@@ -21,11 +21,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.shared.Registration;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.ui.CheckBox;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.shared.Registration;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -38,6 +39,7 @@ import de.symeda.sormas.ui.dashboard.DashboardDataProvider;
 import de.symeda.sormas.ui.dashboard.map.DashboardMapComponent;
 import de.symeda.sormas.ui.dashboard.surveillance.components.epicurve.SurveillanceEpiCurveComponent;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
 
 @SuppressWarnings("serial")
 public class SurveillanceDiseaseCarouselLayout extends VerticalLayout {
@@ -71,33 +73,33 @@ public class SurveillanceDiseaseCarouselLayout extends VerticalLayout {
 	}
 
 	private void initLayout() {
-		addStyleName(DashboardCssStyles.CURVE_AND_MAP_LAYOUT);
+		addClassName(DashboardCssStyles.CURVE_AND_MAP_LAYOUT);
 		setWidth(100, Unit.PERCENTAGE);
-		setHeightUndefined();
-		setMargin(false);
+		setHeight(null);
+		setPadding(false);
 		setSpacing(false);
 
 		HorizontalLayout carouselMenuLayout = createCarouselMenuLayout();
-		addComponent(carouselMenuLayout);
-		setExpandRatio(carouselMenuLayout, 0);
+		add(carouselMenuLayout);
+		setFlexGrow(0, carouselMenuLayout);
 
-		addComponent(statisticsComponent);
-		statisticsComponent.addStyleName(DashboardCssStyles.HIGHLIGHTED_STATISTICS_COMPONENT);
-		setExpandRatio(statisticsComponent, 0);
+		add(statisticsComponent);
+		statisticsComponent.addClassName(DashboardCssStyles.HIGHLIGHTED_STATISTICS_COMPONENT);
+		setFlexGrow(0, statisticsComponent);
 
 		HorizontalLayout epiCurveAndMapLayout = createEpiCurveAndMapLayout();
-		addComponent(epiCurveAndMapLayout);
-		setExpandRatio(epiCurveAndMapLayout, 1);
+		add(epiCurveAndMapLayout);
+		setFlexGrow(1, epiCurveAndMapLayout);
 	}
 
 	private HorizontalLayout createCarouselMenuLayout() {
 		HorizontalLayout layout = new HorizontalLayout();
-		layout.setMargin(false);
+		layout.setPadding(false);
 		CssStyles.style(layout, CssStyles.HSPACE_LEFT_2);
 
 		CheckBox autoSlide = this.setupSlideShow();
-		layout.addComponent(autoSlide);
-		layout.setComponentAlignment(autoSlide, Alignment.MIDDLE_LEFT);
+		layout.add(autoSlide);
+		layout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, autoSlide);
 
 		carouselMenu = new SubMenu();
 
@@ -113,7 +115,7 @@ public class SurveillanceDiseaseCarouselLayout extends VerticalLayout {
 			this.setActiveDisease(diseases.get(0), false);
 		}
 
-		layout.addComponent(carouselMenu);
+		layout.add(carouselMenu);
 
 		return layout;
 	}
@@ -124,21 +126,21 @@ public class SurveillanceDiseaseCarouselLayout extends VerticalLayout {
 		final int BASE_HEIGHT = 480;
 		epiCurveAndMapLayout.setHeight(BASE_HEIGHT, Unit.PIXELS);
 
-		epiCurveAndMapLayout.addComponent(epiCurveComponent);
-		epiCurveAndMapLayout.addComponent(mapComponent);
+		epiCurveAndMapLayout.add(epiCurveComponent);
+		epiCurveAndMapLayout.add(mapComponent);
 
 		epiCurveComponent.setExpandListener(expanded -> {
 			if (expanded) {
-				removeComponent(statisticsComponent);
-				epiCurveAndMapLayout.removeComponent(mapComponent);
+				remove(statisticsComponent);
+				epiCurveAndMapLayout.remove(mapComponent);
 				epiCurveAndMapLayout.setHeight(100, Unit.PERCENTAGE);
 				setHeight(100, Unit.PERCENTAGE);
 			} else {
-				addComponent(statisticsComponent, 1);
-				epiCurveAndMapLayout.addComponent(mapComponent, 1);
+				addComponentAtIndex(1, statisticsComponent);
+				epiCurveAndMapLayout.addComponentAtIndex(1, mapComponent);
 				mapComponent.refreshMap();
 				epiCurveAndMapLayout.setHeight(BASE_HEIGHT, Unit.PIXELS);
-				setHeightUndefined();
+				setHeight(null);
 			}
 			if (externalExpandListener != null) {
 				externalExpandListener.accept(expanded);
@@ -147,15 +149,15 @@ public class SurveillanceDiseaseCarouselLayout extends VerticalLayout {
 
 		mapComponent.setExpandListener(expanded -> {
 			if (expanded) {
-				removeComponent(statisticsComponent);
-				epiCurveAndMapLayout.removeComponent(epiCurveComponent);
+				remove(statisticsComponent);
+				epiCurveAndMapLayout.remove(epiCurveComponent);
 				epiCurveAndMapLayout.setHeight(100, Unit.PERCENTAGE);
 				setHeight(100, Unit.PERCENTAGE);
 			} else {
-				addComponent(statisticsComponent, 1);
-				epiCurveAndMapLayout.addComponent(epiCurveComponent, 0);
+				addComponentAtIndex(1, statisticsComponent);
+				epiCurveAndMapLayout.addComponentAtIndex(0, epiCurveComponent);
 				epiCurveAndMapLayout.setHeight(BASE_HEIGHT, Unit.PIXELS);
-				setHeightUndefined();
+				setHeight(null);
 			}
 			if (externalExpandListener != null) {
 				externalExpandListener.accept(expanded);
@@ -192,8 +194,8 @@ public class SurveillanceDiseaseCarouselLayout extends VerticalLayout {
 	}
 
 	@Override
-	public void detach() {
-		super.detach();
+	protected void onDetach(DetachEvent detachEvent) {
+		super.onDetach(detachEvent);
 
 		// deactivate polling
 		changeAutoSlideOption(false);

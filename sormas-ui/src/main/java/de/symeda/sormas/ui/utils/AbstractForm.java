@@ -657,7 +657,10 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 	 * invalid and throws one {@link de.symeda.sormas.ui.utils.InvalidValueException} whose causes are the invalid fields' errors;</li>
 	 * <li>a field with {@code setInvalidCommitted(true)} is written even if invalid, and shows its error;</li>
 	 * <li>a bound field that is itself {@link Buffered} (a form bound to a property of this form) commits and discards
-	 * its own fields first and counts for {@link #isModified()};</li>
+	 * its own fields first and counts for {@link #isModified()}; a bound form commits even if another field of this group
+	 * is invalid (Vaadin 7 committed field by field, and a bound form's commit wrote its bean at once);</li>
+	 * <li>{@link #isModified()} is the Vaadin 7 modified state: any value change since the last read, commit or
+	 * discard;</li>
 	 * <li>errors are shown on a field only while {@code isValidationVisible()} and not for a required empty field (Vaadin
 	 * 7 showed only the required indicator there);</li>
 	 * <li>a property without setter makes its field read-only.</li>
@@ -679,11 +682,17 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 		private boolean buffered = true;
 		private boolean readOnly;
 		private boolean enabled = true;
+		/**
+		 * Vaadin 7 modified state: set by any value change of a bound field (also a programmatic one, also back to the
+		 * loaded value), cleared when the bean is read, committed or discarded.
+		 */
+		private boolean modified;
 
 		public BeanFieldGroup(Class<T> beanType) {
 			this.beanType = beanType;
 			this.binder = new Binder<>(beanType);
 			this.propertySet = BeanPropertySet.get(beanType);
+			binder.addValueChangeListener(e -> modified = true);
 		}
 
 		public Binder<T> getBinder() {
@@ -793,7 +802,10 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 			configureField(field);
 
 			if (bean != null) {
+				// reading a field is not a change
+				boolean wasModified = modified;
 				binding.read(bean);
+				modified = wasModified;
 			}
 		}
 
@@ -867,6 +879,7 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 			} else {
 				binder.setBean(bean);
 			}
+			modified = false;
 		}
 
 		/**
@@ -914,6 +927,7 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 					throw new FieldGroupInvalidValueException(invalidFields);
 				}
 				write();
+				modified = false;
 			}
 
 			try {
@@ -1001,11 +1015,17 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 			if (buffered && bean != null) {
 				binder.readBean(bean);
 			}
+			modified = false;
 		}
 
+		/**
+		 * Vaadin 7 {@code FieldGroup.isModified()}: a bound field changed since the bean was read, committed or
+		 * discarded, or a bound form is modified. (Not {@code Binder.hasChanges()}, which forgets a field changed back to
+		 * its loaded value.)
+		 */
 		@Override
 		public boolean isModified() {
-			if (binder.hasChanges()) {
+			if (modified) {
 				return true;
 			}
 			for (Field<?> field : bindings.keySet()) {

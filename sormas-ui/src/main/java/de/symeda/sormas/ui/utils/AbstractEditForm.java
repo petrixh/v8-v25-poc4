@@ -515,6 +515,18 @@ public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements
 		}
 	}
 
+	/**
+	 * Validators written like Vaadin 7 ones (one argument, throw an {@code InvalidValueException}), see
+	 * {@link Field#addValidator(Field.ValueValidator)}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected <V> void addValidators(String fieldOrPropertyId, Field.ValueValidator<V>... validators) {
+
+		for (Field.ValueValidator<V> validator : validators) {
+			getField(fieldOrPropertyId).addValidator(validator);
+		}
+	}
+
 	protected boolean areFieldsValid(String... propertyIds) {
 		return Stream.of(propertyIds).allMatch(p -> getField(p).isValid());
 	}

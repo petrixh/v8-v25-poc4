@@ -1,11 +1,11 @@
 package de.symeda.sormas.ui.survey;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.ui.Alignment;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -65,12 +65,14 @@ public class SurveyTokenGridComponent extends VerticalLayout {
 			Button importSurveyTokenButton = ButtonHelper.createIconButton(Captions.actionImportSurveyTokens, VaadinIcon.UPLOAD, e -> {
 				Dialog window = VaadinUiUtil
 					.showPopupWindow(new ImportSurveyTokensLayout(FacadeProvider.getSurveyFacade().getByUuid(criteria.getSurvey().getUuid())));
-				window.setCaption(I18nProperties.getString(Strings.headingImportSurveyTokens));
-				window.addCloseListener((event) -> reload());
+				window.setHeaderTitle(I18nProperties.getString(Strings.headingImportSurveyTokens));
+				VaadinUiUtil.addCloseListener(window, (event) -> reload());
 			}, CssStyles.BUTTON_PRIMARY);
 
 			statusFilterLayout.add(importSurveyTokenButton);
-			statusFilterLayout.setComponentAlignment(importSurveyTokenButton, Alignment.TOP_RIGHT);
+			// was Alignment.TOP_RIGHT in the only (full-width) slot
+			statusFilterLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+			statusFilterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, importSurveyTokenButton);
 		}
 		statusFilterLayout.addClassName("top-bar");
 		return statusFilterLayout;

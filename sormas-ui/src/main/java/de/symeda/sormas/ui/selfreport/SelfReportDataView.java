@@ -41,7 +41,7 @@ public class SelfReportDataView extends AbstractSelfReportView implements HasNam
 
 	@Override
 	protected void initView(String params) {
-		setHeightUndefined();
+		setHeight(null);
 
 		SelfReportDto selfReport = FacadeProvider.getSelfReportFacade().getByUuid(getReference().getUuid());
 

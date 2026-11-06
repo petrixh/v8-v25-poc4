@@ -44,7 +44,7 @@ public class SurveyTokenDataView extends AbstractDetailView<SurveyTokenReference
 
 	@Override
 	protected void initView(String params) {
-		setHeightUndefined();
+		setHeight(null);
 
 		surveyToken = FacadeProvider.getSurveyTokenFacade().getByUuid(getReference().getUuid());
 

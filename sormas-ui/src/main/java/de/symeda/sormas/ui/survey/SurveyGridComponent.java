@@ -24,7 +24,7 @@ public class SurveyGridComponent extends VerticalLayout {
 		filterForm.addApplyHandler(e -> filterChangeHandler.run());
 		filterForm.addResetHandler(e -> filterResetHandler.run());
 
-		addComponents(filterForm, grid);
+		add(filterForm, grid);
 		setFlexGrow(1, grid);
 	}
 

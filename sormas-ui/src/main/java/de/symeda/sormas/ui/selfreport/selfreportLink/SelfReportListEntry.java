@@ -1,6 +1,7 @@
 package de.symeda.sormas.ui.selfreport.selfreportLink;
 
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -57,6 +58,7 @@ public class SelfReportListEntry extends SideComponentField {
 		}
 
 		topLayout.add(topLeftLayout);
-		topLayout.setComponentAlignment(topLeftLayout, Alignment.TOP_LEFT);
+		// was Alignment.TOP_LEFT
+		topLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, topLeftLayout);
 	}
 }

@@ -18,8 +18,7 @@ import java.util.List;
 
 import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.ui.Panel;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.dialog.Dialog;
 
@@ -27,6 +26,7 @@ import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.survey.SurveyTokenReferenceDto;
 import de.symeda.sormas.api.survey.external.views.ExternalSurveyView;
 import de.symeda.sormas.api.survey.external.views.QuestionAnswersView;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -45,11 +45,12 @@ public class SurveyQuestionnaireWindow {
 			surveyView = null;
 		}
 
-		Dialog window = new Dialog(surveyTokenRef.getCaption());
-		window.setModal(true);
+		// was new Window(caption): modal, movable and closable, not closed by a click outside
+		Dialog window = VaadinUiUtil.createPopupWindow();
+		window.setHeaderTitle(surveyTokenRef.getCaption());
 		window.setResizable(true);
-		window.setWidth(700, com.vaadin.server.Unit.PIXELS);
-		window.setHeight(80, com.vaadin.server.Unit.PERCENTAGE);
+		window.setWidth("700px");
+		window.setHeight("80%");
 
 		VerticalLayout mainLayout = new VerticalLayout();
 		mainLayout.setPadding(true);
@@ -58,15 +59,16 @@ public class SurveyQuestionnaireWindow {
 		if (surveyView == null || surveyView.getQuestionAnswersViews() == null || surveyView.getQuestionAnswersViews().isEmpty()) {
 			mainLayout.add(new Span("No questionnaire data available."));
 		} else {
-			Span htmlContent = new Span(buildHtml(surveyView.getQuestionAnswersViews()), ContentMode.HTML);
+			Span htmlContent = VaadinUiUtil.createLabel(buildHtml(surveyView.getQuestionAnswersViews()), ContentMode.HTML);
 			htmlContent.setSizeFull();
 			mainLayout.add(htmlContent);
 		}
 
-		Panel scrollPanel = new Panel(mainLayout);
+		// was a Panel: scrolls the content
+		Scroller scrollPanel = new Scroller(mainLayout);
 		scrollPanel.setSizeFull();
 
-		window.setContent(scrollPanel);
+		window.add(scrollPanel);
 		window.open();
 	}
 

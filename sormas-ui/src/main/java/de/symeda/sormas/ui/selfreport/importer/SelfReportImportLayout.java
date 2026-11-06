@@ -3,7 +3,7 @@ package de.symeda.sormas.ui.selfreport.importer;
 import java.io.IOException;
 
 import com.opencsv.exceptions.CsvValidationException;
-import com.vaadin.server.ClassResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.FacadeProvider;
@@ -24,7 +24,7 @@ public class SelfReportImportLayout extends AbstractImportLayout {
 
 		ImportFacade importFacade = FacadeProvider.getImportFacade();
 
-		addDownloadResourcesComponent(1, new ClassResource("/SORMAS_Self_Report_Import_Guide.pdf"));
+		addDownloadResourcesComponent(1, DownloadHandler.forClassResource(SelfReportImportLayout.class, "/SORMAS_Self_Report_Import_Guide.pdf"));
 		addDownloadImportTemplateComponent(2, importFacade.getSelfReportImportTemplateFilePath(), importFacade.getSelfReportImportTemplateFileName());
 		addImportCsvComponent(3, new ImportReceiver("_self_report_import_", file -> {
 			resetDownloadErrorReportButton();

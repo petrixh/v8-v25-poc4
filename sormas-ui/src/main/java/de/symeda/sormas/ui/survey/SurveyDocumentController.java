@@ -29,11 +29,10 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.Unit;
 import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Span;
 import de.symeda.sormas.ui.utils.NotificationHelper;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import de.symeda.sormas.ui.utils.fields.ComboBox;
 
@@ -58,6 +57,7 @@ import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.MultilineLabel;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class SurveyDocumentController {
 
@@ -75,7 +75,7 @@ public class SurveyDocumentController {
 
 		form.setValue(options);
 		CommitDiscardWrapperComponent<SurveyDocumentOptionsForm> editView = new CommitDiscardWrapperComponent<>(form, form.getFieldGroup());
-		editView.getCommitButton().setCaption(I18nProperties.getCaption(Captions.surveySend));
+		editView.getCommitButton().setText(I18nProperties.getCaption(Captions.surveySend));
 
 		if (attachmentAvailable) {
 			editView.addCommitListener(() -> {
@@ -113,7 +113,7 @@ public class SurveyDocumentController {
 		form.setValue(new SurveyDocumentOptionsDto(rootEntityType, rootEntityReference));
 
 		CommitDiscardWrapperComponent<SurveyDocumentOptionsForm> editView = new CommitDiscardWrapperComponent<>(form, form.getFieldGroup());
-		editView.getCommitButton().setCaption(I18nProperties.getCaption(Captions.surveyGenerate));
+		editView.getCommitButton().setText(I18nProperties.getCaption(Captions.surveyGenerate));
 
 		editView.addCommitListener(() -> {
 			SurveyDocumentOptionsDto surveyOptions = form.getValue();
@@ -204,7 +204,8 @@ public class SurveyDocumentController {
 
 			additionalVariablesComponent = new VerticalLayout();
 			additionalVariablesComponent.setSpacing(false);
-			additionalVariablesComponent.setMargin(new MarginInfo(false, false, true, false));
+			// was a bottom-only margin (MarginInfo(false, false, true, false)): spacing below the inputs is look only
+			additionalVariablesComponent.setPadding(false);
 			getContent().addComponent(additionalVariablesComponent, TEMPLATE_ADDITIONAL_VARIABLES_LOC);
 
 			surveyCombo.addValueChangeListener(e -> {
@@ -219,21 +220,21 @@ public class SurveyDocumentController {
 
 				if (survey.getDocumentTemplate() == null) {
 					surveyWarningLabel.setVisible(true);
-					surveyWarningLabel.setValue(I18nProperties.getString(Strings.messageSurveyNoDocumentTemplate));
+					surveyWarningLabel.setText(I18nProperties.getString(Strings.messageSurveyNoDocumentTemplate));
 					surveyErrorCallback.accept(true);
 					return;
 				}
 
 				if (forEmail && survey.getEmailTemplate() == null) {
 					surveyWarningLabel.setVisible(true);
-					surveyWarningLabel.setValue(I18nProperties.getString(Strings.messageSurveyNoEmailTemplate));
+					surveyWarningLabel.setText(I18nProperties.getString(Strings.messageSurveyNoEmailTemplate));
 					surveyErrorCallback.accept(true);
 					return;
 				}
 
 				if (!FacadeProvider.getSurveyFacade().hasUnassignedTokens(survey.toReference())) {
 					surveyWarningLabel.setVisible(true);
-					surveyWarningLabel.setValue(I18nProperties.getString(Strings.messageSurveyNoTokens));
+					surveyWarningLabel.setText(I18nProperties.getString(Strings.messageSurveyNoTokens));
 					surveyErrorCallback.accept(true);
 					return;
 				}
@@ -256,7 +257,7 @@ public class SurveyDocumentController {
 
 			if (!attachmentAvailable) {
 				MultilineLabel attachmentUnavailableInfo = new MultilineLabel(
-					VaadinIcon.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.messageExternalEmailAttachmentNotAvailableInfo),
+					HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " " + I18nProperties.getString(Strings.messageExternalEmailAttachmentNotAvailableInfo),
 					ContentMode.HTML);
 				attachmentUnavailableInfo.addClassNames(CssStyles.VSPACE_2, CssStyles.VSPACE_TOP_4);
 				getContent().addComponent(attachmentUnavailableInfo, ATTACHMENT_NOT_AVAILABLE_INFO_LOC);
@@ -266,7 +267,7 @@ public class SurveyDocumentController {
 		protected Properties readAdditionalVariables() {
 			Properties properties = new Properties();
 			doForAllVariableInputs(textField -> {
-				properties.setProperty(textField.getCaption(), textField.getValue());
+				properties.setProperty(textField.getLabel(), textField.getValue());
 				return null;
 			});
 			return properties;
@@ -274,7 +275,7 @@ public class SurveyDocumentController {
 
 		private void doForAllVariableInputs(Function<TextField, Void> function) {
 			for (int i = 0; i < additionalVariablesComponent.getComponentCount(); i++) {
-				Component component = additionalVariablesComponent.getComponent(i);
+				Component component = additionalVariablesComponent.getComponentAt(i);
 				if (component instanceof TextField) {
 					TextField textField = (TextField) component;
 					function.apply(textField);

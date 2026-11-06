@@ -2,7 +2,6 @@ package de.symeda.sormas.ui.survey;
 
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import de.symeda.sormas.ui.utils.fields.TextField;
 
@@ -61,7 +60,8 @@ public class SurveyDataForm extends AbstractEditForm<SurveyDto> {
 		gridLayout = new VerticalLayout(documentTemplateSection, emailTemplateSection);
 
 		gridLayout.setWidthFull();
-		gridLayout.setMargin(new MarginInfo(true, false, true, false));
+		// was a top and bottom margin (MarginInfo(true, false, true, false)); spacing details belong to the theme work
+		gridLayout.setPadding(false);
 		gridLayout.setSpacing(true);
 		gridLayout.setClassName("crud-main-layout");
 

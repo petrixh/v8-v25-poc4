@@ -24,11 +24,11 @@ import de.symeda.sormas.ui.utils.PopupButton;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
 import de.symeda.sormas.ui.navigation.ViewChangeListener;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;
@@ -81,8 +81,8 @@ public class SelfReportsView extends AbstractView {
 		if (UiUtil.permitted(UserRight.SELF_REPORT_IMPORT)) {
 			Button importButton = ButtonHelper.createIconButton(Captions.actionImport, VaadinIcon.UPLOAD, e -> {
 				Dialog popupWindow = VaadinUiUtil.showPopupWindow(new SelfReportImportLayout());
-				popupWindow.setCaption(I18nProperties.getString(Strings.headingImportSelfReports));
-				popupWindow.addCloseListener(c -> gridComponent.reload());
+				popupWindow.setHeaderTitle(I18nProperties.getString(Strings.headingImportSelfReports));
+				VaadinUiUtil.addCloseListener(popupWindow, c -> gridComponent.reload());
 			}, CssStyles.BUTTON_PRIMARY);
 
 			addHeaderComponent(importButton);
@@ -119,18 +119,18 @@ public class SelfReportsView extends AbstractView {
 		addHeaderComponent(exportButton);
 
 		Button basicExportButton = ButtonHelper.createIconButton(Captions.exportBasic, VaadinIcon.TABLE, null, CssStyles.BUTTON_PRIMARY);
-		basicExportButton.setDescription(I18nProperties.getString(Strings.infoBasicExport));
+		basicExportButton.setTooltipText(I18nProperties.getString(Strings.infoBasicExport));
 		basicExportButton.setWidthFull();
 
 		exportLayout.add(basicExportButton);
 
 		SelfReportGrid grid = gridComponent.getGrid();
-		StreamResource streamResource =
+		DownloadHandler streamResource =
 			GridExportStreamResource.createStreamResourceWithSelectedItems(grid, this::getSelectedRows, ExportEntityName.SELF_REPORTS);
-		FileDownloader fileDownloader = new FileDownloader(streamResource);
-		fileDownloader.extend(basicExportButton);
+		// was a FileDownloader extending the button
+		DownloadUtil.attachDownloader(basicExportButton, streamResource);
 
-		StreamResource extendedExportStreamResource = DownloadUtil.createCsvExportStreamResource(
+		DownloadHandler extendedExportStreamResource = DownloadUtil.createCsvExportStreamResource(
 			SelfReportExportDto.class,
 			null,
 			(Integer start, Integer max) -> FacadeProvider.getSelfReportFacade()
@@ -157,7 +157,7 @@ public class SelfReportsView extends AbstractView {
 
 		addExportButton(
 			extendedExportStreamResource,
-			exportButton,
+			exportButton.getPopover(),
 			exportLayout,
 			VaadinIcon.FILE_TEXT,
 			Captions.exportDetailed,

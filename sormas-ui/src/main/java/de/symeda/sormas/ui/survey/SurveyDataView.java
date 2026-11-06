@@ -1,10 +1,10 @@
 package de.symeda.sormas.ui.survey;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.ui.Alignment;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -46,7 +46,7 @@ public class SurveyDataView extends AbstractSurveyView implements HasName {
 
 	@Override
 	protected void initView(String params) {
-		setHeightUndefined();
+		setHeight(null);
 
 		survey = FacadeProvider.getSurveyFacade().getByUuid(getReference().getUuid());
 		editComponent =
@@ -72,11 +72,13 @@ public class SurveyDataView extends AbstractSurveyView implements HasName {
 		if (UiUtil.permitted(UserRight.SURVEY_TOKEN_IMPORT)) {
 			Button importSurveyTokenResponsesButton = ButtonHelper.createIconButton(Captions.actionImportSurveyTokenResponses, VaadinIcon.UPLOAD, e -> {
 				Dialog window = VaadinUiUtil.showPopupWindow(new ImportSurveyTokenResponsesLayout(survey));
-				window.setCaption(I18nProperties.getString(Strings.headingImportSurveyTokenResponses));
+				window.setHeaderTitle(I18nProperties.getString(Strings.headingImportSurveyTokenResponses));
 			}, CssStyles.BUTTON_PRIMARY);
 
 			statusFilterLayout.add(importSurveyTokenResponsesButton);
-			statusFilterLayout.setComponentAlignment(importSurveyTokenResponsesButton, Alignment.MIDDLE_CENTER);
+			// was Alignment.MIDDLE_CENTER in the only (full-width) slot
+			statusFilterLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+			statusFilterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, importSurveyTokenResponsesButton);
 		}
 		statusFilterLayout.addClassName("top-bar");
 		return statusFilterLayout;

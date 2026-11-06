@@ -23,10 +23,11 @@ import java.util.function.Consumer;
 import org.apache.commons.lang3.StringUtils;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
 import de.symeda.sormas.ui.utils.NotificationHelper;
@@ -50,7 +51,9 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
+import de.symeda.sormas.ui.utils.DownloadUtil;
 import de.symeda.sormas.ui.utils.PaginationList;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
 import de.symeda.sormas.ui.utils.components.sidecomponent.SideComponent;
 import de.symeda.sormas.ui.utils.components.sidecomponent.SideComponentField;
 import de.symeda.sormas.ui.utils.components.sidecomponent.SideComponentLayout;
@@ -97,7 +100,7 @@ public class SurveyListComponentLayout extends SideComponentLayout {
 			super(heading, actionWrapper);
 
 			setWidthFull();
-			setMargin(false);
+			setPadding(false);
 			setSpacing(false);
 
 			VerticalLayout uploadLayout = new VerticalLayout();
@@ -120,7 +123,7 @@ public class SurveyListComponentLayout extends SideComponentLayout {
 						.generateSurveyDocument(RootEntityType.ROOT_CASE, caseRef, disease, createCallback);
 				});
 			if (!isEmailAllowed) {
-				generateSurveyDocButton.addClassName(CssStyles.BUTTON_PRIMARY);
+				CssStyles.style(generateSurveyDocButton, CssStyles.BUTTON_PRIMARY);
 			}
 
 			generateSurveyDocButton.setWidthFull();
@@ -172,9 +175,10 @@ public class SurveyListComponentLayout extends SideComponentLayout {
 				SurveyTokenIndexDto token = displayedEntries.get(i);
 				SurveyListEntry listEntry = new SurveyListEntry(token);
 
-				Button downloadButton = buildDownloadButton(token);
+				Component downloadButton = buildDownloadButton(token);
 				listEntry.add(downloadButton);
-				listEntry.setComponentAlignment(downloadButton, Alignment.TOP_RIGHT);
+				// was Alignment.TOP_RIGHT
+				listEntry.setVerticalComponentAlignment(FlexComponent.Alignment.START, downloadButton);
 				listEntry.setFlexGrow(0, downloadButton);
 
 				if (Boolean.TRUE.equals(token.getResponseReceived()) && StringUtils.isNotBlank(token.getExternalRespondentId())) {
@@ -182,11 +186,12 @@ public class SurveyListComponentLayout extends SideComponentLayout {
 						new SurveyQuestionnaireWindow(listEntry.getToken().toReference());
 					}, CssStyles.BUTTON_LINK, CssStyles.BUTTON_COMPACT);
 					listEntry.add(eyeButton);
-					listEntry.setComponentAlignment(eyeButton, Alignment.TOP_RIGHT);
+					// was Alignment.TOP_RIGHT
+					listEntry.setVerticalComponentAlignment(FlexComponent.Alignment.START, eyeButton);
 					listEntry.setFlexGrow(0, eyeButton);
 				}
 
-				listEntry.addActionButton(String.valueOf(i), (Button.ClickListener) clickEvent -> {
+				listEntry.addActionButton(String.valueOf(i), clickEvent -> {
 					ControllerProvider.getSurveyTokenController().showCaseSurveyDetails(listEntry.getToken().toReference(), this::reload);
 				}, UiUtil.permitted(isEditAllowed, UserRight.SURVEY_EDIT));
 				listEntry.setEnabled(isEditAllowed);
@@ -194,10 +199,10 @@ public class SurveyListComponentLayout extends SideComponentLayout {
 			}
 		}
 
-		private Button buildDownloadButton(SurveyTokenIndexDto token) {
+		private Component buildDownloadButton(SurveyTokenIndexDto token) {
 			Button viewButton = ButtonHelper.createIconButton(null, VaadinIcon.DOWNLOAD, null, CssStyles.BUTTON_LINK, CssStyles.BUTTON_COMPACT);
 
-			StreamResource streamResource = new StreamResource((StreamResource.StreamSource) () -> {
+			StreamSourceDownloadHandler streamResource = new StreamSourceDownloadHandler(() -> {
 				DocumentFacade documentFacade = FacadeProvider.getDocumentFacade();
 				try {
 					return new ByteArrayInputStream(documentFacade.getContent(token.getGeneratedDocumentUuid()));
@@ -212,11 +217,8 @@ public class SurveyListComponentLayout extends SideComponentLayout {
 			}, token.getGeneratedDocumentName());
 			streamResource.setMIMEType(token.getGeneratedDocumentMimeType());
 
-			FileDownloader fileDownloader = new FileDownloader(streamResource);
-			fileDownloader.extend(viewButton);
-			fileDownloader.setFileDownloadResource(streamResource);
-
-			return viewButton;
+			// was a FileDownloader on the button: a download link around it
+			return DownloadUtil.createDownloadLink(viewButton, streamResource);
 		}
 	}
 
@@ -268,7 +270,7 @@ public class SurveyListComponentLayout extends SideComponentLayout {
 			topLayout.add(topLeftLayout);
 		}
 
-		public void addDeleteButton(String id, Button.ClickListener actionClickListener) {
+		public void addDeleteButton(String id, ComponentEventListener<ClickEvent<Button>> actionClickListener) {
 			Button actionButton = ButtonHelper.createIconButtonWithCaption(
 				"delete" + id,
 				null,

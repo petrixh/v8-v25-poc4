@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 import org.apache.commons.collections4.CollectionUtils;
 
 import de.symeda.sormas.ui.utils.CustomLayout;
-import com.vaadin.v7.data.Property;
+import com.vaadin.flow.component.HasValue;
 import de.symeda.sormas.ui.utils.fields.ComboBox;
 import de.symeda.sormas.ui.utils.fields.Field;
 import de.symeda.sormas.ui.utils.fields.TextField;
@@ -89,14 +89,14 @@ public class SelfReportFilterForm extends AbstractFilterForm<SelfReportCriteria>
 	}
 
 	@Override
-	protected void applyDependenciesOnFieldChange(String propertyId, Property.ValueChangeEvent event) {
+	protected void applyDependenciesOnFieldChange(String propertyId, HasValue.ValueChangeEvent<?> event) {
 		switch (propertyId) {
 		case SelfReportCriteria.DISEASE:
 			ComboBox diseaseVariantField = getField(SelfReportCriteria.DISEASE_VARIANT);
 			Disease disease = (Disease) event.getValue();
 
 			if (disease == null) {
-				FieldHelper.updateItems(diseaseVariantField, Collections.emptyList());
+				FieldHelper.updateItems(diseaseVariantField, Collections.<DiseaseVariant> emptyList());
 				FieldHelper.setEnabled(false, diseaseVariantField);
 			} else {
 				List<DiseaseVariant> diseaseVariants =
@@ -140,7 +140,7 @@ public class SelfReportFilterForm extends AbstractFilterForm<SelfReportCriteria>
 		ComboBox diseaseVariantField = getField(SelfReportCriteria.DISEASE_VARIANT);
 		Disease disease = (Disease) diseaseField.getValue();
 		if (disease == null) {
-			FieldHelper.updateItems(diseaseVariantField, Collections.emptyList());
+			FieldHelper.updateItems(diseaseVariantField, Collections.<DiseaseVariant> emptyList());
 			FieldHelper.setEnabled(false, diseaseVariantField);
 		} else {
 			List<DiseaseVariant> diseaseVariants =

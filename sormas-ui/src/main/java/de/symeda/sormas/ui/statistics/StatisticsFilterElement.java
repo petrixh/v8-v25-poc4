@@ -20,9 +20,9 @@ package de.symeda.sormas.ui.statistics;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
-import com.explicatis.ext_token_field.Tokenizable;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.statistics.StatisticsGroupingKey;
 import de.symeda.sormas.api.utils.DataHelper;
@@ -31,7 +31,7 @@ import de.symeda.sormas.api.utils.DataHelper;
 public abstract class StatisticsFilterElement extends HorizontalLayout {
 
 	protected StatisticsFilterElement() {
-		setMargin(false);
+		setPadding(false);
 		setSpacing(false);
 	}
 
@@ -57,7 +57,13 @@ public abstract class StatisticsFilterElement extends HorizontalLayout {
 		return result;
 	}
 
-	public static class TokenizableValue implements Tokenizable {
+	/**
+	 * Was the ExtTokenField add-on's {@code Tokenizable}; now an item of the {@code MultiSelectComboBox} of
+	 * {@link StatisticsFilterValuesElement}. Two values are equal when they wrap equal values: the combo box identifies its
+	 * items by {@code equals}, so a selected value stays selected (and is not added twice) when the item list is rebuilt.
+	 * The add-on identified tokens by {@link #getIdentifier()}, which is only the index in the item list.
+	 */
+	public static class TokenizableValue {
 
 		private final Object value;
 		private final String stringRepresentation;
@@ -79,7 +85,6 @@ public abstract class StatisticsFilterElement extends HorizontalLayout {
 			return value;
 		}
 
-		@Override
 		public String getStringValue() {
 			if (stringRepresentation != null) {
 				return stringRepresentation;
@@ -88,7 +93,6 @@ public abstract class StatisticsFilterElement extends HorizontalLayout {
 			}
 		}
 
-		@Override
 		public long getIdentifier() {
 			return id;
 		}
@@ -96,6 +100,23 @@ public abstract class StatisticsFilterElement extends HorizontalLayout {
 		@Override
 		public String toString() {
 			return getStringValue();
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
+			TokenizableValue that = (TokenizableValue) o;
+			return value != null ? value.equals(that.value) : that.value == null && id == that.id;
+		}
+
+		@Override
+		public int hashCode() {
+			return value != null ? value.hashCode() : Objects.hash(id);
 		}
 	}
 }

@@ -17,9 +17,9 @@ package de.symeda.sormas.ui.epipulse;
 
 import java.util.Date;
 
-import com.vaadin.data.provider.DataProviderListener;
-import com.vaadin.ui.renderers.DateRenderer;
-import com.vaadin.ui.renderers.HtmlRenderer;
+import com.vaadin.flow.data.provider.DataProviderListener;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
@@ -35,9 +35,9 @@ import de.symeda.sormas.api.utils.HtmlHelper;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FilteredGrid;
+import de.symeda.sormas.ui.utils.GridExportStreamResource;
 import de.symeda.sormas.ui.utils.ShowDetailsListener;
 import de.symeda.sormas.ui.utils.UuidRenderer;
-import elemental.json.JsonValue;
 
 public class EpipulseExportGrid extends FilteredGrid<EpipulseExportIndexDto, EpipulseExportCriteria> {
 
@@ -65,6 +65,7 @@ public class EpipulseExportGrid extends FilteredGrid<EpipulseExportIndexDto, Epi
 			}
 		});
 		totalRecordsColumn.setId(TOTAL_RECORDS_FORMATTED);
+		GridExportStreamResource.setExportValueProvider(totalRecordsColumn, totalRecordsColumn.getValueProvider());
 		totalRecordsColumn.setSortable(true);
 		totalRecordsColumn.setCaption(I18nProperties.getCaption(Captions.epipulseTotalRecordsColumnCaption));
 
@@ -90,6 +91,7 @@ public class EpipulseExportGrid extends FilteredGrid<EpipulseExportIndexDto, Epi
 			}
 		});
 		fileSizeColumn.setId(EXPORT_FILE_SIZE_FORMATTED);
+		GridExportStreamResource.setExportValueProvider(fileSizeColumn, fileSizeColumn.getValueProvider());
 		fileSizeColumn.setSortable(true);
 		fileSizeColumn.setCaption(I18nProperties.getCaption(Captions.epipulseFileSizeColumnCaption));
 
@@ -101,10 +103,11 @@ public class EpipulseExportGrid extends FilteredGrid<EpipulseExportIndexDto, Epi
 			}
 		});
 		downloadColumn.setId(DOWNLOAD_LINK_COLUMN);
+		GridExportStreamResource.setExportValueProvider(downloadColumn, downloadColumn.getValueProvider());
 		downloadColumn.setRenderer(new HtmlRenderer() {
 
 			@Override
-			public JsonValue encode(String value) {
+			public String encode(String value) {
 				if ("-".equals(value)) {
 					return super.encode(value);
 				} else {
@@ -173,14 +176,14 @@ public class EpipulseExportGrid extends FilteredGrid<EpipulseExportIndexDto, Epi
 		addItemClickListener(event -> {
 			if (event.getItem() != null
 				&& event.getColumn() != null
-				&& DOWNLOAD_LINK_COLUMN.equals(event.getColumn().getId())
+				&& DOWNLOAD_LINK_COLUMN.equals(event.getColumn().getKey())
 				&& event.getItem().getStatus() == EpipulseExportStatus.COMPLETED) {
 				ControllerProvider.getEpipulseExportController().download(event.getItem());
 			}
 		});
 
-		for (Column<?, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(EpipulseExportIndexDto.I18N_PREFIX, column.getId(), column.getCaption()));
+		for (Column<?, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(EpipulseExportIndexDto.I18N_PREFIX, column.getKey(), column.getCaption()));
 		}
 	}
 

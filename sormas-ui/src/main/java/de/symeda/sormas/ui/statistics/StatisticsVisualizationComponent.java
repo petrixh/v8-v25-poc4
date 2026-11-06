@@ -22,14 +22,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.Property.ValueChangeEvent;
-import com.vaadin.v7.data.Property.ValueChangeListener;
-import com.vaadin.v7.ui.OptionGroup;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -39,6 +37,7 @@ import de.symeda.sormas.ui.statistics.StatisticsVisualizationType.StatisticsVisu
 import de.symeda.sormas.ui.statistics.StatisticsVisualizationType.StatisticsVisualizationMapType;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
 
 @SuppressWarnings("serial")
 public class StatisticsVisualizationComponent extends HorizontalLayout {
@@ -63,90 +62,79 @@ public class StatisticsVisualizationComponent extends HorizontalLayout {
 		visualizationSelect =
 			new OptionGroup(I18nProperties.getCaption(Captions.statisticsVisualizationType), Arrays.asList(StatisticsVisualizationType.values()));
 		visualizationSelect.setId(Captions.statisticsVisualizationType);
-		visualizationSelect.addValueChangeListener(new ValueChangeListener() {
+		visualizationSelect.addValueChangeListener(event -> {
+			visualizationType = (StatisticsVisualizationType) event.getValue();
+			updateComponentVisibility();
+			if (rowsElement != null) {
+				rowsElement.setType(rowsElement.getType(), visualizationType);
+			}
+			if (columnsElement != null) {
+				columnsElement.setType(columnsElement.getType(), visualizationType);
+			}
 
-			@Override
-			public void valueChange(ValueChangeEvent event) {
-				visualizationType = (StatisticsVisualizationType) event.getProperty().getValue();
-				updateComponentVisibility();
-				if (rowsElement != null) {
-					rowsElement.setType(rowsElement.getType(), visualizationType);
-				}
-				if (columnsElement != null) {
-					columnsElement.setType(columnsElement.getType(), visualizationType);
-				}
-
-				for (Consumer<StatisticsVisualizationType> visualizationTypeChangedListener : visualizationTypeChangedListeners) {
-					visualizationTypeChangedListener.accept(visualizationType);
-				}
+			for (Consumer<StatisticsVisualizationType> visualizationTypeChangedListener : visualizationTypeChangedListeners) {
+				visualizationTypeChangedListener.accept(visualizationType);
 			}
 		});
-		CssStyles.style(visualizationSelect, CssStyles.VSPACE_NONE, ValoTheme.OPTIONGROUP_HORIZONTAL);
+		CssStyles.style(visualizationSelect, CssStyles.VSPACE_NONE, SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL);
 		visualizationSelect.setNullSelectionAllowed(false);
-		addComponent(visualizationSelect);
-		setExpandRatio(visualizationSelect, 0);
+		add(visualizationSelect);
+		setFlexGrow(0, visualizationSelect);
 
 		visualizationMapSelect =
 			new OptionGroup(I18nProperties.getCaption(Captions.statisticsMapType), Arrays.asList(StatisticsVisualizationMapType.values()));
 		visualizationMapSelect.setId(Captions.statisticsMapType);
-		visualizationMapSelect.addValueChangeListener(new ValueChangeListener() {
-
-			@Override
-			public void valueChange(ValueChangeEvent event) {
-				visualizationMapType = (StatisticsVisualizationMapType) event.getProperty().getValue();
-			}
+		visualizationMapSelect.addValueChangeListener(event -> {
+			visualizationMapType = (StatisticsVisualizationMapType) event.getValue();
 		});
-		CssStyles.style(visualizationMapSelect, CssStyles.VSPACE_NONE, ValoTheme.OPTIONGROUP_HORIZONTAL);
+		CssStyles.style(visualizationMapSelect, CssStyles.VSPACE_NONE, SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL);
 		visualizationMapSelect.setNullSelectionAllowed(false);
-		addComponent(visualizationMapSelect);
-		setExpandRatio(visualizationSelect, 0);
+		add(visualizationMapSelect);
+		setFlexGrow(0, visualizationSelect);
 
 		visualizationChartSelect =
 			new OptionGroup(I18nProperties.getCaption(Captions.statisticsChartType), Arrays.asList(StatisticsVisualizationChartType.values()));
 		visualizationChartSelect.setId(Captions.statisticsChartType);
-		visualizationChartSelect.addValueChangeListener(new ValueChangeListener() {
-
-			@Override
-			public void valueChange(ValueChangeEvent event) {
-				visualizationChartType = (StatisticsVisualizationChartType) event.getProperty().getValue();
-				updateComponentVisibility();
-			}
+		visualizationChartSelect.addValueChangeListener(event -> {
+			visualizationChartType = (StatisticsVisualizationChartType) event.getValue();
+			updateComponentVisibility();
 		});
-		CssStyles.style(visualizationChartSelect, CssStyles.VSPACE_NONE, ValoTheme.OPTIONGROUP_HORIZONTAL);
+		CssStyles.style(visualizationChartSelect, CssStyles.VSPACE_NONE, SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL);
 		visualizationChartSelect.setNullSelectionAllowed(false);
-		addComponent(visualizationChartSelect);
-		setExpandRatio(visualizationChartSelect, 0);
+		add(visualizationChartSelect);
+		setFlexGrow(0, visualizationChartSelect);
 
 		rowsElement = new StatisticsVisualizationElement(StatisticsVisualizationElementType.ROWS, visualizationType);
-		addComponent(rowsElement);
-		setExpandRatio(rowsElement, 0);
+		add(rowsElement);
+		setFlexGrow(0, rowsElement);
 
-		switchRowsAndColumnsButton = ButtonHelper.createIconButtonWithCaption("switchRowsAndColumns", null, VaadinIcons.EXCHANGE, event -> {
+		switchRowsAndColumnsButton = ButtonHelper.createIconButtonWithCaption("switchRowsAndColumns", null, VaadinIcon.EXCHANGE, event -> {
 			StatisticsVisualizationElement newRowsElement = columnsElement;
 			newRowsElement.setType(StatisticsVisualizationElementType.ROWS, visualizationType);
 			StatisticsVisualizationElement newColumnsElement = rowsElement;
 			newColumnsElement.setType(StatisticsVisualizationElementType.COLUMNS, visualizationType);
-			removeComponent(rowsElement);
-			removeComponent(columnsElement);
-			addComponent(newRowsElement, getComponentIndex(switchRowsAndColumnsButton));
-			addComponent(newColumnsElement, getComponentIndex(switchRowsAndColumnsButton) + 1);
-			replaceComponent(rowsElement, newRowsElement);
-			replaceComponent(columnsElement, newColumnsElement);
+			remove(rowsElement);
+			remove(columnsElement);
+			addComponentAtIndex(indexOf(switchRowsAndColumnsButton), newRowsElement);
+			addComponentAtIndex(indexOf(switchRowsAndColumnsButton) + 1, newColumnsElement);
+			// both are children: Flow's replace swaps them, as Vaadin 8's replaceComponent did
+			replace(rowsElement, newRowsElement);
+			replace(columnsElement, newColumnsElement);
 			rowsElement = newRowsElement;
 			columnsElement = newColumnsElement;
 		}, CssStyles.FORCE_CAPTION);
-		switchRowsAndColumnsButton.setDescription(I18nProperties.getCaption(Captions.statisticsExchange));
+		switchRowsAndColumnsButton.setTooltipText(I18nProperties.getCaption(Captions.statisticsExchange));
 
-		addComponent(switchRowsAndColumnsButton);
-		setExpandRatio(switchRowsAndColumnsButton, 0);
+		add(switchRowsAndColumnsButton);
+		setFlexGrow(0, switchRowsAndColumnsButton);
 
 		columnsElement = new StatisticsVisualizationElement(StatisticsVisualizationElementType.COLUMNS, visualizationType);
-		addComponent(columnsElement);
-		setExpandRatio(columnsElement, 0);
+		add(columnsElement);
+		setFlexGrow(0, columnsElement);
 
-		Label spacer = new Label();
-		addComponent(spacer);
-		setExpandRatio(spacer, 1);
+		Span spacer = new Span();
+		add(spacer);
+		setFlexGrow(1, spacer);
 
 		visualizationSelect.setValue(StatisticsVisualizationType.TABLE);
 		visualizationChartSelect.setValue(StatisticsVisualizationChartType.STACKED_COLUMN);

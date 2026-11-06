@@ -17,7 +17,7 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.statistics;
 
-import com.vaadin.navigator.Navigator;
+import de.symeda.sormas.ui.navigation.Navigator;
 
 import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.UiUtil;

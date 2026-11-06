@@ -20,8 +20,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.ui.Label;
-import com.vaadin.ui.renderers.DateRenderer;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
@@ -65,12 +65,12 @@ public class EventPreviewGrid extends BasePreviewGrid<SormasToSormasEventPreview
 					diseaseText += " - " + casePreview.getDiseaseDetails();
 				}
 			}
-			return new Label(diseaseText);
-		}).setId(SormasToSormasEventPreview.DISEASE);
+			return new Span(diseaseText);
+		}).setKey(SormasToSormasEventPreview.DISEASE);
 
 		removeColumn(SormasToSormasEventPreview.EVENT_LOCATION);
-		addComponentColumn(previewData -> new Label(LocationHelper.buildLocationString(previewData.getEventLocation())))
-			.setId(SormasToSormasEventPreview.EVENT_LOCATION);
+		addComponentColumn(previewData -> new Span(LocationHelper.buildLocationString(previewData.getEventLocation())))
+			.setKey(SormasToSormasEventPreview.EVENT_LOCATION);
 
 		setColumns(
 			SormasToSormasEventPreview.UUID,
@@ -84,9 +84,9 @@ public class EventPreviewGrid extends BasePreviewGrid<SormasToSormasEventPreview
 		((Column<SormasToSormasEventPreview, Date>) getColumn(SormasToSormasEventPreview.REPORT_DATE_TIME))
 			.setRenderer(new DateRenderer(DateHelper.getLocalDateTimeFormat(userLanguage)));
 
-		for (Column<?, ?> column : getColumns()) {
+		for (Column<?, ?> column : getAllColumns()) {
 			column.setCaption(
-				I18nProperties.findPrefixCaption(column.getId(), SormasToSormasEventPreview.I18N_PREFIX, SormasToSormasPersonPreview.I18N_PREFIX));
+				I18nProperties.findPrefixCaption(column.getKey(), SormasToSormasEventPreview.I18N_PREFIX, SormasToSormasPersonPreview.I18N_PREFIX));
 		}
 	}
 }

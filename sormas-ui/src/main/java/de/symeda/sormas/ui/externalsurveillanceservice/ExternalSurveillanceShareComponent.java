@@ -15,13 +15,12 @@
 
 package de.symeda.sormas.ui.externalsurveillanceservice;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -54,21 +53,21 @@ public class ExternalSurveillanceShareComponent extends VerticalLayout {
 		Runnable deleteHandler,
 		ExternalShareInfoCriteria shareInfoCriteria,
 		DirtyStateComponent editComponent) {
-		setWidth(100, Unit.PERCENTAGE);
-		setMargin(false);
+		setWidthFull();
+		setPadding(false);
 		setSpacing(false);
-		addStyleNames(CssStyles.SIDE_COMPONENT);
+		addClassNames(CssStyles.SIDE_COMPONENT);
 
 		if (shareInfoCriteria.getCaze() != null) {
 			String caseUuid = shareInfoCriteria.getCaze().getUuid();
-			addComponent(createHeader(entityString, sendHandler, deleteHandler, editComponent, caseUuid, null));
+			add(createHeader(entityString, sendHandler, deleteHandler, editComponent, caseUuid, null));
 		}
 
 		if (shareInfoCriteria.getEvent() != null) {
 			String eventUuid = shareInfoCriteria.getEvent().getUuid();
-			addComponent(createHeader(entityString, sendHandler, deleteHandler, editComponent, null, eventUuid));
+			add(createHeader(entityString, sendHandler, deleteHandler, editComponent, null, eventUuid));
 		}
-		addComponent(createShareInfoList(shareInfoCriteria));
+		add(createShareInfoList(shareInfoCriteria));
 	}
 
 	private HorizontalLayout createHeader(
@@ -78,22 +77,23 @@ public class ExternalSurveillanceShareComponent extends VerticalLayout {
 		DirtyStateComponent editComponent,
 		String caseUuid,
 		String eventUuid) {
-		Label header = new Label(I18nProperties.getCaption(Captions.ExternalSurveillanceToolGateway_title));
-		header.addStyleName(CssStyles.H3);
+		Span header = new Span(I18nProperties.getCaption(Captions.ExternalSurveillanceToolGateway_title));
+		header.addClassName(CssStyles.H3);
 
 		HorizontalLayout headerLayout = new HorizontalLayout(header);
-		headerLayout.setComponentAlignment(header, Alignment.MIDDLE_LEFT);
+		headerLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, header);
 
 		if (sendHandler != null && UiUtil.permitted(UserRight.EXTERNAL_SURVEILLANCE_SHARE)) {
 			Button sendButton = ButtonHelper.createIconButton(
 				Captions.ExternalSurveillanceToolGateway_send,
-				VaadinIcons.OUTBOX,
+				VaadinIcon.OUTBOX,
 				e -> onSendButtonClick(entityName, sendHandler, editComponent),
-				ValoTheme.BUTTON_PRIMARY);
+				CssStyles.BUTTON_PRIMARY);
 
-			headerLayout.addComponent(sendButton);
-			headerLayout.setExpandRatio(sendButton, 1);
-			headerLayout.setComponentAlignment(sendButton, Alignment.MIDDLE_RIGHT);
+			headerLayout.add(sendButton);
+			// was expand ratio 1 and Alignment.MIDDLE_RIGHT: the button goes right instead of growing
+			headerLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, sendButton);
+			sendButton.getStyle().set("margin-left", "auto");
 		}
 
 		if (UiUtil.permitted(UserRight.EXTERNAL_SURVEILLANCE_DELETE)) {
@@ -114,10 +114,14 @@ public class ExternalSurveillanceShareComponent extends VerticalLayout {
 	}
 
 	private void addDeleteButtonToLayout(Runnable deleteHandler, HorizontalLayout headerLayout) {
-		Button deleteButton = ButtonHelper.createIconButton("", VaadinIcons.TRASH, e -> deleteHandler.run(), ValoTheme.BUTTON_ICON_ONLY);
-		headerLayout.addComponent(deleteButton);
-		headerLayout.setComponentAlignment(deleteButton, Alignment.MIDDLE_RIGHT);
-		headerLayout.setWidth(100, Unit.PERCENTAGE);
+		Button deleteButton = ButtonHelper.createIconButton("", VaadinIcon.TRASH, e -> deleteHandler.run(), CssStyles.BUTTON_ICON_ONLY);
+		// was Alignment.MIDDLE_RIGHT: without a send button, Vaadin 8 put it at the right edge of the full-width header
+		if (headerLayout.getComponentCount() == 1) {
+			deleteButton.getStyle().set("margin-left", "auto");
+		}
+		headerLayout.add(deleteButton);
+		headerLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, deleteButton);
+		headerLayout.setWidthFull();
 	}
 
 	private boolean isVisibleDeleteButtonForCase(String caseUuid) {

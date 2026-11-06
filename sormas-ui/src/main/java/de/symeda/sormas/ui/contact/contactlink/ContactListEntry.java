@@ -1,8 +1,8 @@
 package de.symeda.sormas.ui.contact.contactlink;
 
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.contact.ContactCategory;
 import de.symeda.sormas.api.contact.ContactDto;
@@ -23,81 +23,83 @@ public class ContactListEntry extends SideComponentField {
 		this.contactListEntryDto = contactListEntryDto;
 
 		HorizontalLayout uuidStatusLayout = new HorizontalLayout();
-		uuidStatusLayout.setMargin(false);
+		uuidStatusLayout.setPadding(false);
 		uuidStatusLayout.setSpacing(true);
 
-		Label contactUuidLabel = new Label(DataHelper.toStringNullable(DataHelper.getShortUuid(contactListEntryDto.getUuid())));
-		contactUuidLabel.setDescription(contactListEntryDto.getUuid());
+		Span contactUuidLabel = new Span(DataHelper.toStringNullable(DataHelper.getShortUuid(contactListEntryDto.getUuid())));
+		contactUuidLabel.setTitle(contactListEntryDto.getUuid());
 
-		Label statusLabel = new Label(contactListEntryDto.getContactStatus().toString());
-		statusLabel.addStyleNames(CssStyles.LABEL_BOLD);
-		statusLabel.setDescription(contactListEntryDto.getContactStatus().toString());
+		Span statusLabel = new Span(contactListEntryDto.getContactStatus().toString());
+		statusLabel.addClassNames(CssStyles.LABEL_BOLD);
+		statusLabel.setTitle(contactListEntryDto.getContactStatus().toString());
 
-		uuidStatusLayout.addComponent(contactUuidLabel);
-		uuidStatusLayout.addComponent(statusLabel);
+		uuidStatusLayout.add(contactUuidLabel);
+		uuidStatusLayout.add(statusLabel);
 		uuidStatusLayout.setWidthFull();
-		uuidStatusLayout.setComponentAlignment(contactUuidLabel, Alignment.MIDDLE_LEFT);
-		uuidStatusLayout.setComponentAlignment(statusLabel, Alignment.MIDDLE_RIGHT);
+		// was each label aligned left and right in its half
+		uuidStatusLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+		uuidStatusLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 		addComponentToField(uuidStatusLayout);
 
 		HorizontalLayout diseaseClassificationLayout = new HorizontalLayout();
-		diseaseClassificationLayout.setMargin(false);
+		diseaseClassificationLayout.setPadding(false);
 		diseaseClassificationLayout.setSpacing(true);
 
-		Label diseaseLabel = new Label(contactListEntryDto.getDisease().toString());
-		diseaseLabel.addStyleNames(CssStyles.LABEL_BOLD);
-		diseaseLabel.setDescription(contactListEntryDto.getDisease().toString());
+		Span diseaseLabel = new Span(contactListEntryDto.getDisease().toString());
+		diseaseLabel.addClassNames(CssStyles.LABEL_BOLD);
+		diseaseLabel.setTitle(contactListEntryDto.getDisease().toString());
 
-		Label classificationLabel = new Label(contactListEntryDto.getContactClassification().toString());
-		classificationLabel.addStyleNames(CssStyles.LABEL_BOLD);
-		classificationLabel.setDescription(contactListEntryDto.getContactClassification().toString());
+		Span classificationLabel = new Span(contactListEntryDto.getContactClassification().toString());
+		classificationLabel.addClassNames(CssStyles.LABEL_BOLD);
+		classificationLabel.setTitle(contactListEntryDto.getContactClassification().toString());
 
-		diseaseClassificationLayout.addComponent(diseaseLabel);
-		diseaseClassificationLayout.addComponent(classificationLabel);
+		diseaseClassificationLayout.add(diseaseLabel);
+		diseaseClassificationLayout.add(classificationLabel);
 		diseaseClassificationLayout.setWidthFull();
-		diseaseClassificationLayout.setComponentAlignment(diseaseLabel, Alignment.MIDDLE_LEFT);
-		diseaseClassificationLayout.setComponentAlignment(classificationLabel, Alignment.MIDDLE_RIGHT);
+		// was each label aligned left and right in its half
+		diseaseClassificationLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+		diseaseClassificationLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 		addComponentToField(diseaseClassificationLayout);
 
 		if (contactListEntryDto.getLastContactDate() != null) {
 			HorizontalLayout lastContactDateLayout = new HorizontalLayout();
-			lastContactDateLayout.setMargin(false);
+			lastContactDateLayout.setPadding(false);
 			lastContactDateLayout.setSpacing(true);
 
-			Label lastContactDateLabel = new Label(
+			Span lastContactDateLabel = new Span(
 				I18nProperties.getPrefixCaption(ContactDto.I18N_PREFIX, ContactDto.LAST_CONTACT_DATE)
 					+ SEPARATOR
 					+ DateFormatHelper.formatDate(contactListEntryDto.getLastContactDate()));
-			lastContactDateLayout.addComponent(lastContactDateLabel);
+			lastContactDateLayout.add(lastContactDateLabel);
 
 			lastContactDateLayout.setWidthFull();
-			lastContactDateLayout.setComponentAlignment(lastContactDateLabel, Alignment.MIDDLE_LEFT);
+			lastContactDateLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 			addComponentToField(lastContactDateLayout);
 		}
 
 		HorizontalLayout reportDateLayout = new HorizontalLayout();
-		reportDateLayout.setMargin(false);
+		reportDateLayout.setPadding(false);
 		reportDateLayout.setSpacing(true);
 
-		Label reportDateLabel = new Label(
+		Span reportDateLabel = new Span(
 			I18nProperties.getPrefixCaption(ContactDto.I18N_PREFIX, ContactDto.REPORT_DATE_TIME)
 				+ SEPARATOR
 				+ DateFormatHelper.formatDate(contactListEntryDto.getReportDate()));
-		reportDateLayout.addComponent(reportDateLabel);
+		reportDateLayout.add(reportDateLabel);
 
 		reportDateLayout.setWidthFull();
-		reportDateLayout.setComponentAlignment(reportDateLabel, Alignment.MIDDLE_LEFT);
+		reportDateLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 		addComponentToField(reportDateLayout);
 
 		final ContactCategory contactCategory = contactListEntryDto.getContactCategory();
 		if (contactCategory != null) {
-			Label categoryLabel = new Label(contactCategory.toString());
+			Span categoryLabel = new Span(contactCategory.toString());
 			if (ContactCategory.HIGH_RISK == contactCategory || ContactCategory.HIGH_RISK_MED == contactCategory) {
-				categoryLabel.addStyleName(CssStyles.LABEL_IMPORTANT);
+				categoryLabel.addClassName(CssStyles.LABEL_IMPORTANT);
 			} else {
-				categoryLabel.addStyleName(CssStyles.LABEL_NEUTRAL);
+				categoryLabel.addClassName(CssStyles.LABEL_NEUTRAL);
 			}
-			categoryLabel.setDescription(contactCategory.toString());
+			categoryLabel.setTitle(contactCategory.toString());
 			addComponentToField(categoryLabel);
 		}
 	}

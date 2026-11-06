@@ -5,9 +5,8 @@ import static de.symeda.sormas.api.user.UserRight.CONTACT_CREATE;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 
 import de.symeda.sormas.api.contact.ContactCriteria;
 import de.symeda.sormas.api.contact.ContactListEntryDto;
@@ -36,16 +35,16 @@ public class ContactListComponent extends SideComponent {
 
 		contactList = new ContactList(personReferenceDto);
 		contactList.setActiveUuid(activeUuid);
-		addComponent(contactList);
+		add(contactList);
 		contactList.reload();
 
 		if (!contactList.isEmpty()) {
 			final Button seeContacts = ButtonHelper.createButton(I18nProperties.getCaption(Captions.personLinkToContacts));
-			CssStyles.style(seeContacts, ValoTheme.BUTTON_PRIMARY);
+			CssStyles.style(seeContacts, CssStyles.BUTTON_PRIMARY);
 			seeContacts.addClickListener(
 				clickEvent -> ControllerProvider.getContactController().navigateTo(new ContactCriteria().setPerson(personReferenceDto)));
-			addComponent(seeContacts);
-			setComponentAlignment(seeContacts, Alignment.MIDDLE_LEFT);
+			add(seeContacts);
+			setHorizontalComponentAlignment(FlexComponent.Alignment.START, seeContacts);
 		}
 	}
 

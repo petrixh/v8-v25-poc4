@@ -1,12 +1,10 @@
 package de.symeda.sormas.ui.contact;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.CheckBox;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseReferenceDto;
@@ -17,7 +15,9 @@ import de.symeda.sormas.api.utils.fieldaccess.UiFieldAccessCheckers;
 import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.location.LocationEditForm;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
 
 public class AdoptAddressLayout extends HorizontalLayout {
 
@@ -28,21 +28,23 @@ public class AdoptAddressLayout extends HorizontalLayout {
 
 	public AdoptAddressLayout() {
 		adoptAddress = new CheckBox(I18nProperties.getCaption(Captions.adoptHomeAddressOfCasePerson));
-		showAddressButton = ButtonHelper.createIconButton(VaadinIcons.EYE);
+		showAddressButton = ButtonHelper.createIconButton(VaadinIcon.EYE);
 		showAddressButton.addClickListener(e -> showAddressOfCasePerson(contact.getCaze()));
-		showAddressButton.setStyleName(ValoTheme.BUTTON_BORDERLESS);
-		addComponents(adoptAddress, showAddressButton);
-		setComponentAlignment(adoptAddress, Alignment.MIDDLE_CENTER);
+		// was setStyleName(BUTTON_BORDERLESS): replaces the button's styles
+		CssStyles.style(showAddressButton, CssStyles.BUTTON_BORDERLESS);
+		add(adoptAddress, showAddressButton);
+		setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, adoptAddress);
 	}
 
 	public AdoptAddressLayout(CaseReferenceDto caseReference) {
 		this.caseReference = caseReference;
 		adoptAddress = new CheckBox(I18nProperties.getCaption(Captions.adoptHomeAddressOfCasePersonIfRelationMatches));
-		showAddressButton = ButtonHelper.createIconButton(VaadinIcons.EYE);
+		showAddressButton = ButtonHelper.createIconButton(VaadinIcon.EYE);
 		showAddressButton.addClickListener(e -> showAddressOfCasePerson(this.caseReference));
-		showAddressButton.setStyleName(ValoTheme.BUTTON_BORDERLESS);
-		addComponents(adoptAddress, showAddressButton);
-		setComponentAlignment(adoptAddress, Alignment.MIDDLE_CENTER);
+		// was setStyleName(BUTTON_BORDERLESS): replaces the button's styles
+		CssStyles.style(showAddressButton, CssStyles.BUTTON_BORDERLESS);
+		add(adoptAddress, showAddressButton);
+		setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, adoptAddress);
 	}
 
 	private void showAddressOfCasePerson(CaseReferenceDto caseReference) {
@@ -55,9 +57,9 @@ public class AdoptAddressLayout extends HorizontalLayout {
 				.getAddress());
 		locationForm.setEnabled(false);
 		HorizontalLayout layout = new HorizontalLayout(locationForm);
-		layout.setMargin(true);
-		Window window = VaadinUiUtil.showPopupWindow(layout);
-		window.setCaption(I18nProperties.getCaption(Captions.casePersonAddress));
+		layout.setPadding(true);
+		Dialog window = VaadinUiUtil.showPopupWindow(layout);
+		window.setHeaderTitle(I18nProperties.getCaption(Captions.casePersonAddress));
 	}
 
 	public boolean isAdoptAddress() {

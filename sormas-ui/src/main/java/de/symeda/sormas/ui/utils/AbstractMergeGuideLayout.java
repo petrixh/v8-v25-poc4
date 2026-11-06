@@ -15,9 +15,8 @@
 
 package de.symeda.sormas.ui.utils;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -29,70 +28,65 @@ public abstract class AbstractMergeGuideLayout extends VerticalLayout {
 
 	public AbstractMergeGuideLayout() {
 
-		setMargin(true);
+		setPadding(true);
 		setSpacing(false);
 
-		Label lblHeadingIntroduction = new Label(I18nProperties.getString(Strings.headingIntroduction));
+		Span lblHeadingIntroduction = new Span(I18nProperties.getString(Strings.headingIntroduction));
 		CssStyles.style(lblHeadingIntroduction, CssStyles.H2);
-		addComponent(lblHeadingIntroduction);
-		Label lblIntroduction = new Label(I18nProperties.getString(getInfoMergingExplanationMessage()));
+		add(lblHeadingIntroduction);
+		Span lblIntroduction = VaadinUiUtil.createLabel(I18nProperties.getString(getInfoMergingExplanationMessage()), ContentMode.HTML);
 		CssStyles.style(lblIntroduction, CssStyles.VSPACE_4);
-		lblIntroduction.setContentMode(ContentMode.HTML);
-		lblIntroduction.setWidth(100, Unit.PERCENTAGE);
-		addComponent(lblIntroduction);
+		lblIntroduction.setWidthFull();
+		add(lblIntroduction);
 
-		Label lblHeadingHowTo = new Label(I18nProperties.getString(getHeadingHowToMergeMessage()));
+		Span lblHeadingHowTo = new Span(I18nProperties.getString(getHeadingHowToMergeMessage()));
 		CssStyles.style(lblHeadingHowTo, CssStyles.H2);
-		addComponent(lblHeadingHowTo);
-		Label lblHowTo = new Label(I18nProperties.getString(getInfoHowToMergeMessage()));
-		addComponent(lblHowTo);
+		add(lblHeadingHowTo);
+		Span lblHowTo = new Span(I18nProperties.getString(getInfoHowToMergeMessage()));
+		add(lblHowTo);
 
-		Label lblHeadingMerge = new Label(I18nProperties.getCaption(Captions.actionMerge));
+		Span lblHeadingMerge = new Span(I18nProperties.getCaption(Captions.actionMerge));
 		CssStyles.style(lblHeadingMerge, CssStyles.H3);
-		addComponent(lblHeadingMerge);
-		Label lblMergeDescription = new Label(I18nProperties.getString(getInfoMergingMergeDescriptionMessage()));
-		lblMergeDescription.setContentMode(ContentMode.HTML);
-		lblMergeDescription.setWidth(100, Unit.PERCENTAGE);
-		addComponent(lblMergeDescription);
+		add(lblHeadingMerge);
+		Span lblMergeDescription = VaadinUiUtil.createLabel(I18nProperties.getString(getInfoMergingMergeDescriptionMessage()), ContentMode.HTML);
+		lblMergeDescription.setWidthFull();
+		add(lblMergeDescription);
 
-		Label lblHeadingPick = new Label(I18nProperties.getCaption(Captions.actionPick));
+		Span lblHeadingPick = new Span(I18nProperties.getCaption(Captions.actionPick));
 		CssStyles.style(lblHeadingPick, CssStyles.H3);
-		addComponent(lblHeadingPick);
-		Label lblPickDescription = new Label(I18nProperties.getString(getInfoMergingPickDescriptionMessage()));
+		add(lblHeadingPick);
+		Span lblPickDescription = new Span(I18nProperties.getString(getInfoMergingPickDescriptionMessage()));
 		CssStyles.style(lblPickDescription, CssStyles.VSPACE_4);
-		lblPickDescription.setWidth(100, Unit.PERCENTAGE);
-		addComponent(lblPickDescription);
+		lblPickDescription.setWidthFull();
+		add(lblPickDescription);
 
-		Label lblHeadingHide = new Label(I18nProperties.getCaption(Captions.actionHide));
+		Span lblHeadingHide = new Span(I18nProperties.getCaption(Captions.actionHide));
 		CssStyles.style(lblHeadingHide, CssStyles.H3);
-		addComponent(lblHeadingHide);
-		Label lblHideDescription = new Label(I18nProperties.getString(getInfoMergingHideDescriptionMessage()));
+		add(lblHeadingHide);
+		Span lblHideDescription = VaadinUiUtil.createLabel(I18nProperties.getString(getInfoMergingHideDescriptionMessage()), ContentMode.HTML);
 		CssStyles.style(lblHideDescription, CssStyles.VSPACE_4);
-		lblHideDescription.setWidth(100, Unit.PERCENTAGE);
-		lblHideDescription.setContentMode(ContentMode.HTML);
-		addComponent(lblHideDescription);
+		lblHideDescription.setWidthFull();
+		add(lblHideDescription);
 
-		Label lblHeadingTermsDefinition = new Label(I18nProperties.getString(Strings.headingExplanationOfTerms));
+		Span lblHeadingTermsDefinition = new Span(I18nProperties.getString(Strings.headingExplanationOfTerms));
 		CssStyles.style(lblHeadingTermsDefinition, CssStyles.H2);
-		addComponent(lblHeadingTermsDefinition);
+		add(lblHeadingTermsDefinition);
 
-		Label lblHeadingCompleteness = new Label(I18nProperties.getString(Strings.headingCompleteness));
+		Span lblHeadingCompleteness = new Span(I18nProperties.getString(Strings.headingCompleteness));
 		CssStyles.style(lblHeadingCompleteness, CssStyles.H3, CssStyles.VSPACE_TOP_5);
-		addComponent(lblHeadingCompleteness);
-		Label lblCompletenessDescription = new Label(
+		add(lblHeadingCompleteness);
+		Span lblCompletenessDescription = VaadinUiUtil.createLabel(
 			I18nProperties.getString(getInfoCompletenessMessage()) + I18nProperties.getString(getInfoCompletenessMergeMessage()) + "</br></br>"
-				+ I18nProperties.getString(getInfoCalculateCompletenessMessage()));
-		lblCompletenessDescription.setContentMode(ContentMode.HTML);
-		lblCompletenessDescription.setWidth(100, Unit.PERCENTAGE);
-		addComponent(lblCompletenessDescription);
+				+ I18nProperties.getString(getInfoCalculateCompletenessMessage()), ContentMode.HTML);
+		lblCompletenessDescription.setWidthFull();
+		add(lblCompletenessDescription);
 
-		Label lblHeadingIgnoreRegion = new Label(I18nProperties.getCaption(Captions.caseFilterWithDifferentRegion));
+		Span lblHeadingIgnoreRegion = new Span(I18nProperties.getCaption(Captions.caseFilterWithDifferentRegion));
 		CssStyles.style(lblHeadingIgnoreRegion, CssStyles.H3);
-		addComponent(lblHeadingIgnoreRegion);
-		Label lblIgnoreRegionDescription = new Label(I18nProperties.getString(getInfoMergeIgnoreRegionMessage()));
-		lblIgnoreRegionDescription.setContentMode(ContentMode.HTML);
-		lblIgnoreRegionDescription.setWidth(100, Unit.PERCENTAGE);
-		addComponent(lblIgnoreRegionDescription);
+		add(lblHeadingIgnoreRegion);
+		Span lblIgnoreRegionDescription = VaadinUiUtil.createLabel(I18nProperties.getString(getInfoMergeIgnoreRegionMessage()), ContentMode.HTML);
+		lblIgnoreRegionDescription.setWidthFull();
+		add(lblIgnoreRegionDescription);
 	}
 
 	protected abstract String getInfoMergingExplanationMessage();

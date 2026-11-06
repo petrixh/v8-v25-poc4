@@ -5,17 +5,17 @@ import static de.symeda.sormas.ui.utils.CssStyles.VSPACE_TOP_4;
 import java.util.Calendar;
 import java.util.Date;
 
-import com.vaadin.server.Page;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.PopupDateField;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.Descriptions;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.utils.DateHelper;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.PopupDateField;
 
 public class BirthdateRangeFilterComponent extends HorizontalLayout {
 
@@ -35,8 +35,8 @@ public class BirthdateRangeFilterComponent extends HorizontalLayout {
 		dateToFilter = new PopupDateField();
 		includePartialMatch = new CheckBox();
 
-		addComponent(dateFromFilter);
-		addComponent(dateToFilter);
+		add(dateFromFilter);
+		add(dateToFilter);
 
 		// Date filter
 		dateFromFilter.setDateFormat(DateFormatHelper.getDateFormatPattern());
@@ -56,36 +56,36 @@ public class BirthdateRangeFilterComponent extends HorizontalLayout {
 		dateToFilter.setInputPrompt(I18nProperties.getString(Strings.promptBirthdateTo));
 
 		dateFromFilter.addValueChangeListener(e -> {
-			Date dateFrom = (Date) e.getProperty().getValue();
+			Date dateFrom = (Date) e.getValue();
 			Date dateTo = dateToFilter.getValue();
 			notifyIfIncorrectRange(dateFrom, dateTo);
 			parentFilterForm.onChange();
 		});
 
 		dateToFilter.addValueChangeListener(e -> {
-			Date dateTo = (Date) e.getProperty().getValue();
+			Date dateTo = (Date) e.getValue();
 			Date dateFrom = dateFromFilter.getValue();
 			notifyIfIncorrectRange(dateFrom, dateTo);
 			parentFilterForm.onChange();
 		});
 
 		includePartialMatch.setCaption(I18nProperties.getCaption(Captions.includePartialBirthdates));
-		includePartialMatch.addStyleName(VSPACE_TOP_4);
+		includePartialMatch.addClassName(VSPACE_TOP_4);
 		includePartialMatch.setDescription(I18nProperties.getDescription(Descriptions.birthdateFilterPartialMatchDescription));
-		addComponent(includePartialMatch);
+		add(includePartialMatch);
 	}
 
 	private static void notifyIfIncorrectRange(Date dateFrom, Date dateTo) {
 		if (dateFrom != null & dateTo != null) {
 			if (DateHelper.isDateAfter(dateFrom, dateTo)) {
-				Notification notification = new Notification(
+				Notification notification = NotificationHelper.createNotification(
 					I18nProperties.getString(Strings.headingIncorrectDateRange),
 					I18nProperties.getString(Strings.messageIncorrectDateRange),
-					Notification.Type.WARNING_MESSAGE,
+					NotificationHelper.Type.WARNING_MESSAGE,
 					false);
 
-				notification.setDelayMsec(-1);
-				notification.show(Page.getCurrent());
+				NotificationHelper.setDelayMsec(notification, -1);
+				notification.open();
 			}
 		}
 	}

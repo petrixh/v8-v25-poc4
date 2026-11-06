@@ -17,7 +17,7 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.utils;
 
-import com.vaadin.data.ValueProvider;
+import com.vaadin.flow.function.ValueProvider;
 
 import de.symeda.sormas.api.ReferenceDto;
 import de.symeda.sormas.api.utils.DataHelper;

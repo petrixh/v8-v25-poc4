@@ -17,13 +17,14 @@ package de.symeda.sormas.ui.utils;
 
 import java.util.function.Consumer;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.Unit;
+
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.UiUtil;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 public final class RelevanceStatusFilter {
 
@@ -41,7 +42,7 @@ public final class RelevanceStatusFilter {
 
 		ComboBox relevanceStatusFilter = ComboBoxHelper.createComboBoxV7();
 		relevanceStatusFilter.setId("relevanceStatus");
-		relevanceStatusFilter.setWidth(260, Sizeable.Unit.PIXELS);
+		relevanceStatusFilter.setWidth(260, Unit.PIXELS);
 		relevanceStatusFilter.setNullSelectionAllowed(false);
 		relevanceStatusFilter.addItems((Object[]) EntityRelevanceStatus.values());
 		relevanceStatusFilter.setItemCaption(EntityRelevanceStatus.ACTIVE, I18nProperties.getCaption(activeCaption));
@@ -61,7 +62,7 @@ public final class RelevanceStatusFilter {
 		}
 
 		relevanceStatusFilter.setValue(initialValue);
-		relevanceStatusFilter.addValueChangeListener(e -> changeListener.accept((EntityRelevanceStatus) e.getProperty().getValue()));
+		relevanceStatusFilter.addValueChangeListener(e -> changeListener.accept((EntityRelevanceStatus) e.getValue()));
 
 		return relevanceStatusFilter;
 	}

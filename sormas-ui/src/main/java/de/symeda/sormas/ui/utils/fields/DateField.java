@@ -90,7 +90,10 @@ public class DateField extends CustomField<Date> {
 	}
 
 	/**
-	 * No-op: the Flow date picker parses with its date format only (no V7 lenient parsing).
+	 * No-op. V7 lenient parsing also accepted out-of-range day and month values and rolled them over (e.g. 32.01. became
+	 * 01.02.); the Flow date picker rejects such input as invalid. It parses with {@link #setDateFormat(String) the date
+	 * format} only. Extra parse formats (e.g. {@code d.M.yy}) would go through {@code DatePickerI18n.setDateFormats};
+	 * parked (parking lot, register row of 1a-32).
 	 */
 	public void setLenient(boolean lenient) {
 		// see register

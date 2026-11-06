@@ -19,13 +19,12 @@ import static de.symeda.sormas.ui.utils.CssStyles.VSPACE_3;
 
 import java.util.function.Supplier;
 
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.v7.ui.CheckBox;
-
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
 
 public class CaseFormHelper {
 
@@ -45,7 +44,7 @@ public class CaseFormHelper {
 			CheckBox dontShareCheckbox = checkBoxSupplier.get();
 			dontShareCheckbox.addStyleName(VSPACE_3);
 			dontShareCheckbox.addValueChangeListener(e -> {
-				Boolean dontShare = (Boolean) e.getProperty().getValue();
+				Boolean dontShare = (Boolean) e.getValue();
 				if (Boolean.TRUE.equals(dontShare)) {
 					layout.addComponent(VaadinUiUtil.createWarningComponent(I18nProperties.getString(warningMessageKey), 20), warningLoc);
 				} else {

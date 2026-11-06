@@ -17,12 +17,11 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.login;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -32,64 +31,60 @@ import de.symeda.sormas.api.user.UserDto;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 
-public class ChangeDefaultUserPasswordWindow extends Window {
+public class ChangeDefaultUserPasswordWindow extends Dialog {
 
 	public ChangeDefaultUserPasswordWindow(Runnable onContinue, UserDto currentUser) {
-		setCaption(" " + I18nProperties.getString(Strings.headingSecurityAlert));
-		setIcon(VaadinIcons.WARNING);
-		setWidth(40, Unit.PERCENTAGE);
+		setHeaderTitle(" " + I18nProperties.getString(Strings.headingSecurityAlert));
+		getHeader().add(VaadinIcon.WARNING.create());
+		setWidth("40%");
 		final VerticalLayout content = new VerticalLayout();
-		content.setMargin(true);
+		content.setPadding(true);
 		content.setWidthFull();
 
-		Label introductionLabel = new Label(I18nProperties.getString(Strings.DefaultPassword_ownUserIntroduction));
+		Span introductionLabel = new Span(I18nProperties.getString(Strings.DefaultPassword_ownUserIntroduction));
 		introductionLabel.setWidthFull();
-		introductionLabel.setStyleName(ValoTheme.LAYOUT_HORIZONTAL_WRAPPING);
-		content.addComponent(introductionLabel);
+		content.add(introductionLabel);
 
-		Label actionLabel = new Label(I18nProperties.getString(Strings.DefaultPassword_ownUserAction));
+		Span actionLabel = new Span(I18nProperties.getString(Strings.DefaultPassword_ownUserAction));
 		actionLabel.setWidthFull();
-		actionLabel.setStyleName(ValoTheme.LAYOUT_HORIZONTAL_WRAPPING);
-		content.addComponent(actionLabel);
+		content.add(actionLabel);
 
-		Label newPasswordLabel = new Label();
+		Span newPasswordLabel = new Span();
 		newPasswordLabel.setWidthFull();
 		newPasswordLabel.setVisible(false);
-		newPasswordLabel.setStyleName(ValoTheme.LAYOUT_HORIZONTAL_WRAPPING);
-		newPasswordLabel.setStyleName(CssStyles.H2, true);
-		content.addComponent(newPasswordLabel);
+		CssStyles.style(newPasswordLabel, CssStyles.H2);
+		content.add(newPasswordLabel);
 
-		Label newPasswordSetHintsLabel = new Label(I18nProperties.getString(Strings.DefaultPassword_ownUserNewPasswordSetHints));
+		Span newPasswordSetHintsLabel = new Span(I18nProperties.getString(Strings.DefaultPassword_ownUserNewPasswordSetHints));
 		newPasswordSetHintsLabel.setWidthFull();
-		newPasswordSetHintsLabel.setStyleName(ValoTheme.LAYOUT_HORIZONTAL_WRAPPING);
-		newPasswordSetHintsLabel.setStyleName(ValoTheme.LABEL_SUCCESS, true);
+		CssStyles.style(newPasswordSetHintsLabel, CssStyles.LABEL_POSITIVE);
 		newPasswordSetHintsLabel.setVisible(false);
-		content.addComponent(newPasswordSetHintsLabel);
+		content.add(newPasswordSetHintsLabel);
 
-		Button continueButton = ButtonHelper.createButton(Captions.actionRemindMeLater, (Button.ClickListener) clickEvent -> {
+		Button continueButton = ButtonHelper.createButton(Captions.actionRemindMeLater, clickEvent -> {
 			close();
 			onContinue.run();
-		}, ValoTheme.BUTTON_PRIMARY);
+		}, CssStyles.BUTTON_PRIMARY);
 
-		Button generateNewPasswordButton = ButtonHelper.createButton(Captions.actionGenerateNewPassword, (Button.ClickListener) clickEvent -> {
+		Button generateNewPasswordButton = ButtonHelper.createButton(Captions.actionGenerateNewPassword, clickEvent -> {
 			newPasswordLabel.setVisible(true);
 			newPasswordSetHintsLabel.setVisible(true);
-			continueButton.setCaption(I18nProperties.getCaption(Captions.actionContinue));
-			clickEvent.getButton().setVisible(false);
-			newPasswordLabel.setValue(
+			continueButton.setText(I18nProperties.getCaption(Captions.actionContinue));
+			clickEvent.getSource().setVisible(false);
+			newPasswordLabel.setText(
 				String.format(
 					I18nProperties.getString(Strings.DefaultPassword_newPasswordPlaceholder),
 					FacadeProvider.getUserFacade().resetPassword(currentUser.getUuid())));
-			center();
-
 		});
-		content.addComponent(generateNewPasswordButton);
-		content.addComponent(continueButton);
+		content.add(generateNewPasswordButton);
+		content.add(continueButton);
 
 		setModal(true);
 		setResizable(false);
-		setClosable(false);
-		setContent(content);
+		// not closable, as in Vaadin 8: no close button, Escape and a click outside do nothing
+		setCloseOnEsc(false);
+		setCloseOnOutsideClick(false);
+		add(content);
 		setDraggable(false);
 
 	}

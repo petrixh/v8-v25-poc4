@@ -24,20 +24,15 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.server.Command;
-import com.vaadin.flow.server.InitParameters;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinServlet;
 import com.vaadin.flow.server.VaadinSession;
 
 import de.symeda.sormas.api.FacadeProvider;
-import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.UserProvider.HasUserProvider;
 import de.symeda.sormas.ui.ViewModelProviders.HasViewModelProviders;
 import de.symeda.sormas.ui.navigation.Navigator;
 
-import jakarta.servlet.annotation.HttpConstraint;
-import jakarta.servlet.annotation.ServletSecurity;
-import jakarta.servlet.annotation.WebInitParam;
 import jakarta.servlet.annotation.WebServlet;
 
 /**
@@ -165,10 +160,14 @@ public class SormasUI implements HasUserProvider, HasViewModelProviders, Seriali
 		return viewModelProviders;
 	}
 
+	/**
+	 * The one Vaadin servlet of the web UI. No {@code @ServletSecurity}: in Vaadin 8 the container refused this servlet
+	 * to users without the {@code SORMAS_UI} right; on Payara 7 that refuses the servlet root to everyone, so
+	 * {@link de.symeda.sormas.ui.login.LoginUI} checks the login before every navigation instead (E001). The {@code UI}
+	 * init parameter is gone: Flow ignores it ({@link SormasUIInitListener}).
+	 */
 	@WebServlet(urlPatterns = {
-		"/*" }, name = "SormasUIServlet", asyncSupported = true, initParams = @WebInitParam(name = InitParameters.UI_PARAMETER,
-			value = "de.symeda.sormas.ui.SormasUI"))
-	@ServletSecurity(@HttpConstraint(rolesAllowed = UserRight._SORMAS_UI))
+		"/*" }, name = "SormasUIServlet", asyncSupported = true)
 	public static class SormasUIServlet extends VaadinServlet {
 
 	}

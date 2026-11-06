@@ -26,43 +26,38 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.server.FileResource;
-import com.vaadin.server.Page;
-import com.vaadin.server.ThemeResource;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Image;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Layout;
-import com.vaadin.ui.LoginForm;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.login.LoginForm;
+import com.vaadin.flow.component.login.LoginI18n;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
-import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 /**
  * UI content when the user is not logged in yet.
  */
 @SuppressWarnings("serial")
-public class LoginScreen extends CssLayout {
+public class LoginScreen extends Div {
 
 	private static final String UTF_8 = "UTF-8";
 	private static final int LOGO_WIDTH = 220;
 	private static final int CUSTOM_BRANDING_LOGO_WIDTH = 150;
+	private static final String THEME_IMG = VaadinUiUtil.THEME_IMAGE_PATH + "img/";
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -76,23 +71,22 @@ public class LoginScreen extends CssLayout {
 	}
 
 	private void buildUI() {
-		addStyleName(CssStyles.LOGINSCREEN_BACK);
+		addClassName(CssStyles.LOGINSCREEN_BACK);
 
 		if (isCustomBranding && FacadeProvider.getConfigFacade().getLoginBackgroundPath() != null) {
-			Page.Styles styles = Page.getCurrent().getStyles();
-			styles.add(
-				".v-app .login-screen-back { background-image: url(" + FacadeProvider.getConfigFacade().getLoginBackgroundPath() + ") !important; }");
+			// was a page style rule for .login-screen-back; set on the element itself now
+			getStyle().set("background-image", "url(" + FacadeProvider.getConfigFacade().getLoginBackgroundPath() + ")");
 		}
-		CssLayout layout = new CssLayout();
-		layout.addStyleName(CssStyles.LOGINSCREEN);
-		addComponent(layout);
+		Div layout = new Div();
+		layout.addClassName(CssStyles.LOGINSCREEN);
+		add(layout);
 
-		layout.addComponent(buildLoginLayout());
+		layout.add(buildLoginLayout());
 
 		// custom html layout
 		if (!isCustomBranding || FacadeProvider.getConfigFacade().isUseLoginSidebar()) {
-			Layout loginSidebarLayout = buildLoginSidebarLayout();
-			layout.addComponent(loginSidebarLayout);
+			Component loginSidebarLayout = buildLoginSidebarLayout();
+			layout.add(loginSidebarLayout);
 		}
 	}
 
@@ -113,8 +107,8 @@ public class LoginScreen extends CssLayout {
 
 		if (html.contains("location=\"login\"")) {
 			CustomLayout loginDetailsLayout = new CustomLayout();
-			loginDetailsLayout.setStyleName(CssStyles.LOGINDEATILS);
-			loginDetailsLayout.setWidth(100, Unit.PERCENTAGE);
+			loginDetailsLayout.addClassName(CssStyles.LOGINDEATILS);
+			loginDetailsLayout.setWidthFull();
 
 			loginDetailsLayout.setTemplateContents(html);
 			loginDetailsLayout.addComponent(loginLayout, "login");
@@ -130,119 +124,95 @@ public class LoginScreen extends CssLayout {
 		// login form, centered in the available part of the screen
 		VerticalLayout loginFormLayout = new VerticalLayout();
 		CssStyles.style(loginFormLayout, CssStyles.LOGINFORM, CssStyles.LAYOUT_SPACIOUS);
-		loginFormLayout.setMargin(true);
+		loginFormLayout.setPadding(true);
 		loginFormLayout.setSpacing(false);
 
 		// header of the menu
 		final HorizontalLayout titleLayout = new HorizontalLayout();
-		titleLayout.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
+		titleLayout.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
 		titleLayout.setSpacing(false);
-		Label title = new Label(FacadeProvider.getConfigFacade().getSormasInstanceName());
+		Span title = new Span(FacadeProvider.getConfigFacade().getSormasInstanceName());
 		CssStyles.style(title, CssStyles.H1, CssStyles.VSPACE_NONE, CssStyles.VSPACE_TOP_NONE, CssStyles.HSPACE_LEFT_3);
 
 		Image image;
 		if (isCustomBranding && StringUtils.isNotBlank(FacadeProvider.getConfigFacade().getCustomBrandingLogoPath())) {
 			Path logoPath = Paths.get(FacadeProvider.getConfigFacade().getCustomBrandingLogoPath());
-			image = new Image(null, new FileResource(logoPath.toFile()));
-			image.setWidth(50, Unit.PIXELS);
+			image = new Image(DownloadHandler.forFile(logoPath.toFile()), "");
+			image.setWidth("50px");
 		} else {
-			image = new Image(null, new ThemeResource("img/sormas-logo.png"));
+			image = new Image(THEME_IMG + "sormas-logo.png", "");
 		}
 
-		titleLayout.addComponent(image);
-		titleLayout.addComponent(title);
-		loginFormLayout.addComponent(titleLayout);
+		titleLayout.add(image);
+		titleLayout.add(title);
+		loginFormLayout.add(titleLayout);
 
-		Label header = new Label(I18nProperties.getCaption(Captions.Login_login));
-		CssStyles.style(header, CssStyles.H2);
-		loginFormLayout.addComponent(header);
-
+		// the "Login" header (Captions.Login_login) is the title of the login form
 		Component loginForm = buildLoginForm();
-		loginFormLayout.addComponent(loginForm);
-		loginFormLayout.addComponent(buildLoginDetails());
+		loginFormLayout.add(loginForm);
+		loginFormLayout.add(buildLoginDetails());
 
 		// layout to center login form when there is sufficient screen space
 		// - see the theme for how this is made responsive for various screen
 		// sizes
-		CssLayout loginLayout = new CssLayout();
-		loginLayout.setStyleName(CssStyles.LOGINFORM_CONTAINER);
-		loginLayout.addComponent(loginFormLayout);
+		Div loginLayout = new Div();
+		loginLayout.setClassName(CssStyles.LOGINFORM_CONTAINER);
+		loginLayout.add(loginFormLayout);
 
 		return loginLayout;
 	}
 
 	private Component buildLoginForm() {
 
-		LoginForm loginForm = new LoginForm() {
+		// was the Vaadin 8 LoginForm (a real form, so that browsers offer to save the password)
+		LoginI18n i18n = LoginI18n.createDefault();
+		i18n.getForm().setTitle(I18nProperties.getCaption(Captions.Login_login));
+		i18n.getForm().setUsername(I18nProperties.getCaption(Captions.Login_username));
+		i18n.getForm().setPassword(I18nProperties.getCaption(Captions.Login_password));
+		i18n.getForm().setSubmit(I18nProperties.getCaption(Captions.Login_doLogIn));
 
-			@Override
-			protected TextField createUsernameField() {
-				TextField usernameField = new TextField(I18nProperties.getCaption(Captions.Login_username));
-				usernameField.focus();
-				usernameField.setWidth(100, Unit.PERCENTAGE);
-				return usernameField;
-			}
-
-			@Override
-			protected PasswordField createPasswordField() {
-				PasswordField passwordField = new PasswordField(I18nProperties.getCaption(Captions.Login_password));
-				passwordField.setWidth(100, Unit.PERCENTAGE);
-				return passwordField;
-			}
-
-			@Override
-			protected Button createLoginButton() {
-				Button loginButton = ButtonHelper.createButton(Captions.Login_doLogIn, null, CssStyles.FORCE_CAPTION, ValoTheme.BUTTON_PRIMARY);
-				loginButton.setWidth(100, Unit.PERCENTAGE);
-
-				return loginButton;
-			}
-
-			@Override
-			protected Component createContent(TextField userNameField, PasswordField passwordField, Button loginButton) {
-				VerticalLayout contentLayout = (VerticalLayout) super.createContent(userNameField, passwordField, loginButton);
-				contentLayout.setMargin(false);
-				contentLayout.setSpacing(false);
-				return contentLayout;
-			}
-		};
+		// the default constructor disables the form on submit on the server too, so setEnabled(true) below reaches the browser
+		LoginForm loginForm = new LoginForm();
+		loginForm.setI18n(i18n);
+		loginForm.setForgotPasswordButtonVisible(false);
+		loginForm.setId(Captions.Login_doLogIn);
 
 		loginForm.addLoginListener(event -> {
-			login(event.getLoginParameter("username").trim(), event.getLoginParameter("password"));
+			login(loginForm, event.getUsername().trim(), event.getPassword());
 		});
 
-		loginForm.setWidth(240, Unit.PIXELS);
+		loginForm.getElement().getStyle().set("width", "240px");
 
 		return loginForm;
 	}
 
-	private CssLayout buildLoginDetails() {
+	private Div buildLoginDetails() {
 
-		CssLayout loginDetailsLayout = new CssLayout();
-		loginDetailsLayout.setStyleName(CssStyles.LOGINDEATILS);
-		loginDetailsLayout.setWidth(100, Unit.PERCENTAGE);
-
-		Label htmlLabel = new Label();
-		htmlLabel.setContentMode(ContentMode.HTML);
-		htmlLabel.setWidth(100, Unit.PERCENTAGE);
+		Div loginDetailsLayout = new Div();
+		loginDetailsLayout.setClassName(CssStyles.LOGINDEATILS);
+		loginDetailsLayout.setWidthFull();
 
 		Path customHtmlDirectory = Paths.get(FacadeProvider.getConfigFacade().getCustomFilesPath());
 		Path filePath = customHtmlDirectory.resolve("logindetails.html");
 
+		String html;
 		try {
 			byte[] encoded = Files.readAllBytes(filePath);
-			htmlLabel.setValue(new String(encoded, UTF_8));
+			html = new String(encoded, UTF_8);
 		} catch (IOException e) {
-			htmlLabel.setValue("");
+			html = "";
 		}
 
-		loginDetailsLayout.addComponent(htmlLabel);
+		Span htmlLabel = VaadinUiUtil.createLabel(html, ContentMode.HTML);
+		htmlLabel.setWidthFull();
+
+		loginDetailsLayout.add(htmlLabel);
 		return loginDetailsLayout;
 	}
 
-	private Layout buildLoginSidebarLayout() {
+	private Component buildLoginSidebarLayout() {
 
-		CssLayout loginSidebarLayout = new CssLayout();
+		Div loginSidebarLayout = new Div();
 		CssStyles.style(loginSidebarLayout, CssStyles.LOGINSIDEBAR);
 
 		VerticalLayout sidebarHeaderLayout = new VerticalLayout();
@@ -254,111 +224,105 @@ public class LoginScreen extends CssLayout {
 
 		if (isCustomBranding) {
 			Path sidebarHeaderPath = customHtmlDirectory.resolve("loginsidebar-header.html");
-			Label customSidebarHeaderLabel = new Label();
+			String html;
 			CssStyles.style(sidebarHeaderLayout, CssStyles.LOGINSIDEBAR_CUSTOM_HEADER);
-			customSidebarHeaderLabel.setContentMode(ContentMode.HTML);
 			try {
 				byte[] encoded = Files.readAllBytes(sidebarHeaderPath);
-				customSidebarHeaderLabel.setValue(new String(encoded, StandardCharsets.UTF_8));
+				html = new String(encoded, StandardCharsets.UTF_8);
 			} catch (IOException e) {
-				customSidebarHeaderLabel.setValue("");
+				html = "";
 			}
 
-			sidebarHeaderLayout.addComponent(customSidebarHeaderLabel);
+			sidebarHeaderLayout.add(VaadinUiUtil.createLabel(html, ContentMode.HTML));
 		} else {
-			Image img = new Image(null, new ThemeResource("img/sormas-logo-big-text.png"));
-			img.setWidth(200, Unit.PIXELS);
-			sidebarHeaderLayout.addComponent(img);
-			sidebarHeaderLayout.setComponentAlignment(img, Alignment.TOP_CENTER);
+			Image img = new Image(THEME_IMG + "sormas-logo-big-text.png", "");
+			img.setWidth("200px");
+			sidebarHeaderLayout.add(img);
+			sidebarHeaderLayout.setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, img);
 
-			Label fullNameText = new Label("Surveillance,<br>Outbreak Response Management<br>and Analysis System<br>", ContentMode.HTML);
-			fullNameText.setWidth(320, Unit.PIXELS);
+			Span fullNameText =
+				VaadinUiUtil.createLabel("Surveillance,<br>Outbreak Response Management<br>and Analysis System<br>", ContentMode.HTML);
+			fullNameText.setWidth("320px");
 			CssStyles.style(fullNameText, CssStyles.H2, CssStyles.LABEL_PRIMARY, CssStyles.VSPACE_TOP_NONE, CssStyles.ALIGN_CENTER);
-			sidebarHeaderLayout.addComponent(fullNameText);
-			sidebarHeaderLayout.setComponentAlignment(fullNameText, Alignment.TOP_CENTER);
+			sidebarHeaderLayout.add(fullNameText);
+			sidebarHeaderLayout.setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, fullNameText);
 
-			Label missionText = new Label(
+			Span missionText = VaadinUiUtil.createLabel(
 				"• " + I18nProperties.getCaption(Captions.LoginSidebar_diseasePrevention) + "<br>• "
 					+ I18nProperties.getCaption(Captions.LoginSidebar_diseaseDetection) + "<br>• "
 					+ I18nProperties.getCaption(Captions.LoginSidebar_outbreakResponse),
 				ContentMode.HTML);
-			missionText.setWidth(320, Unit.PIXELS);
+			missionText.setWidth("320px");
 			CssStyles.style(missionText, CssStyles.H3, CssStyles.VSPACE_TOP_NONE, CssStyles.ALIGN_CENTER);
-			sidebarHeaderLayout.addComponent(missionText);
-			sidebarHeaderLayout.setComponentAlignment(missionText, Alignment.TOP_CENTER);
+			sidebarHeaderLayout.add(missionText);
+			sidebarHeaderLayout.setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, missionText);
 		}
 
-		loginSidebarLayout.addComponent(sidebarHeaderLayout);
+		loginSidebarLayout.add(sidebarHeaderLayout);
 
-		Label poweredByLabel = new Label(I18nProperties.getCaption(Captions.LoginSidebar_poweredBy));
+		Span poweredByLabel = new Span(I18nProperties.getCaption(Captions.LoginSidebar_poweredBy));
 		CssStyles.style(poweredByLabel, CssStyles.LOGIN_HEADLINELABEL, CssStyles.H2, CssStyles.VSPACE_NONE);
-		loginSidebarLayout.addComponent(poweredByLabel);
+		loginSidebarLayout.add(poweredByLabel);
 
-		GridLayout poweredByLayout = new GridLayout(isCustomBranding ? 2 : 1, 1);
+		// was a GridLayout of one row: one or two logos, centered
+		HorizontalLayout poweredByLayout = new HorizontalLayout();
 		CssStyles.style(poweredByLayout, CssStyles.LOGIN_LOGOCONTAINER);
-		poweredByLayout.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
-		poweredByLayout.setWidth(100, Unit.PERCENTAGE);
+		poweredByLayout.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
+		poweredByLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.AROUND);
+		poweredByLayout.setWidthFull();
 		poweredByLayout.setSpacing(true);
 
 		if (isCustomBranding) {
 			CssStyles.style(poweredByLayout, CssStyles.VSPACE_TOP_3);
 
-			Image imgSormas = new Image(null, new ThemeResource("img/sormas-logo-horizontal.png"));
-			imgSormas.setWidth(isCustomBranding ? CUSTOM_BRANDING_LOGO_WIDTH : LOGO_WIDTH, Unit.PIXELS);
+			Image imgSormas = new Image(THEME_IMG + "sormas-logo-horizontal.png", "");
+			imgSormas.setWidth((isCustomBranding ? CUSTOM_BRANDING_LOGO_WIDTH : LOGO_WIDTH) + "px");
 			CssStyles.style(imgSormas, CssStyles.VSPACE_2);
-			poweredByLayout.addComponent(imgSormas);
+			poweredByLayout.add(imgSormas);
 		} else {
 			CssStyles.style(poweredByLayout, CssStyles.VSPACE_TOP_1);
 		}
 
-		Image imgSormasFoundation = new Image(null, new ThemeResource("img/sormas-foundation-logo.png"));
-		imgSormasFoundation.setWidth(isCustomBranding ? CUSTOM_BRANDING_LOGO_WIDTH : LOGO_WIDTH, Unit.PIXELS);
-		poweredByLayout.addComponent(imgSormasFoundation);
+		Image imgSormasFoundation = new Image(THEME_IMG + "sormas-foundation-logo.png", "");
+		imgSormasFoundation.setWidth((isCustomBranding ? CUSTOM_BRANDING_LOGO_WIDTH : LOGO_WIDTH) + "px");
+		poweredByLayout.add(imgSormasFoundation);
 
-		loginSidebarLayout.addComponent(poweredByLayout);
-
-		Label customSidebarLabel = new Label();
-		customSidebarLabel.setContentMode(ContentMode.HTML);
+		loginSidebarLayout.add(poweredByLayout);
 
 		Path sidebarPath = customHtmlDirectory.resolve("loginsidebar.html");
-
+		String sidebarHtml;
 		try {
 			byte[] encoded = Files.readAllBytes(sidebarPath);
-			customSidebarLabel.setValue(new String(encoded, StandardCharsets.UTF_8));
+			sidebarHtml = new String(encoded, StandardCharsets.UTF_8);
 		} catch (IOException e) {
-			customSidebarLabel.setValue("");
+			sidebarHtml = "";
 		}
 
-		loginSidebarLayout.addComponent(customSidebarLabel);
+		loginSidebarLayout.add(VaadinUiUtil.createLabel(sidebarHtml, ContentMode.HTML));
 		return loginSidebarLayout;
 	}
 
-	private void login(String username, String password) {
+	private void login(LoginForm loginForm, String username, String password) {
 		if (LoginHelper.login(username, password)) {
 			if (LoginHelper.hasApplicationRight()) {
 				loginListener.loginSuccessful();
 			} else {
-				showNotification(
-					new Notification(
-						I18nProperties.getString(Strings.headingLoginFailed),
-						I18nProperties.getString(Strings.errorNoAccessToWeb),
-						Notification.Type.WARNING_MESSAGE));
+				showNotification(I18nProperties.getString(Strings.headingLoginFailed), I18nProperties.getString(Strings.errorNoAccessToWeb));
 			}
 
 		} else {
-			showNotification(
-				new Notification(
-					I18nProperties.getString(Strings.headingLoginFailed),
-					I18nProperties.getString(Strings.messageLoginFailed),
-					Notification.Type.WARNING_MESSAGE));
+			showNotification(I18nProperties.getString(Strings.headingLoginFailed), I18nProperties.getString(Strings.messageLoginFailed));
 		}
+		// Flow's login form disables itself on submit; the Vaadin 8 form stayed usable
+		loginForm.setEnabled(true);
 	}
 
-	private void showNotification(Notification notification) {
+	private void showNotification(String caption, String description) {
+		Notification notification = NotificationHelper.createNotification(caption, description, NotificationHelper.Type.WARNING_MESSAGE, false);
 		// keep the notification visible a little while after moving the
 		// mouse, or until clicked
-		notification.setDelayMsec(2000);
-		notification.show(Page.getCurrent());
+		NotificationHelper.setDelayMsec(notification, 2000);
+		notification.open();
 	}
 
 	public interface LoginListener extends Serializable {

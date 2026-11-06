@@ -41,32 +41,56 @@ public class MainLayout extends Div
 
 	public MainLayout() {
 		setSizeFull();
-		add(SormasUI.get().getMainScreen());
+		// a UI without the SORMAS holder (user not logged in) never gets here: the login check sends it to the login
+		// page first; the guards only keep such a UI from failing
+		SormasUI sormasUI = SormasUI.get();
+		if (sormasUI != null) {
+			add(sormasUI.getMainScreen());
+		}
 	}
 
 	@Override
 	public void showRouterLayoutContent(HasElement content) {
-		navigator().showView(content);
+		Navigator navigator = navigator();
+		if (navigator != null) {
+			navigator.showView(content);
+		} else {
+			RouterLayout.super.showRouterLayoutContent(content);
+		}
 	}
 
 	@Override
 	public void removeRouterLayoutContent(HasElement oldContent) {
-		navigator().removeView(oldContent);
+		Navigator navigator = navigator();
+		if (navigator != null) {
+			navigator.removeView(oldContent);
+		} else {
+			RouterLayout.super.removeRouterLayoutContent(oldContent);
+		}
 	}
 
 	@Override
 	public void beforeLeave(BeforeLeaveEvent event) {
-		navigator().beforeLeave(event);
+		Navigator navigator = navigator();
+		if (navigator != null) {
+			navigator.beforeLeave(event);
+		}
 	}
 
 	@Override
 	public void beforeEnter(BeforeEnterEvent event) {
-		navigator().beforeEnter(event);
+		Navigator navigator = navigator();
+		if (navigator != null) {
+			navigator.beforeEnter(event);
+		}
 	}
 
 	@Override
 	public void afterNavigation(AfterNavigationEvent event) {
-		navigator().afterNavigation(event);
+		Navigator navigator = navigator();
+		if (navigator != null) {
+			navigator.afterNavigation(event);
+		}
 	}
 
 	@Override
@@ -76,6 +100,7 @@ public class MainLayout extends Div
 	}
 
 	private static Navigator navigator() {
-		return SormasUI.get().getNavigator();
+		SormasUI sormasUI = SormasUI.get();
+		return sormasUI != null ? sormasUI.getNavigator() : null;
 	}
 }

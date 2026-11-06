@@ -33,15 +33,9 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.google.common.collect.Sets;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.AbstractSelect.ItemCaptionMode;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -80,6 +74,11 @@ import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.InfrastructureFieldsHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class CaseCreateForm extends AbstractEditForm<CaseDataDto> {
 
@@ -113,7 +112,7 @@ public class CaseCreateForm extends AbstractEditForm<CaseDataDto> {
 	private NullableOptionGroup ogCaseOrigin;
 
 	private PersonCreateForm personCreateForm;
-	private Window warningSimilarPersons;
+	private Dialog warningSimilarPersons;
 
 	private final boolean showHomeAddressForm;
 	private final boolean showPersonSearchButton;
@@ -224,8 +223,8 @@ public class CaseCreateForm extends AbstractEditForm<CaseDataDto> {
 		});
 
 		// Jurisdiction fields
-		Label jurisdictionHeadingLabel = new Label(I18nProperties.getString(Strings.headingCaseResponsibleJurisidction));
-		jurisdictionHeadingLabel.addStyleName(H3);
+		Span jurisdictionHeadingLabel = new Span(I18nProperties.getString(Strings.headingCaseResponsibleJurisidction));
+		jurisdictionHeadingLabel.addClassName(H3);
 		getContent().addComponent(jurisdictionHeadingLabel, RESPONSIBLE_JURISDICTION_HEADING_LOC);
 
 		responsibleRegionCombo = addInfrastructureField(CaseDataDto.RESPONSIBLE_REGION);
@@ -240,8 +239,8 @@ public class CaseCreateForm extends AbstractEditForm<CaseDataDto> {
 		differentPlaceOfStayJurisdiction = addCustomField(DIFFERENT_PLACE_OF_STAY_JURISDICTION, Boolean.class, CheckBox.class);
 		differentPlaceOfStayJurisdiction.addStyleName(VSPACE_3);
 
-		Label placeOfStayHeadingLabel = new Label(I18nProperties.getCaption(Captions.casePlaceOfStay));
-		placeOfStayHeadingLabel.addStyleName(H3);
+		Span placeOfStayHeadingLabel = new Span(I18nProperties.getCaption(Captions.casePlaceOfStay));
+		placeOfStayHeadingLabel.addClassName(H3);
 		getContent().addComponent(placeOfStayHeadingLabel, PLACE_OF_STAY_HEADING_LOC);
 
 		regionCombo = addInfrastructureField(CaseDataDto.REGION);
@@ -291,10 +290,10 @@ public class CaseCreateForm extends AbstractEditForm<CaseDataDto> {
 			facilityOrHome.addItem(place);
 			facilityOrHome.setItemCaption(place, I18nProperties.getEnumCaption(place));
 		}
-		facilityOrHome.setItemCaptionMode(ItemCaptionMode.EXPLICIT);
+		// was setItemCaptionMode(EXPLICIT): every item has an explicit caption
 		facilityOrHome.setId("facilityOrHome");
 		facilityOrHome.setWidth(100, Unit.PERCENTAGE);
-		CssStyles.style(facilityOrHome, ValoTheme.OPTIONGROUP_HORIZONTAL);
+		CssStyles.style(facilityOrHome, SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL);
 		facilityTypeGroup = ComboBoxHelper.createComboBoxV7();
 		facilityTypeGroup.setId("typeGroup");
 		facilityTypeGroup.setCaption(I18nProperties.getCaption(Captions.Facility_typeGroup));
@@ -336,13 +335,13 @@ public class CaseCreateForm extends AbstractEditForm<CaseDataDto> {
 		}
 
 		regionCombo.addValueChangeListener(e -> {
-			RegionReferenceDto regionDto = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto regionDto = (RegionReferenceDto) e.getValue();
 			FieldHelper
 				.updateItems(districtCombo, regionDto != null ? FacadeProvider.getDistrictFacade().getAllActiveByRegion(regionDto.getUuid()) : null);
 		});
 		districtCombo.addValueChangeListener(e -> {
 			FieldHelper.removeItems(communityCombo);
-			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getProperty().getValue();
+			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getValue();
 			FieldHelper.updateItems(
 				communityCombo,
 				districtDto != null ? FacadeProvider.getCommunityFacade().getAllActiveByDistrict(districtDto.getUuid()) : null);
@@ -432,7 +431,7 @@ public class CaseCreateForm extends AbstractEditForm<CaseDataDto> {
 
 		if (!UiUtil.isPortHealthUser()) {
 			ogCaseOrigin.addValueChangeListener(ev -> {
-				if (ev.getProperty().getValue() == CaseOrigin.IN_COUNTRY) {
+				if (ev.getValue() == CaseOrigin.IN_COUNTRY) {
 					setVisible(false, CaseDataDto.POINT_OF_ENTRY, CaseDataDto.POINT_OF_ENTRY_DETAILS);
 					differentPointOfEntryJurisdiction.setVisible(false);
 					setRequired(true, FACILITY_OR_HOME_LOC, FACILITY_TYPE_GROUP_LOC, CaseDataDto.FACILITY_TYPE, CaseDataDto.HEALTH_FACILITY);
@@ -525,13 +524,13 @@ public class CaseCreateForm extends AbstractEditForm<CaseDataDto> {
 				setVisible(true, CaseDataDto.POINT_OF_ENTRY);
 			}
 		});
-		diseaseField.addValueChangeListener((ValueChangeListener) valueChangeEvent -> {
-			handleDiseaseChanged((Disease) valueChangeEvent.getProperty().getValue());
-			personCreateForm.updatePresentConditionEnum((Disease) valueChangeEvent.getProperty().getValue());
+		diseaseField.addValueChangeListener(valueChangeEvent -> {
+			handleDiseaseChanged((Disease) valueChangeEvent.getValue());
+			personCreateForm.updatePresentConditionEnum((Disease) valueChangeEvent.getValue());
 		});
 
 		diseaseVariantField.addValueChangeListener(e -> {
-			DiseaseVariant diseaseVariant = (DiseaseVariant) e.getProperty().getValue();
+			DiseaseVariant diseaseVariant = (DiseaseVariant) e.getValue();
 			diseaseVariantDetailsField.setVisible(diseaseVariant != null && diseaseVariant.matchPropertyValue(DiseaseVariant.HAS_DETAILS, true));
 		});
 
@@ -731,7 +730,7 @@ public class CaseCreateForm extends AbstractEditForm<CaseDataDto> {
 	}
 
 	@Override
-	public void setValue(CaseDataDto caseDataDto) throws com.vaadin.v7.data.Property.ReadOnlyException, Converter.ConversionException {
+	public void setValue(CaseDataDto caseDataDto) {
 		super.setValue(caseDataDto);
 
 		FacilityReferenceDto healthFacility = caseDataDto.getHealthFacility();
@@ -768,7 +767,7 @@ public class CaseCreateForm extends AbstractEditForm<CaseDataDto> {
 		personCreateForm.setSearchedPerson(searchedPerson);
 	}
 
-	public Window getWarningSimilarPersons() {
+	public Dialog getWarningSimilarPersons() {
 		return warningSimilarPersons;
 	}
 }

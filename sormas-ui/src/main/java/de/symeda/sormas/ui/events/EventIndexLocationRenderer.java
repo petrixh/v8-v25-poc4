@@ -15,17 +15,16 @@
 
 package de.symeda.sormas.ui.events;
 
-import com.vaadin.ui.renderers.TextRenderer;
 
 import de.symeda.sormas.api.event.EventIndexDto.EventIndexLocation;
 import de.symeda.sormas.api.feature.FeatureType;
 import de.symeda.sormas.ui.UiUtil;
-import elemental.json.JsonValue;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
 public class EventIndexLocationRenderer extends TextRenderer {
 
 	@Override
-	public JsonValue encode(Object value) {
+	public String encode(Object value) {
 
 		if (value != null && (value.getClass().equals(EventIndexLocation.class))) {
 			if (UiUtil.enabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {

@@ -22,9 +22,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import com.vaadin.navigator.View;
-import com.vaadin.ui.renderers.DateRenderer;
-
 import de.symeda.sormas.api.DiseaseHelper;
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
@@ -38,11 +35,13 @@ import de.symeda.sormas.api.utils.DateHelper;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
+import de.symeda.sormas.ui.navigation.View;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.FilteredGrid;
 import de.symeda.sormas.ui.utils.ShowDetailsListener;
 import de.symeda.sormas.ui.utils.UuidRenderer;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 @SuppressWarnings("serial")
 public class EventActionsGrid extends FilteredGrid<EventActionIndexDto, EventCriteria> {
@@ -105,8 +104,8 @@ public class EventActionsGrid extends FilteredGrid<EventActionIndexDto, EventCri
 		((Column<EventActionIndexDto, Date>) getColumn(EventActionIndexDto.ACTION_DATE))
 			.setRenderer(new DateRenderer(DateHelper.getLocalDateTimeFormat(userLanguage)));
 
-		for (Column<EventActionIndexDto, ?> column : getColumns()) {
-			String columnId = column.getId();
+		for (Column<EventActionIndexDto, ?> column : getAllColumns()) {
+			String columnId = column.getKey();
 			column.setCaption(I18nProperties.getPrefixCaption(EventActionIndexDto.I18N_PREFIX, columnId, column.getCaption()));
 		}
 
@@ -142,7 +141,7 @@ public class EventActionsGrid extends FilteredGrid<EventActionIndexDto, EventCri
 				return event.getActionCreatorUser();
 			}
 		})
-			.setId(ACTION_LAST_MODIFIED_BY_OR_CREATOR)
+			.setKey(ACTION_LAST_MODIFIED_BY_OR_CREATOR)
 			.setSortProperty(EventActionIndexDto.ACTION_LAST_MODIFIED_BY)
 			.setCaption(I18nProperties.getPrefixCaption(EventActionIndexDto.I18N_PREFIX, EventActionIndexDto.ACTION_LAST_MODIFIED_BY));
 
@@ -175,7 +174,7 @@ public class EventActionsGrid extends FilteredGrid<EventActionIndexDto, EventCri
 
 	public void reload() {
 
-		if (getSelectionModel().isUserSelectionAllowed()) {
+		if (isUserSelectionAllowed()) {
 			deselectAll();
 		}
 

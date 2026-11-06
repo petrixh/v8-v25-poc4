@@ -17,12 +17,12 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.events;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.action.ActionContext;
 import de.symeda.sormas.api.action.ActionCriteria;
@@ -64,22 +64,24 @@ public class EventActionsView extends AbstractEventView {
 		topLayout.setSpacing(true);
 		topLayout.setWidth(100, Unit.PERCENTAGE);
 
-		Label header = new Label(I18nProperties.getPrefixCaption(EventDto.I18N_PREFIX, EventDto.EVENT_ACTIONS));
+		Span header = new Span(I18nProperties.getPrefixCaption(EventDto.I18N_PREFIX, EventDto.EVENT_ACTIONS));
 		header.setSizeUndefined();
 		CssStyles.style(header, CssStyles.H2, CssStyles.VSPACE_NONE);
-		topLayout.addComponent(header);
+		topLayout.add(header);
 
 		// add create button if user has role
 		if (UiUtil.permitted(UserRight.ACTION_CREATE)) {
-			addButton = ButtonHelper.createIconButton(Captions.actionCreate, VaadinIcons.PLUS_CIRCLE, e -> {
+			addButton = ButtonHelper.createIconButton(Captions.actionCreate, VaadinIcon.PLUS_CIRCLE, e -> {
 				ControllerProvider.getActionController().create(ActionContext.EVENT, this.getEventRef(), this::reload);
-			}, ValoTheme.BUTTON_PRIMARY);
+			}, CssStyles.BUTTON_PRIMARY);
 
-			topLayout.addComponent(addButton);
-			topLayout.setComponentAlignment(addButton, Alignment.MIDDLE_RIGHT);
+			topLayout.add(addButton);
+			// was Alignment.MIDDLE_RIGHT in its slot: header left, button right
+			topLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, addButton);
+			topLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
 		}
 
-		topLayout.addStyleName(CssStyles.VSPACE_3);
+		topLayout.addClassName(CssStyles.VSPACE_3);
 		return topLayout;
 	}
 
@@ -88,14 +90,14 @@ public class EventActionsView extends AbstractEventView {
 	 */
 	private HorizontalLayout createFilterBar() {
 		HorizontalLayout filterLayout = new HorizontalLayout();
-		filterLayout.setMargin(false);
+		filterLayout.setPadding(false);
 		filterLayout.setSpacing(true);
 		filterLayout.setSizeUndefined();
 
 		filterForm = new EventActionFilterForm();
 		filterForm.addResetHandler(e -> navigateTo(null));
 		filterForm.addApplyHandler(e -> navigateTo(criteria));
-		filterLayout.addComponent(filterForm);
+		filterLayout.add(filterForm);
 
 		return filterLayout;
 	}
@@ -113,17 +115,17 @@ public class EventActionsView extends AbstractEventView {
 			list = new ActionList(ActionContext.EVENT, criteria, 20);
 			listLayout = new DetailSubComponentWrapper(() -> null);
 			listLayout.setSizeFull();
-			listLayout.setMargin(true);
+			listLayout.setPadding(true);
 			listLayout.setSpacing(false);
 
 			HorizontalLayout topBar = createTopBar();
-			listLayout.addComponent(topBar);
+			listLayout.add(topBar);
 
 			HorizontalLayout filterBar = createFilterBar();
-			listLayout.addComponent(filterBar);
+			listLayout.add(filterBar);
 
-			listLayout.addComponent(list);
-			listLayout.setExpandRatio(list, 1);
+			listLayout.add(list);
+			listLayout.setFlexGrow(1, list);
 			setSubComponent(listLayout);
 
 			boolean hasEventEditRight = UiUtil.permitted(UserRight.EVENT_EDIT);

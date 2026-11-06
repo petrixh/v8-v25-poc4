@@ -22,10 +22,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import com.vaadin.data.provider.DataProviderListener;
-import com.vaadin.navigator.View;
-import com.vaadin.ui.renderers.DateRenderer;
-import com.vaadin.ui.renderers.HtmlRenderer;
+import com.vaadin.flow.data.provider.DataProviderListener;
 
 import de.symeda.sormas.api.DiseaseHelper;
 import de.symeda.sormas.api.FacadeProvider;
@@ -46,12 +43,15 @@ import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.events.groups.EventGroupsValueProvider;
+import de.symeda.sormas.ui.navigation.View;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.FieldAccessColumnStyleGenerator;
 import de.symeda.sormas.ui.utils.FieldAccessHelper;
 import de.symeda.sormas.ui.utils.FilteredGrid;
 import de.symeda.sormas.ui.utils.ShowDetailsListener;
 import de.symeda.sormas.ui.utils.UuidRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 @SuppressWarnings("serial")
 public class EventGrid extends FilteredGrid<EventIndexDto, EventCriteria> {
@@ -208,7 +208,7 @@ public class EventGrid extends FilteredGrid<EventIndexDto, EventCriteria> {
 			eventGroupsColumn.setRenderer(new EventGroupsValueProvider(), new HtmlRenderer());
 
 			addItemClickListener(e -> {
-				if (e.getColumn() != null && EventIndexDto.EVENT_GROUPS.equals(e.getColumn().getId())) {
+				if (e.getColumn() != null && EventIndexDto.EVENT_GROUPS.equals(e.getColumn().getKey())) {
 					EventGroupsIndexDto eventGroups = e.getItem().getEventGroups();
 					if (eventGroups != null && eventGroups.getEventGroup() != null) {
 						ControllerProvider.getEventGroupController().navigateToData(eventGroups.getEventGroup().getUuid());
@@ -223,8 +223,8 @@ public class EventGrid extends FilteredGrid<EventIndexDto, EventCriteria> {
 		((Column<EventIndexDto, Date>) getColumn(EventIndexDto.REPORT_DATE_TIME))
 			.setRenderer(new DateRenderer(DateHelper.getLocalDateTimeFormat(userLanguage)));
 
-		for (Column<EventIndexDto, ?> column : getColumns()) {
-			String columnId = column.getId();
+		for (Column<EventIndexDto, ?> column : getAllColumns()) {
+			String columnId = column.getKey();
 			column.setCaption(I18nProperties.getPrefixCaption(EventIndexDto.I18N_PREFIX, columnId, column.getCaption()));
 			column.setStyleGenerator(
 				FieldAccessColumnStyleGenerator
@@ -300,7 +300,7 @@ public class EventGrid extends FilteredGrid<EventIndexDto, EventCriteria> {
 
 	public void reload() {
 
-		if (getSelectionModel().isUserSelectionAllowed()) {
+		if (isUserSelectionAllowed()) {
 			deselectAll();
 		}
 

@@ -14,9 +14,9 @@
  */
 package de.symeda.sormas.ui.events;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.event.EventDto;
 import de.symeda.sormas.api.event.EventParticipantDto;
@@ -42,17 +42,17 @@ public class EventParticipantInfoLayout extends AbstractInfoLayout<EventParticip
 		this.eventDto = eventDto;
 
 		setSpacing(true);
-		setMargin(false);
-		setWidth(100, Sizeable.Unit.PERCENTAGE);
+		setPadding(false);
+		setWidth(100, Unit.PERCENTAGE);
 		updateEventParticipantInfo();
 	}
 
 	private void updateEventParticipantInfo() {
 
-		this.removeAllComponents();
+		this.removeAll();
 
 		final VerticalLayout firstColumn = new VerticalLayout();
-		firstColumn.setMargin(false);
+		firstColumn.setPadding(false);
 		firstColumn.setSpacing(true);
 
 		addCustomDescLabel(
@@ -60,7 +60,7 @@ public class EventParticipantInfoLayout extends AbstractInfoLayout<EventParticip
 			EventDto.class,
 			"eventUuid",
 			DataHelper.getShortUuid(eventDto.getUuid()),
-			I18nProperties.getPrefixCaption(EventDto.I18N_PREFIX, EventDto.UUID)).setDescription(eventDto.getUuid());
+			I18nProperties.getPrefixCaption(EventDto.I18N_PREFIX, EventDto.UUID)).setTitle(eventDto.getUuid());
 		addCustomDescLabel(
 			firstColumn,
 			EventDto.class,
@@ -79,10 +79,10 @@ public class EventParticipantInfoLayout extends AbstractInfoLayout<EventParticip
 						.format("%s - %s", DateFormatHelper.formatDate(eventDto.getStartDate()), DateFormatHelper.formatDate(eventDto.getEndDate())),
 			I18nProperties.getCaption(Captions.singleDayEventDate));
 
-		this.addComponent(firstColumn);
+		this.add(firstColumn);
 
 		final VerticalLayout secondColumn = new VerticalLayout();
-		secondColumn.setMargin(false);
+		secondColumn.setPadding(false);
 		secondColumn.setSpacing(true);
 
 		final PersonDto personDto = eventParticipantDto.getPerson();
@@ -91,7 +91,7 @@ public class EventParticipantInfoLayout extends AbstractInfoLayout<EventParticip
 			PersonDto.class,
 			"personUuid",
 			DataHelper.getShortUuid(personDto.getUuid()),
-			I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.UUID)).setDescription(personDto.getUuid());
+			I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.UUID)).setTitle(personDto.getUuid());
 
 		addDescLabel(
 			secondColumn,
@@ -113,8 +113,8 @@ public class EventParticipantInfoLayout extends AbstractInfoLayout<EventParticip
 			personDto.getSex(),
 			I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.SEX));
 
-		secondColumn.addComponent(ageSexRow);
+		secondColumn.add(ageSexRow);
 
-		this.addComponent(secondColumn);
+		this.add(secondColumn);
 	}
 }

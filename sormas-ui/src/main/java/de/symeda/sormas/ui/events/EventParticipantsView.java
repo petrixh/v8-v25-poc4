@@ -25,24 +25,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.vaadin.hene.popupbutton.PopupButton;
-
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.Page;
-import com.vaadin.server.StreamResource;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.components.grid.MultiSelectionModelImpl;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.grid.GridMultiSelectionModel;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.server.StreamRegistration;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;
@@ -70,16 +66,20 @@ import de.symeda.sormas.ui.events.eventparticipantimporter.EventParticipantImpor
 import de.symeda.sormas.ui.samples.HasName;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.ComboBoxHelper;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DetailSubComponentWrapper;
 import de.symeda.sormas.ui.utils.EventParticipantDownloadUtil;
 import de.symeda.sormas.ui.utils.ExportEntityName;
 import de.symeda.sormas.ui.utils.GridExportStreamResource;
-import de.symeda.sormas.ui.utils.LayoutUtil;
 import de.symeda.sormas.ui.utils.MenuBarHelper;
 import de.symeda.sormas.ui.utils.MenuBarHelper.MenuBarItem;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.PopupButton;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.expandablebutton.ExpandableButton;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class EventParticipantsView extends AbstractEventView implements HasName {
 
@@ -98,14 +98,14 @@ public class EventParticipantsView extends AbstractEventView implements HasName 
 	private Button activeStatusButton;
 	private EventParticipantsFilterForm filterForm;
 
-	private Label relevanceStatusInfoLabel;
+	private Span relevanceStatusInfoLabel;
 	private ComboBox eventParticipantRelevanceStatusFilter;
 
 	public EventParticipantsView() {
 		super(VIEW_NAME);
 
 		setSizeFull();
-		addStyleName("crud-view");
+		addClassName("crud-view");
 
 		viewConfiguration = ViewModelProviders.of(getClass()).get(EventParticipantsViewConfiguration.class);
 	}
@@ -128,7 +128,7 @@ public class EventParticipantsView extends AbstractEventView implements HasName 
 		});
 		filterForm.addApplyHandler(e -> grid.reload());
 
-		topLayout.addComponent(filterForm);
+		topLayout.add(filterForm);
 
 		return topLayout;
 	}
@@ -142,7 +142,7 @@ public class EventParticipantsView extends AbstractEventView implements HasName 
 	}
 
 	private Set<String> getSelectedRows() {
-		return this.grid.getSelectionModel() instanceof MultiSelectionModelImpl
+		return this.grid.getSelectionModel() instanceof GridMultiSelectionModel
 			? grid.asMultiSelect().getSelectedItems().stream().map(EventParticipantIndexDto::getUuid).collect(Collectors.toSet())
 			: Collections.emptySet();
 	}
@@ -163,13 +163,13 @@ public class EventParticipantsView extends AbstractEventView implements HasName 
 			grid = new EventParticipantsGrid(criteria);
 			gridLayout = new DetailSubComponentWrapper(() -> null);
 			gridLayout.setSizeFull();
-			gridLayout.setMargin(true);
+			gridLayout.setPadding(true);
 			gridLayout.setSpacing(false);
-			gridLayout.addComponent(createTopBar());
-			gridLayout.addComponent(createStatusFilterBar(isEditAllowed()));
-			gridLayout.addComponent(grid);
-			gridLayout.setExpandRatio(grid, 1);
-			gridLayout.setStyleName("crud-main-layout");
+			gridLayout.add(createTopBar());
+			gridLayout.add(createStatusFilterBar(isEditAllowed()));
+			gridLayout.add(grid);
+			gridLayout.setFlexGrow(1, grid);
+			gridLayout.setClassName("crud-main-layout");
 			grid.addDataSizeChangeListener(e -> updateStatusButtons());
 			setSubComponent(gridLayout);
 			gridLayout.setEnabled(allowActions() || FacadeProvider.getEventFacade().hasParticipantWithSpecialAccess(eventRef));
@@ -186,14 +186,13 @@ public class EventParticipantsView extends AbstractEventView implements HasName 
 
 		HorizontalLayout statusFilterLayout = new HorizontalLayout();
 		statusFilterLayout.setSpacing(true);
-		statusFilterLayout.setMargin(false);
+		statusFilterLayout.setPadding(false);
 		statusFilterLayout.setWidth(100, Unit.PERCENTAGE);
-		statusFilterLayout.addStyleName(CssStyles.VSPACE_3);
+		statusFilterLayout.addClassName(CssStyles.VSPACE_3);
 
 		Button statusAll = ButtonHelper.createButton(Captions.all, e -> {
-		}, ValoTheme.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER);
-		statusAll.setCaptionAsHtml(true);
-		statusFilterLayout.addComponent(statusAll);
+		}, CssStyles.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER);
+		statusFilterLayout.add(statusAll);
 		activeStatusButton = statusAll;
 
 		HorizontalLayout actionButtonsLayout = new HorizontalLayout();
@@ -208,14 +207,14 @@ public class EventParticipantsView extends AbstractEventView implements HasName 
 					FeatureTypeProperty.THRESHOLD_IN_DAYS,
 					Integer.class);
 			if (daysAfterEventParticipantGetsArchived > 0) {
-				relevanceStatusInfoLabel = new Label(
-					VaadinIcons.INFO_CIRCLE.getHtml() + " "
+				relevanceStatusInfoLabel = VaadinUiUtil.createLabel(
+					HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " "
 						+ String.format(I18nProperties.getString(Strings.infoArchivedEventParticipants), daysAfterEventParticipantGetsArchived),
 					ContentMode.HTML);
 				relevanceStatusInfoLabel.setVisible(false);
-				relevanceStatusInfoLabel.addStyleName(CssStyles.LABEL_VERTICAL_ALIGN_SUPER);
-				actionButtonsLayout.addComponent(relevanceStatusInfoLabel);
-				actionButtonsLayout.setComponentAlignment(relevanceStatusInfoLabel, Alignment.MIDDLE_RIGHT);
+				relevanceStatusInfoLabel.addClassName(CssStyles.LABEL_VERTICAL_ALIGN_SUPER);
+				actionButtonsLayout.add(relevanceStatusInfoLabel);
+				actionButtonsLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, relevanceStatusInfoLabel);
 			}
 		}
 
@@ -227,7 +226,7 @@ public class EventParticipantsView extends AbstractEventView implements HasName 
 		eventParticipantRelevanceStatusFilter.addValueChangeListener(e -> {
 			viewConfiguration.setRelevanceStatusChangedEvent(getEventRef().getUuid());
 			if (relevanceStatusInfoLabel != null) {
-				relevanceStatusInfoLabel.setVisible(EntityRelevanceStatus.ARCHIVED.equals(e.getProperty().getValue()));
+				relevanceStatusInfoLabel.setVisible(EntityRelevanceStatus.ARCHIVED.equals(e.getValue()));
 			}
 
 			if (grid.getColumn(grid.DELETE_REASON_COLUMN) != null) {
@@ -235,18 +234,18 @@ public class EventParticipantsView extends AbstractEventView implements HasName 
 					.setHidden(!eventParticipantRelevanceStatusFilter.getValue().equals(EntityRelevanceStatus.DELETED));
 			}
 
-			criteria.relevanceStatus((EntityRelevanceStatus) e.getProperty().getValue());
+			criteria.relevanceStatus((EntityRelevanceStatus) e.getValue());
 			navigateTo(criteria);
 		});
-		actionButtonsLayout.addComponent(eventParticipantRelevanceStatusFilter);
+		actionButtonsLayout.add(eventParticipantRelevanceStatusFilter);
 
 		if (isEditAllowed) {
-			Button btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcons.CHECK_SQUARE_O, null);
+			Button btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcon.CHECK_SQUARE_O, null);
 			btnEnterBulkEditMode.setVisible(!viewConfiguration.isInEagerMode());
-			actionButtonsLayout.addComponent(btnEnterBulkEditMode);
+			actionButtonsLayout.add(btnEnterBulkEditMode);
 
 			Button btnLeaveBulkEditMode =
-				ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcons.CLOSE, null, ValoTheme.BUTTON_PRIMARY);
+				ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcon.CLOSE, null, CssStyles.BUTTON_PRIMARY);
 			btnLeaveBulkEditMode.setVisible(viewConfiguration.isInEagerMode());
 
 			if (shouldDisableButton()) {
@@ -254,7 +253,7 @@ public class EventParticipantsView extends AbstractEventView implements HasName 
 				btnLeaveBulkEditMode.setEnabled(false);
 				bulkOperationsDropdown.setEnabled(false);
 			}
-			actionButtonsLayout.addComponent(btnLeaveBulkEditMode);
+			actionButtonsLayout.add(btnLeaveBulkEditMode);
 
 			btnEnterBulkEditMode.addClickListener(e -> {
 				bulkOperationsDropdown.setVisible(true);
@@ -276,7 +275,7 @@ public class EventParticipantsView extends AbstractEventView implements HasName 
 				bulkOperationsDropdown = MenuBarHelper.createDropDown(Captions.bulkActions, getBulkActions());
 				bulkOperationsDropdown.setVisible(viewConfiguration.isInEagerMode());
 
-				actionButtonsLayout.addComponent(bulkOperationsDropdown);
+				actionButtonsLayout.add(bulkOperationsDropdown);
 			}
 
 			addImportExportButtons(actionButtonsLayout);
@@ -284,19 +283,21 @@ public class EventParticipantsView extends AbstractEventView implements HasName 
 			if (UiUtil.permitted(UserRight.EVENTPARTICIPANT_CREATE)) {
 				final ExpandableButton lineListingButton = new ExpandableButton(Captions.lineListing)
 					.expand(e -> ControllerProvider.getEventParticipantController().openLineListingWindow(getEventRef()));
-				actionButtonsLayout.addComponent(lineListingButton);
+				actionButtonsLayout.add(lineListingButton);
 				lineListingButton.setEnabled(allowActions());
 
-				addButton = ButtonHelper.createIconButton(Captions.eventParticipantAddPerson, VaadinIcons.PLUS_CIRCLE, e -> {
+				addButton = ButtonHelper.createIconButton(Captions.eventParticipantAddPerson, VaadinIcon.PLUS_CIRCLE, e -> {
 					ControllerProvider.getEventParticipantController().createEventParticipant(this.getEventRef(), r -> navigateTo(criteria));
-				}, ValoTheme.BUTTON_PRIMARY);
+				}, CssStyles.BUTTON_PRIMARY);
 
-				actionButtonsLayout.addComponent(addButton);
+				actionButtonsLayout.add(addButton);
 			}
 
-			statusFilterLayout.addComponent(actionButtonsLayout);
-			statusFilterLayout.setComponentAlignment(actionButtonsLayout, Alignment.MIDDLE_RIGHT);
-			statusFilterLayout.setExpandRatio(actionButtonsLayout, 1);
+			statusFilterLayout.add(actionButtonsLayout);
+			// was Alignment.MIDDLE_RIGHT: the layout grows, its content goes right
+			statusFilterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, actionButtonsLayout);
+			statusFilterLayout.setFlexGrow(1, actionButtonsLayout);
+			actionButtonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 		}
 
 		return statusFilterLayout;
@@ -339,30 +340,29 @@ public class EventParticipantsView extends AbstractEventView implements HasName 
 				bulkActions.add(
 					new MenuBarItem(
 						I18nProperties.getCaption(Captions.bulkEventParticipantsToContacts),
-						VaadinIcons.HAND,
+						VaadinIcon.HAND,
 						mi -> grid.bulkActionHandler(items -> {
 							EventDto eventDto = FacadeProvider.getEventFacade().getEventByUuid(getEventRef().getUuid(), false);
 							ControllerProvider.getContactController().openLineListingWindow(eventDto, items);
 						}, true)));
 			}
 			if (UiUtil.permitted(UserRight.EVENTPARTICIPANT_DELETE)) {
-				bulkActions.add(new MenuBarItem(I18nProperties.getCaption(Captions.bulkDelete), VaadinIcons.TRASH, mi -> {
+				bulkActions.add(new MenuBarItem(I18nProperties.getCaption(Captions.bulkDelete), VaadinIcon.TRASH, mi -> {
 					grid.bulkActionHandler(items -> {
 						ControllerProvider.getEventParticipantController().deleteAllSelectedItems(items, grid, () -> grid.reload());
 					}, true);
 				}));
 			}
 			if (isDocGenerationAllowed()) {
-				bulkActions.add(new MenuBarItem(I18nProperties.getCaption(Captions.bulkActionCreatDocuments), VaadinIcons.FILE_TEXT, mi -> {
+				bulkActions.add(new MenuBarItem(I18nProperties.getCaption(Captions.bulkActionCreatDocuments), VaadinIcon.FILE_TEXT, mi -> {
 					grid.bulkActionHandler(items -> {
 						List<EventParticipantReferenceDto> references =
 							grid.asMultiSelect().getSelectedItems().stream().map(EventParticipantIndexDto::toReference).collect(Collectors.toList());
 						if (references.size() == 0) {
-							new Notification(
+							NotificationHelper.show(
 								I18nProperties.getString(Strings.headingNoEventParticipantsSelected),
 								I18nProperties.getString(Strings.messageNoEventParticipantsSelected),
-								Notification.Type.WARNING_MESSAGE,
-								false).show(Page.getCurrent());
+								NotificationHelper.Type.WARNING_MESSAGE);
 
 							return;
 						}
@@ -375,12 +375,12 @@ public class EventParticipantsView extends AbstractEventView implements HasName 
 				}));
 			}
 
-			bulkActions.add(new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkEmailSend), VaadinIcons.ENVELOPE, mi -> {
+			bulkActions.add(new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkEmailSend), VaadinIcon.ENVELOPE, mi -> {
 				grid.bulkActionHandler(items -> ControllerProvider.getEventParticipantController().sendEmailsToAllSelectedItems(items, grid), true);
 			}, UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS) && UiUtil.permitted(UserRight.EXTERNAL_EMAIL_SEND)));
 
 		} else if (UiUtil.permitted(UserRight.EVENTPARTICIPANT_DELETE)) {
-			bulkActions.add(new MenuBarItem(I18nProperties.getCaption(Captions.bulkRestore), VaadinIcons.ARROW_BACKWARD, mi -> {
+			bulkActions.add(new MenuBarItem(I18nProperties.getCaption(Captions.bulkRestore), VaadinIcon.ARROW_BACKWARD, mi -> {
 				grid.bulkActionHandler(items -> {
 					ControllerProvider.getEventParticipantController().restoreSelectedEventParticipants(items, grid, () -> grid.reload());
 				}, true);
@@ -393,55 +393,61 @@ public class EventParticipantsView extends AbstractEventView implements HasName 
 		VerticalLayout exportLayout = new VerticalLayout();
 		{
 			exportLayout.setSpacing(true);
-			exportLayout.setMargin(true);
-			exportLayout.addStyleName(CssStyles.LAYOUT_MINIMAL);
+			exportLayout.setPadding(true);
+			exportLayout.addClassName(CssStyles.LAYOUT_MINIMAL);
 			exportLayout.setWidth(250, Unit.PIXELS);
 		}
 
 		if (UiUtil.permitted(UserRight.EVENTPARTICIPANT_IMPORT)) {
-			Button importButton = ButtonHelper.createIconButton(Captions.actionImport, VaadinIcons.UPLOAD, e -> {
-				Window popupWindow = VaadinUiUtil.showPopupWindow(new EventParticipantImportLayout(getEventRef()));
-				popupWindow.setCaption(I18nProperties.getString(Strings.headingImportEventParticipant));
-				popupWindow.addCloseListener(c -> this.grid.reload());
-			}, ValoTheme.BUTTON_PRIMARY);
+			Button importButton = ButtonHelper.createIconButton(Captions.actionImport, VaadinIcon.UPLOAD, e -> {
+				Dialog popupWindow = VaadinUiUtil.showPopupWindow(new EventParticipantImportLayout(getEventRef()));
+				popupWindow.setHeaderTitle(I18nProperties.getString(Strings.headingImportEventParticipant));
+				VaadinUiUtil.addCloseListener(popupWindow, c -> this.grid.reload());
+			}, CssStyles.BUTTON_PRIMARY);
 			if (shouldDisableButton()) {
 				importButton.setEnabled(false);
 			}
 
-			actionButtonsLayout.addComponent(importButton);
+			actionButtonsLayout.add(importButton);
 		}
 
 		// export
-		PopupButton exportPopupButton = ButtonHelper.createIconPopupButton(Captions.export, VaadinIcons.DOWNLOAD, exportLayout);
+		PopupButton exportPopupButton = ButtonHelper.createIconPopupButton(Captions.export, VaadinIcon.DOWNLOAD, exportLayout);
 		if (shouldDisableButton()) {
 			exportPopupButton.setEnabled(false);
 		}
-		actionButtonsLayout.addComponent(exportPopupButton);
+		actionButtonsLayout.add(exportPopupButton);
 
 		{
-			StreamResource streamResource = GridExportStreamResource.createStreamResourceWithSelectedItems(
+			DownloadHandler streamResource = GridExportStreamResource.createStreamResourceWithSelectedItems(
 				grid,
-				() -> this.grid.getSelectionModel() instanceof MultiSelectionModelImpl ? this.grid.asMultiSelect().getSelectedItems() : null,
+				() -> this.grid.getSelectionModel() instanceof GridMultiSelectionModel ? this.grid.asMultiSelect().getSelectedItems() : null,
 				ExportEntityName.EVENT_PARTICIPANTS);
-			addExportButton(streamResource, exportPopupButton, exportLayout, VaadinIcons.TABLE, Captions.exportBasic, Strings.infoBasicExport);
+			addExportButton(
+				streamResource,
+				exportPopupButton.getPopover(),
+				exportLayout,
+				VaadinIcon.TABLE,
+				Captions.exportBasic,
+				Strings.infoBasicExport);
 		}
 
 		{
-			StreamResource extendedExportStreamResource =
+			DownloadHandler extendedExportStreamResource =
 				EventParticipantDownloadUtil.createExtendedEventParticipantExportResource(grid.getCriteria(), this::getSelectedRows, null);
 
 			addExportButton(
 				extendedExportStreamResource,
-				exportPopupButton,
+				exportPopupButton.getPopover(),
 				exportLayout,
-				VaadinIcons.FILE_TEXT,
+				VaadinIcon.FILE_TEXT,
 				Captions.exportDetailed,
 				Descriptions.descDetailedExportButton);
 		}
 
 		{
-			Button btnCustomExport = ButtonHelper.createIconButton(Captions.exportCustom, VaadinIcons.FILE_TEXT, e -> {
-				Window customExportWindow = VaadinUiUtil.createPopupWindow();
+			Button btnCustomExport = ButtonHelper.createIconButton(Captions.exportCustom, VaadinIcon.FILE_TEXT, e -> {
+				Dialog customExportWindow = VaadinUiUtil.createPopupWindow();
 
 				ExportConfigurationsLayout customExportsLayout = new ExportConfigurationsLayout(
 					ExportType.EVENT_PARTICIPANTS,
@@ -450,22 +456,25 @@ public class EventParticipantsView extends AbstractEventView implements HasName 
 						FacadeProvider.getConfigFacade().getCountryLocale(),
 						FacadeProvider.getFeatureConfigurationFacade().getActiveServerFeatureConfigurations()),
 					customExportWindow::close);
-				customExportsLayout.setExportCallback(
-					(exportConfig) -> Page.getCurrent()
-						.open(
+				customExportsLayout.setExportCallback((exportConfig) -> {
+					// was Page.open(resource, null, true): the download opens in the current window (as CasesView)
+					StreamRegistration exportRegistration = VaadinSession.getCurrent()
+						.getResourceRegistry()
+						.registerResource(
 							EventParticipantDownloadUtil
 								.createExtendedEventParticipantExportResource(grid.getCriteria(), this::getSelectedRows, exportConfig),
-							null,
-							true));
+							UI.getCurrent().getElement());
+					UI.getCurrent().getPage().open(exportRegistration.getResourceUri().toString(), "_self");
+				});
 				customExportWindow.setWidth(1024, Unit.PIXELS);
-				customExportWindow.setCaption(I18nProperties.getCaption(Captions.exportCustom));
-				customExportWindow.setContent(customExportsLayout);
-				UI.getCurrent().addWindow(customExportWindow);
+				customExportWindow.setHeaderTitle(I18nProperties.getCaption(Captions.exportCustom));
+				customExportWindow.add(customExportsLayout);
+				customExportWindow.open();
 				exportPopupButton.setPopupVisible(false);
-			}, ValoTheme.BUTTON_PRIMARY);
-			btnCustomExport.setDescription(I18nProperties.getString(Strings.infoCustomExport));
+			}, CssStyles.BUTTON_PRIMARY);
+			btnCustomExport.setTooltipText(I18nProperties.getString(Strings.infoCustomExport));
 			btnCustomExport.setWidth(100, Unit.PERCENTAGE);
-			exportLayout.addComponent(btnCustomExport);
+			exportLayout.add(btnCustomExport);
 		}
 	}
 
@@ -488,8 +497,11 @@ public class EventParticipantsView extends AbstractEventView implements HasName 
 	private void updateStatusButtons() {
 
 		if (activeStatusButton != null) {
-			activeStatusButton
-				.setCaption(I18nProperties.getCaption(Captions.all) + LayoutUtil.spanCss(CssStyles.BADGE, String.valueOf(grid.getDataSize())));
+			// was an HTML caption with LayoutUtil.spanCss(BADGE, count): the count is a badge after the text
+			activeStatusButton.setText(I18nProperties.getCaption(Captions.all));
+			Span badge = new Span(String.valueOf(grid.getDataSize()));
+			badge.addClassName(CssStyles.BADGE);
+			activeStatusButton.setSuffixComponent(badge);
 		}
 	}
 

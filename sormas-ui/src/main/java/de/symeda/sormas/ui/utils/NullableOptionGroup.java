@@ -20,6 +20,7 @@ package de.symeda.sormas.ui.utils;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -89,6 +90,21 @@ public class NullableOptionGroup extends OptionGroup {
 			return single;
 		}
 		return newValue;
+	}
+
+	/**
+	 * V7 {@code AbstractField.setValue} passed the value through the converter and back. With
+	 * {@link NullableOptionGroupConverter} (not required) a set holding only {@code null}, e.g.
+	 * {@code Sets.newHashSet(null)}, became the empty value: {@code null} is dropped from the set here.
+	 */
+	@Override
+	public void setValue(Object value) {
+		if (isMultiSelect() && value instanceof Collection && ((Collection<?>) value).stream().anyMatch(Objects::isNull)) {
+			Set<Object> withoutNull = new LinkedHashSet<>((Collection<?>) value);
+			withoutNull.remove(null);
+			value = withoutNull;
+		}
+		super.setValue(value);
 	}
 
 	public Object getNullableValue() {

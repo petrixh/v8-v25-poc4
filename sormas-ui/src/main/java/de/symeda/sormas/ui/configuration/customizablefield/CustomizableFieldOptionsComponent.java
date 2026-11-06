@@ -20,7 +20,6 @@ import java.util.List;
 
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
@@ -55,23 +54,24 @@ public class CustomizableFieldOptionsComponent extends VerticalLayout {
     public CustomizableFieldOptionsComponent() {
 
         setWidthFull();
-        setMargin(new MarginInfo(false, false, true, false));
+        setPadding(false);
+        // was a bottom-only margin (MarginInfo(false, false, true, false)): spacing below the rows is look only
         setSpacing(false);
         CssStyles.style(this, CssStyles.VSPACE_TOP_4);
 
         lblNoOptions = new Span(I18nProperties.getString(Strings.infoNoCustomizableFieldOptions));
-        addComponent(lblNoOptions);
+        add(lblNoOptions);
 
         rowsLayout = new VerticalLayout();
         rowsLayout.setWidthFull();
         rowsLayout.setPadding(false);
         rowsLayout.setSpacing(false);
-        addComponent(rowsLayout);
+        add(rowsLayout);
 
         Button btnAdd = ButtonHelper.createIconButtonWithCaption(null, null, VaadinIcon.PLUS, e -> addRow(null, true), CssStyles.VSPACE_TOP_5);
         btnAdd.setHeight(25, Unit.PIXELS);
         btnAdd.setWidthFull();
-        addComponent(btnAdd);
+        add(btnAdd);
     }
 
     public void setValue(List<String> options) {
@@ -174,11 +174,11 @@ public class CustomizableFieldOptionsComponent extends VerticalLayout {
 
             Button btnDelete = ButtonHelper.createIconButtonWithCaption(null, null, VaadinIcon.TRASH, e -> deleteCallback.run());
 
-            addComponent(tfValue);
-            addComponent(btnDelete);
-            setExpandRatio(tfValue, 1);
+            add(tfValue);
+            add(btnDelete);
+            setFlexGrow(1, tfValue);
             setWidthFull();
-            setMargin(false);
+            setPadding(false);
         }
 
         public String getValue() {

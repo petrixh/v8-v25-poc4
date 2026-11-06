@@ -58,10 +58,10 @@ import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.i18n.Validations;
 import de.symeda.sormas.api.utils.DateFormatHelper;
-import de.symeda.sormas.api.utils.DateHelper;
 import de.symeda.sormas.api.utils.YesNoUnknown;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.components.CheckboxSet;
+import de.symeda.sormas.ui.utils.fields.KeepValueComboBox;
 
 /**
  * Edit form for creating and editing customizable field metadata.
@@ -108,10 +108,10 @@ public class CustomizableFieldEditForm extends CustomLayout {
 	//@formatter:on
 
     private final Binder<CustomizableFieldMetadataDto> binder = new Binder<>(CustomizableFieldMetadataDto.class);
-    private final ComboBox<CustomizableFieldGroup> groupCombo;
+    private final KeepValueComboBox<CustomizableFieldGroup> groupCombo;
     private final CheckboxSet<Disease> cbsDiseases;
     private final TextField defaultValueField;
-    private final ComboBox<String> defaultValueCombo;
+    private final KeepValueComboBox<String> defaultValueCombo;
     private final ComboBox<Boolean> defaultValueCheckboxCombo;
     private final ComboBox<YesNoUnknown> defaultValueYesNoUnknownCombo;
     private final DatePicker defaultValueDateField;
@@ -156,7 +156,6 @@ public class CustomizableFieldEditForm extends CustomLayout {
 
         ComboBox<CustomizableFieldType> fieldTypeCombo = new ComboBox<>(caption(CustomizableFieldMetadataDto.FIELD_TYPE));
         fieldTypeCombo.setWidth(100, Unit.PERCENTAGE);
-        fieldTypeCombo.setEmptySelectionAllowed(false);
         fieldTypeCombo.setItems(CustomizableFieldType.values());
         fieldTypeCombo.setItemLabelGenerator(I18nProperties::getEnumCaption);
         fieldTypeCombo.setRequiredIndicatorVisible(true);
@@ -167,7 +166,14 @@ public class CustomizableFieldEditForm extends CustomLayout {
         binder.forField(fieldTypeCombo)
             .asRequired(I18nProperties.getValidationError(Validations.required, caption(CustomizableFieldMetadataDto.FIELD_TYPE)))
             .bind(CustomizableFieldMetadataDto::getFieldType, CustomizableFieldMetadataDto::setFieldType);
-        fieldTypeCombo.addValueChangeListener(e -> updateOptionsVisibility(e.getValue()));
+        fieldTypeCombo.addValueChangeListener(e -> {
+            if (e.isFromClient() && e.getValue() == null) {
+                // was setEmptySelectionAllowed(false): a Flow combo box has no empty item, but the user can clear it
+                fieldTypeCombo.setValue(e.getOldValue());
+                return;
+            }
+            updateOptionsVisibility(e.getValue());
+        });
 
         TextField descriptionField = new TextField(caption(CustomizableFieldMetadataDto.DESCRIPTION));
         descriptionField.setWidth(100, Unit.PERCENTAGE);
@@ -187,29 +193,38 @@ public class CustomizableFieldEditForm extends CustomLayout {
                 errorMessage -> getDefaultValueErrorMessage(fieldTypeCombo.getValue()))
             .bind(CustomizableFieldMetadataDto::getDefaultValue, CustomizableFieldMetadataDto::setDefaultValue);
 
-        defaultValueCombo = new ComboBox<>(defaultValueCaption);
+        defaultValueCombo = new KeepValueComboBox<>(defaultValueCaption);
         defaultValueCombo.setWidth(100, Unit.PERCENTAGE);
-        defaultValueCombo.setEmptySelectionAllowed(true);
+        // was setEmptySelectionAllowed(true): the empty item is the clear button
+        defaultValueCombo.setClearButtonVisible(true);
 
         defaultValueCheckboxCombo = new ComboBox<>(defaultValueCaption);
         defaultValueCheckboxCombo.setWidth(100, Unit.PERCENTAGE);
-        defaultValueCheckboxCombo.setEmptySelectionAllowed(true);
+        // was setEmptySelectionAllowed(true): the empty item is the clear button
+        defaultValueCheckboxCombo.setClearButtonVisible(true);
         defaultValueCheckboxCombo.setItems(Boolean.TRUE, Boolean.FALSE);
         defaultValueCheckboxCombo.setItemLabelGenerator(value -> Boolean.TRUE.equals(value) ? "True" : "False");
 
         defaultValueYesNoUnknownCombo = new ComboBox<>(defaultValueCaption);
         defaultValueYesNoUnknownCombo.setWidth(100, Unit.PERCENTAGE);
-        defaultValueYesNoUnknownCombo.setEmptySelectionAllowed(true);
+        // was setEmptySelectionAllowed(true): the empty item is the clear button
+        defaultValueYesNoUnknownCombo.setClearButtonVisible(true);
         defaultValueYesNoUnknownCombo.setItems(YesNoUnknown.values());
         defaultValueYesNoUnknownCombo.setItemLabelGenerator(I18nProperties::getEnumCaption);
 
         defaultValueDateField = new DatePicker(defaultValueCaption);
         defaultValueDateField.setWidth(100, Unit.PERCENTAGE);
-        defaultValueDateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
+        DatePicker.DatePickerI18n dateI18n = new DatePicker.DatePickerI18n();
+        dateI18n.setDateFormat(DateFormatHelper.getDateFormatPattern());
+        defaultValueDateField.setI18n(dateI18n);
 
         defaultValueDateTimeField = new DateTimePicker(defaultValueCaption);
         defaultValueDateTimeField.setWidth(100, Unit.PERCENTAGE);
-        defaultValueDateTimeField.setDateFormat(DateHelper.getLocalDateTimeFormat(I18nProperties.getUserLanguage()).toPattern());
+        // was setDateFormat(<user's date-time pattern>): the Flow picker formats the date part with the user's date
+        // pattern and the time part by locale (as CustomizableFieldInputDateTime)
+        DatePicker.DatePickerI18n dateTimeI18n = new DatePicker.DatePickerI18n();
+        dateTimeI18n.setDateFormat(DateFormatHelper.getDateFormatPattern());
+        defaultValueDateTimeField.setDatePickerI18n(dateTimeI18n);
 
         optionsHeading = new Span(I18nProperties.getString(Strings.labelCustomizableFieldOptions));
         optionsHeading.addClassName(CssStyles.VAADIN_CAPTION);
@@ -230,7 +245,6 @@ public class CustomizableFieldEditForm extends CustomLayout {
 
         ComboBox<CustomizableFieldContext> contextCombo = new ComboBox<>(caption(CustomizableFieldMetadataDto.CONTEXT_CLASS));
         contextCombo.setWidth(100, Unit.PERCENTAGE);
-        contextCombo.setEmptySelectionAllowed(false);
         contextCombo.setItems(CustomizableFieldContext.values());
         contextCombo.setItemLabelGenerator(I18nProperties::getEnumCaption);
         contextCombo.setRequiredIndicatorVisible(true);
@@ -239,9 +253,14 @@ public class CustomizableFieldEditForm extends CustomLayout {
             .asRequired(I18nProperties.getValidationError(Validations.required, caption(CustomizableFieldMetadataDto.CONTEXT_CLASS)))
             .bind(CustomizableFieldMetadataDto::getContextClass, CustomizableFieldMetadataDto::setContextClass);
 
-        groupCombo = new ComboBox<>(caption(CustomizableFieldMetadataDto.UI_GROUP));
+        groupCombo = new KeepValueComboBox<>(caption(CustomizableFieldMetadataDto.UI_GROUP));
         groupCombo.setWidth(100, Unit.PERCENTAGE);
-        groupCombo.setEmptySelectionAllowed(false);
+        // was setEmptySelectionAllowed(false): a Flow combo box has no empty item, but the user can clear it
+        groupCombo.addValueChangeListener(e -> {
+            if (e.isFromClient() && e.getValue() == null) {
+                groupCombo.setValue(e.getOldValue());
+            }
+        });
         groupCombo.setItemLabelGenerator(I18nProperties::getEnumCaption);
         groupCombo.setRequiredIndicatorVisible(true);
         addComponent(groupCombo, CustomizableFieldMetadataDto.UI_GROUP);
@@ -251,6 +270,11 @@ public class CustomizableFieldEditForm extends CustomLayout {
 
         // Repopulate group items when context changes; clear value first, then retain only if still valid
         contextCombo.addValueChangeListener(e -> {
+            if (e.isFromClient() && e.getValue() == null) {
+                // was setEmptySelectionAllowed(false): a Flow combo box has no empty item, but the user can clear it
+                contextCombo.setValue(e.getOldValue());
+                return;
+            }
             CustomizableFieldContext ctx = e.getValue();
             CustomizableFieldGroup current = groupCombo.getValue();
             groupCombo.setValue(null);

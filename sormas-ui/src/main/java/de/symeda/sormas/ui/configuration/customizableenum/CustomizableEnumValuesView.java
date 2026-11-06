@@ -21,8 +21,8 @@ import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.ui.Alignment;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
@@ -67,7 +67,7 @@ public class CustomizableEnumValuesView extends AbstractConfigurationView {
 		gridLayout.add(createFilterBar());
 		setUpRelevanceStatusFilter();
 		gridLayout.add(relevanceStatusFilter);
-		gridLayout.setComponentAlignment(relevanceStatusFilter, Alignment.MIDDLE_RIGHT);
+		gridLayout.setHorizontalComponentAlignment(FlexComponent.Alignment.END, relevanceStatusFilter);
 		gridLayout.add(grid);
 		gridLayout.setPadding(true);
 		gridLayout.setSpacing(false);
@@ -101,8 +101,12 @@ public class CustomizableEnumValuesView extends AbstractConfigurationView {
 
 		searchField = new SearchField();
 		searchField.setInputPrompt(I18nProperties.getString(Strings.promptCustomizableEnumSearchField));
-		searchField.addTextChangeListener(e -> {
-			criteria.freeTextFilter(e.getText());
+		searchField.addValueChangeListener(e -> {
+			// was a V7 text change listener: user input only
+			if (!e.isFromClient()) {
+				return;
+			}
+			criteria.freeTextFilter(e.getValue());
 			grid.reload();
 		});
 		filterLayout.add(searchField);
@@ -138,11 +142,18 @@ public class CustomizableEnumValuesView extends AbstractConfigurationView {
 		relevanceStatusFilter = new ComboBox<>();
 		relevanceStatusFilter.setId("relevanceStatus");
 		relevanceStatusFilter.setWidth(210, Unit.PIXELS);
-		relevanceStatusFilter.setEmptySelectionAllowed(false);
 		relevanceStatusFilter.setItems(Boolean.TRUE, Boolean.FALSE);
 		relevanceStatusFilter.setItemLabelGenerator(
 			item -> I18nProperties.getCaption(item ? Captions.customizableEnumValueActiveValues : Captions.customizableEnumValueInactiveValues));
 		relevanceStatusFilter.addValueChangeListener(e -> {
+			if (e.isFromClient() && e.getValue() == null) {
+				// was setEmptySelectionAllowed(false): a Flow combo box has no empty item, but the user can clear it;
+				// the previous value comes back without a new navigation
+				applyingCriteria = true;
+				relevanceStatusFilter.setValue(e.getOldValue());
+				applyingCriteria = false;
+				return;
+			}
 			criteria.active(e.getValue());
 			navigateTo(criteria);
 		});

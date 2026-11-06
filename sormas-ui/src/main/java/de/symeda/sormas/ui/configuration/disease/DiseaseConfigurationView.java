@@ -21,8 +21,8 @@ import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Unit;
 import de.symeda.sormas.ui.navigation.ViewChangeListener;
-import com.vaadin.ui.Alignment;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
@@ -74,10 +74,10 @@ public class DiseaseConfigurationView extends AbstractConfigurationView {
 		relevanceStatusLayout.setPadding(false);
 		relevanceStatusLayout.add(rowCount);
 		relevanceStatusLayout.add(relevanceStatusFilter);
-		relevanceStatusLayout.setDefaultComponentAlignment(Alignment.MIDDLE_RIGHT);
+		relevanceStatusLayout.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
 
 		gridLayout.add(relevanceStatusLayout);
-		gridLayout.setComponentAlignment(relevanceStatusLayout, Alignment.MIDDLE_RIGHT);
+		gridLayout.setHorizontalComponentAlignment(FlexComponent.Alignment.END, relevanceStatusLayout);
 		gridLayout.add(grid);
 		gridLayout.setPadding(true);
 		gridLayout.setSpacing(false);
@@ -125,10 +125,17 @@ public class DiseaseConfigurationView extends AbstractConfigurationView {
 		relevanceStatusFilter = new ComboBox<>();
 		relevanceStatusFilter.setId("relevanceStatus");
 		relevanceStatusFilter.setWidth(210, Unit.PIXELS);
-		relevanceStatusFilter.setEmptySelectionAllowed(false);
 		relevanceStatusFilter.setItems(ActiveRelevanceStatus.values());
 		relevanceStatusFilter.setItemLabelGenerator(ActiveRelevanceStatus::toString);
 		relevanceStatusFilter.addValueChangeListener(e -> {
+			if (e.isFromClient() && e.getValue() == null) {
+				// was setEmptySelectionAllowed(false): a Flow combo box has no empty item, but the user can clear it;
+				// the previous value comes back without a new navigation
+				applyingCriteria = true;
+				relevanceStatusFilter.setValue(e.getOldValue());
+				applyingCriteria = false;
+				return;
+			}
 			criteria.relevanceStatus(e.getValue());
 			navigateTo(criteria);
 		});

@@ -85,8 +85,12 @@ public class CustomizableFieldsView extends AbstractConfigurationView {
 
         searchField = new SearchField();
         searchField.setInputPrompt(I18nProperties.getString(Strings.promptCustomizableFieldSearchField));
-        searchField.addTextChangeListener(e -> {
-            criteria.freeTextFilter(e.getText());
+        searchField.addValueChangeListener(e -> {
+            // was a V7 text change listener: user input only
+            if (!e.isFromClient()) {
+                return;
+            }
+            criteria.freeTextFilter(e.getValue());
             grid.reload();
         });
         filterLayout.add(searchField);

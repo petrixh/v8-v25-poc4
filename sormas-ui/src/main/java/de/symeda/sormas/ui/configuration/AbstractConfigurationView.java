@@ -18,7 +18,7 @@ package de.symeda.sormas.ui.configuration;
 import java.util.function.Consumer;
 
 import de.symeda.sormas.ui.navigation.Navigator;
-import com.vaadin.ui.Layout;
+import com.vaadin.flow.component.HasComponents;
 import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 import de.symeda.sormas.api.FacadeProvider;
@@ -305,7 +305,7 @@ public abstract class AbstractConfigurationView extends AbstractSubNavigationVie
 		}
 	}
 
-	protected ComboBox addCountryFilter(Layout layout, Consumer<CountryReferenceDto> changeHandler, ComboBox regionFilter) {
+	protected ComboBox addCountryFilter(HasComponents layout, Consumer<CountryReferenceDto> changeHandler, ComboBox regionFilter) {
 		ComboBox countryFilter = null;
 		if (FacadeProvider.getFeatureConfigurationFacade().isCountryEnabled()) {
 			countryFilter = new CountryCombo((country, isServerCountry) -> {

@@ -21,6 +21,7 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocsCss;
 import java.util.Arrays;
 import java.util.Collections;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Unit;
 import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.fields.CheckBox;
@@ -108,7 +109,7 @@ public class DiseaseConfigurationEditForm extends AbstractEditForm<DiseaseConfig
 		generalLayout.setTemplateContents(GENERAL_HTML_LAYOUT);
 
 		cbDisease = addDiseaseField(DiseaseConfigurationDto.DISEASE, true, false);
-		cbDisease.setStyleName(CssStyles.H3);
+		setStyleName(cbDisease, CssStyles.H3);
 		addField(generalLayout, DiseaseConfigurationDto.UUID);
 		addField(generalLayout, DiseaseConfigurationDto.ACTIVE, CheckBox.class);
 		addField(generalLayout, DiseaseConfigurationDto.PRIMARY_DISEASE, CheckBox.class);
@@ -192,8 +193,8 @@ public class DiseaseConfigurationEditForm extends AbstractEditForm<DiseaseConfig
 	}
 
 	@Override
-	public void attach() {
-		super.attach();
+	protected void onAttach(AttachEvent attachEvent) {
+		super.onAttach(attachEvent);
 
 		cbCaseSurveillance.addValueChangeListener(e -> {
 			System.out.println("not enabled" + !cbFollowUpEnabled.isEnabled());

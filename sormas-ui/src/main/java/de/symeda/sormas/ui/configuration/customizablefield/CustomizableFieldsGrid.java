@@ -66,17 +66,17 @@ public class CustomizableFieldsGrid extends FilteredGrid<CustomizableFieldMetada
 
 		addEditColumn(e -> ControllerProvider.getCustomizableFieldsController().editField(e.getUuid()));
 
-		addColumn(e -> HtmlRenderer.iconHtml(VaadinIcon.COPY), new HtmlRenderer()).setId(CLONE_COLUMN_ID)
+		addColumn(e -> HtmlRenderer.iconHtml(VaadinIcon.COPY), new HtmlRenderer()).setKey(CLONE_COLUMN_ID)
 			.setCaption(I18nProperties.getCaption(Captions.actionClone))
 			.setSortable(false)
 			.setWidth(40);
 
-		addColumn(e -> e.isActive() ? HtmlRenderer.iconHtml(VaadinIcon.CLOSE) : HtmlRenderer.iconHtml(VaadinIcon.CHECK), new HtmlRenderer()).setId(TOGGLE_ACTIVE_COLUMN_ID)
+		addColumn(e -> e.isActive() ? HtmlRenderer.iconHtml(VaadinIcon.CLOSE) : HtmlRenderer.iconHtml(VaadinIcon.CHECK), new HtmlRenderer()).setKey(TOGGLE_ACTIVE_COLUMN_ID)
 			.setCaption(I18nProperties.getCaption(Captions.actionEnable) + "/" + I18nProperties.getCaption(Captions.actionDisable))
 			.setSortable(false)
 			.setWidth(55);
 
-		addColumn(e -> HtmlRenderer.iconHtml(VaadinIcon.TRASH), new HtmlRenderer()).setId(DELETE_COLUMN_ID)
+		addColumn(e -> HtmlRenderer.iconHtml(VaadinIcon.TRASH), new HtmlRenderer()).setKey(DELETE_COLUMN_ID)
 			.setCaption(I18nProperties.getCaption(Captions.actionDelete))
 			.setSortable(false)
 			.setWidth(40);

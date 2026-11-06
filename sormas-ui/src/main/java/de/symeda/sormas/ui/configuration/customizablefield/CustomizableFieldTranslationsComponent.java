@@ -24,7 +24,6 @@ import java.util.Set;
 
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -59,24 +58,25 @@ public class CustomizableFieldTranslationsComponent extends VerticalLayout {
 	public CustomizableFieldTranslationsComponent() {
 
 		setWidthFull();
-		setMargin(new MarginInfo(false, false, true, false));
+		setPadding(false);
+		// was a bottom-only margin (MarginInfo(false, false, true, false)): spacing below the rows is look only
 		setSpacing(false);
 		CssStyles.style(this, CssStyles.VSPACE_TOP_4);
 
 		lblNoTranslations = new Span(I18nProperties.getString(Strings.infoNoCustomizableFieldTranslations));
-		addComponent(lblNoTranslations);
+		add(lblNoTranslations);
 
 		rowsLayout = new VerticalLayout();
 		rowsLayout.setWidthFull();
 		rowsLayout.setPadding(false);
 		rowsLayout.setSpacing(false);
-		addComponent(rowsLayout);
+		add(rowsLayout);
 
 		Button btnAdd =
 			ButtonHelper.createIconButtonWithCaption(null, null, VaadinIcon.PLUS, e -> addRow(null, null, null, true), CssStyles.VSPACE_TOP_5);
 		btnAdd.setHeight(25, Unit.PIXELS);
 		btnAdd.setWidthFull();
-		addComponent(btnAdd);
+		add(btnAdd);
 	}
 
 	public void setValue(Map<String, Map<String, String>> translations) {
@@ -198,14 +198,14 @@ public class CustomizableFieldTranslationsComponent extends VerticalLayout {
 
 			Button btnDelete = ButtonHelper.createIconButtonWithCaption(null, null, VaadinIcon.TRASH, e -> deleteCallback.run());
 
-			addComponent(cbLanguage);
-			addComponent(tfName);
-			addComponent(tfDescription);
-			addComponent(btnDelete);
-			setExpandRatio(tfName, 1);
-			setExpandRatio(tfDescription, 1);
+			add(cbLanguage);
+			add(tfName);
+			add(tfDescription);
+			add(btnDelete);
+			setFlexGrow(1, tfName);
+			setFlexGrow(1, tfDescription);
 			setWidthFull();
-			setMargin(false);
+			setPadding(false);
 			CssStyles.style(this, CssStyles.VSPACE_4);
 		}
 
@@ -217,7 +217,6 @@ public class CustomizableFieldTranslationsComponent extends VerticalLayout {
 			return tfName.getValue();
 		}
 
-		@Override
 		public String getDescription() {
 			return tfDescription.getValue();
 		}

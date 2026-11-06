@@ -47,15 +47,16 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.ui.Alignment;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
 import de.symeda.sormas.ui.utils.NotificationHelper;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Disease;
@@ -122,6 +123,7 @@ import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.KeepValueComboBox;
 
 public class DevModeView extends AbstractConfigurationView {
 
@@ -165,13 +167,13 @@ public class DevModeView extends AbstractConfigurationView {
 		contentLayout.setClassName("crud-main-layout");
 
 		contentLayout.add(
-			new Span(HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " " + I18nProperties.getString(Strings.infoDeveloperOptions), ContentMode.HTML));
+			VaadinUiUtil.createLabel(HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " " + I18nProperties.getString(Strings.infoDeveloperOptions), ContentMode.HTML));
 		contentLayout.add(
-			new Span(
+			VaadinUiUtil.createLabel(
 				HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " " + I18nProperties.getString(Strings.infoDeveloperOptionsContactGeneration),
 				ContentMode.HTML));
 		contentLayout.add(
-			new Span(HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " " + I18nProperties.getString(Strings.infoDeveloperOptionsSeedUsage), ContentMode.HTML));
+			VaadinUiUtil.createLabel(HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " " + I18nProperties.getString(Strings.infoDeveloperOptionsSeedUsage), ContentMode.HTML));
 
 		contentLayout.add(createSeedSettingsLayout());
 		contentLayout.add(createCaseGeneratorLayout());
@@ -278,13 +280,15 @@ public class DevModeView extends AbstractConfigurationView {
 		seedField.setLabel(I18nProperties.getCaption(Captions.devModeGeneratorSeed));
 		seedField.setValue(Long.toString(manualSeed, 36));
 		seedField.setMaxLength(11);
+		// Vaadin 8 text fields sent the value while typing (lazy); Flow sends it on change
+		seedField.setValueChangeMode(ValueChangeMode.LAZY);
 		seedField.addValueChangeListener(e -> {
 			try {
 				manualSeed = Long.parseLong(e.getValue(), 36);
 			} catch (NumberFormatException ex) {
 				manualSeed = 0;
 			}
-			seedLabel.setValue(I18nProperties.getString(Strings.labelActualLongSeed) + " " + manualSeed);
+			seedLabel.setText(I18nProperties.getString(Strings.labelActualLongSeed) + " " + manualSeed);
 		});
 
 		useManualSeedCheckbox = new Checkbox(I18nProperties.getCaption(Captions.devModeUseSeed));
@@ -350,7 +354,7 @@ public class DevModeView extends AbstractConfigurationView {
 		horizontalLayout.add(verticalLayout);
 		horizontalLayout.add(performanceConfigButton);
 		horizontalLayout.add(defaultConfigButton);
-		horizontalLayout.setComponentAlignment(verticalLayout, Alignment.MIDDLE_LEFT);
+		horizontalLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, verticalLayout);
 
 		return horizontalLayout;
 	}
@@ -376,15 +380,15 @@ public class DevModeView extends AbstractConfigurationView {
 
 		DatePicker startDateField = new DatePicker();
 		startDateField.setLabel(I18nProperties.getCaption(Captions.devModeCaseStartDate));
-		startDateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
-		startDateField.setLenient(true);
+		// was setDateFormat(<user's date pattern>) + setLenient(true): the Flow picker parses only that format
+		startDateField.setI18n(createDatePickerI18n());
 		caseGeneratorConfigBinder.bind(startDateField, CaseGenerationConfig::getStartDate, CaseGenerationConfig::setStartDate);
 		caseOptionsLayout.add(startDateField);
 
 		DatePicker endDateField = new DatePicker();
 		endDateField.setLabel(I18nProperties.getCaption(Captions.devModeCaseEndDate));
-		endDateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
-		endDateField.setLenient(true);
+		// was setDateFormat(<user's date pattern>) + setLenient(true): the Flow picker parses only that format
+		endDateField.setI18n(createDatePickerI18n());
 		caseGeneratorConfigBinder.bind(endDateField, CaseGenerationConfig::getEndDate, CaseGenerationConfig::setEndDate);
 		caseOptionsLayout.add(endDateField);
 
@@ -400,7 +404,7 @@ public class DevModeView extends AbstractConfigurationView {
 		caseGeneratorConfigBinder.bind(regionField, CaseGenerationConfig::getRegion, CaseGenerationConfig::setRegion);
 		caseOptionsLayout.add(regionField);
 
-		ComboBox<DistrictReferenceDto> districtField = new ComboBox<DistrictReferenceDto>();
+		KeepValueComboBox<DistrictReferenceDto> districtField = new KeepValueComboBox<>();
 		districtField.setLabel(I18nProperties.getCaption(Captions.devModeCaseDistrict));
 		districtField.setItemLabelGenerator(item -> item.buildCaption());
 		caseGeneratorConfigBinder.bind(districtField, CaseGenerationConfig::getDistrict, CaseGenerationConfig::setDistrict);
@@ -449,15 +453,15 @@ public class DevModeView extends AbstractConfigurationView {
 
 		DatePicker startDateField = new DatePicker();
 		startDateField.setLabel(I18nProperties.getCaption(Captions.devModeContactStartDate));
-		startDateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
-		startDateField.setLenient(true);
+		// was setDateFormat(<user's date pattern>) + setLenient(true): the Flow picker parses only that format
+		startDateField.setI18n(createDatePickerI18n());
 		contactGeneratorConfigBinder.bind(startDateField, ContactGenerationConfig::getStartDate, ContactGenerationConfig::setStartDate);
 		contactOptionsFirstLineLayout.add(startDateField);
 
 		DatePicker endDateField = new DatePicker();
 		endDateField.setLabel(I18nProperties.getCaption(Captions.devModeContactEndDate));
-		endDateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
-		endDateField.setLenient(true);
+		// was setDateFormat(<user's date pattern>) + setLenient(true): the Flow picker parses only that format
+		endDateField.setI18n(createDatePickerI18n());
 		contactGeneratorConfigBinder.bind(endDateField, ContactGenerationConfig::getEndDate, ContactGenerationConfig::setEndDate);
 		contactOptionsFirstLineLayout.add(endDateField);
 
@@ -473,7 +477,7 @@ public class DevModeView extends AbstractConfigurationView {
 		contactGeneratorConfigBinder.bind(regionField, ContactGenerationConfig::getRegion, ContactGenerationConfig::setRegion);
 		contactOptionsFirstLineLayout.add(regionField);
 
-		ComboBox<DistrictReferenceDto> districtField = new ComboBox<DistrictReferenceDto>();
+		KeepValueComboBox<DistrictReferenceDto> districtField = new KeepValueComboBox<>();
 		districtField.setItemLabelGenerator(item -> item.buildCaption());
 		districtField.setLabel(I18nProperties.getCaption(Captions.devModeContactDistrict));
 		contactGeneratorConfigBinder.bind(districtField, ContactGenerationConfig::getDistrict, ContactGenerationConfig::setDistrict);
@@ -545,15 +549,15 @@ public class DevModeView extends AbstractConfigurationView {
 
 		DatePicker startDateField = new DatePicker();
 		startDateField.setLabel(I18nProperties.getCaption(Captions.devModeEventStartDate));
-		startDateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
-		startDateField.setLenient(true);
+		// was setDateFormat(<user's date pattern>) + setLenient(true): the Flow picker parses only that format
+		startDateField.setI18n(createDatePickerI18n());
 		eventGeneratorConfigBinder.bind(startDateField, EventGenerationConfig::getStartDate, EventGenerationConfig::setStartDate);
 		eventOptionsFirstLineLayout.add(startDateField);
 
 		DatePicker endDateField = new DatePicker();
 		endDateField.setLabel(I18nProperties.getCaption(Captions.devModeEventEndDate));
-		endDateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
-		endDateField.setLenient(true);
+		// was setDateFormat(<user's date pattern>) + setLenient(true): the Flow picker parses only that format
+		endDateField.setI18n(createDatePickerI18n());
 		eventGeneratorConfigBinder.bind(endDateField, EventGenerationConfig::getEndDate, EventGenerationConfig::setEndDate);
 		eventOptionsFirstLineLayout.add(endDateField);
 
@@ -569,7 +573,7 @@ public class DevModeView extends AbstractConfigurationView {
 		eventGeneratorConfigBinder.bind(regionField, EventGenerationConfig::getRegion, EventGenerationConfig::setRegion);
 		eventOptionsFirstLineLayout.add(regionField);
 
-		ComboBox<DistrictReferenceDto> districtField = new ComboBox<DistrictReferenceDto>();
+		KeepValueComboBox<DistrictReferenceDto> districtField = new KeepValueComboBox<>();
 		districtField.setLabel(I18nProperties.getCaption(Captions.devModeEventDistrict));
 		districtField.setItemLabelGenerator(item -> item.buildCaption());
 		eventGeneratorConfigBinder.bind(districtField, EventGenerationConfig::getDistrict, EventGenerationConfig::setDistrict);
@@ -659,15 +663,15 @@ public class DevModeView extends AbstractConfigurationView {
 
 		DatePicker startDateField = new DatePicker();
 		startDateField.setLabel(I18nProperties.getCaption(Captions.devModeSampleStartDate));
-		startDateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
-		startDateField.setLenient(true);
+		// was setDateFormat(<user's date pattern>) + setLenient(true): the Flow picker parses only that format
+		startDateField.setI18n(createDatePickerI18n());
 		sampleGeneratorConfigBinder.bind(startDateField, SampleGenerationConfig::getStartDate, SampleGenerationConfig::setStartDate);
 		sampleOptionsFirstLineLayout.add(startDateField);
 
 		DatePicker endDateField = new DatePicker();
 		endDateField.setLabel(I18nProperties.getCaption(Captions.devModeSampleEndDate));
-		endDateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
-		endDateField.setLenient(true);
+		// was setDateFormat(<user's date pattern>) + setLenient(true): the Flow picker parses only that format
+		endDateField.setI18n(createDatePickerI18n());
 		sampleGeneratorConfigBinder.bind(endDateField, SampleGenerationConfig::getEndDate, SampleGenerationConfig::setEndDate);
 		sampleOptionsFirstLineLayout.add(endDateField);
 
@@ -684,7 +688,7 @@ public class DevModeView extends AbstractConfigurationView {
 		sampleGeneratorConfigBinder.bind(regionField, SampleGenerationConfig::getRegion, SampleGenerationConfig::setRegion);
 		sampleOptionsFirstLineLayout.add(regionField);
 
-		ComboBox<DistrictReferenceDto> districtField = new ComboBox<>();
+		KeepValueComboBox<DistrictReferenceDto> districtField = new KeepValueComboBox<>();
 		districtField.setLabel(I18nProperties.getCaption(Captions.devModeSampleDistrict));
 		districtField.setItemLabelGenerator(item -> item.buildCaption());
 		sampleGeneratorConfigBinder.bind(districtField, SampleGenerationConfig::getDistrict, SampleGenerationConfig::setDistrict);
@@ -1761,6 +1765,12 @@ public class DevModeView extends AbstractConfigurationView {
 		}
 		person.setLastName(random(lastNames) + "-" + random(lastNames));
 
+	}
+
+	private static DatePicker.DatePickerI18n createDatePickerI18n() {
+		DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+		i18n.setDateFormat(DateFormatHelper.getDateFormatPattern());
+		return i18n;
 	}
 
 	@Override

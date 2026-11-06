@@ -21,9 +21,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.disease.DiseaseBurdenDto;
 import de.symeda.sormas.api.i18n.Captions;
@@ -39,16 +39,16 @@ public class CaseCountDifferenceComponent extends VerticalLayout {
 
 	private DashboardDataProvider dashboardDataProvider;
 	private HighChart chart;
-	private Label subtitleLabel;
+	private Span subtitleLabel;
 
 	public CaseCountDifferenceComponent(DashboardDataProvider dashboardDataProvider) {
 
 		this.dashboardDataProvider = dashboardDataProvider;
 
-		Label title = new Label(I18nProperties.getCaption(Captions.dashboardDiseaseDifference));
+		Span title = new Span(I18nProperties.getCaption(Captions.dashboardDiseaseDifference));
 		CssStyles.style(title, CssStyles.H2, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_NONE);
 
-		subtitleLabel = new Label();
+		subtitleLabel = new Span();
 		updateSubHeader();
 
 		chart = new HighChart();
@@ -57,12 +57,13 @@ public class CaseCountDifferenceComponent extends VerticalLayout {
 		// layout
 		setWidth(100, Unit.PERCENTAGE);
 
-		addComponent(title);
-		addComponent(subtitleLabel);
-		addComponent(chart);
-		setExpandRatio(chart, 1);
+		add(title);
+		add(subtitleLabel);
+		add(chart);
+		setFlexGrow(1, chart);
 
-		setMargin(new MarginInfo(true, true, false, true));
+		// was a margin on all sides but the bottom (MarginInfo); spacing details belong to the theme work
+		setPadding(true);
 		setSpacing(false);
 		setSizeFull();
 	}
@@ -88,9 +89,9 @@ public class CaseCountDifferenceComponent extends VerticalLayout {
 
 		refreshChart(diseasesBurden);
 		if (limitDiseasesCount > 0) {
-			chart.setHeight(diseasesBurden.size() * 20 + 70, Unit.PIXELS); // compact mode
+			chart.setHeight((diseasesBurden.size() * 20 + 70) + "px"); // compact mode
 		} else {
-			chart.setHeight(diseasesBurden.size() * 40 + 70, Unit.PIXELS);
+			chart.setHeight((diseasesBurden.size() * 40 + 70) + "px");
 		}
 	}
 
@@ -160,7 +161,7 @@ public class CaseCountDifferenceComponent extends VerticalLayout {
 
 	public void updateSubHeader() {
 
-		subtitleLabel.setValue(
+		subtitleLabel.setText(
 			String.format(
 				I18nProperties.getCaption(Captions.dashboardComparedToPreviousPeriod),
 				DateFormatHelper.buildPeriodString(dashboardDataProvider.getFromDate(), dashboardDataProvider.getToDate()),

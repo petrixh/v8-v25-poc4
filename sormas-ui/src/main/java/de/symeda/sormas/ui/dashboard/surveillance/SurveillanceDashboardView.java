@@ -47,13 +47,13 @@ public class SurveillanceDashboardView extends AbstractDashboardView {
 		}
 		filterLayout = new SurveillanceFilterLayout(this, dashboardDataProvider);
 		filterLayout.addDateTypeValueChangeListener(e -> {
-			dashboardDataProvider.setNewCaseDateType((NewCaseDateType) e.getProperty().getValue());
+			dashboardDataProvider.setNewCaseDateType((NewCaseDateType) e.getValue());
 		});
-		dashboardLayout.addComponent(filterLayout);
+		dashboardLayout.add(filterLayout);
 
 		dashboardSwitcher.setValue(DashboardType.SURVEILLANCE);
 		dashboardSwitcher.addValueChangeListener(e -> {
-			dashboardDataProvider.setDashboardType((DashboardType) e.getProperty().getValue());
+			dashboardDataProvider.setDashboardType((DashboardType) e.getValue());
 			navigateToDashboardView(e);
 		});
 
@@ -61,21 +61,21 @@ public class SurveillanceDashboardView extends AbstractDashboardView {
 
 		//add disease burden and cases
 		surveillanceOverviewLayout = new SurveillanceOverviewLayout(dashboardDataProvider);
-		dashboardLayout.addComponent(surveillanceOverviewLayout);
+		dashboardLayout.add(surveillanceOverviewLayout);
 		filterLayout.setDateFilterChangeCallback(() -> {
 			surveillanceOverviewLayout.updateDifferenceComponentSubHeader();
 		});
 
 		//add diseaseCarousel and map
 		diseaseCarouselLayout = new SurveillanceDiseaseCarouselLayout(dashboardDataProvider);
-		dashboardLayout.addComponent(diseaseCarouselLayout);
-		dashboardLayout.setExpandRatio(diseaseCarouselLayout, 1);
+		dashboardLayout.add(diseaseCarouselLayout);
+		dashboardLayout.setFlexGrow(1, diseaseCarouselLayout);
 
 		diseaseCarouselLayout.setExpandListener(expanded -> {
 			if (expanded) {
-				dashboardLayout.removeComponent(surveillanceOverviewLayout);
+				dashboardLayout.remove(surveillanceOverviewLayout);
 			} else {
-				dashboardLayout.addComponent(surveillanceOverviewLayout, 1);
+				dashboardLayout.addComponentAtIndex(1, surveillanceOverviewLayout);
 			}
 		});
 	}

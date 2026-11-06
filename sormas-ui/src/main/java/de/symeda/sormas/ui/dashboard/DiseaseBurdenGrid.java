@@ -18,32 +18,26 @@
 package de.symeda.sormas.ui.dashboard;
 
 import java.util.List;
-import java.util.Locale;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.data.util.GeneratedPropertyContainer;
-import com.vaadin.v7.data.util.converter.StringToFloatConverter;
-import com.vaadin.v7.ui.Grid;
-import com.vaadin.v7.ui.renderers.HtmlRenderer;
+import com.vaadin.flow.component.icon.VaadinIcon;
 
 import de.symeda.sormas.api.disease.DiseaseBurdenDto;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.PercentageRenderer;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 @SuppressWarnings("serial")
-public class DiseaseBurdenGrid extends Grid {
+public class DiseaseBurdenGrid extends Grid<DiseaseBurdenDto> {
 
 	private static final String VIEW_DETAILS_BTN_ID = "viewDetails";
 
+	@SuppressWarnings("unchecked")
 	public DiseaseBurdenGrid() {
 
+		super(DiseaseBurdenDto.class);
 		setSizeFull();
-
-		BeanItemContainer<DiseaseBurdenDto> container = new BeanItemContainer<DiseaseBurdenDto>(DiseaseBurdenDto.class);
-		GeneratedPropertyContainer generatedContainer = new GeneratedPropertyContainer(container);
-		setContainerDataSource(generatedContainer);
 
 		setColumns(/* VIEW_DETAILS_BTN_ID, */
 			DiseaseBurdenDto.DISEASE,
@@ -55,7 +49,7 @@ public class DiseaseBurdenGrid extends Grid {
 			DiseaseBurdenDto.CASE_DEATH_COUNT,
 			DiseaseBurdenDto.CASE_FATALITY_RATE);
 
-		for (Column column : getColumns()) {
+		for (Column<DiseaseBurdenDto, ?> column : getAllColumns()) {
 			if (column.getPropertyId().equals(VIEW_DETAILS_BTN_ID)) {
 				column.setHeaderCaption("");
 			} else {
@@ -71,57 +65,47 @@ public class DiseaseBurdenGrid extends Grid {
 		getColumn(DiseaseBurdenDto.CASE_FATALITY_RATE).setRenderer(new PercentageRenderer());
 
 		// format casesGrowth column with chevrons
-		getColumn(DiseaseBurdenDto.CASES_DIFFERENCE_PERCENTAGE).setConverter(new StringToFloatConverter() {
+		// was setConverter(new StringToFloatConverter() {..}).setRenderer(new HtmlRenderer()); the converter's own text was not used
+		((Column<DiseaseBurdenDto, Float>) getColumn(DiseaseBurdenDto.CASES_DIFFERENCE_PERCENTAGE)).setRenderer(value -> {
 
-			@Override
-			public String convertToPresentation(Float value, Class<? extends String> targetType, Locale locale) throws ConversionException {
+			String stringRepresentation;
+			String chevronType = "";
+			String criticalLevel = "";
 
-				String stringRepresentation = super.convertToPresentation(value, targetType, locale);
-				String chevronType = "";
-				String criticalLevel = "";
-
-				if (value > 0) {
-					chevronType = VaadinIcons.CHEVRON_UP.getHtml();
-					criticalLevel = CssStyles.LABEL_CRITICAL;
-				} else if (value < 0) {
-					chevronType = VaadinIcons.CHEVRON_DOWN.getHtml();
-					criticalLevel = CssStyles.LABEL_POSITIVE;
-				} else {
-					chevronType = VaadinIcons.CHEVRON_RIGHT.getHtml();
-					criticalLevel = CssStyles.LABEL_IMPORTANT;
-				}
-
-				String strValue = "" + Math.abs(value);
-				if (strValue.equals("100.0"))
-					strValue = "100";
-
-				//@formatter:off
-				stringRepresentation =
-					  "<div style=\"width:100%\">"
-					+	"<div class=\"\" style=\"display: inline-block;margin-top: 2px;width: 70%;text-align:left;\">" + strValue + "%" + "</div>"
-					+	"<div class=\"v-label v-widget " + criticalLevel + " v-label-" + criticalLevel
-					+		" align-center v-label-align-center bold v-label-bold large v-label-large v-has-width\" "
-					+		" style=\"width: 15px;width: 30%;text-align: left;\">"
-					+		"<span class=\"v-icon\" style=\"font-family: VaadinIcons;\">" + chevronType + "</span>" 
-					+ 	"</div>"
-					+ "</div>";
-				//@formatter:on
-
-				return stringRepresentation;
+			if (value > 0) {
+				chevronType = HtmlRenderer.iconHtml(VaadinIcon.CHEVRON_UP);
+				criticalLevel = CssStyles.LABEL_CRITICAL;
+			} else if (value < 0) {
+				chevronType = HtmlRenderer.iconHtml(VaadinIcon.CHEVRON_DOWN);
+				criticalLevel = CssStyles.LABEL_POSITIVE;
+			} else {
+				chevronType = HtmlRenderer.iconHtml(VaadinIcon.CHEVRON_RIGHT);
+				criticalLevel = CssStyles.LABEL_IMPORTANT;
 			}
-		}).setRenderer(new HtmlRenderer());
+
+			String strValue = "" + Math.abs(value);
+			if (strValue.equals("100.0"))
+				strValue = "100";
+
+			//@formatter:off
+			stringRepresentation =
+				  "<div style=\"width:100%\">"
+				+	"<div class=\"\" style=\"display: inline-block;margin-top: 2px;width: 70%;text-align:left;\">" + strValue + "%" + "</div>"
+				+	"<div class=\"v-label v-widget " + criticalLevel + " v-label-" + criticalLevel
+				+		" align-center v-label-align-center bold v-label-bold large v-label-large v-has-width\" "
+				+		" style=\"width: 15px;width: 30%;text-align: left;\">"
+				+		"<span class=\"v-icon\" style=\"font-family: VaadinIcons;\">" + chevronType + "</span>" 
+				+ 	"</div>"
+				+ "</div>";
+			//@formatter:on
+
+			return stringRepresentation;
+		}, new HtmlRenderer());
 
 		setSelectionMode(SelectionMode.NONE);
 	}
 
-	@SuppressWarnings("unchecked")
-	private BeanItemContainer<DiseaseBurdenDto> getContainer() {
-		GeneratedPropertyContainer container = (GeneratedPropertyContainer) super.getContainerDataSource();
-		return (BeanItemContainer<DiseaseBurdenDto>) container.getWrappedContainer();
-	}
-
 	public void reload(List<DiseaseBurdenDto> items) {
-		getContainer().removeAllItems();
-		getContainer().addAll(items);
+		setItems(items);
 	}
 }

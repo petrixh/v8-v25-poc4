@@ -1,7 +1,5 @@
 package de.symeda.sormas.ui.dashboard.surveillance.components;
 
-import com.vaadin.v7.data.Property;
-
 import de.symeda.sormas.api.caze.NewCaseDateType;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
@@ -9,6 +7,7 @@ import de.symeda.sormas.ui.dashboard.DashboardDataProvider;
 import de.symeda.sormas.ui.dashboard.components.DashboardFilterLayout;
 import de.symeda.sormas.ui.dashboard.surveillance.SurveillanceDashboardView;
 import de.symeda.sormas.ui.utils.components.datetypeselector.DateTypeSelectorComponent;
+import de.symeda.sormas.ui.utils.fields.Field;
 
 public class SurveillanceFilterLayout extends DashboardFilterLayout<DashboardDataProvider> {
 
@@ -30,7 +29,7 @@ public class SurveillanceFilterLayout extends DashboardFilterLayout<DashboardDat
 		createRegionAndDistrictFilter();
 	}
 
-	public void addDateTypeValueChangeListener(Property.ValueChangeListener listener) {
+	public void addDateTypeValueChangeListener(Field.ValueChangeListener<Object> listener) {
 		dateTypeSelectorComponent.addValueChangeListener(listener);
 	}
 

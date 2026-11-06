@@ -131,6 +131,15 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 	}
 
 	/**
+	 * V7 {@code AbstractSelect.setValue}: in multi select, {@code null} is stored as an empty set, so the value of a
+	 * multi select is never {@code null}.
+	 */
+	@Override
+	public void setValue(Object value) {
+		super.setValue(multiSelect && value == null ? new LinkedHashSet<>() : value);
+	}
+
+	/**
 	 * The inner Flow component: a {@link RadioButtonGroup} or a {@link CheckboxGroup}.
 	 */
 	public Component getGroupComponent() {

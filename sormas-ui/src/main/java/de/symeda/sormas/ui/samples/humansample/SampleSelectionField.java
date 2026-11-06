@@ -18,18 +18,23 @@ package de.symeda.sormas.ui.samples.humansample;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.RadioButtonGroup;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.sample.SampleDto;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 
+/**
+ * Content is built on first attach (as in Vaadin 8), so a selection change callback set after construction is in place
+ * when the initial radio value is set.
+ */
 public class SampleSelectionField extends CustomField<SampleDto> {
 
 	public static final String CREATE_SAMPLE = "createSample";
@@ -66,7 +71,7 @@ public class SampleSelectionField extends CustomField<SampleDto> {
 
 		RadioButtonGroup<String> radioGroup = new RadioButtonGroup<>();
 		radioGroup.setItems(value);
-		radioGroup.setItemCaptionGenerator(item -> I18nProperties.getCaption(captionTag));
+		radioGroup.setItemLabelGenerator(item -> I18nProperties.getCaption(captionTag));
 		CssStyles.style(radioGroup, CssStyles.VSPACE_NONE);
 
 		return radioGroup;
@@ -76,7 +81,7 @@ public class SampleSelectionField extends CustomField<SampleDto> {
 
 		RadioButtonGroup<String> radioGroup = new RadioButtonGroup<>();
 		radioGroup.setItems(CREATE_SAMPLE);
-		radioGroup.setItemCaptionGenerator(item -> I18nProperties.getCaption(Captions.sampleCreateNew));
+		radioGroup.setItemLabelGenerator(item -> I18nProperties.getCaption(Captions.sampleCreateNew));
 
 		return radioGroup;
 	}
@@ -105,7 +110,7 @@ public class SampleSelectionField extends CustomField<SampleDto> {
 	protected Component initContent() {
 		mainLayout = new VerticalLayout();
 		mainLayout.setSpacing(true);
-		mainLayout.setMargin(false);
+		mainLayout.setPadding(false);
 		mainLayout.setSizeUndefined();
 		mainLayout.setWidth(100, Unit.PERCENTAGE);
 
@@ -114,24 +119,24 @@ public class SampleSelectionField extends CustomField<SampleDto> {
 
 		similarSampleGrid = createSampleGrid(similarSamples);
 		rbSelectSimilarSample = createSelectSelectRadioGroup(SELECT_SIMILAR_SAMPLE, Captions.selectSimilarSample);
-		mainLayout.addComponent(rbSelectSimilarSample);
+		mainLayout.add(rbSelectSimilarSample);
 		if (similarSamples.isEmpty()) {
 			rbSelectSimilarSample.setEnabled(false);
 		} else {
-			mainLayout.addComponent(similarSampleGrid);
+			mainLayout.add(similarSampleGrid);
 		}
 
 		otherSampleGrid = createSampleGrid(otherSamples);
 		rbSelectOtherSample = createSelectSelectRadioGroup(SELECT_OTHER_SAMPLE, Captions.selectOtherSample);
-		mainLayout.addComponent(rbSelectOtherSample);
+		mainLayout.add(rbSelectOtherSample);
 		if (otherSamples.isEmpty()) {
 			rbSelectOtherSample.setEnabled(false);
 		} else {
-			mainLayout.addComponent(otherSampleGrid);
+			mainLayout.add(otherSampleGrid);
 		}
 
 		rbCreateSample = createSampleCreateRadioGroup();
-		mainLayout.addComponent(rbCreateSample);
+		mainLayout.add(rbCreateSample);
 
 		addRadioListeners();
 
@@ -147,11 +152,11 @@ public class SampleSelectionField extends CustomField<SampleDto> {
 	}
 
 	private void addDetailsComponent() {
-		mainLayout.addComponent(detailsComponent);
+		mainLayout.add(detailsComponent);
 	}
 
 	@Override
-	protected void doSetValue(SampleDto sampleDto) {
+	protected void setPresentationValue(SampleDto sampleDto) {
 		if (similarSamples.contains(sampleDto)) {
 			rbSelectSimilarSample.setValue(SELECT_SIMILAR_SAMPLE);
 			similarSampleGrid.select(sampleDto);
@@ -167,21 +172,24 @@ public class SampleSelectionField extends CustomField<SampleDto> {
 		}
 	}
 
+	/**
+	 * As in Vaadin 8, the value is read from the grid selection, not from a stored model value.
+	 */
 	@Override
 	public SampleDto getValue() {
 		if (similarSampleGrid != null && similarSampleGrid.isEnabled()) {
-			return (SampleDto) similarSampleGrid.getSelectedRow();
+			return similarSampleGrid.getSelectedRow();
 		}
 
 		if (otherSampleGrid != null && otherSampleGrid.isEnabled()) {
-			return (SampleDto) otherSampleGrid.getSelectedRow();
+			return otherSampleGrid.getSelectedRow();
 		}
 
 		return null;
 	}
 
 	private void addInfoComponent() {
-		mainLayout.addComponent(VaadinUiUtil.createInfoComponent(infoText));
+		mainLayout.add(VaadinUiUtil.createInfoComponent(infoText));
 	}
 
 	private SampleSelectionGrid createSampleGrid(List<SampleDto> samples) {
@@ -189,7 +197,7 @@ public class SampleSelectionField extends CustomField<SampleDto> {
 
 		grid.addSelectionListener(e -> {
 			if (selectionChangeCallback != null) {
-				selectionChangeCallback.accept(!e.getSelected().isEmpty());
+				selectionChangeCallback.accept(!e.getAllSelectedItems().isEmpty());
 			}
 		});
 

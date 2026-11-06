@@ -20,13 +20,8 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 import java.util.Date;
 import java.util.stream.Stream;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -42,8 +37,12 @@ import de.symeda.sormas.api.utils.DateFilterOption;
 import de.symeda.sormas.api.utils.DateHelper;
 import de.symeda.sormas.api.utils.EpiWeek;
 import de.symeda.sormas.ui.utils.AbstractFilterForm;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.EpiWeekAndDateFilterComponent;
 import de.symeda.sormas.ui.utils.FieldConfiguration;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class SampleGridFilterForm extends AbstractFilterForm<SampleCriteria> {
 
@@ -123,7 +122,8 @@ public class SampleGridFilterForm extends AbstractFilterForm<SampleCriteria> {
 		TextField searchField = addField(
 			FieldConfiguration
 				.withCaptionAndPixelSized(SampleCriteria.CASE_CODE_ID_LIKE, I18nProperties.getString(Strings.promptSamplesSearchField), 200));
-		searchField.setDescription(I18nProperties.getString(Strings.promptSamplesSearchField), ContentMode.HTML);
+		// was ContentMode.HTML: Flow tooltips are text (the prompt has no markup)
+		searchField.setDescription(I18nProperties.getString(Strings.promptSamplesSearchField));
 		searchField.setNullRepresentation("");
 
 	}
@@ -149,7 +149,7 @@ public class SampleGridFilterForm extends AbstractFilterForm<SampleCriteria> {
 		dateFilterRowLayout.setSpacing(true);
 		dateFilterRowLayout.setSizeUndefined();
 
-		dateFilterRowLayout.addComponent(weekAndDateFilter);
+		dateFilterRowLayout.add(weekAndDateFilter);
 
 		return dateFilterRowLayout;
 	}
@@ -177,10 +177,10 @@ public class SampleGridFilterForm extends AbstractFilterForm<SampleCriteria> {
 	}
 
 	@Override
-	protected void applyDependenciesOnFieldChange(String propertyId, Property.ValueChangeEvent event) {
+	protected void applyDependenciesOnFieldChange(String propertyId, HasValue.ValueChangeEvent<?> event) {
 		switch (propertyId) {
 		case SampleCriteria.REGION: {
-			RegionReferenceDto region = (RegionReferenceDto) event.getProperty().getValue();
+			RegionReferenceDto region = (RegionReferenceDto) event.getValue();
 			if (region == null) {
 				clearAndDisableFields(SampleCriteria.DISTRICT);
 			} else {
@@ -214,7 +214,7 @@ public class SampleGridFilterForm extends AbstractFilterForm<SampleCriteria> {
 
 		HorizontalLayout dateFilterLayout = (HorizontalLayout) getMoreFiltersContainer().getComponent(WEEK_AND_DATE_FILTER);
 		EpiWeekAndDateFilterComponent<DateFilterOption> weekAndDateFilter;
-		weekAndDateFilter = (EpiWeekAndDateFilterComponent<DateFilterOption>) dateFilterLayout.getComponent(0);
+		weekAndDateFilter = (EpiWeekAndDateFilterComponent<DateFilterOption>) dateFilterLayout.getComponentAt(0);
 
 		weekAndDateFilter.getDateFilterOptionFilter().setValue(criteria.getDateFilterOption());
 		Date sampleDateFrom = criteria.getSampleReportDateFrom();
@@ -236,7 +236,7 @@ public class SampleGridFilterForm extends AbstractFilterForm<SampleCriteria> {
 		HorizontalLayout dateFilterLayout = (HorizontalLayout) getMoreFiltersContainer().getComponent(WEEK_AND_DATE_FILTER);
 		@SuppressWarnings("unchecked")
 		EpiWeekAndDateFilterComponent<DateFilterOption> weekAndDateFilter =
-			(EpiWeekAndDateFilterComponent<DateFilterOption>) dateFilterLayout.getComponent(0);
+			(EpiWeekAndDateFilterComponent<DateFilterOption>) dateFilterLayout.getComponentAt(0);
 
 		return super.streamFieldsForEmptyCheck(layout).filter(f -> f != weekAndDateFilter.getDateFilterOptionFilter());
 	}

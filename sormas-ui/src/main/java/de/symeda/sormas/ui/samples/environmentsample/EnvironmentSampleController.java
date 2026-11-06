@@ -22,10 +22,8 @@ import java.util.function.Consumer;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.common.DeletionReason;
@@ -49,6 +47,7 @@ import de.symeda.sormas.ui.samples.SamplesView;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.DeleteRestoreHandlers;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.automaticdeletion.DeletionLabel;
 import de.symeda.sormas.ui.utils.components.page.title.TitleLayout;
@@ -84,7 +83,7 @@ public class EnvironmentSampleController {
 		return remainingSamples -> {
 			sampleGrid.reload();
 			if (CollectionUtils.isNotEmpty(remainingSamples)) {
-				sampleGrid.asMultiSelect().selectItems(remainingSamples.toArray(new EnvironmentSampleIndexDto[0]));
+				sampleGrid.asMultiSelect().select(remainingSamples.toArray(new EnvironmentSampleIndexDto[0]));
 			} else {
 				noEntriesRemainingCallback.run();
 			}
@@ -104,7 +103,7 @@ public class EnvironmentSampleController {
 
 		EnvironmentSampleEditForm editForm = new EnvironmentSampleEditForm(sample.isPseudonymized(), false);
 		editForm.setValue(sample);
-		editForm.setWidth(100, Sizeable.Unit.PERCENTAGE);
+		editForm.setWidth(100, Unit.PERCENTAGE);
 
 		CommitDiscardWrapperComponent<EnvironmentSampleEditForm> editComponent =
 			new CommitDiscardWrapperComponent<>(editForm, editForm.getFieldGroup());
@@ -117,7 +116,7 @@ public class EnvironmentSampleController {
 				EnvironmentSampleDto editedSample = editForm.getValue();
 				FacadeProvider.getEnvironmentSampleFacade().save(editedSample);
 
-				Notification.show(I18nProperties.getString(Strings.messageEnvironmentSampleSaved), Notification.Type.WARNING_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageEnvironmentSampleSaved), NotificationHelper.Type.WARNING_MESSAGE);
 				SormasUI.refreshView();
 			}
 		});
@@ -135,7 +134,7 @@ public class EnvironmentSampleController {
 				redirectToOldNavigationState(sample, oldViewName);
 			}, (deletionDetails) -> {
 				FacadeProvider.getEnvironmentSampleFacade().restore(sample.getUuid());
-				UI.getCurrent().getNavigator().navigateTo(SamplesView.VIEW_NAME);
+				SormasUI.get().getNavigator().navigateTo(SamplesView.VIEW_NAME);
 			}, I18nProperties.getString(Strings.entityEnvironmentSample), FacadeProvider.getEnvironmentSampleFacade().isDeleted(sample.getUuid()));
 		}
 
@@ -197,10 +196,10 @@ public class EnvironmentSampleController {
 				// Environment sample accessed from samples directory
 				navigationState = oldViewName;
 			}
-			UI.getCurrent().getNavigator().navigateTo(navigationState);
+			SormasUI.get().getNavigator().navigateTo(navigationState);
 		} else {
 			// Environment sample accessed by URL from any other view
-			UI.getCurrent().getNavigator().navigateTo(SamplesView.VIEW_NAME);
+			SormasUI.get().getNavigator().navigateTo(SamplesView.VIEW_NAME);
 		}
 	}
 }

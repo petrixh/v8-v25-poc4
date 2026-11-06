@@ -18,9 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.EditPermissionType;
@@ -43,6 +42,8 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.caze.CaseInfoLayout;
 import de.symeda.sormas.ui.contact.ContactInfoLayout;
 import de.symeda.sormas.ui.events.EventParticipantInfoLayout;
+import de.symeda.sormas.ui.navigation.View;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import de.symeda.sormas.ui.samples.AbstractSampleView;
 import de.symeda.sormas.ui.samples.AdditionalTestListComponent;
 import de.symeda.sormas.ui.samples.HasName;
@@ -94,11 +95,11 @@ public class SampleDataView extends AbstractSampleView implements HasName {
 	@Override
 	protected void initView(String params) {
 
-		setHeightUndefined();
+		setHeight(null);
 
 		DetailSubComponentWrapper container = new DetailSubComponentWrapper(() -> editComponent);
 		container.setWidth(100, Unit.PERCENTAGE);
-		container.setMargin(true);
+		container.setPadding(true);
 		setSubComponent(container);
 
 		SampleDto sampleDto = FacadeProvider.getSampleFacade().getSampleByUuid(getSampleRef().getUuid());
@@ -136,7 +137,7 @@ public class SampleDataView extends AbstractSampleView implements HasName {
 			ADDITIONAL_TESTS_LOC,
 			SORMAS_TO_SORMAS_LOC);
 
-		container.addComponent(layout);
+		container.add(layout);
 
 		if (dependentComponent != null) {
 			if (dependentComponent.getClass().equals(CaseInfoLayout.class)) {
@@ -157,7 +158,7 @@ public class SampleDataView extends AbstractSampleView implements HasName {
 
 			AdditionalTestListComponent additionalTestList =
 				new AdditionalTestListComponent(sampleReferenceDto.getUuid(), this::showUnsavedChangesPopup, isEditAllowed());
-			additionalTestList.addStyleName(CssStyles.SIDE_COMPONENT);
+			additionalTestList.addClassName(CssStyles.SIDE_COMPONENT);
 			layout.addSidePanelComponent(additionalTestList, ADDITIONAL_TESTS_LOC);
 		}
 
@@ -167,12 +168,12 @@ public class SampleDataView extends AbstractSampleView implements HasName {
 				FeatureType.SORMAS_TO_SORMAS_SHARE_CONTACTS,
 				FeatureType.SORMAS_TO_SORMAS_SHARE_EVENTS)) {
 			VerticalLayout sormasToSormasLocLayout = new VerticalLayout();
-			sormasToSormasLocLayout.setMargin(false);
+			sormasToSormasLocLayout.setPadding(false);
 			sormasToSormasLocLayout.setSpacing(false);
 
 			SormasToSormasListComponent sormasToSormasListComponent = new SormasToSormasListComponent(sampleDto);
-			sormasToSormasListComponent.addStyleNames(CssStyles.SIDE_COMPONENT);
-			sormasToSormasLocLayout.addComponent(sormasToSormasListComponent);
+			sormasToSormasListComponent.addClassNames(CssStyles.SIDE_COMPONENT);
+			sormasToSormasLocLayout.add(sormasToSormasListComponent);
 
 			layout.addSidePanelComponent(sormasToSormasLocLayout, SORMAS_TO_SORMAS_LOC);
 		}
@@ -190,7 +191,7 @@ public class SampleDataView extends AbstractSampleView implements HasName {
 			disease = caseDto.getDisease();
 
 			final CaseInfoLayout caseInfoLayout = new CaseInfoLayout(caseDto);
-			caseInfoLayout.addStyleName(CssStyles.SIDE_COMPONENT);
+			caseInfoLayout.addClassName(CssStyles.SIDE_COMPONENT);
 
 			return (AbstractInfoLayout) caseInfoLayout;
 		}
@@ -202,7 +203,7 @@ public class SampleDataView extends AbstractSampleView implements HasName {
 			disease = contactDto.getDisease();
 
 			final ContactInfoLayout contactInfoLayout = new ContactInfoLayout(contactDto, FieldAccessHelper.getFieldAccessCheckers(contactDto));
-			contactInfoLayout.addStyleName(CssStyles.SIDE_COMPONENT);
+			contactInfoLayout.addClassName(CssStyles.SIDE_COMPONENT);
 
 			return (AbstractInfoLayout) contactInfoLayout;
 		}
@@ -218,7 +219,7 @@ public class SampleDataView extends AbstractSampleView implements HasName {
 			final EventParticipantInfoLayout eventParticipantInfoLayout =
 				new EventParticipantInfoLayout(eventParticipantDto, eventDto, FieldAccessHelper.getFieldAccessCheckers(eventParticipantDto));
 
-			eventParticipantInfoLayout.addStyleName(CssStyles.SIDE_COMPONENT);
+			eventParticipantInfoLayout.addClassName(CssStyles.SIDE_COMPONENT);
 
 			return (AbstractInfoLayout) eventParticipantInfoLayout;
 		}

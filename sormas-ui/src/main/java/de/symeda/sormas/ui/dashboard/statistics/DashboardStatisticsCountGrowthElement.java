@@ -17,9 +17,8 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.dashboard.statistics;
 
-import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.ui.Alignment;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 
 import de.symeda.sormas.ui.utils.CssStyles;
 
@@ -31,8 +30,7 @@ public class DashboardStatisticsCountGrowthElement extends DashboardStatisticsGr
 		addClassName("count-element");
 		addClassName(countElementStyle.getCssClass());
 
-		setComponentAlignment(captionLabel, Alignment.MIDDLE_CENTER);
-		setComponentAlignment(growthLayout, Alignment.MIDDLE_CENTER);
+		setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, captionLabel, growthLayout);
 	}
 
 	@Override
@@ -53,8 +51,7 @@ public class DashboardStatisticsCountGrowthElement extends DashboardStatisticsGr
 	@Override
 	protected void createGrowthLabel() {
 		growthLabel = new Span();
-		growthLabel.setHeightUndefined();
-		growthLabel.setContentMode(ContentMode.HTML);
+		growthLabel.setHeight(null);
 		CssStyles.style(
 			growthLabel,
 			CssStyles.LABEL_MEDIUM,

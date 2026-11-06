@@ -18,13 +18,15 @@
 package de.symeda.sormas.ui.dashboard.statistics;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.ui.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 @SuppressWarnings("serial")
 public class DashboardStatisticsGrowthElement extends VerticalLayout {
@@ -42,7 +44,7 @@ public class DashboardStatisticsGrowthElement extends VerticalLayout {
 		this(caption, null, null);
 	}
 
-	public DashboardStatisticsGrowthElement(String caption, String captionClass, Alignment alignment) {
+	public DashboardStatisticsGrowthElement(String caption, String captionClass, FlexComponent.Alignment alignment) {
 		this.setPadding(false);
 		this.setSpacing(false);
 
@@ -50,24 +52,24 @@ public class DashboardStatisticsGrowthElement extends VerticalLayout {
 		this.captionClass = captionClass;
 
 		if (alignment != null) {
-			setDefaultComponentAlignment(alignment);
+			setDefaultHorizontalComponentAlignment(alignment);
 		}
 		CssStyles.style(this, CssStyles.VSPACE_3);
 
 		growthLayout = new HorizontalLayout();
 
 		createCountLabel();
-		growthLayout.addComponent(countLabel);
+		growthLayout.add(countLabel);
 		createGrowthLabel();
-		growthLayout.addComponent(growthLabel);
-		growthLayout.setComponentAlignment(growthLabel, Alignment.MIDDLE_CENTER);
+		growthLayout.add(growthLabel);
+		growthLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, growthLabel);
 		createPercentageLabel();
-		growthLayout.addComponent(percentageLabel);
+		growthLayout.add(percentageLabel);
 
-		addComponent(growthLayout);
+		add(growthLayout);
 
 		createCaptionLabel();
-		addComponent(captionLabel);
+		add(captionLabel);
 	}
 
 	protected void createCountLabel() {
@@ -77,8 +79,7 @@ public class DashboardStatisticsGrowthElement extends VerticalLayout {
 
 	protected void createGrowthLabel() {
 		growthLabel = new Span();
-		growthLabel.setHeightUndefined();
-		growthLabel.setContentMode(ContentMode.HTML);
+		growthLabel.setHeight(null);
 		CssStyles.style(growthLabel, CssStyles.LABEL_MEDIUM, CssStyles.LABEL_PRIMARY, CssStyles.LABEL_BOLD, CssStyles.HSPACE_RIGHT_4);
 
 	}
@@ -90,23 +91,23 @@ public class DashboardStatisticsGrowthElement extends VerticalLayout {
 
 	protected void createCaptionLabel() {
 		captionLabel = new Span(caption);
-		captionLabel.setWidthUndefined();
+		captionLabel.setWidth(null);
 		CssStyles.style(captionLabel, CssStyles.LABEL_MEDIUM, CssStyles.LABEL_UPPERCASE, CssStyles.LABEL_BOLD, captionClass);
 
 	}
 
 	public void update(int count, int percentage, boolean increaseIsPositive) {
-		countLabel.setValue(Integer.toString(count));
-		percentageLabel.setValue(percentage != Integer.MIN_VALUE ? (percentage + " %") : "");
+		countLabel.setText(Integer.toString(count));
+		percentageLabel.setText(percentage != Integer.MIN_VALUE ? (percentage + " %") : "");
 		CssStyles.removeStyles(growthLabel, CssStyles.LABEL_CRITICAL, CssStyles.LABEL_POSITIVE, CssStyles.LABEL_IMPORTANT);
 		if (percentage > 0) {
-			growthLabel.setValue(VaadinIcon.CHEVRON_UP.getHtml());
+			VaadinUiUtil.setLabelValue(growthLabel, HtmlRenderer.iconHtml(VaadinIcon.CHEVRON_UP), ContentMode.HTML);
 			CssStyles.style(growthLabel, increaseIsPositive ? CssStyles.LABEL_POSITIVE : CssStyles.LABEL_CRITICAL);
 		} else if (percentage < 0) {
-			growthLabel.setValue(VaadinIcon.CHEVRON_DOWN.getHtml());
+			VaadinUiUtil.setLabelValue(growthLabel, HtmlRenderer.iconHtml(VaadinIcon.CHEVRON_DOWN), ContentMode.HTML);
 			CssStyles.style(growthLabel, increaseIsPositive ? CssStyles.LABEL_CRITICAL : CssStyles.LABEL_POSITIVE);
 		} else {
-			growthLabel.setValue(VaadinIcon.CHEVRON_RIGHT.getHtml());
+			VaadinUiUtil.setLabelValue(growthLabel, HtmlRenderer.iconHtml(VaadinIcon.CHEVRON_RIGHT), ContentMode.HTML);
 			CssStyles.style(growthLabel, CssStyles.LABEL_IMPORTANT);
 		}
 	}

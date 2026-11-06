@@ -9,13 +9,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.server.Page;
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.flow.component.Component;
-import com.vaadin.ui.CssLayout;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import com.vaadin.flow.component.page.Page;
 
 import de.symeda.sormas.api.campaign.CampaignReferenceDto;
 import de.symeda.sormas.api.campaign.diagram.CampaignDashboardElement;
@@ -27,6 +26,8 @@ import de.symeda.sormas.ui.SubMenu;
 import de.symeda.sormas.ui.dashboard.AbstractDashboardView;
 import de.symeda.sormas.ui.dashboard.DashboardType;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 public class CampaignDashboardView extends AbstractDashboardView {
 
@@ -50,7 +51,7 @@ public class CampaignDashboardView extends AbstractDashboardView {
 
 		dataProvider = new CampaignDashboardDataProvider();
 		filterLayout = new CampaignDashboardFilterLayout(this, dataProvider);
-		dashboardLayout.addComponent(filterLayout);
+		dashboardLayout.add(filterLayout);
 		dashboardLayout.setPadding(false);
 
 		dashboardSwitcher.setValue(DashboardType.CAMPAIGNS);
@@ -65,15 +66,15 @@ public class CampaignDashboardView extends AbstractDashboardView {
 	@Override
 	public void refreshDashboard() {
 
-		final Page page = Page.getCurrent();
+		final Page page = UI.getCurrent().getPage();
 		cleanupDashboard(page);
 
 		final VerticalLayout tabLayout = new VerticalLayout();
 		tabLayout.setSizeFull();
-		tabLayout.setMargin(new MarginInfo(false, false, false, false));
+		tabLayout.setPadding(false);
 		tabLayout.setSpacing(false);
 		campaignDashboardTabComponents.add(tabLayout);
-		dashboardLayout.addComponent(tabLayout);
+		dashboardLayout.add(tabLayout);
 		dashboardLayout.setFlexGrow(1, tabLayout);
 
 		final OptionGroup tabSwitcher = new OptionGroup();
@@ -81,9 +82,10 @@ public class CampaignDashboardView extends AbstractDashboardView {
 
 		final VerticalLayout tabSwitcherLayout = new VerticalLayout(tabSwitcher);
 		tabSwitcherLayout.setWidthFull();
-		tabSwitcherLayout.setMargin(new MarginInfo(false, false, false, true));
+		// was a left margin only (MarginInfo); spacing details belong to the theme work
+		tabSwitcherLayout.setPadding(false);
 		tabSwitcherLayout.setSpacing(false);
-		tabLayout.addComponent(tabSwitcherLayout);
+		tabLayout.add(tabSwitcherLayout);
 		tabLayout.setFlexGrow(0, tabSwitcherLayout);
 
 		final List<String> tabs = new ArrayList<>(dataProvider.getTabIds());
@@ -97,20 +99,24 @@ public class CampaignDashboardView extends AbstractDashboardView {
 		final String lastTabId = lastTabIdForCampaign.get(dataProvider.getCampaign());
 		tabSwitcher.setValue(tabs.isEmpty() ? StringUtils.EMPTY : lastTabId != null ? lastTabId : tabs.get(0));
 
-		CssStyles.style(tabSwitcher, CssStyles.FORCE_CAPTION, ValoTheme.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_HORIZONTAL_PRIMARY);
+		CssStyles.style(
+			tabSwitcher,
+			CssStyles.FORCE_CAPTION,
+			SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL,
+			CssStyles.OPTIONGROUP_HORIZONTAL_PRIMARY);
 
 		final VerticalLayout subTabLayout = new VerticalLayout();
 		subTabLayout.setSizeFull();
-		subTabLayout.setMargin(new MarginInfo(false, false, false, false));
+		subTabLayout.setPadding(false);
 		subTabLayout.setSpacing(false);
 		campaignDashboardTabComponents.add(subTabLayout);
-		tabLayout.addComponent(subTabLayout);
+		tabLayout.add(subTabLayout);
 		tabLayout.setFlexGrow(1, subTabLayout);
 
 		tabSwitcher.addValueChangeListener(e -> {
 			final String tabId = (String) e.getValue();
-			subTabLayout.remove(currentDiagramsWrapper);
-			subTabLayout.remove(currentSubTabsWrapper);
+			removeIfChild(subTabLayout, currentDiagramsWrapper);
+			removeIfChild(subTabLayout, currentSubTabsWrapper);
 			lastTabIdForCampaign.put(dataProvider.getCampaign(), tabId);
 			refreshSubTabs(page, tabId, subTabLayout);
 		});
@@ -124,16 +130,17 @@ public class CampaignDashboardView extends AbstractDashboardView {
 		final SubMenu subTabSwitcher = new SubMenu();
 
 		final VerticalLayout subTabSwitcherLayout = new VerticalLayout(subTabSwitcher);
-		subTabSwitcherLayout.setMargin(new MarginInfo(false, false, false, true));
+		// was a left margin only (MarginInfo); spacing details belong to the theme work
+		subTabSwitcherLayout.setPadding(false);
 		subTabSwitcherLayout.setSpacing(false);
 		subTabSwitcherLayout.setId("subTabsOf" + tabId);
 		currentSubTabsWrapper = subTabSwitcherLayout;
-		subTabLayout.addComponent(subTabSwitcherLayout);
+		subTabLayout.add(subTabSwitcherLayout);
 		subTabLayout.setFlexGrow(0, subTabSwitcherLayout);
 		subTabSwitcherLayout.addClassNames("statistics-sublayout", CssStyles.VSPACE_3);
 
 		subTabs.forEach(subTabId -> subTabSwitcher.addView(subTabId, subTabId, () -> {
-			subTabLayout.remove(currentDiagramsWrapper);
+			removeIfChild(subTabLayout, currentDiagramsWrapper);
 			if (lastSubTabIdForTabIdAndCampaign.containsKey(dataProvider.getCampaign())) {
 				lastSubTabIdForTabIdAndCampaign.get(dataProvider.getCampaign()).put(tabId, subTabId);
 			} else {
@@ -157,8 +164,6 @@ public class CampaignDashboardView extends AbstractDashboardView {
 	}
 
 	private void refreshDiagrams(Page page, VerticalLayout layout, String tabId, String subTabId) {
-		final Page.Styles styles = page.getStyles();
-
 		Map<CampaignDashboardDiagramDto, List<CampaignDiagramDataDto>> campaignFormDataMap = dataProvider.getCampaignFormDataMap(tabId, subTabId);
 
 		if (campaignFormDataMap != null && !campaignFormDataMap.isEmpty()) {
@@ -168,7 +173,8 @@ public class CampaignDashboardView extends AbstractDashboardView {
 			final GridTemplateAreaCreator gridTemplateAreaCreator = new GridTemplateAreaCreator(dashboardElements);
 
 			final VerticalLayout diagramsWrapper = new VerticalLayout();
-			diagramsWrapper.setMargin(new MarginInfo(false, true, false, true));
+			// was a left and right margin only (MarginInfo); spacing details belong to the theme work
+			diagramsWrapper.setPadding(false);
 			diagramsWrapper.setId(tabId + "_" + subTabId);
 			currentDiagramsWrapper = diagramsWrapper;
 
@@ -177,11 +183,13 @@ public class CampaignDashboardView extends AbstractDashboardView {
 				Unit.PERCENTAGE);
 			diagramsWrapper.setHeight(gridTemplateAreaCreator.getGridContainerHeight(), Unit.PERCENTAGE);
 
-			final CssLayout diagramsLayout = new CssLayout();
+			// was a CssLayout; the grid style below lays it out
+			final Div diagramsLayout = new Div();
 			diagramsLayout.setSizeFull();
 			final String gridCssClass = (tabId + subTabId).replaceAll("[^a-zA-Z]+", "") + generateRandomString() + GRID_CONTAINER;
 
-			styles.add(
+			addStyles(
+				page,
 				createDiagramGridStyle(
 					gridCssClass,
 					gridTemplateAreaCreator.getFormattedGridTemplate(),
@@ -199,25 +207,43 @@ public class CampaignDashboardView extends AbstractDashboardView {
 					diagramData,
 					dataProvider.getCampaignFormTotalsMap(tabId, subTabId).get(campaignDashboardDiagramDto),
 					dataProvider.getCampaignJurisdictionLevelGroupBy());
-				styles.add(createDiagramStyle(diagramCssClass, diagramId));
+				addStyles(page, createDiagramStyle(diagramCssClass, diagramId));
 				diagramComponent.setClassName(diagramCssClass);
 
-				diagramsLayout.addComponent(diagramComponent);
+				diagramsLayout.add(diagramComponent);
 			});
-			diagramsWrapper.addComponent(diagramsLayout);
+			diagramsWrapper.add(diagramsLayout);
 
 			diagramsWrapper.setVisible(true);
-			layout.addComponent(diagramsWrapper);
+			layout.add(diagramsWrapper);
 			layout.setFlexGrow(1, diagramsWrapper);
 		}
 	}
 
 	private void cleanupDashboard(Page page) {
 		campaignDashboardTabComponents
-			.forEach(campaignDashboardDiagramComponents -> dashboardLayout.remove(campaignDashboardDiagramComponents));
+			.forEach(campaignDashboardDiagramComponents -> removeIfChild(dashboardLayout, campaignDashboardDiagramComponents));
 		campaignDashboardTabComponents.clear();
-		campaignDashboardDiagramStyles.forEach(s -> page.getJavaScript().execute(removeStyles(s)));
+		campaignDashboardDiagramStyles.forEach(s -> page.executeJs(removeStyles(s)));
 		campaignDashboardDiagramStyles.clear();
+	}
+
+	/**
+	 * Was {@code layout.removeComponent(component)}: Vaadin 8 ignored {@code null} and components of another parent, Flow's
+	 * {@code remove} throws for both.
+	 */
+	private static void removeIfChild(VerticalLayout layout, Component component) {
+		if (component != null && component.getParent().orElse(null) == layout) {
+			layout.remove(component);
+		}
+	}
+
+	/**
+	 * Was {@code Page.getStyles().add(css)}: Flow has no API that adds style text to the page, so the browser adds a
+	 * {@code style} element to the document head, as Vaadin 8 did. {@link #removeStyles(String)} removes it again.
+	 */
+	private static void addStyles(Page page, String css) {
+		page.executeJs("const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);", css);
 	}
 
 	private String generateRandomString() {

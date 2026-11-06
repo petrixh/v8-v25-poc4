@@ -81,7 +81,7 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
             showEnvironmentalSamples = false; // Environment samples are OFF by default
         }
 
-        super.add();
+        super.addComponents();
 
         if (showEnvironmentalSamples) {
             appendHeadingInfo(" " + I18nProperties.getString(Strings.infoHeadingEnvironmentSampleDashboardMap));
@@ -256,7 +256,7 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
 
                 refreshMap(true);
             });
-            layersLayout.addComponent(showCaseSamplesCheckBox);
+            layersLayout.add(showCaseSamplesCheckBox);
         }
 
         if (UiUtil.permitted(UserRight.CONTACT_VIEW)) {
@@ -273,7 +273,7 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
 
                 refreshMap(true);
             });
-            layersLayout.addComponent(showContactSamplesCheckBox);
+            layersLayout.add(showContactSamplesCheckBox);
         }
 
         if (UiUtil.permitted(UserRight.EVENTPARTICIPANT_VIEW)) {
@@ -290,7 +290,7 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
 
                 refreshMap(true);
             });
-            layersLayout.addComponent(showEventParticipantSamplesCheckBox);
+            layersLayout.add(showEventParticipantSamplesCheckBox);
         }
 
         if (UiUtil.permitted(UserRight.ENVIRONMENT_VIEW)) {
@@ -302,7 +302,7 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
                 showEnvironmentalSamples = (boolean) e.getValue();
                 refreshMap(true);
             });
-            layersLayout.addComponent(showEnvironmentSamplesCheckBox);
+            layersLayout.add(showEnvironmentSamplesCheckBox);
         }
     }
 
@@ -325,14 +325,14 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
             HorizontalLayout legendEntry =
                 buildMarkerLegendEntry(MarkerIcon.SAMPLE_CASE, I18nProperties.getCaption(Captions.sampleDashboardCaseSamples));
             CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-            samplesLegendLayout.addComponent(legendEntry);
+            samplesLegendLayout.add(legendEntry);
         }
 
         if (shouldShowContactSamples()) {
             HorizontalLayout legendEntry =
                 buildMarkerLegendEntry(MarkerIcon.SAMPLE_CONTACT, I18nProperties.getCaption(Captions.sampleDashboardContactSamples));
             CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-            samplesLegendLayout.addComponent(legendEntry);
+            samplesLegendLayout.add(legendEntry);
         }
 
         if (shouldShowEventParticipantSamples()) {
@@ -340,13 +340,13 @@ public class SampleDashboardMapComponent extends BaseDashboardMapComponent<Sampl
                 MarkerIcon.SAMPLE_EVENT_PARTICIPANT,
                 I18nProperties.getCaption(Captions.sampleDashboardEventParticipantSamples));
             CssStyles.style(legendEntry, CssStyles.HSPACE_RIGHT_3);
-            samplesLegendLayout.addComponent(legendEntry);
+            samplesLegendLayout.add(legendEntry);
         }
 
         if (showEnvironmentalSamples) {
             HorizontalLayout legendEntry =
                 buildMarkerLegendEntry(MarkerIcon.SAMPLE_ENVIRONMENT, I18nProperties.getCaption(Captions.sampleDashboardEnvironmentsSamples));
-            samplesLegendLayout.addComponent(legendEntry);
+            samplesLegendLayout.add(legendEntry);
         }
 
         return Collections.singletonList(samplesLegendLayout);

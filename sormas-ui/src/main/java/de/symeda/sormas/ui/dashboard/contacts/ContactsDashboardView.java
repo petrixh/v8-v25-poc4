@@ -21,12 +21,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Alignment;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.ConfigFacade;
@@ -43,7 +43,10 @@ import de.symeda.sormas.ui.dashboard.contacts.components.ContactsFilterLayout;
 import de.symeda.sormas.ui.dashboard.map.DashboardMapComponent;
 import de.symeda.sormas.ui.dashboard.statistics.AbstractDashboardStatisticsComponent;
 import de.symeda.sormas.ui.dashboard.visualisation.DashboardNetworkComponent;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 @SuppressWarnings("serial")
 public class ContactsDashboardView extends AbstractDashboardView {
@@ -92,7 +95,7 @@ public class ContactsDashboardView extends AbstractDashboardView {
 		}
 
 		filterLayout = new ContactsFilterLayout(this, dashboardDataProvider);
-		dashboardLayout.addComponent(filterLayout);
+		dashboardLayout.add(filterLayout);
 
 		dashboardSwitcher.setValue(DashboardType.CONTACTS);
 		dashboardSwitcher.addValueChangeListener(e -> {
@@ -103,20 +106,20 @@ public class ContactsDashboardView extends AbstractDashboardView {
 		rowsLayout = new VerticalLayout();
 		rowsLayout.setPadding(false);
 		rowsLayout.setSpacing(false);
-		dashboardLayout.addComponent(rowsLayout);
+		dashboardLayout.add(rowsLayout);
 		dashboardLayout.setFlexGrow(1, rowsLayout);
 
 		// Add statistics
 		statisticsComponent = new ContactsDashboardStatisticsComponent(dashboardDataProvider);
-		rowsLayout.addComponent(statisticsComponent);
+		rowsLayout.add(statisticsComponent);
 		rowsLayout.setFlexGrow(0, statisticsComponent);
 
 		caseStatisticsLayout = createCaseStatisticsLayout();
-		rowsLayout.addComponent(caseStatisticsLayout);
+		rowsLayout.add(caseStatisticsLayout);
 		rowsLayout.setFlexGrow(0, caseStatisticsLayout);
 
 		contactsStatisticsLayout = createContactsStatisticsLayout();
-		rowsLayout.addComponent(contactsStatisticsLayout);
+		rowsLayout.add(contactsStatisticsLayout);
 		rowsLayout.setFlexGrow(0, contactsStatisticsLayout);
 
 		epiCurveComponent = new ContactsEpiCurveComponent(dashboardDataProvider);
@@ -124,7 +127,7 @@ public class ContactsDashboardView extends AbstractDashboardView {
 
 		// Add epi curve and map
 		epiCurveAndMapLayout = createEpiCurveAndMapLayout();
-		rowsLayout.addComponent(epiCurveAndMapLayout);
+		rowsLayout.add(epiCurveAndMapLayout);
 
 		// add network diagram
 		if (UiUtil.permitted(UserRight.DASHBOARD_CONTACT_VIEW_TRANSMISSION_CHAINS)) {
@@ -133,7 +136,7 @@ public class ContactsDashboardView extends AbstractDashboardView {
 				.map(x -> new DashboardNetworkComponent(dashboardDataProvider));
 
 			networkDiagramRowLayout = createNetworkDiagramRowLayout();
-			rowsLayout.addComponent(networkDiagramRowLayout);
+			rowsLayout.add(networkDiagramRowLayout);
 		}
 	}
 
@@ -146,46 +149,48 @@ public class ContactsDashboardView extends AbstractDashboardView {
 
 		HorizontalLayout contactsPerCaseLayout = createContactsPerCaseLayout();
 		HorizontalLayout sourceCasesLayout = createSourceCasesLayout();
-		layout.addComponent(contactsPerCaseLayout);
-		layout.addComponent(sourceCasesLayout);
+		layout.add(contactsPerCaseLayout);
+		layout.add(sourceCasesLayout);
 		layout.setFlexGrow(1, contactsPerCaseLayout);
-		layout.setComponentAlignment(sourceCasesLayout, Alignment.MIDDLE_RIGHT);
+		layout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, sourceCasesLayout);
 
 		return layout;
 	}
 
 	private HorizontalLayout createContactsPerCaseLayout() {
 		HorizontalLayout layout = new HorizontalLayout();
-		layout.setMargin(new MarginInfo(false, true, false, true));
+		// was a left and right margin only (MarginInfo); spacing details belong to the theme work
+		layout.setPadding(false);
 		layout.setSpacing(false);
 
 		Span caption = new Span(I18nProperties.getString(Strings.headingContactsPerCase));
 		CssStyles.style(caption, CssStyles.H3, CssStyles.HSPACE_RIGHT_1, CssStyles.VSPACE_TOP_NONE);
-		layout.addComponent(caption);
+		layout.add(caption);
 
 		CssStyles
 			.style(minLabel, CssStyles.LABEL_PRIMARY, CssStyles.LABEL_LARGE_ALT, CssStyles.LABEL_BOLD, CssStyles.VSPACE_5, CssStyles.HSPACE_RIGHT_3);
-		layout.addComponent(minLabel);
+		layout.add(minLabel);
 		CssStyles
 			.style(maxLabel, CssStyles.LABEL_PRIMARY, CssStyles.LABEL_LARGE_ALT, CssStyles.LABEL_BOLD, CssStyles.VSPACE_5, CssStyles.HSPACE_RIGHT_3);
-		layout.addComponent(maxLabel);
+		layout.add(maxLabel);
 		CssStyles.style(avgLabel, CssStyles.LABEL_PRIMARY, CssStyles.LABEL_LARGE_ALT, CssStyles.LABEL_BOLD, CssStyles.VSPACE_5);
-		layout.addComponent(avgLabel);
+		layout.add(avgLabel);
 
 		return layout;
 	}
 
 	private HorizontalLayout createSourceCasesLayout() {
 		HorizontalLayout layout = new HorizontalLayout();
-		layout.setMargin(new MarginInfo(false, true, false, true));
+		// was a left and right margin only (MarginInfo); spacing details belong to the theme work
+		layout.setPadding(false);
 		layout.setSpacing(false);
 
 		Span caption = new Span(I18nProperties.getString(Strings.headingNewSourceCases));
 		CssStyles.style(caption, CssStyles.H3, CssStyles.HSPACE_RIGHT_1, CssStyles.VSPACE_TOP_NONE);
-		layout.addComponent(caption);
+		layout.add(caption);
 
 		CssStyles.style(sourceCasesLabel, CssStyles.LABEL_PRIMARY, CssStyles.LABEL_LARGE_ALT, CssStyles.LABEL_BOLD, CssStyles.VSPACE_5);
-		layout.addComponent(sourceCasesLabel);
+		layout.add(sourceCasesLabel);
 
 		return layout;
 	}
@@ -199,12 +204,14 @@ public class ContactsDashboardView extends AbstractDashboardView {
 		layout.setSpacing(false);
 
 		HorizontalLayout contactsInQuarantine = createContactsInQuarantineLayout();
-		layout.addComponent(contactsInQuarantine);
+		layout.add(contactsInQuarantine);
 
 		HorizontalLayout contactsPlacedInQuarantine = createContactsPlacedInQuarantineLayout();
-		layout.addComponent(contactsPlacedInQuarantine);
+		layout.add(contactsPlacedInQuarantine);
 
-		layout.setComponentAlignment(contactsPlacedInQuarantine, Alignment.MIDDLE_RIGHT);
+		// was MIDDLE_RIGHT in the second of two equal slots: at the right end
+		layout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+		layout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, contactsPlacedInQuarantine);
 
 		return layout;
 	}
@@ -212,12 +219,13 @@ public class ContactsDashboardView extends AbstractDashboardView {
 	private HorizontalLayout createContactsInQuarantineLayout() {
 
 		HorizontalLayout layout = new HorizontalLayout();
-		layout.setMargin(new MarginInfo(false, true, false, true));
+		// was a left and right margin only (MarginInfo); spacing details belong to the theme work
+		layout.setPadding(false);
 		layout.setSpacing(false);
 
 		Span captionInQuarantine = new Span(I18nProperties.getString(Strings.headingContactsInQuarantine));
 		CssStyles.style(captionInQuarantine, CssStyles.H3, CssStyles.HSPACE_RIGHT_1, CssStyles.VSPACE_TOP_NONE);
-		layout.addComponent(captionInQuarantine);
+		layout.add(captionInQuarantine);
 
 		CssStyles.style(
 			contactsInQuarantineByDate,
@@ -226,7 +234,7 @@ public class ContactsDashboardView extends AbstractDashboardView {
 			CssStyles.LABEL_BOLD,
 			CssStyles.VSPACE_5,
 			CssStyles.HSPACE_RIGHT_3);
-		layout.addComponent(contactsInQuarantineByDate);
+		layout.add(contactsInQuarantineByDate);
 
 		return layout;
 	}
@@ -234,12 +242,13 @@ public class ContactsDashboardView extends AbstractDashboardView {
 	private HorizontalLayout createContactsPlacedInQuarantineLayout() {
 
 		HorizontalLayout layout = new HorizontalLayout();
-		layout.setMargin(new MarginInfo(false, true, false, true));
+		// was a left and right margin only (MarginInfo); spacing details belong to the theme work
+		layout.setPadding(false);
 		layout.setSpacing(false);
 
 		Span captionPlacedInQuarantine = new Span(I18nProperties.getString(Strings.headingContactsPlacedInQuarantine));
 		CssStyles.style(captionPlacedInQuarantine, CssStyles.H3, CssStyles.HSPACE_RIGHT_1, CssStyles.VSPACE_TOP_NONE);
-		layout.addComponent(captionPlacedInQuarantine);
+		layout.add(captionPlacedInQuarantine);
 
 		CssStyles.style(
 			contactsPlacedInQuarantineByDate,
@@ -248,7 +257,7 @@ public class ContactsDashboardView extends AbstractDashboardView {
 			CssStyles.LABEL_BOLD,
 			CssStyles.VSPACE_5,
 			CssStyles.HSPACE_RIGHT_3);
-		layout.addComponent(contactsPlacedInQuarantineByDate);
+		layout.add(contactsPlacedInQuarantineByDate);
 
 		return layout;
 	}
@@ -266,9 +275,9 @@ public class ContactsDashboardView extends AbstractDashboardView {
 		int maxContactCount = counts[1];
 		int avgContactCount = counts[2];
 
-		minLabel.setValue(I18nProperties.getString(Strings.min) + ": " + minContactCount);
-		maxLabel.setValue(I18nProperties.getString(Strings.max) + ": " + maxContactCount);
-		avgLabel.setValue(I18nProperties.getString(Strings.average) + ": " + avgContactCount);
+		minLabel.setText(I18nProperties.getString(Strings.min) + ": " + minContactCount);
+		maxLabel.setText(I18nProperties.getString(Strings.max) + ": " + maxContactCount);
+		avgLabel.setText(I18nProperties.getString(Strings.average) + ": " + avgContactCount);
 
 		List<String> caseUuids = dashboardDataProvider.getCases().stream().map(dto -> dto.getUuid()).collect(Collectors.toList());
 		int nonSourceCases = 0;
@@ -279,14 +288,14 @@ public class ContactsDashboardView extends AbstractDashboardView {
 		int newSourceCases = caseUuids.size() - nonSourceCases;
 		int newSourceCasesPercentage = newSourceCases == 0 ? 0 : (int) ((newSourceCases * 100.0f) / caseUuids.size());
 
-		sourceCasesLabel.setValue(newSourceCases + " (" + newSourceCasesPercentage + " %)");
+		sourceCasesLabel.setText(newSourceCases + " (" + newSourceCasesPercentage + " %)");
 	}
 
 	private void updateContactsInQuarantineData() {
 
-		contactsInQuarantineByDate.setValue(dashboardDataProvider.getContactsInQuarantineCount().toString());
+		contactsInQuarantineByDate.setText(dashboardDataProvider.getContactsInQuarantineCount().toString());
 
-		contactsPlacedInQuarantineByDate.setValue(dashboardDataProvider.getContactsPlacedInQuarantineCount().toString());
+		contactsPlacedInQuarantineByDate.setText(dashboardDataProvider.getContactsPlacedInQuarantineCount().toString());
 	}
 
 	protected HorizontalLayout createEpiCurveAndMapLayout() {
@@ -298,11 +307,11 @@ public class ContactsDashboardView extends AbstractDashboardView {
 
 		// Epi curve layout
 		epiCurveLayout = createEpiCurveLayout();
-		layout.addComponent(epiCurveLayout);
+		layout.add(epiCurveLayout);
 
 		// Map layout
 		mapLayout = createMapLayout();
-		mapLayout.ifPresent(layout::addComponent);
+		mapLayout.ifPresent(layout::add);
 
 		return layout;
 	}
@@ -316,15 +325,17 @@ public class ContactsDashboardView extends AbstractDashboardView {
 
 		// network diagram layout 
 		networkDiagramLayout = createNetworkDiagramLayout();
-		networkDiagramLayout.ifPresent(layout::addComponent);
+		networkDiagramLayout.ifPresent(layout::add);
 
 		noNetworkDiagramLayout = new HorizontalLayout();
 		noNetworkDiagramLayout.setPadding(true);
-		Span noDiagramLabel =
-			new Span(VaadinIcon.CLUSTER.getHtml() + " " + I18nProperties.getString(Strings.infoNoNetworkDiagram), ContentMode.HTML);
-		noNetworkDiagramLayout.addComponent(noDiagramLabel);
-		layout.addComponent(noNetworkDiagramLayout);
-		layout.setComponentAlignment(noNetworkDiagramLayout, Alignment.MIDDLE_CENTER);
+		Span noDiagramLabel = VaadinUiUtil
+			.createLabel(HtmlRenderer.iconHtml(VaadinIcon.CLUSTER) + " " + I18nProperties.getString(Strings.infoNoNetworkDiagram), ContentMode.HTML);
+		noNetworkDiagramLayout.add(noDiagramLabel);
+		layout.add(noNetworkDiagramLayout);
+		// was MIDDLE_CENTER
+		layout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+		layout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, noNetworkDiagramLayout);
 		noNetworkDiagramLayout.setVisible(false);
 
 		networkDiagramLayout.ifPresent(l -> {
@@ -347,27 +358,27 @@ public class ContactsDashboardView extends AbstractDashboardView {
 
 		epiCurveComponent.setSizeFull();
 
-		layout.addComponent(epiCurveComponent);
+		layout.add(epiCurveComponent);
 		layout.setFlexGrow(1, epiCurveComponent);
 
 		epiCurveComponent.setExpandListener(expanded -> {
 			if (expanded) {
 				rowsLayout.remove(statisticsComponent);
-				mapLayout.ifPresent(epiCurveAndMapLayout::removeComponent);
+				mapLayout.ifPresent(epiCurveAndMapLayout::remove);
 				ContactsDashboardView.this.setHeight(100, Unit.PERCENTAGE);
 				epiCurveAndMapLayout.setHeight(100, Unit.PERCENTAGE);
 				epiCurveLayout.setSizeFull();
 				rowsLayout.setSizeFull();
 			} else {
-				rowsLayout.addComponent(statisticsComponent, 0);
+				rowsLayout.addComponentAtIndex(0, statisticsComponent);
 				mapLayout.ifPresent(l -> {
-					epiCurveAndMapLayout.addComponent(l, 1);
+					epiCurveAndMapLayout.addComponentAtIndex(1, l);
 					mapComponent.refreshMap();
 				});
 				epiCurveLayout.setHeight(ROW_HEIGHT, Unit.PIXELS);
-				ContactsDashboardView.this.setHeightUndefined();
-				epiCurveAndMapLayout.setHeightUndefined();
-				rowsLayout.setHeightUndefined();
+				ContactsDashboardView.this.setHeight(null);
+				epiCurveAndMapLayout.setHeight(null);
+				rowsLayout.setHeight(null);
 			}
 			caseStatisticsLayout.setVisible(!expanded);
 			if (networkDiagramRowLayout != null) {
@@ -390,7 +401,7 @@ public class ContactsDashboardView extends AbstractDashboardView {
 
 		mapComponent.setSizeFull();
 
-		layout.addComponent(mapComponent);
+		layout.add(mapComponent);
 		layout.setFlexGrow(1, mapComponent);
 
 		mapComponent.setExpandListener(expanded -> {
@@ -403,12 +414,12 @@ public class ContactsDashboardView extends AbstractDashboardView {
 				layout.setSizeFull();
 				rowsLayout.setSizeFull();
 			} else {
-				rowsLayout.addComponent(statisticsComponent, 0);
-				epiCurveAndMapLayout.addComponent(epiCurveLayout, 0);
+				rowsLayout.addComponentAtIndex(0, statisticsComponent);
+				epiCurveAndMapLayout.addComponentAtIndex(0, epiCurveLayout);
 				layout.setHeight(ROW_HEIGHT, Unit.PIXELS);
-				ContactsDashboardView.this.setHeightUndefined();
-				epiCurveAndMapLayout.setHeightUndefined();
-				rowsLayout.setHeightUndefined();
+				ContactsDashboardView.this.setHeight(null);
+				epiCurveAndMapLayout.setHeight(null);
+				rowsLayout.setHeight(null);
 			}
 			caseStatisticsLayout.setVisible(!expanded);
 			if (networkDiagramRowLayout != null) {
@@ -427,11 +438,11 @@ public class ContactsDashboardView extends AbstractDashboardView {
 			VerticalLayout layout = new VerticalLayout();
 			layout.setPadding(false);
 			layout.setSpacing(false);
-			layout.setHeightUndefined();
+			layout.setHeight(null);
 
 			ndc.setSizeFull();
 
-			layout.addComponent(ndc);
+			layout.add(ndc);
 			layout.setFlexGrow(1, ndc);
 
 			ndc.setExpandListener(expanded -> {
@@ -442,11 +453,11 @@ public class ContactsDashboardView extends AbstractDashboardView {
 					networkDiagramRowLayout.setHeight(100, Unit.PERCENTAGE);
 					rowsLayout.setSizeFull();
 				} else {
-					rowsLayout.addComponent(statisticsComponent, 0);
-					ContactsDashboardView.this.setHeightUndefined();
-					layout.setHeightUndefined();
-					networkDiagramRowLayout.setHeightUndefined();
-					rowsLayout.setHeightUndefined();
+					rowsLayout.addComponentAtIndex(0, statisticsComponent);
+					ContactsDashboardView.this.setHeight(null);
+					layout.setHeight(null);
+					networkDiagramRowLayout.setHeight(null);
+					rowsLayout.setHeight(null);
 				}
 				caseStatisticsLayout.setVisible(!expanded);
 				epiCurveAndMapLayout.setVisible(!expanded);
@@ -480,7 +491,7 @@ public class ContactsDashboardView extends AbstractDashboardView {
 
 			networkDiagramLayout.get().setVisible(diseaseSelected);
 			noNetworkDiagramLayout.setVisible(!diseaseSelected);
-			networkDiagramComponent.filter(c -> c.getParent().isVisible()).ifPresent(DashboardNetworkComponent::refreshDiagram);
+			networkDiagramComponent.filter(c -> c.getParent().map(Component::isVisible).orElse(false)).ifPresent(DashboardNetworkComponent::refreshDiagram);
 		}
 
 		// Epi curve chart has to be created again due to a canvas resizing issue when

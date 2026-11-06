@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import de.symeda.sormas.ui.utils.fields.ComboBox;
+import com.vaadin.flow.component.Unit;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -43,6 +43,7 @@ import de.symeda.sormas.api.sample.SampleMaterial;
 import de.symeda.sormas.ui.dashboard.components.DashboardFilterLayout;
 import de.symeda.sormas.ui.utils.ComboBoxHelper;
 import de.symeda.sormas.ui.utils.components.datetypeselector.DateTypeSelectorComponent;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 public class SampleDashboardFilterLayout extends DashboardFilterLayout<SampleDashboardDataProvider> {
 

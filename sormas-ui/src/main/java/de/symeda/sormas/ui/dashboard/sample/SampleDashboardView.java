@@ -15,9 +15,7 @@
 
 package de.symeda.sormas.ui.dashboard.sample;
 
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.flow.component.Component;
-import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
@@ -35,6 +33,7 @@ import de.symeda.sormas.ui.dashboard.sample.components.SampleCountTilesComponent
 import de.symeda.sormas.ui.dashboard.sample.components.SampleDashboardMapComponent;
 import de.symeda.sormas.ui.dashboard.surveillance.components.statistics.LaboratoryResultsStatisticsComponent;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.LayoutUtil;
 
 import java.util.HashMap;
@@ -77,17 +76,18 @@ public class SampleDashboardView extends AbstractDashboardView {
 		dashboardSwitcher.setValue(DashboardType.SAMPLES);
 		dashboardSwitcher.addValueChangeListener(this::navigateToDashboardView);
 
-		dashboardLayout.setHeightUndefined();
+		dashboardLayout.setHeight(null);
 
 		dataProvider = new SampleDashboardDataProvider();
 		SampleDashboardFilterLayout filterLayout = new SampleDashboardFilterLayout(this, dataProvider);
 
-		dashboardLayout.addComponent(filterLayout);
+		dashboardLayout.add(filterLayout);
 		dashboardLayout.setFlexGrow(0, filterLayout);
 
 		heading = new DashboardHeadingComponent(Captions.sampleDashboardAllSamples, null);
-		heading.setMargin(new MarginInfo(true, true, false, true));
-		dashboardLayout.addComponent(heading);
+		// was a margin on all sides but the bottom (MarginInfo); spacing details belong to the theme work
+		heading.setPadding(true);
+		dashboardLayout.add(heading);
 
 		sampleCountsLayout = new CustomLayout();
 		sampleCountsLayout.setTemplateContents(
@@ -100,7 +100,7 @@ public class SampleDashboardView extends AbstractDashboardView {
 					LayoutUtil.fluidColumnLoc(4, 0, 6, 0, SHIPMENT_STATUS),
 					LayoutUtil.fluidColumnLoc(4, 0, 6, 0, SPECIMEN_CONDITION)));
 
-		dashboardLayout.addComponent(sampleCountsLayout);
+		dashboardLayout.add(sampleCountsLayout);
 
 		sampleCountsByResultType =
 			new LaboratoryResultsStatisticsComponent(Captions.sampleDashboardAllSamples, Descriptions.sampleDashboardHumans, Captions.sampleDashboardFinalLabResults, true, false);
@@ -152,7 +152,7 @@ public class SampleDashboardView extends AbstractDashboardView {
 
 		epiCurveAndMapLayout = createEpiCurveAndMapLayout(epiCurveLayout, mapLayout);
 		epiCurveAndMapLayout.addClassName(CssStyles.VSPACE_TOP_1);
-		dashboardLayout.addComponent(epiCurveAndMapLayout);
+		dashboardLayout.add(epiCurveAndMapLayout);
 		dashboardLayout.setFlexGrow(1, epiCurveAndMapLayout);
 	}
 
@@ -248,7 +248,7 @@ public class SampleDashboardView extends AbstractDashboardView {
 
 		epiCurveComponent.setSizeFull();
 
-		layout.addComponent(epiCurveComponent);
+		layout.add(epiCurveComponent);
 		layout.setFlexGrow(1, epiCurveComponent);
 
 		epiCurveComponent.setExpandListener(expanded -> {
@@ -266,7 +266,7 @@ public class SampleDashboardView extends AbstractDashboardView {
 
 		mapComponent.setSizeFull();
 
-		layout.addComponent(mapComponent);
+		layout.add(mapComponent);
 		layout.setFlexGrow(1, mapComponent);
 
 		mapComponent.setExpandListener(expanded -> {
@@ -276,7 +276,7 @@ public class SampleDashboardView extends AbstractDashboardView {
 		return layout;
 	}
 
-	private void setExpanded(Boolean expanded, Component componentToExpand, Component componentToRemove, int removedComponentIndex) {
+	private void setExpanded(Boolean expanded, VerticalLayout componentToExpand, VerticalLayout componentToRemove, int removedComponentIndex) {
 		if (expanded) {
 			dashboardLayout.remove(heading);
 			dashboardLayout.remove(sampleCountsLayout);
@@ -288,15 +288,15 @@ public class SampleDashboardView extends AbstractDashboardView {
 			componentToExpand.setSizeFull();
 			dashboardLayout.setHeightFull();
 		} else {
-			dashboardLayout.addComponent(heading, 1);
-			dashboardLayout.addComponent(sampleCountsLayout, 2);
-			epiCurveAndMapLayout.addComponent(componentToRemove, removedComponentIndex);
+			dashboardLayout.addComponentAtIndex(1, heading);
+			dashboardLayout.addComponentAtIndex(2, sampleCountsLayout);
+			epiCurveAndMapLayout.addComponentAtIndex(removedComponentIndex, componentToRemove);
 			mapComponent.refreshMap();
 
 			componentToExpand.setHeight(EPI_CURVE_AND_MAP_HEIGHT, Unit.PIXELS);
-			setHeightUndefined();
-			epiCurveAndMapLayout.setHeightUndefined();
-			dashboardLayout.setHeightUndefined();
+			setHeight(null);
+			epiCurveAndMapLayout.setHeight(null);
+			dashboardLayout.setHeight(null);
 		}
 	}
 }

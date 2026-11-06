@@ -17,14 +17,15 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.dashboard.statistics;
 
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.AbstractOrderedLayout;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.CssLayout;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.ui.Image;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.ui.utils.CssStyles;
@@ -33,13 +34,14 @@ import de.symeda.sormas.ui.utils.CssStyles;
 public class DashboardStatisticsSubComponent extends VerticalLayout {
 
 	// Layouts
-	private AbstractOrderedLayout contentLayout;
+	private VerticalLayout contentLayout;
 
 	// Components
 	private Span totalCountLabel;
 
 	public DashboardStatisticsSubComponent() {
-		this.setMargin(new MarginInfo(false, true, false, true));
+		// was a left and right margin only (MarginInfo); spacing details belong to the theme work
+		this.setPadding(false);
 		this.setSpacing(false);
 	}
 
@@ -56,7 +58,7 @@ public class DashboardStatisticsSubComponent extends VerticalLayout {
 			labelAndTotalLayout.setSpacing(false);
 			Span headlineLabel = new Span(headline);
 			CssStyles.style(headlineLabel, CssStyles.H2, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_NONE);
-			labelAndTotalLayout.addComponent(headlineLabel);
+			labelAndTotalLayout.add(headlineLabel);
 
 			if (showTotalCount) {
 				totalCountLabel = new Span();
@@ -67,39 +69,41 @@ public class DashboardStatisticsSubComponent extends VerticalLayout {
 					CssStyles.LABEL_BOLD,
 					CssStyles.VSPACE_4,
 					CssStyles.VSPACE_TOP_NONE);
-				labelAndTotalLayout.addComponent(totalCountLabel);
+				labelAndTotalLayout.add(totalCountLabel);
 			} else {
 				CssStyles.style(labelAndTotalLayout, CssStyles.VSPACE_4);
 			}
 
 		}
-		headerLayout.addComponent(labelAndTotalLayout);
-		headerLayout.setComponentAlignment(labelAndTotalLayout, Alignment.BOTTOM_LEFT);
-		headerLayout.setHeightUndefined();
+		headerLayout.add(labelAndTotalLayout);
+		headerLayout.setVerticalComponentAlignment(FlexComponent.Alignment.END, labelAndTotalLayout);
+		headerLayout.setHeight(null);
 		headerLayout.setFlexGrow(1, labelAndTotalLayout);
 
 		if (icon != null) {
-			headerLayout.addComponent(icon);
-			headerLayout.setComponentAlignment(icon, Alignment.TOP_RIGHT);
+			headerLayout.add(icon);
+			headerLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, icon);
 		}
 
-		addComponent(headerLayout);
+		add(headerLayout);
 		setFlexGrow(0, headerLayout);
 	}
 
-	public CssLayout createCountLayout(boolean addMarginBottom) {
-		CssLayout countLayout = new CssLayout();
-		countLayout.setWidthUndefined();
+	public FlexLayout createCountLayout(boolean addMarginBottom) {
+		// was a CssLayout: the count elements flow side by side and wrap
+		FlexLayout countLayout = new FlexLayout();
+		countLayout.setFlexWrap(FlexLayout.FlexWrap.WRAP);
+		countLayout.setWidth(null);
 		if (addMarginBottom) {
 			CssStyles.style(countLayout, CssStyles.VSPACE_3);
 		}
 		return countLayout;
 	}
 
-	public void addComponentToCountLayout(CssLayout countLayout, AbstractComponent countElement) {
-		countElement.setWidthUndefined();
+	public <C extends Component & HasSize & HasStyle> void addComponentToCountLayout(FlexLayout countLayout, C countElement) {
+		countElement.setWidth(null);
 		countElement.addClassName(CssStyles.HSPACE_RIGHT_3);
-		countLayout.addComponent(countElement);
+		countLayout.add(countElement);
 	}
 
 	public void addMainContent() {
@@ -108,25 +112,25 @@ public class DashboardStatisticsSubComponent extends VerticalLayout {
 			contentLayout.setPadding(false);
 			contentLayout.setSpacing(false);
 			contentLayout.setWidth(100, Unit.PERCENTAGE);
-			contentLayout.setHeightUndefined();
-			addComponent(contentLayout);
-			contentLayout.setHeightUndefined();
+			contentLayout.setHeight(null);
+			add(contentLayout);
+			contentLayout.setHeight(null);
 			setFlexGrow(1, contentLayout);
 		}
 	}
 
-	public void addComponentToContent(AbstractComponent component) {
+	public <C extends Component & HasSize> void addComponentToContent(C component) {
 		if (contentLayout != null) {
 			component.setWidth(100, Unit.PERCENTAGE);
-			contentLayout.addComponent(component);
+			contentLayout.add(component);
 		}
 	}
 
-	public void addComponentToContent(AbstractComponent component, Alignment alignment) {
+	public <C extends Component & HasSize> void addComponentToContent(C component, FlexComponent.Alignment alignment) {
 		if (contentLayout != null) {
-			component.setWidthUndefined();
-			contentLayout.addComponent(component);
-			contentLayout.setComponentAlignment(component, alignment);
+			component.setWidth(null);
+			contentLayout.add(component);
+			contentLayout.setHorizontalComponentAlignment(alignment, component);
 		}
 	}
 
@@ -145,6 +149,6 @@ public class DashboardStatisticsSubComponent extends VerticalLayout {
 	}
 
 	public void updateCountLabel(int count) {
-		totalCountLabel.setValue(Integer.toString(count));
+		totalCountLabel.setText(Integer.toString(count));
 	}
 }

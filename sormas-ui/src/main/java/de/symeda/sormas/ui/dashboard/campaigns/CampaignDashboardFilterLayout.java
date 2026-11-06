@@ -5,15 +5,11 @@ import static de.symeda.sormas.api.campaign.CampaignJurisdictionLevel.COMMUNITY;
 import static de.symeda.sormas.api.campaign.CampaignJurisdictionLevel.DISTRICT;
 import static de.symeda.sormas.api.campaign.CampaignJurisdictionLevel.REGION;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Alignment;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.ui.themes.ValoTheme;
-import de.symeda.sormas.ui.utils.fields.ComboBox;
-import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.campaign.CampaignDto;
@@ -31,6 +27,9 @@ import de.symeda.sormas.api.user.UserDto;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.ComboBoxHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 public class CampaignDashboardFilterLayout extends HorizontalLayout {
 
@@ -59,9 +58,10 @@ public class CampaignDashboardFilterLayout extends HorizontalLayout {
 
 		setSpacing(true);
 		setWidthFull();
-		setMargin(new MarginInfo(true, true, false, true));
+		// was a margin on all sides but the bottom (MarginInfo); spacing details belong to the theme work
+		setPadding(true);
 
-		infoLabel = new Span(VaadinIcon.INFO_CIRCLE.getHtml(), ContentMode.HTML);
+		infoLabel = new Span(VaadinIcon.INFO_CIRCLE.create());
 		infoLabel.setSizeUndefined();
 
 		final CampaignJurisdictionLevel campaignJurisdictionLevel = CampaignJurisdictionLevel.getByJurisdictionLevel(UiUtil.getJurisdictionLevel());
@@ -72,13 +72,13 @@ public class CampaignDashboardFilterLayout extends HorizontalLayout {
 
 		campaignPhaseSelector = new OptionGroup();
 		campaignPhaseSelector.setDescription(I18nProperties.getPrefixDescription(CampaignDto.I18N_PREFIX, "campaignPhase"));
-		CssStyles.style(campaignPhaseSelector, ValoTheme.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_HORIZONTAL_PRIMARY);
+		CssStyles.style(campaignPhaseSelector, SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_HORIZONTAL_PRIMARY);
 		campaignPhaseSelector.addItems(CampaignPhase.values());
 		campaignPhaseSelector.setValue(CampaignPhase.INTRA);
 		campaignPhaseSelector.setEnabled(false);
-		addComponent(campaignPhaseSelector);
+		add(campaignPhaseSelector);
 		setFlexGrow(1, campaignPhaseSelector);
-		setComponentAlignment(campaignPhaseSelector, Alignment.MIDDLE_RIGHT);
+		setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, campaignPhaseSelector);
 	}
 
 	private void createCampaignFilter() {
@@ -92,7 +92,7 @@ public class CampaignDashboardFilterLayout extends HorizontalLayout {
 			dashboardDataProvider.setCampaign((CampaignReferenceDto) campaignFilter.getValue());
 			dashboardView.refreshDashboard();
 		});
-		addComponent(campaignFilter);
+		add(campaignFilter);
 
 		final CampaignReferenceDto lastStartedCampaign = dashboardDataProvider.getLastStartedCampaign();
 		if (lastStartedCampaign != null) {
@@ -119,7 +119,7 @@ public class CampaignDashboardFilterLayout extends HorizontalLayout {
 			updateFiltersBasedOnArea(value);
 			dashboardView.refreshDashboard();
 		});
-		addComponent(areaFilter);
+		add(areaFilter);
 		dashboardDataProvider.setArea((AreaReferenceDto) areaFilter.getValue());
 
 		dashboardDataProvider.setRegion(userRegion);
@@ -132,7 +132,7 @@ public class CampaignDashboardFilterLayout extends HorizontalLayout {
 			updateFiltersBasedOnRegion(value);
 			dashboardView.refreshDashboard();
 		});
-		addComponent(regionFilter);
+		add(regionFilter);
 		dashboardDataProvider.setRegion((RegionReferenceDto) regionFilter.getValue());
 
 		dashboardDataProvider.setDistrict(userDistrict);
@@ -148,7 +148,7 @@ public class CampaignDashboardFilterLayout extends HorizontalLayout {
 			dashboardDataProvider.setDistrict((DistrictReferenceDto) value);
 			dashboardView.refreshDashboard();
 		});
-		addComponent(districtFilter);
+		add(districtFilter);
 		dashboardDataProvider.setDistrict((DistrictReferenceDto) districtFilter.getValue());
 
 		campaignJurisdictionGroupByFilter.setCaption(I18nProperties.getCaption(Captions.campaignDiagramGroupBy));
@@ -176,7 +176,7 @@ public class CampaignDashboardFilterLayout extends HorizontalLayout {
 			dashboardDataProvider.setCampaignJurisdictionLevelGroupBy(currentValue);
 			dashboardView.refreshDashboard();
 		});
-		addComponent(campaignJurisdictionGroupByFilter);
+		add(campaignJurisdictionGroupByFilter);
 
 		if (userRegion != null) {
 			areaFilter.setValue(userArea);
@@ -259,6 +259,6 @@ public class CampaignDashboardFilterLayout extends HorizontalLayout {
 	}
 
 	public void setInfoLabelText(String text) {
-		infoLabel.setDescription(text);
+		infoLabel.setTitle(text);
 	}
 }

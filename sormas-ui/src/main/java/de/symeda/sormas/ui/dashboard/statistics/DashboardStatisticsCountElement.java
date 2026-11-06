@@ -17,8 +17,8 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.dashboard.statistics;
 
-import com.vaadin.ui.Alignment;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.ui.utils.CssStyles;
@@ -45,7 +45,7 @@ public class DashboardStatisticsCountElement extends VerticalLayout {
 			CssStyles.LABEL_UPPERCASE,
 			CssStyles.VSPACE_5,
 			CssStyles.VSPACE_TOP_NONE);
-		addComponent(countLabel);
+		add(countLabel);
 
 		captionLabel = new Span(caption);
 		captionLabel.setSizeUndefined();
@@ -57,17 +57,17 @@ public class DashboardStatisticsCountElement extends VerticalLayout {
 			CssStyles.LABEL_UPPERCASE,
 			CssStyles.VSPACE_5,
 			CssStyles.VSPACE_TOP_NONE);
-		addComponent(captionLabel);
+		add(captionLabel);
 
-		setComponentAlignment(countLabel, Alignment.MIDDLE_CENTER);
-		setComponentAlignment(captionLabel, Alignment.MIDDLE_CENTER);
+		setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, countLabel);
+		setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, captionLabel);
 	}
 
 	public void updateCountLabel(int count) {
-		countLabel.setValue(Integer.toString(count));
+		countLabel.setText(Integer.toString(count));
 	}
 
 	public void updateCountLabel(String count) {
-		countLabel.setValue(count);
+		countLabel.setText(count);
 	}
 }

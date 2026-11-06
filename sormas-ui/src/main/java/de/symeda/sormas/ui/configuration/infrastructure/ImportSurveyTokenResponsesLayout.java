@@ -18,9 +18,7 @@ package de.symeda.sormas.ui.configuration.infrastructure;
 import java.io.IOException;
 
 import com.opencsv.exceptions.CsvValidationException;
-import com.vaadin.server.ClassResource;
-import com.vaadin.server.Page;
-import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -33,6 +31,7 @@ import de.symeda.sormas.ui.importer.DataImporter;
 import de.symeda.sormas.ui.importer.ImportReceiver;
 import de.symeda.sormas.ui.importer.SurveyTokenImporter;
 import de.symeda.sormas.ui.importer.SurveyTokenResponsesImporter;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 public class ImportSurveyTokenResponsesLayout extends AbstractImportLayout {
 
@@ -44,7 +43,7 @@ public class ImportSurveyTokenResponsesLayout extends AbstractImportLayout {
 		String templateFileName = surveyTokenFacade.getSurveyTokenResponsesImportTemplateFileName();
 		String fileNameAddition = "_survey_token_responses_import_";
 
-		addDownloadResourcesComponent(1, new ClassResource("/SORMAS_Survey_Token_Responses_Import_Guide.pdf"));
+		addDownloadResourcesComponent(1, DownloadHandler.forClassResource(ImportSurveyTokenResponsesLayout.class, "/SORMAS_Survey_Token_Responses_Import_Guide.pdf"));
 		addDownloadImportTemplateComponent(2, templateFilePath, templateFileName);
 
 		addImportCsvComponent(3, new ImportReceiver(fileNameAddition, file -> {
@@ -57,11 +56,11 @@ public class ImportSurveyTokenResponsesLayout extends AbstractImportLayout {
 						(ValueSeparator) separator.getValue());
 				importer.startImport(this::extendDownloadErrorReportButton, currentUI, false);
 			} catch (IOException | CsvValidationException e) {
-				new Notification(
+				NotificationHelper.show(
 						I18nProperties.getString(Strings.headingImportFailed),
 						I18nProperties.getString(Strings.messageImportFailed),
 						NotificationHelper.Type.ERROR_MESSAGE,
-						false).show(Page.getCurrent());
+						false);
 			}
 		}));
 		addDownloadErrorReportComponent(4);

@@ -21,20 +21,21 @@ import java.net.URI;
 import java.nio.file.Paths;
 
 import com.opencsv.exceptions.CsvValidationException;
-import com.vaadin.server.Page;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.ui.CheckBox;
-import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.checkbox.Checkbox;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.ui.importer.AbstractImportLayout;
 import de.symeda.sormas.ui.importer.ImportLayoutComponent;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 public abstract class AbstractImportDefaultCsvLayout extends AbstractImportLayout {
 
-	private CheckBox allowOverwrite;
+	private Checkbox allowOverwrite;
 
 	public AbstractImportDefaultCsvLayout() {
 		super();
@@ -46,11 +47,11 @@ public abstract class AbstractImportDefaultCsvLayout extends AbstractImportLayou
 			try {
 				doImport(subcontinentsFile);
 			} catch (IOException | CsvValidationException e) {
-				new Notification(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.headingImportFailed),
 					I18nProperties.getString(Strings.messageImportFailed),
 					NotificationHelper.Type.ERROR_MESSAGE,
-					false).show(Page.getCurrent());
+					false);
 			}
 		});
 
@@ -65,7 +66,7 @@ public abstract class AbstractImportDefaultCsvLayout extends AbstractImportLayou
 
 	protected abstract String getInfoImport();
 
-	protected void addImportDefaultSubcontinentsCsvComponent(int step, Button.ClickListener clickListener) {
+	protected void addImportDefaultSubcontinentsCsvComponent(int step, ComponentEventListener<ClickEvent<Button>> clickListener) {
 		String headline = I18nProperties.getString(getHeadingImport());
 		String infoText = I18nProperties.getString(getInfoImport());
 		ImportLayoutComponent importCsvComponent = new ImportLayoutComponent(
@@ -78,7 +79,7 @@ public abstract class AbstractImportDefaultCsvLayout extends AbstractImportLayou
 			I18nProperties.getString(Strings.infoImportInfrastructureAllowOverwrite));
 		importCsvComponent.getButton().addClickListener(clickListener);
 		allowOverwrite = importCsvComponent.getCheckbox();
-		addComponent(importCsvComponent);
+		add(importCsvComponent);
 	}
 
 	protected boolean isAllowOverwrite() {

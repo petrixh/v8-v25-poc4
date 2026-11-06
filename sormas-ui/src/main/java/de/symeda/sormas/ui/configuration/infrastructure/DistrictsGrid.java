@@ -73,8 +73,8 @@ public class DistrictsGrid extends FilteredGrid<DistrictIndexDto, DistrictCriter
 		Optional.ofNullable(((Column<DistrictIndexDto, Boolean>) getColumn(DistrictIndexDto.DEFAULT_INFRASTRUCTURE)))
 			.ifPresent(c -> c.setRenderer(new BooleanRenderer()));
 
-		for (Column<?, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(DistrictIndexDto.I18N_PREFIX, column.getId(), column.getCaption()));
+		for (Column<?, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(DistrictIndexDto.I18N_PREFIX, column.getKey(), column.getCaption()));
 		}
 	}
 

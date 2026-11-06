@@ -1,14 +1,13 @@
 package de.symeda.sormas.ui.configuration.infrastructure;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.flow.server.streams.DownloadHandler;
-import com.vaadin.ui.Alignment;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.dialog.Dialog;
-import de.symeda.sormas.ui.utils.CssStyles;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -35,22 +34,23 @@ public class PopulationDataView extends AbstractConfigurationView {
 
 		Span lblIntroduction = new Span(I18nProperties.getString(Strings.infoPopulationDataView));
 		CssStyles.style(lblIntroduction, CssStyles.VSPACE_2);
-		layout.addComponent(lblIntroduction);
-		layout.setComponentAlignment(lblIntroduction, Alignment.MIDDLE_CENTER);
+		layout.add(lblIntroduction);
+		layout.setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, lblIntroduction);
 
 		Button btnImport = ButtonHelper.createIconButton(Captions.actionImport, VaadinIcon.UPLOAD, e -> {
 			Dialog window = VaadinUiUtil.showPopupWindow(new InfrastructureImportLayout(InfrastructureType.POPULATION_DATA));
-			window.setCaption(I18nProperties.getString(Strings.headingImportPopulationData));
+			window.setHeaderTitle(I18nProperties.getString(Strings.headingImportPopulationData));
 		}, CssStyles.VSPACE_4, CssStyles.BUTTON_PRIMARY);
-		layout.addComponent(btnImport);
-		layout.setComponentAlignment(btnImport, Alignment.MIDDLE_CENTER);
+		layout.add(btnImport);
+		layout.setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, btnImport);
 
 		Button btnExport = ButtonHelper.createIconButton(Captions.export, VaadinIcon.DOWNLOAD, null, CssStyles.BUTTON_PRIMARY);
-		layout.addComponent(btnExport);
-		layout.setComponentAlignment(btnExport, Alignment.MIDDLE_CENTER);
+		layout.add(btnExport);
 
 		DownloadHandler populationDataExportResource = DownloadUtil.createPopulationDataExportResource();
-		new FileDownloader(populationDataExportResource).extend(btnExport);
+		// the download link takes the button's place in the layout, so the link is centred (was the button)
+		Anchor exportLink = DownloadUtil.attachDownloader(btnExport, populationDataExportResource);
+		layout.setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, exportLink);
 
 		addComponent(layout);
 	}

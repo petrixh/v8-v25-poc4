@@ -24,9 +24,6 @@ import java.util.function.Consumer;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import de.symeda.sormas.ui.utils.NotificationHelper;
-import de.symeda.sormas.ui.utils.NotificationHelper.Type;
-
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
@@ -52,6 +49,8 @@ import de.symeda.sormas.ui.utils.ArchiveMessages;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent.CommitListener;
 import de.symeda.sormas.ui.utils.FilteredGrid;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 public class InfrastructureController {
@@ -498,7 +497,7 @@ public class InfrastructureController {
 		return remaining -> {
 			reloadGrid.run();
 			if (CollectionUtils.isNotEmpty(remaining)) {
-				grid.asMultiSelect().selectItems((T[]) remaining.toArray());
+				grid.asMultiSelect().select((T[]) remaining.toArray());
 			} else {
 				noEntriesRemainingCallback.run();
 			}

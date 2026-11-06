@@ -2,10 +2,11 @@ package de.symeda.sormas.ui.configuration.infrastructure;
 
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 
-import de.symeda.sormas.ui.utils.fields.TextField;
+import com.vaadin.flow.component.Unit;
 
 import de.symeda.sormas.api.infrastructure.area.AreaDto;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 @SuppressWarnings("serial")
 public class AreaEditForm extends AbstractEditForm<AreaDto> {

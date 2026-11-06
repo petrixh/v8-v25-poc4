@@ -866,20 +866,20 @@ public class PersonService extends AdoServiceWithUserFilterAndJurisdiction<Perso
 
 			String name = criteria.getFirstName() + " " + criteria.getLastName();
 
-			filter = and(cb, filter, cb.isTrue(cb.function(SIMILARITY_OPERATOR, boolean.class, nameExpr, cb.literal(name))));
+			filter = and(cb, filter, cb.isTrue(cb.function(SIMILARITY_OPERATOR, boolean.class, nameExpr, CriteriaBuilderHelper.value(cb, name))));
 		} else if (!StringUtils.isBlank(criteria.getFirstName())) {
 			filter = and(
 				cb,
 				filter,
-				cb.isTrue(cb.function(SIMILARITY_OPERATOR, boolean.class, personFrom.get(Person.FIRST_NAME), cb.literal(criteria.getFirstName()))));
+				cb.isTrue(cb.function(SIMILARITY_OPERATOR, boolean.class, personFrom.get(Person.FIRST_NAME), CriteriaBuilderHelper.value(cb, criteria.getFirstName()))));
 		} else if (!StringUtils.isBlank(criteria.getLastName())) {
 			filter = and(
 				cb,
 				filter,
-				cb.isTrue(cb.function(SIMILARITY_OPERATOR, boolean.class, personFrom.get(Person.LAST_NAME), cb.literal(criteria.getLastName()))));
+				cb.isTrue(cb.function(SIMILARITY_OPERATOR, boolean.class, personFrom.get(Person.LAST_NAME), CriteriaBuilderHelper.value(cb, criteria.getLastName()))));
 		}
 		if (criteria.getSex() != null) {
-			Expression<Sex> sexExpr = cb.literal(criteria.getSex());
+			Expression<Sex> sexExpr = CriteriaBuilderHelper.value(cb, criteria.getSex());
 
 			Predicate sexFilter = cb.or(
 				cb.or(cb.isNull(personFrom.get(Person.SEX)), cb.isNull(sexExpr)),
@@ -928,10 +928,10 @@ public class PersonService extends AdoServiceWithUserFilterAndJurisdiction<Perso
 					!strictNameComparison ? CriteriaBuilderHelper.unaccentedIlike(cb, personFrom.get(Person.FIRST_NAME), textFilter) : null,
 					!strictNameComparison ? CriteriaBuilderHelper.unaccentedIlike(cb, personFrom.get(Person.LAST_NAME), textFilter) : null,
 					!strictNameComparison
-						? cb.isTrue(cb.function(SIMILARITY_OPERATOR, boolean.class, personFrom.get(Person.FIRST_NAME), cb.literal(textFilter)))
+						? cb.isTrue(cb.function(SIMILARITY_OPERATOR, boolean.class, personFrom.get(Person.FIRST_NAME), CriteriaBuilderHelper.value(cb, textFilter)))
 						: null,
 					!strictNameComparison
-						? cb.isTrue(cb.function(SIMILARITY_OPERATOR, boolean.class, personFrom.get(Person.LAST_NAME), cb.literal(textFilter)))
+						? cb.isTrue(cb.function(SIMILARITY_OPERATOR, boolean.class, personFrom.get(Person.LAST_NAME), CriteriaBuilderHelper.value(cb, textFilter)))
 						: null);
 
 				filter = CriteriaBuilderHelper.and(cb, filter, likeFilters);

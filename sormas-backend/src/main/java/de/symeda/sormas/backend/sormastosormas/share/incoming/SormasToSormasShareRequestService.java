@@ -89,7 +89,7 @@ public class SormasToSormasShareRequestService extends AdoServiceWithUserFilterA
 
 		cq.where(
 			cb.isTrue(
-				cb.function(ARRAY_CONTAINS_TEXT, Boolean.class, cb.function("array", String[].class, casesSubQuery), cb.literal(caze.getUuid()))));
+				cb.function(ARRAY_CONTAINS_TEXT, Boolean.class, cb.function("array", String[].class, casesSubQuery), CriteriaBuilderHelper.value(cb, caze.getUuid()))));
 
 		return em.createQuery(cq).getResultList();
 	}

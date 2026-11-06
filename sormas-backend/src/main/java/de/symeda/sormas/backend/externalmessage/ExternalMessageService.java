@@ -169,7 +169,7 @@ public class ExternalMessageService extends AdoServiceWithUserFilterAndJurisdict
 						ExtendedPostgreSQL94Dialect.FULLTEXT_SEARCH,
 						Boolean.class,
 						labMessage.get(ExternalMessage.TSV),
-						cb.literal(
+						CriteriaBuilderHelper.value(cb,
 							// replace xml tag marks
 							criteria.getMessageContentLike().replaceAll("[<>]", " "))),
 					true));

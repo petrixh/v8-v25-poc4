@@ -2524,7 +2524,7 @@ public class CaseService extends AbstractCoreAdoService<Case, CaseJoins> {
 							ExtendedPostgreSQL94Dialect.DATE,
 							Date.class,
 							CriteriaBuilderHelper.coalesce(cb, Date.class, earliestSampleSq, caseRoot.get(Case.REPORT_DATE))),
-						cb.function(ExtendedPostgreSQL94Dialect.DATE, Date.class, cb.literal(dateToCompareTo))),
+						cb.function(ExtendedPostgreSQL94Dialect.DATE, Date.class, CriteriaBuilderHelper.value(cb, dateToCompareTo))),
 					Long.valueOf(TimeUnit.DAYS.toSeconds(threshold)).doubleValue())));
 		cq.orderBy(cb.desc(caseRoot.get(Case.REPORT_DATE)));
 
@@ -2562,7 +2562,7 @@ public class CaseService extends AbstractCoreAdoService<Case, CaseJoins> {
 							ExtendedPostgreSQL94Dialect.DATE,
 							Date.class,
 							CriteriaBuilderHelper.coalesce(cb, Date.class, earliestSampleSq, caseRoot.get(Case.REPORT_DATE))),
-						cb.function(ExtendedPostgreSQL94Dialect.DATE, Date.class, cb.literal(dateToCompareTo))),
+						cb.function(ExtendedPostgreSQL94Dialect.DATE, Date.class, CriteriaBuilderHelper.value(cb, dateToCompareTo))),
 					Long.valueOf(TimeUnit.DAYS.toSeconds(threshold)).doubleValue())));
 		cq.orderBy(cb.desc(caseRoot.get(Case.REPORT_DATE)));
 

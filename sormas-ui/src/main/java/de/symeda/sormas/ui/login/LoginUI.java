@@ -46,7 +46,6 @@ import com.vaadin.flow.server.VaadinSession;
 
 import de.symeda.sormas.api.AuthProvider;
 import de.symeda.sormas.api.FacadeProvider;
-import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.SormasErrorHandler;
 import de.symeda.sormas.ui.SormasUI;
 import fish.payara.security.openid.api.OpenIdContext;
@@ -184,7 +183,7 @@ public final class LoginUI {
 				return;
 			}
 			if (status == AuthenticationStatus.SUCCESS) {
-				if (request.isUserInRole(UserRight.SORMAS_UI.name())) {
+				if (LoginHelper.currentUserHasWebUiRight()) {
 					response.sendRedirect(request.getContextPath() + "/");
 				} else {
 					// what the Vaadin 8 container constraint answered to a user without the web UI right

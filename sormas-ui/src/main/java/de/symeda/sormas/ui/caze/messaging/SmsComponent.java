@@ -5,6 +5,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -59,7 +60,8 @@ public class SmsComponent extends CustomField<String> {
 
 		mainLayout.setHorizontalComponentAlignment(FlexComponent.Alignment.END, numberOfMessagesLabel);
 
-		// was also a text change listener: the wrapper makes the value follow typing (200 ms timeout)
+		// was a text change listener: the value follows every keystroke
+		smsTextArea.setValueChangeMode(ValueChangeMode.EAGER);
 		smsTextArea.addValueChangeListener(e -> setNumberOfMessagesLabel(numberOfMessagesLabel, smsTextArea.getValue().length()));
 
 		return mainLayout;

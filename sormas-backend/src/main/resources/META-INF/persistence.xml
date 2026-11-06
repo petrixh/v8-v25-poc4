@@ -1,6 +1,6 @@
-<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
-	version="2.1">
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_2.xsd"
+	version="3.2">
 
 	<persistence-unit name="SormasPU" transaction-type="JTA">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
@@ -112,14 +112,19 @@
 
 		<properties>
 			<property name="hibernate.dialect" value="de.symeda.sormas.backend.ExtendedPostgreSQL94Dialect"/>
-			<property name="hibernate.criteria.literal_handling_mode" value="bind"/>
+			<property name="hibernate.criteria.value_handling_mode" value="bind"/>
+			<property name="hibernate.type.json_format_mapper" value="jackson"/>
+			<!-- Native queries return java.sql.Date/Time/Timestamp for date and time columns, as with Hibernate 5, instead of java.time types -->
+			<property name="hibernate.query.native.prefer_jdbc_datetime_types" value="true"/>
 			<property name="hibernate.transaction.jta.platform"
-					  value="org.hibernate.service.jta.platform.internal.SunOneJtaPlatform"/>
+					  value="org.hibernate.engine.transaction.jta.platform.internal.GlassFishJtaPlatform"/>
 			<property name="hibernate.show_sql" value="false"/>
 			<property name="hibernate.format_sql" value="false"/>
 
 			<property name="hibernate.cache.use_second_level_cache" value="true"/>
-			<property name="hibernate.cache.region.factory_class" value="org.hibernate.cache.ehcache.internal.SingletonEhcacheRegionFactory"/>
+			<property name="hibernate.cache.region.factory_class" value="jcache"/>
+			<property name="hibernate.javax.cache.provider" value="org.ehcache.jsr107.EhcacheCachingProvider"/>
+			<property name="hibernate.javax.cache.uri" value="META-INF/ehcache.xml"/>
 			<!-- don't validate on release, otherwise the automatic db update won't work
             <property name="hibernate.hbm2ddl.auto" value="validate"/>
              -->

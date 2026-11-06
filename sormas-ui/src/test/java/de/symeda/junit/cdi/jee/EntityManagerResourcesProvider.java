@@ -53,7 +53,7 @@ public class EntityManagerResourcesProvider {
 
 	private EntityManagerFactory createEntityManagerFactory(String persistenceUnit) {
 		Map<String, Object> props = new HashMap();
-		props.put("javax.persistence.bean.manager", this.beanManager);
+		props.put("jakarta.persistence.bean.manager", this.beanManager);
 		return Persistence.createEntityManagerFactory(persistenceUnit, props);
 	}
 

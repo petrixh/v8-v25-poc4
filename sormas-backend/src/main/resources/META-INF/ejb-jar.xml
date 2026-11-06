@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ejb-jar xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="3.2"
+<ejb-jar xmlns="https://jakarta.ee/xml/ns/jakartaee" version="4.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/ejb-jar_3_2.xsd">
+	xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/ejb-jar_4_0.xsd">
 
 	<interceptors>
 		<interceptor>
@@ -36,15 +36,15 @@
 		</interceptor-binding>
 
 		<application-exception>
-			<exception-class>javax.validation.ValidationException</exception-class>
+			<exception-class>jakarta.validation.ValidationException</exception-class>
 			<rollback>true</rollback>
 		</application-exception>
 		<application-exception>
-			<exception-class>javax.validation.ConstraintViolationException</exception-class>
+			<exception-class>jakarta.validation.ConstraintViolationException</exception-class>
 			<rollback>true</rollback>
 		</application-exception>
 		<application-exception>
-			<exception-class>javax.persistence.EntityNotFoundException</exception-class>
+			<exception-class>jakarta.persistence.EntityNotFoundException</exception-class>
 			<rollback>true</rollback>
 		</application-exception>
 	</assembly-descriptor>

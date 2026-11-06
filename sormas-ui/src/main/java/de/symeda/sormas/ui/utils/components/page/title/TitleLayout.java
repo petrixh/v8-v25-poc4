@@ -2,15 +2,15 @@ package de.symeda.sormas.ui.utils.components.page.title;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.ui.utils.CssStyles;
 
 public class TitleLayout extends VerticalLayout {
 
 	public TitleLayout() {
-		addStyleNames(CssStyles.LAYOUT_MINIMAL, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_4);
+		addClassNames(CssStyles.LAYOUT_MINIMAL, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_4);
 		setSpacing(false);
 	}
 
@@ -19,7 +19,7 @@ public class TitleLayout extends VerticalLayout {
 	}
 
 	public void addRow(RowLayout rowLayout) {
-		addComponent(rowLayout);
+		add(rowLayout);
 	}
 
 	public void addMainRow(String text) {
@@ -28,10 +28,10 @@ public class TitleLayout extends VerticalLayout {
 
 	private void addRow(String text, String... styles) {
 		if (StringUtils.isNotBlank(text)) {
-			Label row = new Label(text);
-			row.addStyleNames(styles);
-			row.addStyleNames(CssStyles.VSPACE_NONE, CssStyles.VSPACE_TOP_NONE, CssStyles.LABEL_CAPTION_TRUNCATED);
-			addComponent(row);
+			Span row = new Span(text);
+			row.addClassNames(styles);
+			row.addClassNames(CssStyles.VSPACE_NONE, CssStyles.VSPACE_TOP_NONE, CssStyles.LABEL_CAPTION_TRUNCATED);
+			add(row);
 		}
 	}
 }

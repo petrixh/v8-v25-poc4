@@ -26,25 +26,25 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.CustomField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.ui.email.ExternalBulkEmailOptionsForm;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 
 public class MultiSelectFiles<T> extends CustomField<Set<T>> {
 
+	/** Was {@code BUTTON_ICON_ALIGN_TOP}. */
+	private static final String BUTTON_ICON_ALIGN_TOP = "icon-align-top";
 	private VerticalLayout labelLayout = new VerticalLayout();
 	private Map<String, T> selectedItemsWithCaption = new HashMap<>();
 
@@ -55,13 +55,14 @@ public class MultiSelectFiles<T> extends CustomField<Set<T>> {
 	@Override
 	protected Component initContent() {
 		VerticalLayout verticalLayout = new VerticalLayout();
-		verticalLayout.setMargin(new MarginInfo(false, false, true, false));
+		// was MarginInfo(false, false, true, false): bottom margin only (look, parked)
+		verticalLayout.setPadding(false);
 
 		verticalLayout.setSpacing(false);
 
-		labelLayout.setMargin(false);
+		labelLayout.setPadding(false);
 		labelLayout.setSpacing(false);
-		verticalLayout.addComponent(labelLayout);
+		verticalLayout.add(labelLayout);
 
 		return verticalLayout;
 	}
@@ -72,30 +73,30 @@ public class MultiSelectFiles<T> extends CustomField<Set<T>> {
 	}
 
 	private void listSelectedItems() {
-		labelLayout.removeAllComponents();
+		labelLayout.removeAll();
 
 		for (Map.Entry<String, T> itemEntry : new HashMap<>(selectedItemsWithCaption).entrySet()) {
 			HorizontalLayout itemLayout = new HorizontalLayout();
-			itemLayout.setMargin(false);
+			itemLayout.setPadding(false);
 			itemLayout.setWidth("100%");
 
-			Label label = new Label(itemEntry.getKey());
+			Span label = new Span(itemEntry.getKey());
 			label.setWidth("100%");
-			itemLayout.addComponent(label);
+			itemLayout.add(label);
 
 			if (!isReadOnly()) {
 				Button removeButton = ButtonHelper.createIconButtonWithCaption(
 					null,
 					null,
-					VaadinIcons.TRASH,
+					VaadinIcon.TRASH,
 					e -> removeSelectedItem(itemEntry.getValue()),
-					ValoTheme.BUTTON_ICON_ONLY,
-					ValoTheme.BUTTON_BORDERLESS,
-					ValoTheme.BUTTON_ICON_ALIGN_TOP);
-				itemLayout.addComponent(removeButton);
+					CssStyles.BUTTON_ICON_ONLY,
+					CssStyles.BUTTON_BORDERLESS,
+					BUTTON_ICON_ALIGN_TOP);
+				itemLayout.add(removeButton);
 			}
 
-			labelLayout.addComponent(itemLayout);
+			labelLayout.add(itemLayout);
 		}
 	}
 
@@ -109,11 +110,6 @@ public class MultiSelectFiles<T> extends CustomField<Set<T>> {
 		listSelectedItems();
 	}
 
-	@Override
-	public void setValue(Set<T> newFieldValue, boolean ignoreReadOnly) throws ReadOnlyException, Converter.ConversionException {
-		super.setValue(newFieldValue, false, ignoreReadOnly);
-	}
-
 	public void addSelectedItemWithCaption(T item, String caption) {
 
 		if (selectedItemsWithCaption.size() <= 5) {
@@ -123,8 +119,8 @@ public class MultiSelectFiles<T> extends CustomField<Set<T>> {
 			setValue(new HashSet<>(selectedItemsWithCaption.values()));
 		} else {
 			VaadinUiUtil.createWarningLayout()
-				.addComponent(
-					new Label(
+				.add(
+					new Span(
 						String.format(
 							I18nProperties.getString(Strings.messageBulkEmailMaxAttachedFiles),
 							ExternalBulkEmailOptionsForm.MAX_ATTACHMENT_NUMBER)));

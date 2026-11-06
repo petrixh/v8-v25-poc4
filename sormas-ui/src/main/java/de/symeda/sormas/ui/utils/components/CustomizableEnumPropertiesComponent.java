@@ -18,16 +18,14 @@ package de.symeda.sormas.ui.utils.components;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.CustomField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.customizableenum.CustomizableEnum;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 
 public class CustomizableEnumPropertiesComponent extends CustomField<Map<String, Object>> {
 
@@ -40,7 +38,8 @@ public class CustomizableEnumPropertiesComponent extends CustomField<Map<String,
 
 		layout = new VerticalLayout();
 		layout.setWidthFull();
-		layout.setMargin(new MarginInfo(false, false, true, false));
+		// was MarginInfo(false, false, true, false): bottom margin only (look, parked)
+		layout.setPadding(false);
 		layout.setSpacing(false);
 		CssStyles.style(layout, CssStyles.VSPACE_TOP_4);
 
@@ -63,15 +62,15 @@ public class CustomizableEnumPropertiesComponent extends CustomField<Map<String,
 			return;
 		}
 
-		layout.removeAllComponents();
+		layout.removeAll();
 
 		allProperties.keySet().forEach(p -> {
 			if (allProperties.get(p) == boolean.class) {
 				Boolean value = (Boolean) properties.get(p);
-				CheckBox checkBox = new CheckBox(I18nProperties.getPrefixCaption(CustomizableEnum.I18N_PREFIX, p), value != null ? value : false);
+				Checkbox checkBox = new Checkbox(I18nProperties.getPrefixCaption(CustomizableEnum.I18N_PREFIX, p), value != null ? value : false);
 				CssStyles.style(checkBox, CssStyles.VSPACE_NONE);
 				checkBox.addValueChangeListener(e -> properties.put(p, e.getValue()));
-				layout.addComponent(checkBox);
+				layout.add(checkBox);
 			} else {
 				throw new UnsupportedOperationException(
 					String.format("Class %s is not yet implemented for properties component", allProperties.get(p).getName()));
@@ -80,13 +79,16 @@ public class CustomizableEnumPropertiesComponent extends CustomField<Map<String,
 	}
 
 	@Override
-	public void setValue(Map<String, Object> newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(Map<String, Object> newFieldValue) {
 		super.setValue(newFieldValue);
 		this.properties = newFieldValue != null ? newFieldValue : new HashMap<>();
 	}
 
+	/**
+	 * Was V7 {@code getInternalValue()}: the value is the edited properties map.
+	 */
 	@Override
-	protected Map<String, Object> getInternalValue() {
+	public Map<String, Object> getValue() {
 		return properties != null ? (!properties.isEmpty() ? properties : null) : null;
 	}
 

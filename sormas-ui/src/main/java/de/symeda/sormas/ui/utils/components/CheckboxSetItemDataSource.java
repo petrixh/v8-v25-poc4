@@ -15,11 +15,18 @@
 
 package de.symeda.sormas.ui.utils.components;
 
-import com.vaadin.v7.data.Property;
+import java.io.Serializable;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public class CheckboxSetItemDataSource<T> implements Property<Boolean> {
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.shared.Registration;
+
+/**
+ * Was a V7 {@code Property<Boolean>} used as the property data source of a check box. Flow fields have no property
+ * data source: {@link #bind(HasValue)} shows the current state in the check box and writes the user's changes back.
+ */
+public class CheckboxSetItemDataSource<T> implements Serializable {
 
 	private static final long serialVersionUID = -1956478277209246907L;
 
@@ -35,32 +42,40 @@ public class CheckboxSetItemDataSource<T> implements Property<Boolean> {
 		this.setChecked = setChecked;
 	}
 
-	@Override
 	public Boolean getValue() {
 		return isChecked.apply(propertyValue);
 	}
 
-	@Override
-	public void setValue(Boolean checked) throws ReadOnlyException {
+	/**
+	 * @throws IllegalStateException
+	 *             if read-only (was the V7 {@code Property.ReadOnlyException})
+	 */
+	public void setValue(Boolean checked) {
 		if (readOnly) {
-			throw new ReadOnlyException();
+			throw new IllegalStateException("read-only data source");
 		}
 
 		setChecked.accept(checked, propertyValue);
 	}
 
-	@Override
 	public Class<? extends Boolean> getType() {
 		return Boolean.class;
 	}
 
-	@Override
 	public boolean isReadOnly() {
 		return readOnly;
 	}
 
-	@Override
 	public void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
+	}
+
+	/**
+	 * Was {@code new CheckBox(caption, dataSource)}: sets the check box to the current state and writes each change of
+	 * the check box to this data source before the check box's later listeners run.
+	 */
+	public Registration bind(HasValue<?, Boolean> checkBox) {
+		checkBox.setValue(Boolean.TRUE.equals(getValue()));
+		return checkBox.addValueChangeListener(e -> setValue(e.getValue()));
 	}
 }

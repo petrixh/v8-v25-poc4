@@ -15,10 +15,10 @@
 
 package de.symeda.sormas.ui.utils.components.customizablefield;
 
-import com.vaadin.data.ValueProvider;
-import com.vaadin.server.Setter;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.TextArea;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.data.binder.Setter;
+import com.vaadin.flow.function.ValueProvider;
 
 import de.symeda.sormas.api.customizablefield.CustomizableFieldMetadataDto;
 import de.symeda.sormas.api.customizablefield.CustomizableFieldValueDto;
@@ -26,9 +26,9 @@ import de.symeda.sormas.api.customizablefield.CustomizableFieldValueDto;
 /**
  * Concrete {@link CustomizableFieldInput} for {@link de.symeda.sormas.api.customizablefield.CustomizableFieldType#TEXTAREA}.
  * <p>
- * Renders a Vaadin v8 {@link TextArea}. User edits are propagated to the parent field's
+ * Renders a Flow {@link TextArea}. User edits are propagated to the parent field's
  * internal state via a value-change listener; programmatic changes pushed through
- * {@link #setValue(Object)} are reflected in the {@link TextArea} via {@link #doSetValue(String)}.
+ * {@link #setValue(Object)} are reflected in the {@link TextArea} via {@link #setPresentationValue(Object)}.
  */
 public class CustomizableFieldInputTextArea extends CustomizableFieldInput<String> {
 
@@ -36,7 +36,7 @@ public class CustomizableFieldInputTextArea extends CustomizableFieldInput<Strin
 
 	private TextArea textArea;
 	/**
-	 * Holds a value that was pushed via {@link #doSetValue(String)} before {@link #buildInputComponent()}
+	 * Holds a value that was pushed via {@link #setPresentationValue(Object)} before {@link #buildInputComponent()}
 	 * had a chance to create the {@link TextArea}. Applied to the text area on first render.
 	 */
 	private String pendingValue;
@@ -62,7 +62,7 @@ public class CustomizableFieldInputTextArea extends CustomizableFieldInput<Strin
 	@Override
 	protected Component buildInputComponent() {
 		textArea = new TextArea();
-		textArea.setWidth(100, Unit.PERCENTAGE);
+		textArea.setWidthFull();
 
 		// Apply any value that arrived before the component was first rendered.
 		if (pendingValue != null) {

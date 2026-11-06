@@ -17,21 +17,21 @@ package de.symeda.sormas.ui.utils.components.progress;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.server.ThemeResource;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Image;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.ProgressBar;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 public abstract class AbstractProgressLayout<P extends ProgressUpdateInfo> extends VerticalLayout {
 
@@ -40,8 +40,8 @@ public abstract class AbstractProgressLayout<P extends ProgressUpdateInfo> exten
 
 	private HorizontalLayout infoLayout;
 	private HorizontalLayout descriptionLayout;
-	private Label infoLabel;
-	private Label descriptionLabel;
+	private Span infoLabel;
+	private Span descriptionLabel;
 	/**
 	 * The component that is displayed to the left of the info label,
 	 * indicating the result of the operation; set to a progress circle in the beginning
@@ -54,7 +54,7 @@ public abstract class AbstractProgressLayout<P extends ProgressUpdateInfo> exten
 
 	private ProgressBar progressBar;
 	protected HorizontalLayout progressStatusLayout;
-	private Label progressCountLabel;
+	private Span progressCountLabel;
 	private int progressCount = 0;
 
 	protected HorizontalLayout hintLayout;
@@ -69,8 +69,8 @@ public abstract class AbstractProgressLayout<P extends ProgressUpdateInfo> exten
 		this.totalCount = totalCount;
 		this.cancelCallback = cancelCallback;
 
-		setWidth(100, Unit.PERCENTAGE);
-		setMargin(true);
+		setWidthFull();
+		setPadding(true);
 
 		initInfoSection(initialInfoText);
 		initDescriptionSection(descriptionText);
@@ -94,7 +94,7 @@ public abstract class AbstractProgressLayout<P extends ProgressUpdateInfo> exten
 
 		currentUI.access(() -> {
 			progressCount += progressUpdateInfo.getProcessedEntryCount();
-			progressCountLabel.setValue(String.format(getProcessedLabelI18nProperty(), progressCount, totalCount));
+			progressCountLabel.setText(String.format(getProcessedLabelI18nProperty(), progressCount, totalCount));
 			progressBar.setValue((float) progressCount / (float) totalCount);
 			handleOptionalProgressUpdates(progressUpdateInfo);
 		});
@@ -107,7 +107,7 @@ public abstract class AbstractProgressLayout<P extends ProgressUpdateInfo> exten
 	 */
 	public void finishProgress(ProgressResult result, String newInfoText, String descriptionText, Runnable closeCallback) {
 
-		infoLayout.removeComponent(progressResultComponent);
+		infoLayout.remove(progressResultComponent);
 		switch (result) {
 		case SUCCESS:
 			progressResultComponent = successIcon;
@@ -122,11 +122,11 @@ public abstract class AbstractProgressLayout<P extends ProgressUpdateInfo> exten
 		infoLayout.addComponentAsFirst(progressResultComponent);
 
 		if (newInfoText != null) {
-			infoLabel.setValue(newInfoText);
+			VaadinUiUtil.setLabelValue(infoLabel, newInfoText, ContentMode.HTML);
 		}
 
 		if (descriptionText != null) {
-			descriptionLabel.setValue(descriptionText);
+			VaadinUiUtil.setLabelValue(descriptionLabel, descriptionText, ContentMode.HTML);
 		}
 
 		cancelButton.setVisible(false);
@@ -141,35 +141,33 @@ public abstract class AbstractProgressLayout<P extends ProgressUpdateInfo> exten
 	private void initInfoSection(String initialInfoText) {
 
 		infoLayout = new HorizontalLayout();
-		infoLayout.setWidth(100, Unit.PERCENTAGE);
+		infoLayout.setWidthFull();
 		infoLayout.setSpacing(true);
 
 		initInfoComponents();
-		infoLayout.addComponent(progressResultComponent);
+		infoLayout.add(progressResultComponent);
 
-		infoLabel = new Label(initialInfoText);
-		infoLabel.setContentMode(ContentMode.HTML);
+		infoLabel = VaadinUiUtil.createLabel(initialInfoText, ContentMode.HTML);
 		infoLabel.setWidthFull();
-		infoLayout.addComponent(infoLabel);
-		infoLayout.setExpandRatio(infoLabel, 1);
+		infoLayout.add(infoLabel);
+		infoLayout.setFlexGrow(1, infoLabel);
 
-		addComponent(infoLayout);
+		add(infoLayout);
 	}
 
 	private void initDescriptionSection(String descriptionText) {
 		descriptionLayout = new HorizontalLayout();
-		descriptionLayout.setWidth(90, Unit.PERCENTAGE);
+		descriptionLayout.setWidth("90%");
 		descriptionLayout.setSpacing(true);
 
-		descriptionLabel = new Label(descriptionText);
-		descriptionLabel.setContentMode(ContentMode.HTML);
+		descriptionLabel = VaadinUiUtil.createLabel(descriptionText, ContentMode.HTML);
 		descriptionLabel.setWidthFull();
-		descriptionLabel.addStyleNames(CssStyles.VSPACE_TOP_3, CssStyles.HSPACE_LEFT_1);
+		descriptionLabel.addClassNames(CssStyles.VSPACE_TOP_3, CssStyles.HSPACE_LEFT_1);
 
-		descriptionLayout.addComponent(descriptionLabel);
-		descriptionLayout.setExpandRatio(descriptionLabel, 1);
+		descriptionLayout.add(descriptionLabel);
+		descriptionLayout.setFlexGrow(1, descriptionLabel);
 
-		addComponent(descriptionLayout);
+		add(descriptionLayout);
 	}
 
 	private void initInfoComponents() {
@@ -185,9 +183,10 @@ public abstract class AbstractProgressLayout<P extends ProgressUpdateInfo> exten
 
 	private Image buildInfoIcon(String resourceId) {
 
-		Image infoIcon = new Image(null, new ThemeResource(resourceId));
-		infoIcon.setHeight(35, Unit.PIXELS);
-		infoIcon.setWidth(35, Unit.PIXELS);
+		// was a ThemeResource of the sormas theme
+		Image infoIcon = new Image(VaadinUiUtil.THEME_IMAGE_PATH + resourceId, "");
+		infoIcon.setHeight("35px");
+		infoIcon.setWidth("35px");
 		return infoIcon;
 	}
 
@@ -196,19 +195,19 @@ public abstract class AbstractProgressLayout<P extends ProgressUpdateInfo> exten
 		VerticalLayout progressLayout = new VerticalLayout();
 		progressLayout.setSpacing(true);
 
-		progressBar = new ProgressBar(0.0f);
-		progressBar.setWidth(100, Unit.PERCENTAGE);
+		progressBar = new ProgressBar(0, 1, 0);
+		progressBar.setWidthFull();
 		CssStyles.style(progressBar, CssStyles.VSPACE_TOP_3);
-		progressLayout.addComponent(progressBar);
+		progressLayout.add(progressBar);
 
 		progressStatusLayout = new HorizontalLayout();
 		progressStatusLayout.setSpacing(true);
-		progressCountLabel = new Label(String.format(getProcessedLabelI18nProperty(), progressCount, totalCount));
-		progressStatusLayout.addComponent(progressCountLabel);
-		progressLayout.addComponent(progressStatusLayout);
-		progressLayout.setComponentAlignment(progressStatusLayout, Alignment.TOP_RIGHT);
+		progressCountLabel = new Span(String.format(getProcessedLabelI18nProperty(), progressCount, totalCount));
+		progressStatusLayout.add(progressCountLabel);
+		progressLayout.add(progressStatusLayout);
+		progressLayout.setHorizontalComponentAlignment(FlexComponent.Alignment.END, progressStatusLayout);
 
-		addComponent(progressLayout);
+		add(progressLayout);
 	}
 
 	private void initButtonPanel() {
@@ -218,13 +217,13 @@ public abstract class AbstractProgressLayout<P extends ProgressUpdateInfo> exten
 		CssStyles.style(buttonPanel, CssStyles.VSPACE_TOP_2);
 
 		cancelButton = ButtonHelper.createButton(Captions.actionCancel, e -> cancelCallback.run());
-		buttonPanel.addComponent(cancelButton);
+		buttonPanel.add(cancelButton);
 		closeButton = ButtonHelper.createButton(Captions.actionClose);
 		closeButton.setVisible(false);
-		buttonPanel.addComponent(closeButton);
+		buttonPanel.add(closeButton);
 
-		addComponent(buttonPanel);
-		setComponentAlignment(buttonPanel, Alignment.MIDDLE_RIGHT);
+		add(buttonPanel);
+		setHorizontalComponentAlignment(FlexComponent.Alignment.END, buttonPanel);
 	}
 
 	private void initHintSection() {
@@ -233,11 +232,11 @@ public abstract class AbstractProgressLayout<P extends ProgressUpdateInfo> exten
 			hintLayout = new HorizontalLayout();
 			CssStyles.style(hintLayout, CssStyles.VSPACE_TOP_3);
 
-			Label hintLabel = new Label(getHintText(), ContentMode.HTML);
+			Span hintLabel = VaadinUiUtil.createLabel(getHintText(), ContentMode.HTML);
 			CssStyles.style(hintLabel, CssStyles.LABEL_MINOR, CssStyles.LABEL_SMALL);
-			hintLayout.addComponent(hintLabel);
+			hintLayout.add(hintLabel);
 
-			addComponent(hintLayout);
+			add(hintLayout);
 		}
 	}
 

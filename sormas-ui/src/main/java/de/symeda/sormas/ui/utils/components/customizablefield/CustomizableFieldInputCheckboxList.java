@@ -19,10 +19,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import com.vaadin.data.ValueProvider;
-import com.vaadin.server.Setter;
-import com.vaadin.ui.CheckBoxGroup;
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.data.binder.Setter;
+import com.vaadin.flow.function.ValueProvider;
 
 import de.symeda.sormas.api.customizablefield.CustomizableFieldCustomProperties;
 import de.symeda.sormas.api.customizablefield.CustomizableFieldMetadataDto;
@@ -32,7 +32,7 @@ import de.symeda.sormas.api.customizablefield.CustomizableFieldValueDto;
  * Concrete {@link CustomizableFieldInput} for
  * {@link de.symeda.sormas.api.customizablefield.CustomizableFieldType#CHECKBOX_LIST}.
  * <p>
- * Renders a Vaadin v8 {@link CheckBoxGroup} populated with the string options defined in the
+ * Renders a Flow {@link CheckboxGroup} populated with the string options defined in the
  * field's {@link CustomizableFieldMetadataDto#getCustomProperties() customProperties} under
  * {@link CustomizableFieldCustomProperties#getOptions()}.
  * <p>
@@ -44,10 +44,10 @@ public class CustomizableFieldInputCheckboxList extends CustomizableFieldInput<S
 
     private static final long serialVersionUID = 1L;
 
-    private CheckBoxGroup<String> checkBoxGroup;
+    private CheckboxGroup<String> checkBoxGroup;
     /**
-     * Holds a value that was pushed via {@link #doSetValue(Set)} before
-     * {@link #buildInputComponent()} had a chance to create the {@link CheckBoxGroup}.
+     * Holds a value that was pushed via {@link #setPresentationValue(Object)} before
+     * {@link #buildInputComponent()} had a chance to create the {@link CheckboxGroup}.
      * Applied to the group on first render.
      */
     private Set<String> pendingValue;
@@ -73,7 +73,7 @@ public class CustomizableFieldInputCheckboxList extends CustomizableFieldInput<S
 
     @Override
     protected Component buildInputComponent() {
-        checkBoxGroup = new CheckBoxGroup<>();
+        checkBoxGroup = new CheckboxGroup<>();
         checkBoxGroup.setItems(resolveOptions());
 
         // Apply any value that arrived before the component was first rendered.
@@ -90,8 +90,8 @@ public class CustomizableFieldInputCheckboxList extends CustomizableFieldInput<S
 
     /**
      * Called by Vaadin when {@link #setValue(Object)} is invoked programmatically.
-     * Pushes the value into the {@link CheckBoxGroup}; {@code null} clears the selection.
-     * If the {@link CheckBoxGroup} has not been created yet (component not yet rendered),
+     * Pushes the value into the {@link CheckboxGroup}; {@code null} clears the selection.
+     * If the {@link CheckboxGroup} has not been created yet (component not yet rendered),
      * the value is stored as a pending value and applied in {@link #buildInputComponent()}.
      */
     @Override

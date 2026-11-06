@@ -17,23 +17,25 @@ package de.symeda.sormas.ui.utils.components.customizablefield;
 
 import java.time.LocalDateTime;
 
-import com.vaadin.data.ValueProvider;
-import com.vaadin.server.Setter;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.DateTimeField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
+import com.vaadin.flow.data.binder.Setter;
+import com.vaadin.flow.function.ValueProvider;
 
 import de.symeda.sormas.api.customizablefield.CustomizableFieldMetadataDto;
 import de.symeda.sormas.api.customizablefield.CustomizableFieldValueDto;
-import de.symeda.sormas.api.i18n.I18nProperties;
-import de.symeda.sormas.api.utils.DateHelper;
+import de.symeda.sormas.api.utils.DateFormatHelper;
 
 /**
  * Concrete {@link CustomizableFieldInput} for {@link de.symeda.sormas.api.customizablefield.CustomizableFieldType#DATE_TIME}.
  * <p>
- * Renders a Vaadin 8 {@link DateTimeField} (date + time picker, value type {@link LocalDateTime}).
+ * Renders a Flow {@link DateTimePicker} (date + time picker, value type {@link LocalDateTime}; was a Vaadin 8
+ * {@code DateTimeField}).
  * The value is stored internally as an ISO-8601 date-time string ({@code yyyy-MM-ddTHH:mm})
  * consistent with the {@link String} contract of the base class. The display format follows
- * the locale configured in SORMAS via {@link DateHelper#getLocalDateTimeFormat}.
+ * the user's date pattern ({@link DateFormatHelper#getDateFormatPattern()}) and the locale's time format (Vaadin 8:
+ * {@code DateHelper.getLocalDateTimeFormat}).
  * <p>
  * Value round-trip:
  * <ul>
@@ -46,9 +48,9 @@ public class CustomizableFieldInputDateTime extends CustomizableFieldInput<Local
 
 	private static final long serialVersionUID = 1L;
 
-	private DateTimeField dateTimeField;
+	private DateTimePicker dateTimeField;
 	/**
-	 * Holds a value that was pushed via {@link #doSetValue(LocalDateTime)} before
+	 * Holds a value that was pushed via {@link #setPresentationValue(Object)} before
 	 * {@link #buildInputComponent()} had a chance to create the {@link DateTimeField}.
 	 * Applied to the date-time field on first render.
 	 */
@@ -74,9 +76,13 @@ public class CustomizableFieldInputDateTime extends CustomizableFieldInput<Local
 
 	@Override
 	protected Component buildInputComponent() {
-		dateTimeField = new DateTimeField();
-		dateTimeField.setWidth(100, Unit.PERCENTAGE);
-		dateTimeField.setDateFormat(DateHelper.getLocalDateTimeFormat(I18nProperties.getUserLanguage()).toPattern());
+		dateTimeField = new DateTimePicker();
+		dateTimeField.setWidthFull();
+		// was setDateFormat(<user's date-time pattern>): the Flow picker formats the date part with the user's date
+		// pattern and the time part by locale
+		DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+		i18n.setDateFormat(DateFormatHelper.getDateFormatPattern());
+		dateTimeField.setDatePickerI18n(i18n);
 
 		// Apply any value that arrived before the component was first rendered.
 		if (pendingValue != null) {

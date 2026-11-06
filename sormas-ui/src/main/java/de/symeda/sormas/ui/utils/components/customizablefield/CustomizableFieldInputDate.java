@@ -17,10 +17,10 @@ package de.symeda.sormas.ui.utils.components.customizablefield;
 
 import java.time.LocalDate;
 
-import com.vaadin.data.ValueProvider;
-import com.vaadin.server.Setter;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.DateField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.data.binder.Setter;
+import com.vaadin.flow.function.ValueProvider;
 
 import de.symeda.sormas.api.customizablefield.CustomizableFieldMetadataDto;
 import de.symeda.sormas.api.customizablefield.CustomizableFieldValueDto;
@@ -29,7 +29,7 @@ import de.symeda.sormas.api.utils.DateFormatHelper;
 /**
  * Concrete {@link CustomizableFieldInput} for {@link de.symeda.sormas.api.customizablefield.CustomizableFieldType#DATE}.
  * <p>
- * Renders a Vaadin 8 {@link DateField} (date-only picker, value type {@link LocalDate}).
+ * Renders a Flow {@link DatePicker} (date-only picker, value type {@link LocalDate}).
  * The value is stored internally as an ISO date string ({@code yyyy-MM-dd}) consistent with
  * the {@link String} contract of the base class. The display format follows the locale
  * configured in SORMAS via {@link DateFormatHelper#getDateFormatPattern()}.
@@ -44,10 +44,10 @@ public class CustomizableFieldInputDate extends CustomizableFieldInput<LocalDate
 
 	private static final long serialVersionUID = 1L;
 
-	private DateField dateField;
+	private DatePicker dateField;
 	/**
-	 * Holds a value that was pushed via {@link #doSetValue(LocalDate)} before
-	 * {@link #buildInputComponent()} had a chance to create the {@link DateField}.
+	 * Holds a value that was pushed via {@link #setPresentationValue(Object)} before
+	 * {@link #buildInputComponent()} had a chance to create the {@link DatePicker}.
 	 * Applied to the date field on first render.
 	 */
 	private LocalDate pendingValue;
@@ -72,9 +72,11 @@ public class CustomizableFieldInputDate extends CustomizableFieldInput<LocalDate
 
 	@Override
 	protected Component buildInputComponent() {
-		dateField = new DateField();
-		dateField.setWidth(100, Unit.PERCENTAGE);
-		dateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
+		dateField = new DatePicker();
+		dateField.setWidthFull();
+		DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+		i18n.setDateFormat(DateFormatHelper.getDateFormatPattern());
+		dateField.setI18n(i18n);
 
 		// Apply any value that arrived before the component was first rendered.
 		if (pendingValue != null) {
@@ -89,8 +91,8 @@ public class CustomizableFieldInputDate extends CustomizableFieldInput<LocalDate
 	}
 
 	/**
-	 * Propagates {@code value} into the {@link DateField}; {@code null} clears it.
-	 * If the {@link DateField} has not been created yet (component not yet rendered),
+	 * Propagates {@code value} into the {@link DatePicker}; {@code null} clears it.
+	 * If the {@link DatePicker} has not been created yet (component not yet rendered),
 	 * the value is stored as a pending value and applied in {@link #buildInputComponent()}.
 	 */
 	@Override

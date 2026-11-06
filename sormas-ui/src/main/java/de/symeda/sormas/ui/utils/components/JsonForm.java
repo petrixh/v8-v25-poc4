@@ -19,22 +19,25 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.GridLayout;
-import com.vaadin.v7.ui.CustomField;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.formlayout.FormLayout;
 
 import de.symeda.sormas.api.utils.fieldaccess.UiFieldAccessCheckers;
 import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
+import de.symeda.sormas.ui.utils.fields.CustomField;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class JsonForm extends CustomField<Map<String, String>> {
 
 	private static final long serialVersionUID = 5762983268792751775L;
 
-	private final GridLayout gridLayout;
+	/**
+	 * Was a two-column {@code GridLayout}.
+	 */
+	private final FormLayout gridLayout;
 	private final SormasFieldGroupFieldFactory fieldFactory;
 
 	private Field<?>[] fields;
@@ -43,9 +46,9 @@ public class JsonForm extends CustomField<Map<String, String>> {
 		super();
 		setWidthFull();
 
-		gridLayout = new GridLayout();
+		gridLayout = new FormLayout();
 		gridLayout.setWidthFull();
-		gridLayout.setSpacing(true);
+		gridLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 2));
 		CssStyles.style(gridLayout, CssStyles.VSPACE_3);
 
 		fieldFactory = new SormasFieldGroupFieldFactory(fieldVisibilityCheckers, fieldAccessCheckers);
@@ -62,29 +65,30 @@ public class JsonForm extends CustomField<Map<String, String>> {
 	}
 
 	@Override
-	protected void setInternalValue(Map<String, String> newValue) {
-		super.setInternalValue(newValue);
+	protected void setPresentationValue(Map<String, String> newValue) {
 		doSetValue(newValue);
 	}
 
 	private void doSetValue(Map<String, String> value) {
-		gridLayout.removeAllComponents();
+		gridLayout.removeAll();
 
 		if (value != null) {
-			gridLayout.setColumns(2);
-			gridLayout.setRows((int) Math.ceil(value.size() / 2d));
-
 			fields = buildFields(value);
-			gridLayout.addComponents(fields);
+			for (Field<?> field : fields) {
+				gridLayout.add(field.asComponent());
+			}
 		}
 	}
 
+	/**
+	 * As in V7, the value is the set value with the edited texts of the fields.
+	 */
 	@Override
 	public Map<String, String> getValue() {
-		Map<String, String> data = new HashMap<>(getInternalValue());
+		Map<String, String> data = new HashMap<>(super.getValue());
 
 		for (Field<?> field : fields) {
-			data.put(field.getId(), (String) field.getValue());
+			data.put(field.getId().orElse(null), (String) field.getValue());
 		}
 
 		return data;

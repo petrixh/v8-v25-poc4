@@ -18,14 +18,13 @@ package de.symeda.sormas.ui.utils.components;
 import java.time.Month;
 import java.util.function.Function;
 
-import com.vaadin.v7.ui.AbstractSelect;
-import com.vaadin.v7.ui.ComboBox;
-
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.person.PersonDto;
 import de.symeda.sormas.api.utils.DateHelper;
 import de.symeda.sormas.ui.ControllerProvider;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.SelectField;
 
 public class BirthdateFields {
 
@@ -67,7 +66,7 @@ public class BirthdateFields {
 		// @TODO: Done for nullselection Bug, fixed in Vaadin 7.7.3
 		birthDateYear.setNullSelectionAllowed(true);
 		birthDateYear.addItems(DateHelper.getYearsToNow());
-		birthDateYear.setItemCaptionMode(AbstractSelect.ItemCaptionMode.ID_TOSTRING);
+		// was setItemCaptionMode(ID_TOSTRING): items without an explicit caption show toString()
 		birthDateYear.setInputPrompt(I18nProperties.getString(Strings.year));
 		birthDateDay.addValidator(
 			e -> ControllerProvider.getPersonController()
@@ -80,22 +79,16 @@ public class BirthdateFields {
 				.validateBirthDate((Integer) e, (Integer) birthDateMonth.getValue(), (Integer) birthDateDay.getValue()));
 
 		birthDateYear.addValueChangeListener(e -> {
-			updateListOfDays(birthDateDay, (Integer) e.getProperty().getValue(), (Integer) birthDateMonth.getValue());
-			birthDateMonth.markAsDirty();
-			birthDateDay.markAsDirty();
+			updateListOfDays(birthDateDay, (Integer) e.getValue(), (Integer) birthDateMonth.getValue());
 
 			fieldChangeCallback.run();
 		});
 		birthDateMonth.addValueChangeListener(e -> {
-			updateListOfDays(birthDateDay, (Integer) birthDateYear.getValue(), (Integer) e.getProperty().getValue());
-			birthDateYear.markAsDirty();
-			birthDateDay.markAsDirty();
+			updateListOfDays(birthDateDay, (Integer) birthDateYear.getValue(), (Integer) e.getValue());
 
 			fieldChangeCallback.run();
 		});
 		birthDateDay.addValueChangeListener(e -> {
-			birthDateYear.markAsDirty();
-			birthDateMonth.markAsDirty();
 
 			fieldChangeCallback.run();
 		});
@@ -113,7 +106,7 @@ public class BirthdateFields {
 		return birthDateYear;
 	}
 
-	private void setItemCaptionsForMonths(AbstractSelect months) {
+	private void setItemCaptionsForMonths(SelectField months) {
 		months.setItemCaption(1, I18nProperties.getEnumCaption(Month.JANUARY));
 		months.setItemCaption(2, I18nProperties.getEnumCaption(Month.FEBRUARY));
 		months.setItemCaption(3, I18nProperties.getEnumCaption(Month.MARCH));

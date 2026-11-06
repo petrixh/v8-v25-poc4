@@ -15,11 +15,11 @@
 
 package de.symeda.sormas.ui.utils.components.customizablefield;
 
-import com.vaadin.data.Binder;
-import com.vaadin.data.ValueProvider;
-import com.vaadin.server.Setter;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.Setter;
+import com.vaadin.flow.function.ValueProvider;
 
 import de.symeda.sormas.api.customizablefield.CustomizableFieldMetadataDto;
 import de.symeda.sormas.api.customizablefield.CustomizableFieldValueDto;
@@ -29,11 +29,11 @@ import de.symeda.sormas.api.i18n.Validations;
 /**
  * Concrete {@link CustomizableFieldInput} for {@link de.symeda.sormas.api.customizablefield.CustomizableFieldType#NUMBER}.
  * <p>
- * Renders a Vaadin v8 {@link TextField} restricted to whole-number input via a
+ * Renders a Flow {@link TextField} restricted to whole-number input via a
  * binder validator. The value is stored as a {@link String} consistent with the
  * base class contract. User edits are propagated via a value-change listener;
  * programmatic changes pushed through {@link #setValue(Object)} reach the widget via
- * {@link #doSetValue(String)}.
+ * {@link #setPresentationValue(Object)}.
  */
 public class CustomizableFieldInputNumber extends CustomizableFieldInput<String> {
 
@@ -44,7 +44,7 @@ public class CustomizableFieldInputNumber extends CustomizableFieldInput<String>
 
 	private TextField textField;
 	/**
-	 * Holds a value that was pushed via {@link #doSetValue(String)} before {@link #buildInputComponent()}
+	 * Holds a value that was pushed via {@link #setPresentationValue(Object)} before {@link #buildInputComponent()}
 	 * had a chance to create the {@link TextField}. Applied to the text field on first render.
 	 */
 	private String pendingValue;
@@ -78,7 +78,7 @@ public class CustomizableFieldInputNumber extends CustomizableFieldInput<String>
 	@Override
 	protected Component buildInputComponent() {
 		textField = new TextField();
-		textField.setWidth(100, Unit.PERCENTAGE);
+		textField.setWidthFull();
 
 		// Apply any value that arrived before the component was first rendered.
 		if (pendingValue != null) {

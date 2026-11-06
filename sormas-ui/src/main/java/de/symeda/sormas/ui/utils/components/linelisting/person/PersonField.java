@@ -1,16 +1,16 @@
 package de.symeda.sormas.ui.utils.components.linelisting.person;
 
-import com.vaadin.data.Binder;
-import com.vaadin.data.BinderValidationStatus;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.BinderValidationStatus;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.person.Sex;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 import de.symeda.sormas.ui.utils.components.birthdate.BirthDateField;
 
 public class PersonField extends CustomField<PersonFieldDto> {
@@ -29,6 +29,9 @@ public class PersonField extends CustomField<PersonFieldDto> {
 		sex = new ComboBox<>();
 	}
 
+	/**
+	 * Built on first attach, as in Vaadin 8 ({@link CustomField}).
+	 */
 	@Override
 	protected Component initContent() {
 		if (getValue() == null) {
@@ -48,17 +51,22 @@ public class PersonField extends CustomField<PersonFieldDto> {
 
 		sex.setId("sex");
 		sex.setItems(Sex.values());
-		sex.setWidth(100, Unit.PIXELS);
+		sex.setWidth("100px");
 		binder.forField(sex).asRequired().bind(PersonFieldDto.SEX);
 
-		layout.addComponents(firstname, lastname, birthDate, sex);
+		layout.add(firstname, lastname, birthDate, sex);
 
 		return layout;
 	}
 
 	@Override
-	protected void doSetValue(PersonFieldDto personFieldDto) {
+	protected void setPresentationValue(PersonFieldDto personFieldDto) {
 		binder.setBean(personFieldDto);
+	}
+
+	@Override
+	protected PersonFieldDto generateModelValue() {
+		return binder.getBean();
 	}
 
 	@Override
@@ -80,13 +88,13 @@ public class PersonField extends CustomField<PersonFieldDto> {
 	}
 
 	public void showCaptions() {
-		firstname.setCaption(I18nProperties.getPrefixCaption(PersonFieldDto.I18N_PREFIX, PersonFieldDto.FIRST_NAME));
-		firstname.removeStyleName(CssStyles.CAPTION_HIDDEN);
-		lastname.setCaption(I18nProperties.getPrefixCaption(PersonFieldDto.I18N_PREFIX, PersonFieldDto.LAST_NAME));
-		lastname.removeStyleName(CssStyles.CAPTION_HIDDEN);
-		birthDate.setCaption(I18nProperties.getPrefixCaption(PersonFieldDto.I18N_PREFIX, PersonFieldDto.BIRTH_DATE));
-		sex.setCaption(I18nProperties.getPrefixCaption(PersonFieldDto.I18N_PREFIX, PersonFieldDto.SEX));
-		sex.removeStyleName(CssStyles.CAPTION_HIDDEN);
+		firstname.setLabel(I18nProperties.getPrefixCaption(PersonFieldDto.I18N_PREFIX, PersonFieldDto.FIRST_NAME));
+		firstname.removeClassName(CssStyles.CAPTION_HIDDEN);
+		lastname.setLabel(I18nProperties.getPrefixCaption(PersonFieldDto.I18N_PREFIX, PersonFieldDto.LAST_NAME));
+		lastname.removeClassName(CssStyles.CAPTION_HIDDEN);
+		birthDate.setLabel(I18nProperties.getPrefixCaption(PersonFieldDto.I18N_PREFIX, PersonFieldDto.BIRTH_DATE));
+		sex.setLabel(I18nProperties.getPrefixCaption(PersonFieldDto.I18N_PREFIX, PersonFieldDto.SEX));
+		sex.removeClassName(CssStyles.CAPTION_HIDDEN);
 	}
 
 	public void hideCaptions() {

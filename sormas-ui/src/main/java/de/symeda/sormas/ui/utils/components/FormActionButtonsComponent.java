@@ -1,8 +1,11 @@
 package de.symeda.sormas.ui.utils.components;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.v7.ui.HorizontalLayout;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+
+import de.symeda.sormas.ui.utils.CustomLayout;
 
 public class FormActionButtonsComponent extends HorizontalLayout {
 
@@ -14,18 +17,18 @@ public class FormActionButtonsComponent extends HorizontalLayout {
 	public FormActionButtonsComponent(String applyCaptionTag, String resetCaptionTag, CustomLayout moreFiltersLayout) {
 		if (moreFiltersLayout != null) {
 			showHideMoreButton = new ToggleMoreFiltersComponent(moreFiltersLayout);
-			addComponent(showHideMoreButton);
+			add(showHideMoreButton);
 		}
 
 		applyResetButtonsComponent = new ApplyResetButtonsComponent(applyCaptionTag, resetCaptionTag);
-		addComponent(applyResetButtonsComponent);
+		add(applyResetButtonsComponent);
 	}
 
-	public void addResetHandler(Button.ClickListener resetHandler) {
+	public void addResetHandler(ComponentEventListener<ClickEvent<Button>> resetHandler) {
 		applyResetButtonsComponent.addResetHandler(resetHandler);
 	}
 
-	public void addApplyHandler(Button.ClickListener applyHandler) {
+	public void addApplyHandler(ComponentEventListener<ClickEvent<Button>> applyHandler) {
 		applyResetButtonsComponent.addApplyHandler(applyHandler);
 	}
 

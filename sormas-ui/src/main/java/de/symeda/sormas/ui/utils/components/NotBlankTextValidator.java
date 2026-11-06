@@ -2,7 +2,7 @@ package de.symeda.sormas.ui.utils.components;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.v7.data.validator.AbstractValidator;
+import de.symeda.sormas.ui.utils.fields.AbstractValidator;
 
 public class NotBlankTextValidator extends AbstractValidator<Object> {
 

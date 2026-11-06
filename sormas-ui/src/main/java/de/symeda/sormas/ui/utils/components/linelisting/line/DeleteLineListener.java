@@ -1,14 +1,14 @@
 package de.symeda.sormas.ui.utils.components.linelisting.line;
 
-import java.lang.reflect.Method;
-
-import com.vaadin.event.SerializableEventListener;
-import com.vaadin.util.ReflectTools;
+import com.vaadin.flow.component.ComponentEventListener;
 
 @FunctionalInterface
-public interface DeleteLineListener extends SerializableEventListener {
-
-	Method DELETE_LINE_METHOD = ReflectTools.findMethod(DeleteLineListener.class, "deleteLine", DeleteLineEvent.class);
+public interface DeleteLineListener extends ComponentEventListener<DeleteLineEvent> {
 
 	void deleteLine(DeleteLineEvent event);
+
+	@Override
+	default void onComponentEvent(DeleteLineEvent event) {
+		deleteLine(event);
+	}
 }

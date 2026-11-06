@@ -22,11 +22,11 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.ui.Field;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.i18n.Captions;
@@ -37,6 +37,7 @@ import de.symeda.sormas.api.utils.AnnotationFieldHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.components.sidecomponent.SideComponent;
+import de.symeda.sormas.ui.utils.fields.Field;
 
 /**
  * This component is used to display the symptoms of a case in the side view of the symptom details view.
@@ -46,7 +47,7 @@ public class CaseSymptomSideViewComponent extends SideComponent {
 
 	private static final long serialVersionUID = -1L;
 	private HorizontalLayout topLayout = new HorizontalLayout();
-	private final Label noComplicationsLabel;
+	private final Span noComplicationsLabel;
 	private VerticalLayout layout = new VerticalLayout();
 	private Map<String, Component> componentMap = new LinkedHashMap<>();
 	private final List<String> complicatedSymptoms;
@@ -54,12 +55,12 @@ public class CaseSymptomSideViewComponent extends SideComponent {
 	public CaseSymptomSideViewComponent(Disease disease) {
 		super(I18nProperties.getCaption(String.format(Disease.DENGUE == disease ? Captions.titleComplications_DENG : Captions.titleComplications)));
 		topLayout.setWidth(100, Unit.PERCENTAGE);
-		topLayout.setMargin(false);
+		topLayout.setPadding(false);
 		topLayout.setSpacing(false);
-		addComponent(topLayout);
+		add(topLayout);
 		noComplicationsLabel =
-			new Label(I18nProperties.getCaption(Disease.DENGUE == disease ? Captions.titleNoComplications_DENG : Captions.titleNoComplications));
-		topLayout.addComponents(noComplicationsLabel, layout);
+			new Span(I18nProperties.getCaption(Disease.DENGUE == disease ? Captions.titleNoComplications_DENG : Captions.titleNoComplications));
+		topLayout.add(noComplicationsLabel, layout);
 		complicatedSymptoms = AnnotationFieldHelper.getComplicatedSymptomsWithDiseases(SymptomsDto.class, disease);
 	}
 
@@ -68,22 +69,24 @@ public class CaseSymptomSideViewComponent extends SideComponent {
 	 * 
 	 * @param sourceField
 	 */
-	public void toggleComplicationSymptom(Field sourceField) {
+	public void toggleComplicationSymptom(Field<?> sourceField) {
 
 		if (sourceField == null) {
 			return;
 		}
 
 		Object sourceFieldObj = FieldHelper.getNullableSourceFieldValue(sourceField);
+		// Flow: the component id is an Optional (the field's property id)
+		String sourceFieldId = sourceField.getId().orElse(null);
 
 		// if the source field value is NO, UNKNOWN or deselect Yes and the value will be empty (in case of other complications symptoms data),
 		// and a map has it, remove it from the layout and map
 		if ((sourceFieldObj == null
 			|| sourceFieldObj == SymptomState.NO
 			|| sourceFieldObj == SymptomState.UNKNOWN
-			|| StringUtils.isBlank(sourceFieldObj.toString())) && componentMap.containsKey(sourceField.getId())) {
-			layout.removeComponent(componentMap.get(sourceField.getId()));
-			componentMap.entrySet().removeIf(entry -> entry.getKey().equals(sourceField.getId()));
+			|| StringUtils.isBlank(sourceFieldObj.toString())) && componentMap.containsKey(sourceFieldId)) {
+			layout.remove(componentMap.get(sourceFieldId));
+			componentMap.entrySet().removeIf(entry -> entry.getKey().equals(sourceFieldId));
 			return;
 		}
 		// This is to set the symptom name as the caption.
@@ -91,28 +94,28 @@ public class CaseSymptomSideViewComponent extends SideComponent {
 		// if the sourceField value YES and map does not have it, and it's a complicated symptom,
 		// add it to the layout and map
 		if ((sourceFieldObj == SymptomState.YES)
-			&& !componentMap.containsKey(sourceField.getId())
-			&& complicatedSymptoms.contains(sourceField.getId())) {
-			Label label = new Label(I18nProperties.getCaption(Captions.Symptoms + "." + sourceField.getId()));
-			componentMap.put(sourceField.getId(), label);
+			&& !componentMap.containsKey(sourceFieldId)
+			&& complicatedSymptoms.contains(sourceFieldId)) {
+			Span label = new Span(I18nProperties.getCaption(Captions.Symptoms + "." + sourceFieldId));
+			componentMap.put(sourceFieldId, label);
 			return;
 		}
 
 		// if the source field value is String type
 		if (sourceFieldObj instanceof String && StringUtils.isNotBlank((String) sourceFieldObj)) {
-			Label label;
-			if (componentMap.containsKey(sourceField.getId())) {
+			Span label;
+			if (componentMap.containsKey(sourceFieldId)) {
 				// if the map has a different value, then remove the old value from the layout and add the new value.
-				layout.removeComponent(componentMap.get(sourceField.getId()));
-				label = new Label(sourceField.getValue().toString());
-			} else if (!componentMap.containsKey(sourceField.getId()) && complicatedSymptoms.contains(sourceField.getId())) {
+				layout.remove(componentMap.get(sourceFieldId));
+				label = new Span(sourceField.getValue().toString());
+			} else if (!componentMap.containsKey(sourceFieldId) && complicatedSymptoms.contains(sourceFieldId)) {
 				// If the map not has a key, and it's a complicated symptom, then add it to the layout.
-				label = new Label(sourceField.getValue().toString());
+				label = new Span(sourceField.getValue().toString());
 			} else {
 				label = null;
 			}
 			if (label != null) {
-				componentMap.put(sourceField.getId(), label);
+				componentMap.put(sourceFieldId, label);
 			}
 		}
 		// , and it's value is not empty, and a map does not have that symptom, and its a complicated symptom, add it to the layout and map
@@ -127,8 +130,8 @@ public class CaseSymptomSideViewComponent extends SideComponent {
 	private Map<String, Component> sortMapValues() {
 		return componentMap.entrySet().stream().sorted((entry1, entry2) -> {
 			// Cast Component to Label to get the text string
-			String val1 = ((Label) entry1.getValue()).getValue().toString();
-			String val2 = ((Label) entry2.getValue()).getValue().toString();
+			String val1 = ((Span) entry1.getValue()).getText();
+			String val2 = ((Span) entry2.getValue()).getText();
 
 			int compareValues = String.CASE_INSENSITIVE_ORDER.compare(val1, val2);
 
@@ -144,13 +147,13 @@ public class CaseSymptomSideViewComponent extends SideComponent {
 	 * Refresh the layout based on the list of symptoms
 	 */
 	public void refreshLayout() {
-		layout.setMargin(false);
+		layout.setPadding(false);
 		layout.setSpacing(false);
 		componentMap = sortMapValues();
 		componentMap.keySet().forEach(symptom -> {
 			Component comp = componentMap.get(symptom);
-			comp.addStyleNames(CssStyles.LABEL_PRIMARY, CssStyles.LABEL_BOLD);
-			layout.addComponent(comp);
+			((Span) comp).addClassNames(CssStyles.LABEL_PRIMARY, CssStyles.LABEL_BOLD);
+			layout.add(comp);
 		});
 		if (componentMap.isEmpty()) {
 			noComplicationsLabel.setVisible(true);

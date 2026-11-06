@@ -26,10 +26,9 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.renderers.DateRenderer;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
@@ -49,6 +48,8 @@ import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DetailSubComponentWrapper;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 /**
  * The case "Laboratory results" tab (#13948, issue #13955): an editable header (date other / external
@@ -78,18 +79,18 @@ public class CaseLabResultsView extends AbstractCaseView {
 
 		DetailSubComponentWrapper container = new DetailSubComponentWrapper(() -> editComponent);
 		container.setWidth(100, Unit.PERCENTAGE);
-		container.setMargin(true);
+		container.setPadding(true);
 
 		// Editable header (onset read-only + date other + external comments).
-		container.addComponent(editComponent);
+		container.add(editComponent);
 
 		// The three read-only tables live in their own layout so they can be refreshed (e.g. after editing a
 		// test) without rebuilding the editable header and discarding the user's un-committed header edits.
 		tablesLayout = new VerticalLayout();
-		tablesLayout.setMargin(false);
+		tablesLayout.setPadding(false);
 		tablesLayout.setSpacing(false);
 		tablesLayout.setWidth(100, Unit.PERCENTAGE);
-		container.addComponent(tablesLayout);
+		container.add(tablesLayout);
 
 		refreshTables();
 
@@ -101,7 +102,7 @@ public class CaseLabResultsView extends AbstractCaseView {
 		if (tablesLayout == null) {
 			return;
 		}
-		tablesLayout.removeAllComponents();
+		tablesLayout.removeAll();
 
 		Language userLanguage = I18nProperties.getUserLanguage();
 
@@ -129,30 +130,30 @@ public class CaseLabResultsView extends AbstractCaseView {
 		Map<String, Long> testCountBySampleUuid =
 			tests.stream().filter(t -> t.getSample() != null).collect(Collectors.groupingBy(t -> t.getSample().getUuid(), Collectors.counting()));
 
-		tablesLayout.addComponent(buildSectionHeader(Captions.caseLabResultsTestsHeading));
-		tablesLayout.addComponent(
+		tablesLayout.add(buildSectionHeader(Captions.caseLabResultsTestsHeading));
+		tablesLayout.add(
 			displayTests.isEmpty() ? emptyInfoLabel(Strings.infoNoCaseLabResultsTests) : buildTestsGrid(displayTests, sampleByUuid, userLanguage));
 
-		tablesLayout.addComponent(buildSectionHeader(Captions.caseLabResultsSamplesHeading));
-		tablesLayout.addComponent(
+		tablesLayout.add(buildSectionHeader(Captions.caseLabResultsSamplesHeading));
+		tablesLayout.add(
 			samples.isEmpty() ? emptyInfoLabel(Strings.infoNoCaseLabResultsSamples) : buildSamplesGrid(samples, testCountBySampleUuid, userLanguage));
 
 		// The drug-susceptibility table is shown only when antimicrobial susceptibility testing exists.
 		if (!astTests.isEmpty()) {
-			tablesLayout.addComponent(buildSectionHeader(Captions.caseLabResultsDrugSusceptibilityHeading));
-			tablesLayout.addComponent(buildAstGrid(astTests));
+			tablesLayout.add(buildSectionHeader(Captions.caseLabResultsDrugSusceptibilityHeading));
+			tablesLayout.add(buildAstGrid(astTests));
 		}
 	}
 
-	private Label buildSectionHeader(String captionKey) {
-		Label label = new Label(I18nProperties.getCaption(captionKey));
-		label.addStyleName(CssStyles.H3);
+	private Span buildSectionHeader(String captionKey) {
+		Span label = new Span(I18nProperties.getCaption(captionKey));
+		label.addClassName(CssStyles.H3);
 		CssStyles.style(label, CssStyles.VSPACE_TOP_3);
 		return label;
 	}
 
-	private Label emptyInfoLabel(String stringKey) {
-		Label label = new Label(I18nProperties.getString(stringKey));
+	private Span emptyInfoLabel(String stringKey) {
+		Span label = new Span(I18nProperties.getString(stringKey));
 		CssStyles.style(label, CssStyles.VSPACE_3);
 		return label;
 	}
@@ -188,7 +189,7 @@ public class CaseLabResultsView extends AbstractCaseView {
 		grid.setItems(rows);
 
 		grid.addItemClickListener(e -> {
-			if (e.getMouseEventDetails().isDoubleClick() && e.getItem() != null) {
+			if (e.getClickCount() > 1 && e.getItem() != null) {
 				ControllerProvider.getPathogenTestController().edit(e.getItem().getUuid(), this::reload, isEditAllowed(), false);
 			}
 		});
@@ -225,7 +226,7 @@ public class CaseLabResultsView extends AbstractCaseView {
 		grid.setItems(rows);
 
 		grid.addItemClickListener(e -> {
-			if (e.getMouseEventDetails().isDoubleClick() && e.getItem() != null) {
+			if (e.getClickCount() > 1 && e.getItem() != null) {
 				ControllerProvider.getSampleController().navigateToData(e.getItem().getUuid());
 			}
 		});

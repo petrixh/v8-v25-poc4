@@ -24,11 +24,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.vaadin.navigator.View;
-import com.vaadin.ui.DescriptionGenerator;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.StyleGenerator;
-import com.vaadin.ui.renderers.DateRenderer;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseCriteria;
@@ -39,9 +35,12 @@ import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.utils.DateHelper;
 import de.symeda.sormas.api.visit.VisitResultDto;
 import de.symeda.sormas.ui.ControllerProvider;
+import de.symeda.sormas.ui.navigation.View;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.FilteredGrid;
+import de.symeda.sormas.ui.utils.GridExportStreamResource;
 import de.symeda.sormas.ui.utils.UuidRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 @SuppressWarnings("serial")
 public class CaseFollowUpGrid extends FilteredGrid<CaseFollowUpDto, CaseCriteria> {
@@ -68,13 +67,13 @@ public class CaseFollowUpGrid extends FilteredGrid<CaseFollowUpDto, CaseCriteria
 		((Column<CaseFollowUpDto, Date>) getColumn(CaseFollowUpDto.REPORT_DATE)).setRenderer(new DateRenderer(DateFormatHelper.getDateFormat()));
 		((Column<CaseFollowUpDto, Date>) getColumn(CaseFollowUpDto.FOLLOW_UP_UNTIL)).setRenderer(new DateRenderer(DateFormatHelper.getDateFormat()));
 
-		for (Column<?, ?> column : getColumns()) {
+		for (Column<?, ?> column : getAllColumns()) {
 			column.setCaption(
-				I18nProperties.findPrefixCaptionWithDefault(column.getId(), column.getCaption(), CaseDataDto.I18N_PREFIX, FollowUpDto.I18N_PREFIX));
+				I18nProperties.findPrefixCaptionWithDefault(column.getKey(), column.getCaption(), CaseDataDto.I18N_PREFIX, FollowUpDto.I18N_PREFIX));
 		}
 
 		addItemClickListener(e -> {
-			if ((e.getColumn() != null && CaseFollowUpDto.UUID.equals(e.getColumn().getId())) || e.getMouseEventDetails().isDoubleClick()) {
+			if ((e.getColumn() != null && CaseFollowUpDto.UUID.equals(e.getColumn().getKey())) || e.getClickCount() > 1) {
 				ControllerProvider.getCaseController().navigateToCase(e.getItem().getUuid());
 			}
 		});
@@ -92,14 +91,17 @@ public class CaseFollowUpGrid extends FilteredGrid<CaseFollowUpDto, CaseCriteria
 
 		for (int i = 0; i < interval; i++) {
 			String columnId = DateFormatHelper.formatDate(dates.get(i));
-			addComponentColumn(followUpDto -> new Label("")).setId(columnId);
+			Column<CaseFollowUpDto, Span> visitColumn = addComponentColumn(followUpDto -> new Span(""));
+			visitColumn.setId(columnId);
+			// Vaadin 8 exported the empty label text
+			GridExportStreamResource.setExportValueProvider(visitColumn, followUpDto -> "");
 
 			final int index = i;
-			getColumn(columnId).setCaption(columnId).setSortable(false).setStyleGenerator((StyleGenerator<CaseFollowUpDto>) item -> {
+			getColumn(columnId).setCaption(columnId).setSortable(false).setStyleGenerator(item -> {
 				final VisitResultDto visitResult = item.getVisitResults()[index];
 				final Date date = dates.get(index);
 				return getVisitResultCssStyle(visitResult, date, item.getReportDate(), item.getFollowUpUntil());
-			}).setDescriptionGenerator((DescriptionGenerator<CaseFollowUpDto>) item -> {
+			}).setDescriptionGenerator(item -> {
 				final VisitResultDto visitResult = item.getVisitResults()[index];
 				final Date date = dates.get(index);
 				return getVisitResultDescription(visitResult, date, item.getReportDate(), item.getFollowUpUntil());

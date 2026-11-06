@@ -21,11 +21,7 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.OptionGroup;
+import com.vaadin.flow.shared.Registration;
 
 import de.symeda.sormas.api.CoreFacade;
 import de.symeda.sormas.api.CountryHelper;
@@ -41,6 +37,7 @@ import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.person.PersonDto;
 import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.ControllerProvider;
+import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.SubMenu;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
@@ -50,13 +47,17 @@ import de.symeda.sormas.ui.clinicalcourse.ClinicalCourseView;
 import de.symeda.sormas.ui.epidata.CaseEpiDataView;
 import de.symeda.sormas.ui.externalmessage.ExternalMessagesView;
 import de.symeda.sormas.ui.hospitalization.HospitalizationView;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 import de.symeda.sormas.ui.therapy.TherapyView;
 import de.symeda.sormas.ui.utils.AbstractEditAllowedDetailView;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DirtyStateComponent;
 import de.symeda.sormas.ui.utils.ExternalJournalUtil;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
 import de.symeda.sormas.ui.utils.ViewMode;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 public abstract class AbstractCaseView extends AbstractEditAllowedDetailView<CaseReferenceDto> {
 
@@ -91,7 +92,8 @@ public abstract class AbstractCaseView extends AbstractEditAllowedDetailView<Cas
 	private final ViewConfiguration viewConfiguration;
 	private final boolean redirectSimpleModeToCaseDataView;
 	private final OptionGroup viewModeToggle;
-	private final Property.ValueChangeListener viewModeToggleListener;
+	private final Field.ValueChangeListener<Object> viewModeToggleListener;
+	private Registration viewModeToggleRegistration;
 	boolean isLuxembourg = FacadeProvider.getConfigFacade().isConfiguredCountry(CountryHelper.COUNTRY_CODE_LUXEMBOURG);
 
 	protected AbstractCaseView(String viewName, boolean redirectSimpleModeToCaseDataView) {
@@ -110,7 +112,7 @@ public abstract class AbstractCaseView extends AbstractEditAllowedDetailView<Cas
 		this.redirectSimpleModeToCaseDataView = redirectSimpleModeToCaseDataView;
 
 		viewModeToggle = new OptionGroup();
-		CssStyles.style(viewModeToggle, ValoTheme.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_HORIZONTAL_PRIMARY, CssStyles.VSPACE_TOP_3);
+		CssStyles.style(viewModeToggle, SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_HORIZONTAL_PRIMARY, CssStyles.VSPACE_TOP_3);
 		viewModeToggle.addItems((Object[]) ViewMode.values());
 		viewModeToggle.setItemCaption(ViewMode.SIMPLE, I18nProperties.getEnumCaption(ViewMode.SIMPLE));
 		viewModeToggle.setItemCaption(ViewMode.NORMAL, I18nProperties.getEnumCaption(ViewMode.NORMAL));
@@ -119,11 +121,11 @@ public abstract class AbstractCaseView extends AbstractEditAllowedDetailView<Cas
 		addHeaderComponent(viewModeToggle);
 
 		viewModeToggleListener = event -> {
-			viewConfiguration.setViewMode((ViewMode) event.getProperty().getValue());
+			viewConfiguration.setViewMode((ViewMode) event.getValue());
 			// refresh
 			ControllerProvider.getCaseController().navigateToCase(getReference().getUuid());
 		};
-		viewModeToggle.addValueChangeListener(viewModeToggleListener);
+		viewModeToggleRegistration = viewModeToggle.addValueChangeListener(viewModeToggleListener);
 	}
 
 	@Override
@@ -156,9 +158,9 @@ public abstract class AbstractCaseView extends AbstractEditAllowedDetailView<Cas
 			//				} catch (IllegalArgumentException ex) { } // just ignore
 			//			}
 			//
-			viewModeToggle.removeValueChangeListener(viewModeToggleListener);
+			viewModeToggleRegistration.remove();
 			viewModeToggle.setValue(viewConfiguration.getViewMode());
-			viewModeToggle.addValueChangeListener(viewModeToggleListener);
+			viewModeToggleRegistration = viewModeToggle.addValueChangeListener(viewModeToggleListener);
 			viewModeToggle.setVisible(true);
 
 		} else {
@@ -263,7 +265,7 @@ public abstract class AbstractCaseView extends AbstractEditAllowedDetailView<Cas
 
 		if (caseFollowupEnabled && UiUtil.permitted(UserRight.MANAGE_EXTERNAL_SYMPTOM_JOURNAL)) {
 			PersonDto casePerson = FacadeProvider.getPersonFacade().getByUuid(caze.getPerson().getUuid());
-			ExternalJournalUtil.getExternalJournalUiButton(casePerson, caze).ifPresent(getButtonsLayout()::addComponent);
+			ExternalJournalUtil.getExternalJournalUiButton(casePerson, caze).ifPresent(getButtonsLayout()::add);
 		}
 	}
 
@@ -273,7 +275,7 @@ public abstract class AbstractCaseView extends AbstractEditAllowedDetailView<Cas
 		super.enter(event);
 
 		if (getReference() == null) {
-			UI.getCurrent().getNavigator().navigateTo(getRootViewName());
+			SormasUI.get().getNavigator().navigateTo(getRootViewName());
 		} else if (redirectSimpleModeToCaseDataView && getViewMode() == ViewMode.SIMPLE) {
 			ControllerProvider.getCaseController().navigateToCase(getReference().getUuid());
 		} else {
@@ -304,7 +306,7 @@ public abstract class AbstractCaseView extends AbstractEditAllowedDetailView<Cas
 		super.setSubComponent(newComponent);
 
 		if (getReference() != null && FacadeProvider.getCaseFacade().isDeleted(getReference().getUuid())) {
-			newComponent.setEnabled(false);
+			newComponent.getElement().setEnabled(false);
 		}
 	}
 

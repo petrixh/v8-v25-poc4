@@ -15,10 +15,11 @@
 
 package de.symeda.sormas.ui.caze;
 
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Link;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -54,47 +55,47 @@ public class CaseInfoLayout extends AbstractInfoLayout<CaseDataDto> {
 		this.caseDto = caseDto;
 		this.isTravelEntry = isTravelEntry;
 		setSpacing(true);
-		setMargin(false);
+		setPadding(false);
 		setWidth(100, Unit.PERCENTAGE);
 		updateCaseInfo();
 	}
 
 	private void updateCaseInfo() {
 
-		this.removeAllComponents();
+		this.removeAll();
 
 		PersonDto personDto = FacadeProvider.getPersonFacade().getByUuid(caseDto.getPerson().getUuid());
 
 		VerticalLayout leftColumnLayout = new VerticalLayout();
-		leftColumnLayout.setMargin(false);
+		leftColumnLayout.setPadding(false);
 		leftColumnLayout.setSpacing(true);
 		boolean hasUserRightCaseView = UiUtil.permitted(UserRight.CASE_VIEW);
 		{
-			final Label caseIdLabel = addDescLabel(
+			final Span caseIdLabel = addDescLabel(
 				leftColumnLayout,
 				CaseDataDto.UUID,
 				DataHelper.getShortUuid(caseDto.getUuid()),
 				I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.UUID));
 			caseIdLabel.setId("caseIdLabel");
-			caseIdLabel.setDescription(caseDto.getUuid());
+			caseIdLabel.setTitle(caseDto.getUuid());
 
 			if (FacadeProvider.getConfigFacade().isConfiguredCountry(CountryHelper.COUNTRY_CODE_GERMANY)) {
 				addDescLabel(
 					leftColumnLayout,
 					CaseDataDto.EXTERNAL_ID,
 					caseDto.getExternalID(),
-					I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.EXTERNAL_ID)).setDescription(caseDto.getEpidNumber());
+					I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.EXTERNAL_ID)).setTitle(caseDto.getEpidNumber());
 				addDescLabel(
 					leftColumnLayout,
 					CaseDataDto.EXTERNAL_TOKEN,
 					caseDto.getExternalToken(),
-					I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.EXTERNAL_TOKEN)).setDescription(caseDto.getExternalToken());
+					I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.EXTERNAL_TOKEN)).setTitle(caseDto.getExternalToken());
 			} else {
 				addDescLabel(
 					leftColumnLayout,
 					CaseDataDto.EPID_NUMBER,
 					caseDto.getEpidNumber(),
-					I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.EPID_NUMBER)).setDescription(caseDto.getEpidNumber());
+					I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.EPID_NUMBER)).setTitle(caseDto.getEpidNumber());
 			}
 
 			if (hasUserRightCaseView) {
@@ -105,7 +106,7 @@ public class CaseInfoLayout extends AbstractInfoLayout<CaseDataDto> {
 					I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.PERSON));
 
 				HorizontalLayout ageSexLayout = new HorizontalLayout();
-				ageSexLayout.setMargin(false);
+				ageSexLayout.setPadding(false);
 				ageSexLayout.setSpacing(true);
 				addCustomDescLabel(
 					ageSexLayout,
@@ -119,7 +120,7 @@ public class CaseInfoLayout extends AbstractInfoLayout<CaseDataDto> {
 					PersonDto.SEX,
 					personDto.getSex(),
 					I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.SEX));
-				leftColumnLayout.addComponent(ageSexLayout);
+				leftColumnLayout.add(ageSexLayout);
 			}
 
 			if (UiUtil.permitted(UserRight.CASE_CLINICIAN_VIEW)) {
@@ -130,16 +131,16 @@ public class CaseInfoLayout extends AbstractInfoLayout<CaseDataDto> {
 					I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.CLINICIAN_NAME));
 			}
 			if (isTravelEntry && hasUserRightCaseView) {
-				Link linkToData = ControllerProvider.getCaseController()
+				Anchor linkToData = ControllerProvider.getCaseController()
 					.createLinkToData(caseDto.getUuid(), I18nProperties.getCaption(Captions.travelEntryOpenResultingCase));
-				leftColumnLayout.addComponent(linkToData);
+				leftColumnLayout.add(linkToData);
 				linkToData.setWidthFull();
 			}
 		}
-		this.addComponent(leftColumnLayout);
+		this.add(leftColumnLayout);
 
 		VerticalLayout rightColumnLayout = new VerticalLayout();
-		rightColumnLayout.setMargin(false);
+		rightColumnLayout.setPadding(false);
 		rightColumnLayout.setSpacing(true);
 		{
 			if (!isTravelEntry) {
@@ -167,6 +168,6 @@ public class CaseInfoLayout extends AbstractInfoLayout<CaseDataDto> {
 					I18nProperties.getPrefixCaption(SymptomsDto.I18N_PREFIX, SymptomsDto.ONSET_DATE));
 			}
 		}
-		this.addComponent(rightColumnLayout);
+		this.add(rightColumnLayout);
 	}
 }

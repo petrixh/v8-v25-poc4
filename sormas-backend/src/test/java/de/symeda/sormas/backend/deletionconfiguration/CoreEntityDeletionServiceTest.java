@@ -561,7 +561,7 @@ public class CoreEntityDeletionServiceTest extends SormasToSormasTest {
 
 		final Date ninetyDaysPlusAgo = DateUtils.addDays(new Date(), (-1) * deletionConfig.deletionPeriod - 1);
 		executeInTransaction(em -> {
-			Query query = em.createQuery("update immunization i set changedate=:date where i.uuid=:uuid");
+			Query query = em.createQuery("update immunization i set i.changeDate=:date where i.uuid=:uuid");
 			query.setParameter("date", new Timestamp(ninetyDaysPlusAgo.getTime()));
 			query.setParameter("uuid", immunization.getUuid());
 			query.executeUpdate();

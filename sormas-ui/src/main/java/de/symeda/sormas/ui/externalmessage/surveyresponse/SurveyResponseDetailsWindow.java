@@ -20,16 +20,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.vaadin.server.ExternalResource;
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.ui.Link;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.DiseaseHelper;
 import de.symeda.sormas.api.FacadeProvider;
@@ -63,21 +62,21 @@ public class SurveyResponseDetailsWindow {
 		displayData = FacadeProvider.getExternalMessageFacade().fetchSurveyResponseFieldsForDisplay(uuid);
 
 		VerticalLayout layout = new VerticalLayout();
-		layout.setMargin(true);
+		layout.setPadding(true);
 		layout.setSpacing(true);
-		layout.setWidth(100, Sizeable.Unit.PERCENTAGE);
+		layout.setWidth(100, Unit.PERCENTAGE);
 
-		Window window = new Window(I18nProperties.getString(Strings.headingSurveyResponseDetails));
+		Dialog window = new Dialog(I18nProperties.getString(Strings.headingSurveyResponseDetails));
 		window.setModal(true);
 		window.setResizable(true);
-		window.setWidth(850, Sizeable.Unit.PIXELS);
+		window.setWidth(850, Unit.PIXELS);
 
 		ExternalMessageSurveyResponseWrapper latest = externalMessage.getSurveyResponseData().getLatest();
 		ExternalMessageSurveyResponseRequest request = latest.getRequest();
 		ExternalMessageSurveyResponseResult result = latest.getResult();
 
 		// --- External Message General Info section ---
-		Label generalInfoHeading = new Label(I18nProperties.getCaption(Captions.surveyResponseGeneralInfo));
+		Span generalInfoHeading = new Span(I18nProperties.getCaption(Captions.surveyResponseGeneralInfo));
 		CssStyles.style(generalInfoHeading, CssStyles.H3);
 		layout.addComponent(generalInfoHeading);
 
@@ -93,7 +92,7 @@ public class SurveyResponseDetailsWindow {
 			status != null ? I18nProperties.getEnumCaption(status) : "");
 
 		// --- Metadata section ---
-		Label metadataHeading = new Label(I18nProperties.getCaption(Captions.surveyResponseMetadata));
+		Span metadataHeading = new Span(I18nProperties.getCaption(Captions.surveyResponseMetadata));
 		CssStyles.style(metadataHeading, CssStyles.H3);
 		layout.addComponent(metadataHeading);
 
@@ -118,7 +117,7 @@ public class SurveyResponseDetailsWindow {
 			String.valueOf(request.isPatchedInCaseOfFailures()));
 
 		// --- Patch Dictionary section ---
-		Label dictionaryHeading = new Label(I18nProperties.getCaption(Captions.surveyResponsePatchDictionary));
+		Span dictionaryHeading = new Span(I18nProperties.getCaption(Captions.surveyResponsePatchDictionary));
 		CssStyles.style(dictionaryHeading, CssStyles.H3);
 		layout.addComponent(dictionaryHeading);
 
@@ -150,7 +149,7 @@ public class SurveyResponseDetailsWindow {
 		}
 
 		// --- Ignored patch dictionary section ---
-		Label excludedFieldsDictionaryLabel = new Label(I18nProperties.getCaption(Captions.surveyResponseExcludedFieldsDictionary));
+		Span excludedFieldsDictionaryLabel = new Span(I18nProperties.getCaption(Captions.surveyResponseExcludedFieldsDictionary));
 		CssStyles.style(excludedFieldsDictionaryLabel, CssStyles.H3);
 		layout.addComponent(excludedFieldsDictionaryLabel);
 
@@ -181,13 +180,13 @@ public class SurveyResponseDetailsWindow {
 				externalMessage = FacadeProvider.getExternalMessageFacade().executeSurveyProcessing(uuid);
 				result = externalMessage.getSurveyResponseData().getLatest().getResult();
 			} catch (RuntimeException e) {
-				Notification.show(I18nProperties.getString(Strings.messageSurveyResponseNotYetProcessed), Notification.Type.HUMANIZED_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageSurveyResponseNotYetProcessed), NotificationHelper.Type.HUMANIZED_MESSAGE);
 			}
 		}
 
 		// --- Processing Result section ---
 		if (result != null) {
-			Label resultHeading = new Label(I18nProperties.getCaption(Captions.surveyResponseProcessingResult));
+			Span resultHeading = new Span(I18nProperties.getCaption(Captions.surveyResponseProcessingResult));
 			CssStyles.style(resultHeading, CssStyles.H3);
 			layout.addComponent(resultHeading);
 
@@ -207,19 +206,19 @@ public class SurveyResponseDetailsWindow {
 					patchResponse.isApplied() ? I18nProperties.getCaption(Captions.actionYes) : I18nProperties.getCaption(Captions.actionNo));
 
 				if (patchResponse.hasFailures() || externalMessage.getStatus() == ExternalMessageStatus.UNPROCESSED) {
-					Label failuresHeading = new Label(I18nProperties.getString(Strings.headingSurveyResponseFailures));
+					Span failuresHeading = new Span(I18nProperties.getString(Strings.headingSurveyResponseFailures));
 					CssStyles.style(failuresHeading, CssStyles.H4);
 					layout.addComponent(failuresHeading);
 
 					layout.addComponent(new SurveyResponseFailurePanel(patchResponse.getFailures(), displayData));
 				} else {
-					Label successLabel = new Label(I18nProperties.getString(Strings.messageSurveyResponseAllFieldsApplied));
+					Span successLabel = new Span(I18nProperties.getString(Strings.messageSurveyResponseAllFieldsApplied));
 					CssStyles.style(successLabel, ValoTheme.LABEL_SUCCESS);
 					layout.addComponent(successLabel);
 				}
 			}
 		} else {
-			Label notProcessedLabel = new Label(I18nProperties.getString(Strings.messageSurveyResponseNotYetProcessed));
+			Span notProcessedLabel = new Span(I18nProperties.getString(Strings.messageSurveyResponseNotYetProcessed));
 			layout.addComponent(notProcessedLabel);
 		}
 
@@ -241,14 +240,14 @@ public class SurveyResponseDetailsWindow {
 						window.close();
 						onFormActionPerformed.run();
 					});
-					UI.getCurrent().addWindow(editor);
-				}, ValoTheme.BUTTON_PRIMARY);
+					editor.open();
+				}, CssStyles.BUTTON_PRIMARY);
 
 			layout.addComponent(correctButton);
 		}
 
 		window.setContent(layout);
-		UI.getCurrent().addWindow(window);
+		window.open();
 	}
 
 	private static String toStringOrEmpty(Object value) {
@@ -256,7 +255,7 @@ public class SurveyResponseDetailsWindow {
 	}
 
 	private void addReadOnlyField(VerticalLayout layout, String caption, String value) {
-		Label label = new Label(value != null ? value : "");
+		Span label = new Span(value != null ? value : "");
 		label.setCaption(caption);
 		layout.addComponent(label);
 	}

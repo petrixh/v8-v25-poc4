@@ -24,11 +24,11 @@ import java.util.function.Supplier;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.Field;
+import de.symeda.sormas.ui.utils.fields.Field;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -100,7 +100,7 @@ public class CorrectionPanel<T> extends HorizontalLayout {
 
 			Object originalValue = field.getValue();
 			field.addValueChangeListener(e -> {
-				if (DataHelper.equal(e.getProperty().getValue(), originalValue)) {
+				if (DataHelper.equal(e.getValue(), originalValue)) {
 					if (!isChanged) {
 						unmarkChanged(field);
 					}
@@ -112,11 +112,11 @@ public class CorrectionPanel<T> extends HorizontalLayout {
 	}
 
 	private void markChanged(Field<?> field) {
-		field.addStyleName(CssStyles.LAB_MESSAGE_PROCESSING_BORDER_DIRTY);
+		field.addClassName(CssStyles.LAB_MESSAGE_PROCESSING_BORDER_DIRTY);
 	}
 
 	private void unmarkChanged(Field<?> field) {
-		field.removeStyleName(CssStyles.LAB_MESSAGE_PROCESSING_BORDER_DIRTY);
+		field.removeClassName(CssStyles.LAB_MESSAGE_PROCESSING_BORDER_DIRTY);
 	}
 
 	private void iterateFields(AbstractEditForm<T> form, BiConsumer<Field<?>, String[]> action) {

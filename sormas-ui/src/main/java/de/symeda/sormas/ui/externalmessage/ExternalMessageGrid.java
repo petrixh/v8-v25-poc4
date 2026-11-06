@@ -24,18 +24,17 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.vaadin.data.provider.DataProviderListener;
-import com.vaadin.icons.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.StreamResource;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.renderers.DateRenderer;
-import com.vaadin.ui.renderers.HtmlRenderer;
-import com.vaadin.ui.themes.ValoTheme;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.Component;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.FacadeProvider;
@@ -141,7 +140,7 @@ public class ExternalMessageGrid extends FilteredGrid<ExternalMessageIndexDto, E
 
 	protected void addShowColumn(Consumer<ExternalMessageIndexDto> handler) {
 
-		Column<ExternalMessageIndexDto, String> editColumn = addColumn(entry -> VaadinIcons.EYE.getHtml(), new HtmlRenderer());
+		Column<ExternalMessageIndexDto, String> editColumn = addColumn(entry -> VaadinIcon.EYE.getHtml(), new HtmlRenderer());
 		editColumn.setId(SHOW_MESSAGE);
 		editColumn.setSortable(false);
 		editColumn.setWidth(20);
@@ -177,7 +176,7 @@ public class ExternalMessageGrid extends FilteredGrid<ExternalMessageIndexDto, E
 		HorizontalLayout layout = new HorizontalLayout();
 
 		if (externalMessage.getAssignee() != null) {
-			Label label = new Label(externalMessage.getAssignee().getCaption());
+			Span label = new Span(externalMessage.getAssignee().getCaption());
 			layout.addComponent(label);
 		}
 
@@ -192,11 +191,11 @@ public class ExternalMessageGrid extends FilteredGrid<ExternalMessageIndexDto, E
 
 		if (canAssignLabMessage || canAssignDoctorDeclaration || canAssignSurveyResponse) {
 			Button button = new Button();
-			CssStyles.style(button, ValoTheme.BUTTON_LINK, CssStyles.BUTTON_COMPACT);
+			CssStyles.style(button, CssStyles.BUTTON_LINK, CssStyles.BUTTON_COMPACT);
 			if (externalMessage.getAssignee() == null) {
 				button.setCaption(I18nProperties.getCaption(Captions.assign));
 			} else {
-				button.setIcon((VaadinIcons.ELLIPSIS_DOTS_V));
+				button.setIcon((VaadinIcon.ELLIPSIS_DOTS_V));
 				CssStyles.style(button, CssStyles.ALIGN_RIGHT);
 			}
 			button.addClickListener(e -> ControllerProvider.getExternalMessageController().editAssignee(externalMessage.getUuid()));
@@ -228,17 +227,17 @@ public class ExternalMessageGrid extends FilteredGrid<ExternalMessageIndexDto, E
 				} else if (ExternalMessageType.SURVEY_RESPONSE == indexDto.getType()) {
 					ControllerProvider.getExternalMessageController().processSurveyResponse(indexDto.getUuid(), this::reload);
 				}
-			}, ValoTheme.BUTTON_PRIMARY);
+			}, CssStyles.BUTTON_PRIMARY);
 		} else {
 			// build placeholder necessary to circumvent a vaadin scaling issue (see #7681)
-			Label placeholder = new Label(PLACEHOLDER_SPACE);
+			Span placeholder = new Span(PLACEHOLDER_SPACE);
 			placeholder.setContentMode(ContentMode.HTML);
 			return placeholder;
 		}
 	}
 
 	private Button buildDownloadButton(ExternalMessageIndexDto externalMessageIndex) {
-		Button downloadButton = new Button(VaadinIcons.DOWNLOAD);
+		Button downloadButton = new Button(VaadinIcon.DOWNLOAD);
 		downloadButton.setDescription(I18nProperties.getString(Strings.headingExternalMessageDownload));
 
 		String fileName;

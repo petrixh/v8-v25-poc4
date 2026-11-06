@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.VerticalLayout;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.externalmessage.survey.PatchField;
 import de.symeda.sormas.api.i18n.Captions;

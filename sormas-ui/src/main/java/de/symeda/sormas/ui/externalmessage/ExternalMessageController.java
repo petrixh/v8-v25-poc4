@@ -35,18 +35,17 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.Navigator;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.navigation.Navigator;
 import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.FacadeProvider;
@@ -139,22 +138,22 @@ public class ExternalMessageController {
 		}
 
 		VerticalLayout layout = new VerticalLayout();
-		layout.setMargin(true);
+		layout.setPadding(true);
 
-		Window window = VaadinUiUtil.showPopupWindow(layout, I18nProperties.getString(Strings.headingShowExternalMessage));
+		Dialog window = VaadinUiUtil.showPopupWindow(layout, I18nProperties.getString(Strings.headingShowExternalMessage));
 
 		ExternalMessageForm form = new ExternalMessageForm();
-		form.setWidth(550, Sizeable.Unit.PIXELS);
+		form.setWidth(550, Unit.PIXELS);
 		layout.addComponent(form);
 
 		if (withActions && newDto.getStatus().isProcessable()) {
-			layout.addStyleName("lab-message-processable");
+			layout.addClassName("lab-message-processable");
 			layout.addComponent(getExternalMessageButtonsPanel(newDto, () -> {
 				window.close();
 				onFormActionPerformed.run();
 			}));
 		} else {
-			layout.addStyleName("lab-message-not-processable");
+			layout.addClassName("lab-message-not-processable");
 		}
 
 		form.setValue(newDto);
@@ -177,12 +176,12 @@ public class ExternalMessageController {
 					.getLatest()
 					.getResult();
 			} catch (RuntimeException e) {
-				Notification.show(I18nProperties.getString(Strings.messageSurveyResponseNotYetProcessed), Notification.Type.HUMANIZED_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageSurveyResponseNotYetProcessed), NotificationHelper.Type.HUMANIZED_MESSAGE);
 			}
 		}
 
 		if (result == null) {
-			Notification.show(I18nProperties.getString(Strings.messageSurveyResponseNotYetProcessed), Notification.Type.HUMANIZED_MESSAGE);
+			NotificationHelper.show(I18nProperties.getString(Strings.messageSurveyResponseNotYetProcessed), NotificationHelper.Type.HUMANIZED_MESSAGE);
 			return;
 		}
 
@@ -199,9 +198,9 @@ public class ExternalMessageController {
 			SurveyResponseFailureEditor editor = new SurveyResponseFailureEditor(externalMessage, finalDisplayData, () -> {
 				SormasUI.get().getNavigator().navigateTo(ExternalMessagesView.VIEW_NAME);
 			});
-			UI.getCurrent().addWindow(editor);
+			editor.open();
 		} else {
-			Notification.show(I18nProperties.getString(Strings.messageSurveyResponseAllFieldsApplied), Notification.Type.HUMANIZED_MESSAGE);
+			NotificationHelper.show(I18nProperties.getString(Strings.messageSurveyResponseAllFieldsApplied), NotificationHelper.Type.HUMANIZED_MESSAGE);
 
 			successRunnable.run();
 		}
@@ -218,10 +217,10 @@ public class ExternalMessageController {
 			if (exception != null) {
 				logger.error("Unexpected exception while processing lab message", exception);
 
-				Notification.show(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.errorOccurred, I18nProperties.getString(Strings.errorOccurred)),
 					I18nProperties.getString(Strings.errorWasReported),
-					Notification.Type.ERROR_MESSAGE);
+					NotificationHelper.Type.ERROR_MESSAGE);
 
 				return null;
 			}
@@ -247,10 +246,10 @@ public class ExternalMessageController {
 			if (exception != null) {
 				logger.error("Unexpected exception while processing doctor declaration message", exception);
 
-				Notification.show(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.errorOccurred, I18nProperties.getString(Strings.errorOccurred)),
 					I18nProperties.getString(Strings.errorWasReported),
-					Notification.Type.ERROR_MESSAGE);
+					NotificationHelper.Type.ERROR_MESSAGE);
 
 				return null;
 			}
@@ -277,10 +276,10 @@ public class ExternalMessageController {
 			if (exception != null) {
 				logger.error("Unexpected exception while processing lab message", exception);
 
-				Notification.show(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.errorOccurred, I18nProperties.getString(Strings.errorOccurred)),
 					I18nProperties.getString(Strings.errorWasReported),
-					Notification.Type.ERROR_MESSAGE);
+					NotificationHelper.Type.ERROR_MESSAGE);
 
 				return null;
 			}
@@ -363,7 +362,7 @@ public class ExternalMessageController {
 			new Notification(
 				I18nProperties.getString(Strings.headingNoExternalMessagesSelected),
 				I18nProperties.getString(Strings.messageNoExternalMessagesSelected),
-				Notification.Type.WARNING_MESSAGE,
+				NotificationHelper.Type.WARNING_MESSAGE,
 				false).show(Page.getCurrent());
 		} else {
 			bulkEditAssignee(selectedRows, callback);
@@ -390,7 +389,7 @@ public class ExternalMessageController {
 
 	private HorizontalLayout getExternalMessageButtonsPanel(ExternalMessageDto externalMessage, Runnable callback) {
 		HorizontalLayout buttonsPanel = new HorizontalLayout();
-		buttonsPanel.setMargin(false);
+		buttonsPanel.setPadding(false);
 		buttonsPanel.setSpacing(true);
 
 		if ((ReportingType.LABORATORY.equals(externalMessage.getType()) && UiUtil.permitted(UserRight.EXTERNAL_MESSAGE_LABORATORY_DELETE)
@@ -408,7 +407,7 @@ public class ExternalMessageController {
 							callback.run();
 						}
 					}),
-				ValoTheme.BUTTON_DANGER,
+				CssStyles.BUTTON_DANGER,
 				CssStyles.BUTTON_BORDER_NEUTRAL);
 
 			buttonsPanel.addComponent(deleteButton);
@@ -420,7 +419,7 @@ public class ExternalMessageController {
 				I18nProperties.getCaption(Captions.actionUnclearLabMessage),
 				e -> VaadinUiUtil.showConfirmationPopup(
 					I18nProperties.getString(Strings.headingConfirmUnclearLabMessage),
-					new Label(I18nProperties.getString(Strings.confirmationUnclearExternalMessage)),
+					new Span(I18nProperties.getString(Strings.confirmationUnclearExternalMessage)),
 					I18nProperties.getString(Strings.yes),
 					I18nProperties.getString(Strings.no),
 					null,
@@ -443,7 +442,7 @@ public class ExternalMessageController {
 				I18nProperties.getCaption(Captions.actionManualForwardLabMessage),
 				e -> VaadinUiUtil.showConfirmationPopup(
 					I18nProperties.getString(Strings.headingConfirmManuallyForwardedLabMessage),
-					new Label(I18nProperties.getString(Strings.confirmationManuallyForwardedExternalMessage)),
+					new Span(I18nProperties.getString(Strings.confirmationManuallyForwardedExternalMessage)),
 					I18nProperties.getString(Strings.yes),
 					I18nProperties.getString(Strings.no),
 					null,
@@ -465,7 +464,7 @@ public class ExternalMessageController {
 		if (FacadeProvider.getSormasToSormasFacade().isSharingExternalMessagesEnabledForUser()) {
 			Button shareButton = ButtonHelper.createIconButton(
 				Captions.sormasToSormasSendLabMessage,
-				VaadinIcons.SHARE,
+				VaadinIcon.SHARE,
 				e -> ControllerProvider.getSormasToSormasController().shareExternalMessage(externalMessage, callback));
 
 			buttonsPanel.addComponent(shareButton);
@@ -509,7 +508,7 @@ public class ExternalMessageController {
 				new Notification(
 					I18nProperties.getString(Strings.headingExternalMessageDownload),
 					result.getError(),
-					Notification.Type.ERROR_MESSAGE,
+					NotificationHelper.Type.ERROR_MESSAGE,
 					false).show(Page.getCurrent());
 			}
 
@@ -517,7 +516,7 @@ public class ExternalMessageController {
 			new Notification(
 				I18nProperties.getString(Strings.headingExternalMessageDownload),
 				I18nProperties.getString(Strings.messageExternalLabResultsAdapterNotFound),
-				Notification.Type.ERROR_MESSAGE,
+				NotificationHelper.Type.ERROR_MESSAGE,
 				false).show(Page.getCurrent());
 			logger.error(e.getMessage());
 		}
@@ -526,12 +525,12 @@ public class ExternalMessageController {
 
 	private void showCorrectionsSavedPopup() {
 		VerticalLayout warningLayout = VaadinUiUtil.createWarningLayout();
-		Window popupWindow = VaadinUiUtil.showPopupWindow(warningLayout);
-		Label infoLabel = new Label(I18nProperties.getValidationError(Validations.externalMessageCorrectionsMade));
+		Dialog popupWindow = VaadinUiUtil.showPopupWindow(warningLayout);
+		Span infoLabel = new Span(I18nProperties.getValidationError(Validations.externalMessageCorrectionsMade));
 		CssStyles.style(infoLabel, CssStyles.LABEL_LARGE, CssStyles.LABEL_WHITE_SPACE_NORMAL);
 		warningLayout.addComponent(infoLabel);
 		popupWindow.addCloseListener(e -> popupWindow.close());
-		popupWindow.setWidth(400, Sizeable.Unit.PIXELS);
+		popupWindow.setWidth(400, Unit.PIXELS);
 	}
 
 	public void editAssignee(String labMessageUuid) {
@@ -552,7 +551,7 @@ public class ExternalMessageController {
 			.addCommitListener(
 				() -> saveAssignee(externalMessageDto, (UserReferenceDto) components.getAssigneeComboBox().getValue(), components.getWindow()));
 
-		UI.getCurrent().addWindow(components.getWindow());
+		components.getWindow().open();
 	}
 
 	private void bulkEditAssignee(Collection<ExternalMessageIndexDto> selectedRows, Runnable callback) {
@@ -577,7 +576,7 @@ public class ExternalMessageController {
 					selectedRows.stream().map(ExternalMessageIndexDto::getUuid).collect(Collectors.toList()),
 					UiUtil.getUserReference());
 			components.getWindow().close();
-			Notification.show(I18nProperties.getString(Strings.messageExternalMessagesAssigned), Notification.Type.HUMANIZED_MESSAGE);
+			NotificationHelper.show(I18nProperties.getString(Strings.messageExternalMessagesAssigned), NotificationHelper.Type.HUMANIZED_MESSAGE);
 			callback.run();
 		});
 
@@ -587,14 +586,14 @@ public class ExternalMessageController {
 					selectedRows.stream().map(ExternalMessageIndexDto::getUuid).collect(Collectors.toList()),
 					(UserReferenceDto) components.getAssigneeComboBox().getValue());
 			components.getWindow().close();
-			Notification.show(I18nProperties.getString(Strings.messageExternalMessagesAssigned), Notification.Type.HUMANIZED_MESSAGE);
+			NotificationHelper.show(I18nProperties.getString(Strings.messageExternalMessagesAssigned), NotificationHelper.Type.HUMANIZED_MESSAGE);
 			callback.run();
 		});
 
-		UI.getCurrent().addWindow(components.getWindow());
+		components.getWindow().open();
 	}
 
-	private void saveAssignee(ExternalMessageDto externalMessageDto, UserReferenceDto assignee, Window popupWindow) {
+	private void saveAssignee(ExternalMessageDto externalMessageDto, UserReferenceDto assignee, Dialog popupWindow) {
 		externalMessageDto.setAssignee(assignee);
 		FacadeProvider.getExternalMessageFacade().save(externalMessageDto);
 		popupWindow.close();
@@ -608,7 +607,7 @@ public class ExternalMessageController {
 	private Consumer<List<ExternalMessageIndexDto>> bulkOperationCallback(
 		ExternalMessageGrid externalMessageGrid,
 		Runnable noEntriesRemainingCallback,
-		Window popupWindow) {
+		Dialog popupWindow) {
 		return remainingExternalMessages -> {
 			if (popupWindow != null) {
 				popupWindow.close();

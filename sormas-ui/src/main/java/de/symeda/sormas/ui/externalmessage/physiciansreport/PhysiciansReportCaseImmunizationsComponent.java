@@ -25,15 +25,14 @@ import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -79,8 +78,8 @@ public class PhysiciansReportCaseImmunizationsComponent extends CommitDiscardWra
 		super(createLayout());
 		this.caze = caze;
 
-		Label immunizationsLabel = new Label(I18nProperties.getString(Strings.entityVaccinations));
-		immunizationsLabel.addStyleName(H3);
+		Span immunizationsLabel = new Span(I18nProperties.getString(Strings.entityVaccinations));
+		immunizationsLabel.addClassName(H3);
 		getWrappedComponent().addComponent(immunizationsLabel);
 
 		VaccinationCriteria criteria = new VaccinationCriteria.Builder(caze.getPerson()).withDisease(caze.getDisease())
@@ -304,34 +303,34 @@ public class PhysiciansReportCaseImmunizationsComponent extends CommitDiscardWra
 		private void buildLayout(Runnable deleteHandler, Runnable editHandler) {
 
 			HorizontalLayout vaccineLayout = new HorizontalLayout();
-			vaccineLayout.setMargin(false);
+			vaccineLayout.setPadding(false);
 			vaccineLayout.setSpacing(false);
 			vaccineLayout.setWidthFull();
 
 			String vaccine = vaccination.getVaccineName() != null
 				? (vaccination.getVaccineName() == Vaccine.OTHER ? vaccination.getOtherVaccineName() : vaccination.getVaccineName().toString())
 				: null;
-			Label vaccineLabel = new Label(StringUtils.isNotBlank(vaccine) ? vaccine : I18nProperties.getString(Strings.labelNoVaccineName));
+			Span vaccineLabel = new Span(StringUtils.isNotBlank(vaccine) ? vaccine : I18nProperties.getString(Strings.labelNoVaccineName));
 			CssStyles.style(vaccineLabel, CssStyles.LABEL_BOLD);
 
-			Label dateLabel = new Label(
+			Span dateLabel = new Span(
 				vaccination.getVaccinationDate() != null
 					? DateFormatHelper.formatDate(vaccination.getVaccinationDate())
 					: I18nProperties.getString(Strings.labelNoVaccinationDate));
 
 			VerticalLayout vaccineInfoLayout = new VerticalLayout(vaccineLabel, dateLabel);
-			vaccineInfoLayout.setMargin(false);
+			vaccineInfoLayout.setPadding(false);
 			vaccineInfoLayout.setSpacing(false);
 			vaccineLayout.addComponent(vaccineInfoLayout);
 			vaccineLayout.setExpandRatio(vaccineInfoLayout, 1);
 
-			Button deleteButton = ButtonHelper.createIconButtonWithCaption("delete-vaccination", null, VaadinIcons.TRASH, (e) -> {
+			Button deleteButton = ButtonHelper.createIconButtonWithCaption("delete-vaccination", null, VaadinIcon.TRASH, (e) -> {
 				deleteHandler.run();
-			}, ValoTheme.BUTTON_LINK, CssStyles.BUTTON_COMPACT);
+			}, CssStyles.BUTTON_LINK, CssStyles.BUTTON_COMPACT);
 
-			Button editButton = ButtonHelper.createIconButtonWithCaption("edit-vaccination", null, VaadinIcons.PENCIL, (e) -> {
+			Button editButton = ButtonHelper.createIconButtonWithCaption("edit-vaccination", null, VaadinIcon.PENCIL, (e) -> {
 				editHandler.run();
-			}, ValoTheme.BUTTON_LINK, CssStyles.BUTTON_COMPACT);
+			}, CssStyles.BUTTON_LINK, CssStyles.BUTTON_COMPACT);
 
 			HorizontalLayout buttonsLayout = new HorizontalLayout(deleteButton, editButton);
 			vaccineLayout.addComponent(buttonsLayout);
@@ -340,7 +339,7 @@ public class PhysiciansReportCaseImmunizationsComponent extends CommitDiscardWra
 
 			addComponent(vaccineLayout);
 
-			Label horizontalRule = new Label("<br><hr /><br>", ContentMode.HTML);
+			Span horizontalRule = new Span("<br><hr /><br>", ContentMode.HTML);
 			horizontalRule.setWidthFull();
 			addComponent(horizontalRule);
 		}

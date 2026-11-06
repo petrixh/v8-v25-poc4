@@ -17,7 +17,6 @@ package de.symeda.sormas.ui.externalmessage.surveyresponse;
 import java.util.*;
 
 import com.vaadin.ui.*;
-import com.vaadin.ui.themes.ValoTheme;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.externalmessage.ExternalMessageDto;
@@ -58,17 +57,17 @@ public class SurveyResponseFailureEditor extends Window {
 			: new LinkedHashMap<>();
 
 		VerticalLayout mainLayout = new VerticalLayout();
-		mainLayout.setMargin(true);
+		mainLayout.setPadding(true);
 		mainLayout.setSpacing(true);
 
 		// --- Failed fields (editable) ---
 		if (!failures.isEmpty()) {
-			Label failuresHeading = new Label(I18nProperties.getString(Strings.headingSurveyResponseFailures));
+			Span failuresHeading = new Span(I18nProperties.getString(Strings.headingSurveyResponseFailures));
 			CssStyles.style(failuresHeading, CssStyles.H3);
 			mainLayout.addComponent(failuresHeading);
 
 			FormLayout failuresForm = new FormLayout();
-			failuresForm.setMargin(false);
+			failuresForm.setPadding(false);
 
 			Map<PatchField, CheckBox> ignoreCheckboxes = new HashMap<>();
 			Map<PatchField, TextField> pathEditors = new HashMap<>();
@@ -85,7 +84,7 @@ public class SurveyResponseFailureEditor extends Window {
 					failure.getDataPatchFailureCause() != null ? I18nProperties.getEnumCaption(failure.getDataPatchFailureCause()) : "";
 
 				VerticalLayout fieldContainer = new VerticalLayout();
-				fieldContainer.setMargin(false);
+				fieldContainer.setPadding(false);
 				fieldContainer.setSpacing(false);
 
 				// Ignore checkbox
@@ -93,12 +92,12 @@ public class SurveyResponseFailureEditor extends Window {
 				ignoreCheckboxes.put(patchField, ignoreCheckbox);
 				fieldContainer.addComponent(ignoreCheckbox);
 
-				Label causeLabel = new Label(I18nProperties.getCaption(Captions.surveyResponseFailureCause) + ": " + causeName);
+				Span causeLabel = new Span(I18nProperties.getCaption(Captions.surveyResponseFailureCause) + ": " + causeName);
 				CssStyles.style(causeLabel, CssStyles.LABEL_SMALL, CssStyles.LABEL_SECONDARY);
 				fieldContainer.addComponent(causeLabel);
 
-				Label currentValueLabel =
-					new Label(I18nProperties.getCaption(Captions.surveyResponseCurrentCaseValue) + ": " + (currentValue != null ? currentValue : ""));
+				Span currentValueLabel =
+					new Span(I18nProperties.getCaption(Captions.surveyResponseCurrentCaseValue) + ": " + (currentValue != null ? currentValue : ""));
 				CssStyles.style(currentValueLabel, CssStyles.LABEL_SMALL, CssStyles.LABEL_SECONDARY);
 				fieldContainer.addComponent(currentValueLabel);
 
@@ -132,7 +131,7 @@ public class SurveyResponseFailureEditor extends Window {
 
 			// --- Valid fields (read-only context) ---§
 			if (!validValues.isEmpty()) {
-				Label validHeading = new Label(I18nProperties.getCaption(Captions.surveyResponseValidFields));
+				Span validHeading = new Span(I18nProperties.getCaption(Captions.surveyResponseValidFields));
 				CssStyles.style(validHeading, CssStyles.H4);
 				mainLayout.addComponent(validHeading);
 
@@ -183,15 +182,15 @@ public class SurveyResponseFailureEditor extends Window {
 						.overwriteSurveyResponse(externalMessage.getUuid(), new PatchDictionary().setDictionary(correctedDictionary));
 
 					if (externalMessageDto.getStatus() == ExternalMessageStatus.PROCESSED) {
-						Notification.show(I18nProperties.getString(Strings.messageSurveyResponseReprocessed), Notification.Type.HUMANIZED_MESSAGE);
+						NotificationHelper.show(I18nProperties.getString(Strings.messageSurveyResponseReprocessed), NotificationHelper.Type.HUMANIZED_MESSAGE);
 					} else {
 						Notification
-							.show(I18nProperties.getString(Strings.messageSurveyResponseReprocessedFailure), Notification.Type.HUMANIZED_MESSAGE);
+							.show(I18nProperties.getString(Strings.messageSurveyResponseReprocessedFailure), NotificationHelper.Type.HUMANIZED_MESSAGE);
 					}
 
 					close();
 					onReprocessed.run();
-				}, ValoTheme.BUTTON_PRIMARY);
+				}, CssStyles.BUTTON_PRIMARY);
 
 			Button cancelButton = ButtonHelper.createButton(Captions.actionCancel, I18nProperties.getCaption(Captions.actionCancel), e -> close());
 

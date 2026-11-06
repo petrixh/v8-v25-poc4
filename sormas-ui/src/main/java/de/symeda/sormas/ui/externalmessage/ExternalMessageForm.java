@@ -20,13 +20,13 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.Label;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.Component;
+import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.externalmessage.ExternalMessageDto;
@@ -71,26 +71,26 @@ public class ExternalMessageForm extends AbstractEditForm<ExternalMessageDto> {
 		addFields(ExternalMessageDto.UUID, ExternalMessageDto.MESSAGE_DATE_TIME);
 
 		structuredViewContainer = new VerticalLayout();
-		structuredViewContainer.setMargin(false);
+		structuredViewContainer.setPadding(false);
 		structuredViewContainer.setSizeUndefined();
 
 		structuredViewPanel = new Panel();
 		structuredViewPanel.setSizeFull();
-		structuredViewPanel.addStyleName("lab-message-structured-view");
+		structuredViewPanel.addClassName("lab-message-structured-view");
 		structuredViewPanel.setContent(structuredViewContainer);
 
 		detailedViewContainer = new VerticalLayout();
-		detailedViewContainer.setMargin(false);
+		detailedViewContainer.setPadding(false);
 		detailedViewContainer.setSizeUndefined();
 
 		detailedViewPanel = new Panel();
 		detailedViewPanel.setSizeFull();
-		detailedViewPanel.addStyleName("lab-message-detailed-view");
+		detailedViewPanel.addClassName("lab-message-detailed-view");
 		detailedViewPanel.setContent(detailedViewContainer);
 
 		detailsTabSheet = new TabSheet();
 		detailsTabSheet.setSizeFull();
-		detailsTabSheet.addStyleName("lab-message-details");
+		detailsTabSheet.addClassName("lab-message-details");
 		detailsTabSheet.addTab(structuredViewPanel, I18nProperties.getCaption(Captions.externalMessage_structuredView));
 		detailsTabSheet.addTab(detailedViewPanel, I18nProperties.getCaption(Captions.externalMessage_detailedView));
 
@@ -121,8 +121,8 @@ public class ExternalMessageForm extends AbstractEditForm<ExternalMessageDto> {
 		getFieldGroup().setReadOnly(true);
 		structuredViewLoaded = false;
 		detailedViewLoaded = false;
-		structuredViewContainer.removeAllComponents();
-		detailedViewContainer.removeAllComponents();
+		structuredViewContainer.removeAll();
+		detailedViewContainer.removeAll();
 		loadStructuredView(externalMessage);
 		detailsTabSheet.setSelectedTab(structuredViewPanel);
 	}
@@ -170,7 +170,7 @@ public class ExternalMessageForm extends AbstractEditForm<ExternalMessageDto> {
 	}
 
 	private Component createXmlDisplay(String xml) {
-		Label label = new Label();
+		Span label = new Span();
 		label.setValue(xml);
 		label.setContentMode(ContentMode.PREFORMATTED);
 		return label;

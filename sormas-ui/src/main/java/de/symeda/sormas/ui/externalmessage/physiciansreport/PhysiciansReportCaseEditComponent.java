@@ -22,9 +22,8 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -86,7 +85,7 @@ public class PhysiciansReportCaseEditComponent extends CommitDiscardWrapperCompo
 					setActiveTab(previousTab);
 				}
 			}
-		}, ValoTheme.BUTTON_PRIMARY);
+		}, CssStyles.BUTTON_PRIMARY);
 		getButtonsPanel().addComponent(backButton, 0);
 
 		nextButton = ButtonHelper.createButton(Captions.actionNext, (b) -> {
@@ -96,14 +95,14 @@ public class PhysiciansReportCaseEditComponent extends CommitDiscardWrapperCompo
 					setActiveTab(tabConfigs.get(activeTabIndex + 1).captionTag);
 				}
 			}
-		}, ValoTheme.BUTTON_PRIMARY);
+		}, CssStyles.BUTTON_PRIMARY);
 		getButtonsPanel().addComponent(nextButton);
 
 		saveAndOpenCaseButton = ButtonHelper.createButton(Captions.actionSaveAndOpenCase, (b) -> {
 			if (commitAndHandle()) {
 				ControllerProvider.getCaseController().navigateToCase(caze.getUuid());
 			}
-		}, ValoTheme.BUTTON_PRIMARY);
+		}, CssStyles.BUTTON_PRIMARY);
 
 		getButtonsPanel().addComponent(saveAndOpenCaseButton, getButtonsPanel().getComponentIndex(getCommitButton()));
 
@@ -137,7 +136,7 @@ public class PhysiciansReportCaseEditComponent extends CommitDiscardWrapperCompo
 
 	private static VerticalLayout createLayout() {
 		VerticalLayout layout = new VerticalLayout();
-		layout.setMargin(false);
+		layout.setPadding(false);
 		layout.setWidthFull();
 
 		return layout;

@@ -17,7 +17,7 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.samples.components;
 
-import com.vaadin.ui.RadioButtonGroup;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 
 import de.symeda.sormas.api.sample.PathogenTestDto;
 import de.symeda.sormas.ui.utils.FormComponent;

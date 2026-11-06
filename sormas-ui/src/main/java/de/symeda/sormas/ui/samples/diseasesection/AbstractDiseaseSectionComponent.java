@@ -19,17 +19,16 @@ package de.symeda.sormas.ui.samples.diseasesection;
 
 import java.util.function.Consumer;
 
-import com.vaadin.data.HasValue;
-import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.RadioButtonGroup;
-import com.vaadin.ui.TextField;
-import com.vaadin.v7.data.fieldgroup.FieldGroup;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.textfield.TextField;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.sample.PathogenTestDto;
+import de.symeda.sormas.ui.utils.AbstractForm;
 import de.symeda.sormas.ui.utils.FormComponent;
 import de.symeda.sormas.ui.utils.FormEventBus;
 
@@ -39,7 +38,7 @@ import de.symeda.sormas.ui.utils.FormEventBus;
  * <ul>
  * <li>Deferred initialization via {@link #initialize}</li>
  * <li>Mid-lifecycle {@link #cleanup()} that clears owned DTO fields before unbinding</li>
- * <li>Legacy {@link FieldGroup} support for DrugSusceptibilityForm</li>
+ * <li>Legacy {@link AbstractForm.BeanFieldGroup} support for DrugSusceptibilityForm</li>
  * <li>Drug susceptibility field management</li>
  * </ul>
  */
@@ -52,7 +51,7 @@ public abstract class AbstractDiseaseSectionComponent extends FormComponent<Path
 	protected Disease disease;
 
 	/** Kept only for DrugSusceptibilityForm legacy binding */
-	protected FieldGroup fieldGroup;
+	protected AbstractForm.BeanFieldGroup<PathogenTestDto> fieldGroup;
 
 	private Component drugSusceptibilityField;
 	private Consumer<Boolean> visibilityCallback;
@@ -73,7 +72,7 @@ public abstract class AbstractDiseaseSectionComponent extends FormComponent<Path
 		}
 	}
 
-	public void initialize(FieldGroup fieldGroup, FormEventBus eventBus, PathogenTestFormConfig config, Disease disease) {
+	public void initialize(AbstractForm.BeanFieldGroup<PathogenTestDto> fieldGroup, FormEventBus eventBus, PathogenTestFormConfig config, Disease disease) {
 		this.fieldGroup = fieldGroup;
 		this.eventBus = eventBus;
 		this.config = config;
@@ -111,7 +110,7 @@ public abstract class AbstractDiseaseSectionComponent extends FormComponent<Path
 	protected void addDrugSusceptibilityField(Component field) {
 		this.drugSusceptibilityField = field;
 		field.setVisible(false);
-		addComponent(field);
+		add(field);
 	}
 
 	protected void setDrugSusceptibilityRowVisible(boolean visible) {
@@ -126,14 +125,14 @@ public abstract class AbstractDiseaseSectionComponent extends FormComponent<Path
 	 *
 	 * @param components
 	 */
-	public void setVisibleClear(AbstractComponent... components) {
+	public void setVisibleClear(Component... components) {
 		if (components == null) {
 			return;
 		}
-		for (AbstractComponent component : components) {
+		for (Component component : components) {
 			component.setVisible(false);
 			if (component instanceof HasValue) {
-				((HasValue<?>) component).clear();
+				((HasValue<?, ?>) component).clear();
 			}
 		}
 	}
@@ -151,7 +150,7 @@ public abstract class AbstractDiseaseSectionComponent extends FormComponent<Path
 		return createTextField(propertyId, PathogenTestDto.I18N_PREFIX);
 	}
 
-	protected CheckBox createCheckBox(String propertyId) {
+	protected Checkbox createCheckBox(String propertyId) {
 		return createCheckBox(propertyId, PathogenTestDto.I18N_PREFIX);
 	}
 

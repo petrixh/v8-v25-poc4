@@ -21,11 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.RadioButtonGroup;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.sample.PathogenTestDto;
@@ -68,6 +69,11 @@ public class TestResultComponent extends FormComponent<PathogenTestDto> {
 	private HorizontalLayout quantitativeEnumRow;
 
 	private List<PathogenTestResultType> resultTypes;
+	/**
+	 * Flow's {@code ComboBox.setItems} sets the value to {@code null} (Vaadin 8 kept it), so the item list is changed
+	 * through this provider and refreshed instead.
+	 */
+	private ListDataProvider<PathogenTestResultType> resultTypesProvider;
 
 	private Disease currentDisease;
 	private PathogenTestType currentTestType;
@@ -90,14 +96,15 @@ public class TestResultComponent extends FormComponent<PathogenTestDto> {
 		if (!isLuxembourg) {
 			resultTypes.remove(PathogenTestResultType.NOT_APPLICABLE);
 		}
-		testResultField.setItems(resultTypes);
-		testResultField.setItemCaptionGenerator(PathogenTestResultType::toString);
+		resultTypesProvider = new ListDataProvider<>(resultTypes);
+		testResultField.setItems(resultTypesProvider);
+		testResultField.setItemLabelGenerator(PathogenTestResultType::toString);
 		testResultField.setRequiredIndicatorVisible(resultRequired);
 
 		testResultVerifiedField = createBooleanRadioGroup(PathogenTestDto.TEST_RESULT_VERIFIED, PathogenTestDto.I18N_PREFIX);
 
 		preliminaryField = createBooleanRadioGroup(PathogenTestDto.PRELIMINARY, PathogenTestDto.I18N_PREFIX);
-		preliminaryField.removeStyleName(CssStyles.CAPTION_ON_TOP);
+		preliminaryField.removeClassName(CssStyles.CAPTION_ON_TOP);
 		CssStyles.style(preliminaryField, CssStyles.VSPACE_4);
 
 		addRow(
@@ -109,15 +116,15 @@ public class TestResultComponent extends FormComponent<PathogenTestDto> {
 			testResultVerifiedField,
 			preliminaryField);
 
-		quantitativeValueField = createTextField(PathogenTestDto.QUANTITATIVE_VALUE, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
-		quantitativeUnitField = createTextField(PathogenTestDto.QUANTITATIVE_UNIT, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
+		quantitativeValueField = createTextField(PathogenTestDto.QUANTITATIVE_VALUE, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
+		quantitativeUnitField = createTextField(PathogenTestDto.QUANTITATIVE_UNIT, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
 		quantitativeBooleanField = createEnumRadioGroup(PathogenTestDto.QUANTITATIVE_BOOLEAN, PathogenTestDto.I18N_PREFIX, YesNoUnknown.class);
 		smearGradeField = createComboBox(PathogenTestDto.SMEAR_GRADE, PathogenTestDto.I18N_PREFIX);
 		smearGradeField.setItems(SmearGrade.values());
-		smearGradeField.setItemCaptionGenerator(SmearGrade::toString);
+		smearGradeField.setItemLabelGenerator(SmearGrade::toString);
 		westernBlotInterpretationField = createComboBox(PathogenTestDto.WESTERN_BLOT_INTERPRETATION, PathogenTestDto.I18N_PREFIX);
 		westernBlotInterpretationField.setItems(WesternBlotInterpretation.values());
-		westernBlotInterpretationField.setItemCaptionGenerator(WesternBlotInterpretation::toString);
+		westernBlotInterpretationField.setItemLabelGenerator(WesternBlotInterpretation::toString);
 
 		// All result-bearing fields are mandatory only when the administrator requires a result (#13948
 		// issue #13958). The same flag that gates the Pos/Neg selector gates the quantitative result fields.
@@ -153,7 +160,7 @@ public class TestResultComponent extends FormComponent<PathogenTestDto> {
 		binder.forField(preliminaryField).bind(PathogenTestDto::getPreliminary, PathogenTestDto::setPreliminary);
 
 		binder.forField(quantitativeValueField)
-			.withConverter(new de.symeda.sormas.ui.utils.StringToFloatNullableConverter(quantitativeValueField.getCaption()))
+			.withConverter(new de.symeda.sormas.ui.utils.StringToFloatNullableConverter(quantitativeValueField.getLabel()))
 			.bind(PathogenTestDto::getQuantitativeValue, PathogenTestDto::setQuantitativeValue);
 		binder.forField(quantitativeUnitField).bind(PathogenTestDto::getQuantitativeUnit, PathogenTestDto::setQuantitativeUnit);
 		binder.forField(quantitativeBooleanField).bind(PathogenTestDto::getQuantitativeBoolean, PathogenTestDto::setQuantitativeBoolean);
@@ -261,7 +268,7 @@ public class TestResultComponent extends FormComponent<PathogenTestDto> {
 	private void ensureNotApplicableSelectable() {
 		if (!resultTypes.contains(PathogenTestResultType.NOT_APPLICABLE)) {
 			resultTypes.add(PathogenTestResultType.NOT_APPLICABLE);
-			testResultField.setItems(resultTypes);
+			resultTypesProvider.refreshAll();
 		}
 	}
 
@@ -272,7 +279,7 @@ public class TestResultComponent extends FormComponent<PathogenTestDto> {
 	 */
 	private void removeNotApplicableSelectable() {
 		if (resultTypes.remove(PathogenTestResultType.NOT_APPLICABLE)) {
-			testResultField.setItems(resultTypes);
+			resultTypesProvider.refreshAll();
 		}
 	}
 
@@ -328,10 +335,10 @@ public class TestResultComponent extends FormComponent<PathogenTestDto> {
 		return PathogenTestType.cqInputApplies(currentDisease, testType);
 	}
 
-	private void setQuantitativeFieldVisible(com.vaadin.data.HasValue<?> field, boolean visible) {
-		((com.vaadin.ui.Component) field).setVisible(visible);
+	private void setQuantitativeFieldVisible(com.vaadin.flow.component.HasValue<?, ?> field, boolean visible) {
+		((com.vaadin.flow.component.Component) field).setVisible(visible);
 		if (!visible) {
-			clearValidationError((com.vaadin.ui.Component) field);
+			clearValidationError((com.vaadin.flow.component.Component) field);
 		}
 		if (!visible && !field.isEmpty()) {
 			field.clear();

@@ -20,8 +20,8 @@ package de.symeda.sormas.ui.samples.diseasesection;
 import java.util.Arrays;
 import java.util.List;
 
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.textfield.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -64,14 +64,14 @@ public class IpiSectionComponent extends AbstractDiseaseSectionComponent {
 	protected void buildLayout() {
 		serotypeField = createTextField(PathogenTestDto.SEROTYPE_TEXT);
 		// IPI-specific caption: the free-text serotype field is labelled "Serotype"
-		serotypeField.setCaption(I18nProperties.getCaption(Captions.PathogenTest_serotypeText_INVASIVE_PNEUMOCOCCAL_INFECTION));
+		serotypeField.setLabel(I18nProperties.getCaption(Captions.PathogenTest_serotypeText_INVASIVE_PNEUMOCOCCAL_INFECTION));
 		serotypeField.setVisible(false);
 
 		serotypingMethodField = createComboBox(PathogenTestDto.SEROTYPING_METHOD);
 		serotypingMethodField.setItems(SerotypingMethod.values());
-		serotypingMethodField.setItemCaptionGenerator(SerotypingMethod::toString);
+		serotypingMethodField.setItemLabelGenerator(SerotypingMethod::toString);
 		// IPI-specific caption: "Serotyping Method"
-		serotypingMethodField.setCaption(I18nProperties.getCaption(Captions.PathogenTest_seroTypingMethod_INVASIVE_PNEUMOCOCCAL_INFECTION));
+		serotypingMethodField.setLabel(I18nProperties.getCaption(Captions.PathogenTest_seroTypingMethod_INVASIVE_PNEUMOCOCCAL_INFECTION));
 		serotypingMethodField.setVisible(false);
 
 		addRow(serotypeField, serotypingMethodField);

@@ -20,9 +20,9 @@ package de.symeda.sormas.ui.samples.diseasesection;
 import java.util.Arrays;
 import java.util.List;
 
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.sample.PathogenTestDto;
@@ -53,7 +53,7 @@ public class ImiSectionComponent extends AbstractDiseaseSectionComponent {
 
 	private ComboBox<SeroGroupSpecification> seroGroupSpecField;
 	private TextField seroGroupSpecTextField;
-	private Label seroGroupSpecTextSpacer;
+	private Span seroGroupSpecTextSpacer;
 	private DrugSusceptibilityForm drugSusceptibilityField;
 
 	private PathogenTestType currentTestType;
@@ -64,7 +64,7 @@ public class ImiSectionComponent extends AbstractDiseaseSectionComponent {
 
 		seroGroupSpecField = createComboBox(PathogenTestDto.SERO_GROUP_SPECIFICATION);
 		seroGroupSpecField.setItems(SeroGroupSpecification.values());
-		seroGroupSpecField.setItemCaptionGenerator(SeroGroupSpecification::toString);
+		seroGroupSpecField.setItemLabelGenerator(SeroGroupSpecification::toString);
 		seroGroupSpecField.setVisible(false);
 
 		seroGroupSpecTextField = createTextField(PathogenTestDto.SERO_GROUP_SPECIFICATION_TEXT);

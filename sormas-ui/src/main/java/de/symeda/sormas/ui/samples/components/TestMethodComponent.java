@@ -26,12 +26,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.DateField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -68,11 +68,11 @@ public class TestMethodComponent extends FormComponent<PathogenTestDto> {
 	private ComboBox<PathogenTestCategory> testCategoryField;
 	private ComboBox<PathogenTestType> testTypeField;
 	private TextField testTypeTextField;
-	private Label testTypeTextSpacer;
+	private Span testTypeTextSpacer;
 	private ComboBox<PCRTestSpecification> pcrTestSpecField;
 	private HorizontalLayout pcrTestSpecRow;
 	private TextField typingIdField;
-	private DateField testDateField;
+	private DatePicker testDateField;
 	private ComboBox<Integer> testTimeField;
 	private ComboBox<FacilityReferenceDto> labField;
 	private TextField labDetailsField;
@@ -100,21 +100,21 @@ public class TestMethodComponent extends FormComponent<PathogenTestDto> {
 		// Test category — scopes the method list below; not persisted (derived from the chosen method)
 		testCategoryField = new ComboBox<>();
 		testCategoryField.setId(PathogenTestDto.TEST_TYPE + "_category");
-		testCategoryField.setCaption(I18nProperties.getCaption(Captions.PathogenTest_testCategory));
+		testCategoryField.setLabel(I18nProperties.getCaption(Captions.PathogenTest_testCategory));
 		testCategoryField.setRequiredIndicatorVisible(true);
 		CssStyles.style(testCategoryField, CssStyles.CAPTION_ON_TOP);
-		testCategoryField.setWidth(100, Unit.PERCENTAGE);
+		testCategoryField.setWidthFull();
 		testCategoryField.setItems(getVisibleTestCategories(currentDisease));
-		testCategoryField.setItemCaptionGenerator(PathogenTestCategory::toString);
+		testCategoryField.setItemLabelGenerator(PathogenTestCategory::toString);
 		trackValidationField(testCategoryField);
 		addRow(testCategoryField);
 
 		// Test type
 		testTypeField = createComboBox(PathogenTestDto.TEST_TYPE, PathogenTestDto.I18N_PREFIX);
 		updateTestTypeItemsByCategory(testTypeField, currentDisease, null);
-		testTypeField.setItemCaptionGenerator(PathogenTestType::toString);
+		testTypeField.setItemLabelGenerator(PathogenTestType::toString);
 
-		testTypeTextField = createTextField(PathogenTestDto.TEST_TYPE_TEXT, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
+		testTypeTextField = createTextField(PathogenTestDto.TEST_TYPE_TEXT, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
 		testTypeTextField.setVisible(false);
 
 		testTypeTextSpacer = createSpacer();
@@ -123,30 +123,30 @@ public class TestMethodComponent extends FormComponent<PathogenTestDto> {
 		// PCR test specification (Coronavirus-specific, below test type)
 		pcrTestSpecField = createComboBox(PathogenTestDto.PCR_TEST_SPECIFICATION, PathogenTestDto.I18N_PREFIX);
 		pcrTestSpecField.setItems(PCRTestSpecification.values());
-		pcrTestSpecField.setItemCaptionGenerator(PCRTestSpecification::toString);
+		pcrTestSpecField.setItemLabelGenerator(PCRTestSpecification::toString);
 		pcrTestSpecField.setVisible(false);
 		pcrTestSpecRow = addRow(pcrTestSpecField);
 
 		// Typing ID
-		typingIdField = createTextField(PathogenTestDto.TYPING_ID, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
+		typingIdField = createTextField(PathogenTestDto.TYPING_ID, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
 		typingIdField.setVisible(false);
 		typingIdRow = addRow(typingIdField);
 
 		// Test date/time — custom IDs so created manually and tracked
-		testDateField = new DateField();
+		testDateField = new DatePicker();
 		testDateField.setId(PathogenTestDto.TEST_DATE_TIME + "_date");
-		testDateField.setCaption(I18nProperties.getPrefixCaption(PathogenTestDto.I18N_PREFIX, PathogenTestDto.TEST_DATE_TIME));
+		testDateField.setLabel(I18nProperties.getPrefixCaption(PathogenTestDto.I18N_PREFIX, PathogenTestDto.TEST_DATE_TIME));
 		testDateField.setRequiredIndicatorVisible(true);
 		CssStyles.style(testDateField, CssStyles.CAPTION_ON_TOP);
-		testDateField.setWidth(100, Unit.PERCENTAGE);
+		testDateField.setWidthFull();
 		trackValidationField(testDateField);
 
 		testTimeField = new ComboBox<>();
 		testTimeField.setId(PathogenTestDto.TEST_DATE_TIME + "_time");
-		testTimeField.setCaption("");
+		testTimeField.setLabel("");
 		CssStyles.style(testTimeField, CssStyles.CAPTION_ON_TOP);
-		testTimeField.setWidth(100, Unit.PERCENTAGE);
-		testTimeField.setEmptySelectionAllowed(true);
+		testTimeField.setWidthFull();
+		testTimeField.setClearButtonVisible(true);
 		for (int hours = 0; hours <= 23; hours++) {
 			for (int minutes = 0; minutes <= 59; minutes += 15) {
 				int totalMinutes = hours * 60 + minutes;
@@ -154,25 +154,25 @@ public class TestMethodComponent extends FormComponent<PathogenTestDto> {
 			}
 		}
 		testTimeField.setItems(timeItems.keySet());
-		testTimeField.setItemCaptionGenerator(timeItems::get);
+		testTimeField.setItemLabelGenerator(timeItems::get);
 
 		HorizontalLayout testDateTimeGroup = new HorizontalLayout();
-		testDateTimeGroup.setWidth(100, Unit.PERCENTAGE);
+		testDateTimeGroup.setWidthFull();
 		testDateTimeGroup.setSpacing(true);
-		testDateTimeGroup.addComponent(testDateField);
-		testDateTimeGroup.setExpandRatio(testDateField, 1);
-		testDateTimeGroup.addComponent(testTimeField);
-		testDateTimeGroup.setExpandRatio(testTimeField, 1);
+		testDateTimeGroup.add(testDateField);
+		testDateTimeGroup.setFlexGrow(1, testDateField);
+		testDateTimeGroup.add(testTimeField);
+		testDateTimeGroup.setFlexGrow(1, testTimeField);
 
 		// Lab
 		labField = createComboBox(PathogenTestDto.LAB, PathogenTestDto.I18N_PREFIX);
 		labField.setItems(FacadeProvider.getFacilityFacade().getAllActiveLaboratories(true));
-		labField.setItemCaptionGenerator(FacilityReferenceDto::getCaption);
+		labField.setItemLabelGenerator(FacilityReferenceDto::getCaption);
 
 		addRow(testDateTimeGroup, labField);
 
 		// Lab details
-		labDetailsField = createTextField(PathogenTestDto.LAB_DETAILS, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
+		labDetailsField = createTextField(PathogenTestDto.LAB_DETAILS, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
 		labDetailsField.setVisible(false);
 		labDetailsRow = addRowWithLeadingSpacer(labDetailsField);
 	}
@@ -303,7 +303,7 @@ public class TestMethodComponent extends FormComponent<PathogenTestDto> {
 		if (!timeItems.containsKey(totalMinutes)) {
 			timeItems.put(totalMinutes, String.format("%02d:%02d", time.getHour(), time.getMinute()));
 			testTimeField.setItems(timeItems.keySet());
-			testTimeField.setItemCaptionGenerator(timeItems::get);
+			testTimeField.setItemLabelGenerator(timeItems::get);
 		}
 		testTimeField.setValue(totalMinutes);
 	}
@@ -374,7 +374,7 @@ public class TestMethodComponent extends FormComponent<PathogenTestDto> {
 			return null;
 		}
 		if (testDateField.getValue() == null) {
-			return I18nProperties.getValidationError(Validations.required, testDateField.getCaption());
+			return I18nProperties.getValidationError(Validations.required, testDateField.getLabel());
 		}
 		Integer totalMinutes = testTimeField.getValue();
 		LocalDateTime ldt = totalMinutes != null
@@ -454,13 +454,13 @@ public class TestMethodComponent extends FormComponent<PathogenTestDto> {
 		// testDateField/testTimeField/testCategoryField have custom IDs that don't match a DTO property
 		if (!checkers.isAccessible(dtoClass, PathogenTestDto.TEST_DATE_TIME)) {
 			testDateField.setEnabled(false);
-			testDateField.addStyleName(CssStyles.INACCESSIBLE_FIELD);
+			testDateField.addClassName(CssStyles.INACCESSIBLE_FIELD);
 			testTimeField.setEnabled(false);
-			testTimeField.addStyleName(CssStyles.INACCESSIBLE_FIELD);
+			testTimeField.addClassName(CssStyles.INACCESSIBLE_FIELD);
 		}
 		if (!checkers.isAccessible(dtoClass, PathogenTestDto.TEST_TYPE)) {
 			testCategoryField.setEnabled(false);
-			testCategoryField.addStyleName(CssStyles.INACCESSIBLE_FIELD);
+			testCategoryField.addClassName(CssStyles.INACCESSIBLE_FIELD);
 		}
 	}
 }

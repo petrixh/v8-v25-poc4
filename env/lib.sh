@@ -20,6 +20,9 @@ APP_ENV_RESET_MODE=${APP_ENV_RESET_MODE:-restart}
 export APP_ENV_CONFIG=${APP_ENV_CONFIG:-C1}
 # on: the "Security Alert: default password" dialog after a default-user login (skipDefaultPasswordCheck=false)
 APP_ENV_PWCHECK=${APP_ENV_PWCHECK:-off}
+# up.sh: ui.url of the copy, the link in notification mails. The app only accepts https URLs for it (ConfigFacadeEjb
+# validateConfigUrls), so the link names this copy's UI with https although the copy serves http
+export APP_ENV_UI_URL=${APP_ENV_UI_URL:-https://localhost:$APP_ENV_PORT/sormas-ui/}
 # up.sh data: snapshot (the committed env/seed/snapshot-<C>.pgdump) or rest (the small REST seed only, as env/seed/generate.sh needs)
 APP_ENV_SEED=${APP_ENV_SEED:-snapshot}
 
@@ -129,5 +132,8 @@ snapshot_counts() {
   UNION ALL SELECT 'adverseeventinvestigations', count(*) FROM adverseeventsfollowingimmunizationinvestigation
   UNION ALL SELECT 'continents', count(*) FROM continent UNION ALL SELECT 'subcontinents', count(*) FROM subcontinent
   UNION ALL SELECT 'countries', count(*) FROM country
+  UNION ALL SELECT 'campaignforms', count(*) FROM campaignformmeta UNION ALL SELECT 'campaignformdata', count(*) FROM campaignformdata
+  UNION ALL SELECT 'areas', count(*) FROM areas UNION ALL SELECT 'userroles', count(*) FROM userroles
+  UNION ALL SELECT 'users', count(*) FROM users
   UNION ALL SELECT 'tasksFor' || u.username, count(*) FROM task t JOIN users u ON u.id=t.assigneeuser_id GROUP BY u.username"
 }

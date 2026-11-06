@@ -19,14 +19,14 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Locale;
 
-import com.vaadin.data.provider.DataProvider;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.DateField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.RadioButtonGroup;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
 
 import de.symeda.sormas.api.caze.surveillancereport.ReportingType;
 import de.symeda.sormas.api.caze.surveillancereport.SurveillanceReportDto;
@@ -35,6 +35,7 @@ import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.person.notifier.NotifierDto;
 import de.symeda.sormas.api.utils.YesNoUnknown;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
 
 /**
  * Side view content for case notifiers.
@@ -63,8 +64,8 @@ public class CaseNotifierSideViewContent extends VerticalLayout {
         this.surveillanceReport = surveillanceReport;
         this.notifier = notifier;
 
-        setStyleName("case-notifier-side-view");
-        setMargin(false);
+        setClassName("case-notifier-side-view");
+        setPadding(false);
         setSpacing(false);
         buildNotifierDetails();
     }
@@ -75,40 +76,40 @@ public class CaseNotifierSideViewContent extends VerticalLayout {
     private void buildNotifierDetails() {
 
         // Full name
-        Label fullNameLabel = new Label(notifier.getFirstName() + " " + notifier.getLastName());
+        Span fullNameLabel = new Span(notifier.getFirstName() + " " + notifier.getLastName());
         CssStyles.style(fullNameLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
-        addComponent(fullNameLabel);
+        add(fullNameLabel);
 
         // Registration number
-        Label registrationNumberLabel = new Label(notifier.getRegistrationNumber());
+        Span registrationNumberLabel = new Span(notifier.getRegistrationNumber());
         CssStyles.style(registrationNumberLabel, CssStyles.LABEL_BOLD);
-        addComponent(registrationNumberLabel);
+        add(registrationNumberLabel);
 
         // Spacer before contact label
         if ((notifier.getPhone() != null && !notifier.getPhone().isEmpty()) || (notifier.getEmail() != null && !notifier.getEmail().isEmpty())) {
-            Label spacerBeforeContact = new Label();
+            Span spacerBeforeContact = new Span();
             spacerBeforeContact.setHeight("0.1rem");
-            addComponent(spacerBeforeContact);
+            add(spacerBeforeContact);
         }
 
         // Phone
         if (notifier.getPhone() != null && !notifier.getPhone().isEmpty()) {
-            Label phoneLabel = new Label(notifier.getPhone());
-            addComponent(phoneLabel);
+            Span phoneLabel = new Span(notifier.getPhone());
+            add(phoneLabel);
         }
 
         // Email
         if (notifier.getEmail() != null && !notifier.getEmail().isEmpty()) {
-            Label emailLabel = new Label(notifier.getEmail());
-            addComponent(emailLabel);
+            Span emailLabel = new Span(notifier.getEmail());
+            add(emailLabel);
         }
 
         // Spacer before email label
-        Label spacerDates = new Label();
+        Span spacerDates = new Span();
         spacerDates.setHeight("0.1rem");
 
         // Date of notification
-        DateField notificationDateField = new DateField(I18nProperties.getCaption(Captions.Notification_dateOfNotification));
+        DatePicker notificationDateField = new DatePicker(I18nProperties.getCaption(Captions.Notification_dateOfNotification));
         if (surveillanceReport != null && surveillanceReport.getReportDate() != null) {
             notificationDateField.setValue(surveillanceReport.getReportDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
         } else {
@@ -120,7 +121,7 @@ public class CaseNotifierSideViewContent extends VerticalLayout {
         notificationDateField.setReadOnly(true);
 
         // Date of diagnostic
-        DateField diagnosticDateField = new DateField(I18nProperties.getCaption(Captions.SurveillanceReport_dateOfDiagnosis));
+        DatePicker diagnosticDateField = new DatePicker(I18nProperties.getCaption(Captions.SurveillanceReport_dateOfDiagnosis));
         if (surveillanceReport != null && surveillanceReport.getDateOfDiagnosis() != null) {
             diagnosticDateField.setValue(surveillanceReport.getDateOfDiagnosis().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
         }
@@ -129,37 +130,37 @@ public class CaseNotifierSideViewContent extends VerticalLayout {
         // Horizontal layout for date fields
         HorizontalLayout dateFieldsLayout = new HorizontalLayout(notificationDateField, diagnosticDateField);
         dateFieldsLayout.setSpacing(true);
-        dateFieldsLayout.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
-        addComponent(spacerDates);
-        addComponent(dateFieldsLayout);
+        dateFieldsLayout.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
+        add(spacerDates);
+        add(dateFieldsLayout);
 
         RadioButtonGroup<TreatmentOption> treatmentGroup = buildTreatmentOptions();
-        addComponent(treatmentGroup);
+        add(treatmentGroup);
 
         if ((notifier.getAgentFirstName() != null && !notifier.getAgentFirstName().isBlank())
             || (notifier.getAgentLastName() != null && !notifier.getAgentLastName().isBlank())) {
             // Spacer before Reporting Agent label
-            Label spacerAgent = new Label();
+            Span spacerAgent = new Span();
             spacerAgent.setHeight("0.1rem");
-            addComponent(spacerAgent);
-            Label reportingAgent = new Label(I18nProperties.getCaption(Captions.Notification_reportingAgent));
+            add(spacerAgent);
+            Span reportingAgent = new Span(I18nProperties.getCaption(Captions.Notification_reportingAgent));
             CssStyles.style(reportingAgent, CssStyles.LABEL_BOLD, CssStyles.LABEL_BOTTOM_LINE);
-            addComponent(reportingAgent);
-            Label agentNameLabel = new Label(notifier.getAgentFirstName() + " " + notifier.getAgentLastName().toUpperCase(Locale.ROOT));
+            add(reportingAgent);
+            Span agentNameLabel = new Span(notifier.getAgentFirstName() + " " + notifier.getAgentLastName().toUpperCase(Locale.ROOT));
             CssStyles.style(agentNameLabel, CssStyles.LABEL_RELEVANT);
-            addComponent(agentNameLabel);
+            add(agentNameLabel);
         }
 
-        Label spacerNotificationType = new Label();
+        Span spacerNotificationType = new Span();
         spacerNotificationType.setHeight("0.1rem");
-        addComponent(spacerNotificationType);
+        add(spacerNotificationType);
         // Notification type
-        Label notificationTypeLabel = new Label(
+        Span notificationTypeLabel = new Span(
             (surveillanceReport != null && surveillanceReport.getReportingType() == ReportingType.PHONE_NOTIFICATION)
                 ? I18nProperties.getCaption(Captions.Notification_notificationTypePhone)
                 : I18nProperties.getCaption(Captions.Notification_notificationTypeExternal));
         CssStyles.style(notificationTypeLabel, CssStyles.BADGE);
-        addComponent(notificationTypeLabel);
+        add(notificationTypeLabel);
 
     }
 
@@ -169,14 +170,14 @@ public class CaseNotifierSideViewContent extends VerticalLayout {
      * @return radio button group with treatment options
      */
     private RadioButtonGroup<TreatmentOption> buildTreatmentOptions() {
-        DataProvider<TreatmentOption, ?> dataProvider = DataProvider.ofCollection(TreatmentOption.ALL_OPTIONS);
+        ListDataProvider<TreatmentOption> dataProvider = DataProvider.ofCollection(TreatmentOption.ALL_OPTIONS);
 
         // Treatment radios
         RadioButtonGroup<TreatmentOption> treatmentGroup = new RadioButtonGroup<>(I18nProperties.getCaption(Captions.Treatment));
-        treatmentGroup.setDataProvider(dataProvider);
-        treatmentGroup.setItemCaptionGenerator(t -> t.getCaption());
+        treatmentGroup.setItems(dataProvider);
+        treatmentGroup.setItemLabelGenerator(t -> t.getCaption());
 
-        treatmentGroup.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
+        treatmentGroup.addClassName(SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL);
         treatmentGroup.setReadOnly(true);
         treatmentGroup.clear();
 

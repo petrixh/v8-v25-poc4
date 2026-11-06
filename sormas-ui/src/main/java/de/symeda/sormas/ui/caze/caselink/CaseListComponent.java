@@ -3,9 +3,8 @@ package de.symeda.sormas.ui.caze.caselink;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 
 import de.symeda.sormas.api.caze.CaseCriteria;
 import de.symeda.sormas.api.caze.CaseListEntryDto;
@@ -36,16 +35,16 @@ public class CaseListComponent extends SideComponent {
 
 		caseList = new CaseList(personReferenceDto);
 		caseList.setActiveUuid(activeUuid);
-		addComponent(caseList);
+		add(caseList);
 		caseList.reload();
 		if (!caseList.isEmpty()) {
 			final Button seeCases = ButtonHelper.createButton(I18nProperties.getCaption(Captions.personLinkToCases));
-			CssStyles.style(seeCases, ValoTheme.BUTTON_PRIMARY);
+			CssStyles.style(seeCases, CssStyles.BUTTON_PRIMARY);
 			CaseCriteria caseCriteria = new CaseCriteria().person(personReferenceDto);
 			caseCriteria.setIncludeCasesFromOtherJurisdictions(true);
 			seeCases.addClickListener(clickEvent -> ControllerProvider.getCaseController().navigateTo(caseCriteria));
-			addComponent(seeCases);
-			setComponentAlignment(seeCases, Alignment.MIDDLE_LEFT);
+			add(seeCases);
+			setHorizontalComponentAlignment(FlexComponent.Alignment.START, seeCases);
 		}
 	}
 

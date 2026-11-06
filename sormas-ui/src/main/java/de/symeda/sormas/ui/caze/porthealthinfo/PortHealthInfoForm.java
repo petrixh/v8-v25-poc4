@@ -6,10 +6,7 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 
 import java.util.Arrays;
 
-import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -32,6 +29,9 @@ import de.symeda.sormas.ui.utils.DateTimeField;
 import de.symeda.sormas.ui.utils.FieldAccessHelper;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class PortHealthInfoForm extends AbstractEditForm<PortHealthInfoDto> {
 
@@ -97,8 +97,8 @@ public class PortHealthInfoForm extends AbstractEditForm<PortHealthInfoDto> {
 			return;
 		}
 
-		Label portHealthInfoHeadingLabel = new Label(I18nProperties.getString(Strings.headingPointOfEntryInformation));
-		portHealthInfoHeadingLabel.addStyleName(H3);
+		Span portHealthInfoHeadingLabel = new Span(I18nProperties.getString(Strings.headingPointOfEntryInformation));
+		portHealthInfoHeadingLabel.addClassName(H3);
 		getContent().addComponent(portHealthInfoHeadingLabel, PORT_HEALTH_INFO_HEADING_LOC);
 
 		TextField tfPointOfEntryType = addCustomField(PointOfEntryDto.POINT_OF_ENTRY_TYPE, String.class, TextField.class);
@@ -111,7 +111,7 @@ public class PortHealthInfoForm extends AbstractEditForm<PortHealthInfoDto> {
 				.setValue(InfrastructureHelper.buildPointOfEntryString(pointOfEntry.getUuid(), pointOfEntry.getName(), pointOfEntryDetails));
 		} else {
 			tfPointOfEntry.setValue(I18nProperties.getCaption(Captions.inaccessibleValue));
-			tfPointOfEntry.addStyleName(CssStyles.INACCESSIBLE_LABEL);
+			tfPointOfEntry.addClassName(CssStyles.INACCESSIBLE_LABEL);
 		}
 		tfPointOfEntry.setCaption(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.POINT_OF_ENTRY));
 		tfPointOfEntry.setReadOnly(true);

@@ -18,16 +18,13 @@ package de.symeda.sormas.ui.caze.notifier;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
-import com.vaadin.data.provider.DataProvider;
-import com.vaadin.server.UserError;
-import com.vaadin.ui.DateField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.RadioButtonGroup;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
 
 import de.symeda.sormas.api.caze.surveillancereport.SurveillanceReportDto;
 import de.symeda.sormas.api.i18n.Captions;
@@ -39,6 +36,7 @@ import de.symeda.sormas.api.person.PersonDto;
 import de.symeda.sormas.api.person.notifier.NotifierDto;
 import de.symeda.sormas.api.utils.YesNoUnknown;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
 
 /**
  * Form for creating and editing notifier information.
@@ -57,8 +55,8 @@ public class CaseNotifierForm extends VerticalLayout {
     private TextField phoneField;
     private TextField emailField;
     private TextArea addressField;
-    private DateField notificationDateField;
-    private DateField diagnosticDateField;
+    private DatePicker notificationDateField;
+    private DatePicker diagnosticDateField;
     private RadioButtonGroup<TreatmentOption> treatmentGroup;
     private TextField agentFirstNameField;
     private TextField agentLastNameField;
@@ -71,10 +69,10 @@ public class CaseNotifierForm extends VerticalLayout {
      * Creates a new notifier form.
      */
     protected CaseNotifierForm() {
-        setStyleName("notifier-edit-form");
-        setMargin(true);
+        setClassName("notifier-edit-form");
+        setPadding(true);
         setSpacing(true);
-        setWidth(800, Unit.PIXELS);
+        setWidth("800px");
         buildForm();
     }
 
@@ -102,108 +100,108 @@ public class CaseNotifierForm extends VerticalLayout {
      */
     private void buildForm() {
         // Personal Information Section
-        Label personalInfoLabel = new Label(I18nProperties.getString(Strings.headingPersonInformation));
+        Span personalInfoLabel = new Span(I18nProperties.getString(Strings.headingPersonInformation));
         CssStyles.style(personalInfoLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_BOTTOM_LINE);
-        addComponent(personalInfoLabel);
+        add(personalInfoLabel);
 
         // Name fields
         HorizontalLayout nameLayout = new HorizontalLayout();
         nameLayout.setSpacing(true);
-        nameLayout.setWidth(100, Unit.PERCENTAGE);
+        nameLayout.setWidthFull();
 
         firstNameField = new TextField(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, NotifierDto.FIRST_NAME));
         firstNameField.setRequiredIndicatorVisible(true);
-        firstNameField.setWidth(100, Unit.PERCENTAGE);
+        firstNameField.setWidthFull();
 
         lastNameField = new TextField(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, NotifierDto.LAST_NAME));
         lastNameField.setRequiredIndicatorVisible(true);
-        lastNameField.setWidth(100, Unit.PERCENTAGE);
+        lastNameField.setWidthFull();
 
-        nameLayout.addComponents(firstNameField, lastNameField);
-        nameLayout.setExpandRatio(firstNameField, 1);
-        nameLayout.setExpandRatio(lastNameField, 1);
-        addComponent(nameLayout);
+        nameLayout.add(firstNameField, lastNameField);
+        nameLayout.setFlexGrow(1, firstNameField);
+        nameLayout.setFlexGrow(1, lastNameField);
+        add(nameLayout);
 
         // Registration number
         registrationNumberField = new TextField(I18nProperties.getCaption(Captions.Notification_registrationNumber));
         registrationNumberField.setRequiredIndicatorVisible(true);
-        registrationNumberField.setWidth(100, Unit.PERCENTAGE);
-        addComponent(registrationNumberField);
+        registrationNumberField.setWidthFull();
+        add(registrationNumberField);
 
         // Contact Information Section
-        Label contactInfoLabel = new Label(I18nProperties.getString(Strings.headingContactInformation));
+        Span contactInfoLabel = new Span(I18nProperties.getString(Strings.headingContactInformation));
         CssStyles.style(contactInfoLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_BOTTOM_LINE);
-        addComponent(contactInfoLabel);
+        add(contactInfoLabel);
 
         // Contact fields
         HorizontalLayout contactLayout = new HorizontalLayout();
         contactLayout.setSpacing(true);
-        contactLayout.setWidth(100, Unit.PERCENTAGE);
+        contactLayout.setWidthFull();
 
         phoneField = new TextField(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, NotifierDto.PHONE));
-        phoneField.setWidth(100, Unit.PERCENTAGE);
+        phoneField.setWidthFull();
 
         emailField = new TextField(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, NotifierDto.EMAIL));
-        emailField.setWidth(100, Unit.PERCENTAGE);
+        emailField.setWidthFull();
 
-        contactLayout.addComponents(phoneField, emailField);
-        contactLayout.setExpandRatio(phoneField, 1);
-        contactLayout.setExpandRatio(emailField, 1);
-        addComponent(contactLayout);
+        contactLayout.add(phoneField, emailField);
+        contactLayout.setFlexGrow(1, phoneField);
+        contactLayout.setFlexGrow(1, emailField);
+        add(contactLayout);
 
         // Address
         addressField = new TextArea(I18nProperties.getPrefixCaption(LocationDto.I18N_PREFIX, NotifierDto.ADDRESS));
-        addressField.setRows(3);
-        addressField.setWidth(100, Unit.PERCENTAGE);
-        addComponent(addressField);
+        addressField.setMinRows(3);
+        addressField.setWidthFull();
+        add(addressField);
 
         // Notification Dates Section
-        Label datesLabel = new Label(I18nProperties.getCaption(Captions.Notification_notifierInformation));
+        Span datesLabel = new Span(I18nProperties.getCaption(Captions.Notification_notifierInformation));
         CssStyles.style(datesLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_BOTTOM_LINE);
-        addComponent(datesLabel);
+        add(datesLabel);
 
         // Date fields
         HorizontalLayout dateLayout = new HorizontalLayout();
         dateLayout.setSpacing(true);
-        dateLayout.setWidth(100, Unit.PERCENTAGE);
+        dateLayout.setWidthFull();
 
-        notificationDateField = new DateField(I18nProperties.getCaption(Captions.Notification_dateOfNotification));
-        notificationDateField.setWidth(100, Unit.PERCENTAGE);
+        notificationDateField = new DatePicker(I18nProperties.getCaption(Captions.Notification_dateOfNotification));
+        notificationDateField.setWidthFull();
         notificationDateField.setEnabled(false); // Read-only as it's automatically set
-        notificationDateField.setDescription(I18nProperties.getString(Strings.notificationNotificationDateInformation));
+        notificationDateField.setTooltipText(I18nProperties.getString(Strings.notificationNotificationDateInformation));
 
-        diagnosticDateField = new DateField(I18nProperties.getCaption(Captions.SurveillanceReport_dateOfDiagnosis));
-        diagnosticDateField.setWidth(100, Unit.PERCENTAGE);
+        diagnosticDateField = new DatePicker(I18nProperties.getCaption(Captions.SurveillanceReport_dateOfDiagnosis));
+        diagnosticDateField.setWidthFull();
 
-        dateLayout.addComponents(notificationDateField, diagnosticDateField);
-        dateLayout.setExpandRatio(notificationDateField, 1);
-        dateLayout.setExpandRatio(diagnosticDateField, 1);
-        addComponent(dateLayout);
+        dateLayout.add(notificationDateField, diagnosticDateField);
+        dateLayout.setFlexGrow(1, notificationDateField);
+        dateLayout.setFlexGrow(1, diagnosticDateField);
+        add(dateLayout);
 
         // Treatment Section
         treatmentGroup = buildTreatmentOptions();
-        addComponent(treatmentGroup);
+        add(treatmentGroup);
 
         // Reporting Agent Section
-        Label agentLabel = new Label(I18nProperties.getCaption(Captions.Notification_reportingAgent));
+        Span agentLabel = new Span(I18nProperties.getCaption(Captions.Notification_reportingAgent));
         CssStyles.style(agentLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_BOTTOM_LINE);
-        addComponent(agentLabel);
+        add(agentLabel);
 
         // Agent fields
         HorizontalLayout agentLayout = new HorizontalLayout();
         agentLayout.setSpacing(true);
-        agentLayout.setWidth(100, Unit.PERCENTAGE);
+        agentLayout.setWidthFull();
 
         agentFirstNameField = new TextField(I18nProperties.getCaption(Captions.firstName));
-        agentFirstNameField.setWidth(100, Unit.PERCENTAGE);
+        agentFirstNameField.setWidthFull();
 
         agentLastNameField = new TextField(I18nProperties.getCaption(Captions.lastName));
-        agentLastNameField.setWidth(100, Unit.PERCENTAGE);
+        agentLastNameField.setWidthFull();
 
-        agentLayout.addComponents(agentFirstNameField, agentLastNameField);
-        agentLayout.setExpandRatio(agentFirstNameField, 1);
-        agentLayout.setExpandRatio(agentLastNameField, 1);
-        addComponent(agentLayout);
+        agentLayout.add(agentFirstNameField, agentLastNameField);
+        agentLayout.setFlexGrow(1, agentFirstNameField);
+        agentLayout.setFlexGrow(1, agentLastNameField);
+        add(agentLayout);
     }
 
     /**
@@ -211,9 +209,9 @@ public class CaseNotifierForm extends VerticalLayout {
      */
     private RadioButtonGroup<TreatmentOption> buildTreatmentOptions() {
         RadioButtonGroup<TreatmentOption> group = new RadioButtonGroup<>(I18nProperties.getCaption(Captions.Treatment));
-        group.setDataProvider(DataProvider.ofCollection(TreatmentOption.ALL_OPTIONS));
-        group.setItemCaptionGenerator(TreatmentOption::getCaption);
-        group.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
+        group.setItems(TreatmentOption.ALL_OPTIONS);
+        group.setItemLabelGenerator(TreatmentOption::getCaption);
+        group.addClassName(SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL);
         group.setValue(TreatmentOption.UNKNOWN); // Default value
 
         return group;
@@ -343,24 +341,30 @@ public class CaseNotifierForm extends VerticalLayout {
         boolean valid = true;
 
         if (firstNameField.getValue() == null || firstNameField.getValue().trim().isEmpty()) {
-            firstNameField.setComponentError(new UserError(I18nProperties.getValidationError(Validations.requiredField)));
+            firstNameField.setErrorMessage(I18nProperties.getValidationError(Validations.requiredField));
+            firstNameField.setInvalid(true);
             valid = false;
         } else {
-            firstNameField.setComponentError(null);
+            firstNameField.setErrorMessage(null);
+            firstNameField.setInvalid(false);
         }
 
         if (lastNameField.getValue() == null || lastNameField.getValue().trim().isEmpty()) {
-            lastNameField.setComponentError(new UserError(I18nProperties.getValidationError(Validations.requiredField)));
+            lastNameField.setErrorMessage(I18nProperties.getValidationError(Validations.requiredField));
+            lastNameField.setInvalid(true);
             valid = false;
         } else {
-            lastNameField.setComponentError(null);
+            lastNameField.setErrorMessage(null);
+            lastNameField.setInvalid(false);
         }
 
         if (registrationNumberField.getValue() == null || registrationNumberField.getValue().trim().isEmpty()) {
-            registrationNumberField.setComponentError(new UserError(I18nProperties.getValidationError(Validations.requiredField)));
+            registrationNumberField.setErrorMessage(I18nProperties.getValidationError(Validations.requiredField));
+            registrationNumberField.setInvalid(true);
             valid = false;
         } else {
-            registrationNumberField.setComponentError(null);
+            registrationNumberField.setErrorMessage(null);
+            registrationNumberField.setInvalid(false);
         }
 
         return valid;

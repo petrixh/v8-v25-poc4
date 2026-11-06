@@ -10,8 +10,7 @@ import java.util.function.Consumer;
 import org.apache.commons.lang3.StringUtils;
 
 import com.opencsv.exceptions.CsvValidationException;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.UI;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -29,6 +28,7 @@ import de.symeda.sormas.ui.importer.CountryImportProgressLayout;
 import de.symeda.sormas.ui.importer.ImportLineResult;
 import de.symeda.sormas.ui.importer.ImportProgressLayout;
 import de.symeda.sormas.ui.importer.InfrastructureImporter;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
 
 public class CountryImporter extends InfrastructureImporter {
 
@@ -127,7 +127,7 @@ public class CountryImporter extends InfrastructureImporter {
 		}
 	}
 
-	public void startImport(Consumer<StreamResource> errorReportConsumer, UI currentUI) throws IOException, CsvValidationException {
+	public void startImport(Consumer<StreamSourceDownloadHandler> errorReportConsumer, UI currentUI) throws IOException, CsvValidationException {
 		startImport(errorReportConsumer, currentUI, true);
 	}
 

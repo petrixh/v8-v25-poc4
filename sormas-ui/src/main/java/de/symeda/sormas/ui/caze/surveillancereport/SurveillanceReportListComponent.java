@@ -34,12 +34,12 @@ public class SurveillanceReportListComponent extends SideComponent {
 
 	public SurveillanceReportListComponent(CaseReferenceDto caze, Consumer<Runnable> actionCallback, UserRight editRight, boolean isEditAllowed) {
 		super(I18nProperties.getString(Strings.headingSurveillanceReports), actionCallback);
-		setWidth(100, Unit.PERCENTAGE);
-		setMargin(false);
+		setWidthFull();
+		setPadding(false);
 		setSpacing(false);
 
 		list = new SurveillanceReportList(caze, editRight, isEditAllowed);
-		addComponent(list);
+		add(list);
 		list.reload();
 
 		if (UiUtil.permitted(isEditAllowed, editRight)) {

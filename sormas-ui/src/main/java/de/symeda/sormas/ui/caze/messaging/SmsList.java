@@ -2,7 +2,7 @@ package de.symeda.sormas.ui.caze.messaging;
 
 import java.util.List;
 
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -29,8 +29,8 @@ public class SmsList extends PaginationList<ManualMessageLogDto> {
 		List<ManualMessageLogDto> messageLogs = FacadeProvider.getCaseFacade().getMessageLog(personReferenceDto.getUuid(), MessageType.SMS);
 
 		if (!hasPhoneNumber){
-			Label noPhoneNumberLabel = new Label(I18nProperties.getCaption(Captions.messagesNoPhoneNumberForCasePerson));
-			listLayout.addComponent(noPhoneNumberLabel);
+			Span noPhoneNumberLabel = new Span(I18nProperties.getCaption(Captions.messagesNoPhoneNumberForCasePerson));
+			listLayout.add(noPhoneNumberLabel);
 		}
 
 		setEntries(messageLogs);
@@ -38,8 +38,8 @@ public class SmsList extends PaginationList<ManualMessageLogDto> {
 			showPage(1);
 		} else {
 			updatePaginationLayout();
-			Label noMessageLabel = new Label(I18nProperties.getCaption(Captions.messagesNoSmsSentForCase));
-			listLayout.addComponent(noMessageLabel);
+			Span noMessageLabel = new Span(I18nProperties.getCaption(Captions.messagesNoSmsSentForCase));
+			listLayout.add(noMessageLabel);
 		}
 	}
 
@@ -48,7 +48,7 @@ public class SmsList extends PaginationList<ManualMessageLogDto> {
 		List<ManualMessageLogDto> displayedEntries = getDisplayedEntries();
 		for (int i = 0, displayedEntriesSize = displayedEntries.size(); i < displayedEntriesSize; i++) {
 			SmsListEntry listEntry = new SmsListEntry(displayedEntries.get(i));
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 }

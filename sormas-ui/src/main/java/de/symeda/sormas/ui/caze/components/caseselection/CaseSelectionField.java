@@ -4,13 +4,11 @@ import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -20,7 +18,9 @@ import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 
 @SuppressWarnings("serial")
 public class CaseSelectionField extends CustomField<CaseSelectionDto> {
@@ -38,11 +38,11 @@ public class CaseSelectionField extends CustomField<CaseSelectionDto> {
 		mainLayout = new VerticalLayout();
 		mainLayout.setSpacing(true);
 		mainLayout.setSizeUndefined();
-		mainLayout.setWidth(100, Unit.PERCENTAGE);
+		mainLayout.setWidthFull();
 	}
 
 	private void addInfoComponent() {
-		mainLayout.addComponent(VaadinUiUtil.createInfoComponent(I18nProperties.getString(Strings.infoSearchCaseForContact)));
+		mainLayout.add(VaadinUiUtil.createInfoComponent(I18nProperties.getString(Strings.infoSearchCaseForContact)));
 	}
 
 	private void addFilterComponent() {
@@ -52,8 +52,8 @@ public class CaseSelectionField extends CustomField<CaseSelectionDto> {
 
 		TextField searchField = new TextField();
 		searchField.setPlaceholder(I18nProperties.getString(Strings.promptSearch));
-		searchField.setWidth(400, Unit.PIXELS);
-		filterLayout.addComponent(searchField);
+		searchField.setWidth("400px");
+		filterLayout.add(searchField);
 
 		Button searchButton = ButtonHelper.createButton(Captions.caseSearchCase, e -> {
 			CaseCriteria criteria = new CaseCriteria().disease(disease);
@@ -64,11 +64,11 @@ public class CaseSelectionField extends CustomField<CaseSelectionDto> {
 				criteria.setSourceCaseInfoLike(null);
 				grid.clearCases();
 			}
-		}, ValoTheme.BUTTON_PRIMARY);
+		}, CssStyles.BUTTON_PRIMARY);
 
-		filterLayout.addComponent(searchButton);
+		filterLayout.add(searchButton);
 
-		mainLayout.addComponent(filterLayout);
+		mainLayout.add(filterLayout);
 	}
 
 	private void addGrid() {
@@ -76,15 +76,15 @@ public class CaseSelectionField extends CustomField<CaseSelectionDto> {
 		grid = new CaseSelectionGrid(null);
 		grid.addSelectionListener(e -> {
 			if (selectionChangeCallback != null) {
-				selectionChangeCallback.accept(!e.getSelected().isEmpty());
+				selectionChangeCallback.accept(!e.getAllSelectedItems().isEmpty());
 			}
 		});
-		mainLayout.addComponent(grid);
+		mainLayout.add(grid);
 	}
 
 	@Override
 	public CaseSelectionDto getValue() {
-		return (CaseSelectionDto) grid.getSelectedRow();
+		return grid.getSelectedItems().stream().findFirst().orElse(null);
 	}
 
 	@Override
@@ -98,8 +98,7 @@ public class CaseSelectionField extends CustomField<CaseSelectionDto> {
 	}
 
 	@Override
-	protected void doSetValue(CaseSelectionDto value) {
-		super.setValue(value);
+	protected void setPresentationValue(CaseSelectionDto value) {
 		grid.select(value);
 	}
 

@@ -21,8 +21,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -278,7 +278,7 @@ public class CaseNotifierSideViewController {
 
         final CommitDiscardWrapperComponent<CaseNotifierForm> editView = new CommitDiscardWrapperComponent<>(notifierForm, true);
 
-        final Window window = VaadinUiUtil.showModalPopupWindow(editView, title);
+        final Dialog window = VaadinUiUtil.showModalPopupWindow(editView, title);
 
         if (isEditAllowed) {
             editView.setPreCommitListener(cb -> {
@@ -329,7 +329,7 @@ public class CaseNotifierSideViewController {
             editView.getDiscardButton().setVisible(false);
 
             Button closeButton = ButtonHelper.createButton(Captions.actionClose, e -> window.close());
-            editView.getButtonsPanel().addComponent(closeButton);
+            editView.getButtonsPanel().add(closeButton);
         }
     }
 

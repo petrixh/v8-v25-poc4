@@ -15,11 +15,10 @@
 
 package de.symeda.sormas.ui.caze.surveillancereport;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseReferenceDto;
@@ -57,7 +56,7 @@ public class SurveillanceReportController {
 
 	private void openEditWindow(SurveillanceReportDto report, String titleTag, boolean canDelete, Runnable callback, boolean isEditAllowed) {
 		SurveillanceReportForm surveillanceReportForm = new SurveillanceReportForm(report);
-		surveillanceReportForm.setWidth(600, Sizeable.Unit.PIXELS);
+		surveillanceReportForm.setWidth("600px");
 
 		final CommitDiscardWrapperComponent<SurveillanceReportForm> editView =
 			new CommitDiscardWrapperComponent<>(surveillanceReportForm, true, surveillanceReportForm.getFieldGroup());
@@ -69,15 +68,15 @@ public class SurveillanceReportController {
 			if (externalMessage != null) {
 				Button viewMessageButton = ButtonHelper.createIconButton(
 					Captions.viewMessage,
-					VaadinIcons.EYE,
+					VaadinIcon.EYE,
 					e -> ControllerProvider.getExternalMessageController().showExternalMessage(externalMessage.getUuid(), false, null));
 
-				editView.getButtonsPanel().addComponent(viewMessageButton, 0);
-				editView.getButtonsPanel().setComponentAlignment(viewMessageButton, Alignment.BOTTOM_LEFT);
+				editView.getButtonsPanel().addComponentAtIndex(0, viewMessageButton);
+				editView.getButtonsPanel().setVerticalComponentAlignment(FlexComponent.Alignment.END, viewMessageButton);
 			}
 		}
 
-		Window window = VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getString(titleTag));
+		Dialog window = VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getString(titleTag));
 
 		if (isEditAllowed) {
 			editView.addCommitListener(() -> {

@@ -22,10 +22,8 @@ import java.util.function.Consumer;
 import org.apache.commons.lang3.ArrayUtils;
 
 import com.opencsv.exceptions.CsvValidationException;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -52,6 +50,7 @@ import de.symeda.sormas.ui.importer.ImportSimilarityResultOption;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent.DiscardListener;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 /**
@@ -84,7 +83,7 @@ public class CaseImporter extends DataImporter {
 	}
 
 	@Override
-	public void startImport(Consumer<StreamResource> addErrorReportToLayoutCallback, UI currentUI, boolean duplicatesPossible)
+	public void startImport(Consumer<StreamSourceDownloadHandler> addErrorReportToLayoutCallback, UI currentUI, boolean duplicatesPossible)
 		throws IOException, CsvValidationException {
 
 		this.currentUI = currentUI;
@@ -247,7 +246,7 @@ public class CaseImporter extends DataImporter {
 	protected void handleCaseSimilarity(CaseImportSimilarityInput input, Consumer<CaseImportSimilarityResult> resultConsumer) {
 		currentUI.accessSynchronously(() -> {
 			CasePickOrImportField pickOrImportField = new CasePickOrImportField(input.getCaze(), input.getPerson(), input.getSimilarCases());
-			pickOrImportField.setWidth(1024, Unit.PIXELS);
+			pickOrImportField.setWidth("1024px");
 
 			final CommitDiscardWrapperComponent<CasePickOrImportField> component = new CommitDiscardWrapperComponent<>(pickOrImportField);
 
@@ -267,8 +266,8 @@ public class CaseImporter extends DataImporter {
 			DiscardListener discardListener =
 				() -> resultConsumer.accept(new CaseImportSimilarityResult(null, null, ImportSimilarityResultOption.CANCEL));
 			component.addDiscardListener(discardListener);
-			component.getDiscardButton().setCaption(I18nProperties.getCaption(Captions.actionCancel));
-			component.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionConfirm));
+			component.getDiscardButton().setText(I18nProperties.getCaption(Captions.actionCancel));
+			component.getCommitButton().setText(I18nProperties.getCaption(Captions.actionConfirm));
 			component.getCommitButton().setEnabled(false);
 
 			Button skipButton = ButtonHelper.createButton(Captions.actionSkip, e -> {

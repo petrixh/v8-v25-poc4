@@ -2,13 +2,11 @@ package de.symeda.sormas.ui.caze.importer;
 
 import java.util.List;
 
-import com.vaadin.server.ThemeResource;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Image;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.Label;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.DiseaseHelper;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -22,6 +20,8 @@ import de.symeda.sormas.api.person.PersonHelper;
 import de.symeda.sormas.ui.caze.CasePickOrCreateField;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
 
 @SuppressWarnings("serial")
 public class CasePickOrImportField extends CasePickOrCreateField {
@@ -36,115 +36,115 @@ public class CasePickOrImportField extends CasePickOrCreateField {
 	protected void addInfoComponent() {
 
 		HorizontalLayout infoLayout = new HorizontalLayout();
-		infoLayout.setWidth(100, Unit.PERCENTAGE);
+		infoLayout.setWidthFull();
 		infoLayout.setSpacing(true);
-		Image icon = new Image(null, new ThemeResource("img/info-icon.png"));
-		icon.setHeight(35, Unit.PIXELS);
-		icon.setWidth(35, Unit.PIXELS);
-		infoLayout.addComponent(icon);
-		Label infoLabel = new Label(I18nProperties.getString(Strings.infoImportSimilarity));
-		infoLayout.addComponent(infoLabel);
-		infoLayout.setExpandRatio(infoLabel, 1);
-		mainLayout.addComponent(infoLayout);
+		Image icon = new Image(VaadinUiUtil.THEME_IMAGE_PATH + "img/info-icon.png", "");
+		icon.setHeight("35px");
+		icon.setWidth("35px");
+		infoLayout.add(icon);
+		Span infoLabel = new Span(I18nProperties.getString(Strings.infoImportSimilarity));
+		infoLayout.add(infoLabel);
+		infoLayout.setFlexGrow(1, infoLabel);
+		mainLayout.add(infoLayout);
 		CssStyles.style(infoLayout, CssStyles.VSPACE_3);
 
 		// Imported case info
 		VerticalLayout caseInfoContainer = new VerticalLayout();
-		caseInfoContainer.setWidth(100, Unit.PERCENTAGE);
+		caseInfoContainer.setWidthFull();
 		CssStyles
 			.style(caseInfoContainer, CssStyles.BACKGROUND_ROUNDED_CORNERS, CssStyles.BACKGROUND_SUB_CRITERIA, CssStyles.VSPACE_3, "v-scrollable");
 
-		Label newCaseLabel = new Label(I18nProperties.getString(Strings.headingImportedCaseInfo));
+		Span newCaseLabel = new Span(I18nProperties.getString(Strings.headingImportedCaseInfo));
 		CssStyles.style(newCaseLabel, CssStyles.LABEL_BOLD, CssStyles.VSPACE_4);
-		caseInfoContainer.addComponent(newCaseLabel);
+		caseInfoContainer.add(newCaseLabel);
 
 		HorizontalLayout caseInfoLayout = new HorizontalLayout();
 		caseInfoLayout.setSpacing(true);
 		caseInfoLayout.setSizeUndefined();
 		{
-			Label diseaseField = new Label();
-			diseaseField.setCaption(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.DISEASE));
-			diseaseField.setValue(DiseaseHelper.toString(newCase.getDisease(), newCase.getDiseaseDetails()));
-			diseaseField.setWidthUndefined();
-			caseInfoLayout.addComponent(diseaseField);
+			Span diseaseField = new Span();
+			String diseaseFieldCaption = I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.DISEASE);
+			diseaseField.setText(DiseaseHelper.toString(newCase.getDisease(), newCase.getDiseaseDetails()));
+			diseaseField.setWidth(null);
+			caseInfoLayout.add(withCaption(diseaseFieldCaption, diseaseField));
 
-			Label reportDateField = new Label();
-			reportDateField.setCaption(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.REPORT_DATE));
-			reportDateField.setValue(DateFormatHelper.formatDate(newCase.getReportDate()));
-			reportDateField.setWidthUndefined();
-			caseInfoLayout.addComponent(reportDateField);
+			Span reportDateField = new Span();
+			String reportDateFieldCaption = I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.REPORT_DATE);
+			reportDateField.setText(DateFormatHelper.formatDate(newCase.getReportDate()));
+			reportDateField.setWidth(null);
+			caseInfoLayout.add(withCaption(reportDateFieldCaption, reportDateField));
 
-			Label responsibleRegionField = new Label();
-			responsibleRegionField.setCaption(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_REGION));
-			responsibleRegionField.setValue(newCase.getResponsibleRegion().buildCaption());
-			responsibleRegionField.setWidthUndefined();
-			caseInfoLayout.addComponent(responsibleRegionField);
+			Span responsibleRegionField = new Span();
+			String responsibleRegionFieldCaption = I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_REGION);
+			responsibleRegionField.setText(newCase.getResponsibleRegion().buildCaption());
+			responsibleRegionField.setWidth(null);
+			caseInfoLayout.add(withCaption(responsibleRegionFieldCaption, responsibleRegionField));
 
-			Label responsibleDistrictField = new Label();
-			responsibleDistrictField.setCaption(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_DISTRICT));
-			responsibleDistrictField.setValue(newCase.getResponsibleDistrict().buildCaption());
-			responsibleDistrictField.setWidthUndefined();
-			caseInfoLayout.addComponent(responsibleDistrictField);
+			Span responsibleDistrictField = new Span();
+			String responsibleDistrictFieldCaption = I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_DISTRICT);
+			responsibleDistrictField.setText(newCase.getResponsibleDistrict().buildCaption());
+			responsibleDistrictField.setWidth(null);
+			caseInfoLayout.add(withCaption(responsibleDistrictFieldCaption, responsibleDistrictField));
 
 			if (newCase.getRegion() != null) {
-				Label regionField = new Label();
-				regionField.setCaption(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.REGION));
-				regionField.setValue(newCase.getRegion().buildCaption());
-				regionField.setWidthUndefined();
-				caseInfoLayout.addComponent(regionField);
+				Span regionField = new Span();
+				String regionFieldCaption = I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.REGION);
+				regionField.setText(newCase.getRegion().buildCaption());
+				regionField.setWidth(null);
+				caseInfoLayout.add(withCaption(regionFieldCaption, regionField));
 			}
 
 			if (newCase.getDistrict() != null) {
-				Label districtField = new Label();
-				districtField.setCaption(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.DISTRICT));
-				districtField.setValue(newCase.getDistrict().buildCaption());
-				districtField.setWidthUndefined();
-				caseInfoLayout.addComponent(districtField);
+				Span districtField = new Span();
+				String districtFieldCaption = I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.DISTRICT);
+				districtField.setText(newCase.getDistrict().buildCaption());
+				districtField.setWidth(null);
+				caseInfoLayout.add(withCaption(districtFieldCaption, districtField));
 			}
 
-			Label facilityField = new Label();
-			facilityField.setCaption(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.HEALTH_FACILITY));
-			facilityField.setValue(
+			Span facilityField = new Span();
+			String facilityFieldCaption = I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.HEALTH_FACILITY);
+			facilityField.setText(
 				FacilityHelper.buildFacilityString(
 					null,
 					newCase.getHealthFacility() != null ? newCase.getHealthFacility().buildCaption() : "",
 					newCase.getHealthFacilityDetails()));
-			facilityField.setWidthUndefined();
-			caseInfoLayout.addComponent(facilityField);
+			facilityField.setWidth(null);
+			caseInfoLayout.add(withCaption(facilityFieldCaption, facilityField));
 
-			Label firstNameField = new Label();
-			firstNameField.setCaption(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.FIRST_NAME));
-			firstNameField.setValue(newPerson.getFirstName());
-			firstNameField.setWidthUndefined();
-			caseInfoLayout.addComponent(firstNameField);
+			Span firstNameField = new Span();
+			String firstNameFieldCaption = I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.FIRST_NAME);
+			firstNameField.setText(newPerson.getFirstName());
+			firstNameField.setWidth(null);
+			caseInfoLayout.add(withCaption(firstNameFieldCaption, firstNameField));
 
-			Label lastNameField = new Label();
-			lastNameField.setCaption(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.LAST_NAME));
-			lastNameField.setValue(newPerson.getLastName());
-			lastNameField.setWidthUndefined();
-			caseInfoLayout.addComponent(lastNameField);
+			Span lastNameField = new Span();
+			String lastNameFieldCaption = I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.LAST_NAME);
+			lastNameField.setText(newPerson.getLastName());
+			lastNameField.setWidth(null);
+			caseInfoLayout.add(withCaption(lastNameFieldCaption, lastNameField));
 
-			Label ageAndBirthDateField = new Label();
-			ageAndBirthDateField.setCaption(I18nProperties.getCaption(Captions.personAgeAndBirthdate));
-			ageAndBirthDateField.setValue(
+			Span ageAndBirthDateField = new Span();
+			String ageAndBirthDateFieldCaption = I18nProperties.getCaption(Captions.personAgeAndBirthdate);
+			ageAndBirthDateField.setText(
 				PersonHelper.getAgeAndBirthdateString(
 					newPerson.getApproximateAge(),
 					newPerson.getApproximateAgeType(),
 					newPerson.getBirthdateDD(),
 					newPerson.getBirthdateMM(),
 					newPerson.getBirthdateYYYY()));
-			ageAndBirthDateField.setWidthUndefined();
-			caseInfoLayout.addComponent(ageAndBirthDateField);
+			ageAndBirthDateField.setWidth(null);
+			caseInfoLayout.add(withCaption(ageAndBirthDateFieldCaption, ageAndBirthDateField));
 
-			Label sexField = new Label();
-			sexField.setCaption(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.SEX));
-			sexField.setValue(newPerson.getSex() != null ? newPerson.getSex().toString() : "");
-			sexField.setWidthUndefined();
-			caseInfoLayout.addComponent(sexField);
+			Span sexField = new Span();
+			String sexFieldCaption = I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.SEX);
+			sexField.setText(newPerson.getSex() != null ? newPerson.getSex().toString() : "");
+			sexField.setWidth(null);
+			caseInfoLayout.add(withCaption(sexFieldCaption, sexField));
 		}
 
-		caseInfoContainer.addComponent(caseInfoLayout);
-		mainLayout.addComponent(caseInfoContainer);
+		caseInfoContainer.add(caseInfoLayout);
+		mainLayout.add(caseInfoContainer);
 	}
 
 	@Override
@@ -156,24 +156,24 @@ public class CasePickOrImportField extends CasePickOrCreateField {
 		overrideCheckBox = new CheckBox();
 		overrideCheckBox.setCaption(I18nProperties.getCaption(Captions.caseImportMergeCase));
 		CssStyles.style(overrideCheckBox, CssStyles.VSPACE_3);
-		mainLayout.addComponent(overrideCheckBox);
+		mainLayout.add(overrideCheckBox);
 
 		addAndConfigureGrid();
 		addCreateCaseComponent();
 
 		pickCase.addValueChangeListener(e -> {
-			if (e.getProperty().getValue() != null) {
+			if (e.getValue() != null) {
 				overrideCheckBox.setEnabled(true);
 			}
 		});
 
 		createCase.addValueChangeListener(e -> {
-			if (e.getProperty().getValue() != null) {
+			if (e.getValue() != null) {
 				overrideCheckBox.setEnabled(false);
 			}
 		});
 
-		setInternalValue(super.getInternalValue());
+		setPresentationValue(super.generateModelValue());
 		pickCase.setValue(PICK_CASE);
 
 		return mainLayout;

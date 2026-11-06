@@ -1,5 +1,7 @@
 package de.symeda.sormas.ui.immunization.components.layout.directory;
 
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
@@ -8,17 +10,15 @@ import de.symeda.sormas.ui.immunization.components.filter.ImmunizationFilterForm
 
 public class FilterFormLayout extends VerticalLayout {
 
-	private static final float PERCENTAGE_WIDTH = 100;
-
 	private final ImmunizationFilterForm filterForm;
 
 	public FilterFormLayout() {
 		setSpacing(false);
-		setMargin(false);
-		setWidth(PERCENTAGE_WIDTH, Unit.PERCENTAGE);
+		setPadding(false);
+		setWidthFull();
 
 		filterForm = new ImmunizationFilterForm();
-		addComponent(filterForm);
+		add(filterForm);
 	}
 
 	public ImmunizationCriteria getValue() {
@@ -29,11 +29,11 @@ public class FilterFormLayout extends VerticalLayout {
 		filterForm.setValue(criteria);
 	}
 
-	public void addResetHandler(Button.ClickListener listener) {
+	public void addResetHandler(ComponentEventListener<ClickEvent<Button>> listener) {
 		filterForm.addResetHandler(listener);
 	}
 
-	public void addApplyHandler(Button.ClickListener listener) {
+	public void addApplyHandler(ComponentEventListener<ClickEvent<Button>> listener) {
 		filterForm.addApplyHandler(listener);
 	}
 }

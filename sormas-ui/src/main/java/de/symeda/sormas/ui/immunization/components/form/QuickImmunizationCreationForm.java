@@ -25,20 +25,18 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import com.vaadin.data.Binder;
-import com.vaadin.data.Result;
-import com.vaadin.data.ValidationResult;
-import com.vaadin.data.ValueContext;
-import com.vaadin.data.converter.StringToIntegerConverter;
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.DateField;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
-import com.vaadin.v7.data.fieldgroup.FieldGroup.CommitEvent;
-import com.vaadin.v7.data.fieldgroup.FieldGroup.CommitException;
-import com.vaadin.v7.data.util.converter.Converter;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.converter.StringToIntegerConverter;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -54,6 +52,7 @@ import de.symeda.sormas.api.utils.Diseases;
 import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.api.vaccination.VaccinationDto;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
+import de.symeda.sormas.ui.utils.AbstractForm.BeanFieldGroup;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.FieldHelper;
@@ -112,7 +111,7 @@ public class QuickImmunizationCreationForm extends AbstractEditForm<Immunization
 	}
 
 	@Override
-	public void preCommit(CommitEvent commitEvent) throws CommitException {
+	public void preCommit(BeanFieldGroup.CommitEvent commitEvent) throws BeanFieldGroup.CommitException {
 		super.preCommit(commitEvent);
 		fieldsComponent.validate(); // throws InvalidValueException (RuntimeException) on failure
 	}
@@ -138,19 +137,19 @@ public class QuickImmunizationCreationForm extends AbstractEditForm<Immunization
 
 		private ComboBox<Disease> disease;
 		private TextField diseaseDetails;
-		private Label diseaseDetailsSpacer;
+		private Span diseaseDetailsSpacer;
 		private HorizontalLayout diseaseRow;
-		private DateField reportDate;
+		private DatePicker reportDate;
 		private ComboBox<MeansOfImmunization> meansOfImmunization;
 		private ComboBox<RegionReferenceDto> responsibleRegion;
 		private ComboBox<DistrictReferenceDto> responsibleDistrict;
 		private HorizontalLayout jurisdictionRow;
 		private TextField numberOfDoses;
-		private DateField dateOfMostRecentDose;
+		private DatePicker dateOfMostRecentDose;
 		private ComboBox<VaccinationInfoSource> vaccinationInfoSource;
-		private DateField validFrom;
-		private DateField validUntil;
-		private Label validityWarningLabel;
+		private DatePicker validFrom;
+		private DatePicker validUntil;
+		private Span validityWarningLabel;
 		private boolean diseaseSelectionVisible;
 
 		FieldsComponent() {
@@ -191,10 +190,10 @@ public class QuickImmunizationCreationForm extends AbstractEditForm<Immunization
 
 		private void buildLayout() {
 			disease = createComboBox(ImmunizationDto.DISEASE, ImmunizationDto.I18N_PREFIX);
-			disease.setItemCaptionGenerator(Disease::toString);
+			disease.setItemLabelGenerator(Disease::toString);
 			refreshDiseaseOptions(null);
 
-			diseaseDetails = createTextField(ImmunizationDto.DISEASE_DETAILS, ImmunizationDto.I18N_PREFIX, ValueChangeMode.BLUR);
+			diseaseDetails = createTextField(ImmunizationDto.DISEASE_DETAILS, ImmunizationDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
 			diseaseDetails.setVisible(false);
 
 			diseaseDetailsSpacer = createSpacer();
@@ -204,71 +203,73 @@ public class QuickImmunizationCreationForm extends AbstractEditForm<Immunization
 
 			meansOfImmunization = createComboBox(ImmunizationDto.MEANS_OF_IMMUNIZATION, ImmunizationDto.I18N_PREFIX);
 			refreshMeansOfImmunizationOptions(null);
-			meansOfImmunization.setItemCaptionGenerator(I18nProperties::getEnumCaption);
+			meansOfImmunization.setItemLabelGenerator(I18nProperties::getEnumCaption);
 			addRow(reportDate, meansOfImmunization);
 
 			responsibleRegion = createComboBox(ImmunizationDto.RESPONSIBLE_REGION, ImmunizationDto.I18N_PREFIX);
-			responsibleRegion.setItemCaptionGenerator(item -> item != null ? item.buildCaption() : "");
+			responsibleRegion.setItemLabelGenerator(item -> item != null ? item.buildCaption() : "");
 			responsibleRegion.setItems(FacadeProvider.getRegionFacade().getAllActiveByServerCountry());
 
 			responsibleDistrict = createComboBox(ImmunizationDto.RESPONSIBLE_DISTRICT, ImmunizationDto.I18N_PREFIX);
-			responsibleDistrict.setItemCaptionGenerator(item -> item != null ? item.buildCaption() : "");
+			responsibleDistrict.setItemLabelGenerator(item -> item != null ? item.buildCaption() : "");
 			jurisdictionRow = addRow(responsibleRegion, responsibleDistrict);
 
 			numberOfDoses = createTextField(ImmunizationDto.NUMBER_OF_DOSES, ImmunizationDto.I18N_PREFIX);
 			addRow(numberOfDoses, null);
 
-			dateOfMostRecentDose = new DateField();
+			dateOfMostRecentDose = new DatePicker();
 			dateOfMostRecentDose.setId("dateOfMostRecentDose");
-			dateOfMostRecentDose.setCaption(I18nProperties.getCaption(Captions.quickImmunizationDateOfMostRecentDose));
+			dateOfMostRecentDose.setLabel(I18nProperties.getCaption(Captions.quickImmunizationDateOfMostRecentDose));
 			CssStyles.style(dateOfMostRecentDose, CssStyles.CAPTION_ON_TOP);
-			dateOfMostRecentDose.setWidth(100, Unit.PERCENTAGE);
+			dateOfMostRecentDose.setWidthFull();
 			dateOfMostRecentDose.setLocale(I18nProperties.getUserLanguage().getLocale());
-			dateOfMostRecentDose.setDateFormat(DateFormatHelper.getDateFormatPattern());
+			DatePicker.DatePickerI18n dateOfMostRecentDoseI18n = new DatePicker.DatePickerI18n();
+			dateOfMostRecentDoseI18n.setDateFormat(DateFormatHelper.getDateFormatPattern());
+			dateOfMostRecentDose.setI18n(dateOfMostRecentDoseI18n);
 
 			vaccinationInfoSource = new ComboBox<>();
 			vaccinationInfoSource.setId("vaccinationInfoSource");
-			vaccinationInfoSource.setCaption(I18nProperties.getPrefixCaption(VaccinationDto.I18N_PREFIX, VaccinationDto.VACCINATION_INFO_SOURCE));
+			vaccinationInfoSource.setLabel(I18nProperties.getPrefixCaption(VaccinationDto.I18N_PREFIX, VaccinationDto.VACCINATION_INFO_SOURCE));
 			vaccinationInfoSource.setItems(Arrays.asList(VaccinationInfoSource.values()));
-			vaccinationInfoSource.setItemCaptionGenerator(I18nProperties::getEnumCaption);
+			vaccinationInfoSource.setItemLabelGenerator(I18nProperties::getEnumCaption);
 			CssStyles.style(vaccinationInfoSource, CssStyles.CAPTION_ON_TOP);
-			vaccinationInfoSource.setWidth(100, Unit.PERCENTAGE);
+			vaccinationInfoSource.setWidthFull();
 			addRow(dateOfMostRecentDose, vaccinationInfoSource);
 
 			validFrom = createDateField(ImmunizationDto.VALID_FROM, ImmunizationDto.I18N_PREFIX);
 			validUntil = createDateField(ImmunizationDto.VALID_UNTIL, ImmunizationDto.I18N_PREFIX);
 			addRow(validFrom, validUntil);
 
-			validityWarningLabel = new Label(I18nProperties.getCaption(Captions.quickImmunizationValidityDatesCannotBeCalculated));
+			validityWarningLabel = new Span(I18nProperties.getCaption(Captions.quickImmunizationValidityDatesCannotBeCalculated));
 			validityWarningLabel.setId("validityDatesWarning");
-			validityWarningLabel.setWidth(100, Unit.PERCENTAGE);
+			validityWarningLabel.setWidthFull();
 			CssStyles.style(validityWarningLabel, CssStyles.LABEL_WARNING, CssStyles.LABEL_WHITE_SPACE_NORMAL);
 			validityWarningLabel.setVisible(false);
-			addComponent(validityWarningLabel);
+			add(validityWarningLabel);
 		}
 
 		private void bindFields() {
 			binder.forField(disease)
-				.asRequired(I18nProperties.getValidationError(Validations.required, disease.getCaption()))
+				.asRequired(I18nProperties.getValidationError(Validations.required, disease.getLabel()))
 				.bind(ImmunizationDto::getDisease, ImmunizationDto::setDisease);
 
 			binder.forField(diseaseDetails).withNullRepresentation("").bind(ImmunizationDto::getDiseaseDetails, ImmunizationDto::setDiseaseDetails);
 
 			binder.forField(reportDate)
-				.asRequired(I18nProperties.getValidationError(Validations.required, reportDate.getCaption()))
+				.asRequired(I18nProperties.getValidationError(Validations.required, reportDate.getLabel()))
 				.withConverter(new LocalDateToDateConverter())
 				.bind(ImmunizationDto::getReportDate, ImmunizationDto::setReportDate);
 
 			binder.forField(meansOfImmunization)
-				.asRequired(I18nProperties.getValidationError(Validations.required, meansOfImmunization.getCaption()))
+				.asRequired(I18nProperties.getValidationError(Validations.required, meansOfImmunization.getLabel()))
 				.bind(ImmunizationDto::getMeansOfImmunization, ImmunizationDto::setMeansOfImmunization);
 
 			binder.forField(responsibleRegion)
-				.asRequired(I18nProperties.getValidationError(Validations.required, responsibleRegion.getCaption()))
+				.asRequired(I18nProperties.getValidationError(Validations.required, responsibleRegion.getLabel()))
 				.bind(ImmunizationDto.RESPONSIBLE_REGION);
 
 			binder.forField(responsibleDistrict)
-				.asRequired(I18nProperties.getValidationError(Validations.required, responsibleDistrict.getCaption()))
+				.asRequired(I18nProperties.getValidationError(Validations.required, responsibleDistrict.getLabel()))
 				.bind(ImmunizationDto.RESPONSIBLE_DISTRICT);
 
 			binder.forField(numberOfDoses)
@@ -296,7 +297,7 @@ public class QuickImmunizationCreationForm extends AbstractEditForm<Immunization
 				return !v.isBefore(validFrom.getValue())
 					? ValidationResult.ok()
 					: ValidationResult
-						.error(I18nProperties.getValidationError(Validations.beforeDate, validUntil.getCaption(), validFrom.getCaption()));
+						.error(I18nProperties.getValidationError(Validations.beforeDate, validUntil.getLabel(), validFrom.getLabel()));
 			}).withConverter(new LocalDateToDateConverter()).bind(ImmunizationDto::getValidUntil, ImmunizationDto::setValidUntil);
 		}
 
@@ -504,7 +505,7 @@ public class QuickImmunizationCreationForm extends AbstractEditForm<Immunization
 		// LocalDate ↔ java.util.Date converter
 		// -------------------------------------------------------------------------
 
-		private static final class LocalDateToDateConverter implements com.vaadin.data.Converter<LocalDate, Date> {
+		private static final class LocalDateToDateConverter implements com.vaadin.flow.data.converter.Converter<LocalDate, Date> {
 
 			@Override
 			public Result<Date> convertToModel(LocalDate value, ValueContext context) {

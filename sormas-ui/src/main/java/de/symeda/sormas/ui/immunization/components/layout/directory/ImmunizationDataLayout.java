@@ -11,12 +11,12 @@ public class ImmunizationDataLayout extends VerticalLayout {
 
 	public ImmunizationDataLayout(ImmunizationCriteria criteria) {
 		grid = new ImmunizationGrid(criteria);
-		addComponent(grid);
+		add(grid);
 
-		setMargin(false);
+		setPadding(false);
 		setSpacing(false);
 		setSizeFull();
-		setExpandRatio(grid, 1);
+		setFlexGrow(1, grid);
 	}
 
 	public ImmunizationGrid getGrid() {

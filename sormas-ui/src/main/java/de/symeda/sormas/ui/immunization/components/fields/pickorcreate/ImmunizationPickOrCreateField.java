@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.ui.CustomField;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
@@ -14,6 +13,7 @@ import de.symeda.sormas.api.immunization.ImmunizationDto;
 import de.symeda.sormas.ui.immunization.components.fields.info.ImmunizationInfo;
 import de.symeda.sormas.ui.immunization.components.fields.info.InfoLayout;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 
 public class ImmunizationPickOrCreateField extends CustomField<String> {
 
@@ -40,38 +40,38 @@ public class ImmunizationPickOrCreateField extends CustomField<String> {
 		VerticalLayout mainLayout = new VerticalLayout();
 		mainLayout.setSpacing(true);
 		mainLayout.setSizeUndefined();
-		mainLayout.setWidth(100, Unit.PERCENTAGE);
+		mainLayout.setWidthFull();
 
 		String infoText = String.format(I18nProperties.getString(Strings.infoPickOrCreateImmunization), newImmunization.getDisease().toString());
 		InfoLayout infoLayout = new InfoLayout(infoText);
-		mainLayout.addComponent(infoLayout);
+		mainLayout.add(infoLayout);
 		CssStyles.style(infoLayout, CssStyles.VSPACE_3);
 
 		ImmunizationInfo existingImmunization = new ImmunizationInfo(I18nProperties.getString(Strings.infoPickOrCreateImmunizationExisting));
-		existingImmunization.addComponent(new ImmunizationInfoLayout(similarImmunization));
-		mainLayout.addComponent(existingImmunization);
+		existingImmunization.add(new ImmunizationInfoLayout(similarImmunization));
+		mainLayout.add(existingImmunization);
 
 		ImmunizationPickOrCreateOption keepImmunization =
 			new ImmunizationPickOrCreateOption(KEEP_IMMUNIZATION, I18nProperties.getCaption(Captions.immunizationKeepImmunization));
-		mainLayout.addComponent(keepImmunization);
+		mainLayout.add(keepImmunization);
 
 		ImmunizationInfo newImmunizationInfo = new ImmunizationInfo(I18nProperties.getString(Strings.infoPickOrCreateImmunizationNew));
-		newImmunizationInfo.addComponent(new ImmunizationInfoLayout(newImmunization));
-		mainLayout.addComponent(newImmunizationInfo);
+		newImmunizationInfo.add(new ImmunizationInfoLayout(newImmunization));
+		mainLayout.add(newImmunizationInfo);
 
 		ImmunizationPickOrCreateOption overwriteImmunization =
 			new ImmunizationPickOrCreateOption(OVERWRITE_IMMUNIZATION, I18nProperties.getCaption(Captions.immunizationOverwriteImmunization));
-		mainLayout.addComponent(overwriteImmunization);
+		mainLayout.add(overwriteImmunization);
 
 		ImmunizationPickOrCreateOption createNewImmunization =
 			new ImmunizationPickOrCreateOption(CREATE_NEW_IMMUNIZATION, I18nProperties.getCaption(Captions.immunizationCreateNewImmunization));
-		mainLayout.addComponent(createNewImmunization);
+		mainLayout.add(createNewImmunization);
 
 		keepImmunization.addValueChangeListener(e -> {
 			if (e.getValue() != null) {
 				overwriteImmunization.setValue(null);
 				createNewImmunization.setValue(null);
-				doSetValue(null);
+				setPresentationValue(null);
 				if (selectionChangeCallback != null) {
 					selectionChangeCallback.accept(true);
 				}
@@ -82,7 +82,7 @@ public class ImmunizationPickOrCreateField extends CustomField<String> {
 			if (e.getValue() != null) {
 				keepImmunization.setValue(null);
 				createNewImmunization.setValue(null);
-				doSetValue(similarImmunization.getUuid());
+				setPresentationValue(similarImmunization.getUuid());
 				if (selectionChangeCallback != null) {
 					selectionChangeCallback.accept(true);
 				}
@@ -93,7 +93,7 @@ public class ImmunizationPickOrCreateField extends CustomField<String> {
 			if (e.getValue() != null) {
 				overwriteImmunization.setValue(null);
 				keepImmunization.setValue(null);
-				doSetValue(newImmunization.getUuid());
+				setPresentationValue(newImmunization.getUuid());
 				if (selectionChangeCallback != null) {
 					selectionChangeCallback.accept(true);
 				}
@@ -103,8 +103,11 @@ public class ImmunizationPickOrCreateField extends CustomField<String> {
 		return mainLayout;
 	}
 
+	/**
+	 * Was Vaadin 8 {@code doSetValue}: stores the value without a value change event.
+	 */
 	@Override
-	protected void doSetValue(String selectedImmunizationUuid) {
+	protected void setPresentationValue(String selectedImmunizationUuid) {
 		this.selectedImmunizationUuid = selectedImmunizationUuid;
 	}
 

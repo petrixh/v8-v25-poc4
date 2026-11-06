@@ -28,13 +28,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dialog.Dialog;
-import de.symeda.sormas.ui.utils.fields.CheckBox;
-import de.symeda.sormas.ui.utils.fields.ComboBox;
-import de.symeda.sormas.ui.utils.fields.DateField;
-import de.symeda.sormas.ui.utils.fields.Field;
-import de.symeda.sormas.ui.utils.fields.TextField;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -67,6 +63,11 @@ import de.symeda.sormas.ui.utils.DateComparisonValidator;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.InfrastructureFieldsHelper;
 import de.symeda.sormas.ui.utils.NumberValidator;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class ImmunizationCreationForm extends AbstractEditForm<ImmunizationDto> {
 
@@ -153,7 +154,7 @@ public class ImmunizationCreationForm extends AbstractEditForm<ImmunizationDto> 
 		immunizationStatusField.setValue(ImmunizationStatus.PENDING);
 		immunizationStatusField.setEnabled(false);
 
-		Label jurisdictionHeadingLabel = new Label(I18nProperties.getString(Strings.headingResponsibleJurisdiction));
+		Span jurisdictionHeadingLabel = new Span(I18nProperties.getString(Strings.headingResponsibleJurisdiction));
 		jurisdictionHeadingLabel.addClassName(H3);
 		getContent().addComponent(jurisdictionHeadingLabel, RESPONSIBLE_JURISDICTION_HEADING_LOC);
 
@@ -213,7 +214,7 @@ public class ImmunizationCreationForm extends AbstractEditForm<ImmunizationDto> 
 				.warningSimilarPersons(personCreateForm.getNationalHealthIdField().getValue(), null, () -> warningSimilarPersons = null);
 		});
 
-		diseaseField.addValueChangeListener((ValueChangeListener) valueChangeEvent -> {
+		diseaseField.addValueChangeListener(valueChangeEvent -> {
 			final Disease selectedDisease = (Disease) valueChangeEvent.getValue();
 			personCreateForm.updatePresentConditionEnum(selectedDisease);
 
@@ -457,8 +458,8 @@ public class ImmunizationCreationForm extends AbstractEditForm<ImmunizationDto> 
 	}
 
 	@Override
-	protected void setInternalValue(ImmunizationDto newValue) {
-		super.setInternalValue(newValue);
+	protected void setPresentationValue(ImmunizationDto newValue) {
+		super.setPresentationValue(newValue);
 
 		if (UiUtil.enabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {
 			hideAndFillJurisdictionFields();

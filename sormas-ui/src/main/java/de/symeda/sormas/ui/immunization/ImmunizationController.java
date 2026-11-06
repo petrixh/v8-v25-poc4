@@ -4,9 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
 
-import de.symeda.sormas.ui.navigation.Navigator;
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Notification;
+import com.vaadin.flow.component.Unit;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -35,6 +33,7 @@ import de.symeda.sormas.ui.immunization.components.fields.popup.SimilarImmunizat
 import de.symeda.sormas.ui.immunization.components.form.ImmunizationCreationForm;
 import de.symeda.sormas.ui.immunization.components.form.ImmunizationDataForm;
 import de.symeda.sormas.ui.immunization.components.form.QuickImmunizationCreationForm;
+import de.symeda.sormas.ui.navigation.Navigator;
 import de.symeda.sormas.ui.person.PersonSelectionGrid;
 import de.symeda.sormas.ui.utils.ArchiveHandlers;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
@@ -121,7 +120,7 @@ public class ImmunizationController {
 
 				FacadeProvider.getImmunizationFacade().saveQuickImmunization(dto, vaccinationInfoSource, dateOfMostRecentDose);
 
-				Notification.show(I18nProperties.getString(Strings.messageQuickImmunizationSaved), Notification.Type.HUMANIZED_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageQuickImmunizationSaved), NotificationHelper.Type.HUMANIZED_MESSAGE);
 				if (savedCallback != null) {
 					savedCallback.run();
 				}
@@ -163,12 +162,16 @@ public class ImmunizationController {
 					} else {
 						final PersonDto person = createForm.getPerson();
 						if (createForm.getWarningSimilarPersons() != null) {
+							// the similar-persons popup is a Dialog (1a-51); its first child is the wrapper component
+							@SuppressWarnings("unchecked")
 							CommitDiscardWrapperComponent<PersonSelectionGrid> warningPopUpDuplicatePerson =
 								(CommitDiscardWrapperComponent<PersonSelectionGrid>) viewComponent.getWrappedComponent()
 									.getWarningSimilarPersons()
-									.getContent();
+									.getChildren()
+									.findFirst()
+									.orElse(null);
 							warningPopUpDuplicatePerson.getDiscardButton().setVisible(true);
-							warningPopUpDuplicatePerson.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionContinue));
+							warningPopUpDuplicatePerson.getCommitButton().setText(I18nProperties.getCaption(Captions.actionContinue));
 							warningPopUpDuplicatePerson.addDoneListener(() -> {
 								if (!immunizationSaveTriggered) {
 									VaadinUiUtil.showModalPopupWindow(viewComponent, I18nProperties.getString(Strings.headingCreateNewImmunization));
@@ -287,10 +290,10 @@ public class ImmunizationController {
 				if (immunizationDtoValue.getImmunizationStatus() == ImmunizationStatus.ACQUIRED) {
 					NotificationHelper.showNotification(
 						I18nProperties.getString(Strings.messageImmunizationSavedVaccinationStatusUpdated),
-						Notification.Type.WARNING_MESSAGE,
+						NotificationHelper.Type.WARNING_MESSAGE,
 						-1);
 				} else {
-					Notification.show(I18nProperties.getString(Strings.messageImmunizationSaved), Notification.Type.WARNING_MESSAGE);
+					NotificationHelper.show(I18nProperties.getString(Strings.messageImmunizationSaved), NotificationHelper.Type.WARNING_MESSAGE);
 				}
 				SormasUI.refreshView();
 			}
@@ -368,10 +371,10 @@ public class ImmunizationController {
 
 		if (!similarImmunizations.isEmpty()) {
 			ImmunizationPickOrCreateField pickOrCreateField = new ImmunizationPickOrCreateField(immunizationDto, similarImmunizations);
-			pickOrCreateField.setWidth(1280, Sizeable.Unit.PIXELS);
+			pickOrCreateField.setWidth(1280, Unit.PIXELS);
 
 			final CommitDiscardWrapperComponent<ImmunizationPickOrCreateField> component = new CommitDiscardWrapperComponent<>(pickOrCreateField);
-			component.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionConfirm));
+			component.getCommitButton().setText(I18nProperties.getCaption(Captions.actionConfirm));
 			component.getCommitButton().setEnabled(false);
 			component.addCommitListener(() -> selectedImmunizationUuidConsumer.accept(pickOrCreateField.getValue()));
 
@@ -417,12 +420,12 @@ public class ImmunizationController {
 		ImmunizationDto similarImmunization,
 		Consumer<ImmunizationDto> callback) {
 		SimilarImmunizationPopup similarImmunizationPopup = new SimilarImmunizationPopup(immunizationDto, similarImmunization);
-		similarImmunizationPopup.setWidth(1280, Sizeable.Unit.PIXELS);
+		similarImmunizationPopup.setWidth(1280, Unit.PIXELS);
 
 		final CommitDiscardWrapperComponent<SimilarImmunizationPopup> component = new CommitDiscardWrapperComponent<>(similarImmunizationPopup);
 		component.getCommitButton().addClickListener(clickEvent -> callback.accept(immunizationDto));
-		component.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionSaveChanges));
-		component.getDiscardButton().setCaption(I18nProperties.getCaption(Captions.actionAdjustChanges));
+		component.getCommitButton().setText(I18nProperties.getCaption(Captions.actionSaveChanges));
+		component.getDiscardButton().setText(I18nProperties.getCaption(Captions.actionAdjustChanges));
 
 		VaadinUiUtil.showModalPopupWindow(component, I18nProperties.getString(Strings.headingSimilarImmunization));
 	}

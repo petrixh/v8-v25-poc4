@@ -100,11 +100,11 @@ public class ImmunizationGrid extends FilteredGrid<ImmunizationIndexDto, Immuniz
 		((Column<ImmunizationIndexDto, Date>) getColumn(ImmunizationIndexDto.RECOVERY_DATE))
 			.setRenderer(new DateRenderer(DateFormatHelper.getDateFormat()));
 
-		for (Column<ImmunizationIndexDto, ?> column : getColumns()) {
+		for (Column<ImmunizationIndexDto, ?> column : getAllColumns()) {
 			column.setCaption(
 				I18nProperties
-					.findPrefixCaptionWithDefault(column.getId(), column.getCaption(), ImmunizationIndexDto.I18N_PREFIX, PersonDto.I18N_PREFIX));
-			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getId()));
+					.findPrefixCaptionWithDefault(column.getKey(), column.getCaption(), ImmunizationIndexDto.I18N_PREFIX, PersonDto.I18N_PREFIX));
+			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getKey()));
 		}
 
 		if (UiUtil.enabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {

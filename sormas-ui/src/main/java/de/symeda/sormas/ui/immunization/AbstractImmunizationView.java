@@ -74,7 +74,7 @@ public abstract class AbstractImmunizationView extends AbstractEditAllowedDetail
 
 		ImmunizationDto dto = FacadeProvider.getImmunizationFacade().getByUuid(getReference().getUuid());
 		if (dto.isDeleted()) {
-			newComponent.setEnabled(false);
+			newComponent.getElement().setEnabled(false);
 		}
 	}
 }

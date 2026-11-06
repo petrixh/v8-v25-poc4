@@ -1,8 +1,8 @@
 package de.symeda.sormas.ui.immunization.immunizationlink;
 
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.ui.Label;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.immunization.ImmunizationListEntryDto;
@@ -21,53 +21,54 @@ public class ImmunizationListEntry extends SideComponentField {
 		this.immunization = immunization;
 
 		HorizontalLayout uuidReportLayout = new HorizontalLayout();
-		uuidReportLayout.setMargin(false);
+		uuidReportLayout.setPadding(false);
 		uuidReportLayout.setSpacing(true);
 
-		Label immunizationUuidLabel = new Label(DataHelper.getShortUuid(immunization.getUuid()));
-		immunizationUuidLabel.setDescription(immunization.getUuid());
+		Span immunizationUuidLabel = new Span(DataHelper.getShortUuid(immunization.getUuid()));
+		immunizationUuidLabel.setTitle(immunization.getUuid());
 		CssStyles.style(immunizationUuidLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
-		uuidReportLayout.addComponent(immunizationUuidLabel);
+		uuidReportLayout.add(immunizationUuidLabel);
 
-		Label diseaseLabel = new Label(DataHelper.toStringNullable(immunization.getDisease()));
+		Span diseaseLabel = new Span(DataHelper.toStringNullable(immunization.getDisease()));
 		CssStyles.style(diseaseLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
-		uuidReportLayout.addComponent(diseaseLabel);
+		uuidReportLayout.add(diseaseLabel);
 
 		uuidReportLayout.setWidthFull();
-		uuidReportLayout.setComponentAlignment(immunizationUuidLabel, Alignment.MIDDLE_LEFT);
-		uuidReportLayout.setComponentAlignment(diseaseLabel, Alignment.MIDDLE_RIGHT);
+		// was MIDDLE_LEFT / MIDDLE_RIGHT alignment of the two labels
+		uuidReportLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+		uuidReportLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 		addComponentToField(uuidReportLayout);
 
 		HorizontalLayout meansOfImmunizationLayout = new HorizontalLayout();
-		Label meansOfImmunizationLabel = new Label(
+		Span meansOfImmunizationLabel = new Span(
 			I18nProperties.getPrefixCaption(ImmunizationListEntryDto.I18N_PREFIX, ImmunizationListEntryDto.MEANS_OF_IMMUNIZATION)
 				+ SEPARATOR
 				+ DataHelper.toStringNullable(immunization.getMeansOfImmunization()));
-		meansOfImmunizationLayout.addComponent(meansOfImmunizationLabel);
+		meansOfImmunizationLayout.add(meansOfImmunizationLabel);
 		addComponentToField(meansOfImmunizationLayout);
 
 		HorizontalLayout immunizationStatusLayout = new HorizontalLayout();
-		Label immunizationStatusLabel = new Label(
+		Span immunizationStatusLabel = new Span(
 			I18nProperties.getPrefixCaption(ImmunizationListEntryDto.I18N_PREFIX, ImmunizationListEntryDto.IMMUNIZATION_STATUS)
 				+ SEPARATOR
 				+ DataHelper.toStringNullable(immunization.getImmunizationStatus()));
-		immunizationStatusLayout.addComponent(immunizationStatusLabel);
+		immunizationStatusLayout.add(immunizationStatusLabel);
 		addComponentToField(immunizationStatusLayout);
 
 		HorizontalLayout managementStatusLayout = new HorizontalLayout();
-		Label managementStatusLabel = new Label(
+		Span managementStatusLabel = new Span(
 			I18nProperties.getPrefixCaption(ImmunizationListEntryDto.I18N_PREFIX, ImmunizationListEntryDto.IMMUNIZATION_MANAGEMENT_STATUS)
 				+ SEPARATOR
 				+ DataHelper.toStringNullable(immunization.getImmunizationManagementStatus()));
-		managementStatusLayout.addComponent(managementStatusLabel);
+		managementStatusLayout.add(managementStatusLabel);
 		addComponentToField(managementStatusLayout);
 
 		HorizontalLayout immunizationPeriodLayout = new HorizontalLayout();
-		Label reportDateLabel = new Label(
+		Span reportDateLabel = new Span(
 			I18nProperties.getPrefixCaption(ImmunizationListEntryDto.I18N_PREFIX, ImmunizationListEntryDto.IMMUNIZATION_PERIOD)
 				+ SEPARATOR
 				+ DateFormatHelper.buildPeriodString(immunization.getStartDate(), immunization.getEndDate()));
-		immunizationPeriodLayout.addComponent(reportDateLabel);
+		immunizationPeriodLayout.add(reportDateLabel);
 		addComponentToField(immunizationPeriodLayout);
 	}
 

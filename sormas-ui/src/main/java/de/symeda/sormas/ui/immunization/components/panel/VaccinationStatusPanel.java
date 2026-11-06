@@ -18,9 +18,8 @@ package de.symeda.sormas.ui.immunization.components.panel;
 import java.util.Date;
 import java.util.Objects;
 
-import com.vaadin.server.Sizeable;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -61,14 +60,14 @@ public class VaccinationStatusPanel extends VerticalLayout {
     private HorizontalLayout referencePeriodRow;
     private HorizontalLayout vaccinationStatusLastUpdatedRow;
 
-    private Label vaccinationStatusValueLabel;
-    private Label vaccinationStatusDetailsValueLabel;
-    private Label numberOfDosesValueLabel;
-    private Label dateOfLastDoseValueLabel;
-    private Label informationReliabilityValueLabel;
-    private Label referencePeriodCaptionLabel;
-    private Label referencePeriodValueLabel;
-    private Label vaccinationStatusLastUpdatedValueLabel;
+    private Span vaccinationStatusValueLabel;
+    private Span vaccinationStatusDetailsValueLabel;
+    private Span numberOfDosesValueLabel;
+    private Span dateOfLastDoseValueLabel;
+    private Span informationReliabilityValueLabel;
+    private Span referencePeriodCaptionLabel;
+    private Span referencePeriodValueLabel;
+    private Span vaccinationStatusLastUpdatedValueLabel;
 
     public VaccinationStatusPanel() {
 
@@ -81,8 +80,8 @@ public class VaccinationStatusPanel extends VerticalLayout {
         captionReferencePeriod = I18nProperties.getCaption("ImmunizationSidePanel.referencePeriod");
         captionVaccinationStatusLastUpdated = I18nProperties.getCaption("ImmunizationSidePanel.vaccinationStatusLastUpdated");
 
-        setWidth(100, Sizeable.Unit.PERCENTAGE);
-        setMargin(false);
+        setWidthFull();
+        setPadding(false);
         setSpacing(false);
 
         initializeComponents();
@@ -147,59 +146,59 @@ public class VaccinationStatusPanel extends VerticalLayout {
     }
 
     protected void initializeComponents() {
-        vaccinationStatusValueLabel = new Label();
+        vaccinationStatusValueLabel = new Span();
         vaccinationStatusRow = createLabelRow(captionVaccinationStatus, vaccinationStatusValueLabel);
 
-        vaccinationStatusDetailsValueLabel = new Label();
+        vaccinationStatusDetailsValueLabel = new Span();
         vaccinationStatusDetailsRow = createLabelRow(captionVaccinationStatusDetails, vaccinationStatusDetailsValueLabel);
 
-        numberOfDosesValueLabel = new Label();
+        numberOfDosesValueLabel = new Span();
         numberOfDosesRow = createLabelRow(captionNumberOfDoses, numberOfDosesValueLabel);
 
-        dateOfLastDoseValueLabel = new Label();
+        dateOfLastDoseValueLabel = new Span();
         dateOfLastDoseRow = createLabelRow(captionDateOfLastDose, dateOfLastDoseValueLabel);
 
-        informationReliabilityValueLabel = new Label();
+        informationReliabilityValueLabel = new Span();
         informationReliabilityRow = createLabelRow(captionInformationReliability, informationReliabilityValueLabel);
 
-        referencePeriodCaptionLabel = new Label(captionReferencePeriod);
-        referencePeriodValueLabel = new Label();
+        referencePeriodCaptionLabel = new Span(captionReferencePeriod);
+        referencePeriodValueLabel = new Span();
         referencePeriodRow = createLabelRow(referencePeriodCaptionLabel, referencePeriodValueLabel);
 
-        vaccinationStatusLastUpdatedValueLabel = new Label();
+        vaccinationStatusLastUpdatedValueLabel = new Span();
         vaccinationStatusLastUpdatedRow = createLabelRow(captionVaccinationStatusLastUpdated, vaccinationStatusLastUpdatedValueLabel);
     }
 
-    protected HorizontalLayout createLabelRow(String caption, Label valueLabel) {
-        return createLabelRow(new Label(caption), valueLabel);
+    protected HorizontalLayout createLabelRow(String caption, Span valueLabel) {
+        return createLabelRow(new Span(caption), valueLabel);
     }
 
-    protected HorizontalLayout createLabelRow(Label captionLabel, Label valueLabel) {
+    protected HorizontalLayout createLabelRow(Span captionLabel, Span valueLabel) {
         HorizontalLayout row = new HorizontalLayout();
-        row.setWidth(100, Sizeable.Unit.PERCENTAGE);
-        row.setMargin(false);
+        row.setWidthFull();
+        row.setPadding(false);
         row.setSpacing(false);
 
-        String caption = captionLabel.getValue();
-        captionLabel.setDescription(caption);
-        valueLabel.setDescription(caption);
-        captionLabel.setWidthUndefined();
+        String caption = captionLabel.getText();
+        captionLabel.setTitle(caption);
+        valueLabel.setTitle(caption);
+        captionLabel.setWidth(null);
 
-        row.addComponents(captionLabel, valueLabel);
+        row.add(captionLabel, valueLabel);
 
-        row.setExpandRatio(captionLabel, 0.5f);
-        row.setExpandRatio(valueLabel, 1.0f);
+        row.setFlexGrow(0.5, captionLabel);
+        row.setFlexGrow(1.0, valueLabel);
         return row;
     }
 
     protected void buildLayout() {
-        addComponent(vaccinationStatusRow);
-        addComponent(vaccinationStatusDetailsRow);
-        addComponent(numberOfDosesRow);
-        addComponent(dateOfLastDoseRow);
-        addComponent(informationReliabilityRow);
-        addComponent(referencePeriodRow);
-        addComponent(vaccinationStatusLastUpdatedRow);
+        add(vaccinationStatusRow);
+        add(vaccinationStatusDetailsRow);
+        add(numberOfDosesRow);
+        add(dateOfLastDoseRow);
+        add(informationReliabilityRow);
+        add(referencePeriodRow);
+        add(vaccinationStatusLastUpdatedRow);
     }
 
     protected void updateComponents() {
@@ -211,10 +210,10 @@ public class VaccinationStatusPanel extends VerticalLayout {
         VaccinationStatus vaccinationStatus = data.getVaccinationStatus();
         if (vaccinationStatus != null) {
             vaccinationStatusRow.setVisible(true);
-            vaccinationStatusValueLabel.setValue(vaccinationStatus.toString());
+            vaccinationStatusValueLabel.setText(vaccinationStatus.toString());
         } else {
             vaccinationStatusRow.setVisible(false);
-            vaccinationStatusValueLabel.setValue("");
+            vaccinationStatusValueLabel.setText("");
         }
         vaccinationStatusValueLabel.removeClassNames(CssStyles.LABEL_POSITIVE, CssStyles.LABEL_CRITICAL);
         if (vaccinationStatus == VaccinationStatus.VACCINATED) {
@@ -226,23 +225,23 @@ public class VaccinationStatusPanel extends VerticalLayout {
         String details = data.getVaccinationStatusDetails();
         boolean showDetails = data.getVaccinationStatus() == VaccinationStatus.OTHER && details != null && !details.trim().isEmpty();
         vaccinationStatusDetailsRow.setVisible(showDetails);
-        vaccinationStatusDetailsValueLabel.setValue(showDetails ? details : "");
+        vaccinationStatusDetailsValueLabel.setText(showDetails ? details : "");
 
         boolean showNumberOfDoses = data.getNumberOfDoses() != null;
         numberOfDosesRow.setVisible(showNumberOfDoses);
-        numberOfDosesValueLabel.setValue(showNumberOfDoses ? data.getNumberOfDoses().toString() : "");
+        numberOfDosesValueLabel.setText(showNumberOfDoses ? data.getNumberOfDoses().toString() : "");
 
         boolean showDateOfLastDose = data.getDateOfLastDose() != null;
         dateOfLastDoseRow.setVisible(showDateOfLastDose);
-        dateOfLastDoseValueLabel.setValue(showDateOfLastDose ? DateFormatHelper.formatLocalDate(data.getDateOfLastDose()) : "");
+        dateOfLastDoseValueLabel.setText(showDateOfLastDose ? DateFormatHelper.formatLocalDate(data.getDateOfLastDose()) : "");
 
         InformationReliability reliability = data.getInformationReliability();
         if (reliability != null) {
             informationReliabilityRow.setVisible(true);
-            informationReliabilityValueLabel.setValue(reliability.toString());
+            informationReliabilityValueLabel.setText(reliability.toString());
         } else {
             informationReliabilityRow.setVisible(false);
-            informationReliabilityValueLabel.setValue("");
+            informationReliabilityValueLabel.setText("");
         }
 
         Date referencePeriodFromDate = data.getReferencePeriodFrom();
@@ -254,10 +253,10 @@ public class VaccinationStatusPanel extends VerticalLayout {
         if (showReferencePeriod) {
             boolean isSingleReferenceDate =
                 referencePeriodFromDate == null || referencePeriodToDate == null || Objects.equals(referencePeriodFromDate, referencePeriodToDate);
-            referencePeriodCaptionLabel.setValue(isSingleReferenceDate ? captionReferenceDate : captionReferencePeriod);
-            String referenceCaption = referencePeriodCaptionLabel.getValue();
-            referencePeriodCaptionLabel.setDescription(referenceCaption);
-            referencePeriodValueLabel.setDescription(referenceCaption);
+            referencePeriodCaptionLabel.setText(isSingleReferenceDate ? captionReferenceDate : captionReferencePeriod);
+            String referenceCaption = referencePeriodCaptionLabel.getText();
+            referencePeriodCaptionLabel.setTitle(referenceCaption);
+            referencePeriodValueLabel.setTitle(referenceCaption);
             String referencePeriod;
             if (periodFrom != null && periodTo != null && !Objects.equals(referencePeriodFromDate, referencePeriodToDate)) {
                 referencePeriod = periodFrom + " - " + periodTo;
@@ -266,18 +265,18 @@ public class VaccinationStatusPanel extends VerticalLayout {
             } else {
                 referencePeriod = periodTo;
             }
-            referencePeriodValueLabel.setValue(referencePeriod);
+            referencePeriodValueLabel.setText(referencePeriod);
         } else {
-            referencePeriodCaptionLabel.setValue(captionReferencePeriod);
-            referencePeriodCaptionLabel.setDescription(captionReferencePeriod);
-            referencePeriodValueLabel.setDescription(captionReferencePeriod);
-            referencePeriodValueLabel.setValue("");
+            referencePeriodCaptionLabel.setText(captionReferencePeriod);
+            referencePeriodCaptionLabel.setTitle(captionReferencePeriod);
+            referencePeriodValueLabel.setTitle(captionReferencePeriod);
+            referencePeriodValueLabel.setText("");
         }
 
         boolean showVaccinationStatusLastUpdated = data.getVaccinationStatusLastUpdated() != null;
         vaccinationStatusLastUpdatedRow.setVisible(showVaccinationStatusLastUpdated);
         vaccinationStatusLastUpdatedValueLabel
-            .setValue(showVaccinationStatusLastUpdated ? DateFormatHelper.formatDate(data.getVaccinationStatusLastUpdated()) : "");
+            .setText(showVaccinationStatusLastUpdated ? DateFormatHelper.formatDate(data.getVaccinationStatusLastUpdated()) : "");
     }
 
     public void setValue(VaccinationStatusData data) {
@@ -286,20 +285,20 @@ public class VaccinationStatusPanel extends VerticalLayout {
     }
 
     public void clear() {
-        vaccinationStatusValueLabel.setValue("");
+        vaccinationStatusValueLabel.setText("");
         vaccinationStatusRow.setVisible(false);
         vaccinationStatusValueLabel.removeClassNames(CssStyles.LABEL_POSITIVE, CssStyles.LABEL_CRITICAL);
-        vaccinationStatusDetailsValueLabel.setValue("");
+        vaccinationStatusDetailsValueLabel.setText("");
         vaccinationStatusDetailsRow.setVisible(false);
-        numberOfDosesValueLabel.setValue("");
+        numberOfDosesValueLabel.setText("");
         numberOfDosesRow.setVisible(false);
-        dateOfLastDoseValueLabel.setValue("");
+        dateOfLastDoseValueLabel.setText("");
         dateOfLastDoseRow.setVisible(false);
-        informationReliabilityValueLabel.setValue("");
+        informationReliabilityValueLabel.setText("");
         informationReliabilityRow.setVisible(false);
-        referencePeriodValueLabel.setValue("");
+        referencePeriodValueLabel.setText("");
         referencePeriodRow.setVisible(false);
-        vaccinationStatusLastUpdatedValueLabel.setValue("");
+        vaccinationStatusLastUpdatedValueLabel.setText("");
         vaccinationStatusLastUpdatedRow.setVisible(false);
     }
 }

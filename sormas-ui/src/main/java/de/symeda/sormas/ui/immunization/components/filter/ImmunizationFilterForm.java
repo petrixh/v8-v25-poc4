@@ -6,13 +6,8 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 import java.util.Date;
 import java.util.stream.Stream;
 
-import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.v7.data.Property;
-import de.symeda.sormas.ui.utils.fields.CheckBox;
-import de.symeda.sormas.ui.utils.fields.ComboBox;
-import de.symeda.sormas.ui.utils.fields.Field;
-import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -36,9 +31,14 @@ import de.symeda.sormas.api.utils.EpiWeek;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.AbstractFilterForm;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.EpiWeekAndDateFilterComponent;
 import de.symeda.sormas.ui.utils.FieldConfiguration;
 import de.symeda.sormas.ui.utils.FieldHelper;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class ImmunizationFilterForm extends AbstractFilterForm<ImmunizationCriteria> {
 
@@ -136,7 +136,7 @@ public class ImmunizationFilterForm extends AbstractFilterForm<ImmunizationCrite
 	}
 
 	@Override
-	protected void applyDependenciesOnFieldChange(String propertyId, Property.ValueChangeEvent event) {
+	protected void applyDependenciesOnFieldChange(String propertyId, HasValue.ValueChangeEvent<?> event) {
 
 		super.applyDependenciesOnFieldChange(propertyId, event);
 
@@ -366,7 +366,7 @@ public class ImmunizationFilterForm extends AbstractFilterForm<ImmunizationCrite
 		HorizontalLayout dateFilterLayout = (HorizontalLayout) getMoreFiltersContainer().getComponent(WEEK_AND_DATE_FILTER);
 		@SuppressWarnings("unchecked")
 		EpiWeekAndDateFilterComponent<ImmunizationDateType> weekAndDateFilter =
-			(EpiWeekAndDateFilterComponent<ImmunizationDateType>) dateFilterLayout.getComponent(0);
+			(EpiWeekAndDateFilterComponent<ImmunizationDateType>) dateFilterLayout.getComponentAt(0);
 
 		ImmunizationDateType immunizationDateType = criteria.getImmunizationDateType();
 		weekAndDateFilter.getDateTypeSelector().setValue(immunizationDateType);
@@ -387,7 +387,7 @@ public class ImmunizationFilterForm extends AbstractFilterForm<ImmunizationCrite
 	protected Stream<Field> streamFieldsForEmptyCheck(CustomLayout layout) {
 		HorizontalLayout dateFilterLayout = (HorizontalLayout) getMoreFiltersContainer().getComponent(WEEK_AND_DATE_FILTER);
 		EpiWeekAndDateFilterComponent<ImmunizationDateType> weekAndDateFilter =
-			(EpiWeekAndDateFilterComponent<ImmunizationDateType>) dateFilterLayout.getComponent(0);
+			(EpiWeekAndDateFilterComponent<ImmunizationDateType>) dateFilterLayout.getComponentAt(0);
 
 		return super.streamFieldsForEmptyCheck(layout).filter(f -> f != weekAndDateFilter.getDateFilterOptionFilter());
 	}
@@ -413,7 +413,7 @@ public class ImmunizationFilterForm extends AbstractFilterForm<ImmunizationCrite
 		dateFilterRowLayout.setSpacing(true);
 		dateFilterRowLayout.setSizeUndefined();
 
-		dateFilterRowLayout.addComponent(weekAndDateFilter);
+		dateFilterRowLayout.add(weekAndDateFilter);
 
 		return dateFilterRowLayout;
 	}

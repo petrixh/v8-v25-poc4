@@ -12,15 +12,13 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.CustomField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 
 public class CheckBoxTree<ENUM extends Enum<?>> extends CustomField<Map<ENUM, Boolean>> {
 
@@ -52,14 +50,13 @@ public class CheckBoxTree<ENUM extends Enum<?>> extends CustomField<Map<ENUM, Bo
 				checkBoxLayout = new VerticalLayout();
 				checkBoxLayout.setMargin(false);
 				checkBoxLayout.setSpacing(false);
-				checkBoxLayout.setWidth(100, Sizeable.Unit.PERCENTAGE);
+				checkBoxLayout.setWidthFull();
 				addCheckBoxes();
-				final MarginInfo marginInfo = new MarginInfo(false, false, true, false);
-				checkBoxLayout.setMargin(marginInfo);
+				// V8 bottom margin (MarginInfo) not carried over: no CSS in stage 1a
 			} else {
 				groupLayout = new HorizontalLayout();
 				groupLayout.setMargin(false);
-				groupLayout.setWidth(100, Unit.PERCENTAGE);
+				groupLayout.setWidthFull();
 				addGroups();
 			}
 
@@ -67,7 +64,7 @@ public class CheckBoxTree<ENUM extends Enum<?>> extends CustomField<Map<ENUM, Bo
 		}
 
 		addValueChangeListener(valueChangeEvent -> {
-			Map<ENUM, Boolean> value = (Map<ENUM, Boolean>) valueChangeEvent.getProperty().getValue();
+			Map<ENUM, Boolean> value = valueChangeEvent.getValue();
 			final Map<ENUM, Boolean> nullSafeValue = value == null ? new HashMap<>() : value;
 			settingToggles = true;
 			enumToggles.forEach(((anEnum, checkBox) -> {
@@ -97,27 +94,26 @@ public class CheckBoxTree<ENUM extends Enum<?>> extends CustomField<Map<ENUM, Bo
 			columnLayout.setMargin(false);
 			columnLayout.setSpacing(false);
 			columnList.add(columnLayout);
-			groupLayout.addComponent(columnLayout);
+			groupLayout.add(columnLayout);
 		}
 
 		final Enum<?>[] enumConstants = parentGroup.getEnumConstants();
 		for (int i = 0; i < parentGroup.getEnumConstants().length; i++) {
 			final Enum<?> enumListEntry = enumConstants[i];
-			Label heading = new Label(enumListEntry.toString());
-			heading.setWidth(100, Unit.PERCENTAGE);
-			CssStyles.style(heading, CssStyles.H4);
+			Span heading = new Span(enumListEntry.toString());
+			heading.setWidthFull();
+			heading.addClassName(CssStyles.H4);
 			final VerticalLayout columnLayout = columnList.get(i % columns);
-			columnLayout.addComponent(heading);
+			columnLayout.add(heading);
 
 			enumGroupMap.get(enumListEntry).forEach(anEnum -> {
 				CheckBox checkbox = createCheckbox(0, anEnum, null);
 				enumToggles.put(anEnum, checkbox);
-				columnLayout.addComponent(checkbox);
+				columnLayout.add(checkbox);
 			});
 		}
 
-		final MarginInfo marginInfo = new MarginInfo(false, false, true, false);
-		groupLayout.setMargin(marginInfo);
+		// V8 bottom margin (MarginInfo) not carried over: no CSS in stage 1a
 
 		setToggleValues(getValue());
 	}
@@ -137,7 +133,7 @@ public class CheckBoxTree<ENUM extends Enum<?>> extends CustomField<Map<ENUM, Bo
 			CheckBox elementCheckbox = createCheckbox(level, enumElement, parentElement);
 
 			enumToggles.put(enumElement, elementCheckbox);
-			checkBoxLayout.addComponent(elementCheckbox);
+			checkBoxLayout.add(elementCheckbox);
 		}
 	}
 
@@ -161,15 +157,15 @@ public class CheckBoxTree<ENUM extends Enum<?>> extends CustomField<Map<ENUM, Bo
 			elementCheckbox.addStyleName(INDENTATION_STYLES[safeLevel]);
 		}
 		if (addVerticalSpaces) {
-			CssStyles.style(elementCheckbox, CssStyles.VSPACE_4);
+			elementCheckbox.addStyleName(CssStyles.VSPACE_4);
 		}
 
-		elementCheckbox.setWidth(100, Unit.PERCENTAGE);
+		elementCheckbox.setWidthFull();
 		elementCheckbox.addValueChangeListener(e -> {
 			if (settingToggles){
 				return;
 			}
-			final Boolean value = (Boolean) e.getProperty().getValue();
+			final Boolean value = e.getValue();
 			Map<ENUM, Boolean> newValue = getValue() != null ? new HashMap<>(getValue()) : new HashMap<>();
 			newValue.put(element, value);
 			setValue(newValue);
@@ -183,7 +179,7 @@ public class CheckBoxTree<ENUM extends Enum<?>> extends CustomField<Map<ENUM, Bo
 					elementCheckbox.setValue(false);
 				}
 
-				elementCheckbox.setVisible((Boolean) parentChangeEvent.getProperty().getValue());
+				elementCheckbox.setVisible(parentChangeEvent.getValue());
 			});
 		}
 		return elementCheckbox;
@@ -202,7 +198,7 @@ public class CheckBoxTree<ENUM extends Enum<?>> extends CustomField<Map<ENUM, Bo
 	}
 
 	@Override
-	public void setValue(Map<ENUM, Boolean> newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(Map<ENUM, Boolean> newFieldValue) {
 		super.setValue(newFieldValue);
 
 		if (!this.enumToggles.isEmpty()) {

@@ -17,13 +17,13 @@ package de.symeda.sormas.ui.utils;
 
 import java.util.function.Function;
 
-import com.vaadin.ui.StyleGenerator;
+import com.vaadin.flow.function.SerializableFunction;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.utils.fieldaccess.UiFieldAccessCheckers;
 import de.symeda.sormas.api.utils.pseudonymization.Pseudonymizable;
 
-public class FieldAccessColumnStyleGenerator<T> implements StyleGenerator<T> {
+public class FieldAccessColumnStyleGenerator<T> implements SerializableFunction<T, String> {
 
 	private static final long serialVersionUID = -8348150203879621498L;
 

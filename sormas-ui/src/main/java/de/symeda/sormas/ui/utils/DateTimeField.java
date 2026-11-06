@@ -17,58 +17,50 @@ package de.symeda.sormas.ui.utils;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.Date;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.data.util.IndexedContainer;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.AbstractSelect.NewItemHandler;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.CustomField;
-import com.vaadin.v7.ui.PopupDateField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.utils.DateHelper;
 import de.symeda.sormas.api.utils.UtilDate;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.CustomField;
+import de.symeda.sormas.ui.utils.fields.PopupDateField;
 
+/**
+ * Date and time field: a date picker and a combo box with times in 15 minute steps; other times can be typed.
+ * <p>
+ * Converters: a converter set with {@link #setConverter} applies to the whole date and time value in the form binding
+ * (V7 applied it to the date part).
+ */
 @SuppressWarnings("serial")
 public class DateTimeField extends CustomField<Date> {
-
-	private static final String CAPTION_PROPERTY_ID = "caption";
 
 	private PopupDateField dateField;
 	private ComboBox timeField;
 	private String inputPrompt;
-
-	private Converter<Date, ?> converter;
-	boolean converterSet;
+	private boolean settingPresentation;
 
 	@Override
 	protected Component initContent() {
 
 		HorizontalLayout layout = new HorizontalLayout();
 		layout.setSpacing(true);
-		layout.setWidth(100, Unit.PERCENTAGE);
+		layout.setWidthFull();
 
 		dateField = new PopupDateField();
-		dateField.setId(this.getId() + "_" + "date");
-		dateField.setWidth(100, Unit.PERCENTAGE);
+		dateField.setId(this.getId().orElse(null) + "_" + "date");
+		dateField.setWidthFull();
 		dateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
 		dateField.setLenient(true);
 		dateField.setInputPrompt(inputPrompt);
-		layout.addComponent(dateField);
-		layout.setExpandRatio(dateField, 0.5f);
-
-		if (!converterSet) {
-			dateField.setConverter(converter);
-			converterSet = true;
-		}
+		layout.add(dateField);
+		layout.setFlexGrow(0.5, dateField);
 
 		timeField = ComboBoxHelper.createComboBoxV7();
-		timeField.setId(this.getId() + "_" + "time");
-		timeField.addContainerProperty(CAPTION_PROPERTY_ID, String.class, null);
-		timeField.setItemCaptionPropertyId(CAPTION_PROPERTY_ID);
+		timeField.setId(this.getId().orElse(null) + "_" + "time");
 
 		// fill
 		for (int hours = 0; hours <= 23; hours++) {
@@ -78,41 +70,33 @@ public class DateTimeField extends CustomField<Date> {
 		}
 
 		timeField.setNewItemsAllowed(true);
-		timeField.setNewItemHandler(new NewItemHandler() {
-
-			@Override
-			public void addNewItem(String newItemCaption) {
-				Date date = DateHelper.parseTime(newItemCaption);
-				timeField.setValue(ensureTimeEntry(date));
-			}
+		timeField.setNewItemHandler(newItemCaption -> {
+			Date date = DateHelper.parseTime(newItemCaption);
+			timeField.setValue(ensureTimeEntry(date));
 		});
 
-		timeField.setWidth(100, Unit.PERCENTAGE);
-		layout.addComponent(timeField);
-		layout.setExpandRatio(timeField, 0.5f);
+		timeField.setWidthFull();
+		layout.add(timeField);
+		layout.setFlexGrow(0.5, timeField);
 
 		// value can't be set on readOnly fields
 		dateField.setReadOnly(false);
 		timeField.setReadOnly(false);
-
 		// set field values based on internal value
-		setInternalValue(super.getInternalValue());
-
+		setPresentationValue(getValue());
 		dateField.setReadOnly(isReadOnly());
 		timeField.setReadOnly(isReadOnly());
 
-		Property.ValueChangeListener validationValueChangeListener = new Property.ValueChangeListener() {
-
-			@Override
-			public void valueChange(Property.ValueChangeEvent event) {
-				markAsDirty();
-				fireValueChange(false);
-			}
-		};
-		dateField.addValueChangeListener(validationValueChangeListener);
-		timeField.addValueChangeListener(validationValueChangeListener);
+		dateField.addValueChangeListener(e -> onInnerValueChange());
+		timeField.addValueChangeListener(e -> onInnerValueChange());
 
 		return layout;
+	}
+
+	private void onInnerValueChange() {
+		if (!settingPresentation) {
+			updateValue();
+		}
 	}
 
 	@Override
@@ -121,24 +105,25 @@ public class DateTimeField extends CustomField<Date> {
 	}
 
 	@Override
-	protected void setInternalValue(Date newValue) {
-		super.setInternalValue(newValue);
-
+	protected void setPresentationValue(Date newValue) {
 		if (dateField != null && timeField != null) {
-
-			if (newValue != null) {
-				dateField.setValue(DateHelper.getStartOfDay(newValue));
-				timeField.setValue(ensureTimeEntry(newValue));
-			} else {
-				dateField.setValue(null);
-				timeField.setValue(null);
+			settingPresentation = true;
+			try {
+				if (newValue != null) {
+					dateField.setValue(DateHelper.getStartOfDay(newValue));
+					timeField.setValue(ensureTimeEntry(newValue));
+				} else {
+					dateField.setValue(null);
+					timeField.setValue(null);
+				}
+			} finally {
+				settingPresentation = false;
 			}
 		}
 	}
 
 	@Override
-	protected Date getInternalValue() {
-
+	protected Date generateModelValue() {
 		if (dateField != null && timeField != null) {
 			Date date = dateField.getValue();
 			if (date != null) {
@@ -152,15 +137,22 @@ public class DateTimeField extends CustomField<Date> {
 			}
 			return null;
 		}
+		return getValue();
+	}
 
-		return super.getInternalValue();
+	@Override
+	public void setReadOnly(boolean readOnly) {
+		super.setReadOnly(readOnly);
+		if (dateField != null && timeField != null) {
+			dateField.setReadOnly(readOnly);
+			timeField.setReadOnly(readOnly);
+		}
 	}
 
 	/**
 	 * @return itemId of the entry
 	 */
 	private Object ensureTimeEntry(Date time) {
-
 		if (time == null) {
 			return null;
 		}
@@ -171,33 +163,18 @@ public class DateTimeField extends CustomField<Date> {
 	/**
 	 * @return itemId of the entry
 	 */
-	@SuppressWarnings("unchecked")
 	private Object ensureTimeEntry(int hours, int minutes) {
 		int itemId = hours * 60 + minutes;
 		if (!timeField.containsId(itemId)) {
-			timeField.addItem(itemId).getItemProperty(CAPTION_PROPERTY_ID).setValue(String.format("%1$02d:%2$02d", hours, minutes));
-
+			timeField.addItem(itemId);
+			timeField.setItemCaption(itemId, String.format("%1$02d:%2$02d", hours, minutes));
 			// don't do this on initialization
-			if (timeField.getParent() != null) {
+			if (timeField.getParent().isPresent()) {
 				// order the entries by time
-				((IndexedContainer) timeField.getContainerDataSource()).sort(
-					new String[] {
-						CAPTION_PROPERTY_ID },
-					new boolean[] {
-						true });
+				timeField.getSelectItems().sort(Comparator.comparing(id -> timeField.getItemCaption(id)));
 			}
 		}
 		return itemId;
-	}
-
-	@Override
-	public void setConverter(Converter<Date, ?> converter) {
-		this.converter = converter;
-
-		if (dateField != null) {
-			dateField.setConverter(converter);
-			converterSet = true;
-		}
 	}
 
 	public String getInputPrompt() {

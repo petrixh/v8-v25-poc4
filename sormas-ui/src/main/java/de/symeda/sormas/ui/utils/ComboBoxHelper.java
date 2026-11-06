@@ -1,6 +1,6 @@
 package de.symeda.sormas.ui.utils;
 
-import com.vaadin.v7.shared.ui.combobox.FilteringMode;
+import de.symeda.sormas.ui.utils.fields.FilteringMode;
 
 public class ComboBoxHelper {
 

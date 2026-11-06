@@ -10,6 +10,8 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.data.binder.ValueContext;
+
 public class StringToAngularLocationConverterTest {
 
 	@Test
@@ -17,8 +19,8 @@ public class StringToAngularLocationConverterTest {
 
 		StringToAngularLocationConverter c = new StringToAngularLocationConverter();
 
-		assertThat(c.convertToModel(null, Double.class, Locale.GERMANY), is((Double) null));
-		assertThat(c.convertToModel(null, Double.class, Locale.ENGLISH), is((Double) null));
+		assertThat(toModel(c, null, Locale.GERMANY), is((Double) null));
+		assertThat(toModel(c, null, Locale.ENGLISH), is((Double) null));
 
 		//@formatter:off
 		Stream.of(
@@ -27,7 +29,7 @@ public class StringToAngularLocationConverterTest {
 			Pair.of("1.21", Locale.GERMANY),
 			Pair.of("1.21", Locale.ENGLISH)
 		)
-		.map(p -> c.convertToModel(p.getLeft(), Double.class, p.getRight()))
+		.map(p -> toModel(c, p.getLeft(), p.getRight()))
 		.forEach(v -> assertThat(v, closeTo(1.21, 0.00001)));
 		//@formatter:on
 	}
@@ -37,10 +39,14 @@ public class StringToAngularLocationConverterTest {
 
 		StringToAngularLocationConverter c = new StringToAngularLocationConverter();
 
-		assertThat(c.convertToPresentation(null, String.class, Locale.GERMANY), is((String) null));
-		assertThat(c.convertToPresentation(null, String.class, Locale.ENGLISH), is((String) null));
+		assertThat(c.convertToPresentation(null, new ValueContext(Locale.GERMANY)), is((String) null));
+		assertThat(c.convertToPresentation(null, new ValueContext(Locale.ENGLISH)), is((String) null));
 
-		assertThat(c.convertToPresentation(1.21D, String.class, Locale.GERMANY), is("1,21"));
-		assertThat(c.convertToPresentation(1.21D, String.class, Locale.ENGLISH), is("1.21"));
+		assertThat(c.convertToPresentation(1.21D, new ValueContext(Locale.GERMANY)), is("1,21"));
+		assertThat(c.convertToPresentation(1.21D, new ValueContext(Locale.ENGLISH)), is("1.21"));
+	}
+
+	private static Double toModel(StringToAngularLocationConverter c, String value, Locale locale) {
+		return c.convertToModel(value, new ValueContext(locale)).getOrThrow(IllegalArgumentException::new);
 	}
 }

@@ -2,10 +2,10 @@ package de.symeda.sormas.ui.utils;
 
 import java.util.Objects;
 
-import com.vaadin.data.ValidationResult;
-import com.vaadin.data.ValueContext;
-import com.vaadin.data.validator.AbstractValidator;
-import com.vaadin.ui.Component;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.validator.AbstractValidator;
+import com.vaadin.flow.component.Component;
 
 public class FieldVisibleAndNotEmptyValidator<T> extends AbstractValidator<T> {
 

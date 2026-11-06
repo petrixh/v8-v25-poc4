@@ -17,9 +17,10 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.utils;
 
-import java.util.Locale;
 
-import com.vaadin.v7.data.util.converter.Converter;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.converter.Converter;
 
 @SuppressWarnings("serial")
 public class StringToAnythingConverter<T> implements Converter<String, T> {
@@ -31,16 +32,15 @@ public class StringToAnythingConverter<T> implements Converter<String, T> {
 	}
 
 	@Override
-	public T convertToModel(String value, Class<? extends T> targetType, Locale locale) throws ConversionException {
-		return null;
+	public Result<T> convertToModel(String value, ValueContext context) {
+		return Result.ok(null);
 	}
 
 	@Override
-	public String convertToPresentation(T value, Class<? extends String> targetType, Locale locale) throws ConversionException {
+	public String convertToPresentation(T value, ValueContext context) {
 		return value == null ? null : value.toString();
 	}
 
-	@Override
 	public Class<T> getModelType() {
 		return modelType;
 	}

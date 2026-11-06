@@ -1,8 +1,9 @@
 package de.symeda.sormas.ui.utils;
 
-import java.util.Locale;
 
-import com.vaadin.v7.data.util.converter.Converter;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.converter.Converter;
 
 import de.symeda.sormas.api.caze.AgeAndBirthDateDto;
 import de.symeda.sormas.api.person.PersonHelper;
@@ -12,12 +13,12 @@ public class AgeAndBirthDateDtoConverterV7 implements Converter<String, AgeAndBi
 	private static final long serialVersionUID = 4515813046485937433L;
 
 	@Override
-	public AgeAndBirthDateDto convertToModel(String value, Class<? extends AgeAndBirthDateDto> targetType, Locale locale) throws ConversionException {
+	public Result<AgeAndBirthDateDto> convertToModel(String value, ValueContext context) {
 		throw new RuntimeException("Not implemented");
 	}
 
 	@Override
-	public String convertToPresentation(AgeAndBirthDateDto value, Class<? extends String> targetType, Locale locale) throws ConversionException {
+	public String convertToPresentation(AgeAndBirthDateDto value, ValueContext context) {
 
 		if (value == null) {
 			return "";
@@ -31,12 +32,10 @@ public class AgeAndBirthDateDtoConverterV7 implements Converter<String, AgeAndBi
 			value.getDateOfBirthYYYY());
 	}
 
-	@Override
 	public Class<AgeAndBirthDateDto> getModelType() {
 		return AgeAndBirthDateDto.class;
 	}
 
-	@Override
 	public Class<String> getPresentationType() {
 		return String.class;
 	}

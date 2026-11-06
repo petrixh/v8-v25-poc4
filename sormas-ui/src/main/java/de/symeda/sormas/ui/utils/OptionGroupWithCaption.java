@@ -18,14 +18,13 @@ package de.symeda.sormas.ui.utils;
 
 import java.util.Collection;
 
-import com.vaadin.v7.ui.OptionGroup;
-
 import de.symeda.sormas.api.utils.HasCaption;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 public class OptionGroupWithCaption extends OptionGroup {
 
 	@Override
-	public void addItems(Collection<?> itemIds) throws UnsupportedOperationException {
+	public void addItems(Collection<?> itemIds) {
 		super.addItems(itemIds);
 		for (Object item : itemIds) {
 			this.setItemCaption(item, item instanceof HasCaption ? ((HasCaption) item).buildCaption() : item.toString());

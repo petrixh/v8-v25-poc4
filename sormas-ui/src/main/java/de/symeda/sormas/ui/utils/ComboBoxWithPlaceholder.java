@@ -15,14 +15,9 @@
 
 package de.symeda.sormas.ui.utils;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-
-import com.vaadin.v7.shared.ui.combobox.FilteringMode;
-import com.vaadin.v7.ui.ComboBox;
-
 import de.symeda.sormas.api.ReferenceDto;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.FilteringMode;
 
 public class ComboBoxWithPlaceholder extends ComboBox {
 
@@ -35,30 +30,19 @@ public class ComboBoxWithPlaceholder extends ComboBox {
 		this.setFilteringMode(FilteringMode.CONTAINS);
 	}
 
+	/**
+	 * V7 showed the placeholder as the caption of the null selection item; Flow shows it as the placeholder text of the
+	 * empty combo box. Null selection stays allowed.
+	 */
 	@Override
-	public boolean removeAllItems() throws UnsupportedOperationException {
-		AtomicBoolean retVal = new AtomicBoolean(false);
-		List<?> idsToRemove =
-			items.getItemIds().stream().filter(i -> !PlaceholderReferenceDto.class.isAssignableFrom(i.getClass())).collect(Collectors.toList());
-		idsToRemove.forEach(i -> {
-			if (removeItem(i)) {
-				retVal.set(true);
-			}
-		});
-
-		return retVal.get();
-	}
-
 	public void setPlaceholder(String placeholderText) {
 		if (placeholder == null) {
 			placeholder = new PlaceholderReferenceDto(placeholderText);
-			addItems(placeholder);
-
 			setNullSelectionAllowed(true);
-			setNullSelectionItemId(placeholder);
 		} else {
 			placeholder.setCaption(placeholderText);
 		}
+		super.setPlaceholder(placeholderText);
 	}
 
 	public static class PlaceholderReferenceDto extends ReferenceDto {

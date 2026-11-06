@@ -17,12 +17,15 @@ package de.symeda.sormas.ui.utils;
 
 import java.util.function.Function;
 
-import com.vaadin.v7.ui.Grid;
-import com.vaadin.v7.ui.Table;
+import com.vaadin.flow.function.SerializableFunction;
 
 import de.symeda.sormas.api.utils.fieldaccess.UiFieldAccessCheckers;
 
-public class FieldAccessCellStyleGenerator implements Table.CellStyleGenerator, Grid.CellStyleGenerator {
+/**
+ * Marks cells of inaccessible columns. Flow grids style cells per column: use {@link #forColumn(Object)} as the column's
+ * part name generator (V7 grids and tables called {@link #getStyle(Object)} per cell).
+ */
+public class FieldAccessCellStyleGenerator implements java.io.Serializable {
 
 	private static final long serialVersionUID = -1105771966243065908L;
 
@@ -39,17 +42,11 @@ public class FieldAccessCellStyleGenerator implements Table.CellStyleGenerator, 
 		this.accessCheck = accessCheck;
 	}
 
-	@Override
-	public String getStyle(Table source, Object itemId, Object propertyId) {
-		return getStyle(propertyId);
+	public <T> SerializableFunction<T, String> forColumn(Object propertyId) {
+		return item -> getStyle(propertyId);
 	}
 
-	@Override
-	public String getStyle(Grid.CellReference cell) {
-		return getStyle(cell.getPropertyId());
-	}
-
-	private String getStyle(Object propertyId) {
+	public String getStyle(Object propertyId) {
 		if (propertyId != null && !accessCheck.apply(propertyId.toString())) {
 			return CssStyles.INACCESSIBLE_COLUMN;
 		}

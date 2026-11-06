@@ -31,18 +31,12 @@ import java.util.stream.Stream;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.google.common.collect.Sets;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -78,10 +72,19 @@ import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.AbstractFilterForm;
 import de.symeda.sormas.ui.utils.ComboBoxHelper;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.EpiWeekAndDateFilterComponent;
 import de.symeda.sormas.ui.utils.FieldConfiguration;
 import de.symeda.sormas.ui.utils.FieldHelper;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class EventsFilterForm extends AbstractFilterForm<EventCriteria> {
 
@@ -135,8 +138,8 @@ public class EventsFilterForm extends AbstractFilterForm<EventCriteria> {
 
 	private void updateFields() {
 		if (hideActionFilters) {
-			getEpiWeekAndDateComponent(ACTION_CHANGE_WEEK_AND_DATE_FILTER).getParent().setVisible(false);
-			getEpiWeekAndDateComponent(ACTION_WEEK_AND_DATE_FILTER).getParent().setVisible(false);
+			getEpiWeekAndDateComponent(ACTION_CHANGE_WEEK_AND_DATE_FILTER).getParent().ifPresent(p -> p.setVisible(false));
+			getEpiWeekAndDateComponent(ACTION_WEEK_AND_DATE_FILTER).getParent().ifPresent(p -> p.setVisible(false));
 		}
 		if (hideEventStatusFilter) {
 			getField(EventCriteria.EVENT_STATUS).setVisible(false);
@@ -240,7 +243,10 @@ public class EventsFilterForm extends AbstractFilterForm<EventCriteria> {
 		facilityTypeGroupField.setId(FACILITY_TYPE_GROUP_FILTER);
 		facilityTypeGroupField.setInputPrompt(I18nProperties.getPrefixCaption(FacilityDto.I18N_PREFIX, FacilityDto.TYPE_GROUP));
 		facilityTypeGroupField
-			.addStyleNames(ValoTheme.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_CAPTION_INLINE, CssStyles.OPTIONGROUP_GRID_LAYOUT);
+			.addClassNames(
+				SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL,
+				CssStyles.OPTIONGROUP_CAPTION_INLINE,
+				CssStyles.OPTIONGROUP_GRID_LAYOUT);
 		facilityTypeGroupField.setWidth(140, Unit.PIXELS);
 		facilityTypeGroupField.addItems((Object[]) FacilityTypeGroup.values());
 		facilityTypeGroupField.setVisible(false);
@@ -263,9 +269,9 @@ public class EventsFilterForm extends AbstractFilterForm<EventCriteria> {
 
 		addField(moreFiltersContainer, FieldConfiguration.pixelSized(EventCriteria.RESPONSIBLE_USER, 140));
 
-		Label infoLabel = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
+		Span infoLabel = VaadinUiUtil.createLabel(HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE), ContentMode.HTML);
 		infoLabel.setSizeUndefined();
-		infoLabel.setDescription(I18nProperties.getString(Strings.infoEventResponsibleUserFilter), ContentMode.TEXT);
+		infoLabel.setTitle(I18nProperties.getString(Strings.infoEventResponsibleUserFilter));
 		CssStyles.style(infoLabel, CssStyles.LABEL_XLARGE, CssStyles.LABEL_SECONDARY);
 		moreFiltersContainer.addComponent(infoLabel, RESPONSIBLE_USER_INFO);
 
@@ -388,7 +394,7 @@ public class EventsFilterForm extends AbstractFilterForm<EventCriteria> {
 		dateFilterRowLayout.setSpacing(true);
 		dateFilterRowLayout.setSizeUndefined();
 
-		dateFilterRowLayout.addComponent(weekAndDateFilter);
+		dateFilterRowLayout.add(weekAndDateFilter);
 
 		return dateFilterRowLayout;
 	}
@@ -419,7 +425,7 @@ public class EventsFilterForm extends AbstractFilterForm<EventCriteria> {
 
 	private EpiWeekAndDateFilterComponent<?> getEpiWeekAndDateComponent(String location) {
 		HorizontalLayout dateFilterLayout = (HorizontalLayout) getMoreFiltersContainer().getComponent(location);
-		return (EpiWeekAndDateFilterComponent<?>) dateFilterLayout.getComponent(0);
+		return (EpiWeekAndDateFilterComponent<?>) dateFilterLayout.getComponentAt(0);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -435,10 +441,10 @@ public class EventsFilterForm extends AbstractFilterForm<EventCriteria> {
 	}
 
 	@Override
-	protected void applyDependenciesOnFieldChange(String propertyId, Property.ValueChangeEvent event) {
+	protected void applyDependenciesOnFieldChange(String propertyId, HasValue.ValueChangeEvent<?> event) {
 		switch (propertyId) {
 		case LocationDto.REGION:
-			RegionReferenceDto region = (RegionReferenceDto) event.getProperty().getValue();
+			RegionReferenceDto region = (RegionReferenceDto) event.getValue();
 			if (region != null) {
 				applyRegionFilterDependency(region, LocationDto.DISTRICT);
 				clearAndDisableFields(LocationDto.COMMUNITY);
@@ -449,7 +455,7 @@ public class EventsFilterForm extends AbstractFilterForm<EventCriteria> {
 			updateResponsibleUserFieldItems();
 			break;
 		case LocationDto.DISTRICT:
-			DistrictReferenceDto district = (DistrictReferenceDto) event.getProperty().getValue();
+			DistrictReferenceDto district = (DistrictReferenceDto) event.getValue();
 			if (district != null) {
 				applyDistrictDependency(district, LocationDto.COMMUNITY);
 			} else {
@@ -462,7 +468,7 @@ public class EventsFilterForm extends AbstractFilterForm<EventCriteria> {
 			applyFacilityFieldsDependencies();
 			break;
 		case CaseDataDto.DISEASE:
-			Disease disease = (Disease) event.getProperty().getValue();
+			Disease disease = (Disease) event.getValue();
 			applyDiseaseFilterDependency(disease);
 		}
 	}
@@ -530,7 +536,7 @@ public class EventsFilterForm extends AbstractFilterForm<EventCriteria> {
 	private void applyDiseaseFilterDependency(Disease disease) {
 		ComboBox diseaseVariantField = getField(CaseDataDto.DISEASE_VARIANT);
 		if (disease == null) {
-			FieldHelper.updateItems(diseaseVariantField, Collections.emptyList());
+			FieldHelper.updateItems(diseaseVariantField, Collections.<DiseaseVariant> emptyList());
 			FieldHelper.setEnabled(false, diseaseVariantField);
 		} else {
 			List<DiseaseVariant> diseaseVariants =
@@ -543,7 +549,7 @@ public class EventsFilterForm extends AbstractFilterForm<EventCriteria> {
 	private void applyDateDependencyOnNewValue(String componentId, DateFilterOption dateFilterOption, Date dateFrom, Date dateTo) {
 		HorizontalLayout dateFilterLayout = (HorizontalLayout) getMoreFiltersContainer().getComponent(componentId);
 		EpiWeekAndDateFilterComponent<DateFilterOption> weekAndDateFilter;
-		weekAndDateFilter = (EpiWeekAndDateFilterComponent<DateFilterOption>) dateFilterLayout.getComponent(0);
+		weekAndDateFilter = (EpiWeekAndDateFilterComponent<DateFilterOption>) dateFilterLayout.getComponentAt(0);
 
 		weekAndDateFilter.getDateFilterOptionFilter().setValue(dateFilterOption);
 

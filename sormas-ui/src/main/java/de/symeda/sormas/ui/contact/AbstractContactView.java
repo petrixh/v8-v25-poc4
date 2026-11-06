@@ -20,8 +20,7 @@ package de.symeda.sormas.ui.contact;
 import java.util.Collections;
 import java.util.List;
 
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.Component;
 
 import de.symeda.sormas.api.CoreFacade;
 import de.symeda.sormas.api.Disease;
@@ -42,6 +41,7 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.caze.CaseContactsView;
 import de.symeda.sormas.ui.epidata.ContactEpiDataView;
 import de.symeda.sormas.ui.externalmessage.ExternalMessagesView;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 import de.symeda.sormas.ui.utils.AbstractEditAllowedDetailView;
 import de.symeda.sormas.ui.utils.DirtyStateComponent;
 import de.symeda.sormas.ui.utils.ExternalJournalUtil;
@@ -99,7 +99,7 @@ public abstract class AbstractContactView extends AbstractEditAllowedDetailView<
 
 		if (UiUtil.permitted(UserRight.MANAGE_EXTERNAL_SYMPTOM_JOURNAL)) {
 			PersonDto contactPerson = FacadeProvider.getPersonFacade().getByUuid(contact.getPerson().getUuid());
-			ExternalJournalUtil.getExternalJournalUiButton(contactPerson, contact).ifPresent(getButtonsLayout()::addComponent);
+			ExternalJournalUtil.getExternalJournalUiButton(contactPerson, contact).ifPresent(getButtonsLayout()::add);
 		}
 	}
 
@@ -135,7 +135,7 @@ public abstract class AbstractContactView extends AbstractEditAllowedDetailView<
 		super.setSubComponent(newComponent);
 
 		if (FacadeProvider.getContactFacade().isDeleted(getReference().getUuid())) {
-			newComponent.setEnabled(false);
+			newComponent.getElement().setEnabled(false);
 		}
 	}
 
@@ -145,7 +145,7 @@ public abstract class AbstractContactView extends AbstractEditAllowedDetailView<
 
 	public void setEditPermission(Component component) {
 		if (!isEditAllowed()) {
-			getComponent(getComponentIndex(component)).setEnabled(false);
+			getComponentAt(indexOf(component)).getElement().setEnabled(false);
 		}
 	}
 }

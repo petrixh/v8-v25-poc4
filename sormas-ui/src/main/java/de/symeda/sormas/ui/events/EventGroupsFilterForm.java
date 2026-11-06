@@ -1,8 +1,6 @@
 package de.symeda.sormas.ui.events;
 
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.HasValue;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.event.EventGroupCriteria;
@@ -16,6 +14,8 @@ import de.symeda.sormas.api.location.LocationDto;
 import de.symeda.sormas.ui.utils.AbstractFilterForm;
 import de.symeda.sormas.ui.utils.FieldConfiguration;
 import de.symeda.sormas.ui.utils.FieldHelper;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class EventGroupsFilterForm extends AbstractFilterForm<EventGroupCriteria> {
 
@@ -75,10 +75,10 @@ public class EventGroupsFilterForm extends AbstractFilterForm<EventGroupCriteria
 	}
 
 	@Override
-	protected void applyDependenciesOnFieldChange(String propertyId, Property.ValueChangeEvent event) {
+	protected void applyDependenciesOnFieldChange(String propertyId, HasValue.ValueChangeEvent<?> event) {
 		switch (propertyId) {
 		case LocationDto.REGION:
-			RegionReferenceDto region = (RegionReferenceDto) event.getProperty().getValue();
+			RegionReferenceDto region = (RegionReferenceDto) event.getValue();
 			if (region != null) {
 				applyRegionFilterDependency(region, LocationDto.DISTRICT);
 				clearAndDisableFields(LocationDto.COMMUNITY);
@@ -87,7 +87,7 @@ public class EventGroupsFilterForm extends AbstractFilterForm<EventGroupCriteria
 			}
 			break;
 		case LocationDto.DISTRICT:
-			DistrictReferenceDto district = (DistrictReferenceDto) event.getProperty().getValue();
+			DistrictReferenceDto district = (DistrictReferenceDto) event.getValue();
 			if (district != null) {
 				applyDistrictDependency(district, LocationDto.COMMUNITY);
 			} else {

@@ -19,8 +19,9 @@ package de.symeda.sormas.ui.contact;
 
 import java.util.Optional;
 
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.ReferenceDto;
@@ -45,19 +46,19 @@ public class ContactInfoLayout extends AbstractInfoLayout<ContactDto> {
 
 		this.contactDto = contactDto;
 		setSpacing(true);
-		setMargin(false);
+		setPadding(false);
 		setWidth(100, Unit.PERCENTAGE);
 		updateContactInfo();
 	}
 
 	private void updateContactInfo() {
 
-		this.removeAllComponents();
+		this.removeAll();
 
 		final PersonDto personDto = FacadeProvider.getPersonFacade().getByUuid(contactDto.getPerson().getUuid());
 
 		final VerticalLayout firstColumn = new VerticalLayout();
-		firstColumn.setMargin(false);
+		firstColumn.setPadding(false);
 		firstColumn.setSpacing(true);
 
 		{
@@ -65,7 +66,7 @@ public class ContactInfoLayout extends AbstractInfoLayout<ContactDto> {
 				firstColumn,
 				ContactDto.UUID,
 				DataHelper.getShortUuid(contactDto.getUuid()),
-				I18nProperties.getPrefixCaption(ContactDto.I18N_PREFIX, ContactDto.UUID)).setDescription(contactDto.getUuid());
+				I18nProperties.getPrefixCaption(ContactDto.I18N_PREFIX, ContactDto.UUID)).setTitle(contactDto.getUuid());
 
 			addDescLabel(
 				firstColumn,
@@ -76,7 +77,7 @@ public class ContactInfoLayout extends AbstractInfoLayout<ContactDto> {
 			if (UiUtil.permitted(UserRight.CONTACT_VIEW)) {
 
 				final HorizontalLayout ageSexRow = new HorizontalLayout();
-				ageSexRow.setMargin(false);
+				ageSexRow.setPadding(false);
 				ageSexRow.setSpacing(true);
 
 				addCustomDescLabel(
@@ -92,7 +93,7 @@ public class ContactInfoLayout extends AbstractInfoLayout<ContactDto> {
 					PersonDto.SEX,
 					personDto.getSex(),
 					I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.SEX));
-				firstColumn.addComponent(ageSexRow);
+				firstColumn.add(ageSexRow);
 
 				addDescLabel(
 					firstColumn,
@@ -101,10 +102,10 @@ public class ContactInfoLayout extends AbstractInfoLayout<ContactDto> {
 					I18nProperties.getPrefixCaption(ContactDto.I18N_PREFIX, ContactDto.CONTACT_OFFICER));
 			}
 		}
-		this.addComponent(firstColumn);
+		this.add(firstColumn);
 
 		final VerticalLayout secondColumn = new VerticalLayout();
-		secondColumn.setMargin(false);
+		secondColumn.setPadding(false);
 		secondColumn.setSpacing(true);
 
 		if (UiUtil.permitted(UserRight.CONTACT_VIEW)) {
@@ -127,6 +128,6 @@ public class ContactInfoLayout extends AbstractInfoLayout<ContactDto> {
 				DateFormatHelper.formatDate(contactDto.getLastContactDate()),
 				I18nProperties.getPrefixCaption(ContactDto.I18N_PREFIX, ContactDto.LAST_CONTACT_DATE));
 		}
-		this.addComponent(secondColumn);
+		this.add(secondColumn);
 	}
 }

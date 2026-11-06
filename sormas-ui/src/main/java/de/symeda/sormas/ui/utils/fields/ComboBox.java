@@ -22,7 +22,8 @@ import com.vaadin.flow.component.UI;
 
 /**
  * Flow combo box with the V7 {@code com.vaadin.v7.ui.ComboBox} API: untyped item ids added one by one, explicit item
- * captions, filtering mode, null selection (shown as the clear button) and new items.
+ * captions, filtering mode, null selection (shown as the clear button; when off, the user cannot clear the value) and new
+ * items.
  */
 public class ComboBox extends com.vaadin.flow.component.combobox.ComboBox<Object> implements SelectField {
 
@@ -92,6 +93,20 @@ public class ComboBox extends com.vaadin.flow.component.combobox.ComboBox<Object
 		String caption = selectItems.getCaption(item).toLowerCase(locale);
 		String filter = filterText.toLowerCase(locale);
 		return filteringMode == FilteringMode.CONTAINS ? caption.contains(filter) : caption.startsWith(filter);
+	}
+
+	/**
+	 * V7 null selection off: the user cannot clear the combo box. A {@code null} from the client is ignored (the value
+	 * stays, no value change event) and the client shows the kept value again. A programmatic {@code setValue(null)} or
+	 * {@code clear()} still works, as in V7.
+	 */
+	@Override
+	protected void setModelValue(Object newModelValue, boolean fromClient) {
+		if (fromClient && newModelValue == null && !isNullSelectionAllowed()) {
+			refreshValue();
+			return;
+		}
+		super.setModelValue(newModelValue, fromClient);
 	}
 
 	/**

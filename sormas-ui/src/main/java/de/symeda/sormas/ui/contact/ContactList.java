@@ -19,8 +19,7 @@ package de.symeda.sormas.ui.contact;
 
 import java.util.List;
 
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.contact.ContactCriteria;
@@ -52,10 +51,10 @@ public class ContactList extends PaginationList<ContactIndexDto> {
 		if (!contactList.isEmpty()) {
 			showPage(1);
 		} else {
-			listLayout.removeAllComponents();
+			listLayout.removeAll();
 			updatePaginationLayout();
-			Label noContactsLabel = new Label(I18nProperties.getCaption(Captions.contactNoContactsForEventParticipant));
-			listLayout.addComponent(noContactsLabel);
+			Span noContactsLabel = new Span(I18nProperties.getCaption(Captions.contactNoContactsForEventParticipant));
+			listLayout.add(noContactsLabel);
 		}
 	}
 
@@ -72,16 +71,16 @@ public class ContactList extends PaginationList<ContactIndexDto> {
 			if (UiUtil.permitted(UserRight.CONTACT_DELETE)) {
 				listEntry.addDeleteListener(
 					i,
-					(ClickListener) event -> ControllerProvider.getContactController().deleteContact(listEntry.getContact(), this::reload));
+					event -> ControllerProvider.getContactController().deleteContact(listEntry.getContact(), this::reload));
 			}
 
 			if (UiUtil.permitted(UserRight.CONTACT_EDIT)) {
 				listEntry.addEditListener(
 					i,
-					(ClickListener) event -> ControllerProvider.getContactController().navigateToData(listEntry.getContact().getUuid()));
+					event -> ControllerProvider.getContactController().navigateToData(listEntry.getContact().getUuid()));
 			}
 
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 

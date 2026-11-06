@@ -21,11 +21,8 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRow;
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 import static de.symeda.sormas.ui.utils.LayoutUtil.oneOfTwoCol;
 
-import com.vaadin.ui.Button;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.event.EventParticipantDto;
@@ -38,6 +35,9 @@ import de.symeda.sormas.api.person.Sex;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.LayoutUtil;
 import de.symeda.sormas.ui.utils.PersonDependentEditForm;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class EventParticipantCreateForm extends PersonDependentEditForm<EventParticipantDto> {
 
@@ -91,7 +91,7 @@ public class EventParticipantCreateForm extends PersonDependentEditForm<EventPar
 		district.setDescription(I18nProperties.getPrefixDescription(EventParticipantDto.I18N_PREFIX, EventParticipantDto.DISTRICT));
 
 		region.addValueChangeListener(e -> {
-			RegionReferenceDto regionDto = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto regionDto = (RegionReferenceDto) e.getValue();
 
 			FieldHelper
 				.updateItems(district, regionDto != null ? FacadeProvider.getDistrictFacade().getAllActiveByRegion(regionDto.getUuid()) : null);
@@ -103,7 +103,7 @@ public class EventParticipantCreateForm extends PersonDependentEditForm<EventPar
 	}
 
 	@Override
-	public void setValue(EventParticipantDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(EventParticipantDto newFieldValue) {
 		super.setValue(newFieldValue);
 		final PersonDto person = newFieldValue.getPerson();
 		if (person != null) {
@@ -193,8 +193,8 @@ public class EventParticipantCreateForm extends PersonDependentEditForm<EventPar
 	}
 
 	@Override
-	protected void setInternalValue(EventParticipantDto newValue) {
-		super.setInternalValue(newValue);
+	protected void setPresentationValue(EventParticipantDto newValue) {
+		super.setPresentationValue(newValue);
 
 		if (FacadeProvider.getFeatureConfigurationFacade().isFeatureEnabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {
 			hideAndFillJurisdictionFields();

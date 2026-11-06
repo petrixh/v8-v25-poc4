@@ -23,7 +23,7 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocsCss;
 
 import java.util.Arrays;
 
-import com.vaadin.v7.ui.CheckBox;
+import com.vaadin.flow.component.Unit;
 
 import de.symeda.sormas.api.event.EventDto;
 import de.symeda.sormas.api.i18n.Captions;
@@ -31,6 +31,7 @@ import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
 
 public class BulkEventDataForm extends AbstractEditForm<EventDto> {
 
@@ -67,7 +68,7 @@ public class BulkEventDataForm extends AbstractEditForm<EventDto> {
 		FieldHelper.setRequiredWhen(getFieldGroup(), eventStatusCheckBox, Arrays.asList(EventDto.EVENT_STATUS), Arrays.asList(true));
 
 		eventStatusCheckBox.addValueChangeListener(e -> {
-			eventStatus.setEnabled((boolean) e.getProperty().getValue());
+			eventStatus.setEnabled((boolean) e.getValue());
 		});
 
 		eventInvestigationStatusCheckbox = new CheckBox(I18nProperties.getCaption(Captions.bulkEventInvestigationStatus));
@@ -82,7 +83,7 @@ public class BulkEventDataForm extends AbstractEditForm<EventDto> {
 			Arrays.asList(true));
 
 		eventInvestigationStatusCheckbox.addValueChangeListener(e -> {
-			eventInvestigationStatus.setEnabled((boolean) e.getProperty().getValue());
+			eventInvestigationStatus.setEnabled((boolean) e.getValue());
 		});
 
 		eventManagementStatusCheckbox = new CheckBox(I18nProperties.getCaption(Captions.bulkEventManagementStatus));
@@ -97,7 +98,7 @@ public class BulkEventDataForm extends AbstractEditForm<EventDto> {
 			Arrays.asList(true));
 
 		eventManagementStatusCheckbox.addValueChangeListener(e -> {
-			eventManagementStatus.setEnabled((boolean) e.getProperty().getValue());
+			eventManagementStatus.setEnabled((boolean) e.getValue());
 		});
 	}
 

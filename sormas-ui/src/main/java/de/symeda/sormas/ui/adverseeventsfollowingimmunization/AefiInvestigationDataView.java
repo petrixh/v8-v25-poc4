@@ -17,6 +17,8 @@ package de.symeda.sormas.ui.adverseeventsfollowingimmunization;
 
 import java.util.ArrayList;
 
+import com.vaadin.flow.component.Unit;
+
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.EditPermissionType;
 import de.symeda.sormas.api.FacadeProvider;
@@ -56,7 +58,7 @@ public class AefiInvestigationDataView extends AbstractAefiInvestigationDataView
 
 	@Override
 	protected void initView(String params) {
-		setHeightUndefined();
+		setHeight(null);
 
 		AefiInvestigationDto aefiInvestigationDto;
 		AefiDto aefiReport;
@@ -84,13 +86,13 @@ public class AefiInvestigationDataView extends AbstractAefiInvestigationDataView
 
 		DetailSubComponentWrapper container = new DetailSubComponentWrapper(() -> editComponent);
 		container.setWidth(100, Unit.PERCENTAGE);
-		container.setMargin(true);
+		container.setPadding(true);
 		setSubComponent(container);
 		container.setEnabled(true);
 
 		LayoutWithSidePanel layout = new LayoutWithSidePanel(editComponent, PERSON_LOC, ADVERSE_EVENT_LOC, IMMUNIZATION_LOC);
 
-		container.addComponent(layout);
+		container.add(layout);
 
 		UserProvider currentUser = UserProvider.getCurrent();
 		if (currentUser.hasAllUserRights(UserRight.PERSON_VIEW)) {

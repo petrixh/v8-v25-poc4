@@ -15,10 +15,10 @@
 
 package de.symeda.sormas.ui.adverseeventsfollowingimmunization.components.form;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
@@ -35,28 +35,28 @@ public class FormSectionAccordionPanel extends VerticalLayout {
 		this.expanded = expanded;
 		this.formSectionAccordion = formSectionAccordion;
 
-		setMargin(false);
+		setPadding(false);
 		setSpacing(false);
 		setWidth(99, Unit.PERCENTAGE);
-		addStyleNames(CssStyles.VIEW_SECTION_MARGIN_X_4, CssStyles.VSPACE_3);
+		addClassNames(CssStyles.VIEW_SECTION_MARGIN_X_4, CssStyles.VSPACE_3);
 
 		titleButton = ButtonHelper.createButton(titleButtonCaption, (event) -> {
 			formSectionAccordion.toggleFormSection(FormSectionAccordionPanel.this);
-		}, ValoTheme.BUTTON_LINK, CssStyles.FORM_SECTION_ACCORDION_PANEL_TITLE_BUTTON);
-		addComponent(titleButton);
+		}, CssStyles.BUTTON_LINK, CssStyles.FORM_SECTION_ACCORDION_PANEL_TITLE_BUTTON);
+		add(titleButton);
 
 		mainLayout = new VerticalLayout();
-		mainLayout.setMargin(false);
+		mainLayout.setPadding(false);
 		mainLayout.setSpacing(false);
 		//mainLayout.setWidth(100, Unit.PERCENTAGE);
 		mainLayout.setVisible(expanded);
-		mainLayout.addStyleNames(CssStyles.VSPACE_TOP_3);
+		mainLayout.addClassNames(CssStyles.VSPACE_TOP_3);
 
-		addComponent(mainLayout);
+		add(mainLayout);
 	}
 
 	public void addComponentToMainLayout(Component component) {
-		mainLayout.addComponent(component);
+		mainLayout.add(component);
 	}
 
 	public Button getTitleButton() {

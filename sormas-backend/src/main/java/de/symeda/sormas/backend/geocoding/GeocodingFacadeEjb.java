@@ -17,8 +17,8 @@
  *******************************************************************************/
 package de.symeda.sormas.backend.geocoding;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
 
 import de.symeda.sormas.api.geo.GeoLatLon;
 import de.symeda.sormas.api.geocoding.GeocodingException;

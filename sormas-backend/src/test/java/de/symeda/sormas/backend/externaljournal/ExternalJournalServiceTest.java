@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;

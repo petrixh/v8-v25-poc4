@@ -2,7 +2,7 @@ package de.symeda.sormas.api.campaign.statistics;
 
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface CampaignStatisticsFacade {

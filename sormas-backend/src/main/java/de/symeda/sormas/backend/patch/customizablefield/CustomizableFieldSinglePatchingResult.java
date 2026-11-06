@@ -3,7 +3,7 @@ package de.symeda.sormas.backend.patch.customizablefield;
 import java.util.Objects;
 
 import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.customizablefield.CustomizableFieldValueDto;
 import de.symeda.sormas.api.externalmessage.survey.PatchField;

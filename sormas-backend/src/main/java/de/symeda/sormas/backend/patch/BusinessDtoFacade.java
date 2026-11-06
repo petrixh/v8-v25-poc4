@@ -14,10 +14,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.enterprise.context.ApplicationScoped;
-import javax.validation.constraints.NotNull;
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.EJB;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.EntityDto;
 import de.symeda.sormas.api.activityascase.ActivityAsCaseDto;

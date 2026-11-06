@@ -20,7 +20,7 @@ package de.symeda.sormas.api.visualization;
 import java.util.Collection;
 import java.util.Date;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.Language;

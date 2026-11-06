@@ -17,7 +17,7 @@ package de.symeda.sormas.api.info;
 
 import java.io.IOException;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface InfoFacade {

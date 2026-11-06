@@ -1,6 +1,6 @@
 package de.symeda.sormas.api.externalmessage.survey;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import de.symeda.sormas.api.externalmessage.ExternalMessageAdapterFacade;
 

@@ -19,8 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ejb.EJB;
-import javax.ejb.Singleton;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Singleton;
 
 import de.symeda.sormas.api.Language;
 import de.symeda.sormas.api.i18n.I18nProperties;

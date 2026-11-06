@@ -2,8 +2,8 @@ package de.symeda.sormas.api.infrastructure;
 
 import java.util.List;
 
-import javax.ejb.Remote;
-import javax.validation.Valid;
+import jakarta.ejb.Remote;
+import jakarta.validation.Valid;
 
 import de.symeda.sormas.api.statistics.StatisticsCaseCriteria;
 import de.symeda.sormas.api.utils.ValidationRuntimeException;

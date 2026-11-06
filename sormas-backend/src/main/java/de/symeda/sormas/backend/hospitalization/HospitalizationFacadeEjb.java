@@ -21,9 +21,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
 
 import de.symeda.sormas.api.hospitalization.HospitalizationDto;
 import de.symeda.sormas.api.hospitalization.HospitalizationFacade;

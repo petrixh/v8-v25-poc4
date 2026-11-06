@@ -23,7 +23,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import de.symeda.sormas.api.sormastosormas.SormasToSormasOptionsDto;
 import de.symeda.sormas.api.sormastosormas.share.incoming.ShareRequestStatus;

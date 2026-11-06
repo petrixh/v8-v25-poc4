@@ -15,8 +15,8 @@
 
 package de.symeda.sormas.backend.campaign.data;
 
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
 
 import de.symeda.sormas.backend.common.QueryJoins;
 import de.symeda.sormas.backend.infrastructure.community.Community;

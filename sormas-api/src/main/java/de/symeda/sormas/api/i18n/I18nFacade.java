@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.api.i18n;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import de.symeda.sormas.api.Language;
 

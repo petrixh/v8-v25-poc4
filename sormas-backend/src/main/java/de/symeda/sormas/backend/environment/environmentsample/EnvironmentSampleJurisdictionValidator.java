@@ -18,9 +18,9 @@ package de.symeda.sormas.backend.environment.environmentsample;
 import java.util.List;
 import java.util.function.Function;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 
 import org.apache.commons.lang3.NotImplementedException;
 

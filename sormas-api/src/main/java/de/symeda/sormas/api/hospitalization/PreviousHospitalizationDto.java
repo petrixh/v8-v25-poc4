@@ -19,7 +19,7 @@ package de.symeda.sormas.api.hospitalization;
 
 import java.util.Date;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 
 import de.symeda.sormas.api.caze.CaseDataDto;
 import de.symeda.sormas.api.caze.CaseLogic;

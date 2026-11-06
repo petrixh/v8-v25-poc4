@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
 
 import org.apache.commons.io.IOUtils;
 

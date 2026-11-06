@@ -3,7 +3,7 @@ package de.symeda.sormas.backend.patch.mapping.impl.equalitychecker;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import de.symeda.sormas.backend.patch.mapping.PatchingEqualityChecker;
 

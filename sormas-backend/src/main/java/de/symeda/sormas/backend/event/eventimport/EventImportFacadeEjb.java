@@ -23,11 +23,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.transaction.Transactional;
-import javax.validation.Valid;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.Mutable;

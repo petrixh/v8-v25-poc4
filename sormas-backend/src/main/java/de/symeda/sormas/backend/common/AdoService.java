@@ -19,8 +19,8 @@ package de.symeda.sormas.backend.common;
 
 import java.util.List;
 
-import javax.persistence.EntityExistsException;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.EntityExistsException;
+import jakarta.validation.constraints.NotNull;
 
 public interface AdoService<ADO extends AbstractDomainObject> {
 

@@ -18,8 +18,8 @@ package de.symeda.sormas.backend.task;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Predicate;
 
 import de.symeda.sormas.api.utils.jurisdiction.JurisdictionValidator;
 import de.symeda.sormas.backend.caze.CaseJurisdictionPredicateValidator;

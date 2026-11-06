@@ -1,6 +1,6 @@
 package de.symeda.sormas.api.infrastructure.subcontinent;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

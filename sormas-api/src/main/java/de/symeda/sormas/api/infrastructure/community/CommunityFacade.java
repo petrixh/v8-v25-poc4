@@ -17,7 +17,7 @@ package de.symeda.sormas.api.infrastructure.community;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import de.symeda.sormas.api.common.Page;
 import de.symeda.sormas.api.infrastructure.GeoLocationFacade;

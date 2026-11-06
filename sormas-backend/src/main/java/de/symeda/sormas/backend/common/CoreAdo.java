@@ -19,8 +19,8 @@ import static de.symeda.sormas.api.utils.FieldConstraints.CHARACTER_LIMIT_BIG;
 
 import java.sql.Timestamp;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
 
 /**
  * An extension of the {@link AbstractDomainObject} that defines core data that is essential to the system.

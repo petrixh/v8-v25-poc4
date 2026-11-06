@@ -20,7 +20,7 @@ package de.symeda.sormas.api.geo;
 import de.symeda.sormas.api.infrastructure.district.DistrictReferenceDto;
 import de.symeda.sormas.api.infrastructure.region.RegionReferenceDto;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface GeoShapeProvider {

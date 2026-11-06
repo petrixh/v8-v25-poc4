@@ -19,8 +19,8 @@ import static de.symeda.sormas.api.utils.FieldConstraints.CHARACTER_LIMIT_BIG;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import de.symeda.sormas.api.audit.AuditExcludeProperty;
 import de.symeda.sormas.api.audit.AuditedClass;

@@ -33,9 +33,9 @@ import de.symeda.sormas.ui.UserProvider.HasUserProvider;
 import de.symeda.sormas.ui.ViewModelProviders.HasViewModelProviders;
 import de.symeda.sormas.ui.utils.SormasDefaultConverterFactory;
 
-import javax.servlet.annotation.HttpConstraint;
-import javax.servlet.annotation.ServletSecurity;
-import javax.servlet.annotation.WebServlet;
+import jakarta.servlet.annotation.HttpConstraint;
+import jakarta.servlet.annotation.ServletSecurity;
+import jakarta.servlet.annotation.WebServlet;
 
 /**
  * Main UI class of the application that shows either the login screen or the

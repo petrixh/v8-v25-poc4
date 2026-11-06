@@ -17,12 +17,12 @@
  *******************************************************************************/
 package de.symeda.sormas.ui;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
+import jakarta.ejb.TransactionManagement;
+import jakarta.ejb.TransactionManagementType;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;

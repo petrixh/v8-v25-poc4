@@ -21,10 +21,10 @@ package de.symeda.junit.cdi.jee;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
 

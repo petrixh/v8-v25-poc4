@@ -15,11 +15,11 @@
 
 package de.symeda.sormas.backend.epipulse;
 
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ejb.Timer;
-import javax.ejb.TimerService;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.Timer;
+import jakarta.ejb.TimerService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +52,7 @@ public class EpipulseExportTimerEjb {
 		logger.info("Epipulse export scheduled for UUID: {}, of subject code: {} ", uuid, subjectCode);
 	}
 
-	@javax.ejb.Timeout
+	@jakarta.ejb.Timeout
 	public void exportDiseaseTimeout(Timer timer) {
 		String[] timerInfo = (String[]) timer.getInfo();
 		String uuid = timerInfo[0];

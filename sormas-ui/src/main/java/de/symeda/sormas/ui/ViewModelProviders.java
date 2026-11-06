@@ -20,7 +20,7 @@ package de.symeda.sormas.ui;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.vaadin.navigator.View;
 import com.vaadin.ui.UI;

@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.backend.event;
 
-import javax.persistence.criteria.From;
+import jakarta.persistence.criteria.From;
 
 import de.symeda.sormas.backend.common.QueryJoins;
 

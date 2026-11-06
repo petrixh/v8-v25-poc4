@@ -2,7 +2,7 @@ package de.symeda.sormas.api.importexport;
 
 import java.util.Set;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 
 import de.symeda.sormas.api.EntityDto;
 import de.symeda.sormas.api.i18n.Validations;

@@ -3,7 +3,7 @@ package de.symeda.sormas.api.docgeneneration;
 import java.util.List;
 import java.util.Properties;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import de.symeda.sormas.api.Disease;
 

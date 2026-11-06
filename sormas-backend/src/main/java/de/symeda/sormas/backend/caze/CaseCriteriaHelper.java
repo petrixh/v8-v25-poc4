@@ -15,8 +15,8 @@
 
 package de.symeda.sormas.backend.caze;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Predicate;
 
 import de.symeda.sormas.api.caze.CaseJurisdictionType;
 import de.symeda.sormas.api.infrastructure.community.CommunityReferenceDto;

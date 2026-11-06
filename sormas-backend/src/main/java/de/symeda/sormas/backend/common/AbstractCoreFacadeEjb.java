@@ -20,12 +20,12 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.security.DenyAll;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import jakarta.annotation.security.DenyAll;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.CoreFacade;
 import de.symeda.sormas.api.EditPermissionType;

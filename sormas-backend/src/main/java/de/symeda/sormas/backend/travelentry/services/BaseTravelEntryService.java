@@ -1,10 +1,10 @@
 package de.symeda.sormas.backend.travelentry.services;
 
-import javax.ejb.EJB;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Predicate;
+import jakarta.ejb.EJB;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Predicate;
 
 import de.symeda.sormas.api.common.DeletableEntityType;
 import de.symeda.sormas.api.deletionconfiguration.DeletionReference;

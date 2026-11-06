@@ -1,6 +1,6 @@
 package de.symeda.sormas.api.clinicalcourse;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;

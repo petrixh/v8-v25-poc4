@@ -18,7 +18,7 @@ package de.symeda.sormas.api.dashboard.adverseeventsfollowingimmunization;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiClassification;
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiInvestigationStatus;

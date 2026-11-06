@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import de.symeda.sormas.api.dashboard.SampleDashboardCriteria;
 import de.symeda.sormas.api.environment.environmentsample.EnvironmentSampleMaterial;

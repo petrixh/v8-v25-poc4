@@ -1,12 +1,12 @@
 package de.symeda.sormas.backend.infrastructure;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
 
 import de.symeda.sormas.api.infrastructure.PopulationDataCriteria;
 import de.symeda.sormas.backend.common.AdoServiceWithUserFilterAndJurisdiction;

@@ -11,8 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinTable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinTable;
 
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.StringUtils;

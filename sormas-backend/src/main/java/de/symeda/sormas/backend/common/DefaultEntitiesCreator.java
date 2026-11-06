@@ -2,8 +2,8 @@ package de.symeda.sormas.backend.common;
 
 import java.util.ArrayList;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;

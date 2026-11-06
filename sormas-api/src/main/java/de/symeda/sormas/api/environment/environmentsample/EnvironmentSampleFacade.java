@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.api.environment.environmentsample;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import de.symeda.sormas.api.BaseFacade;
 import de.symeda.sormas.api.DeletableFacade;

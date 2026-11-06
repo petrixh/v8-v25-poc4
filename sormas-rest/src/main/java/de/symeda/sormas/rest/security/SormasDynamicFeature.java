@@ -15,13 +15,13 @@
 
 package de.symeda.sormas.rest.security;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.container.DynamicFeature;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.FeatureContext;
-import javax.ws.rs.ext.Provider;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.container.DynamicFeature;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.FeatureContext;
+import jakarta.ws.rs.ext.Provider;
 
 @Provider
 public class SormasDynamicFeature implements DynamicFeature {

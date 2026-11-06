@@ -19,9 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
 
 import de.symeda.sormas.api.dashboard.SampleDashboardCriteria;
 import de.symeda.sormas.api.dashboard.sample.MapSampleDto;

@@ -1,9 +1,9 @@
 package de.symeda.sormas.backend.deletionconfiguration;
 
-import javax.ejb.Asynchronous;
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
 
 import de.symeda.sormas.api.deletionconfiguration.DeletionConfigurationFacade;
 import de.symeda.sormas.api.user.UserRight;

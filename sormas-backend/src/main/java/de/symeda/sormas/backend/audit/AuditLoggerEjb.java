@@ -46,12 +46,12 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.SessionContext;
-import javax.ejb.Singleton;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.Singleton;
 
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.CodeableConcept;

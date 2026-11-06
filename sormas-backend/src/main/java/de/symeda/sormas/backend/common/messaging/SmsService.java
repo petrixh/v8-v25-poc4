@@ -19,10 +19,10 @@ package de.symeda.sormas.backend.common.messaging;
 
 import java.io.IOException;
 
-import javax.ejb.Asynchronous;
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
+import jakarta.ejb.Asynchronous;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
 
 import de.symeda.sormas.api.systemconfiguration.SystemConfigurationValueFacade;
 import de.symeda.sormas.backend.systemconfiguration.SystemConfigurationValueEjb;

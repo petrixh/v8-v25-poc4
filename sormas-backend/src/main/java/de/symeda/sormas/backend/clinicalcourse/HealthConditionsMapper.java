@@ -15,9 +15,9 @@
 
 package de.symeda.sormas.backend.clinicalcourse;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.validation.constraints.NotNull;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.clinicalcourse.HealthConditionsDto;
 import de.symeda.sormas.backend.util.DtoHelper;

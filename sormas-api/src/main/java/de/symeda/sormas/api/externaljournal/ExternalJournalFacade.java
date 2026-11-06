@@ -1,6 +1,6 @@
 package de.symeda.sormas.api.externaljournal;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import de.symeda.sormas.api.externaljournal.patientdiary.PatientDiaryPersonDto;
 import de.symeda.sormas.api.externaljournal.patientdiary.PatientDiaryResult;

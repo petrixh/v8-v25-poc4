@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collector;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public class CollectorUtils {
 

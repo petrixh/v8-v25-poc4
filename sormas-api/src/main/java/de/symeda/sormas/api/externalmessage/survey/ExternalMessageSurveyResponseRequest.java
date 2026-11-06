@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.Language;
 import de.symeda.sormas.api.externalmessage.ExternalMessageType;

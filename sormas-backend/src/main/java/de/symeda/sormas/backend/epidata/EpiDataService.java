@@ -19,13 +19,13 @@ package de.symeda.sormas.backend.epidata;
 
 import java.sql.Timestamp;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
 
 import de.symeda.sormas.api.utils.DataHelper;
 import de.symeda.sormas.backend.activityascase.ActivityAsCase;

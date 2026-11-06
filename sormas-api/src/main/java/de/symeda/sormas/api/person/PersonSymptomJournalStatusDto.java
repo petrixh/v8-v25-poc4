@@ -2,7 +2,7 @@ package de.symeda.sormas.api.person;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.i18n.Validations;
 

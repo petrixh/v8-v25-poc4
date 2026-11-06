@@ -4,7 +4,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import de.symeda.sormas.backend.patch.mapping.PatchingEqualityChecker;
 

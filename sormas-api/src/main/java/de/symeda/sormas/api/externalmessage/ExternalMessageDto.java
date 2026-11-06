@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nullable;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;

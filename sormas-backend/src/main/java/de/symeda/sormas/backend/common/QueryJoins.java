@@ -3,9 +3,9 @@ package de.symeda.sormas.backend.common;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 
 public class QueryJoins<Y extends AbstractDomainObject> {
 

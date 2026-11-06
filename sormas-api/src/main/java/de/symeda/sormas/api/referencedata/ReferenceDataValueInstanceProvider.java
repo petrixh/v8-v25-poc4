@@ -3,8 +3,8 @@ package de.symeda.sormas.api.referencedata;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ejb.Remote;
-import javax.validation.constraints.NotNull;
+import jakarta.ejb.Remote;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.ReferenceDto;
 

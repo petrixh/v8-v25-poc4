@@ -15,9 +15,9 @@
 
 package de.symeda.sormas.backend.campaign.data;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
 
 import de.symeda.sormas.backend.common.QueryContext;
 

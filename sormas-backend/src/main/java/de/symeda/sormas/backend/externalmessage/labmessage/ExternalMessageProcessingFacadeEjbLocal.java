@@ -17,9 +17,9 @@ package de.symeda.sormas.backend.externalmessage.labmessage;
 
 import java.util.Arrays;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 import de.symeda.sormas.api.externalmessage.processing.ExternalMessageProcessingFacade;
 import de.symeda.sormas.api.user.UserRight;

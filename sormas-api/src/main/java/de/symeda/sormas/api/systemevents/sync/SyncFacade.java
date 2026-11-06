@@ -3,7 +3,7 @@ package de.symeda.sormas.api.systemevents.sync;
 import de.symeda.sormas.api.systemevents.SystemEventDto;
 import de.symeda.sormas.api.systemevents.SystemEventType;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 import java.util.Date;
 
 @Remote

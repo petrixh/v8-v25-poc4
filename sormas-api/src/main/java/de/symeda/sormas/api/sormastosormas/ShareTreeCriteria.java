@@ -22,9 +22,9 @@ import static de.symeda.sormas.api.utils.FieldConstraints.CHARACTER_LIMIT_UUID_M
 
 import java.io.Serializable;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import de.symeda.sormas.api.i18n.Validations;
 

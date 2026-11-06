@@ -18,7 +18,7 @@ package de.symeda.sormas.api.bagexport;
 import java.util.Collection;
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface BAGExportFacade {

@@ -20,7 +20,7 @@ package de.symeda.sormas.api.utils;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.ApplicationException;
+import jakarta.ejb.ApplicationException;
 
 /*
  * ATTENTION: Does not do a rollback when thrown because this class is used in

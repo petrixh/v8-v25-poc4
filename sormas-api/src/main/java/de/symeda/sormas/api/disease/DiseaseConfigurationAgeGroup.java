@@ -18,8 +18,8 @@ package de.symeda.sormas.api.disease;
 import java.io.Serializable;
 import java.util.Objects;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 
 import de.symeda.sormas.api.i18n.Validations;
 import de.symeda.sormas.api.person.ApproximateAgeType;

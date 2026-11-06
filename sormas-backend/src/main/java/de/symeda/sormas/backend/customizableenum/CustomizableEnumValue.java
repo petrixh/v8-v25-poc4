@@ -19,11 +19,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 import de.symeda.sormas.api.customizableenum.CustomizableEnumConverter;
 import org.hibernate.annotations.Type;

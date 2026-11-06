@@ -2,7 +2,7 @@ package de.symeda.sormas.api.infrastructure.country;
 
 import java.util.Date;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import de.symeda.sormas.api.ArchivableFacade;
 import de.symeda.sormas.api.BaseFacade;

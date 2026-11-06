@@ -22,9 +22,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ElementKind;
-import javax.validation.Path;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ElementKind;
+import jakarta.validation.Path;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;

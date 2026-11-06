@@ -16,13 +16,13 @@ package de.symeda.sormas.rest;
 
 import java.util.EnumSet;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.FilterRegistration;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
-import javax.ws.rs.ApplicationPath;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.FilterRegistration;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.annotation.WebListener;
+import jakarta.ws.rs.ApplicationPath;
 
 import org.apache.commons.collections4.SetUtils;
 import org.glassfish.jersey.jackson.JacksonFeature;

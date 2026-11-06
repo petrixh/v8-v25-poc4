@@ -19,7 +19,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import de.symeda.sormas.api.audit.AuditedClass;
 import de.symeda.sormas.api.event.EventDto;

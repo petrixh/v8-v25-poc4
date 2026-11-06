@@ -19,8 +19,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Remote;
-import javax.validation.constraints.NotNull;
+import jakarta.ejb.Remote;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.CoreFacade;
 import de.symeda.sormas.api.Language;

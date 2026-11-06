@@ -17,7 +17,7 @@ package de.symeda.sormas.ui.caze.surveillancereport;
 
 import java.util.List;
 
-import javax.validation.constraints.Null;
+import jakarta.validation.constraints.Null;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Alignment;

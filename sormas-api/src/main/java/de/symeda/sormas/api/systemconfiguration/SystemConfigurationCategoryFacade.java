@@ -17,7 +17,7 @@ package de.symeda.sormas.api.systemconfiguration;
 
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import de.symeda.sormas.api.BaseFacade;
 

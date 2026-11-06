@@ -16,14 +16,14 @@ package de.symeda.sormas.ui.security.config;
 
 import java.util.Set;
 
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.spi.CDI;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.ProcessProducer;
-import javax.enterprise.inject.spi.Producer;
+import jakarta.enterprise.context.spi.CreationalContext;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.enterprise.inject.spi.Extension;
+import jakarta.enterprise.inject.spi.InjectionPoint;
+import jakarta.enterprise.inject.spi.ProcessProducer;
+import jakarta.enterprise.inject.spi.Producer;
 
 import fish.payara.security.annotations.OpenIdAuthenticationDefinition;
 import fish.payara.security.openid.OpenIdAuthenticationMechanism;

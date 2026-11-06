@@ -3,7 +3,7 @@ package de.symeda.sormas.api.infrastructure.subcontinent;
 import java.util.Collection;
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import de.symeda.sormas.api.common.Page;
 import de.symeda.sormas.api.infrastructure.GeoLocationFacade;

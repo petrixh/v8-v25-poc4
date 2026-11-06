@@ -18,9 +18,9 @@ package de.symeda.sormas.backend.person;
 import java.util.List;
 import java.util.Optional;
 
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 
 import de.symeda.sormas.api.person.PersonAssociation;
 import de.symeda.sormas.api.person.PersonCriteria;

@@ -2,7 +2,7 @@ package de.symeda.sormas.backend.patch;
 
 import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.EntityDto;
 

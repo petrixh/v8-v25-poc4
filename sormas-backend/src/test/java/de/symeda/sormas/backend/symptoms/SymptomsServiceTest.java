@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.sql.Timestamp;
 import java.util.Date;
 
-import javax.persistence.Query;
+import jakarta.persistence.Query;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.Test;

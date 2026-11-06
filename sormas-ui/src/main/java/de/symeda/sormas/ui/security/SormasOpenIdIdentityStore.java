@@ -14,7 +14,7 @@
  */
 package de.symeda.sormas.ui.security;
 
-import static javax.security.enterprise.identitystore.CredentialValidationResult.Status.VALID;
+import static jakarta.security.enterprise.identitystore.CredentialValidationResult.Status.VALID;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
@@ -22,10 +22,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.security.enterprise.identitystore.CredentialValidationResult;
-import javax.security.enterprise.identitystore.IdentityStore;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.security.enterprise.identitystore.CredentialValidationResult;
+import jakarta.security.enterprise.identitystore.IdentityStore;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;

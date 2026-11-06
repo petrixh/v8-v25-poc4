@@ -17,8 +17,8 @@ package de.symeda.sormas.backend.epipulse.strategy;
 
 import java.util.List;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
 
 import de.symeda.sormas.api.epipulse.EpipulseDiseaseExportEntryDto;
 import de.symeda.sormas.api.epipulse.EpipulseDiseaseExportResult;

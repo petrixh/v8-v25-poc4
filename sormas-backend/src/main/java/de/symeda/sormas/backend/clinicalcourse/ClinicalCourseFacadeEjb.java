@@ -1,9 +1,9 @@
 package de.symeda.sormas.backend.clinicalcourse;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.validation.constraints.NotNull;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.clinicalcourse.ClinicalCourseDto;
 import de.symeda.sormas.api.clinicalcourse.ClinicalCourseFacade;

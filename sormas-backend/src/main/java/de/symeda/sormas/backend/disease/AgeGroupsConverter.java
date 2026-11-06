@@ -20,7 +20,7 @@ import static de.symeda.sormas.api.utils.AgeGroupUtils.convertToString;
 
 import java.util.List;
 
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 
 public class AgeGroupsConverter implements AttributeConverter<List<String>, String> {
 

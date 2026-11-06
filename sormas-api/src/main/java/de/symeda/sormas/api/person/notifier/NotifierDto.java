@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.api.person.notifier;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 
 import de.symeda.sormas.api.i18n.Validations;
 import de.symeda.sormas.api.person.IsPerson;

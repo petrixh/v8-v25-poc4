@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
-import javax.persistence.EntityExistsException;
+import jakarta.persistence.EntityExistsException;
 
 import org.junit.jupiter.api.Test;
 

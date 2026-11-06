@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.api.sormastosormas.entities.contact;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import de.symeda.sormas.api.contact.ContactDto;
 import de.symeda.sormas.api.person.PersonDto;

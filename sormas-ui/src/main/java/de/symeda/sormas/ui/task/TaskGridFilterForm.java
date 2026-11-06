@@ -203,7 +203,7 @@ public class TaskGridFilterForm extends AbstractFilterForm<TaskCriteria> {
 		HorizontalLayout dateFilterLayout = (HorizontalLayout) getMoreFiltersContainer().getComponent(WEEK_AND_DATE_FILTER);
 		@SuppressWarnings("unchecked")
 		EpiWeekAndDateFilterComponent<NewCaseDateType> weekAndDateFilter =
-			(EpiWeekAndDateFilterComponent<NewCaseDateType>) dateFilterLayout.getComponent(0);
+			(EpiWeekAndDateFilterComponent<NewCaseDateType>) dateFilterLayout.getComponentAt(0);
 
 		TaskDateType taskDateType = newValue.getStartDateFrom() != null
 			? TaskDateType.SUGGESTED_START_DATE
@@ -232,7 +232,7 @@ public class TaskGridFilterForm extends AbstractFilterForm<TaskCriteria> {
 		HorizontalLayout dateFilterLayout = (HorizontalLayout) getMoreFiltersContainer().getComponent(WEEK_AND_DATE_FILTER);
 		@SuppressWarnings("unchecked")
 		EpiWeekAndDateFilterComponent<NewCaseDateType> weekAndDateFilter =
-			(EpiWeekAndDateFilterComponent<NewCaseDateType>) dateFilterLayout.getComponent(0);
+			(EpiWeekAndDateFilterComponent<NewCaseDateType>) dateFilterLayout.getComponentAt(0);
 
 		return super.streamFieldsForEmptyCheck(layout).filter(f -> f != weekAndDateFilter.getDateFilterOptionFilter());
 	}

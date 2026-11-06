@@ -17,12 +17,13 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.task;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -88,7 +89,7 @@ public class TaskListEntry extends SideComponentField {
 
 		// TOP RIGHT
 		VerticalLayout topRightLayout = new VerticalLayout();
-		topLayout.setComponentAlignment(topLeftLayout, Alignment.TOP_LEFT);
+		topLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, topLeftLayout);
 
 		topRightLayout.addClassName(CssStyles.ALIGN_RIGHT);
 		/*
@@ -101,7 +102,9 @@ public class TaskListEntry extends SideComponentField {
 		topLeftLayout.add(userLabel);
 
 		topLayout.add(topRightLayout);
-		topLayout.setComponentAlignment(topRightLayout, Alignment.TOP_RIGHT);
+		// was Alignment.TOP_RIGHT
+		topLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, topRightLayout);
+		topRightLayout.getStyle().set("margin-left", "auto");
 
 		String statusStyle;
 		switch (task.getTaskStatus()) {
@@ -129,7 +132,7 @@ public class TaskListEntry extends SideComponentField {
 		}
 	}
 
-	public void addEditListener(int rowIndex, ClickListener editClickListener) {
+	public void addEditListener(int rowIndex, ComponentEventListener<ClickEvent<Button>> editClickListener) {
 		if (editButton == null) {
 			editButton = ButtonHelper.createIconButtonWithCaption(
 				"edit-task-" + rowIndex,
@@ -140,7 +143,8 @@ public class TaskListEntry extends SideComponentField {
 				CssStyles.BUTTON_COMPACT);
 
 			add(editButton);
-			setComponentAlignment(editButton, Alignment.TOP_RIGHT);
+			// was Alignment.TOP_RIGHT
+			setVerticalComponentAlignment(FlexComponent.Alignment.START, editButton);
 			setFlexGrow(0, editButton);
 		}
 

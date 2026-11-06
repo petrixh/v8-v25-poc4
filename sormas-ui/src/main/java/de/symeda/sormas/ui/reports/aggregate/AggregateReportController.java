@@ -2,7 +2,6 @@ package de.symeda.sormas.ui.reports.aggregate;
 
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.dialog.Dialog;
 
@@ -25,14 +24,15 @@ public class AggregateReportController {
 		Dialog window = VaadinUiUtil.createPopupWindow();
 		AggregateReportsEditLayout createLayout = new AggregateReportsEditLayout(window, edit, aggregateReportDto);
 		window.setHeight(90, Unit.PERCENTAGE);
-		window.setWidth(createLayout.getWidth() + 64 + 20, Unit.PIXELS);
+		// was getWidth() + 64 + 20 pixels (Flow returns the width as a CSS string)
+		window.setWidth("calc(" + createLayout.getWidth() + " + 84px)");
 		if (edit) {
-			window.setCaption(I18nProperties.getString(Strings.headingEditAggregateReport));
+			window.setHeaderTitle(I18nProperties.getString(Strings.headingEditAggregateReport));
 		} else {
-			window.setCaption(I18nProperties.getString(Strings.headingCreateNewAggregateReport));
+			window.setHeaderTitle(I18nProperties.getString(Strings.headingCreateNewAggregateReport));
 		}
-		window.setContent(createLayout);
-		window.addCloseListener(e -> onClose.run());
+		window.add(createLayout);
+		VaadinUiUtil.addCloseListener(window, e -> onClose.run());
 		window.open();
 	}
 

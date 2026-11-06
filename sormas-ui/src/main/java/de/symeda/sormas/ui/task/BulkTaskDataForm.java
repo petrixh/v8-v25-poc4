@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.flow.component.html.Span;
@@ -56,6 +57,8 @@ import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class BulkTaskDataForm extends AbstractEditForm<TaskDto> {
 
@@ -124,7 +127,7 @@ public class BulkTaskDataForm extends AbstractEditForm<TaskDto> {
 		CssStyles.style(assigneeHint, VSPACE_4, VSPACE_TOP_5);
 		assigneeHint.setVisible(false);
 		assigneeHint.setWidthFull();
-		assigneeHint.setContentMode(ContentMode.HTML);
+		// was setContentMode(ContentMode.HTML): the text is set with VaadinUiUtil.setLabelValue(.., ContentMode.HTML)
 
 		assigneeCheckbox.addValueChangeListener(e -> {
 			boolean changeAssignee = (boolean) e.getValue();
@@ -174,14 +177,16 @@ public class BulkTaskDataForm extends AbstractEditForm<TaskDto> {
 			}
 
 			if (changeAssignee && lowestCommonJurisdictionLevel.getOrder() < 5 && lowestCommonJurisdictionLevel != JurisdictionLevel.POINT_OF_ENTRY) {
-				assigneeHint.setValue(
-					VaadinIcon.INFO_CIRCLE.getHtml() + " "
+				VaadinUiUtil.setLabelValue(
+					assigneeHint,
+					HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " "
 						+ String.format(
 							I18nProperties.getString(Strings.infoTasksWithMultipleJurisdictionsSelected),
-							lowestCommonJurisdictionLevel.toString()));
+							lowestCommonJurisdictionLevel.toString()),
+					ContentMode.HTML);
 				assigneeHint.setVisible(true);
 			} else {
-				assigneeHint.setValue("");
+				VaadinUiUtil.setLabelValue(assigneeHint, "", ContentMode.HTML);
 				assigneeHint.setVisible(false);
 			}
 		});

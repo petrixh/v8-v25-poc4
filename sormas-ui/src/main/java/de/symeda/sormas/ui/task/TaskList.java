@@ -19,7 +19,6 @@ package de.symeda.sormas.ui.task;
 
 import java.util.List;
 
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
@@ -97,7 +96,7 @@ public class TaskList extends PaginationList<TaskIndexDto> {
 
 			listEntry.addActionButton(
 				String.valueOf(i),
-				(ClickListener) event -> ControllerProvider.getTaskController()
+				event -> ControllerProvider.getTaskController()
 					.edit(listEntry.getTask(), TaskList.this::reload, false, listEntry.getTask().getDisease()),
 				hasEditOrDeleteRights());
 

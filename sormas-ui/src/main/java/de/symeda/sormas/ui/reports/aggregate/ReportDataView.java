@@ -7,12 +7,10 @@ import java.util.Date;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
 import de.symeda.sormas.ui.navigation.ViewChangeListener;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.ui.CheckBox;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.Component;
-import de.symeda.sormas.ui.utils.NotificationHelper;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
@@ -28,6 +26,7 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.DownloadUtil;
 import de.symeda.sormas.ui.utils.ExportEntityName;
 import de.symeda.sormas.ui.utils.GridExportStreamResource;
 import de.symeda.sormas.ui.utils.NotificationHelper;
@@ -42,7 +41,7 @@ public class ReportDataView extends AbstractAggregateReportsView {
 	private Button btnCreate;
 	private Button btnEdit;
 
-	private CheckBox showOnlyDuplicates;
+	private Checkbox showOnlyDuplicates;
 
 	private AggregateReportsFilterForm aggregateReportsFilterForm;
 
@@ -97,18 +96,17 @@ public class ReportDataView extends AbstractAggregateReportsView {
 
 			addHeaderComponent(btnExport);
 
-			StreamResource streamResource = GridExportStreamResource
+			DownloadHandler streamResource = GridExportStreamResource
 				.createStreamResource(grid, ExportEntityName.AGGREGATE_REPORTS, EDIT_AGGREGATE_REPORT, DELETE_AGGREGATE_REPORT);
-			FileDownloader fileDownloader = new FileDownloader(streamResource);
-			fileDownloader.extend(btnExport);
+			DownloadUtil.attachDownloader(btnExport, streamResource);
 		}
 	}
 
 	private Component createDuplicateFilter() {
 
-		showOnlyDuplicates = new CheckBox();
+		showOnlyDuplicates = new Checkbox();
 		showOnlyDuplicates.setId(AggregateReportCriteria.SHOW_ONLY_DUPLICATES);
-		showOnlyDuplicates.setCaption(I18nProperties.getCaption(Captions.aggregateReportShowOnlyDuplicateReports));
+		showOnlyDuplicates.setLabel(I18nProperties.getCaption(Captions.aggregateReportShowOnlyDuplicateReports));
 		showOnlyDuplicates.addClassName(CssStyles.FORCE_CAPTION_CHECKBOX);
 		showOnlyDuplicates.setValue(criteria.getShowOnlyDuplicates());
 

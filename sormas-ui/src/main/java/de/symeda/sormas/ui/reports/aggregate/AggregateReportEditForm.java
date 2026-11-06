@@ -3,9 +3,8 @@ package de.symeda.sormas.ui.reports.aggregate;
 import de.symeda.sormas.api.i18n.Strings;
 import org.apache.commons.lang3.StringUtils;
 
-import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
-import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.i18n.Captions;
@@ -16,7 +15,9 @@ import de.symeda.sormas.api.utils.AgeGroupUtils;
 import de.symeda.sormas.api.utils.DataHelper;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.LayoutUtil;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 /**
  * @author Christopher Riedel
@@ -159,7 +160,7 @@ public class AggregateReportEditForm extends AbstractEditForm<AggregateReportDto
 	}
 
 	@Override
-	protected CustomLayout getContent() {
+	public CustomLayout getContent() {
 		return (CustomLayout) super.getContent();
 	}
 }

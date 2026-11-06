@@ -4,12 +4,10 @@ import java.util.Date;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
 import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.ui.CheckBox;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import de.symeda.sormas.ui.utils.NotificationHelper;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
@@ -26,6 +24,7 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.DownloadUtil;
 import de.symeda.sormas.ui.utils.ExportEntityName;
 import de.symeda.sormas.ui.utils.GridExportStreamResource;
 import de.symeda.sormas.ui.utils.NotificationHelper;
@@ -41,7 +40,7 @@ public class AggregateReportsView extends AbstractAggregateReportsView {
 	private Button btnCreate;
 	private Button btnEdit;
 
-	private CheckBox showZeroRows;
+	private Checkbox showZeroRows;
 
 	private AggregateReportsFilterForm aggregateReportsFilterForm;
 
@@ -99,9 +98,8 @@ public class AggregateReportsView extends AbstractAggregateReportsView {
 
 			addHeaderComponent(btnExport);
 
-			StreamResource streamResource = GridExportStreamResource.createStreamResource(grid, ExportEntityName.AGGREGATE_REPORTS);
-			FileDownloader fileDownloader = new FileDownloader(streamResource);
-			fileDownloader.extend(btnExport);
+			DownloadHandler streamResource = GridExportStreamResource.createStreamResource(grid, ExportEntityName.AGGREGATE_REPORTS);
+			DownloadUtil.attachDownloader(btnExport, streamResource);
 		}
 	}
 
@@ -118,9 +116,9 @@ public class AggregateReportsView extends AbstractAggregateReportsView {
 		});
 		jurisdictionLayout.add(aggregateReportGroupingSelector);
 
-		showZeroRows = new CheckBox();
+		showZeroRows = new Checkbox();
 		showZeroRows.setId(AggregateReportCriteria.SHOW_ZERO_ROWS);
-		showZeroRows.setCaption(I18nProperties.getCaption(Captions.aggregateReportShowZeroRows));
+		showZeroRows.setLabel(I18nProperties.getCaption(Captions.aggregateReportShowZeroRows));
 		showZeroRows.addClassName(CssStyles.FORCE_CAPTION_CHECKBOX);
 
 		showZeroRows.setValue(criteria.getShowZeroRows());

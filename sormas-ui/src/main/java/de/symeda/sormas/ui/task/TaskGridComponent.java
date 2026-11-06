@@ -24,11 +24,13 @@ import java.util.Map;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
 import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.ui.Alignment;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.ui.MenuBar;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import de.symeda.sormas.ui.utils.fields.ComboBox;
 
@@ -44,7 +46,6 @@ import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.ComboBoxHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
-import de.symeda.sormas.ui.utils.LayoutUtil;
 import de.symeda.sormas.ui.utils.MenuBarHelper;
 
 @SuppressWarnings("serial")
@@ -52,6 +53,7 @@ public class TaskGridComponent extends VerticalLayout {
 
 	private static final String MY_TASKS = "myTasks";
 	private static final String OFFICER_TASKS = "officerTasks";
+	private static final String STATUS_DATA = "status";
 
 	private TaskCriteria criteria;
 
@@ -69,13 +71,13 @@ public class TaskGridComponent extends VerticalLayout {
 	private Span viewTitleLabel;
 	private String originalViewTitle;
 
-	public TaskGridComponent(Label viewTitleLabel, TasksView tasksView) {
+	public TaskGridComponent(Span viewTitleLabel, TasksView tasksView) {
 		setSizeFull();
 		setMargin(false);
 
 		this.viewTitleLabel = viewTitleLabel;
 		this.tasksView = tasksView;
-		originalViewTitle = viewTitleLabel.getValue();
+		originalViewTitle = viewTitleLabel.getText();
 
 		criteria = ViewModelProviders.of(TasksView.class).get(TaskCriteria.class);
 		if (criteria.getRelevanceStatus() == null) {
@@ -127,7 +129,7 @@ public class TaskGridComponent extends VerticalLayout {
 		{
 			Button allTasks =
 				ButtonHelper.createButton(Captions.all, e -> processAssigneeFilterChange(null), CssStyles.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER);
-			allTasks.setCaptionAsHtml(true);
+			// was setCaptionAsHtml(true): the count badge is a suffix component (updateAssigneeFilterButtons)
 
 			buttonFilterLayout.add(allTasks);
 			statusButtons.put(allTasks, I18nProperties.getCaption(Captions.all));
@@ -219,8 +221,10 @@ public class TaskGridComponent extends VerticalLayout {
 			}
 		}
 		assigneeFilterLayout.add(actionButtonsLayout);
-		assigneeFilterLayout.setComponentAlignment(actionButtonsLayout, Alignment.TOP_RIGHT);
+		// was Alignment.TOP_RIGHT in an expanding slot: the layout grows, its content goes right
+		assigneeFilterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, actionButtonsLayout);
 		assigneeFilterLayout.setFlexGrow(1, actionButtonsLayout);
+		actionButtonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
 		return assigneeFilterLayout;
 	}
@@ -254,11 +258,10 @@ public class TaskGridComponent extends VerticalLayout {
 			CssStyles.BUTTON_BORDERLESS,
 			CssStyles.BUTTON_FILTER,
 			CssStyles.BUTTON_FILTER_LIGHT);
-		button.setData(status);
-		button.setCaptionAsHtml(true);
+		ComponentUtil.setData(button, STATUS_DATA, status);
 
 		filterLayout.add(button);
-		statusButtons.put(button, button.getCaption());
+		statusButtons.put(button, button.getText());
 
 		return button;
 	}
@@ -276,17 +279,22 @@ public class TaskGridComponent extends VerticalLayout {
 	private void updateAssigneeFilterButtons() {
 		statusButtons.keySet().forEach(b -> {
 			CssStyles.style(b, CssStyles.BUTTON_FILTER_LIGHT);
-			b.setCaption(statusButtons.get(b));
-			if ((OFFICER_TASKS.equals(b.getData()) && criteria.getExcludeAssigneeUser() != null)
-				|| (MY_TASKS.equals(b.getData()) && criteria.getAssigneeUser() != null)
-				|| (b.getData() == null && criteria.getExcludeAssigneeUser() == null && criteria.getAssigneeUser() == null)) {
+			b.setText(statusButtons.get(b));
+			b.setSuffixComponent(null);
+			Object status = ComponentUtil.getData(b, STATUS_DATA);
+			if ((OFFICER_TASKS.equals(status) && criteria.getExcludeAssigneeUser() != null)
+				|| (MY_TASKS.equals(status) && criteria.getAssigneeUser() != null)
+				|| (status == null && criteria.getExcludeAssigneeUser() == null && criteria.getAssigneeUser() == null)) {
 				activeStatusButton = b;
 			}
 		});
 		if (activeStatusButton != null) {
 			CssStyles.removeStyles(activeStatusButton, CssStyles.BUTTON_FILTER_LIGHT);
-			activeStatusButton
-				.setCaption(statusButtons.get(activeStatusButton) + LayoutUtil.spanCss(CssStyles.BADGE, String.valueOf(grid.getDataSize())));
+			// was an HTML caption with LayoutUtil.spanCss(BADGE, count): the count is a badge after the text
+			activeStatusButton.setText(statusButtons.get(activeStatusButton));
+			Span badge = new Span(String.valueOf(grid.getDataSize()));
+			badge.addClassName(CssStyles.BADGE);
+			activeStatusButton.setSuffixComponent(badge);
 		}
 	}
 

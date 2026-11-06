@@ -1,16 +1,12 @@
 package de.symeda.sormas.ui.reports.aggregate;
 
-import static com.vaadin.v7.data.fieldgroup.DefaultFieldGroupFieldFactory.CAPTION_PROPERTY_ID;
-
 import java.util.List;
 import java.util.Optional;
 
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.AbstractField;
-import de.symeda.sormas.ui.utils.fields.ComboBox;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -35,6 +31,8 @@ import de.symeda.sormas.ui.utils.AbstractFilterForm;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FieldConfiguration;
 import de.symeda.sormas.ui.utils.FieldHelper;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.KeepValueComboBox;
 
 public class AggregateReportsFilterForm extends AbstractFilterForm<AggregateReportCriteria> {
 
@@ -48,10 +46,11 @@ public class AggregateReportsFilterForm extends AbstractFilterForm<AggregateRepo
 
 	// Filters
 	private HorizontalLayout hlSecondFilterRow;
-	private com.vaadin.ui.ComboBox<Integer> cbFromYearFilter;
-	private com.vaadin.ui.ComboBox<EpiWeek> cbFromEpiWeekFilter;
-	private com.vaadin.ui.ComboBox<Integer> cbToYearFilter;
-	private com.vaadin.ui.ComboBox<EpiWeek> cbToEpiWeekFilter;
+	private com.vaadin.flow.component.combobox.ComboBox<Integer> cbFromYearFilter;
+	// the epi week items change with the year: they keep their value as Vaadin 8 did (KeepValueComboBox)
+	private KeepValueComboBox<EpiWeek> cbFromEpiWeekFilter;
+	private com.vaadin.flow.component.combobox.ComboBox<Integer> cbToYearFilter;
+	private KeepValueComboBox<EpiWeek> cbToEpiWeekFilter;
 
 	protected AggregateReportsFilterForm() {
 		super(
@@ -121,14 +120,14 @@ public class AggregateReportsFilterForm extends AbstractFilterForm<AggregateRepo
 		List<Disease> aggregateDiseases = FacadeProvider.getDiseaseConfigurationFacade().getAllDiseases(true, null, false, true);
 		FieldHelper.updateItems(diseaseFilter, aggregateDiseases);
 		for (Object r : aggregateDiseases) {
-			diseaseFilter.getItem(r).getItemProperty(CAPTION_PROPERTY_ID).setValue(r.toString());
+			diseaseFilter.setItemCaption(r, r.toString());
 		}
 
 		getContent().addComponent(createEpiWeekFilterBar(), EPI_WEEK_LOC);
 	}
 
 	@Override
-	protected void applyDependenciesOnFieldChange(String propertyId, Property.ValueChangeEvent event) {
+	protected void applyDependenciesOnFieldChange(String propertyId, HasValue.ValueChangeEvent<?> event) {
 
 		super.applyDependenciesOnFieldChange(propertyId, event);
 
@@ -140,8 +139,8 @@ public class AggregateReportsFilterForm extends AbstractFilterForm<AggregateRepo
 			if (region != null) {
 				enableFields(districtFilter);
 				FieldHelper.updateItems(districtFilter, FacadeProvider.getDistrictFacade().getAllActiveByRegion(region.getUuid()));
-				Optional.ofNullable(facilityFilter).ifPresent(AbstractField::clear);
-				Optional.ofNullable(pointOfEntryFilter).ifPresent(AbstractField::clear);
+				Optional.ofNullable(facilityFilter).ifPresent(ComboBox::clear);
+				Optional.ofNullable(pointOfEntryFilter).ifPresent(ComboBox::clear);
 				if (user.getDistrict() != null) {
 					disableFields(districtFilter);
 				}
@@ -195,23 +194,28 @@ public class AggregateReportsFilterForm extends AbstractFilterForm<AggregateRepo
 		hlSecondFilterRow = new HorizontalLayout();
 		hlSecondFilterRow.setPadding(false);
 		hlSecondFilterRow.setSpacing(true);
-		hlSecondFilterRow.setWidthUndefined();
+		hlSecondFilterRow.setWidth(null);
 
 		Span lblFrom = new Span(I18nProperties.getCaption(Captions.from));
 		CssStyles.style(lblFrom, CssStyles.LABEL_BOLD, CssStyles.VSPACE_TOP_4);
 		hlSecondFilterRow.add(lblFrom);
 
-		cbFromYearFilter = new com.vaadin.ui.ComboBox<>();
+		cbFromYearFilter = new com.vaadin.flow.component.combobox.ComboBox<>();
 		cbFromYearFilter.setId("yearFrom");
+		// was the Vaadin 8 empty item (empty selection allowed by default)
+		cbFromYearFilter.setClearButtonVisible(true);
 		cbFromYearFilter.addValueChangeListener(e -> clearFilterIfEmpty(cbFromYearFilter, cbFromEpiWeekFilter));
-		cbFromEpiWeekFilter = new com.vaadin.ui.ComboBox<>();
+		cbFromEpiWeekFilter = new KeepValueComboBox<>();
 		cbFromEpiWeekFilter.setId(AggregateReportCriteria.EPI_WEEK_FROM);
+		cbFromEpiWeekFilter.setClearButtonVisible(true);
 		cbFromEpiWeekFilter.addValueChangeListener(e -> getValue().setEpiWeekFrom(e.getValue()));
-		cbToYearFilter = new com.vaadin.ui.ComboBox<>();
+		cbToYearFilter = new com.vaadin.flow.component.combobox.ComboBox<>();
 		cbToYearFilter.setId("yearTo");
+		cbToYearFilter.setClearButtonVisible(true);
 		cbToYearFilter.addValueChangeListener(e -> clearFilterIfEmpty(cbFromYearFilter, cbToEpiWeekFilter));
-		cbToEpiWeekFilter = new com.vaadin.ui.ComboBox<>();
+		cbToEpiWeekFilter = new KeepValueComboBox<>();
 		cbToEpiWeekFilter.setId(AggregateReportCriteria.EPI_WEEK_TO);
+		cbToEpiWeekFilter.setClearButtonVisible(true);
 		cbToEpiWeekFilter.addValueChangeListener(e -> getValue().setEpiWeekTo(e.getValue()));
 
 		cbFromYearFilter.setWidth(140, Unit.PIXELS);
@@ -252,14 +256,14 @@ public class AggregateReportsFilterForm extends AbstractFilterForm<AggregateRepo
 		return hlSecondFilterRow;
 	}
 
-	private void clearFilterIfEmpty(com.vaadin.ui.ComboBox<?> filter1, com.vaadin.ui.ComboBox<?> filter2) {
+	private void clearFilterIfEmpty(com.vaadin.flow.component.combobox.ComboBox<?> filter1, com.vaadin.flow.component.combobox.ComboBox<?> filter2) {
 		if (filter1.getValue() == null) {
 			filter2.clear();
 		}
 	}
 
 	@Override
-	public void setValue(AggregateReportCriteria newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(AggregateReportCriteria newFieldValue) {
 		super.setValue(newFieldValue);
 
 		if (newFieldValue.getEpiWeekFrom() != null) {

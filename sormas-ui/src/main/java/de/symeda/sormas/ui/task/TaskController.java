@@ -27,7 +27,6 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import de.symeda.sormas.ui.utils.NotificationHelper;
 import de.symeda.sormas.ui.utils.NotificationHelper.Type;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.Disease;
@@ -138,7 +137,7 @@ public class TaskController {
 		if (UiUtil.permitted(UserRight.TASK_DELETE)) {
 			editView.addDeleteListener(() -> {
 				FacadeProvider.getTaskFacade().delete(task.getUuid());
-				UI.getCurrent().removeWindow(popupWindow);
+				popupWindow.close();
 				callback.run();
 			}, I18nProperties.getString(Strings.entityTask));
 		}
@@ -222,7 +221,7 @@ public class TaskController {
 
 			taskGrid.reload();
 			if (CollectionUtils.isNotEmpty(remainingTasks)) {
-				taskGrid.asMultiSelect().selectItems(remainingTasks.toArray(new TaskIndexDto[0]));
+				taskGrid.asMultiSelect().select(remainingTasks.toArray(new TaskIndexDto[0]));
 			} else {
 				noEntriesRemainingCallback.run();
 			}

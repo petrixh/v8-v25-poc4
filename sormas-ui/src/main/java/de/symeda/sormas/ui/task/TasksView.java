@@ -25,8 +25,8 @@ import de.symeda.sormas.ui.utils.PopupButton;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
 import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
@@ -44,6 +44,7 @@ import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.utils.AbstractView;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.DownloadUtil;
 import de.symeda.sormas.ui.utils.ExportEntityName;
 import de.symeda.sormas.ui.utils.GridExportStreamResource;
 import de.symeda.sormas.ui.utils.TaskDownloadUtil;
@@ -83,22 +84,21 @@ public class TasksView extends AbstractView {
 			addHeaderComponent(exportButton);
 
 			Button basicExportButton = ButtonHelper.createIconButton(Captions.exportBasic, VaadinIcon.TABLE, null, CssStyles.BUTTON_PRIMARY);
-			basicExportButton.setDescription(I18nProperties.getString(Strings.infoBasicExport));
+			basicExportButton.setTooltipText(I18nProperties.getString(Strings.infoBasicExport));
 			basicExportButton.setWidthFull();
 			exportLayout.add(basicExportButton);
-			StreamResource streamResource = GridExportStreamResource.createStreamResourceWithSelectedItems(
+			DownloadHandler streamResource = GridExportStreamResource.createStreamResourceWithSelectedItems(
 				taskListComponent.getGrid(),
 				() -> viewConfiguration.isInEagerMode() ? taskListComponent.getGrid().asMultiSelect().getSelectedItems() : Collections.emptySet(),
 				ExportEntityName.TASKS,
 				TaskGrid.ACTION_BTN_ID);
-			FileDownloader fileDownloader = new FileDownloader(streamResource);
-			fileDownloader.extend(basicExportButton);
+			DownloadUtil.attachDownloader(basicExportButton, streamResource);
 
-			StreamResource extendedExportStreamResource =
+			DownloadHandler extendedExportStreamResource =
 				TaskDownloadUtil.createTaskExportResource(taskListComponent.getGrid().getCriteria(), this::getSelectedRowUuids, null);
 			addExportButton(
 				extendedExportStreamResource,
-				exportButton,
+				exportButton.getPopover(),
 				exportLayout,
 				VaadinIcon.FILE_TEXT,
 				Captions.exportDetailed,
@@ -108,7 +108,7 @@ public class TasksView extends AbstractView {
 				ControllerProvider.getCustomExportController().openTaskExportWindow(taskListComponent.getCriteria(), this::getSelectedRowUuids);
 				exportButton.setPopupVisible(false);
 			}, CssStyles.BUTTON_PRIMARY);
-			btnCustomExport.setDescription(I18nProperties.getString(Strings.infoCustomExport));
+			btnCustomExport.setTooltipText(I18nProperties.getString(Strings.infoCustomExport));
 			btnCustomExport.setWidthFull();
 			exportLayout.add(btnCustomExport);
 		}

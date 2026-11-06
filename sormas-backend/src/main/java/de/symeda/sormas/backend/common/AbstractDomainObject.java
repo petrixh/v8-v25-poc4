@@ -41,7 +41,8 @@ import jakarta.persistence.Version;
 import jakarta.validation.constraints.Size;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.proxy.HibernateProxyHelper;
+import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.proxy.LazyInitializer;
 
 import de.symeda.sormas.api.utils.DataHelper;
 import de.symeda.sormas.api.uuid.HasUuid;
@@ -159,7 +160,7 @@ public abstract class AbstractDomainObject implements Serializable, Cloneable, H
 			return false;
 		}
 
-		if (HibernateProxyHelper.getClassWithoutInitializingProxy(o) == HibernateProxyHelper.getClassWithoutInitializingProxy(this)) {
+		if (getClassWithoutInitializingProxy(o) == getClassWithoutInitializingProxy(this)) {
 			// this works, because we are using UUIDs
 			AbstractDomainObject ado = (AbstractDomainObject) o;
 			return getUuid().equals(ado.getUuid());
@@ -172,6 +173,15 @@ public abstract class AbstractDomainObject implements Serializable, Cloneable, H
 	@Override
 	public int hashCode() {
 		return getUuid().hashCode();
+	}
+
+	/**
+	 * Same as Hibernate 5's {@code HibernateProxyHelper.getClassWithoutInitializingProxy} (removed in Hibernate 6): the proxy's
+	 * persistent class for a proxy, without initializing it, otherwise the object's class.
+	 */
+	private static Class<?> getClassWithoutInitializingProxy(Object object) {
+		LazyInitializer lazyInitializer = HibernateProxy.extractLazyInitializer(object);
+		return lazyInitializer != null ? lazyInitializer.getPersistentClass() : object.getClass();
 	}
 
 	@Override

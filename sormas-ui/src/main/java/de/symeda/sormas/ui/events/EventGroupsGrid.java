@@ -21,8 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.vaadin.navigator.View;
-
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.event.EventGroupCriteria;
 import de.symeda.sormas.api.event.EventGroupIndexDto;
@@ -31,6 +29,7 @@ import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
+import de.symeda.sormas.ui.navigation.View;
 import de.symeda.sormas.ui.utils.FilteredGrid;
 import de.symeda.sormas.ui.utils.ShowDetailsListener;
 import de.symeda.sormas.ui.utils.UuidRenderer;
@@ -64,8 +63,8 @@ public class EventGroupsGrid extends FilteredGrid<EventGroupIndexDto, EventGroup
 
 		((Column<EventGroupIndexDto, String>) getColumn(EventGroupIndexDto.UUID)).setRenderer(new UuidRenderer());
 
-		for (Column<EventGroupIndexDto, ?> column : getColumns()) {
-			String columnId = column.getId();
+		for (Column<EventGroupIndexDto, ?> column : getAllColumns()) {
+			String columnId = column.getKey();
 			column.setCaption(I18nProperties.getPrefixCaption(EventGroupIndexDto.I18N_PREFIX, columnId, column.getCaption()));
 		}
 
@@ -75,7 +74,7 @@ public class EventGroupsGrid extends FilteredGrid<EventGroupIndexDto, EventGroup
 
 	public void reload() {
 
-		if (getSelectionModel().isUserSelectionAllowed()) {
+		if (isUserSelectionAllowed()) {
 			deselectAll();
 		}
 

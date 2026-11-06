@@ -29,26 +29,18 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.vaadin.hene.popupbutton.PopupButton;
-
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.Page;
-import com.vaadin.server.StreamResource;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.OptionGroup;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;
@@ -79,9 +71,11 @@ import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.events.importer.EventImportLayout;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 import de.symeda.sormas.ui.utils.AbstractView;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.ComboBoxHelper;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.DownloadUtil;
@@ -89,16 +83,24 @@ import de.symeda.sormas.ui.utils.EventDownloadUtil;
 import de.symeda.sormas.ui.utils.ExportEntityName;
 import de.symeda.sormas.ui.utils.FilteredGrid;
 import de.symeda.sormas.ui.utils.GridExportStreamResource;
-import de.symeda.sormas.ui.utils.LayoutUtil;
 import de.symeda.sormas.ui.utils.MenuBarHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.PopupButton;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.popupmenu.PopupMenu;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class EventsView extends AbstractView {
 
 	private static final long serialVersionUID = -3048977745713631200L;
 
 	public static final String VIEW_NAME = "events";
+
+	/** Key of the status a status filter button stands for (was {@code Button.setData}). */
+	private static final String STATUS_DATA = "status";
 
 	private EventCriteria eventCriteria;
 	private EventGroupCriteria eventGroupCriteria;
@@ -112,7 +114,7 @@ public class EventsView extends AbstractView {
 	// Filter
 	private EventsFilterForm eventsFilterForm;
 	private EventGroupsFilterForm eventGroupsFilterForm;
-	private Label relevanceStatusInfoLabel;
+	private Span relevanceStatusInfoLabel;
 	private ComboBox eventRelevanceStatusFilter;
 	private ComboBox groupRelevanceStatusFilter;
 
@@ -152,22 +154,22 @@ public class EventsView extends AbstractView {
 			grid = new EventGrid(eventCriteria, getClass());
 		} else if (isActionViewType()) {
 			grid = new EventActionsGrid(eventCriteria, getClass());
-			getViewTitleLabel().setValue(I18nProperties.getCaption(Captions.View_actions));
+			getViewTitleLabel().setText(I18nProperties.getCaption(Captions.View_actions));
 		} else {
 			grid = new EventGroupsGrid(eventGroupCriteria, getClass());
-			getViewTitleLabel().setValue(I18nProperties.getCaption(Captions.View_groups));
+			getViewTitleLabel().setText(I18nProperties.getCaption(Captions.View_groups));
 		}
 		grid.addDataSizeChangeListener(e -> updateStatusButtons());
 
 		gridLayout = new VerticalLayout();
-		gridLayout.addComponent(createFilterBar());
-		gridLayout.addComponent(createStatusFilterBar());
-		gridLayout.addComponent(grid);
-		gridLayout.setMargin(true);
+		gridLayout.add(createFilterBar());
+		gridLayout.add(createStatusFilterBar());
+		gridLayout.add(grid);
+		gridLayout.setPadding(true);
 		gridLayout.setSpacing(false);
 		gridLayout.setSizeFull();
-		gridLayout.setExpandRatio(grid, 1);
-		gridLayout.setStyleName("crud-main-layout");
+		gridLayout.setFlexGrow(1, grid);
+		gridLayout.setClassName("crud-main-layout");
 
 		addComponent(gridLayout);
 
@@ -176,7 +178,7 @@ public class EventsView extends AbstractView {
 		CssStyles.style(
 			eventsViewSwitcher,
 			CssStyles.FORCE_CAPTION,
-			ValoTheme.OPTIONGROUP_HORIZONTAL,
+			SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL,
 			CssStyles.OPTIONGROUP_HORIZONTAL_PRIMARY,
 			CssStyles.VSPACE_TOP_3);
 		eventsViewSwitcher.addItem(EventsViewType.DEFAULT);
@@ -193,7 +195,7 @@ public class EventsView extends AbstractView {
 
 		eventsViewSwitcher.setValue(viewConfiguration.getViewType());
 		eventsViewSwitcher.addValueChangeListener(e -> {
-			EventsViewType viewType = (EventsViewType) e.getProperty().getValue();
+			EventsViewType viewType = (EventsViewType) e.getValue();
 
 			viewConfiguration.setViewType(viewType);
 			SormasUI.get().getNavigator().navigateTo(EventsView.VIEW_NAME);
@@ -201,11 +203,11 @@ public class EventsView extends AbstractView {
 		addHeaderComponent(eventsViewSwitcher);
 
 		if (isDefaultViewType() && UiUtil.permitted(UserRight.EVENT_IMPORT)) {
-			Button importButton = ButtonHelper.createIconButton(Captions.actionImport, VaadinIcons.UPLOAD, e -> {
-				Window popupWindow = VaadinUiUtil.showPopupWindow(new EventImportLayout());
-				popupWindow.setCaption(I18nProperties.getString(Strings.headingImportEvent));
-				popupWindow.addCloseListener(c -> ((EventGrid) grid).reload());
-			}, ValoTheme.BUTTON_PRIMARY);
+			Button importButton = ButtonHelper.createIconButton(Captions.actionImport, VaadinIcon.UPLOAD, e -> {
+				Dialog popupWindow = VaadinUiUtil.showPopupWindow(new EventImportLayout());
+				popupWindow.setHeaderTitle(I18nProperties.getString(Strings.headingImportEvent));
+				VaadinUiUtil.addCloseListener(popupWindow, c -> ((EventGrid) grid).reload());
+			}, CssStyles.BUTTON_PRIMARY);
 
 			addHeaderComponent(importButton);
 		}
@@ -214,38 +216,44 @@ public class EventsView extends AbstractView {
 			VerticalLayout exportLayout = new VerticalLayout();
 			{
 				exportLayout.setSpacing(true);
-				exportLayout.setMargin(true);
-				exportLayout.addStyleName(CssStyles.LAYOUT_MINIMAL);
+				exportLayout.setPadding(true);
+				exportLayout.addClassName(CssStyles.LAYOUT_MINIMAL);
 				exportLayout.setWidth(250, Unit.PIXELS);
 			}
 
-			PopupButton exportPopupButton = ButtonHelper.createIconPopupButton(Captions.export, VaadinIcons.DOWNLOAD, exportLayout);
+			PopupButton exportPopupButton = ButtonHelper.createIconPopupButton(Captions.export, VaadinIcon.DOWNLOAD, exportLayout);
 			addHeaderComponent(exportPopupButton);
 
 			{
-				StreamResource streamResource = GridExportStreamResource.createStreamResourceWithSelectedItems(
+				DownloadHandler streamResource = GridExportStreamResource.createStreamResourceWithSelectedItems(
 					grid,
 					() -> isDefaultViewType() && this.viewConfiguration.isInEagerMode()
 						? this.grid.asMultiSelect().getSelectedItems()
 						: Collections.emptySet(),
 					ExportEntityName.EVENTS);
-				addExportButton(streamResource, exportPopupButton, exportLayout, VaadinIcons.TABLE, Captions.exportBasic, Strings.infoBasicExport);
+				addExportButton(
+					streamResource,
+					exportPopupButton.getPopover(),
+					exportLayout,
+					VaadinIcon.TABLE,
+					Captions.exportBasic,
+					Strings.infoBasicExport);
 			}
 
 			{
 				if (isDefaultViewType()) {
-					StreamResource exportStreamResource = EventDownloadUtil
+					DownloadHandler exportStreamResource = EventDownloadUtil
 						.createEventExportResource((EventCriteria) grid.getCriteria(), this::getSelectedRows, buildDetailedExportConfiguration());
 
 					addExportButton(
 						exportStreamResource,
-						exportPopupButton,
+						exportPopupButton.getPopover(),
 						exportLayout,
-						VaadinIcons.FILE_TEXT,
+						VaadinIcon.FILE_TEXT,
 						Captions.exportDetailed,
 						Strings.infoDetailedExport);
 				} else if (isActionViewType()) {
-					StreamResource exportStreamResource = DownloadUtil.createCsvExportStreamResource(
+					DownloadHandler exportStreamResource = DownloadUtil.createCsvExportStreamResource(
 						EventActionExportDto.class,
 						null,
 						(Integer start, Integer max) -> FacadeProvider.getActionFacade()
@@ -266,9 +274,9 @@ public class EventsView extends AbstractView {
 						null);
 					addExportButton(
 						exportStreamResource,
-						exportPopupButton,
+						exportPopupButton.getPopover(),
 						exportLayout,
-						VaadinIcons.FILE_TEXT,
+						VaadinIcon.FILE_TEXT,
 						Captions.exportDetailed,
 						Strings.infoDetailedExport);
 				} else {
@@ -280,9 +288,9 @@ public class EventsView extends AbstractView {
 		if (UiUtil.permitted(UserRight.EVENT_CREATE)) {
 			createButton = ButtonHelper.createIconButton(
 				Captions.eventNewEvent,
-				VaadinIcons.PLUS_CIRCLE,
+				VaadinIcon.PLUS_CIRCLE,
 				e -> ControllerProvider.getEventController().create((CaseReferenceDto) null),
-				ValoTheme.BUTTON_PRIMARY);
+				CssStyles.BUTTON_PRIMARY);
 
 			addHeaderComponent(createButton);
 		}
@@ -290,16 +298,16 @@ public class EventsView extends AbstractView {
 		final PopupMenu moreButton = new PopupMenu(I18nProperties.getCaption(Captions.moreActions));
 
 		if (UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS) && isDefaultViewType()) {
-			Button btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcons.CHECK_SQUARE_O, null);
+			Button btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcon.CHECK_SQUARE_O, null);
 			{
 				btnEnterBulkEditMode.setVisible(!viewConfiguration.isInEagerMode());
-				btnEnterBulkEditMode.addStyleName(ValoTheme.BUTTON_PRIMARY);
+				CssStyles.style(btnEnterBulkEditMode, CssStyles.BUTTON_PRIMARY);
 				btnEnterBulkEditMode.setWidth(100, Unit.PERCENTAGE);
 				moreButton.addMenuEntry(btnEnterBulkEditMode);
 			}
 
 			Button btnLeaveBulkEditMode =
-				ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcons.CLOSE, null, ValoTheme.BUTTON_PRIMARY);
+				ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcon.CLOSE, null, CssStyles.BUTTON_PRIMARY);
 			{
 				btnLeaveBulkEditMode.setVisible(viewConfiguration.isInEagerMode());
 				btnLeaveBulkEditMode.setWidth(100, Unit.PERCENTAGE);
@@ -323,10 +331,10 @@ public class EventsView extends AbstractView {
 		}
 
 		if (isDefaultViewType()) {
-			Button searchSpecificEventButton = ButtonHelper.createIconButton(Captions.eventSearchSpecificEvent, VaadinIcons.SEARCH, e -> {
+			Button searchSpecificEventButton = ButtonHelper.createIconButton(Captions.eventSearchSpecificEvent, VaadinIcon.SEARCH, e -> {
 				buildAndOpenSearchSpecificEventWindow();
 				moreButton.setPopupVisible(false);
-			}, ValoTheme.BUTTON_PRIMARY);
+			}, CssStyles.BUTTON_PRIMARY);
 			searchSpecificEventButton.setWidth(100, Unit.PERCENTAGE);
 			moreButton.addMenuEntry(searchSpecificEventButton);
 		}
@@ -351,7 +359,7 @@ public class EventsView extends AbstractView {
 	public HorizontalLayout createFilterBar() {
 		HorizontalLayout filterLayout = new HorizontalLayout();
 		filterLayout.setSpacing(true);
-		filterLayout.setMargin(false);
+		filterLayout.setPadding(false);
 		filterLayout.setSizeUndefined();
 
 		eventGroupsFilterForm = new EventGroupsFilterForm();
@@ -389,25 +397,25 @@ public class EventsView extends AbstractView {
 		});
 
 		if (isGroupViewType()) {
-			filterLayout.addComponent(eventGroupsFilterForm);
+			filterLayout.add(eventGroupsFilterForm);
 		} else {
-			filterLayout.addComponent(eventsFilterForm);
+			filterLayout.add(eventsFilterForm);
 		}
 
 		return filterLayout;
 	}
 
 	private void buildAndOpenSearchSpecificEventWindow() {
-		Window window = VaadinUiUtil.createPopupWindow();
-		window.setCaption(I18nProperties.getCaption(Captions.eventSearchSpecificEvent));
+		Dialog window = VaadinUiUtil.createPopupWindow();
+		window.setHeaderTitle(I18nProperties.getCaption(Captions.eventSearchSpecificEvent));
 		window.setWidth(768, Unit.PIXELS);
 
 		SearchSpecificLayout layout = buildSearchSpecificLayout(window);
-		window.setContent(layout);
-		UI.getCurrent().addWindow(window);
+		window.add(layout);
+		window.open();
 	}
 
-	private SearchSpecificLayout buildSearchSpecificLayout(Window window) {
+	private SearchSpecificLayout buildSearchSpecificLayout(Dialog window) {
 
 		String description = I18nProperties.getString(Strings.infoSpecificEventSearch);
 		String confirmCaption = I18nProperties.getCaption(Captions.eventSearchEvent);
@@ -433,9 +441,9 @@ public class EventsView extends AbstractView {
 
 		HorizontalLayout statusFilterLayout = new HorizontalLayout();
 		statusFilterLayout.setSpacing(true);
-		statusFilterLayout.setMargin(false);
+		statusFilterLayout.setPadding(false);
 		statusFilterLayout.setWidth(100, Unit.PERCENTAGE);
-		statusFilterLayout.addStyleName(CssStyles.VSPACE_3);
+		statusFilterLayout.addClassName(CssStyles.VSPACE_3);
 
 		statusButtons = new HashMap<>();
 
@@ -443,10 +451,9 @@ public class EventsView extends AbstractView {
 			Button statusAll = ButtonHelper.createButton(Captions.all, e -> {
 				eventCriteria.setEventStatus(null);
 				navigateTo(eventCriteria);
-			}, ValoTheme.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER);
-			statusAll.setCaptionAsHtml(true);
+			}, CssStyles.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER);
 
-			statusFilterLayout.addComponent(statusAll);
+			statusFilterLayout.add(statusAll);
 
 			statusButtons.put(statusAll, I18nProperties.getCaption(Captions.all));
 			activeStatusButton = statusAll;
@@ -455,11 +462,10 @@ public class EventsView extends AbstractView {
 				Button statusButton = ButtonHelper.createButton("status-" + status, status.toString(), e -> {
 					eventCriteria.setEventStatus(status);
 					navigateTo(eventCriteria);
-				}, ValoTheme.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER, CssStyles.BUTTON_FILTER_LIGHT);
-				statusButton.setCaptionAsHtml(true);
-				statusButton.setData(status);
+				}, CssStyles.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER, CssStyles.BUTTON_FILTER_LIGHT);
+				ComponentUtil.setData(statusButton, STATUS_DATA, status);
 
-				statusFilterLayout.addComponent(statusButton);
+				statusFilterLayout.add(statusButton);
 
 				statusButtons.put(statusButton, status.toString());
 			}
@@ -467,10 +473,9 @@ public class EventsView extends AbstractView {
 			Button statusAll = ButtonHelper.createButton(Captions.all, e -> {
 				eventCriteria.setActionStatus(null);
 				navigateTo(eventCriteria);
-			}, ValoTheme.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER);
-			statusAll.setCaptionAsHtml(true);
+			}, CssStyles.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER);
 
-			statusFilterLayout.addComponent(statusAll);
+			statusFilterLayout.add(statusAll);
 
 			statusButtons.put(statusAll, I18nProperties.getCaption(Captions.all));
 			activeStatusButton = statusAll;
@@ -479,11 +484,10 @@ public class EventsView extends AbstractView {
 				Button statusButton = ButtonHelper.createButton("status-" + status, status.toString(), e -> {
 					eventCriteria.actionStatus(status);
 					navigateTo(eventCriteria);
-				}, ValoTheme.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER, CssStyles.BUTTON_FILTER_LIGHT);
-				statusButton.setCaptionAsHtml(true);
-				statusButton.setData(status);
+				}, CssStyles.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER, CssStyles.BUTTON_FILTER_LIGHT);
+				ComponentUtil.setData(statusButton, STATUS_DATA, status);
 
-				statusFilterLayout.addComponent(statusButton);
+				statusFilterLayout.add(statusButton);
 
 				statusButtons.put(statusButton, status.toString());
 			}
@@ -499,10 +503,10 @@ public class EventsView extends AbstractView {
 						buildRelevanceStatus(Captions.eventActiveGroups, Captions.eventArchivedGroups, Captions.eventAllGroups);
 					groupRelevanceStatusFilter.removeItem(EntityRelevanceStatus.DELETED);
 					groupRelevanceStatusFilter.addValueChangeListener(e -> {
-						eventGroupCriteria.relevanceStatus((EntityRelevanceStatus) e.getProperty().getValue());
+						eventGroupCriteria.relevanceStatus((EntityRelevanceStatus) e.getValue());
 						navigateTo(eventGroupCriteria);
 					});
-					actionButtonsLayout.addComponent(groupRelevanceStatusFilter);
+					actionButtonsLayout.add(groupRelevanceStatusFilter);
 				} else {
 					if (UiUtil.enabled(FeatureType.AUTOMATIC_ARCHIVING, DeletableEntityType.EVENT)) {
 
@@ -513,14 +517,15 @@ public class EventsView extends AbstractView {
 								FeatureTypeProperty.THRESHOLD_IN_DAYS,
 								Integer.class);
 						if (daysAfterEventGetsArchived > 0) {
-							relevanceStatusInfoLabel = new Label(
-								VaadinIcons.INFO_CIRCLE.getHtml() + " "
+							relevanceStatusInfoLabel = VaadinUiUtil.createLabel(
+								HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " "
 									+ String.format(I18nProperties.getString(Strings.infoArchivedEvents), daysAfterEventGetsArchived),
 								ContentMode.HTML);
 							relevanceStatusInfoLabel.setVisible(false);
-							relevanceStatusInfoLabel.addStyleName(CssStyles.LABEL_VERTICAL_ALIGN_TOP);
-							actionButtonsLayout.addComponent(relevanceStatusInfoLabel);
-							actionButtonsLayout.setComponentAlignment(relevanceStatusInfoLabel, new Alignment(38));
+							relevanceStatusInfoLabel.addClassName(CssStyles.LABEL_VERTICAL_ALIGN_TOP);
+							actionButtonsLayout.add(relevanceStatusInfoLabel);
+							// was new Alignment(38) (right and middle bits; Vaadin 8 showed it as middle right)
+							actionButtonsLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, relevanceStatusInfoLabel);
 						}
 					}
 
@@ -528,7 +533,7 @@ public class EventsView extends AbstractView {
 						buildRelevanceStatus(Captions.eventActiveEvents, Captions.eventArchivedEvents, Captions.eventAllActiveAndArchivedEvents);
 					eventRelevanceStatusFilter.addValueChangeListener(e -> {
 						if (relevanceStatusInfoLabel != null) {
-							relevanceStatusInfoLabel.setVisible(EntityRelevanceStatus.ARCHIVED.equals(e.getProperty().getValue()));
+							relevanceStatusInfoLabel.setVisible(EntityRelevanceStatus.ARCHIVED.equals(e.getValue()));
 						}
 
 						if (grid.getColumn(grid.DELETE_REASON_COLUMN) != null) {
@@ -536,10 +541,10 @@ public class EventsView extends AbstractView {
 								.setHidden(!eventRelevanceStatusFilter.getValue().equals(EntityRelevanceStatus.DELETED));
 						}
 
-						eventCriteria.relevanceStatus((EntityRelevanceStatus) e.getProperty().getValue());
+						eventCriteria.relevanceStatus((EntityRelevanceStatus) e.getValue());
 						navigateTo(eventCriteria);
 					});
-					actionButtonsLayout.addComponent(eventRelevanceStatusFilter);
+					actionButtonsLayout.add(eventRelevanceStatusFilter);
 				}
 			}
 
@@ -552,7 +557,7 @@ public class EventsView extends AbstractView {
 						bulkActions.add(
 							new MenuBarHelper.MenuBarItem(
 								I18nProperties.getCaption(Captions.bulkEdit),
-								VaadinIcons.ELLIPSIS_H,
+								VaadinIcon.ELLIPSIS_H,
 								mi -> grid.bulkActionHandler(
 									items -> ControllerProvider.getEventController().showBulkEventDataEditComponent(items, (EventGrid) grid))));
 					}
@@ -560,7 +565,7 @@ public class EventsView extends AbstractView {
 						bulkActions.add(
 							new MenuBarHelper.MenuBarItem(
 								I18nProperties.getCaption(Captions.bulkDelete),
-								VaadinIcons.TRASH,
+								VaadinIcon.TRASH,
 								mi -> grid.bulkActionHandler(
 									items -> ControllerProvider.getEventController().deleteAllSelectedItems(items, (EventGrid) grid),
 									true)));
@@ -568,14 +573,14 @@ public class EventsView extends AbstractView {
 					bulkActions.add(
 						new MenuBarHelper.MenuBarItem(
 							I18nProperties.getCaption(Captions.actionArchiveCoreEntity),
-							VaadinIcons.ARCHIVE,
+							VaadinIcon.ARCHIVE,
 							mi -> grid
 								.bulkActionHandler(items -> ControllerProvider.getEventController().archiveAllSelectedItems(items, eventGrid), true),
 							UiUtil.permitted(EVENT_ARCHIVE) && EntityRelevanceStatus.ACTIVE.equals(eventCriteria.getRelevanceStatus())));
 					bulkActions.add(
 						new MenuBarHelper.MenuBarItem(
 							I18nProperties.getCaption(Captions.actionDearchiveCoreEntity),
-							VaadinIcons.ARCHIVE,
+							VaadinIcon.ARCHIVE,
 							mi -> grid.bulkActionHandler(
 								items -> ControllerProvider.getEventController()
 									.dearchiveAllSelectedItems(eventGrid.asMultiSelect().getSelectedItems(), eventGrid),
@@ -587,7 +592,7 @@ public class EventsView extends AbstractView {
 						bulkActions.add(
 							new MenuBarHelper.MenuBarItem(
 								I18nProperties.getCaption(Captions.actionGroupEvent),
-								VaadinIcons.FILE_TREE,
+								VaadinIcon.FILE_TREE,
 								mi -> grid.bulkActionHandler(
 									items -> ControllerProvider.getEventController()
 										.linkAllToGroup(eventGrid.asMultiSelect().getSelectedItems(), eventGrid))));
@@ -595,7 +600,7 @@ public class EventsView extends AbstractView {
 					bulkActions.add(
 						new MenuBarHelper.MenuBarItem(
 							I18nProperties.getCaption(Captions.ExternalSurveillanceToolGateway_send),
-							VaadinIcons.SHARE,
+							VaadinIcon.SHARE,
 							mi -> grid.bulkActionHandler(
 								items -> ControllerProvider.getEventController()
 									.sendAllSelectedToExternalSurveillanceTool(eventGrid.asMultiSelect().getSelectedItems(), eventGrid)),
@@ -604,7 +609,7 @@ public class EventsView extends AbstractView {
 
 					if (isDocGenerationAllowed()) {
 						bulkActions.add(
-							new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkActionCreatDocuments), VaadinIcons.FILE_TEXT, mi -> {
+							new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkActionCreatDocuments), VaadinIcon.FILE_TEXT, mi -> {
 								grid.bulkActionHandler(items -> {
 
 									EventGrid eventGrid1 = (EventGrid) this.grid;
@@ -614,11 +619,10 @@ public class EventsView extends AbstractView {
 										.map(EventIndexDto::toReference)
 										.collect(Collectors.toList());
 									if (references.size() == 0) {
-										new Notification(
+										NotificationHelper.show(
 											I18nProperties.getString(Strings.headingNoEventsSelected),
 											I18nProperties.getString(Strings.headingNoEventsSelected),
-											Notification.Type.WARNING_MESSAGE,
-											false).show(Page.getCurrent());
+											NotificationHelper.Type.WARNING_MESSAGE);
 
 										return;
 									}
@@ -631,7 +635,7 @@ public class EventsView extends AbstractView {
 					bulkActions.add(
 						new MenuBarHelper.MenuBarItem(
 							I18nProperties.getCaption(Captions.bulkRestore),
-							VaadinIcons.ARROW_BACKWARD,
+							VaadinIcon.ARROW_BACKWARD,
 							mi -> grid.bulkActionHandler(
 								items -> ControllerProvider.getEventController().restoreSelectedEvents(items, (EventGrid) grid),
 								true)));
@@ -640,8 +644,8 @@ public class EventsView extends AbstractView {
 				bulkOperationsDropdown = MenuBarHelper.createDropDown(Captions.bulkActions, bulkActions);
 
 				bulkOperationsDropdown.setVisible(viewConfiguration.isInEagerMode());
-				bulkOperationsDropdown.setCaption("");
-				actionButtonsLayout.addComponent(bulkOperationsDropdown);
+				// was setCaption(""): a Flow menu bar has no caption
+				actionButtonsLayout.add(bulkOperationsDropdown);
 			}
 
 			if (isDefaultViewType()) {
@@ -661,15 +665,17 @@ public class EventsView extends AbstractView {
 				contactCountMethod.setTextInputAllowed(false);
 				contactCountMethod.setNullSelectionAllowed(false);
 				contactCountMethod.addValueChangeListener(event -> {
-					((EventGrid) grid).setContactCountMethod((EventContactCountMethod) event.getProperty().getValue());
+					((EventGrid) grid).setContactCountMethod((EventContactCountMethod) event.getValue());
 					((EventGrid) grid).reload();
 				});
-				actionButtonsLayout.addComponent(contactCountMethod);
+				actionButtonsLayout.add(contactCountMethod);
 			}
 		}
-		statusFilterLayout.addComponent(actionButtonsLayout);
-		statusFilterLayout.setComponentAlignment(actionButtonsLayout, Alignment.TOP_RIGHT);
-		statusFilterLayout.setExpandRatio(actionButtonsLayout, 1);
+		statusFilterLayout.add(actionButtonsLayout);
+		// was Alignment.TOP_RIGHT: the layout grows, its content goes right
+		statusFilterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, actionButtonsLayout);
+		statusFilterLayout.setFlexGrow(1, actionButtonsLayout);
+		actionButtonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
 		return statusFilterLayout;
 
@@ -729,8 +735,9 @@ public class EventsView extends AbstractView {
 
 		statusButtons.keySet().forEach(b -> {
 			CssStyles.style(b, CssStyles.BUTTON_FILTER_LIGHT);
-			b.setCaption(statusButtons.get(b));
-			if (b.getData() == (isDefaultViewType() ? eventCriteria.getEventStatus() : eventCriteria.getActionStatus())) {
+			b.setText(statusButtons.get(b));
+			b.setSuffixComponent(null);
+			if (ComponentUtil.getData(b, STATUS_DATA) == (isDefaultViewType() ? eventCriteria.getEventStatus() : eventCriteria.getActionStatus())) {
 				activeStatusButton = b;
 			}
 		});
@@ -738,8 +745,11 @@ public class EventsView extends AbstractView {
 		if (activeStatusButton != null) {
 			CssStyles.removeStyles(activeStatusButton, CssStyles.BUTTON_FILTER_LIGHT);
 			if (activeStatusButton != null) {
-				activeStatusButton
-					.setCaption(statusButtons.get(activeStatusButton) + LayoutUtil.spanCss(CssStyles.BADGE, String.valueOf(grid.getDataSize())));
+				// was an HTML caption with LayoutUtil.spanCss(BADGE, count): the count is a badge after the text
+				activeStatusButton.setText(statusButtons.get(activeStatusButton));
+				Span badge = new Span(String.valueOf(grid.getDataSize()));
+				badge.addClassName(CssStyles.BADGE);
+				activeStatusButton.setSuffixComponent(badge);
 			}
 		}
 	}

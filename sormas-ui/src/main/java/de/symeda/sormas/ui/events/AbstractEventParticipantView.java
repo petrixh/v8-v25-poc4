@@ -1,7 +1,5 @@
 package de.symeda.sormas.ui.events;
 
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-
 import de.symeda.sormas.api.CoreFacade;
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.event.EventParticipantDto;
@@ -14,6 +12,7 @@ import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.SubMenu;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.externalmessage.ExternalMessagesView;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 import de.symeda.sormas.ui.utils.AbstractEditAllowedDetailView;
 
 public abstract class AbstractEventParticipantView extends AbstractEditAllowedDetailView<EventParticipantReferenceDto> {

@@ -17,8 +17,6 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.events;
 
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-
 import de.symeda.sormas.api.CoreFacade;
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.event.EventDto;
@@ -29,6 +27,7 @@ import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.SubMenu;
 import de.symeda.sormas.ui.UiUtil;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 import de.symeda.sormas.ui.utils.AbstractEditAllowedDetailView;
 import de.symeda.sormas.ui.utils.DirtyStateComponent;
 
@@ -93,7 +92,7 @@ public abstract class AbstractEventView extends AbstractEditAllowedDetailView<Ev
 		super.setSubComponent(newComponent);
 
 		if (getReference() != null && isEventDeleted()) {
-			newComponent.setEnabled(false);
+			newComponent.getElement().setEnabled(false);
 		}
 	}
 

@@ -31,15 +31,16 @@ public class EventParticipantCaseConversionSelectionGrid extends EventParticipan
 
 	@Override
 	protected void setColumns() {
+		// some property ids are Object constants (Vaadin 7 property ids) in the API
 		setColumns(
-			SimilarEventParticipantDto.UUID,
-			SimilarEventParticipantDto.INVOLVEMENT_DESCRIPTION,
-			SimilarEventParticipantDto.EVENT_UUID,
+			(String) SimilarEventParticipantDto.UUID,
+			(String) SimilarEventParticipantDto.INVOLVEMENT_DESCRIPTION,
+			(String) SimilarEventParticipantDto.EVENT_UUID,
 			SimilarEventParticipantDto.EVENT_STATUS,
 			SimilarEventParticipantDto.EVENT_TITLE,
 			SimilarEventParticipantDto.START_DATE);
 
-		for (Column column : getColumns()) {
+		for (Column<SimilarEventParticipantDto, ?> column : getAllColumns()) {
 			column.setHeaderCaption(
 				I18nProperties.findPrefixCaption(
 					column.getPropertyId().toString(),
@@ -48,7 +49,8 @@ public class EventParticipantCaseConversionSelectionGrid extends EventParticipan
 					EventDto.I18N_PREFIX));
 		}
 
-		getColumn(SimilarEventParticipantDto.UUID).setRenderer(new V7UuidRenderer());
-		getColumn(SimilarEventParticipantDto.EVENT_UUID).setRenderer(new V7UuidRenderer());
+		getColumn((String) SimilarEventParticipantDto.UUID).setRenderer(new V7UuidRenderer());
+		getColumn((String) SimilarEventParticipantDto.EVENT_UUID).setRenderer(new V7UuidRenderer());
+		setV7ColumnRenderers();
 	}
 }

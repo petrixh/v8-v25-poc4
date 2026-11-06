@@ -19,8 +19,6 @@ import java.util.Date;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import com.vaadin.ui.renderers.DateRenderer;
-
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
 import de.symeda.sormas.api.event.EventParticipantCriteria;
@@ -43,6 +41,7 @@ import de.symeda.sormas.ui.utils.PathogenTestResultTypeRenderer;
 import de.symeda.sormas.ui.utils.ShowDetailsListener;
 import de.symeda.sormas.ui.utils.UuidRenderer;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 @SuppressWarnings("serial")
 public class EventParticipantsGrid extends FilteredGrid<EventParticipantIndexDto, EventParticipantCriteria> {
@@ -131,9 +130,9 @@ public class EventParticipantsGrid extends FilteredGrid<EventParticipantIndexDto
 		final Column<EventParticipantIndexDto, PathogenTestResultType> pathogenTestResultColumn =
 			(Column<EventParticipantIndexDto, PathogenTestResultType>) getColumn(SampleIndexDto.PATHOGEN_TEST_RESULT);
 		pathogenTestResultColumn.setRenderer(new PathogenTestResultTypeRenderer());
-		for (Column<EventParticipantIndexDto, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(EventParticipantIndexDto.I18N_PREFIX, column.getId(), column.getCaption()));
-			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getId()));
+		for (Column<EventParticipantIndexDto, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(EventParticipantIndexDto.I18N_PREFIX, column.getKey(), column.getCaption()));
+			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getKey()));
 		}
 		getColumn(SampleIndexDto.PATHOGEN_TEST_RESULT)
 			.setCaption(I18nProperties.getPrefixCaption(SampleIndexDto.I18N_PREFIX, SampleIndexDto.PATHOGEN_TEST_RESULT));
@@ -179,7 +178,7 @@ public class EventParticipantsGrid extends FilteredGrid<EventParticipantIndexDto
 
 	public void reload() {
 
-		if (getSelectionModel().isUserSelectionAllowed()) {
+		if (isUserSelectionAllowed()) {
 			deselectAll();
 		}
 

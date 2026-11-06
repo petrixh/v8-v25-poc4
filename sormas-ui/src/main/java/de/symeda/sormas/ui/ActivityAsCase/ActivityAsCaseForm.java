@@ -20,7 +20,6 @@
 
 package de.symeda.sormas.ui.ActivityAsCase;
 
-import static com.vaadin.v7.data.fieldgroup.DefaultFieldGroupFieldFactory.CAPTION_PROPERTY_ID;
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidColumn;
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidColumnLoc;
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRow;
@@ -33,15 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
-import com.vaadin.v7.data.Item;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.AbstractSelect;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Unit;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.FacadeProvider;
@@ -60,8 +51,15 @@ import de.symeda.sormas.api.utils.fieldaccess.UiFieldAccessCheckers;
 import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.location.LocationEditForm;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.DateComparisonValidator;
 import de.symeda.sormas.ui.utils.FieldHelper;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.SelectField;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class ActivityAsCaseForm extends AbstractEditForm<ActivityAsCaseDto> {
 
@@ -133,7 +131,7 @@ public class ActivityAsCaseForm extends AbstractEditForm<ActivityAsCaseDto> {
 		locationForm.setCaption(null);
 		addField(ActivityAsCaseDto.CONNECTION_NUMBER, TextField.class);
 		getField(ActivityAsCaseDto.MEANS_OF_TRANSPORT).addValueChangeListener(e -> {
-			if (e.getProperty().getValue() == MeansOfTransport.PLANE) {
+			if (e.getValue() == MeansOfTransport.PLANE) {
 				getField(ActivityAsCaseDto.CONNECTION_NUMBER).setCaption(I18nProperties.getCaption(Captions.exposureFlightNumber));
 			} else {
 				getField(ActivityAsCaseDto.CONNECTION_NUMBER)
@@ -152,7 +150,9 @@ public class ActivityAsCaseForm extends AbstractEditForm<ActivityAsCaseDto> {
 
 	private void addHeadingsAndInfoTexts() {
 		getContent().addComponent(
-			new Label(h3(I18nProperties.getPrefixCaption(ActivityAsCaseDto.I18N_PREFIX, ActivityAsCaseDto.LOCATION)), ContentMode.HTML),
+			VaadinUiUtil.createLabel(
+				h3(I18nProperties.getPrefixCaption(ActivityAsCaseDto.I18N_PREFIX, ActivityAsCaseDto.LOCATION)),
+				ContentMode.HTML),
 			LOC_LOCATION_HEADING);
 	}
 
@@ -175,12 +175,12 @@ public class ActivityAsCaseForm extends AbstractEditForm<ActivityAsCaseDto> {
 			ActivityAsCaseDto.WORK_ENVIRONMENT);
 
 		if (CountryHelper.isCountry(FacadeProvider.getConfigFacade().getCountryLocale(), CountryHelper.COUNTRY_CODE_GERMANY)) {
-			AbstractSelect field = getField(ActivityAsCaseDto.TYPE_OF_PLACE);
+			SelectField field = getField(ActivityAsCaseDto.TYPE_OF_PLACE);
 			field.setCaption(I18nProperties.getCaption(Captions.ActivityAsCase_typeOfPlaceIfSG));
 			field.removeAllItems();
 			for (TypeOfPlace value : TypeOfPlace.FOR_ACTIVITY_AS_CASE_GERMANY) {
-				Item item = field.addItem(value);
-				item.getItemProperty(CAPTION_PROPERTY_ID).setValue(value.toString());
+				field.addItem(value);
+				field.setItemCaption(value, value.toString());
 			}
 			field.addValueChangeListener(e -> {
 				if (TypeOfPlace.FACILITY_23_IFSG.equals(field.getValue())
@@ -268,11 +268,11 @@ public class ActivityAsCaseForm extends AbstractEditForm<ActivityAsCaseDto> {
 			locationForm
 				.setFacilityFieldsVisibleExceptTypeGroupField(TypeOfPlace.isFacilityType(getField(ActivityAsCaseDto.TYPE_OF_PLACE).getValue()), true);
 			getField(ActivityAsCaseDto.TYPE_OF_PLACE).addValueChangeListener(
-				e -> locationForm.setFacilityFieldsVisibleExceptTypeGroupField(TypeOfPlace.isFacilityType(e.getProperty().getValue()), true));
+				e -> locationForm.setFacilityFieldsVisibleExceptTypeGroupField(TypeOfPlace.isFacilityType(e.getValue()), true));
 		} else {
 			locationForm.setFacilityFieldsVisible(TypeOfPlace.isFacilityType(getField(ActivityAsCaseDto.TYPE_OF_PLACE).getValue()), true);
 			getField(ActivityAsCaseDto.TYPE_OF_PLACE)
-				.addValueChangeListener(e -> locationForm.setFacilityFieldsVisible(TypeOfPlace.isFacilityType(e.getProperty().getValue()), true));
+				.addValueChangeListener(e -> locationForm.setFacilityFieldsVisible(TypeOfPlace.isFacilityType(e.getValue()), true));
 		}
 		locationForm.setContinentFieldsVisibility();
 	}
@@ -287,7 +287,7 @@ public class ActivityAsCaseForm extends AbstractEditForm<ActivityAsCaseDto> {
 	}
 
 	@Override
-	public void setValue(ActivityAsCaseDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(ActivityAsCaseDto newFieldValue) {
 		super.setValue(newFieldValue);
 
 		// HACK: Binding to the fields will call field listeners that may clear/modify the values of other fields.

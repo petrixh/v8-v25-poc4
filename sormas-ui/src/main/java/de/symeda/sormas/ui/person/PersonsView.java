@@ -6,23 +6,17 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import org.vaadin.hene.popupbutton.PopupButton;
-
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -37,18 +31,23 @@ import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import de.symeda.sormas.ui.utils.AbstractView;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.DownloadUtil;
 import de.symeda.sormas.ui.utils.ExportEntityName;
 import de.symeda.sormas.ui.utils.FilteredGrid;
 import de.symeda.sormas.ui.utils.GridExportStreamResource;
-import de.symeda.sormas.ui.utils.LayoutUtil;
 import de.symeda.sormas.ui.utils.MenuBarHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 import de.symeda.sormas.ui.utils.PersonDownloadUtil;
+import de.symeda.sormas.ui.utils.PopupButton;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
 import de.symeda.sormas.ui.utils.components.popupmenu.PopupMenu;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class PersonsView extends AbstractView {
 
@@ -58,7 +57,7 @@ public class PersonsView extends AbstractView {
 
 	private final PersonCriteria criteria;
 	private final FilteredGrid<?, PersonCriteria> grid;
-	private Label noAccessLabel;
+	private Span noAccessLabel;
 	private LinkedHashMap<Button, PersonAssociation> associationButtons;
 	private Button activeAssociationButton;
 	private PersonFilterForm filterForm;
@@ -74,10 +73,10 @@ public class PersonsView extends AbstractView {
 		viewConfiguration = ViewModelProviders.of(PersonsView.class).get(ViewConfiguration.class);
 		// Avoid calling ALL associations at view start because the query tends to take long time
 		final VerticalLayout gridLayout = new VerticalLayout();
-		gridLayout.addComponent(createFilterBar());
+		gridLayout.add(createFilterBar());
 		final HorizontalLayout associationFilterBar = createAssociationFilterBar();
-		gridLayout.addComponent(associationFilterBar);
-		gridLayout.setComponentAlignment(associationFilterBar, Alignment.MIDDLE_RIGHT);
+		gridLayout.add(associationFilterBar);
+		gridLayout.setHorizontalComponentAlignment(FlexComponent.Alignment.END, associationFilterBar);
 
 		PersonAssociation defaultAssociation = getFirstAllowedPersonAssociation();
 		if (defaultAssociation != null) {
@@ -85,48 +84,49 @@ public class PersonsView extends AbstractView {
 			criteria = ViewModelProviders.of(PersonsView.class).get(PersonCriteria.class, defaultCriteria);
 			grid = new PersonGrid(criteria);
 
-			gridLayout.addComponent(grid);
-			gridLayout.setMargin(true);
+			gridLayout.add(grid);
+			// was setMargin(true): the Vaadin 8 margin is the padding in Flow
+			gridLayout.setPadding(true);
 			gridLayout.setSpacing(false);
 			gridLayout.setSizeFull();
-			gridLayout.setExpandRatio(grid, 1);
-			gridLayout.setStyleName("crud-main-layout");
+			gridLayout.setFlexGrow(1, grid);
+			gridLayout.setClassName("crud-main-layout");
 
 			if (UiUtil.permitted(UserRight.PERSON_EXPORT)) {
 				VerticalLayout exportLayout = new VerticalLayout();
 				exportLayout.setSpacing(true);
-				exportLayout.setMargin(true);
-				exportLayout.addStyleName(CssStyles.LAYOUT_MINIMAL);
+				exportLayout.setPadding(true);
+				exportLayout.addClassName(CssStyles.LAYOUT_MINIMAL);
 				exportLayout.setWidth(200, Unit.PIXELS);
 
-				PopupButton exportButton = ButtonHelper.createIconPopupButton(Captions.export, VaadinIcons.DOWNLOAD, exportLayout);
+				PopupButton exportButton = ButtonHelper.createIconPopupButton(Captions.export, VaadinIcon.DOWNLOAD, exportLayout);
 				addHeaderComponent(exportButton);
 
-				Button basicExportButton = ButtonHelper.createIconButton(Captions.exportBasic, VaadinIcons.TABLE, null, ValoTheme.BUTTON_PRIMARY);
-				basicExportButton.setDescription(I18nProperties.getString(Strings.infoBasicExport));
+				Button basicExportButton = ButtonHelper.createIconButton(Captions.exportBasic, VaadinIcon.TABLE, null, CssStyles.BUTTON_PRIMARY);
+				basicExportButton.setTooltipText(I18nProperties.getString(Strings.infoBasicExport));
 				basicExportButton.setWidth(100, Unit.PERCENTAGE);
-				exportLayout.addComponent(basicExportButton);
-				StreamResource streamResource =
+				exportLayout.add(basicExportButton);
+				DownloadHandler streamResource =
 					GridExportStreamResource.createStreamResourceWithSelectedItems(grid, Collections::emptySet, ExportEntityName.PERSONS);
-				FileDownloader fileDownloader = new FileDownloader(streamResource);
-				fileDownloader.extend(basicExportButton);
+				// was a FileDownloader extending the button
+				DownloadUtil.attachDownloader(basicExportButton, streamResource);
 
-				StreamResource extendedExportStreamResource = PersonDownloadUtil.createPersonExportResource(grid.getCriteria(), null);
+				DownloadHandler extendedExportStreamResource = PersonDownloadUtil.createPersonExportResource(grid.getCriteria(), null);
 				addExportButton(
 					extendedExportStreamResource,
-					exportButton,
+					exportButton.getPopover(),
 					exportLayout,
-					VaadinIcons.FILE_TEXT,
+					VaadinIcon.FILE_TEXT,
 					Captions.exportDetailed,
 					Strings.infoDetailedExport);
 
-				Button btnCustomExport = ButtonHelper.createIconButton(Captions.exportCustom, VaadinIcons.FILE_TEXT, e -> {
+				Button btnCustomExport = ButtonHelper.createIconButton(Captions.exportCustom, VaadinIcon.FILE_TEXT, e -> {
 					ControllerProvider.getCustomExportController().openPersonExportWindow(grid.getCriteria());
 					exportButton.setPopupVisible(false);
-				}, ValoTheme.BUTTON_PRIMARY);
-				btnCustomExport.setDescription(I18nProperties.getString(Strings.infoCustomExport));
+				}, CssStyles.BUTTON_PRIMARY);
+				btnCustomExport.setTooltipText(I18nProperties.getString(Strings.infoCustomExport));
 				btnCustomExport.setWidth(100, Unit.PERCENTAGE);
-				exportLayout.addComponent(btnCustomExport);
+				exportLayout.add(btnCustomExport);
 			}
 
 			// TODO: add option to re-enable bulk geocoord updates
@@ -146,9 +146,10 @@ public class PersonsView extends AbstractView {
 			criteria = new PersonCriteria();
 			grid = null;
 			associationFilterBar.setVisible(false);
-			noAccessLabel =
-				new Label(VaadinIcons.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoNoAccessToPersonEntities), ContentMode.HTML);
-			gridLayout.addComponent(noAccessLabel);
+			noAccessLabel = VaadinUiUtil.createLabel(
+				HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " " + I18nProperties.getString(Strings.infoNoAccessToPersonEntities),
+				ContentMode.HTML);
+			gridLayout.add(noAccessLabel);
 		}
 
 		addComponent(gridLayout);
@@ -156,12 +157,12 @@ public class PersonsView extends AbstractView {
 		final PopupMenu moreButton = new PopupMenu(I18nProperties.getCaption(Captions.moreActions));
 
 		if (UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS)) {
-			Button btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcons.CHECK_SQUARE_O, null);
+			Button btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcon.CHECK_SQUARE_O, null);
 			btnEnterBulkEditMode.setVisible(!viewConfiguration.isInEagerMode());
 			moreButton.addMenuEntry(btnEnterBulkEditMode);
 
 			Button btnLeaveBulkEditMode =
-				ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcons.CLOSE, null, ValoTheme.BUTTON_PRIMARY);
+				ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcon.CLOSE, null, CssStyles.BUTTON_PRIMARY);
 			btnLeaveBulkEditMode.setVisible(viewConfiguration.isInEagerMode());
 			moreButton.addMenuEntry(btnLeaveBulkEditMode);
 
@@ -190,17 +191,17 @@ public class PersonsView extends AbstractView {
 
 	private void showMissingCoordinatesPopUp() {
 
-		Label popupDescLabel = new Label(I18nProperties.getString(Strings.confirmationSetMissingGeoCoordinates));
-		CheckBox popupCheckbox = new CheckBox(I18nProperties.getCaption(Captions.personsReplaceGeoCoordinates));
+		Span popupDescLabel = new Span(I18nProperties.getString(Strings.confirmationSetMissingGeoCoordinates));
+		Checkbox popupCheckbox = new Checkbox(I18nProperties.getCaption(Captions.personsReplaceGeoCoordinates));
 		popupCheckbox.setValue(false);
 
 		VerticalLayout popupLayout = new VerticalLayout();
-		popupLayout.setMargin(false);
+		popupLayout.setPadding(false);
 		popupLayout.setSpacing(true);
 		popupDescLabel.setWidth(100, Unit.PERCENTAGE);
 		popupCheckbox.setWidth(100, Unit.PERCENTAGE);
-		popupLayout.addComponent(popupDescLabel);
-		popupLayout.addComponent(popupCheckbox);
+		popupLayout.add(popupDescLabel);
+		popupLayout.add(popupCheckbox);
 
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getCaption(Captions.personsSetMissingGeoCoordinates),
@@ -211,10 +212,10 @@ public class PersonsView extends AbstractView {
 			confirmed -> {
 				if (Boolean.TRUE.equals(confirmed)) {
 					long changedPersons = FacadeProvider.getPersonFacade().setMissingGeoCoordinates(popupCheckbox.getValue());
-					Notification.show(
+					NotificationHelper.show(
 						I18nProperties.getCaption(Captions.personsUpdated),
 						String.format(I18nProperties.getString(Strings.notificationPersonsUpdated), changedPersons),
-						Notification.Type.TRAY_NOTIFICATION);
+						NotificationHelper.Type.TRAY_NOTIFICATION);
 				}
 			});
 	}
@@ -256,22 +257,26 @@ public class PersonsView extends AbstractView {
 
 		associationButtons.keySet().forEach(b -> {
 			CssStyles.style(b, CssStyles.BUTTON_FILTER_LIGHT);
-			b.setCaption(associationButtons.get(b).toString());
-			if (b.getData() == criteria.getPersonAssociation()) {
+			b.setText(associationButtons.get(b).toString());
+			b.setSuffixComponent(null);
+			if (ComponentUtil.getData(b, PersonAssociation.class) == criteria.getPersonAssociation()) {
 				activeAssociationButton = b;
 			}
 		});
 		if (activeAssociationButton != null && grid != null) {
 			CssStyles.removeStyles(activeAssociationButton, CssStyles.BUTTON_FILTER_LIGHT);
-			activeAssociationButton.setCaption(
-				associationButtons.get(activeAssociationButton) + LayoutUtil.spanCss(CssStyles.BADGE, String.valueOf(grid.getDataSize())));
+			// was an HTML caption with LayoutUtil.spanCss(BADGE, count): the count is a badge after the text
+			activeAssociationButton.setText(associationButtons.get(activeAssociationButton).toString());
+			Span badge = new Span(String.valueOf(grid.getDataSize()));
+			badge.addClassName(CssStyles.BADGE);
+			activeAssociationButton.setSuffixComponent(badge);
 		}
 	}
 
 	public VerticalLayout createFilterBar() {
 		VerticalLayout filterLayout = new VerticalLayout();
 		filterLayout.setSpacing(false);
-		filterLayout.setMargin(false);
+		filterLayout.setPadding(false);
 		filterLayout.setWidth(100, Unit.PERCENTAGE);
 
 		filterForm = new PersonFilterForm();
@@ -289,7 +294,7 @@ public class PersonsView extends AbstractView {
 				((PersonGrid) grid).reload();
 			}
 		});
-		filterLayout.addComponent(filterForm);
+		filterLayout.add(filterForm);
 
 		return filterLayout;
 	}
@@ -298,16 +303,17 @@ public class PersonsView extends AbstractView {
 
 		HorizontalLayout associationFilterLayout = new HorizontalLayout();
 		associationFilterLayout.setSpacing(true);
-		associationFilterLayout.setMargin(new MarginInfo(true, false, false, false));
+		// was MarginInfo(true, false, false, false), a top margin only (look, ignored at this stage)
+		associationFilterLayout.setPadding(false);
 		associationFilterLayout.setWidth(100, Unit.PERCENTAGE);
-		associationFilterLayout.addStyleName(CssStyles.VSPACE_3);
+		associationFilterLayout.addClassName(CssStyles.VSPACE_3);
 
 		associationButtons = new LinkedHashMap<>();
 		for (PersonAssociation association : FacadeProvider.getPersonFacade().getPermittedAssociations()) {
 
 			Button associationButton = ButtonHelper.createButton(association.toString(), e -> {
 				if (!UiUtil.hasNationJurisdictionLevel() && association == PersonAssociation.ALL) {
-					Label contentLabel = new Label(I18nProperties.getString(Strings.confirmationSeeAllPersons));
+					Span contentLabel = new Span(I18nProperties.getString(Strings.confirmationSeeAllPersons));
 					VaadinUiUtil.showConfirmationPopup(
 						I18nProperties.getString(Strings.headingSeeAllPersons),
 						contentLabel,
@@ -324,19 +330,18 @@ public class PersonsView extends AbstractView {
 					criteria.personAssociation(association);
 					navigateTo(criteria);
 				}
-			}, ValoTheme.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER, CssStyles.BUTTON_FILTER_LIGHT);
-			associationButton.setData(association);
-			associationButton.setCaptionAsHtml(true);
+			}, CssStyles.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER, CssStyles.BUTTON_FILTER_LIGHT);
+			ComponentUtil.setData(associationButton, PersonAssociation.class, association);
 
-			associationFilterLayout.addComponent(associationButton);
-			associationFilterLayout.setComponentAlignment(associationButton, Alignment.MIDDLE_LEFT);
+			associationFilterLayout.add(associationButton);
+			associationFilterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, associationButton);
 			associationButtons.put(associationButton, association);
 		}
 
-		Label emptyLabel = new Label("");
-		associationFilterLayout.addComponent(emptyLabel);
-		associationFilterLayout.setComponentAlignment(emptyLabel, Alignment.MIDDLE_RIGHT);
-		associationFilterLayout.setExpandRatio(emptyLabel, 1);
+		Span emptyLabel = new Span("");
+		associationFilterLayout.add(emptyLabel);
+		associationFilterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, emptyLabel);
+		associationFilterLayout.setFlexGrow(1, emptyLabel);
 
 		// Bulk operation dropdown
 		if (UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS)) {
@@ -345,7 +350,7 @@ public class PersonsView extends AbstractView {
 				bulkActions.add(
 					new MenuBarHelper.MenuBarItem(
 						I18nProperties.getCaption(Captions.actionMerge),
-						VaadinIcons.COMPRESS_SQUARE,
+						VaadinIcon.COMPRESS_SQUARE,
 						mi -> grid.bulkActionHandler(items -> {
 							if (items.size() != 2) {
 								VaadinUiUtil.showWarningPopup(I18nProperties.getString(Strings.messageCannotMergeMoreThanTwoPersons));
@@ -367,7 +372,7 @@ public class PersonsView extends AbstractView {
 								if (!FacadeProvider.getPersonFacade().isPersonSimilar(criteria, person2.getUuid())) {
 									VaadinUiUtil.showConfirmationPopup(
 										I18nProperties.getString(Strings.headingPickOrMergePersonConfirmation),
-										new Label(I18nProperties.getString(Strings.infoPersonMergeConfirmationForNonSimilarPersons)),
+										new Span(I18nProperties.getString(Strings.infoPersonMergeConfirmationForNonSimilarPersons)),
 										I18nProperties.getCaption(Captions.actionProceed),
 										I18nProperties.getCaption(Captions.actionCancel),
 										800,
@@ -386,7 +391,7 @@ public class PersonsView extends AbstractView {
 
 			bulkOperationsDropdown = MenuBarHelper.createDropDown(Captions.bulkActions, bulkActions);
 			bulkOperationsDropdown.setVisible(viewConfiguration.isInEagerMode());
-			associationFilterLayout.addComponent(bulkOperationsDropdown);
+			associationFilterLayout.add(bulkOperationsDropdown);
 		}
 
 		return associationFilterLayout;

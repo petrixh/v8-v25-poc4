@@ -4,11 +4,8 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 
 import java.util.Date;
 
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -26,8 +23,11 @@ import de.symeda.sormas.api.utils.DateHelper;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.AbstractFilterForm;
 import de.symeda.sormas.ui.utils.BirthdateRangeFilterComponent;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.FieldConfiguration;
 import de.symeda.sormas.ui.utils.FieldHelper;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class PersonFilterForm extends AbstractFilterForm<PersonCriteria> {
 
@@ -108,7 +108,7 @@ public class PersonFilterForm extends AbstractFilterForm<PersonCriteria> {
 		dateFilterRowLayout.setSpacing(true);
 		dateFilterRowLayout.setSizeUndefined();
 
-		dateFilterRowLayout.addComponent(birthdateRangeFilterComponent);
+		dateFilterRowLayout.add(birthdateRangeFilterComponent);
 
 		return dateFilterRowLayout;
 	}
@@ -126,7 +126,7 @@ public class PersonFilterForm extends AbstractFilterForm<PersonCriteria> {
 	}
 
 	@Override
-	protected void applyDependenciesOnFieldChange(String propertyId, Property.ValueChangeEvent event) {
+	protected void applyDependenciesOnFieldChange(String propertyId, HasValue.ValueChangeEvent<?> event) {
 		super.applyDependenciesOnFieldChange(propertyId, event);
 
 		final ComboBox districtFilter = getField(PersonCriteria.DISTRICT);
@@ -134,7 +134,7 @@ public class PersonFilterForm extends AbstractFilterForm<PersonCriteria> {
 
 		switch (propertyId) {
 		case PersonCriteria.BIRTHDATE_MM: {
-			Integer birthMM = (Integer) event.getProperty().getValue();
+			Integer birthMM = (Integer) event.getValue();
 
 			ComboBox birthDayDD = getField(PersonCriteria.BIRTHDATE_DD);
 			birthDayDD.setEnabled(birthMM != null);
@@ -147,7 +147,7 @@ public class PersonFilterForm extends AbstractFilterForm<PersonCriteria> {
 			break;
 		}
 		case PersonCriteria.REGION:
-			RegionReferenceDto region = (RegionReferenceDto) event.getProperty().getValue();
+			RegionReferenceDto region = (RegionReferenceDto) event.getValue();
 			if (region != null) {
 				enableFields(districtFilter);
 				districtFilter.removeAllItems();
@@ -159,7 +159,7 @@ public class PersonFilterForm extends AbstractFilterForm<PersonCriteria> {
 			clearAndDisableFields(communityFilter);
 			break;
 		case PersonCriteria.DISTRICT:
-			DistrictReferenceDto district = (DistrictReferenceDto) event.getProperty().getValue();
+			DistrictReferenceDto district = (DistrictReferenceDto) event.getValue();
 
 			if (district != null) {
 				enableFields(communityFilter);
@@ -229,7 +229,7 @@ public class PersonFilterForm extends AbstractFilterForm<PersonCriteria> {
 
 		//Birthdate Filter
 		HorizontalLayout birthdateFilterForm = (HorizontalLayout) getMoreFiltersContainer().getComponent(BIRTHDATE_RANGE_FILTER);
-		BirthdateRangeFilterComponent birtdateFilter = (BirthdateRangeFilterComponent) birthdateFilterForm.getComponent(0);
+		BirthdateRangeFilterComponent birtdateFilter = (BirthdateRangeFilterComponent) birthdateFilterForm.getComponentAt(0);
 		birtdateFilter.getDateFromFilter().setValue(criteria.getBirthdateFrom());
 		birtdateFilter.getDateToFilter().setValue(criteria.getBirthdateTo());
 		birtdateFilter.getIncludePartialMatch().setValue(criteria.isIncludePartialMatch());

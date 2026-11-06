@@ -41,20 +41,11 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.shared.ui.ErrorLevel;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Window;
-import com.vaadin.v7.data.Item;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.AbstractSelect;
-import com.vaadin.v7.ui.AbstractSelect.ItemCaptionMode;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.shared.Registration;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -93,16 +84,23 @@ import de.symeda.sormas.ui.location.LocationEditForm;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.ApproximateAgeValidator;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.DateComparisonValidator;
 import de.symeda.sormas.ui.utils.FieldAccessHelper;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.LayoutUtil;
 import de.symeda.sormas.ui.utils.OutbreakFieldVisibilityChecker;
 import de.symeda.sormas.ui.utils.ResizableTextAreaWrapper;
-import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
 import de.symeda.sormas.ui.utils.ValidationUtils;
 import de.symeda.sormas.ui.utils.ViewMode;
 import de.symeda.sormas.ui.utils.components.SormasTextField;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.SelectField;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class PersonEditForm extends AbstractEditForm<PersonDto> {
 
@@ -192,12 +190,12 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 									fluidRowLocs(PersonDto.NAMES_OF_GUARDIANS) +
 					fluidRowLocs(PersonDto.PERSON_CONTACT_DETAILS)) +
 					loc(GENERAL_COMMENT_LOC) + fluidRowLocs(CaseDataDto.ADDITIONAL_DETAILS);
-	private final Label occupationHeader = new Label(I18nProperties.getString(Strings.headingPersonOccupation));
-	private final Label perinatalDetailsHeader = new Label(I18nProperties.getString(Strings.headingPerinatalDetails));
-	private final Label addressHeader = new Label(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.ADDRESS));
-	private final Label addressesHeader = new Label(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.ADDRESSES));
-	private final Label contactInformationHeader = new Label(I18nProperties.getString(Strings.headingContactInformation));
-	private Label personInformationHeadingLabel;
+	private final Span occupationHeader = new Span(I18nProperties.getString(Strings.headingPersonOccupation));
+	private final Span perinatalDetailsHeader = new Span(I18nProperties.getString(Strings.headingPerinatalDetails));
+	private final Span addressHeader = new Span(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.ADDRESS));
+	private final Span addressesHeader = new Span(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.ADDRESSES));
+	private final Span contactInformationHeader = new Span(I18nProperties.getString(Strings.headingContactInformation));
+	private Span personInformationHeadingLabel;
 	private TextField firstNameField;
 	private TextField lastNameField;
 	private Disease disease;
@@ -212,7 +210,7 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 	private LocationEditForm addressForm;
 	private PresentConditionChangeListener presentConditionChangeListener;
 	private SormasTextField nationalHealthIdField;
-	private Window warningSimilarPersons;
+	private Dialog warningSimilarPersons;
 	private CheckBox isEmancipated;
 	private CheckBox isIncapacitated;
 	private CheckBox hasGuardian;
@@ -310,8 +308,8 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 	@Override
 	protected void addFields() {
 
-		personInformationHeadingLabel = new Label(I18nProperties.getString(Strings.headingPersonInformation));
-		personInformationHeadingLabel.addStyleName(H3);
+		personInformationHeadingLabel = new Span(I18nProperties.getString(Strings.headingPersonInformation));
+		personInformationHeadingLabel.addClassName(H3);
 		getContent().addComponent(personInformationHeadingLabel, PERSON_INFORMATION_HEADING_LOC);
 
 		addField(PersonDto.UUID).setReadOnly(true);
@@ -343,7 +341,7 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 		// @TODO: Done for nullselection Bug, fixed in Vaadin 7.7.3
 		birthDateYear.setNullSelectionAllowed(true);
 		birthDateYear.addItems(DateHelper.getYearsToNow());
-		birthDateYear.setItemCaptionMode(ItemCaptionMode.ID_TOSTRING);
+		// was setItemCaptionMode(ID_TOSTRING): the shim shows toString() of items without an explicit caption
 		birthDateYear.setInputPrompt(I18nProperties.getString(Strings.year));
 		birthDateDay.addValidator(
 			e -> ControllerProvider.getPersonController()
@@ -389,7 +387,7 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 		ComboBox birthWeightCategory = addField(PersonDto.BIRTH_WEIGHT_CATEGORY, ComboBox.class);
 		ComboBox multipleBirth = addField(PersonDto.MULTIPLE_BIRTH, ComboBox.class);
 
-		AbstractSelect deathPlaceType = addField(PersonDto.DEATH_PLACE_TYPE, ComboBox.class);
+		SelectField deathPlaceType = addField(PersonDto.DEATH_PLACE_TYPE, ComboBox.class);
 		deathPlaceType.setNullSelectionAllowed(true);
 		TextField deathPlaceDesc = addField(PersonDto.DEATH_PLACE_DESCRIPTION, TextField.class);
 		DateField burialDate = addField(PersonDto.BURIAL_DATE, DateField.class);
@@ -411,7 +409,7 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 			occupationTypeField,
 			FacadeProvider.getCustomizableEnumFacade().getEnumValues(CustomizableEnumType.OCCUPATION_TYPE, disease));
 		occupationTypeField.addValueChangeListener(e -> {
-			OccupationType occupationType = (OccupationType) e.getProperty().getValue();
+			OccupationType occupationType = (OccupationType) e.getValue();
 			occupationTypeDetailsField.setVisible(occupationType != null && occupationType.matchPropertyValue(OccupationType.HAS_DETAILS, true));
 		});
 
@@ -429,8 +427,8 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 
 		nationalHealthIdField = addField(PersonDto.NATIONAL_HEALTH_ID, SormasTextField.class);
 		nationalHealthIdField.setNullRepresentation("");
-		Label nationalHealthIdWarningLabel = new Label(I18nProperties.getString(Strings.messagePersonNationalHealthIdInvalid));
-		nationalHealthIdWarningLabel.addStyleNames(VSPACE_3, LABEL_WHITE_SPACE_NORMAL);
+		Span nationalHealthIdWarningLabel = new Span(I18nProperties.getString(Strings.messagePersonNationalHealthIdInvalid));
+		nationalHealthIdWarningLabel.addClassNames(VSPACE_3, LABEL_WHITE_SPACE_NORMAL);
 		nationalHealthIdWarningLabel.setVisible(false);
 		getContent().addComponent(nationalHealthIdWarningLabel, NATIONAL_HEALTH_ID_WARNING_LABEL);
 
@@ -439,8 +437,8 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 			externalId.setEnabled(false);
 		}
 		TextField externalTokenField = addField(PersonDto.EXTERNAL_TOKEN);
-		Label externalTokenWarningLabel = new Label(I18nProperties.getString(Strings.messagePersonExternalTokenWarning));
-		externalTokenWarningLabel.addStyleNames(VSPACE_3, LABEL_WHITE_SPACE_NORMAL);
+		Span externalTokenWarningLabel = new Span(I18nProperties.getString(Strings.messagePersonExternalTokenWarning));
+		externalTokenWarningLabel.addClassNames(VSPACE_3, LABEL_WHITE_SPACE_NORMAL);
 		getContent().addComponent(externalTokenWarningLabel, EXTERNAL_TOKEN_WARNING_LOC);
 		addField(PersonDto.INTERNAL_TOKEN);
 
@@ -470,7 +468,7 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 		ComboBox cbPlaceOfBirthCommunity = addInfrastructureField(PersonDto.PLACE_OF_BIRTH_COMMUNITY);
 		ComboBox placeOfBirthFacilityType = addField(PersonDto.PLACE_OF_BIRTH_FACILITY_TYPE);
 		FieldHelper.removeItems(placeOfBirthFacilityType);
-		placeOfBirthFacilityType.setItemCaptionMode(AbstractSelect.ItemCaptionMode.ID);
+		// was setItemCaptionMode(ID): the shim shows toString() of items without an explicit caption
 		placeOfBirthFacilityType.addItems(FacilityType.getPlaceOfBirthTypes());
 
 		cbPlaceOfBirthFacility = addInfrastructureField(PersonDto.PLACE_OF_BIRTH_FACILITY);
@@ -536,7 +534,7 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 			@SuppressWarnings("unchecked")
 			Field<ApproximateAgeType> ageTypeField = (Field<ApproximateAgeType>) getField(PersonDto.APPROXIMATE_AGE_TYPE);
 			if (!ageTypeField.isReadOnly()) {
-				if (e.getProperty().getValue() == null) {
+				if (e.getValue() == null) {
 					ageTypeField.clear();
 				} else {
 					if (ageTypeField.isEmpty()) {
@@ -575,7 +573,7 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 		cbPlaceOfBirthRegion.addItems(FacadeProvider.getRegionFacade().getAllActiveByServerCountry());
 
 		this.presentConditionChangeListener = new PresentConditionChangeListener();
-		addFieldListeners(PersonDto.PRESENT_CONDITION, presentConditionChangeListener);
+		presentConditionChangeListener.register();
 
 		causeOfDeathField.addValueChangeListener(e -> {
 			boolean causeOfDeathVisible = presentCondition.getValue() != PresentCondition.ALIVE
@@ -632,22 +630,19 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 
 		// Update the list of days according to the selected month and year
 		birthDateYear.addValueChangeListener(e -> {
-			updateListOfDays((Integer) e.getProperty().getValue(), (Integer) birthDateMonth.getValue());
-			birthDateMonth.markAsDirty();
-			birthDateDay.markAsDirty();
+			updateListOfDays((Integer) e.getValue(), (Integer) birthDateMonth.getValue());
+			validateBirthDateFields(birthDateMonth, birthDateDay);
 			deathDate.setValidationVisible(!deathDate.isValid());
 			burialDate.setValidationVisible(!burialDate.isValid());
 		});
 		birthDateMonth.addValueChangeListener(e -> {
-			updateListOfDays((Integer) birthDateYear.getValue(), (Integer) e.getProperty().getValue());
-			birthDateYear.markAsDirty();
-			birthDateDay.markAsDirty();
+			updateListOfDays((Integer) birthDateYear.getValue(), (Integer) e.getValue());
+			validateBirthDateFields(birthDateYear, birthDateDay);
 			deathDate.setValidationVisible(!deathDate.isValid());
 			burialDate.setValidationVisible(!burialDate.isValid());
 		});
 		birthDateDay.addValueChangeListener(e -> {
-			birthDateYear.markAsDirty();
-			birthDateMonth.markAsDirty();
+			validateBirthDateFields(birthDateYear, birthDateMonth);
 			deathDate.setValidationVisible(!deathDate.isValid());
 			burialDate.setValidationVisible(!burialDate.isValid());
 		});
@@ -671,14 +666,14 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 						(Integer) birthDateYear.getValue(),
 						(Integer) birthDateMonth.getValue(),
 						(Integer) birthDateDay.getValue()),
-					ErrorLevel.WARNING);
+					ValidationUtils.ErrorLevel.WARNING);
 			}
 
-			personContactDetailsField.setThisPerson((PersonDto) e.getProperty().getValue());
+			personContactDetailsField.setThisPerson((PersonDto) e.getValue());
 		});
 
-		Label generalCommentLabel = new Label(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.ADDITIONAL_DETAILS));
-		generalCommentLabel.addStyleName(H3);
+		Span generalCommentLabel = new Span(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.ADDITIONAL_DETAILS));
+		generalCommentLabel.addClassName(H3);
 		getContent().addComponent(generalCommentLabel, GENERAL_COMMENT_LOC);
 
 		TextArea additionalDetails = addField(PersonDto.ADDITIONAL_DETAILS, TextArea.class, new ResizableTextAreaWrapper<>(false));
@@ -828,13 +823,13 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 		boolean allowNoneFacility) {
 
 		regionField.addValueChangeListener(e -> {
-			RegionReferenceDto regionDto = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto regionDto = (RegionReferenceDto) e.getValue();
 			FieldHelper
 				.updateItems(districtField, regionDto != null ? FacadeProvider.getDistrictFacade().getAllActiveByRegion(regionDto.getUuid()) : null);
 		});
 
 		districtField.addValueChangeListener(e -> {
-			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getProperty().getValue();
+			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getValue();
 			FieldHelper.updateItems(
 				communityField,
 				districtDto != null ? FacadeProvider.getCommunityFacade().getAllActiveByDistrict(districtDto.getUuid()) : null);
@@ -846,10 +841,10 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 		typeField.addValueChangeListener(e -> updateFacilities(facilityField, typeField, communityField, districtField, allowNoneFacility));
 		FieldHelper.updateItems(
 			facilityField,
-			Collections.singletonList(FacadeProvider.getFacilityFacade().getReferenceByUuid(FacilityDto.NONE_FACILITY_UUID)));
+			Collections.<FacilityReferenceDto> singletonList(FacadeProvider.getFacilityFacade().getReferenceByUuid(FacilityDto.NONE_FACILITY_UUID)));
 
 		facilityField.addValueChangeListener(e -> {
-			updateFacilityDetailsVisibility(detailsField, (FacilityReferenceDto) e.getProperty().getValue());
+			updateFacilityDetailsVisibility(detailsField, (FacilityReferenceDto) e.getValue());
 		});
 		// Set initial visibility
 		updateFacilityDetailsVisibility(detailsField, (FacilityReferenceDto) facilityField.getValue());
@@ -884,12 +879,26 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 				// "home or other place" as fallback
 				FieldHelper.updateItems(
 					facilityField,
-					Collections.singletonList(FacadeProvider.getFacilityFacade().getReferenceByUuid(FacilityDto.NONE_FACILITY_UUID)));
+					Collections.<FacilityReferenceDto> singletonList(FacadeProvider.getFacilityFacade().getReferenceByUuid(FacilityDto.NONE_FACILITY_UUID)));
 			} else {
 				FieldHelper.removeItems(facilityField);
 			}
 		}
 
+	}
+
+	/**
+	 * Was V8 {@code markAsDirty()} on the sibling birth date fields: Vaadin 7 repainted them, so their validators' result
+	 * showed at once. Flow shows a field's error when its binding validates, so the siblings' bindings are validated here;
+	 * the form's status handler still honours {@code isValidationVisible()}, as the V7 repaint did.
+	 */
+	private void validateBirthDateFields(Field<?>... fields) {
+		for (Field<?> field : fields) {
+			Binder.Binding<PersonDto, ?> binding = getFieldGroup().getBinding(field);
+			if (binding != null) {
+				binding.validate();
+			}
+		}
 	}
 
 	private void updateListOfDays(Integer selectedYear, Integer selectedMonth) {
@@ -917,18 +926,18 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 			if (currentValue != null && !validValues.contains(currentValue)) {
 				validValues.add(currentValue);
 			}
-			presentConditionField.removeValueChangeListener(presentConditionChangeListener);
+			presentConditionChangeListener.unregister();
 			FieldHelper.updateEnumData(presentConditionField, validValues);
-			presentConditionField.addValueChangeListener(presentConditionChangeListener);
+			presentConditionChangeListener.register();
 		}
 
 		/*
 		 * It may happen that the person currently has a present condition that usually shall not be shows for the form's disease.
 		 * In that case, the present condition is added as selectable item here.
 		 */
-		if (presentCondition != null && presentConditionField.getItem(presentCondition) == null) {
-			Item currentItem = presentConditionField.addItem(presentCondition);
-			currentItem.getItemProperty(SormasFieldGroupFieldFactory.CAPTION_PROPERTY_ID).setValue(presentCondition.toString());
+		if (presentCondition != null && !presentConditionField.containsId(presentCondition)) {
+			presentConditionField.addItem(presentCondition);
+			presentConditionField.setItemCaption(presentCondition, presentCondition.toString());
 		}
 	}
 
@@ -982,7 +991,7 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 		approximateAgeField.setValue(approximateAge);
 		approximateAgeField.setReadOnly(true);
 
-		AbstractSelect approximateAgeTypeSelect = (AbstractSelect) getFieldGroup().getField(PersonDto.APPROXIMATE_AGE_TYPE);
+		SelectField approximateAgeTypeSelect = (SelectField) getFieldGroup().getField(PersonDto.APPROXIMATE_AGE_TYPE);
 		approximateAgeTypeSelect.setReadOnly(false);
 		approximateAgeTypeSelect.setValue(approximateAgeType);
 		approximateAgeTypeSelect.setReadOnly(true);
@@ -1061,7 +1070,7 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 		}
 	}
 
-	private void setItemCaptionsForMonths(AbstractSelect months) {
+	private void setItemCaptionsForMonths(SelectField months) {
 		months.setItemCaption(1, I18nProperties.getEnumCaption(Month.JANUARY));
 		months.setItemCaption(2, I18nProperties.getEnumCaption(Month.FEBRUARY));
 		months.setItemCaption(3, I18nProperties.getEnumCaption(Month.MARCH));
@@ -1076,7 +1085,7 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 		months.setItemCaption(12, I18nProperties.getEnumCaption(Month.DECEMBER));
 	}
 
-	private void fillDeathAndBurialFields(AbstractSelect deathPlaceType, TextField deathPlaceDesc, TextField burialPlaceDesc) {
+	private void fillDeathAndBurialFields(SelectField deathPlaceType, TextField deathPlaceDesc, TextField burialPlaceDesc) {
 
 		if (deathPlaceType.isVisible() && deathPlaceType.getValue() == null) {
 			if (deathPlaceDesc.isVisible() && StringUtils.isBlank(deathPlaceDesc.getValue())) {
@@ -1097,7 +1106,7 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 		return lastNameField;
 	}
 
-	public Window getWarningSimilarPersons() {
+	public Dialog getWarningSimilarPersons() {
 		return warningSimilarPersons;
 	}
 
@@ -1110,14 +1119,28 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 
 	@Override
 	public void setHeading(String heading) {
-		personInformationHeadingLabel.setValue(heading);
+		personInformationHeadingLabel.setText(heading);
 	}
 
-	private class PresentConditionChangeListener implements ValueChangeListener {
+	private class PresentConditionChangeListener implements Field.ValueChangeListener<Object> {
+
+		// Flow removes a listener through its registration (V7: removeValueChangeListener(listener))
+		private Registration registration;
+
+		void register() {
+			registration = ((ComboBox) getField(PersonDto.PRESENT_CONDITION)).addValueChangeListener(this);
+		}
+
+		void unregister() {
+			if (registration != null) {
+				registration.remove();
+				registration = null;
+			}
+		}
 
 		@Override
-		public void valueChange(Property.ValueChangeEvent valueChangeEvent) {
-			PresentCondition type = (PresentCondition) ((AbstractSelect) getFieldGroup().getField(PersonDto.PRESENT_CONDITION)).getValue();
+		public void valueChanged(ComponentValueChangeEvent<?, Object> valueChangeEvent) {
+			PresentCondition type = (PresentCondition) getFieldGroup().getField(PersonDto.PRESENT_CONDITION).getValue();
 			if (type == null) {
 				setVisible(
 					false,

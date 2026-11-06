@@ -31,24 +31,17 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.Navigator;
-import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.Validator;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -80,16 +73,21 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.caze.CaseDataView;
 import de.symeda.sormas.ui.events.eventParticipantMerge.PickLeadEventParticipant;
+import de.symeda.sormas.ui.navigation.Navigator;
 import de.symeda.sormas.ui.utils.AbstractView;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.ConfirmationComponent;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.ViewMode;
 import de.symeda.sormas.ui.utils.components.page.title.TitleLayout;
 import de.symeda.sormas.ui.utils.components.page.title.TitleLayoutHelper;
+import de.symeda.sormas.ui.utils.fields.Field;
 
 public class PersonController {
 
@@ -123,14 +121,15 @@ public class PersonController {
 		personGrid.setVisible(true);
 		personGrid.setWidth(100, Unit.PERCENTAGE);
 
-		final Window popupWindow = VaadinUiUtil.createPopupWindow();
-		popupWindow.setWidth(1024, Unit.PIXELS);
-		popupWindow.setCaption(I18nProperties.getString(Strings.headingPickOrMergePerson));
+		final Dialog popupWindow = VaadinUiUtil.createPopupWindow();
+		popupWindow.setWidth("1024px");
+		popupWindow.setHeaderTitle(I18nProperties.getString(Strings.headingPickOrMergePerson));
 
 		final VerticalLayout layout = new VerticalLayout();
-		layout.setMargin(true);
-		layout.addComponent(VaadinUiUtil.createInfoComponent(I18nProperties.getString(Strings.infoPersonMergeDescription)));
-		layout.addComponent(personGrid);
+		// was setMargin(true): the Vaadin 8 margin is the padding in Flow
+		layout.setPadding(true);
+		layout.add(VaadinUiUtil.createInfoComponent(I18nProperties.getString(Strings.infoPersonMergeDescription)));
+		layout.add(personGrid);
 
 		final ConfirmationComponent confirmationComponent = new ConfirmationComponent(false) {
 
@@ -148,16 +147,16 @@ public class PersonController {
 		};
 
 		final Button mergeButton = confirmationComponent.getConfirmButton();
-		mergeButton.setCaption(I18nProperties.getCaption(Captions.actionMerge));
+		mergeButton.setText(I18nProperties.getCaption(Captions.actionMerge));
 		mergeButton.setEnabled(false);
 		final Button pickButton = confirmationComponent.getCancelButton();
-		pickButton.setCaption(I18nProperties.getCaption(Captions.actionPick));
-		pickButton.removeStyleName(ValoTheme.BUTTON_LINK);
-		pickButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+		pickButton.setText(I18nProperties.getCaption(Captions.actionPick));
+		CssStyles.removeStyles(pickButton, CssStyles.BUTTON_LINK);
+		CssStyles.style(pickButton, CssStyles.BUTTON_PRIMARY);
 		pickButton.setEnabled(false);
 
 		personGrid.addItemClickListener(itemClick -> {
-			if (!itemClick.getMouseEventDetails().isDoubleClick()) {
+			if (itemClick.getClickCount() <= 1) {
 				boolean enabled = personGrid.getSelectedItems().isEmpty()
 					|| !DataHelper.equal(itemClick.getItem(), personGrid.getSelectedItems().stream().findFirst().get());
 				mergeButton.setEnabled(enabled);
@@ -167,20 +166,20 @@ public class PersonController {
 
 		confirmationComponent.addExtraButton(
 			ButtonHelper
-				.createButton(Strings.unsavedChanges_cancel, I18nProperties.getCaption(Captions.actionDiscard), null, ValoTheme.BUTTON_PRIMARY),
+				.createButton(Strings.unsavedChanges_cancel, I18nProperties.getCaption(Captions.actionDiscard), null, CssStyles.BUTTON_PRIMARY),
 			buttonEvent -> popupWindow.close());
 
-		layout.addComponent(confirmationComponent);
-		layout.setComponentAlignment(confirmationComponent, Alignment.BOTTOM_RIGHT);
+		layout.add(confirmationComponent);
+		layout.setHorizontalComponentAlignment(FlexComponent.Alignment.END, confirmationComponent);
 		layout.setWidth(100, Unit.PERCENTAGE);
 		layout.setSpacing(true);
-		popupWindow.setContent(layout);
-		popupWindow.setClosable(false);
+		popupWindow.add(layout);
+		VaadinUiUtil.setClosable(popupWindow, false);
 
-		UI.getCurrent().addWindow(popupWindow);
+		popupWindow.open();
 	}
 
-	private void mergePersons(PersonGrid personGrid, List<PersonIndexDto> personIndexDtos, Window popupWindow, boolean mergeProperties) {
+	private void mergePersons(PersonGrid personGrid, List<PersonIndexDto> personIndexDtos, Dialog popupWindow, boolean mergeProperties) {
 
 		final Set<PersonIndexDto> selectedItems = personGrid.getSelectedItems();
 		final PersonIndexDto leadPerson = selectedItems.iterator().next();
@@ -192,11 +191,11 @@ public class PersonController {
 			if (FacadeProvider.getPersonFacade().isSharedOrReceived(leadPerson.getUuid())) {
 				confirmationMessage = I18nProperties.getString(Strings.infoPersonMergeConfirmationBothShared);
 			} else {
-				new Notification(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.headingMergePersonError),
 					I18nProperties.getString(Strings.infoPersonMergeSharedMustLead),
-					Notification.Type.ERROR_MESSAGE,
-					false).show(Page.getCurrent());
+					Type.ERROR_MESSAGE,
+					false);
 				return;
 			}
 		} else {
@@ -220,26 +219,26 @@ public class PersonController {
 
 		if (!eventsWithMoreDuplicateThanAllowed.isEmpty()) {
 			VerticalLayout popUpContent = new VerticalLayout();
-			popUpContent.addComponent(
+			popUpContent.add(
 				VaadinUiUtil
 					.createInfoComponent(I18nProperties.getString(Strings.infoPickorMergeEventParticipantDuplicateEventParticipantByPersonByEvent)));
 			eventsWithMoreDuplicateThanAllowed.forEach(eventUuid -> {
-				Label eventUuidLabel = new Label(eventUuid);
-				popUpContent.addComponent(eventUuidLabel);
+				Span eventUuidLabel = new Span(eventUuid);
+				popUpContent.add(eventUuidLabel);
 			});
 
-			Window popupMoreDuplicatesThanAllowedWindow = VaadinUiUtil
+			Dialog popupMoreDuplicatesThanAllowedWindow = VaadinUiUtil
 				.showPopupWindow(popUpContent, I18nProperties.getString(Strings.headingMergeDuplicateEventParticipantSamePersonSameEvent));
 
-			Button.ClickListener cancelListener = clickEvent -> {
+			ComponentEventListener<ClickEvent<Button>> cancelListener = clickEvent -> {
 				popupMoreDuplicatesThanAllowedWindow.close();
 			};
 
 			popUpContent.setSpacing(false);
 
 			Button cancelButton = ButtonHelper.createButton(Captions.actionCancel, cancelListener);
-			popUpContent.addComponent(cancelButton);
-			popUpContent.setComponentAlignment(cancelButton, Alignment.BOTTOM_RIGHT);
+			popUpContent.add(cancelButton);
+			popUpContent.setHorizontalComponentAlignment(FlexComponent.Alignment.END, cancelButton);
 
 			return;
 		}
@@ -268,17 +267,17 @@ public class PersonController {
 		pickOrMergeConfirmationPopUp(popupWindow, mergeProperties, leadPerson, otherPerson, confirmationMessage, new ArrayList<>(), false);
 	}
 
-	private Window pickOrMergeConfirmationPopUp(
-		Window popupWindow,
+	private Dialog pickOrMergeConfirmationPopUp(
+		Dialog popupWindow,
 		boolean mergePersonProperties,
 		PersonIndexDto leadPerson,
 		PersonIndexDto otherPerson,
 		String confirmationMessage,
 		List<String> selectedEventParticipantUuids,
 		boolean mergeEventParticipantProperties) {
-		Window mergeWindow = VaadinUiUtil.showConfirmationPopup(
+		Dialog mergeWindow = VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getString(Strings.headingPickOrMergePersonConfirmation),
-			new Label(confirmationMessage, ContentMode.HTML),
+			VaadinUiUtil.createLabel(confirmationMessage, ContentMode.HTML),
 			I18nProperties.getCaption(Captions.actionConfirm),
 			I18nProperties.getCaption(Captions.actionDiscard),
 			800,
@@ -307,12 +306,12 @@ public class PersonController {
 
 		final CommitDiscardWrapperComponent<PickLeadEventParticipant> component = new CommitDiscardWrapperComponent<>(pickLeadEventParticipant);
 
-		component.getCommitButton().setCaption(I18nProperties.getCaption((Captions.actionPick)));
+		component.getCommitButton().setText(I18nProperties.getCaption((Captions.actionPick)));
 
 		final Button mergeButton = ButtonHelper.createButton(Captions.actionMerge);
-		component.getButtonsPanel().addComponent(mergeButton);
-		mergeButton.removeStyleName(ValoTheme.BUTTON_LINK);
-		mergeButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+		component.getButtonsPanel().add(mergeButton);
+		CssStyles.removeStyles(mergeButton, CssStyles.BUTTON_LINK);
+		CssStyles.style(mergeButton, CssStyles.BUTTON_PRIMARY);
 
 		mergeButton.addClickListener(clickEvent -> {
 			pickLeadEventParticipant.setPickOrMerge(PickLeadEventParticipant.PickOrMerge.MERGE);
@@ -377,7 +376,7 @@ public class PersonController {
 			final CommitDiscardWrapperComponent<PersonSelectionField> component =
 				new CommitDiscardWrapperComponent<PersonSelectionField>(personSelect);
 			if (!saveNewPerson) {
-				component.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionConfirm));
+				component.getCommitButton().setText(I18nProperties.getCaption(Captions.actionConfirm));
 			}
 			component.addCommitListener(() -> {
 				SimilarPersonDto selectedPerson = personSelect.getValue();
@@ -486,8 +485,14 @@ public class PersonController {
 			if (!editForm.getFieldGroup().isModified()) {
 				PersonDto dto = editForm.getValue();
 				if (editForm.getWarningSimilarPersons() != null) {
+					// the dialog's first child is its content (was Window.getContent())
+					@SuppressWarnings("unchecked")
 					CommitDiscardWrapperComponent<PersonSelectionGrid> content =
-						(CommitDiscardWrapperComponent<PersonSelectionGrid>) editView.getWrappedComponent().getWarningSimilarPersons().getContent();
+						(CommitDiscardWrapperComponent<PersonSelectionGrid>) editView.getWrappedComponent()
+							.getWarningSimilarPersons()
+							.getChildren()
+							.findFirst()
+							.orElse(null);
 					content.getDiscardButton().setVisible(true);
 					content.addCommitListener(() -> savePersonWithPersonConditionChanged(dto));
 				} else {
@@ -534,52 +539,52 @@ public class PersonController {
 				CommitDiscardWrapperComponent<VerticalLayout> warningComponent = new CommitDiscardWrapperComponent<>(warningLayout);
 				warningComponent.setWidth(100, Unit.PERCENTAGE);
 
-				Window popupWindow = VaadinUiUtil.showPopupWindow(warningComponent, I18nProperties.getString(Strings.warning));
-				Label infoLabel = new Label(I18nProperties.getString(Strings.messageChangingPersonPresentCondition));
+				Dialog popupWindow = VaadinUiUtil.showPopupWindow(warningComponent, I18nProperties.getString(Strings.warning));
+				Span infoLabel = new Span(I18nProperties.getString(Strings.messageChangingPersonPresentCondition));
 				CssStyles.style(infoLabel, CssStyles.LABEL_LARGE, CssStyles.LABEL_WHITE_SPACE_NORMAL);
-				warningLayout.addComponent(infoLabel);
+				warningLayout.add(infoLabel);
 
 				// case information
-				warningLayout.addComponent(new Label(lastCase.buildCaption()));
+				warningLayout.add(new Span(lastCase.buildCaption()));
 
 				// confirmation message
-				Label confirmationMessage = new Label(I18nProperties.getString(Strings.messageReviewChangesAndConfirm));
-				confirmationMessage.addStyleName(CssStyles.VSPACE_TOP_3);
-				warningLayout.addComponent(confirmationMessage);
+				Span confirmationMessage = new Span(I18nProperties.getString(Strings.messageReviewChangesAndConfirm));
+				confirmationMessage.addClassName(CssStyles.VSPACE_TOP_3);
+				warningLayout.add(confirmationMessage);
 
 				// changes listed
 				HorizontalLayout changesLayout = new HorizontalLayout();
-				changesLayout.setMargin(false);
-				changesLayout.addStyleNames(CssStyles.VSPACE_TOP_1, CssStyles.VSPACE_2);
+				changesLayout.setPadding(false);
+				changesLayout.addClassNames(CssStyles.VSPACE_TOP_1, CssStyles.VSPACE_2);
 
 				VerticalLayout fieldsLayout = new VerticalLayout();
-				fieldsLayout.setMargin(false);
-				Label fieldsLabel = new Label(I18nProperties.getCaption(Captions.confirmChangesField));
-				fieldsLayout.addComponent(fieldsLabel);
-				fieldsLabel.addStyleName(CssStyles.LABEL_SECONDARY);
-				fieldsLayout.addComponent(new Label(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.OUTCOME)));
-				fieldsLayout.addComponent(new Label(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.OUTCOME_DATE)));
+				fieldsLayout.setPadding(false);
+				Span fieldsLabel = new Span(I18nProperties.getCaption(Captions.confirmChangesField));
+				fieldsLayout.add(fieldsLabel);
+				fieldsLabel.addClassName(CssStyles.LABEL_SECONDARY);
+				fieldsLayout.add(new Span(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.OUTCOME)));
+				fieldsLayout.add(new Span(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.OUTCOME_DATE)));
 
 				VerticalLayout arrowsLayout = new VerticalLayout();
-				arrowsLayout.setMargin(false);
-				arrowsLayout.addComponent(new Label());
-				arrowsLayout.addComponent(new Label(VaadinIcons.ARROW_RIGHT.getHtml(), ContentMode.HTML));
-				arrowsLayout.addComponent(new Label(VaadinIcons.ARROW_RIGHT.getHtml(), ContentMode.HTML));
+				arrowsLayout.setPadding(false);
+				arrowsLayout.add(new Span());
+				arrowsLayout.add(VaadinIcon.ARROW_RIGHT.create());
+				arrowsLayout.add(VaadinIcon.ARROW_RIGHT.create());
 
 				VerticalLayout valuesLayout = new VerticalLayout();
-				valuesLayout.setMargin(false);
+				valuesLayout.setPadding(false);
 
-				Label valuesLabel = new Label(I18nProperties.getCaption(Captions.confirmChangesValue));
-				valuesLabel.addStyleName(CssStyles.LABEL_SECONDARY);
-				valuesLayout.addComponent(valuesLabel);
+				Span valuesLabel = new Span(I18nProperties.getCaption(Captions.confirmChangesValue));
+				valuesLabel.addClassName(CssStyles.LABEL_SECONDARY);
+				valuesLayout.add(valuesLabel);
 
-				valuesLayout.addComponent(new Label(CaseOutcome.DECEASED.toString()));
-				valuesLayout.addComponent(new Label(DateFormatHelper.formatDate(editedPerson.getDeathDate())));
+				valuesLayout.add(new Span(CaseOutcome.DECEASED.toString()));
+				valuesLayout.add(new Span(DateFormatHelper.formatDate(editedPerson.getDeathDate())));
 
-				changesLayout.addComponent(fieldsLayout);
-				changesLayout.addComponent(arrowsLayout);
-				changesLayout.addComponent(valuesLayout);
-				warningLayout.addComponent(changesLayout);
+				changesLayout.add(fieldsLayout);
+				changesLayout.add(arrowsLayout);
+				changesLayout.add(valuesLayout);
+				warningLayout.add(changesLayout);
 
 				// actions
 				warningComponent.addCommitListener(() -> {
@@ -590,8 +595,8 @@ public class PersonController {
 				warningComponent.addDiscardListener(() -> popupWindow.close());
 
 				// popup configuration
-				popupWindow.addCloseListener(e -> popupWindow.close());
-				popupWindow.setWidth(600, Sizeable.Unit.PIXELS);
+				VaadinUiUtil.addCloseListener(popupWindow, e -> popupWindow.close());
+				popupWindow.setWidth("600px");
 
 				return;
 			}
@@ -612,9 +617,7 @@ public class PersonController {
 				String.format(I18nProperties.getString(Strings.messagePersonSavedClassificationChanged), newClassification.toString());
 			String notificationMessage = String.format("%s.%s", personSavedMessage, synchronizationMessage);
 			if (responseDto == null || (responseDto.isSuccess() && responseDto.getErrors().isEmpty())) {
-				Notification notification = new Notification(notificationMessage, Type.WARNING_MESSAGE);
-				notification.setDelayMsec(-1);
-				notification.show(Page.getCurrent());
+				NotificationHelper.showNotification(notificationMessage, Type.WARNING_MESSAGE, -1);
 			} else {
 				VaadinUiUtil.showWarningPopup(notificationMessage);
 			}
@@ -622,7 +625,7 @@ public class PersonController {
 			String personSavedMessage = I18nProperties.getString(Strings.messagePersonSaved);
 			String notificationMessage = String.format("%s.%s", personSavedMessage, synchronizationMessage);
 			if (responseDto == null || (responseDto.isSuccess() && responseDto.getErrors().isEmpty())) {
-				Notification.show(notificationMessage, Type.WARNING_MESSAGE);
+				NotificationHelper.show(notificationMessage, Type.WARNING_MESSAGE);
 			} else {
 				VaadinUiUtil.showWarningPopup(notificationMessage);
 			}
@@ -680,11 +683,11 @@ public class PersonController {
 		SormasUI.get().getNavigator().navigateTo(navigationState);
 	}
 
-	public void validateBirthDate(Integer year, Integer month, Integer day) throws Validator.InvalidValueException {
+	public void validateBirthDate(Integer year, Integer month, Integer day) throws Field.InvalidValueException {
 		try {
 			PersonHelper.validateBirthDate(year, month, day);
 		} catch (ValidationRuntimeException ex) {
-			throw new Validator.InvalidValueException(ex.getMessage());
+			throw new Field.InvalidValueException(ex.getMessage());
 		}
 	}
 }

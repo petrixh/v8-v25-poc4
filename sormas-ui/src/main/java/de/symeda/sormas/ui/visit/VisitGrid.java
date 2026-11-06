@@ -20,8 +20,7 @@ package de.symeda.sormas.ui.visit;
 import java.util.Date;
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Label;
-import com.vaadin.ui.renderers.DateRenderer;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.VisitOrigin;
@@ -36,6 +35,8 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.BooleanRenderer;
 import de.symeda.sormas.ui.utils.FieldAccessColumnStyleGenerator;
 import de.symeda.sormas.ui.utils.FilteredGrid;
+import de.symeda.sormas.ui.utils.GridExportStreamResource;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 @SuppressWarnings("serial")
 public class VisitGrid extends FilteredGrid<VisitIndexDto, VisitCriteria> {
@@ -63,17 +64,10 @@ public class VisitGrid extends FilteredGrid<VisitIndexDto, VisitCriteria> {
 		}
 
 		removeColumn(VisitIndexDto.ORIGIN);
-		addComponentColumn(visitIndexDto -> {
-			VisitOrigin origin = visitIndexDto.getOrigin();
-
-			String displayText = origin.toString();
-
-			if (origin == VisitOrigin.USER && visitIndexDto.getVisitUser() != null) {
-				displayText += " " + visitIndexDto.getVisitUser().getShortCaption();
-			}
-
-			return new Label(displayText);
-		}).setId(VisitIndexDto.ORIGIN);
+		Column<VisitIndexDto, Span> originColumn =
+			addComponentColumn(visitIndexDto -> new Span(buildOriginCaption(visitIndexDto))).setKey(VisitIndexDto.ORIGIN);
+		// Vaadin 8 exported the label's text
+		GridExportStreamResource.setExportValueProvider(originColumn, VisitGrid::buildOriginCaption);
 
 		setColumns(
 			ACTION_BTN_ID,
@@ -89,8 +83,8 @@ public class VisitGrid extends FilteredGrid<VisitIndexDto, VisitCriteria> {
 			.setRenderer(new DateRenderer(DateHelper.getLocalDateTimeFormat(I18nProperties.getUserLanguage())));
 		((Column<VisitIndexDto, String>) getColumn(VisitIndexDto.SYMPTOMATIC)).setRenderer(new BooleanRenderer());
 
-		for (Column<VisitIndexDto, ?> column : getColumns()) {
-			final String columnId = column.getId();
+		for (Column<VisitIndexDto, ?> column : getAllColumns()) {
+			final String columnId = column.getKey();
 			final String i18nPrefix = columnId.equals(VisitIndexDto.SYMPTOMATIC) || columnId.equals(VisitIndexDto.TEMPERATURE)
 				? SymptomsDto.I18N_PREFIX
 				: VisitIndexDto.I18N_PREFIX;
@@ -99,13 +93,25 @@ public class VisitGrid extends FilteredGrid<VisitIndexDto, VisitCriteria> {
 		}
 	}
 
+	private static String buildOriginCaption(VisitIndexDto visitIndexDto) {
+		VisitOrigin origin = visitIndexDto.getOrigin();
+
+		String displayText = origin.toString();
+
+		if (origin == VisitOrigin.USER && visitIndexDto.getVisitUser() != null) {
+			displayText += " " + visitIndexDto.getVisitUser().getShortCaption();
+		}
+
+		return displayText;
+	}
+
 	public void setEagerDataProvider() {
 
 		setDataProvider(FacadeProvider.getVisitFacade().getIndexList(getCriteria(), null, null, null).stream());
 	}
 
 	public void reload() {
-		if (getSelectionModel().isUserSelectionAllowed()) {
+		if (isUserSelectionAllowed()) {
 			deselectAll();
 		}
 

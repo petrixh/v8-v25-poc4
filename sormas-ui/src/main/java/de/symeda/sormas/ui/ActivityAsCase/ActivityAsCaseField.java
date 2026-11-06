@@ -25,11 +25,9 @@ import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.ui.Window;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.shared.ui.label.ContentMode;
-import com.vaadin.v7.ui.Label;
-import com.vaadin.v7.ui.Table;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.activityascase.ActivityAsCaseDto;
@@ -48,6 +46,7 @@ import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.caze.AbstractTableField;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.FieldAccessCellStyleGenerator;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
@@ -101,7 +100,7 @@ public class ActivityAsCaseField extends AbstractTableField<ActivityAsCaseDto> {
 					? activityAsCaseDto.getActivityAsCaseTypeDetails()
 					: ActivityAsCaseType.OTHER.toString();
 
-			return new Label(activityAsCaseString, ContentMode.HTML);
+			return VaadinUiUtil.createLabel(activityAsCaseString, ContentMode.HTML);
 		});
 
 		table.addGeneratedColumn(COLUMN_TYPE_OF_PLACE, (Table.ColumnGenerator) (source, itemId, columnId) -> {
@@ -125,9 +124,9 @@ public class ActivityAsCaseField extends AbstractTableField<ActivityAsCaseDto> {
 		table.addGeneratedColumn(COLUMN_DESCRIPTION, (Table.ColumnGenerator) (source, itemId, columnId) -> {
 			ActivityAsCaseDto activityAsCase = (ActivityAsCaseDto) itemId;
 
-			Label descriptionLabel = new Label(StringUtils.abbreviate(activityAsCase.getDescription(), 75));
+			Span descriptionLabel = new Span(StringUtils.abbreviate(activityAsCase.getDescription(), 75));
 			if (StringUtils.isNotBlank(activityAsCase.getDescription())) {
-				descriptionLabel.setDescription(activityAsCase.getDescription());
+				descriptionLabel.setTitle(activityAsCase.getDescription());
 			}
 
 			return descriptionLabel;
@@ -169,9 +168,9 @@ public class ActivityAsCaseField extends AbstractTableField<ActivityAsCaseDto> {
 			activityAsCaseForm,
 			UiUtil.permitted(isEditAllowed, UserRight.CASE_EDIT),
 			activityAsCaseForm.getFieldGroup());
-		component.getCommitButton().setCaption(I18nProperties.getString(Strings.done));
+		component.getCommitButton().setText(I18nProperties.getString(Strings.done));
 
-		Window popupWindow = VaadinUiUtil.showModalPopupWindow(component, I18nProperties.getString(Strings.entityActivityAsCase));
+		Dialog popupWindow = VaadinUiUtil.showModalPopupWindow(component, I18nProperties.getString(Strings.entityActivityAsCase));
 		popupWindow.setHeight(90, Unit.PERCENTAGE);
 
 		if (isEditAllowed) {
@@ -206,8 +205,11 @@ public class ActivityAsCaseField extends AbstractTableField<ActivityAsCaseDto> {
 	}
 
 	@Override
-	public void setPropertyDataSource(Property newDataSource) {
-		super.setPropertyDataSource(newDataSource);
+	public void setValue(Collection newDataSource) {
+		super.setValue(newDataSource);
+		// Vaadin 7 field group code called getPropertyDataSource() (below) when it bound and read the field; Flow does not,
+		// so the add button rule is applied when the value is read
+		getAddButton().setVisible(!isPseudonymized && isEditAllowed);
 	}
 
 	public void setPseudonymized(boolean isPseudonymized) {
@@ -215,7 +217,7 @@ public class ActivityAsCaseField extends AbstractTableField<ActivityAsCaseDto> {
 	}
 
 	@Override
-	public Property<Collection<ActivityAsCaseDto>> getPropertyDataSource() {
+	public Collection<ActivityAsCaseDto> getPropertyDataSource() {
 		getAddButton().setVisible(!isPseudonymized && isEditAllowed);
 		return super.getPropertyDataSource();
 	}

@@ -15,9 +15,9 @@
 
 package de.symeda.sormas.ui.person;
 
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.person.PersonDto;
 import de.symeda.sormas.api.person.SimilarPersonDto;
@@ -32,7 +32,8 @@ public class PersonSearchField extends PersonSelectionField {
 	protected Component initContent() {
 		mainLayout = new VerticalLayout();
 		mainLayout.setSpacing(true);
-		mainLayout.setMargin(new MarginInfo(false, false, true, false));
+		// was MarginInfo(false, false, true, false), a bottom margin only (look, ignored at this stage)
+		mainLayout.setPadding(false);
 		mainLayout.setSizeUndefined();
 		mainLayout.setWidth(100, Unit.PERCENTAGE);
 
@@ -40,14 +41,14 @@ public class PersonSearchField extends PersonSelectionField {
 		addFilterForm();
 		filterForm.setVisible(true);
 		setValue(null);
-		mainLayout.addComponent(personGrid);
+		mainLayout.add(personGrid);
 
 		return mainLayout;
 	}
 
 	@Override
-	protected void doSetValue(SimilarPersonDto newValue) {
-		personGrid.select(newValue);
+	protected void setPresentationValue(SimilarPersonDto newValue) {
+		PersonSelectionField.selectInGrid(personGrid, newValue);
 	}
 
 	@Override
@@ -55,8 +56,11 @@ public class PersonSearchField extends PersonSelectionField {
 		personGrid = new PersonSelectionGrid();
 
 		personGrid.addSelectionListener(e -> {
+			// the field value is the grid selection (Vaadin 8: getValue() read the grid)
+			updateValue();
+
 			if (selectionChangeCallback != null) {
-				selectionChangeCallback.accept(!e.getSelected().isEmpty());
+				selectionChangeCallback.accept(!e.getAllSelectedItems().isEmpty());
 			}
 		});
 	}

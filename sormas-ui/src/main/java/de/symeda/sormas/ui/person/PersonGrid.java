@@ -2,8 +2,6 @@ package de.symeda.sormas.ui.person;
 
 import java.util.List;
 
-import com.vaadin.ui.renderers.TextRenderer;
-
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.AgeAndBirthDateDto;
 import de.symeda.sormas.api.feature.FeatureType;
@@ -20,6 +18,7 @@ import de.symeda.sormas.ui.utils.FieldAccessColumnStyleGenerator;
 import de.symeda.sormas.ui.utils.FilteredGrid;
 import de.symeda.sormas.ui.utils.ShowDetailsListener;
 import de.symeda.sormas.ui.utils.UuidRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
 public class PersonGrid extends FilteredGrid<PersonIndexDto, PersonCriteria> {
 
@@ -71,15 +70,15 @@ public class PersonGrid extends FilteredGrid<PersonIndexDto, PersonCriteria> {
 					value.getDateOfBirthYYYY()),
 			new TextRenderer());
 
-		for (Column<PersonIndexDto, ?> column : getColumns()) {
+		for (Column<PersonIndexDto, ?> column : getAllColumns()) {
 			column.setCaption(
 				I18nProperties.findPrefixCaptionWithDefault(
-					column.getId(),
+					column.getKey(),
 					column.getCaption(),
 					PersonIndexDto.I18N_PREFIX,
 					PersonDto.I18N_PREFIX,
 					LocationDto.I18N_PREFIX));
-			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getId()));
+			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getKey()));
 		}
 
 		if (UiUtil.enabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {
@@ -97,7 +96,8 @@ public class PersonGrid extends FilteredGrid<PersonIndexDto, PersonCriteria> {
 
 	public void setFixDataProvider(List<PersonIndexDto> list) {
 
-		setDataProvider(query -> list.stream(), query -> list.size());
+		// Flow checks that the fetch honours offset and limit
+		setDataProvider(query -> list.stream().skip(query.getOffset()).limit(query.getLimit()), query -> list.size());
 	}
 
 	protected void setBulkEditMode(boolean bulkEditMode) {
@@ -111,7 +111,7 @@ public class PersonGrid extends FilteredGrid<PersonIndexDto, PersonCriteria> {
 
 	public void reload() {
 
-		if (getSelectionModel().isUserSelectionAllowed()) {
+		if (isUserSelectionAllowed()) {
 			deselectAll();
 		}
 

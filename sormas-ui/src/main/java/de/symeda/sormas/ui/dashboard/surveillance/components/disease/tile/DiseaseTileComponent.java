@@ -17,11 +17,11 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.dashboard.surveillance.components.disease.tile;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Disease;
@@ -29,7 +29,10 @@ import de.symeda.sormas.api.disease.DiseaseBurdenDto;
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class DiseaseTileComponent extends VerticalLayout {
 
@@ -67,15 +70,17 @@ public class DiseaseTileComponent extends VerticalLayout {
 		nameLayout.setWidth(100, Unit.PERCENTAGE);
 		nameLayout.setHeight(100, Unit.PERCENTAGE);
 		Span nameLabel = new Span(disease.toShortString());
-		nameLabel.addClassNames(
+		CssStyles.style(
+			nameLabel,
 			CssStyles.LABEL_WHITE,
-			nameLabel.getValue().length() > 12 ? CssStyles.LABEL_LARGE : CssStyles.LABEL_XLARGE,
+			nameLabel.getText().length() > 12 ? CssStyles.LABEL_LARGE : CssStyles.LABEL_XLARGE,
 			CssStyles.LABEL_BOLD,
 			CssStyles.ALIGN_CENTER,
 			CssStyles.LABEL_UPPERCASE);
-		nameLayout.addComponent(nameLabel);
-		nameLayout.setComponentAlignment(nameLabel, Alignment.MIDDLE_CENTER);
-		nameAndOutbreakLayout.addComponent(nameLayout);
+		nameLayout.add(nameLabel);
+		nameLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+		nameLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, nameLabel);
+		nameAndOutbreakLayout.add(nameLayout);
 		nameAndOutbreakLayout.setFlexGrow(1, nameLayout);
 
 		if (isOutbreak) {
@@ -86,65 +91,68 @@ public class DiseaseTileComponent extends VerticalLayout {
 			outbreakLayout.setWidth(100, Unit.PERCENTAGE);
 			outbreakLayout.setHeight(30, Unit.PIXELS);
 			Span outbreakLabel = new Span(I18nProperties.getCaption(Captions.dashboardOutbreak));
-			outbreakLabel.addClassNames(CssStyles.LABEL_WHITE, CssStyles.ALIGN_CENTER, CssStyles.LABEL_UPPERCASE);
-			outbreakLayout.addComponent(outbreakLabel);
-			outbreakLayout.setComponentAlignment(outbreakLabel, Alignment.MIDDLE_CENTER);
-			nameAndOutbreakLayout.addComponent(outbreakLayout);
+			CssStyles.style(outbreakLabel, CssStyles.LABEL_WHITE, CssStyles.ALIGN_CENTER, CssStyles.LABEL_UPPERCASE);
+			outbreakLayout.add(outbreakLabel);
+			outbreakLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+			outbreakLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, outbreakLabel);
+			nameAndOutbreakLayout.add(outbreakLayout);
 		}
 
-		layout.addComponent(nameAndOutbreakLayout);
+		layout.add(nameAndOutbreakLayout);
 		layout.setFlexGrow(1, nameAndOutbreakLayout);
 
 		VerticalLayout countLayout = new VerticalLayout();
 		countLayout.setPadding(false);
 		countLayout.setSpacing(false);
-		countLayout.addClassNames(CssStyles.getDiseaseColor(disease), CssStyles.BACKGROUND_DARKER);
+		CssStyles.style(countLayout, CssStyles.getDiseaseColor(disease), CssStyles.BACKGROUND_DARKER);
 		countLayout.setHeight(100, Unit.PERCENTAGE);
 		countLayout.setWidth(100, Unit.PERCENTAGE);
 
 		Span countLabel = new Span(casesCount.toString());
-		countLabel
-			.addClassNames(CssStyles.LABEL_WHITE, CssStyles.LABEL_BOLD, CssStyles.LABEL_XXXLARGE, CssStyles.ALIGN_CENTER, CssStyles.VSPACE_TOP_4);
-		countLayout.addComponent(countLabel);
-		countLayout.setComponentAlignment(countLabel, Alignment.BOTTOM_CENTER);
+		CssStyles.style(countLabel, CssStyles.LABEL_WHITE, CssStyles.LABEL_BOLD, CssStyles.LABEL_XXXLARGE, CssStyles.ALIGN_CENTER, CssStyles.VSPACE_TOP_4);
+		countLayout.add(countLabel);
+		// was BOTTOM_CENTER in its slot
+		countLayout.setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, countLabel);
 
 		HorizontalLayout comparisonLayout = new HorizontalLayout();
 		{
 			comparisonLayout.setPadding(false);
 			comparisonLayout.setSpacing(false);
 
-			Span growthLabel = new Span("", ContentMode.HTML);
+			Span growthLabel = VaadinUiUtil.createLabel("", ContentMode.HTML);
 			String chevronType;
 			if (previousCasesCount < casesCount) {
-				chevronType = VaadinIcon.CHEVRON_UP.getHtml();
+				chevronType = HtmlRenderer.iconHtml(VaadinIcon.CHEVRON_UP);
 			} else if (previousCasesCount > casesCount) {
-				chevronType = VaadinIcon.CHEVRON_DOWN.getHtml();
+				chevronType = HtmlRenderer.iconHtml(VaadinIcon.CHEVRON_DOWN);
 			} else {
-				chevronType = VaadinIcon.CHEVRON_RIGHT.getHtml();
+				chevronType = HtmlRenderer.iconHtml(VaadinIcon.CHEVRON_RIGHT);
 			}
-			growthLabel.setValue(
+			VaadinUiUtil.setLabelValue(
+				growthLabel,
 				"<div class=\"v-label v-widget " + CssStyles.LABEL_WHITE + " v-label-" + CssStyles.LABEL_WHITE
 					+ " align-center v-label-align-center bold v-label-bold v-has-width\" " + "	  style=\"margin-top: 3px;\">"
-					+ "		<span class=\"v-icon\" style=\"font-family: VaadinIcons;\">" + chevronType + "		</span>" + "</div>");
+					+ "		<span class=\"v-icon\" style=\"font-family: VaadinIcons;\">" + chevronType + "		</span>" + "</div>",
+				ContentMode.HTML);
 
-			comparisonLayout.addComponent(growthLabel);
+			comparisonLayout.add(growthLabel);
 
 			Span previousCountLabel = new Span(previousCasesCount.toString());
-			previousCountLabel.addClassNames(CssStyles.LABEL_WHITE, CssStyles.LABEL_BOLD, CssStyles.LABEL_XLARGE, CssStyles.HSPACE_LEFT_4);
-			comparisonLayout.addComponent(previousCountLabel);
-			comparisonLayout.setComponentAlignment(growthLabel, Alignment.MIDDLE_CENTER);
-			comparisonLayout.setComponentAlignment(previousCountLabel, Alignment.MIDDLE_CENTER);
+			CssStyles.style(previousCountLabel, CssStyles.LABEL_WHITE, CssStyles.LABEL_BOLD, CssStyles.LABEL_XLARGE, CssStyles.HSPACE_LEFT_4);
+			comparisonLayout.add(previousCountLabel);
+			comparisonLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, growthLabel);
+			comparisonLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, previousCountLabel);
 		}
-		countLayout.addComponent(comparisonLayout);
-		countLayout.setComponentAlignment(comparisonLayout, Alignment.MIDDLE_CENTER);
+		countLayout.add(comparisonLayout);
+		countLayout.setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, comparisonLayout);
 
 		countLayout.setFlexGrow(0.4f, countLabel);
 		countLayout.setFlexGrow(0.6f, comparisonLayout);
 
-		layout.addComponent(countLayout);
+		layout.add(countLayout);
 		layout.setFlexGrow(0.65f, countLayout);
 
-		addComponent(layout);
+		add(layout);
 	}
 
 	private void addStatsLayout(Long fatalities, Long events, String district) {
@@ -159,12 +167,12 @@ public class DiseaseTileComponent extends VerticalLayout {
 				.singleColumn(true)
 				.build();
 		lastReportItem.addClassName(CssStyles.VSPACE_TOP_4);
-		layout.addComponent(lastReportItem);
-		layout.addComponent(new StatsItem.Builder(Captions.dashboardFatalities, fatalities).critical(fatalities > 0).build());
+		layout.add(lastReportItem);
+		layout.add(new StatsItem.Builder(Captions.dashboardFatalities, fatalities).critical(fatalities > 0).build());
 		StatsItem noOfEventsItem = new StatsItem.Builder(Captions.DiseaseBurden_eventCount, events).build();
 		noOfEventsItem.addClassName(CssStyles.VSPACE_4);
-		layout.addComponent(noOfEventsItem);
+		layout.add(noOfEventsItem);
 
-		addComponent(layout);
+		add(layout);
 	}
 }

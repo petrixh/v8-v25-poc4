@@ -24,12 +24,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Disease;
@@ -41,6 +40,7 @@ import de.symeda.sormas.api.infrastructure.region.RegionReferenceDto;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.dashboard.DashboardDataProvider;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
@@ -83,8 +83,8 @@ public class DashboardNetworkComponent extends VerticalLayout {
 		this.setPadding(true);
 
 		// Add components
-		addComponent(createHeader());
-		addComponent(networkDiagram);
+		add(createHeader());
+		add(networkDiagram);
 //		addComponent(createFooter());
 		setFlexGrow(1, networkDiagram);
 		networkDiagram.setVisible(false);
@@ -114,7 +114,7 @@ public class DashboardNetworkComponent extends VerticalLayout {
 			} else {
 				VaadinUiUtil.showConfirmationPopup(
 					I18nProperties.getString(Strings.headingNetworkDiagramTooManyContacts),
-					new Span(
+					VaadinUiUtil.createLabel(
 						String.format(
 							"%s<br/><br/>%s",
 							String.format(I18nProperties.getString(Strings.warningNetworkDiagramTooManyContacts), contactCount),
@@ -148,14 +148,14 @@ public class DashboardNetworkComponent extends VerticalLayout {
 		CssStyles.style(mapHeaderLayout, CssStyles.VSPACE_4);
 
 //		{
-//			Span diagramLabel = new Span();
+//			Label diagramLabel = new Label();
 //			diagramLabel.setValue(I18nProperties.getString(Strings.headingContactMap));
 //			diagramLabel.setSizeUndefined();
 //			CssStyles.style(diagramLabel, CssStyles.H2, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_NONE);
 //	
 //			mapHeaderLayout.addComponent(diagramLabel);
 //			mapHeaderLayout.setComponentAlignment(diagramLabel, Alignment.BOTTOM_LEFT);
-//			mapHeaderLayout.setFlexGrow(1, diagramLabel);
+//			mapHeaderLayout.setExpandRatio(diagramLabel, 1);
 //		}
 		expandMapButton = ButtonHelper.createIconButtonWithCaption(
 			Strings.infoDisplayNetworkDiagram,
@@ -167,8 +167,8 @@ public class DashboardNetworkComponent extends VerticalLayout {
 		collapseMapButton = ButtonHelper
 			.createIconButtonWithCaption("", "", VaadinIcon.COMPRESS, e -> expandMap(false), CssStyles.BUTTON_SUBTLE, CssStyles.VSPACE_NONE);
 
-		mapHeaderLayout.addComponent(expandMapButton);
-		mapHeaderLayout.setComponentAlignment(expandMapButton, Alignment.MIDDLE_RIGHT);
+		mapHeaderLayout.add(expandMapButton);
+		mapHeaderLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, expandMapButton);
 
 		return mapHeaderLayout;
 	}
@@ -177,14 +177,14 @@ public class DashboardNetworkComponent extends VerticalLayout {
 		externalExpandListener.accept(expand);
 		if (expand) {
 			mapHeaderLayout.remove(expandMapButton);
-			mapHeaderLayout.addComponent(collapseMapButton);
-			mapHeaderLayout.setComponentAlignment(collapseMapButton, Alignment.MIDDLE_RIGHT);
+			mapHeaderLayout.add(collapseMapButton);
+			mapHeaderLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, collapseMapButton);
 			networkDiagram.setVisible(true);
 			updateDiagram();
 		} else {
 			mapHeaderLayout.remove(collapseMapButton);
-			mapHeaderLayout.addComponent(expandMapButton);
-			mapHeaderLayout.setComponentAlignment(expandMapButton, Alignment.MIDDLE_RIGHT);
+			mapHeaderLayout.add(expandMapButton);
+			mapHeaderLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, expandMapButton);
 			networkDiagram.setVisible(false);
 		}
 	}

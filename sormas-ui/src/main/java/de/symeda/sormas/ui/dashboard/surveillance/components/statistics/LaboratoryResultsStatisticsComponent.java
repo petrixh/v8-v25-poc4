@@ -2,10 +2,9 @@ package de.symeda.sormas.ui.dashboard.surveillance.components.statistics;
 
 import java.util.Map;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.Descriptions;
@@ -41,19 +40,19 @@ public class LaboratoryResultsStatisticsComponent extends DiseaseSectionStatisti
 		HorizontalLayout titleLayout = new HorizontalLayout();
 		titleLayout.setPadding(false);
 		titleLayout.setSpacing(false);
-		addComponent(titleLayout);
+		add(titleLayout);
 
 		if (subtitleCaption != null) {
 			Span subTitleLabel = new Span(I18nProperties.getCaption(subtitleCaption));
 			CssStyles.style(subTitleLabel, CssStyles.H3, CssStyles.VSPACE_TOP_5);
-			titleLayout.addComponent(subTitleLabel);
+			titleLayout.add(subTitleLabel);
 		}
 		if (description != null) {
-			Span infoIcon = new Span(VaadinIcon.INFO_CIRCLE.getHtml(), ContentMode.HTML);
-			infoIcon.setDescription(I18nProperties.getDescription(Descriptions.sampleDashboardHumans));
+			Span infoIcon = new Span(VaadinIcon.INFO_CIRCLE.create());
+			infoIcon.setTitle(I18nProperties.getDescription(Descriptions.sampleDashboardHumans));
 			infoIcon.addClassName(CssStyles.HSPACE_LEFT_4);
 			infoIcon.addClassNames(CssStyles.H3);
-			titleLayout.addComponent(infoIcon);
+			titleLayout.add(infoIcon);
 		}
 
 		// Count layout
@@ -123,15 +122,15 @@ public class LaboratoryResultsStatisticsComponent extends DiseaseSectionStatisti
 		DashboardHeadingComponent dashboardHeadingComponent = this.getHeading();
 		Span titleLabel = dashboardHeadingComponent.getTitleLabel();
 
-		titleLabel.removeClassNames(dashboardHeadingComponent.getTitleStyleNames());
-		titleLabel.addClassNames(styleNames);
+		CssStyles.removeStyles(titleLabel, dashboardHeadingComponent.getTitleStyleNames());
+		CssStyles.style(titleLabel, styleNames);
 	}
 
 	public void setTitleStyleNamesOnTotalLabel(String... styleNames) {
 		DashboardHeadingComponent dashboardHeadingComponent = this.getHeading();
 		Span totalLabel = dashboardHeadingComponent.getTotalLabel();
 
-		totalLabel.removeClassNames(dashboardHeadingComponent.getTotalLabelStyleNames());
-		totalLabel.addClassNames(styleNames);
+		CssStyles.removeStyles(totalLabel, dashboardHeadingComponent.getTotalLabelStyleNames());
+		CssStyles.style(totalLabel, styleNames);
 	}
 }

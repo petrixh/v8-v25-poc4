@@ -21,11 +21,8 @@ import static de.symeda.sormas.ui.UiUtil.permitted;
 
 import java.util.EnumSet;
 
-import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.Property;
-import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 import de.symeda.sormas.api.feature.FeatureType;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -37,8 +34,11 @@ import de.symeda.sormas.ui.dashboard.contacts.ContactsDashboardView;
 import de.symeda.sormas.ui.dashboard.gis.GisDashboardView;
 import de.symeda.sormas.ui.dashboard.sample.SampleDashboardView;
 import de.symeda.sormas.ui.dashboard.surveillance.SurveillanceDashboardView;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 import de.symeda.sormas.ui.utils.AbstractView;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 @SuppressWarnings("serial")
 public abstract class AbstractDashboardView extends AbstractView {
@@ -55,7 +55,11 @@ public abstract class AbstractDashboardView extends AbstractView {
 
 		addClassName(DashboardCssStyles.DASHBOARD_SCREEN);
 
-		CssStyles.style(dashboardSwitcher, CssStyles.FORCE_CAPTION, ValoTheme.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_HORIZONTAL_PRIMARY);
+		CssStyles.style(
+			dashboardSwitcher,
+			CssStyles.FORCE_CAPTION,
+			SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL,
+			CssStyles.OPTIONGROUP_HORIZONTAL_PRIMARY);
 		if (permitted(FeatureType.CASE_SURVEILANCE, UserRight.DASHBOARD_SURVEILLANCE_VIEW)) {
 			dashboardSwitcher.addItem(DashboardType.SURVEILLANCE);
 			dashboardSwitcher.setItemCaption(DashboardType.SURVEILLANCE, I18nProperties.getEnumCaption(DashboardType.SURVEILLANCE));
@@ -113,7 +117,7 @@ public abstract class AbstractDashboardView extends AbstractView {
 		setFlexGrow(1, dashboardLayout);
 	}
 
-	protected void navigateToDashboardView(Property.ValueChangeEvent e) {
+	protected void navigateToDashboardView(HasValue.ValueChangeEvent<?> e) {
 		if (DashboardType.SURVEILLANCE.equals(e.getValue())) {
 			SormasUI.get().getNavigator().navigateTo(SurveillanceDashboardView.VIEW_NAME);
 		} else if (DashboardType.CONTACTS.equals(e.getValue())) {

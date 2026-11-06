@@ -1,7 +1,5 @@
 package de.symeda.sormas.ui.dashboard.surveillance.components.statistics;
 
-import com.vaadin.ui.CssLayout;
-
 import de.symeda.sormas.ui.dashboard.components.DashboardHeadingComponent;
 import de.symeda.sormas.ui.dashboard.statistics.DashboardStatisticsCountElement;
 import de.symeda.sormas.ui.dashboard.statistics.DashboardStatisticsSubComponent;
@@ -12,7 +10,7 @@ public class DiseaseSectionStatisticsComponent extends DashboardStatisticsSubCom
 
 	public DiseaseSectionStatisticsComponent(String titleCaption, String infoIconText) {
 		heading = new DashboardHeadingComponent(titleCaption, infoIconText);
-		addComponent(heading);
+		add(heading);
 	}
 
 	public DiseaseSectionStatisticsComponent(String titleCaption, String description, String infoIconText) {
@@ -29,11 +27,12 @@ public class DiseaseSectionStatisticsComponent extends DashboardStatisticsSubCom
 	}
 
 	protected void buildCountLayout(DashboardStatisticsCountElement... dashboardStatisticsCountElements) {
-		CssLayout countLayout = createCountLayout(true);
+		// was CssLayout: the type follows DashboardStatisticsSubComponent.createCountLayout (1a-62)
+		var countLayout = createCountLayout(true);
 		for (DashboardStatisticsCountElement dashboardStatisticsCountElement : dashboardStatisticsCountElements) {
 			addComponentToCountLayout(countLayout, dashboardStatisticsCountElement);
 		}
-		addComponent(countLayout);
+		add(countLayout);
 	}
 
 	public DashboardHeadingComponent getHeading() {

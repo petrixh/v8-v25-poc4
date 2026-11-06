@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.Unit;
-import com.vaadin.ui.Alignment;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.disease.DiseaseBurdenDto;
@@ -32,7 +32,7 @@ public class DiseaseOverviewComponent extends HorizontalLayout {
         diseaseBurdenComponent = new DiseaseBurdenComponent();
         diseaseTileViewLayout = new DiseaseTileViewLayout();
 
-        addComponent(diseaseTileViewLayout);
+        add(diseaseTileViewLayout);
         setFlexGrow(1, diseaseTileViewLayout);
 
         // "Expand" and "Collapse" buttons
@@ -43,25 +43,25 @@ public class DiseaseOverviewComponent extends HorizontalLayout {
 
         showTableViewButton.addClickListener(e -> {
             remove(diseaseTileViewLayout);
-            addComponent(diseaseBurdenComponent);
+            add(diseaseBurdenComponent);
             setFlexGrow(1, diseaseBurdenComponent);
 
             remove(showTableViewButton);
-            addComponent(showTileViewButton);
-            setComponentAlignment(showTileViewButton, Alignment.TOP_RIGHT);
+            add(showTileViewButton);
+            setVerticalComponentAlignment(FlexComponent.Alignment.START, showTileViewButton);
         });
         showTileViewButton.addClickListener(e -> {
             remove(diseaseBurdenComponent);
-            addComponent(diseaseTileViewLayout);
+            add(diseaseTileViewLayout);
             setFlexGrow(1, diseaseTileViewLayout);
 
             remove(showTileViewButton);
-            addComponent(showTableViewButton);
-            setComponentAlignment(showTableViewButton, Alignment.TOP_RIGHT);
+            add(showTableViewButton);
+            setVerticalComponentAlignment(FlexComponent.Alignment.START, showTableViewButton);
         });
 
-        addComponent(showTableViewButton);
-        setComponentAlignment(showTableViewButton, Alignment.TOP_RIGHT);
+        add(showTableViewButton);
+        setVerticalComponentAlignment(FlexComponent.Alignment.START, showTableViewButton);
     }
 
     public void refresh(List<DiseaseBurdenDto> diseasesBurden, boolean isShowingAllDiseases) {

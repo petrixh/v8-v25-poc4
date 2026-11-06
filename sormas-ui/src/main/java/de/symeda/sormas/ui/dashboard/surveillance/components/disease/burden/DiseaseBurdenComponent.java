@@ -19,16 +19,16 @@ package de.symeda.sormas.ui.dashboard.surveillance.components.disease.burden;
 
 import java.util.List;
 
-import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import de.symeda.sormas.ui.utils.grid.HeightMode;
 
 import de.symeda.sormas.api.disease.DiseaseBurdenDto;
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.ui.dashboard.DiseaseBurdenGrid;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
 
 public class DiseaseBurdenComponent extends VerticalLayout {
 
@@ -48,9 +48,10 @@ public class DiseaseBurdenComponent extends VerticalLayout {
 		// layout
 		setWidth(100, Unit.PERCENTAGE);
 
-		addComponent(title);
-		addComponent(grid);
-		setMargin(new MarginInfo(true, true, false, true));
+		add(title);
+		add(grid);
+		// was a margin on all sides but the bottom (MarginInfo); spacing details belong to the theme work
+		setPadding(true);
 		setSpacing(false);
 		setFlexGrow(1, grid);
 	}

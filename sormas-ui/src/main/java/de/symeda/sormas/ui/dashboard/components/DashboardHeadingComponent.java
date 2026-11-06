@@ -17,10 +17,10 @@ package de.symeda.sormas.ui.dashboard.components;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.shared.Tooltip;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.ui.utils.CssStyles;
@@ -48,27 +48,28 @@ public class DashboardHeadingComponent extends HorizontalLayout {
 
 		// count
 		totalLabel = new Span();
-		totalLabel.addClassNames(totalLabelStyleNames);
-		addComponent(totalLabel);
+		CssStyles.style(totalLabel, totalLabelStyleNames);
+		add(totalLabel);
 		// title
 		titleLabel = new Span(I18nProperties.getCaption(titleCaption));
-		titleLabel.addClassNames(titleStyleNames);
-		addComponent(titleLabel);
+		CssStyles.style(titleLabel, titleStyleNames);
+		add(titleLabel);
 
 		if (StringUtils.isNotBlank(infoIconText)) {
-			infoIcon = new Span(VaadinIcon.INFO_CIRCLE.getHtml(), ContentMode.HTML);
+			infoIcon = new Span(VaadinIcon.INFO_CIRCLE.create());
 			CssStyles.style(infoIcon, CssStyles.LABEL_LARGE, CssStyles.LABEL_SECONDARY, "statistics-info-label", CssStyles.HSPACE_LEFT_4);
-			infoIcon.setDescription(infoIconText, ContentMode.HTML);
-			addComponent(infoIcon);
+			// was setDescription(infoIconText, ContentMode.HTML): the tooltip renders the HTML through Markdown
+			Tooltip.forComponent(infoIcon).setMarkdown(infoIconText);
+			add(infoIcon);
 		}
 	}
 
 	public void updateTotalLabel(String value) {
-		totalLabel.setValue(value);
+		totalLabel.setText(value);
 	}
 
 	public void setTotalLabelDescription(String description) {
-		totalLabel.setDescription(I18nProperties.getDescription(description));
+		totalLabel.setTitle(I18nProperties.getDescription(description));
 	}
 
 	public Span getTitleLabel() {

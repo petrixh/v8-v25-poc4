@@ -17,7 +17,7 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.dashboard.surveillance;
 
-import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.Unit;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.Descriptions;
@@ -26,6 +26,7 @@ import de.symeda.sormas.ui.dashboard.surveillance.components.statistics.CaseStat
 import de.symeda.sormas.ui.dashboard.surveillance.components.statistics.EventStatisticsComponent;
 import de.symeda.sormas.ui.dashboard.surveillance.components.statistics.LaboratoryResultsStatisticsComponent;
 import de.symeda.sormas.ui.dashboard.surveillance.components.statistics.summary.DiseaseSummaryComponent;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.LayoutUtil;
 
 public class DiseaseStatisticsComponent extends CustomLayout {

@@ -2,15 +2,17 @@ package de.symeda.sormas.ui.dashboard.surveillance.components.statistics.summary
 
 import java.util.List;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.dashboard.DashboardCaseDto;
 import de.symeda.sormas.api.i18n.Strings;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class FatalitiesSummaryElementComponent extends HorizontalLayout {
 
@@ -23,19 +25,21 @@ public class FatalitiesSummaryElementComponent extends HorizontalLayout {
 		setSpacing(false);
 
 		caseFatalityRateValue = new DiseaseSummaryElementComponent(Strings.headingCaseFatalityRate, "00.0%");
-		addComponent(caseFatalityRateValue);
+		add(caseFatalityRateValue);
 
-		addComponent(new DiseaseSummaryElementComponent(" ", " "));
+		add(new DiseaseSummaryElementComponent(" ", " "));
 
 		caseFatalityCountValue = new DiseaseSummaryElementComponent(Strings.headingFatalities, "0");
 
-		caseFatalityCountGrowth = new Span("", ContentMode.HTML);
+		caseFatalityCountGrowth = VaadinUiUtil.createLabel("", ContentMode.HTML);
 		CssStyles.style(caseFatalityCountGrowth, CssStyles.VSPACE_TOP_5);
-		caseFatalityCountValue.addComponent(caseFatalityCountGrowth);
+		caseFatalityCountValue.add(caseFatalityCountGrowth);
 
-		addComponent(caseFatalityCountValue);
+		add(caseFatalityCountValue);
 		setFlexGrow(1, caseFatalityCountValue);
-		setComponentAlignment(caseFatalityCountValue, Alignment.MIDDLE_RIGHT);
+		// was MIDDLE_RIGHT in a slot with expand ratio 1
+		setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, caseFatalityCountValue);
+		caseFatalityCountValue.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 	}
 
 	public void update(List<DashboardCaseDto> newCases, List<DashboardCaseDto> previousCases) {
@@ -54,19 +58,21 @@ public class FatalitiesSummaryElementComponent extends HorizontalLayout {
 		String criticalLevel;
 
 		if (fatalCasesGrowth > 0) {
-			chevronType = VaadinIcon.CHEVRON_UP.getHtml();
+			chevronType = HtmlRenderer.iconHtml(VaadinIcon.CHEVRON_UP);
 			criticalLevel = CssStyles.LABEL_CRITICAL;
 		} else if (fatalCasesGrowth < 0) {
-			chevronType = VaadinIcon.CHEVRON_DOWN.getHtml();
+			chevronType = HtmlRenderer.iconHtml(VaadinIcon.CHEVRON_DOWN);
 			criticalLevel = CssStyles.LABEL_POSITIVE;
 		} else {
-			chevronType = VaadinIcon.CHEVRON_RIGHT.getHtml();
+			chevronType = HtmlRenderer.iconHtml(VaadinIcon.CHEVRON_RIGHT);
 			criticalLevel = CssStyles.LABEL_IMPORTANT;
 		}
 
-		caseFatalityCountGrowth.setValue(
+		VaadinUiUtil.setLabelValue(
+			caseFatalityCountGrowth,
 			"<div class=\"v-label v-widget " + criticalLevel + " v-label-" + criticalLevel
 				+ " align-center v-label-align-center bold v-label-bold v-has-width\" " + "	  style=\"margin-top: 4px;margin-left: 5px;\">"
-				+ "		<span class=\"v-icon\" style=\"font-family: VaadinIcons;\">" + chevronType + "		</span>" + "</div>");
+				+ "		<span class=\"v-icon\" style=\"font-family: VaadinIcons;\">" + chevronType + "		</span>" + "</div>",
+			ContentMode.HTML);
 	}
 }

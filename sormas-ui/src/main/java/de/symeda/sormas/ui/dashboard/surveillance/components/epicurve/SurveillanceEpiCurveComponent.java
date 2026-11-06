@@ -17,14 +17,13 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.dashboard.surveillance.components.epicurve;
 
-import com.vaadin.ui.themes.ValoTheme;
-import de.symeda.sormas.ui.utils.fields.OptionGroup;
-
 import de.symeda.sormas.ui.dashboard.DashboardDataProvider;
 import de.symeda.sormas.ui.dashboard.diagram.AbstractEpiCurveComponent;
 import de.symeda.sormas.ui.dashboard.surveillance.components.epicurve.builders.SurveillanceEpiCurveBuilder;
 import de.symeda.sormas.ui.dashboard.surveillance.components.epicurve.builders.SurveillanceEpiCurveBuilders;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 public class SurveillanceEpiCurveComponent extends AbstractEpiCurveComponent<DashboardDataProvider> {
 
@@ -43,7 +42,7 @@ public class SurveillanceEpiCurveComponent extends AbstractEpiCurveComponent<Das
 		}
 
 		OptionGroup epiCurveModeOptionGroup = new OptionGroup();
-		CssStyles.style(epiCurveModeOptionGroup, ValoTheme.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_HORIZONTAL_SUBTLE);
+		CssStyles.style(epiCurveModeOptionGroup, SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_HORIZONTAL_SUBTLE);
 		epiCurveModeOptionGroup.addItems((Object[]) SurveillanceEpiCurveMode.values());
 		epiCurveModeOptionGroup.setValue(epiCurveSurveillanceMode);
 		epiCurveModeOptionGroup.select(epiCurveSurveillanceMode);

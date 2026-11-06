@@ -1,7 +1,7 @@
 package de.symeda.sormas.ui.dashboard.surveillance.components.statistics.summary;
 
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.ui.utils.CssStyles;
@@ -15,18 +15,19 @@ public class DiseaseSummaryElementComponent extends HorizontalLayout {
 		setSpacing(false);
 
 		Span headingLabel = new Span(I18nProperties.getString(heading));
-		headingLabel.addClassNames(CssStyles.LABEL_PRIMARY, CssStyles.LABEL_UPPERCASE, CssStyles.VSPACE_TOP_4);
-		addComponent(headingLabel);
+		CssStyles.style(headingLabel, CssStyles.LABEL_PRIMARY, CssStyles.LABEL_UPPERCASE, CssStyles.VSPACE_TOP_4);
+		add(headingLabel);
 
 		totalLabel = new Span();
-		totalLabel.addClassNames(
+		CssStyles.style(
+			totalLabel,
 			CssStyles.LABEL_PRIMARY,
 			CssStyles.LABEL_CAPTION_TRUNCATED,
 			CssStyles.LABEL_BOLD,
 			CssStyles.LABEL_LARGE,
 			CssStyles.HSPACE_LEFT_3,
 			CssStyles.VSPACE_TOP_5);
-		addComponent(totalLabel);
+		add(totalLabel);
 	}
 
 	public DiseaseSummaryElementComponent(String heading, String defaultValue) {
@@ -35,6 +36,6 @@ public class DiseaseSummaryElementComponent extends HorizontalLayout {
 	}
 
 	public void updateTotalLabel(String value) {
-		totalLabel.setValue(value);
+		totalLabel.setText(value);
 	}
 }

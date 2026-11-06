@@ -1,7 +1,8 @@
 package de.symeda.sormas.ui.dashboard.surveillance.components.disease.tile;
 
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.ui.utils.CssStyles;
@@ -46,19 +47,20 @@ public class StatsItem extends HorizontalLayout {
 		setSpacing(false);
 
 		Span nameLabel = new Span(I18nProperties.getCaption(builder.label));
-		nameLabel.addClassNames(CssStyles.LABEL_PRIMARY, builder.isCritical ? CssStyles.LABEL_CRITICAL : "", CssStyles.HSPACE_LEFT_3);
-		addComponent(nameLabel);
+		CssStyles.style(nameLabel, CssStyles.LABEL_PRIMARY, builder.isCritical ? CssStyles.LABEL_CRITICAL : "", CssStyles.HSPACE_LEFT_3);
+		add(nameLabel);
 		if (!builder.isSingleColumn) {
 			setFlexGrow(1, nameLabel);
 		}
 
 		Span valueLabel = new Span(builder.value);
-		valueLabel.addClassNames(
+		CssStyles.style(
+			valueLabel,
 			CssStyles.LABEL_PRIMARY,
 			CssStyles.LABEL_CAPTION_TRUNCATED,
 			builder.isCritical ? CssStyles.LABEL_CRITICAL : "",
 			builder.isSingleColumn ? CssStyles.HSPACE_LEFT_5 : CssStyles.ALIGN_CENTER);
-		addComponent(valueLabel);
+		add(valueLabel);
 		setFlexGrow(builder.isSingleColumn ? 1f : 0.65f, valueLabel);
 	}
 }

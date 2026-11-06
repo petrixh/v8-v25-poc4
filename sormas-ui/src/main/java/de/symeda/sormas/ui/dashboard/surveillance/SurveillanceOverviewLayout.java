@@ -17,14 +17,11 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.dashboard.surveillance;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
-import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import de.symeda.sormas.ui.utils.fields.CheckBox;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -33,7 +30,9 @@ import de.symeda.sormas.ui.dashboard.DashboardDataProvider;
 import de.symeda.sormas.ui.dashboard.surveillance.components.disease.DiseaseOverviewComponent;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.LayoutUtil;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
 
 @SuppressWarnings("serial")
 public class SurveillanceOverviewLayout extends CustomLayout {
@@ -79,9 +78,10 @@ public class SurveillanceOverviewLayout extends CustomLayout {
 	private void addShowMoreAndLessButtons() {
 
 		HorizontalLayout buttonsLayout = new HorizontalLayout();
-		buttonsLayout.setHeightUndefined();
+		buttonsLayout.setHeight(null);
 		buttonsLayout.setWidth(100, Unit.PERCENTAGE);
-		buttonsLayout.setMargin(new MarginInfo(false, true));
+		// was a left and right margin only (MarginInfo); spacing details belong to the theme work
+		buttonsLayout.setPadding(false);
 
 		showMoreButton = ButtonHelper.createIconButton(
 			Captions.dashboardShowAllDiseases,
@@ -131,14 +131,15 @@ public class SurveillanceOverviewLayout extends CustomLayout {
 			}
 		});
 
-		buttonsLayout.addComponent(showMoreButton);
-		buttonsLayout.addComponent(showLessButton);
-		buttonsLayout.setComponentAlignment(showMoreButton, Alignment.BOTTOM_CENTER);
+		buttonsLayout.add(showMoreButton);
+		buttonsLayout.add(showLessButton);
+		// was BOTTOM_CENTER in a slot with expand ratio 1: the growing button shows its caption centred
+		buttonsLayout.setVerticalComponentAlignment(FlexComponent.Alignment.END, showMoreButton);
 		buttonsLayout.setFlexGrow(1, showMoreButton);
-		buttonsLayout.setComponentAlignment(showLessButton, Alignment.BOTTOM_CENTER);
+		buttonsLayout.setVerticalComponentAlignment(FlexComponent.Alignment.END, showLessButton);
 		buttonsLayout.setFlexGrow(1, showLessButton);
-		buttonsLayout.addComponent(hideOverview);
-		buttonsLayout.setComponentAlignment(hideOverview, Alignment.BOTTOM_RIGHT);
+		buttonsLayout.add(hideOverview);
+		buttonsLayout.setVerticalComponentAlignment(FlexComponent.Alignment.END, hideOverview);
 		buttonsLayout.setFlexGrow(0, hideOverview);
 
 		addComponent(buttonsLayout, EXTEND_BUTTONS_LOC);

@@ -32,10 +32,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.opencsv.CSVWriter;
-import com.vaadin.server.Sizeable;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.server.StreamResource;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -107,9 +107,9 @@ public class UserSyncHandler {
 
 		userSyncCallback = progressLayout::updateProgress;
 
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 		window.setCaption(I18nProperties.getString(Strings.headingSyncUsers));
-		window.setWidth(800, Sizeable.Unit.PIXELS);
+		window.setWidth(800, Unit.PIXELS);
 		window.setContent(progressLayout);
 		window.setClosable(false);
 		currentUI.addWindow(window);

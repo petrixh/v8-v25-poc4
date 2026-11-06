@@ -15,13 +15,13 @@
 
 package de.symeda.sormas.ui.user;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.Component;
 import com.vaadin.ui.CustomField;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.Descriptions;
@@ -44,19 +44,19 @@ public class UserRoleTemplateSelectionField extends CustomField<UserRoleDto> {
 	protected Component initContent() {
 		mainLayout = new VerticalLayout();
 		mainLayout.setSpacing(true);
-		mainLayout.setMargin(false);
+		mainLayout.setPadding(false);
 		mainLayout.setSizeFull();
 		mainLayout.setWidthFull();
 
-		Label infoLabel =
-			new Label(VaadinIcons.INFO_CIRCLE.getHtml() + " " + I18nProperties.getDescription(Descriptions.userRoleTemplate), ContentMode.HTML);
-		mainLayout.addComponent(infoLabel);
+		Span infoLabel =
+			new Span(VaadinIcon.INFO_CIRCLE.getHtml() + " " + I18nProperties.getDescription(Descriptions.userRoleTemplate), ContentMode.HTML);
+		mainLayout.add(infoLabel);
 
 		templateRoleCombo = new ComboBox();
 		templateRoleCombo.setWidth(300, Unit.PIXELS);
 		UserRoleFormHelper.setTemplateRoleItems(templateRoleCombo);
 		templateRoleCombo.setCaption(I18nProperties.getCaption(Captions.userrole_applyUserRoleTemplate));
-		mainLayout.addComponent(templateRoleCombo);
+		mainLayout.add(templateRoleCombo);
 
 		return mainLayout;
 	}

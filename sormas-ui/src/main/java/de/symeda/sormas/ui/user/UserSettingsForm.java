@@ -2,11 +2,11 @@ package de.symeda.sormas.ui.user;
 
 import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.v7.data.validator.EmailValidator;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.AuthProvider;
 import de.symeda.sormas.api.FacadeProvider;
@@ -53,8 +53,8 @@ public class UserSettingsForm extends AbstractEditForm<UserDto> {
 		tfUuid.setReadOnly(true);
 		tfUuid.setCaption(I18nProperties.getCaption(Captions.userMyUserId));
 
-		Label crowdinInfoLabel = new Label(I18nProperties.getString(Strings.infoCrowdinLocalization), ContentMode.HTML);
-		crowdinInfoLabel.setWidth(100, Unit.PERCENTAGE);
+		Span crowdinInfoLabel = new Span(I18nProperties.getString(Strings.infoCrowdinLocalization), ContentMode.HTML);
+		crowdinInfoLabel.setWidthFull();
 		CssStyles.style(crowdinInfoLabel, CssStyles.VSPACE_TOP_3, CssStyles.VSPACE_3);
 		getContent().addComponent(crowdinInfoLabel, CROWDIN_INFO_LOC);
 	}

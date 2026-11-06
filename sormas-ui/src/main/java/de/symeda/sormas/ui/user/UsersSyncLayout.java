@@ -15,11 +15,10 @@
 
 package de.symeda.sormas.ui.user;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -48,23 +47,23 @@ public class UsersSyncLayout extends AbstractImportLayout {
 
 	protected void addSyncUsersComponent(int step, Button.ClickListener clickListener) {
 
-		Label headlineLabel =
-			new Label(I18nProperties.getString(Strings.step) + " " + step + ": " + I18nProperties.getString(Strings.headingSyncUsers));
+		Span headlineLabel =
+			new Span(I18nProperties.getString(Strings.step) + " " + step + ": " + I18nProperties.getString(Strings.headingSyncUsers));
 		CssStyles.style(headlineLabel, CssStyles.H3);
-		addComponent(headlineLabel);
+		add(headlineLabel);
 
-		Label infoTextLabel = new Label(I18nProperties.getString(Strings.infoSyncUsers), ContentMode.HTML);
-		addComponent(infoTextLabel);
+		Span infoTextLabel = new Span(I18nProperties.getString(Strings.infoSyncUsers), ContentMode.HTML);
+		add(infoTextLabel);
 
 		Button button = ButtonHelper.createIconButtonWithCaption(
 			"import-step-" + step,
 			Captions.sync,
-			VaadinIcons.REFRESH,
+			VaadinIcon.REFRESH,
 			clickListener,
-			ValoTheme.BUTTON_PRIMARY,
+			CssStyles.BUTTON_PRIMARY,
 			CssStyles.VSPACE_TOP_3);
 
-		addComponent(button);
+		add(button);
 	}
 
 }

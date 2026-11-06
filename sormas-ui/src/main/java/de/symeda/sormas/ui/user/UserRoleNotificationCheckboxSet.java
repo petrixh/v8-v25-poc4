@@ -28,14 +28,13 @@ import java.util.stream.Stream;
 
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.CustomField;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -88,39 +87,39 @@ public class UserRoleNotificationCheckboxSet extends CustomField<UserRoleDto.Not
 		for (NotificationTypeGroup group : NotificationTypeGroup.values()) {
 			List<CheckboxRow> groupRows = createGroupRows(group);
 
-			layout.addComponent(createGroupHeader(group, groupRows));
-			layout.addComponents(groupRows.toArray(new Component[] {}));
+			layout.add(createGroupHeader(group, groupRows));
+			layout.add(groupRows.toArray(new Component[] {}));
 
 			rows.addAll(groupRows);
 		}
 	}
 
 	private HorizontalLayout createGroupHeader(NotificationTypeGroup group, List<CheckboxRow> rows) {
-		Label groupLabel = new Label(group.toString());
-		groupLabel.addStyleName(CssStyles.H3);
+		Span groupLabel = new Span(group.toString());
+		groupLabel.addClassName(CssStyles.H3);
 
-		Label tickForAllLAbel = new Label(I18nProperties.getString(Strings.checkboxSetTickAnAnswerForAll));
-		tickForAllLAbel.addStyleName(CssStyles.LABEL_ITALIC);
+		Span tickForAllLAbel = new Span(I18nProperties.getString(Strings.checkboxSetTickAnAnswerForAll));
+		tickForAllLAbel.addClassName(CssStyles.LABEL_ITALIC);
 
 		Button tickAllButton = ButtonHelper.createButton(
 			I18nProperties.getCaption(Captions.all),
 			(e) -> rows.forEach(CheckboxRow::checkAll),
-			ValoTheme.BUTTON_LINK,
+			CssStyles.BUTTON_LINK,
 			CssStyles.BUTTON_COMPACT);
 		Button tickSmsButton = ButtonHelper.createButton(
 			I18nProperties.getCaption(Captions.userRoleNotificationTypeSms),
 			(e) -> rows.forEach(CheckboxRow::checkAllSms),
-			ValoTheme.BUTTON_LINK,
+			CssStyles.BUTTON_LINK,
 			CssStyles.BUTTON_COMPACT);
 		Button tickEmailButton = ButtonHelper.createButton(
 			I18nProperties.getCaption(Captions.userRoleNotificationTypeEmail),
 			(e) -> rows.forEach(CheckboxRow::checkAllEmail),
-			ValoTheme.BUTTON_LINK,
+			CssStyles.BUTTON_LINK,
 			CssStyles.BUTTON_COMPACT);
 
 		HorizontalLayout buttonsLayout = new HorizontalLayout(tickForAllLAbel, tickAllButton, tickSmsButton, tickEmailButton);
 		buttonsLayout.setWidthFull();
-		buttonsLayout.setExpandRatio(tickForAllLAbel, 1);
+		buttonsLayout.setFlexGrow(1, tickForAllLAbel);
 
 		HorizontalLayout headerLayout = new HorizontalLayout(groupLabel, buttonsLayout);
 		headerLayout.setWidthFull();
@@ -188,11 +187,11 @@ public class UserRoleNotificationCheckboxSet extends CustomField<UserRoleDto.Not
 			setMargin(false);
 
 			NotificationTypeCheckboxes left = new NotificationTypeCheckboxes(leftGroup);
-			addComponent(left);
+			add(left);
 			setExpandRatio(left, 0.45f);
 
 			HorizontalLayout spacer = new HorizontalLayout();
-			addComponent(spacer);
+			add(spacer);
 			setExpandRatio(spacer, 0.01f);
 
 			checkboxes.add(left);
@@ -207,7 +206,7 @@ public class UserRoleNotificationCheckboxSet extends CustomField<UserRoleDto.Not
 				rightComponent = new HorizontalLayout();
 			}
 
-			addComponent(rightComponent);
+			add(rightComponent);
 			setExpandRatio(rightComponent, 0.54f);
 		}
 
@@ -232,7 +231,7 @@ public class UserRoleNotificationCheckboxSet extends CustomField<UserRoleDto.Not
 		private final CheckBox emailCb;
 
 		public NotificationTypeCheckboxes(NotificationType type) {
-			Label label = new Label(type.toString());
+			Span label = new Span(type.toString());
 			label.setDescription(type.getDescription());
 			smsCb = createCheckbox(Captions.userRoleNotificationTypeSms, type, UserRoleNotificationCheckboxSet.this::createSmsCheckboxDataSource);
 			emailCb =
@@ -241,9 +240,9 @@ public class UserRoleNotificationCheckboxSet extends CustomField<UserRoleDto.Not
 			addComponents(label, smsCb, emailCb);
 
 			setWidthFull();
-			setExpandRatio(label, 1);
-			setExpandRatio(smsCb, 0);
-			setExpandRatio(emailCb, 0);
+			setFlexGrow(1, label);
+			setFlexGrow(0, smsCb);
+			setFlexGrow(0, emailCb);
 		}
 
 		public void checkAll() {

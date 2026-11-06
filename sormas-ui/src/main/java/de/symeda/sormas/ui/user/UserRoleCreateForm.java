@@ -21,12 +21,12 @@ import java.util.Collections;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextArea;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextArea;
 
 import de.symeda.sormas.api.i18n.Descriptions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -61,25 +61,25 @@ public class UserRoleCreateForm extends AbstractEditForm<UserRoleDto> {
 
 	@Override
 	protected void addFields() {
-		Label infoLabel =
-			new Label(VaadinIcons.INFO_CIRCLE.getHtml() + " " + I18nProperties.getDescription(Descriptions.userRoleTemplate), ContentMode.HTML);
+		Span infoLabel =
+			new Span(VaadinIcon.INFO_CIRCLE.getHtml() + " " + I18nProperties.getDescription(Descriptions.userRoleTemplate), ContentMode.HTML);
 		infoLabel.setWidthFull();
 		infoLabel.setCaption(StringUtils.EMPTY);
 		getContent().addComponent(infoLabel, TEMPLATE_INFO_LOC);
 
 		ComboBox templateRoleCombo = addCustomField(TEMPLATE_USER_ROLE, UserRoleDto.class, ComboBox.class);
 		UserRoleFormHelper.setTemplateRoleItems(templateRoleCombo);
-		templateRoleCombo.addValueChangeListener(e -> applyTemplateData((UserRoleDto) e.getProperty().getValue()));
+		templateRoleCombo.addValueChangeListener(e -> applyTemplateData((UserRoleDto) e.getValue()));
 
 		addField(UserRoleDto.CAPTION).setRequired(true);
 		addField(UserRoleDto.JURISDICTION_LEVEL).setRequired(true);
 
 		addField(UserRoleDto.DESCRIPTION, TextArea.class);
 
-		addField(UserRoleDto.HAS_OPTIONAL_HEALTH_FACILITY).addStyleName(CssStyles.VSPACE_TOP_3);
-		addField(UserRoleDto.HAS_ASSOCIATED_DISTRICT_USER).addStyleName(CssStyles.VSPACE_TOP_3);
-		addField(UserRoleDto.PORT_HEALTH_USER).addStyleNames(CssStyles.VSPACE_TOP_3);
-		addField(UserRoleDto.RESTRICT_ACCESS_TO_ASSIGNED_ENTITIES).addStyleNames(CssStyles.VSPACE_TOP_3, CssStyles.VSPACE_3);
+		addField(UserRoleDto.HAS_OPTIONAL_HEALTH_FACILITY).addClassName(CssStyles.VSPACE_TOP_3);
+		addField(UserRoleDto.HAS_ASSOCIATED_DISTRICT_USER).addClassName(CssStyles.VSPACE_TOP_3);
+		addField(UserRoleDto.PORT_HEALTH_USER).addClassNames(CssStyles.VSPACE_TOP_3);
+		addField(UserRoleDto.RESTRICT_ACCESS_TO_ASSIGNED_ENTITIES).addClassNames(CssStyles.VSPACE_TOP_3, CssStyles.VSPACE_3);
 
 		UserRoleFormHelper.createFieldDependencies(this);
 	}

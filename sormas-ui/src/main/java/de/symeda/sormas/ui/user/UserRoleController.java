@@ -20,13 +20,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.vaadin.server.Page;
-import com.vaadin.shared.ui.ContentMode;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.UI;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -64,10 +62,10 @@ public class UserRoleController {
 				UserRoleDto dto = createForm.getValue();
 				FacadeProvider.getUserRoleFacade().saveUserRole(dto);
 				if (dto.getUserRights().size() == 0) {
-					Notification.show(
+					NotificationHelper.show(
 						I18nProperties.getString(Strings.messageUserRoleSaved),
 						I18nProperties.getString(Strings.messageUserRoleHasNoRights),
-						Notification.Type.WARNING_MESSAGE);
+						NotificationHelper.Type.WARNING_MESSAGE);
 				}
 				editData(dto.getUuid());
 			}
@@ -102,19 +100,19 @@ public class UserRoleController {
 						.getUserRights(currentUserRoles.stream().map(r -> DataHelper.isSame(r, dto) ? dto : r).collect(Collectors.toList()));
 
 					if (currentUserRights.contains(UserRight.USER_ROLE_EDIT) && !newUserRights.contains(UserRight.USER_ROLE_EDIT)) {
-						new Notification(
+						NotificationHelper.show(
 							I18nProperties.getString(Strings.messageCheckInputData),
 							I18nProperties.getValidationError(Validations.removeUserRightEditRightFromOwnUser),
-							Notification.Type.ERROR_MESSAGE,
-							true).show(Page.getCurrent());
+							NotificationHelper.Type.ERROR_MESSAGE,
+							true);
 
 						return;
 					} else if (currentUserRights.contains(UserRight.USER_EDIT) && !newUserRights.contains(UserRight.USER_EDIT)) {
-						new Notification(
+						NotificationHelper.show(
 							I18nProperties.getString(Strings.messageCheckInputData),
 							I18nProperties.getValidationError(Validations.removeUserEditRightFromOwnUser),
-							Notification.Type.ERROR_MESSAGE,
-							true).show(Page.getCurrent());
+							NotificationHelper.Type.ERROR_MESSAGE,
+							true);
 
 						return;
 					}
@@ -122,13 +120,13 @@ public class UserRoleController {
 				FacadeProvider.getUserRoleFacade().saveUserRole(dto);
 
 				if (!(dto.getUserRights().contains(UserRight.SORMAS_UI) && dto.getUserRights().contains(UserRight.SORMAS_REST))) {
-					Notification.show(
+					NotificationHelper.show(
 						I18nProperties.getString(Strings.messageUserRoleSaved),
 						I18nProperties.getString(Strings.messageUserRoleUnusableForLogin),
-						Notification.Type.WARNING_MESSAGE);
+						NotificationHelper.Type.WARNING_MESSAGE);
 
 				} else {
-					Notification.show(I18nProperties.getString(Strings.messageUserRoleSaved), Notification.Type.WARNING_MESSAGE);
+					NotificationHelper.show(I18nProperties.getString(Strings.messageUserRoleSaved), NotificationHelper.Type.WARNING_MESSAGE);
 				}
 				SormasUI.refreshView();
 			}
@@ -177,7 +175,7 @@ public class UserRoleController {
 
 				SormasUI.refreshView();
 			}
-		}, ValoTheme.BUTTON_LINK);
+		}, CssStyles.BUTTON_LINK);
 
 		editView.getButtonsPanel().addComponentAsFirst(enableDisableButton);
 		editView.getButtonsPanel().setComponentAlignment(enableDisableButton, Alignment.BOTTOM_LEFT);
@@ -201,7 +199,7 @@ public class UserRoleController {
 				UserRoleDto dto = form.getValue();
 				FacadeProvider.getUserRoleFacade().saveUserRole(dto);
 
-				Notification.show(I18nProperties.getString(Strings.messageUserRoleSaved), Notification.Type.WARNING_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageUserRoleSaved), NotificationHelper.Type.WARNING_MESSAGE);
 				SormasUI.refreshView();
 			}
 		});

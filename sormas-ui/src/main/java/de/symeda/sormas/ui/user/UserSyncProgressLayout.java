@@ -19,17 +19,17 @@
 package de.symeda.sormas.ui.user;
 
 import com.vaadin.server.ThemeResource;
-import com.vaadin.shared.ui.ContentMode;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Image;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.ui.ProgressBar;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -46,12 +46,12 @@ public class UserSyncProgressLayout extends VerticalLayout {
 
 	// Components
 	private final ProgressBar progressBar;
-	private final Label processedImportsLabel;
-	private final Label syncSuccessLabel;
-	private final Label syncErrorsLabel;
+	private final Span processedImportsLabel;
+	private final Span syncSuccessLabel;
+	private final Span syncErrorsLabel;
 	private final Button closeCancelButton;
 	private final HorizontalLayout infoLayout;
-	private final Label infoLabel;
+	private final Span infoLabel;
 
 	private ProgressBar progressCircle;
 	private Image errorIcon;
@@ -73,43 +73,43 @@ public class UserSyncProgressLayout extends VerticalLayout {
 		this.totalCount = totalCount;
 		this.currentUI = currentUI;
 
-		setWidth(100, Unit.PERCENTAGE);
+		setWidthFull();
 		setMargin(true);
 
 		// Info text and icon/progress circle
 		infoLayout = new HorizontalLayout();
-		infoLayout.setWidth(100, Unit.PERCENTAGE);
+		infoLayout.setWidthFull();
 		infoLayout.setSpacing(true);
 		initializeInfoComponents();
 		currentInfoComponent = progressCircle;
-		infoLayout.addComponent(currentInfoComponent);
-		infoLabel = new Label(String.format(I18nProperties.getString(Strings.infoUserSyncProcess), totalCount));
+		infoLayout.add(currentInfoComponent);
+		infoLabel = new Span(String.format(I18nProperties.getString(Strings.infoUserSyncProcess), totalCount));
 		infoLabel.setContentMode(ContentMode.HTML);
-		infoLayout.addComponent(infoLabel);
-		infoLayout.setExpandRatio(infoLabel, 1);
+		infoLayout.add(infoLabel);
+		infoLayout.setFlexGrow(1, infoLabel);
 
-		addComponent(infoLayout);
+		add(infoLayout);
 
 		// Progress bar
 		progressBar = new ProgressBar(0.0f);
 		CssStyles.style(progressBar, CssStyles.VSPACE_TOP_3);
-		addComponent(progressBar);
-		progressBar.setWidth(100, Unit.PERCENTAGE);
+		add(progressBar);
+		progressBar.setWidthFull();
 
 		// Progress info
 		HorizontalLayout progressInfoLayout = new HorizontalLayout();
 		CssStyles.style(progressInfoLayout, CssStyles.VSPACE_TOP_5);
 		progressInfoLayout.setSpacing(true);
-		processedImportsLabel = new Label(String.format(I18nProperties.getCaption(Captions.syncProcessed), 0, totalCount));
-		progressInfoLayout.addComponent(processedImportsLabel);
-		syncSuccessLabel = new Label(String.format(I18nProperties.getCaption(Captions.syncSuccessful), 0));
+		processedImportsLabel = new Span(String.format(I18nProperties.getCaption(Captions.syncProcessed), 0, totalCount));
+		progressInfoLayout.add(processedImportsLabel);
+		syncSuccessLabel = new Span(String.format(I18nProperties.getCaption(Captions.syncSuccessful), 0));
 		CssStyles.style(syncSuccessLabel, CssStyles.LABEL_POSITIVE);
-		progressInfoLayout.addComponent(syncSuccessLabel);
-		syncErrorsLabel = new Label(String.format(I18nProperties.getCaption(Captions.syncErrors), 0));
+		progressInfoLayout.add(syncSuccessLabel);
+		syncErrorsLabel = new Span(String.format(I18nProperties.getCaption(Captions.syncErrors), 0));
 		CssStyles.style(syncErrorsLabel, CssStyles.LABEL_CRITICAL);
-		progressInfoLayout.addComponent(syncErrorsLabel);
+		progressInfoLayout.add(syncErrorsLabel);
 
-		addComponent(progressInfoLayout);
+		add(progressInfoLayout);
 		setComponentAlignment(progressInfoLayout, Alignment.TOP_RIGHT);
 
 		// Cancel button
@@ -117,7 +117,7 @@ public class UserSyncProgressLayout extends VerticalLayout {
 
 		closeCancelButton = ButtonHelper.createButton(Captions.actionCancel, cancelListener, CssStyles.VSPACE_TOP_2);
 
-		addComponent(closeCancelButton);
+		add(closeCancelButton);
 		setComponentAlignment(closeCancelButton, Alignment.MIDDLE_RIGHT);
 	}
 

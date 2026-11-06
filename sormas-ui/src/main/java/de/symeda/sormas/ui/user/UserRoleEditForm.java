@@ -27,12 +27,12 @@ import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextArea;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextArea;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.Descriptions;
@@ -83,17 +83,17 @@ public class UserRoleEditForm extends AbstractUserRoleForm {
 
 		addField(UserRoleDto.DESCRIPTION, TextArea.class);
 
-		addField(UserRoleDto.HAS_OPTIONAL_HEALTH_FACILITY).addStyleName(CssStyles.VSPACE_TOP_3);
-		addField(UserRoleDto.HAS_ASSOCIATED_DISTRICT_USER).addStyleName(CssStyles.VSPACE_TOP_3);
-		addField(UserRoleDto.PORT_HEALTH_USER).addStyleNames(CssStyles.VSPACE_TOP_3);
-		addField(UserRoleDto.RESTRICT_ACCESS_TO_ASSIGNED_ENTITIES).addStyleNames(CssStyles.VSPACE_TOP_3, CssStyles.VSPACE_3);
+		addField(UserRoleDto.HAS_OPTIONAL_HEALTH_FACILITY).addClassName(CssStyles.VSPACE_TOP_3);
+		addField(UserRoleDto.HAS_ASSOCIATED_DISTRICT_USER).addClassName(CssStyles.VSPACE_TOP_3);
+		addField(UserRoleDto.PORT_HEALTH_USER).addClassNames(CssStyles.VSPACE_TOP_3);
+		addField(UserRoleDto.RESTRICT_ACCESS_TO_ASSIGNED_ENTITIES).addClassNames(CssStyles.VSPACE_TOP_3, CssStyles.VSPACE_3);
 
-		Label userRightsLabel = new Label(I18nProperties.getCaption(Captions.UserRole_userRights), ContentMode.HTML);
-		userRightsLabel.addStyleNames(CssStyles.H2);
+		Span userRightsLabel = new Span(I18nProperties.getCaption(Captions.UserRole_userRights), ContentMode.HTML);
+		userRightsLabel.addClassNames(CssStyles.H2);
 		getContent().addComponent(userRightsLabel, USER_RIGHTS_LABEL_LOC);
 
-		Label versionUpdateInfoLabel =
-			new Label(VaadinIcons.INFO_CIRCLE.getHtml() + " " + I18nProperties.getDescription(Descriptions.userRoleVersionUpdate), ContentMode.HTML);
+		Span versionUpdateInfoLabel =
+			new Span(VaadinIcon.INFO_CIRCLE.getHtml() + " " + I18nProperties.getDescription(Descriptions.userRoleVersionUpdate), ContentMode.HTML);
 		versionUpdateInfoLabel.setWidthFull();
 		getContent().addComponent(versionUpdateInfoLabel, VERSION_UPDATE_INFO_LOC);
 

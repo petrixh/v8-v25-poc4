@@ -27,21 +27,20 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.View;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.navigation.View;
 import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable.Unit;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 import de.symeda.sormas.api.AuthProvider;
 import de.symeda.sormas.api.FacadeProvider;
@@ -69,14 +68,14 @@ public class UserController {
 
 	public void create() {
 		CommitDiscardWrapperComponent<UserEditForm> userCreateComponent = getUserCreateComponent();
-		Window window = VaadinUiUtil.showModalPopupWindow(userCreateComponent, I18nProperties.getString(Strings.headingCreateNewUser));
+		Dialog window = VaadinUiUtil.showModalPopupWindow(userCreateComponent, I18nProperties.getString(Strings.headingCreateNewUser));
 		// user form is too big for typical screens
 		window.setWidth(userCreateComponent.getWrappedComponent().getWidth() + 64 + 20, Unit.PIXELS);
 		window.setHeight(90, Unit.PERCENTAGE);
 	}
 
 	public void edit(UserDto user) {
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 		CommitDiscardWrapperComponent<UserEditForm> userComponent = getUserEditComponent(user.getUuid(), window::close);
 
 		window.setCaption(I18nProperties.getString(Strings.headingEditUser));
@@ -84,7 +83,7 @@ public class UserController {
 		// user form is too big for typical screens
 		window.setWidth(userComponent.getWrappedComponent().getWidth() + 64 + 20, Unit.PIXELS);
 		window.setHeight(90, Unit.PERCENTAGE);
-		UI.getCurrent().addWindow(window);
+		window.open();
 	}
 
 	public void overview() {
@@ -117,7 +116,7 @@ public class UserController {
 		// Add reset password button
 		if (FacadeProvider.getFeatureConfigurationFacade().isFeatureDisabled(FeatureType.AUTH_PROVIDER_TO_SORMAS_USER_SYNC)) {
 			Button resetPasswordButton = createResetPasswordButton(userUuid, userDto.getUserEmail(), editView);
-			editView.getButtonsPanel().addComponent(resetPasswordButton, 0);
+			editView.getButtonsPanel().add(resetPasswordButton, 0);
 		}
 
 		editView.addDiscardListener(closeWindowCallback::run);
@@ -142,17 +141,17 @@ public class UserController {
 					Set<UserRight> newUserRights = UserRoleDto.getUserRights(FacadeProvider.getUserRoleFacade().getByReferences(user.getUserRoles()));
 
 					if (oldUserRights.contains(UserRight.USER_ROLE_EDIT) && !newUserRights.contains(UserRight.USER_ROLE_EDIT)) {
-						new Notification(
+						NotificationHelper.show(
 							I18nProperties.getString(Strings.messageCheckInputData),
 							I18nProperties.getValidationError(Validations.removeRolesWithEditRightFromOwnUser),
-							Notification.Type.ERROR_MESSAGE,
-							true).show(Page.getCurrent());
+							NotificationHelper.Type.ERROR_MESSAGE,
+							true);
 					} else if (!newUserRights.contains(UserRight.USER_EDIT)) {
-						new Notification(
+						NotificationHelper.show(
 							I18nProperties.getString(Strings.messageCheckInputData),
 							I18nProperties.getValidationError(Validations.removeRolesWithEditUserFromOwnUser),
-							Notification.Type.ERROR_MESSAGE,
-							true).show(Page.getCurrent());
+							NotificationHelper.Type.ERROR_MESSAGE,
+							true);
 					} else {
 						saveUser(user);
 						closeWindowCallback.run();
@@ -170,7 +169,7 @@ public class UserController {
 	private void openRemoveUserAsOfficerPrompt(Consumer<Boolean> callback) {
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getString(Strings.headingSaveUser),
-			new Label(I18nProperties.getString(Strings.confirmationRemoveUserAsOfficer)),
+			new Span(I18nProperties.getString(Strings.confirmationRemoveUserAsOfficer)),
 			I18nProperties.getString(Strings.yes),
 			I18nProperties.getString(Strings.no),
 			640,
@@ -233,31 +232,31 @@ public class UserController {
 
 	private void showPasswordResetInternalSuccessPopup(String newPassword) {
 		VerticalLayout layout = new VerticalLayout();
-		layout.addComponent(new Label(I18nProperties.getString(Strings.messageCopyPassword)));
-		Label passwordLabel = new Label(newPassword);
-		passwordLabel.addStyleName(CssStyles.H2);
-		layout.addComponent(passwordLabel);
-		Window popupWindow = VaadinUiUtil.showPopupWindow(layout);
+		layout.add(new Span(I18nProperties.getString(Strings.messageCopyPassword)));
+		Span passwordLabel = new Span(newPassword);
+		passwordLabel.addClassName(CssStyles.H2);
+		layout.add(passwordLabel);
+		Dialog popupWindow = VaadinUiUtil.showPopupWindow(layout);
 		popupWindow.setCaption(I18nProperties.getString(Strings.headingNewPassword));
-		layout.setMargin(true);
+		layout.setPadding(true);
 	}
 
 	private void showAccountCreatedSuccessful() {
 		VerticalLayout layout = new VerticalLayout();
-		layout.addComponent(new Label(I18nProperties.getString(Strings.messageActivateAccount)));
-		Window popupWindow = VaadinUiUtil.showPopupWindow(layout);
+		layout.add(new Span(I18nProperties.getString(Strings.messageActivateAccount)));
+		Dialog popupWindow = VaadinUiUtil.showPopupWindow(layout);
 		popupWindow.setCaption(I18nProperties.getString(Strings.headingNewAccount));
 		popupWindow.setWidth(350, Unit.PIXELS);
-		layout.setMargin(true);
+		layout.setPadding(true);
 	}
 
 	private void showPasswordResetExternalSuccessPopup() {
 		VerticalLayout layout = new VerticalLayout();
-		layout.addComponent(new Label(I18nProperties.getString(Strings.messagePasswordResetEmailLink)));
-		Window popupWindow = VaadinUiUtil.showPopupWindow(layout);
+		layout.add(new Span(I18nProperties.getString(Strings.messagePasswordResetEmailLink)));
+		Dialog popupWindow = VaadinUiUtil.showPopupWindow(layout);
 		popupWindow.setCaption(I18nProperties.getString(Strings.headingNewPassword));
 		popupWindow.setWidth(450, Unit.PIXELS);
-		layout.setMargin(true);
+		layout.setPadding(true);
 	}
 
 	private void refreshView() {
@@ -270,14 +269,14 @@ public class UserController {
 
 	public Button createResetPasswordButton(String userUuid, String userEmail, CommitDiscardWrapperComponent<UserEditForm> editView) {
 
-		return ButtonHelper.createIconButton(Captions.userResetPassword, VaadinIcons.UNLOCK, new ClickListener() {
+		return ButtonHelper.createIconButton(Captions.userResetPassword, VaadinIcon.UNLOCK, new ClickListener() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void buttonClick(ClickEvent event) {
 				ConfirmationComponent resetPasswordComponent = getResetPasswordConfirmationComponent(userUuid, userEmail, editView);
-				Window popupWindow = VaadinUiUtil.showPopupWindow(resetPasswordComponent);
+				Dialog popupWindow = VaadinUiUtil.showPopupWindow(resetPasswordComponent);
 				resetPasswordComponent.addDoneListener(() -> popupWindow.close());
 				resetPasswordComponent.getCancelButton().addClickListener(new ClickListener() {
 
@@ -290,7 +289,7 @@ public class UserController {
 				});
 				popupWindow.setCaption(I18nProperties.getString(Strings.headingUpdatePassword));
 			}
-		}, ValoTheme.BUTTON_LINK);
+		}, CssStyles.BUTTON_LINK);
 	}
 
 	public ConfirmationComponent getResetPasswordConfirmationComponent(
@@ -314,7 +313,7 @@ public class UserController {
 		};
 		resetPasswordConfirmationComponent.getConfirmButton().setCaption(I18nProperties.getCaption(Captions.userUpdatePasswordConfirmation));
 		resetPasswordConfirmationComponent.getCancelButton().setCaption(I18nProperties.getCaption(Captions.actionCancel));
-		resetPasswordConfirmationComponent.setMargin(true);
+		resetPasswordConfirmationComponent.setPadding(true);
 		return resetPasswordConfirmationComponent;
 	}
 
@@ -356,7 +355,7 @@ public class UserController {
 			FacadeProvider.getUserFacade().syncUsersFromAuthenticationProvider();
 			SormasUI.refreshView();
 		} else {
-			Window window = VaadinUiUtil.showPopupWindow(new UsersSyncLayout());
+			Dialog window = VaadinUiUtil.showPopupWindow(new UsersSyncLayout());
 			window.setCaption(I18nProperties.getCaption(Captions.syncUsers));
 		}
 	}
@@ -364,15 +363,15 @@ public class UserController {
 	public void enableAllSelectedItems(Collection<UserDto> selectedRows, UserGrid userGrid) {
 
 		if (selectedRows.isEmpty()) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingNoUsersSelected),
 				I18nProperties.getString(Strings.messageNoUsersSelected),
-				Notification.Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				NotificationHelper.Type.WARNING_MESSAGE,
+				false);
 		} else {
 			VaadinUiUtil.showConfirmationPopup(
 				I18nProperties.getString(Strings.headingConfirmEnabling),
-				new Label(String.format(I18nProperties.getString(Strings.confirmationEnableUsers), selectedRows.size())),
+				new Span(String.format(I18nProperties.getString(Strings.confirmationEnableUsers), selectedRows.size())),
 				I18nProperties.getString(Strings.yes),
 				I18nProperties.getString(Strings.no),
 				null,
@@ -411,15 +410,15 @@ public class UserController {
 	public void disableAllSelectedItems(Collection<UserDto> selectedRows, UserGrid userGrid) {
 
 		if (selectedRows.isEmpty()) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingNoUsersSelected),
 				I18nProperties.getString(Strings.messageNoUsersSelected),
-				Notification.Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				NotificationHelper.Type.WARNING_MESSAGE,
+				false);
 		} else {
 			VaadinUiUtil.showConfirmationPopup(
 				I18nProperties.getString(Strings.headingConfirmDisabling),
-				new Label(String.format(I18nProperties.getString(Strings.confirmationDisableUsers), selectedRows.size())),
+				new Span(String.format(I18nProperties.getString(Strings.confirmationDisableUsers), selectedRows.size())),
 				I18nProperties.getString(Strings.yes),
 				I18nProperties.getString(Strings.no),
 				null,

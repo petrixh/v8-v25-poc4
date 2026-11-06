@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.renderers.HtmlRenderer;
-import com.vaadin.ui.renderers.TextRenderer;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
 import de.symeda.sormas.api.AuthProvider;
 import de.symeda.sormas.api.FacadeProvider;
@@ -122,9 +122,9 @@ public class UserGrid extends FilteredGrid<UserDto, UserCriteria> {
 
 		@Override
 		public JsonValue encode(String value) {
-			String iconValue = VaadinIcons.CHECK_SQUARE_O.getHtml();
+			String iconValue = VaadinIcon.CHECK_SQUARE_O.getHtml();
 			if (!Boolean.parseBoolean(value)) {
-				iconValue = VaadinIcons.THIN_SQUARE.getHtml();
+				iconValue = VaadinIcon.THIN_SQUARE.getHtml();
 			}
 			return super.encode(iconValue);
 		}

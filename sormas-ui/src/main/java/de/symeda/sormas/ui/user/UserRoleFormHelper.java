@@ -21,9 +21,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
+import de.symeda.sormas.ui.utils.AbstractForm.BeanFieldGroup;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -56,7 +56,7 @@ public class UserRoleFormHelper {
 			.setDisabledWhen(fieldGroup, UserRoleDto.JURISDICTION_LEVEL, JurisdictionLevel.POINT_OF_ENTRY, UserRoleDto.PORT_HEALTH_USER, false);
 		fieldGroup.getField(UserRoleDto.JURISDICTION_LEVEL).addValueChangeListener(e -> {
 			CheckBox portHealthUserCb = (CheckBox) fieldGroup.getField(UserRoleDto.PORT_HEALTH_USER);
-			portHealthUserCb.setValue(e.getProperty().getValue() == JurisdictionLevel.POINT_OF_ENTRY);
+			portHealthUserCb.setValue(e.getValue() == JurisdictionLevel.POINT_OF_ENTRY);
 
 			CheckBox optionalHealthFacilityCb = (CheckBox) fieldGroup.getField(UserRoleDto.HAS_OPTIONAL_HEALTH_FACILITY);
 			//initial default false should be set for any jurisdiction level

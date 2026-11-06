@@ -21,7 +21,6 @@ import static de.symeda.sormas.backend.visit.VisitLogic.getVisitResult;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Objects.isNull;
 
-import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -1536,7 +1535,7 @@ public class ContactFacadeEjb
 					Contact.RESULTING_CASE.toLowerCase(),
 					Case.UUID));
 			query.setParameter("uuidList", batchedCaseUuids);
-			totalCount.addAndGet(((BigInteger) query.getSingleResult()).intValue());
+			totalCount.addAndGet(((Number) query.getSingleResult()).intValue());
 		});
 		return totalCount.get();
 	}

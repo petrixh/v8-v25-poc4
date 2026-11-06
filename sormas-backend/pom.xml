@@ -236,8 +236,9 @@
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
-			<scope>test</scope>
+			<scope>provided</scope>
 			<!-- Avoids java.util.MissingResourceException: Can't find bundle for base name jakarta.servlet.LocalStrings, locale de_DE -->
+			<!-- provided, not test: this declaration overrides the scope of the servlet API that jakarta.jakartaee-api brings, and main code uses it (ExternalSurveillanceToolGatewayFacadeEjb) -->
 		</dependency>
 
 		<dependency>

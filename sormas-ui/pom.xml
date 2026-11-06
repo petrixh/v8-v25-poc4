@@ -18,6 +18,14 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<!-- Payara module (Payara 7.2026.10 ships jackson-annotations 2.22.0). Flow's Jackson 3.1.8 needs annotations 2.21 or newer;
+				the sormas-base pin (2.13.4, Payara 5) breaks the vaadin-maven-plugin (missing JsonSerializeAs). Aligning sormas-base is ticket 1a-21 -->
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+				<version>2.22</version>
+				<scope>provided</scope>
+			</dependency>
 			<!-- Vaadin Flow (vaadin-core, vaadin-cdi). Imported here, not in sormas-base, so that it manages no versions of the other modules -->
 			<dependency>
 				<groupId>com.vaadin</groupId>

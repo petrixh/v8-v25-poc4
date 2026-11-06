@@ -28,8 +28,8 @@
 		<!-- *** Other dependency versions *** -->
 		<slf4j.version>2.0.7</slf4j.version>
 		<logback.version>1.3.5</logback.version>
-		<vaadin.version.warning>TODO: Remove bootstrap.js in widgetset</vaadin.version.warning>
-		<vaadin.version>8.14.3</vaadin.version>
+		<!-- Vaadin Flow; the vaadin-bom is imported in sormas-ui -->
+		<vaadin.version>25.3.5</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 		<swagger.version>2.2.15</swagger.version>
 		<bouncycastle.version>1.76</bouncycastle.version>
@@ -328,66 +328,6 @@
 				<scope>provided</scope>
 			</dependency>
 
-			<!-- *** Legacy javax / Payara 5 entries, used only by sormas-ui and sormas-widgetset until ticket 1a-03 ports their poms. Remove this block then. *** -->
-
-			<dependency>
-				<groupId>javax</groupId>
-				<artifactId>javaee-api</artifactId>
-				<version>8.0.1</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>javax</groupId>
-				<artifactId>javaee-web-api</artifactId>
-				<version>8.0.1</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>javax.servlet</groupId>
-				<artifactId>javax.servlet-api</artifactId>
-				<version>4.0.1</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish</groupId>
-				<artifactId>javax.el</artifactId>
-				<version>3.0.0</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>javax.validation</groupId>
-				<artifactId>validation-api</artifactId>
-				<version>2.0.1.Final</version>
-				<scope>provided</scope>
-				<!-- Also pins the transitive validation-api of the Vaadin 8 widgetset compile -->
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.soteria</groupId>
-				<artifactId>javax.security.enterprise</artifactId>
-				<version>1.1-b01.payara-p5</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-core</artifactId>
-				<version>5.6.15.Final</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-ehcache</artifactId>
-				<version>5.6.15.Final</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>com.vladmihalcea</groupId>
-				<artifactId>hibernate-types-55</artifactId>
-				<version>2.21.1</version>
-				<scope>provided</scope>
-			</dependency>
-
-			<!-- *** Legacy entries END *** -->
-
 			<!-- *** Payara modules END *** -->
 
 			<!-- *** Domain libs *** -->
@@ -558,13 +498,6 @@
 				<groupId>com.opencsv</groupId>
 				<artifactId>opencsv</artifactId>
 				<version>5.7.1</version>
-				<scope>provided</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>com.vaadin</groupId>
-				<artifactId>vaadin-themes</artifactId>
-				<version>${vaadin.version}</version>
 				<scope>provided</scope>
 			</dependency>
 
@@ -1356,53 +1289,6 @@
 				<!-- Kept as compile dependency to avoid version conflicts and classpath problems with sormas-demis-adapter -->
 			</dependency>
 
-			<!-- ** Vaadin ** -->
-
-			<dependency>
-				<groupId>com.vaadin</groupId>
-				<artifactId>vaadin-bom</artifactId>
-				<version>${vaadin.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>com.vaadin</groupId>
-				<artifactId>vaadin-compatibility-client</artifactId>
-				<version>${vaadin.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>com.vaadin</groupId>
-				<artifactId>vaadin-client-compiler</artifactId>
-				<version>${vaadin.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>com.vaadin</groupId>
-				<artifactId>vaadin-compatibility-server</artifactId>
-				<version>${vaadin.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.vaadin.addons</groupId>
-				<artifactId>popupbutton</artifactId>
-				<version>3.0.0</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.vaadin.addons</groupId>
-				<artifactId>extended-token-field</artifactId>
-				<version>0.3.0</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.wcs.wcslib</groupId>
-				<artifactId>wcslib-vaadin-widget-multifileupload</artifactId>
-				<version>4.0</version>
-			</dependency>
-
-			<!-- ** Vaadin END ** -->
-
 			<!-- *** Compile dependencies END *** -->
 
 			<!-- *** Test dependencies *** -->
@@ -1480,13 +1366,6 @@
 				<version>3.18.3</version>
 				<scope>test</scope>
 				<!-- MicroProfile Config 3.1 implementation for tests; replaces geronimo-config-impl, which has no Jakarta version -->
-			</dependency>
-			<!-- Legacy, used only by sormas-ui tests until its pom is ported (1a-03) -->
-			<dependency>
-				<groupId>org.apache.geronimo.config</groupId>
-				<artifactId>geronimo-config-impl</artifactId>
-				<version>1.2.3</version>
-				<scope>test</scope>
 			</dependency>
 
 			<dependency>
@@ -2109,7 +1988,6 @@
 	</profiles>
 
 	<modules>
-		<module>../sormas-widgetset</module>
 		<module>../sormas-api</module>
 		<module>../sormas-backend</module>
 		<module>../sormas-ear</module>

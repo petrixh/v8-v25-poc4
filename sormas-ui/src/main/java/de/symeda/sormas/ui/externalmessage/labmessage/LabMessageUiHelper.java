@@ -15,9 +15,9 @@
 
 package de.symeda.sormas.ui.externalmessage.labmessage;
 
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -35,14 +35,15 @@ import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 public class LabMessageUiHelper {
 
 	public static Button addCancelAndUpdateLabels(CommitDiscardWrapperComponent<?> component, String discardCaptionTag) {
-		component.getButtonsPanel().setExpandRatio(component.getDiscardButton(), 0);
+		// was expand ratio 0 on discard and 1 on the cancel button aligned bottom right: the free space goes left of cancel
+		component.getDiscardButton().getStyle().remove("margin-left");
 		Button cancelButton = ButtonHelper.createButton(Captions.actionCancel, null);
-		component.getButtonsPanel().addComponent(cancelButton, 0);
-		component.getButtonsPanel().setComponentAlignment(cancelButton, Alignment.BOTTOM_RIGHT);
-		component.getButtonsPanel().setExpandRatio(cancelButton, 1);
+		component.getButtonsPanel().addComponentAtIndex(0, cancelButton);
+		component.getButtonsPanel().setVerticalComponentAlignment(FlexComponent.Alignment.END, cancelButton);
+		cancelButton.getStyle().set("margin-left", "auto");
 
-		component.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionSaveAndContinue));
-		component.getDiscardButton().setCaption(I18nProperties.getCaption(discardCaptionTag));
+		component.getCommitButton().setText(I18nProperties.getCaption(Captions.actionSaveAndContinue));
+		component.getDiscardButton().setText(I18nProperties.getCaption(discardCaptionTag));
 
 		return cancelButton;
 	}
@@ -59,33 +60,36 @@ public class LabMessageUiHelper {
 	private static Button addSaveAndOpenEntryButton(CommitDiscardWrapperComponent<? extends AbstractSampleForm> sampleComponent) {
 		Button saveAndOpenEntryButton = ButtonHelper.createButton("");
 
-		// Copy every existing listener from the old commit button to the newly added one
-		for (Object listener : sampleComponent.getCommitButton().getListeners(Button.ClickEvent.class)) {
-			saveAndOpenEntryButton.addClickListener((Button.ClickListener) listener);
-		}
+		// Copy every existing listener from the old commit button to the newly added one: Flow buttons do not expose
+		// their listeners; besides the double-click guard (which this button has itself) the commit button has only the
+		// wrapper's own commit handler at this point
+		saveAndOpenEntryButton.addClickListener(clickEvent -> sampleComponent.commitAndHandle());
 
 		SampleDto sample = sampleComponent.getWrappedComponent().getValue();
 
 		if (sample.getAssociatedCase() != null) {
 			saveAndOpenEntryButton
 				.addClickListener(clickEvent -> ControllerProvider.getCaseController().navigateToCase(sample.getAssociatedCase().getUuid()));
-			saveAndOpenEntryButton.setCaption(I18nProperties.getCaption(Captions.actionSaveAndOpenCase));
+			saveAndOpenEntryButton.setText(I18nProperties.getCaption(Captions.actionSaveAndOpenCase));
 		} else if (sample.getAssociatedContact() != null) {
 			saveAndOpenEntryButton
 				.addClickListener(clickEvent -> ControllerProvider.getContactController().navigateToData(sample.getAssociatedContact().getUuid()));
-			saveAndOpenEntryButton.setCaption(I18nProperties.getCaption(Captions.actionSaveAndOpenContact));
+			saveAndOpenEntryButton.setText(I18nProperties.getCaption(Captions.actionSaveAndOpenContact));
 		} else if (sample.getAssociatedEventParticipant() != null) {
 			saveAndOpenEntryButton.addClickListener(
 				clickEvent -> ControllerProvider.getEventParticipantController().navigateToData(sample.getAssociatedEventParticipant().getUuid()));
-			saveAndOpenEntryButton.setCaption(I18nProperties.getCaption(Captions.actionSaveAndOpenEventParticipant));
+			saveAndOpenEntryButton.setText(I18nProperties.getCaption(Captions.actionSaveAndOpenEventParticipant));
 		} else {
 			throw new UnsupportedOperationException("Could not create saveAndOpenEntryButton: associated entity is not supported.");
 		}
 
-		saveAndOpenEntryButton.setStyleName(sampleComponent.getCommitButton().getStyleName());
+		// was setStyleName(commitButton.getStyleName()): the same class names and theme variants
+		Button commitButton = sampleComponent.getCommitButton();
+		saveAndOpenEntryButton.setClassName(commitButton.getClassName());
+		commitButton.getThemeNames().forEach(saveAndOpenEntryButton::addThemeName);
 
 		HorizontalLayout buttonsPanel = sampleComponent.getButtonsPanel();
-		buttonsPanel.addComponent(saveAndOpenEntryButton, buttonsPanel.getComponentCount() - 1);
+		buttonsPanel.addComponentAtIndex(buttonsPanel.getComponentCount() - 1, saveAndOpenEntryButton);
 
 		saveAndOpenEntryButton.setId("saveAndOpenEntryButton");
 

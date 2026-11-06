@@ -30,21 +30,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.mutable.MutableObject;
 
-import com.vaadin.server.ClientConnector;
-import com.vaadin.server.Sizeable;
-import com.vaadin.shared.Registration;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.shared.Registration;
+
+import de.symeda.sormas.ui.utils.ContentMode;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -93,7 +90,7 @@ public class ExternalMessageProcessingUIHelper {
 	public static CompletionStage<Boolean> showMissingDiseaseConfiguration() {
 		return VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getCaption(Captions.externalMessageNoDisease),
-			new Label(I18nProperties.getString(Strings.messageDiseaseNotSpecifiedInLabMessage)),
+			new Span(I18nProperties.getString(Strings.messageDiseaseNotSpecifiedInLabMessage)),
 			I18nProperties.getCaption(Captions.actionContinue),
 			I18nProperties.getCaption(Captions.actionCancel));
 	}
@@ -101,7 +98,7 @@ public class ExternalMessageProcessingUIHelper {
 	public static CompletionStage<Boolean> showRelatedForwardedMessageConfirmation() {
 		return VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getCaption(Captions.externalMessageForwardedMessageFound),
-			new Label(I18nProperties.getString(Strings.messageForwardedExternalMessageFound)),
+			new Span(I18nProperties.getString(Strings.messageForwardedExternalMessageFound)),
 			I18nProperties.getCaption(Captions.actionYes),
 			I18nProperties.getCaption(Captions.actionCancel));
 	}
@@ -109,7 +106,7 @@ public class ExternalMessageProcessingUIHelper {
 	public static CompletionStage<Boolean> showMultipleSamplesPopup() {
 		return VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getString(Strings.externalMessageMultipleSampleReports),
-			new Label(I18nProperties.getString(Strings.messageMultipleSampleReports), ContentMode.HTML),
+			VaadinUiUtil.createLabel(I18nProperties.getString(Strings.messageMultipleSampleReports), ContentMode.HTML),
 			I18nProperties.getCaption(Captions.actionContinue),
 			I18nProperties.getCaption(Captions.actionCancel));
 	}
@@ -123,8 +120,8 @@ public class ExternalMessageProcessingUIHelper {
 
 		final CommitDiscardWrapperComponent<EntrySelectionComponentForExternalMessage> selectionField =
 			new CommitDiscardWrapperComponent<>(selectField);
-		selectionField.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionConfirm));
-		selectionField.setWidth(1280, Sizeable.Unit.PIXELS);
+		selectionField.getCommitButton().setText(I18nProperties.getCaption(Captions.actionConfirm));
+		selectionField.setWidth(1280, Unit.PIXELS);
 
 		selectionField.addCommitListener(() -> callback.done(selectField.getSelectionResult()));
 		selectionField.addDiscardListener(callback::cancel);
@@ -141,7 +138,7 @@ public class ExternalMessageProcessingUIHelper {
 		ExternalMessageDto labMessage,
 		ExternalMessageMapper mapper,
 		HandlerCallback<CaseDataDto> callback) {
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 
 		CommitDiscardWrapperComponent<CaseCreateForm> caseCreateComponent =
 			ControllerProvider.getCaseController().getCaseCreateComponent(null, null, null, null, null, true);
@@ -195,10 +192,11 @@ public class ExternalMessageProcessingUIHelper {
 		ExternalMessageMapper mapper,
 		Consumer<SampleAndPathogenTests> commitHandler,
 		Runnable cancelHandler) {
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 		MutableObject<CommitDiscardWrapperComponent<SampleEditForm>> editComponentWrapper = new MutableObject<>();
 		// discard on close without commit or discard button clicked
-		Registration closeListener = window.addCloseListener(
+		Registration closeListener = VaadinUiUtil.addCloseListener(
+			window,
 			nonNull(editComponentWrapper.getValue()) ? e -> editComponentWrapper.getValue().discard() : e -> editComponentWrapper.getValue());
 
 		CommitDiscardWrapperComponent<SampleEditForm> sampleEditComponent = ExternalMessageProcessingUIHelper
@@ -248,13 +246,13 @@ public class ExternalMessageProcessingUIHelper {
 
 		List<PathogenTestDto> existingTests = FacadeProvider.getPathogenTestFacade().getAllBySample(sample.toReference());
 
-		Label existingTestsSeparator = new Label("<br/><hr/><br/>", ContentMode.HTML);
-		existingTestsSeparator.setWidth(100f, Sizeable.Unit.PERCENTAGE);
+		Span existingTestsSeparator = VaadinUiUtil.createLabel("<br/><hr/><br/>", ContentMode.HTML);
+		existingTestsSeparator.setWidth(100f, Unit.PERCENTAGE);
 		existingTestsSeparator.setVisible(!existingTests.isEmpty());
-		sampleEditComponent.addComponent(existingTestsSeparator, sampleEditComponent.getComponentCount() - 1);
+		sampleEditComponent.addComponentAtIndex(sampleEditComponent.getComponentCount() - 1, existingTestsSeparator);
 
-		Label existingTestsLabel = createPathogenTestGroupLabel(Strings.headingExternalMessageExistingPathogenTests, existingTests);
-		sampleEditComponent.addComponent(existingTestsLabel, sampleEditComponent.getComponentCount() - 1);
+		Span existingTestsLabel = createPathogenTestGroupLabel(Strings.headingExternalMessageExistingPathogenTests, existingTests);
+		sampleEditComponent.addComponentAtIndex(sampleEditComponent.getComponentCount() - 1, existingTestsLabel);
 
 		for (int i = 0; i < existingTests.size(); i++) {
 			PathogenTestDto existingTest = existingTests.get(i);
@@ -267,7 +265,7 @@ public class ExternalMessageProcessingUIHelper {
 				false,
 				i > 0);
 			// when the user removes the pathogen test from the sampleEditComponent, mark the pathogen test as to be removed on commit
-			pathogenTestForm.addDetachListener((ClientConnector.DetachEvent detachEvent) -> {
+			pathogenTestForm.addDetachListener(detachEvent -> {
 				List<PathogenTestReferenceDto> pathogenTestsToRemove = sampleEditComponent.getWrappedComponent().getTestsToBeRemovedOnCommit();
 
 				pathogenTestsToRemove.add(pathogenTestForm.getValue().toReference());
@@ -303,13 +301,13 @@ public class ExternalMessageProcessingUIHelper {
 			newTestsToAdd.add(LabMessageProcessingHelper.buildPathogenTest(null, mapper, sample, UiUtil.getUser()));
 		}
 
-		Label newTestSeparator = new Label("<br/><hr/><br/>", ContentMode.HTML);
-		newTestSeparator.setWidth(100f, Sizeable.Unit.PERCENTAGE);
+		Span newTestSeparator = VaadinUiUtil.createLabel("<br/><hr/><br/>", ContentMode.HTML);
+		newTestSeparator.setWidth(100f, Unit.PERCENTAGE);
 		newTestSeparator.setVisible(!newTestsToAdd.isEmpty());
-		sampleEditComponent.addComponent(newTestSeparator, sampleEditComponent.getComponentCount() - 1);
+		sampleEditComponent.addComponentAtIndex(sampleEditComponent.getComponentCount() - 1, newTestSeparator);
 
-		Label newTestsLabel = createPathogenTestGroupLabel(Strings.headingExternalMessageNewPathogenTests, newTestsToAdd);
-		sampleEditComponent.addComponent(newTestsLabel, sampleEditComponent.getComponentCount() - 1);
+		Span newTestsLabel = createPathogenTestGroupLabel(Strings.headingExternalMessageNewPathogenTests, newTestsToAdd);
+		sampleEditComponent.addComponentAtIndex(sampleEditComponent.getComponentCount() - 1, newTestsLabel);
 
 		MutableLong newPathogenTestCount = new MutableLong(newTestsToAdd.size());
 		ExternalMessageProcessingUIHelper.addNewPathogenTests(newTestsToAdd, sampleEditComponent, false, pathogenTestHandler::addPathogenTest, () -> {
@@ -361,9 +359,9 @@ public class ExternalMessageProcessingUIHelper {
 		return sampleEditComponent;
 	}
 
-	private static Label createPathogenTestGroupLabel(String captionStringProperty, List<PathogenTestDto> testsInGroup) {
-		Label existingTestsLabel = new Label(I18nProperties.getString(captionStringProperty));
-		existingTestsLabel.addStyleName(H3);
+	private static Span createPathogenTestGroupLabel(String captionStringProperty, List<PathogenTestDto> testsInGroup) {
+		Span existingTestsLabel = new Span(I18nProperties.getString(captionStringProperty));
+		existingTestsLabel.addClassName(H3);
 		existingTestsLabel.setVisible(!testsInGroup.isEmpty());
 		return existingTestsLabel;
 	}
@@ -371,7 +369,7 @@ public class ExternalMessageProcessingUIHelper {
 	public static void showFormWithLabMessage(
 		ExternalMessageDto externalMessageDto,
 		CommitDiscardWrapperComponent<? extends Component> editComponent,
-		Window window,
+		Dialog window,
 		String heading,
 		boolean entityCreated) {
 		showFormWithLabMessage(externalMessageDto, editComponent, window, heading, entityCreated, true);
@@ -380,41 +378,43 @@ public class ExternalMessageProcessingUIHelper {
 	public static void showFormWithLabMessage(
 		ExternalMessageDto externalMessageDto,
 		CommitDiscardWrapperComponent<? extends Component> editComponent,
-		Window window,
+		Dialog window,
 		String heading,
 		boolean entityCreated,
 		boolean discardOnClose) {
 
 		addProcessedInMeantimeCheck(editComponent, externalMessageDto, entityCreated);
 		ExternalMessageForm form = new ExternalMessageForm();
-		form.setWidth(550, Sizeable.Unit.PIXELS);
+		form.setWidth(550, Unit.PIXELS);
 
-		form.addStyleName(CssStyles.VSPACE_TOP_3);
-		editComponent.addStyleName(CssStyles.VSPACE_TOP_3);
+		form.addClassName(CssStyles.VSPACE_TOP_3);
+		editComponent.addClassName(CssStyles.VSPACE_TOP_3);
 
-		HorizontalSplitPanel horizontalSplitPanel = new HorizontalSplitPanel();
-		horizontalSplitPanel.setFirstComponent(form);
-		horizontalSplitPanel.setSecondComponent(editComponent);
-		horizontalSplitPanel.setSplitPosition(569, Sizeable.Unit.PIXELS); // This is just the position it needs to avoid vertical scroll bars.
-		horizontalSplitPanel.addStyleName("lab-message-processing");
+		SplitLayout horizontalSplitPanel = new SplitLayout();
+		horizontalSplitPanel.addToPrimary(form);
+		horizontalSplitPanel.addToSecondary(editComponent);
+		// This is just the position it needs to avoid vertical scroll bars (was setSplitPosition(569, PIXELS)).
+		horizontalSplitPanel.setPrimaryStyle("flex", "0 0 569px");
+		horizontalSplitPanel.addClassName("lab-message-processing");
 
-		Panel panel = new Panel();
+		// was a Panel: scrolls the split panel
+		Scroller panel = new Scroller(horizontalSplitPanel);
 		panel.setHeightFull();
-		panel.setContent(horizontalSplitPanel);
 
 		HorizontalLayout layout = new HorizontalLayout(panel);
 		layout.setHeightFull();
-		layout.setMargin(new MarginInfo(false, true, true, true));
+		// was MarginInfo(false, true, true, true): partial V8 margins become no padding (look only)
+		layout.setPadding(false);
 
 		window.setHeightFull();
-		window.setContent(layout);
-		window.setCaption(heading);
-		UI.getCurrent().addWindow(window);
+		window.add(layout);
+		window.setHeaderTitle(heading);
+		window.open();
 
 		form.setValue(externalMessageDto);
 
 		// discard on close without clicking discard/commit button
-		Registration closeListener = window.addCloseListener(e -> {
+		Registration closeListener = VaadinUiUtil.addCloseListener(window, e -> {
 			if (discardOnClose) {
 				editComponent.discard();
 			}
@@ -436,7 +436,7 @@ public class ExternalMessageProcessingUIHelper {
 		ExternalMessageDto externalMessageDto,
 		Consumer<SampleAndPathogenTests> commitHandler,
 		Runnable cancelHandler) {
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 
 		SampleController sampleController = ControllerProvider.getSampleController();
 		CommitDiscardWrapperComponent<SampleCreateForm> sampleCreateComponent =
@@ -508,18 +508,18 @@ public class ExternalMessageProcessingUIHelper {
 	 */
 	public static void showAlreadyProcessedPopup(Component component, boolean entityCreated) {
 		VerticalLayout warningLayout = VaadinUiUtil.createWarningLayout();
-		Window popupWindow = VaadinUiUtil.showPopupWindow(warningLayout);
-		Label infoLabel = new Label(I18nProperties.getValidationError(Validations.externalMessageAlreadyProcessedError));
+		Dialog popupWindow = VaadinUiUtil.showPopupWindow(warningLayout);
+		Span infoLabel = new Span(I18nProperties.getValidationError(Validations.externalMessageAlreadyProcessedError));
 		CssStyles.style(infoLabel, CssStyles.LABEL_LARGE, CssStyles.LABEL_WHITE_SPACE_NORMAL);
-		warningLayout.addComponent(infoLabel);
-		popupWindow.addCloseListener(e -> popupWindow.close());
-		popupWindow.setWidth(400, Sizeable.Unit.PIXELS);
+		warningLayout.add(infoLabel);
+		VaadinUiUtil.addCloseListener(popupWindow, e -> popupWindow.close());
+		popupWindow.setWidth("400px");
 
 		// If a case, contact or event participant was saved by the user while processing...
 		if (entityCreated) {
 			Button button = createDeleteEntityButton(component);
 			button.addClickListener(e -> popupWindow.close());
-			warningLayout.addComponent(button);
+			warningLayout.add(button);
 		}
 	}
 
@@ -536,19 +536,19 @@ public class ExternalMessageProcessingUIHelper {
 				return ButtonHelper.createButton(Captions.externalMessage_deleteNewlyCreatedCase, e -> {
 					FacadeProvider.getCaseFacade()
 						.delete(sample.getAssociatedCase().getUuid(), new DeletionDetails(DeletionReason.DUPLICATE_ENTRIES, null));
-				}, ValoTheme.BUTTON_PRIMARY);
+				}, CssStyles.BUTTON_PRIMARY);
 			} else if (sample.getAssociatedContact() != null) {
 				return ButtonHelper.createButton(
 					Captions.externalMessage_deleteNewlyCreatedContact,
 					e -> FacadeProvider.getContactFacade()
 						.delete(sample.getAssociatedContact().getUuid(), new DeletionDetails(DeletionReason.DUPLICATE_ENTRIES, null)),
-					ValoTheme.BUTTON_PRIMARY);
+					CssStyles.BUTTON_PRIMARY);
 			} else if (sample.getAssociatedEventParticipant() != null) {
 				return ButtonHelper.createButton(
 					Captions.externalMessage_deleteNewlyCreatedEventParticipant,
 					e -> FacadeProvider.getEventParticipantFacade()
 						.delete(sample.getAssociatedEventParticipant().getUuid(), new DeletionDetails(DeletionReason.DUPLICATE_ENTRIES, null)),
-					ValoTheme.BUTTON_PRIMARY);
+					CssStyles.BUTTON_PRIMARY);
 			}
 		}
 		throw new UnsupportedOperationException("The created entity to be deleted could net be determined.");
@@ -558,10 +558,14 @@ public class ExternalMessageProcessingUIHelper {
 		if (StringUtils.isBlank(text)) {
 			return;
 		}
-		Label label = new Label(text);
-		label.setCaption(I18nProperties.getPrefixCaption(i18nPrefix, captionKey));
-		label.setWidthUndefined();
-		layout.addComponent(label);
+		// was a captioned Label: the caption above the value
+		Span caption = new Span(I18nProperties.getPrefixCaption(i18nPrefix, captionKey));
+		Span label = new Span(text);
+		VerticalLayout captionedLabel = new VerticalLayout(caption, label);
+		captionedLabel.setPadding(false);
+		captionedLabel.setSpacing(false);
+		captionedLabel.setWidth(null);
+		layout.add(captionedLabel);
 	}
 
 }

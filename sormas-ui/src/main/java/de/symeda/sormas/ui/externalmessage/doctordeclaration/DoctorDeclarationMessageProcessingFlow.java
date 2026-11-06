@@ -29,15 +29,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.shared.Registration;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.shared.Registration;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -153,8 +152,8 @@ public class DoctorDeclarationMessageProcessingFlow extends AbstractDoctorDeclar
 					final String hospitalDataMissing = I18nProperties.getString(Strings.infoExternalMessageHospitalizationFacilityMissing);
 
 					CommitDiscardWrapperComponent<VerticalLayout> commitDiscardWrapperComponent =
-						new CommitDiscardWrapperComponent<>(new VerticalLayout(new Label(hospitalDataMissing)));
-					commitDiscardWrapperComponent.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionContinue)); // Continue button
+						new CommitDiscardWrapperComponent<>(new VerticalLayout(new Span(hospitalDataMissing)));
+					commitDiscardWrapperComponent.getCommitButton().setText(I18nProperties.getCaption(Captions.actionContinue)); // Continue button
 					commitDiscardWrapperComponent.getDiscardButton().setVisible(false);
 
 					commitDiscardWrapperComponent.addCommitListener(() -> ret.complete(true));
@@ -168,8 +167,8 @@ public class DoctorDeclarationMessageProcessingFlow extends AbstractDoctorDeclar
 					String.format(I18nProperties.getString(Strings.infoExternalMessageHospitalizationMissingHospital), hospitalNameWithCode);
 
 				CommitDiscardWrapperComponent<VerticalLayout> commitDiscardWrapperComponent =
-					new CommitDiscardWrapperComponent<>(new VerticalLayout(new Label(hospitalNotFound)));
-				commitDiscardWrapperComponent.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionDone));
+					new CommitDiscardWrapperComponent<>(new VerticalLayout(new Span(hospitalNotFound)));
+				commitDiscardWrapperComponent.getCommitButton().setText(I18nProperties.getCaption(Captions.actionDone));
 				commitDiscardWrapperComponent.getDiscardButton().setVisible(false); // No discard button
 
 				commitDiscardWrapperComponent.addDiscardListener(() -> ret.complete(false));
@@ -215,13 +214,12 @@ public class DoctorDeclarationMessageProcessingFlow extends AbstractDoctorDeclar
 		VerticalLayout content = new VerticalLayout();
 		content.setSpacing(true);
 
-		Label message = new Label(I18nProperties.getString(Strings.infoExternalMessageCaseSymptomsMismatch));
-		message.setContentMode(ContentMode.HTML);
+		Span message = VaadinUiUtil.createLabel(I18nProperties.getString(Strings.infoExternalMessageCaseSymptomsMismatch), ContentMode.HTML);
 
-		content.addComponents(message);
+		content.add(message);
 
 		CommitDiscardWrapperComponent<VerticalLayout> commitDiscardWrapperComponent = new CommitDiscardWrapperComponent<>(content);
-		commitDiscardWrapperComponent.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionContinue));
+		commitDiscardWrapperComponent.getCommitButton().setText(I18nProperties.getCaption(Captions.actionContinue));
 		commitDiscardWrapperComponent.addCommitListener(() -> ret.complete(true));
 		commitDiscardWrapperComponent.addDiscardListener(() -> ret.complete(false));
 
@@ -473,7 +471,7 @@ public class DoctorDeclarationMessageProcessingFlow extends AbstractDoctorDeclar
 		HandlerCallback<ContactDto> callback) {
 		LOGGER.debug("Handling create contact for contact: {}, person: {}, externalMessage: {}", contact, person, externalMessage);
 
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 
 		CommitDiscardWrapperComponent<ContactCreateForm> contactCreateComponent =
 			ControllerProvider.getContactController().getContactCreateComponent(null, false, null, true);
@@ -512,9 +510,9 @@ public class DoctorDeclarationMessageProcessingFlow extends AbstractDoctorDeclar
 
 		EventSelectionField eventSelect =
 			new EventSelectionField(externalMessage.getDisease(), I18nProperties.getString(Strings.infoPickOrCreateEventForLabMessage), null);
-		eventSelect.setWidth(1024, Sizeable.Unit.PIXELS);
+		eventSelect.setWidth(1024, Unit.PIXELS);
 
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 
 		final CommitDiscardWrapperComponent<EventSelectionField> component = new CommitDiscardWrapperComponent<>(eventSelect);
 		component.addCommitListener(() -> {
@@ -529,7 +527,7 @@ public class DoctorDeclarationMessageProcessingFlow extends AbstractDoctorDeclar
 			callback.done(result);
 		});
 		component.addDiscardListener(callback::cancel);
-		Registration closeListener = window.addCloseListener((e -> component.discard()));
+		Registration closeListener = VaadinUiUtil.addCloseListener(window, e -> component.discard());
 		component.addDoneListener(() -> {
 			closeListener.remove();
 			window.close();
@@ -537,9 +535,9 @@ public class DoctorDeclarationMessageProcessingFlow extends AbstractDoctorDeclar
 
 		eventSelect.setSelectionChangeCallback(commitAllowed -> component.getCommitButton().setEnabled(commitAllowed));
 
-		window.setContent(component);
-		window.setCaption(I18nProperties.getString(Strings.headingPickOrCreateEvent));
-		UI.getCurrent().addWindow(window);
+		window.add(component);
+		window.setHeaderTitle(I18nProperties.getString(Strings.headingPickOrCreateEvent));
+		window.open();
 	}
 
 	/**
@@ -560,27 +558,27 @@ public class DoctorDeclarationMessageProcessingFlow extends AbstractDoctorDeclar
 		final CommitDiscardWrapperComponent<EventDataForm> editView =
 			new CommitDiscardWrapperComponent<>(eventCreateForm, UiUtil.permitted(UserRight.EVENT_CREATE), eventCreateForm.getFieldGroup());
 
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 		editView.addCommitListener(() -> {
 			if (!eventCreateForm.getFieldGroup().isModified()) {
 				EventDto dto = eventCreateForm.getValue();
 
 				EventDto savedEvent = FacadeProvider.getEventFacade().save(dto);
-				Notification.show(I18nProperties.getString(Strings.messageEventCreated), Notification.Type.WARNING_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageEventCreated), NotificationHelper.Type.WARNING_MESSAGE);
 
 				callback.done(savedEvent);
 			}
 		});
 		editView.addDiscardListener(callback::cancel);
-		Registration closeListener = window.addCloseListener((e -> editView.discard()));
+		Registration closeListener = VaadinUiUtil.addCloseListener(window, e -> editView.discard());
 		editView.addDoneListener(() -> {
 			closeListener.remove();
 			window.close();
 		});
 
-		window.setContent(editView);
-		window.setCaption(I18nProperties.getString(Strings.headingCreateNewEvent));
-		UI.getCurrent().addWindow(window);
+		window.add(editView);
+		window.setHeaderTitle(I18nProperties.getString(Strings.headingCreateNewEvent));
+		window.open();
 	}
 
 	/**
@@ -607,7 +605,7 @@ public class DoctorDeclarationMessageProcessingFlow extends AbstractDoctorDeclar
 			event,
 			externalMessage);
 
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 
 		EventParticipantCreateForm createForm = new EventParticipantCreateForm(
 			event.getEventLocation().getRegion() == null && event.getEventLocation().getDistrict() == null,
@@ -622,7 +620,7 @@ public class DoctorDeclarationMessageProcessingFlow extends AbstractDoctorDeclar
 
 				FacadeProvider.getPersonFacade().save(dto.getPerson());
 				EventParticipantDto savedDto = FacadeProvider.getEventParticipantFacade().save(dto);
-				Notification.show(I18nProperties.getString(Strings.messageEventParticipantCreated), Notification.Type.ASSISTIVE_NOTIFICATION);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageEventParticipantCreated), NotificationHelper.Type.ASSISTIVE_NOTIFICATION);
 
 				if (savedDto.getPerson() != null) {
 					applyPersonUpdates(savedDto.getPerson().getUuid());
@@ -673,11 +671,11 @@ public class DoctorDeclarationMessageProcessingFlow extends AbstractDoctorDeclar
 		SampleSelectionField selectField =
 			new SampleSelectionField(similarSamples, otherSamples, I18nProperties.getString(Strings.infoPickOrCreateSample), sampleDetailsLayout);
 
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 
 		final CommitDiscardWrapperComponent<SampleSelectionField> selectionField = new CommitDiscardWrapperComponent<>(selectField);
-		selectionField.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionConfirm));
-		selectionField.setWidth(1280, Sizeable.Unit.PIXELS);
+		selectionField.getCommitButton().setText(I18nProperties.getCaption(Captions.actionConfirm));
+		selectionField.setWidth(1280, Unit.PIXELS);
 		selectionField.addCommitListener(() -> {
 			PickOrCreateSampleResult result = new PickOrCreateSampleResult();
 
@@ -738,7 +736,7 @@ public class DoctorDeclarationMessageProcessingFlow extends AbstractDoctorDeclar
 		});
 		sampleCreateComponent.addDiscardListener(callback::cancel);
 
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 		ExternalMessageProcessingUIHelper.showFormWithLabMessage(
 			labMessage,
 			sampleCreateComponent,
@@ -787,9 +785,9 @@ public class DoctorDeclarationMessageProcessingFlow extends AbstractDoctorDeclar
 
 		// Create a confirmation dialog with "Continue" and "Back" options
 		CommitDiscardWrapperComponent<VerticalLayout> commitDiscardWrapperComponent =
-			new CommitDiscardWrapperComponent<>(new VerticalLayout(new Label(I18nProperties.getString(Strings.infoEventParticipantAlreadyExisting))));
-		commitDiscardWrapperComponent.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionContinue)); // Continue button
-		commitDiscardWrapperComponent.getDiscardButton().setCaption(I18nProperties.getCaption(Captions.actionBack)); // Back button
+			new CommitDiscardWrapperComponent<>(new VerticalLayout(new Span(I18nProperties.getString(Strings.infoEventParticipantAlreadyExisting))));
+		commitDiscardWrapperComponent.getCommitButton().setText(I18nProperties.getCaption(Captions.actionContinue)); // Continue button
+		commitDiscardWrapperComponent.getDiscardButton().setText(I18nProperties.getCaption(Captions.actionBack)); // Back button
 
 		// Handle the user's choice
 		commitDiscardWrapperComponent.addCommitListener(() -> ret.complete(true)); // User chose to continue
@@ -810,13 +808,12 @@ public class DoctorDeclarationMessageProcessingFlow extends AbstractDoctorDeclar
 		VerticalLayout content = new VerticalLayout();
 		content.setSpacing(true);
 
-		Label message = new Label(I18nProperties.getString(Strings.infoExternalMessageCaseHospitalizationMismatch));
-		message.setContentMode(ContentMode.HTML);
+		Span message = VaadinUiUtil.createLabel(I18nProperties.getString(Strings.infoExternalMessageCaseHospitalizationMismatch), ContentMode.HTML);
 
-		content.addComponents(message);
+		content.add(message);
 
 		CommitDiscardWrapperComponent<VerticalLayout> commitDiscardWrapperComponent = new CommitDiscardWrapperComponent<>(content);
-		commitDiscardWrapperComponent.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionContinue));
+		commitDiscardWrapperComponent.getCommitButton().setText(I18nProperties.getCaption(Captions.actionContinue));
 		commitDiscardWrapperComponent.addCommitListener(() -> ret.complete(true));
 		commitDiscardWrapperComponent.addDiscardListener(() -> ret.complete(false));
 
@@ -834,13 +831,12 @@ public class DoctorDeclarationMessageProcessingFlow extends AbstractDoctorDeclar
 		VerticalLayout content = new VerticalLayout();
 		content.setSpacing(true);
 
-		Label message = new Label(I18nProperties.getString(Strings.infoExternalMessageCaseExposuresMismatch));
-		message.setContentMode(ContentMode.HTML);
+		Span message = VaadinUiUtil.createLabel(I18nProperties.getString(Strings.infoExternalMessageCaseExposuresMismatch), ContentMode.HTML);
 
-		content.addComponents(message);
+		content.add(message);
 
 		CommitDiscardWrapperComponent<VerticalLayout> commitDiscardWrapperComponent = new CommitDiscardWrapperComponent<>(content);
-		commitDiscardWrapperComponent.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionContinue));
+		commitDiscardWrapperComponent.getCommitButton().setText(I18nProperties.getCaption(Captions.actionContinue));
 		commitDiscardWrapperComponent.addCommitListener(() -> ret.complete(true));
 		commitDiscardWrapperComponent.addDiscardListener(() -> ret.complete(false));
 
@@ -858,13 +854,12 @@ public class DoctorDeclarationMessageProcessingFlow extends AbstractDoctorDeclar
 		VerticalLayout content = new VerticalLayout();
 		content.setSpacing(true);
 
-		Label message = new Label(I18nProperties.getString(Strings.infoExternalMessageCaseActivitiesAsCaseMismatch));
-		message.setContentMode(ContentMode.HTML);
+		Span message = VaadinUiUtil.createLabel(I18nProperties.getString(Strings.infoExternalMessageCaseActivitiesAsCaseMismatch), ContentMode.HTML);
 
-		content.addComponents(message);
+		content.add(message);
 
 		CommitDiscardWrapperComponent<VerticalLayout> commitDiscardWrapperComponent = new CommitDiscardWrapperComponent<>(content);
-		commitDiscardWrapperComponent.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionContinue));
+		commitDiscardWrapperComponent.getCommitButton().setText(I18nProperties.getCaption(Captions.actionContinue));
 		commitDiscardWrapperComponent.addCommitListener(() -> ret.complete(true));
 		commitDiscardWrapperComponent.addDiscardListener(() -> ret.complete(false));
 

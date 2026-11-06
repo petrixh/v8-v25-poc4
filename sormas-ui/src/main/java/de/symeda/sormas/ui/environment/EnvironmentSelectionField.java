@@ -3,14 +3,13 @@ package de.symeda.sormas.ui.environment;
 import java.util.Date;
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.RadioButtonGroup;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import de.symeda.sormas.api.environment.EnvironmentCriteria;
 import de.symeda.sormas.api.environment.EnvironmentIndexDto;
@@ -24,6 +23,7 @@ import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.EpiWeekAndDateFilterComponent;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 
 public class EnvironmentSelectionField extends CustomField<EnvironmentIndexDto> {
 
@@ -55,24 +55,26 @@ public class EnvironmentSelectionField extends CustomField<EnvironmentIndexDto> 
 	}
 
 	private void addInfoComponent() {
-		mainLayout.addComponent(VaadinUiUtil.createInfoComponent(infoPickOrCreateEnvironment));
+		mainLayout.add(VaadinUiUtil.createInfoComponent(infoPickOrCreateEnvironment));
 	}
 
 	public HorizontalLayout createFilterBar() {
 
 		HorizontalLayout filterLayout = new HorizontalLayout();
 		filterLayout.setSpacing(true);
-		filterLayout.setMargin(false);
+		filterLayout.setPadding(false);
 		filterLayout.setSizeUndefined();
 
 		searchField.setId("search");
-		searchField.setWidth(200, Unit.PIXELS);
+		searchField.setWidth("200px");
 
-		searchField.setCaption(I18nProperties.getString(Strings.promptEnvironmentSearchField));
+		searchField.setLabel(I18nProperties.getString(Strings.promptEnvironmentSearchField));
+		// Vaadin 8 text fields sent their value while typing (lazy, 400 ms)
+		searchField.setValueChangeMode(ValueChangeMode.LAZY);
 
 		searchField.addValueChangeListener(e -> updateGrid(e.getValue()));
 
-		filterLayout.addComponent(searchField);
+		filterLayout.add(searchField);
 
 		return filterLayout;
 	}
@@ -98,23 +100,23 @@ public class EnvironmentSelectionField extends CustomField<EnvironmentIndexDto> 
 	@Override
 	protected Component initContent() {
 		mainLayout = new VerticalLayout();
-		mainLayout.setMargin(false);
+		mainLayout.setPadding(false);
 		mainLayout.setSpacing(true);
 		mainLayout.setSizeUndefined();
-		mainLayout.setWidth(100, Unit.PERCENTAGE);
+		mainLayout.setWidthFull();
 		addInfoComponent();
 
 		VerticalLayout filterLayout = new VerticalLayout();
-		filterLayout.setMargin(false);
+		filterLayout.setPadding(false);
 		filterLayout.setSpacing(false);
-		filterLayout.setWidth(100, Unit.PERCENTAGE);
+		filterLayout.setWidthFull();
 
-		filterLayout.addComponent(createFilterBar());
-		filterLayout.addComponent(weekAndDateFilterLayout);
+		filterLayout.add(createFilterBar());
+		filterLayout.add(weekAndDateFilterLayout);
 
-		mainLayout.addComponent(filterLayout);
+		mainLayout.add(filterLayout);
 		addSelectEnvironmentRadioGroup();
-		mainLayout.addComponent(environmentGrid);
+		mainLayout.add(environmentGrid);
 		addCreateEnvironmentRadioGroup();
 
 		if (rbSelectEnvironment != null) {
@@ -159,7 +161,7 @@ public class EnvironmentSelectionField extends CustomField<EnvironmentIndexDto> 
 				toDate = toDate == null ? criteria.getReportDateTo() : toDate;
 			}
 
-			applyButton.removeStyleName(ValoTheme.BUTTON_PRIMARY);
+			CssStyles.removeStyles(applyButton, CssStyles.BUTTON_PRIMARY);
 			criteria.reportDateBetween(fromDate, toDate, dateFilterOption);
 			environmentGrid.setCriteria(criteria);
 			environmentGrid.getSelectedItems();
@@ -189,9 +191,9 @@ public class EnvironmentSelectionField extends CustomField<EnvironmentIndexDto> 
 		dateFilterRowLayout.setSpacing(true);
 		dateFilterRowLayout.setSizeUndefined();
 
-		dateFilterRowLayout.addComponent(weekAndDateFilter);
-		dateFilterRowLayout.addComponent(applyButton);
-		dateFilterRowLayout.addComponent(resetButton);
+		dateFilterRowLayout.add(weekAndDateFilter);
+		dateFilterRowLayout.add(applyButton);
+		dateFilterRowLayout.add(resetButton);
 
 		return dateFilterRowLayout;
 	}
@@ -203,7 +205,7 @@ public class EnvironmentSelectionField extends CustomField<EnvironmentIndexDto> 
 
 		rbCreateEnvironment = new RadioButtonGroup<>();
 		rbCreateEnvironment.setItems(CREATE_ENVIRONMENT);
-		rbCreateEnvironment.setItemCaptionGenerator((item) -> I18nProperties.getCaption(Captions.eventNewEnvironment));
+		rbCreateEnvironment.setItemLabelGenerator((item) -> I18nProperties.getCaption(Captions.eventNewEnvironment));
 		rbCreateEnvironment.addValueChangeListener(e -> {
 			if (e.getValue() != null) {
 				rbSelectEnvironment.setValue(null);
@@ -215,7 +217,7 @@ public class EnvironmentSelectionField extends CustomField<EnvironmentIndexDto> 
 			}
 		});
 
-		mainLayout.addComponent(rbCreateEnvironment);
+		mainLayout.add(rbCreateEnvironment);
 	}
 
 	private void addSelectEnvironmentRadioGroup() {
@@ -225,7 +227,7 @@ public class EnvironmentSelectionField extends CustomField<EnvironmentIndexDto> 
 		}
 		rbSelectEnvironment = new RadioButtonGroup<>();
 		rbSelectEnvironment.setItems(SELECT_ENVIRONMENT);
-		rbSelectEnvironment.setItemCaptionGenerator((item) -> I18nProperties.getCaption(Captions.environmentSelect));
+		rbSelectEnvironment.setItemLabelGenerator((item) -> I18nProperties.getCaption(Captions.environmentSelect));
 		CssStyles.style(rbSelectEnvironment, CssStyles.VSPACE_NONE);
 		rbSelectEnvironment.addValueChangeListener(e -> {
 			if (e.getValue() != null) {
@@ -238,7 +240,7 @@ public class EnvironmentSelectionField extends CustomField<EnvironmentIndexDto> 
 			}
 		});
 
-		mainLayout.addComponent(rbSelectEnvironment);
+		mainLayout.add(rbSelectEnvironment);
 	}
 
 	public void setSelectionChangeCallback(Consumer<Boolean> callback) {
@@ -246,7 +248,7 @@ public class EnvironmentSelectionField extends CustomField<EnvironmentIndexDto> 
 	}
 
 	@Override
-	protected void doSetValue(EnvironmentIndexDto newValue) {
+	protected void setPresentationValue(EnvironmentIndexDto newValue) {
 		if (rbSelectEnvironment != null) {
 			rbSelectEnvironment.setValue(SELECT_ENVIRONMENT);
 		}

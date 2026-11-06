@@ -26,16 +26,14 @@ import java.util.function.Consumer;
 
 import javax.naming.CannotProceedException;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.externalmessage.ExternalMessageDto;
@@ -81,15 +79,15 @@ public class RelatedLabMessageHandler extends AbstractRelatedLabMessageHandler {
 			? I18nProperties.getString(Strings.messageRelatedSampleAndLabMessagesFound)
 			: I18nProperties.getString(Strings.messageRelatedSampleFound);
 
-		Window window = VaadinUiUtil.showChooseOptionPopup(
+		Dialog window = VaadinUiUtil.showChooseOptionPopup(
 			I18nProperties.getCaption(Captions.externalMessageRelatedEntriesFound),
-			new Label(message, ContentMode.HTML),
+			VaadinUiUtil.createLabel(message, ContentMode.HTML),
 			I18nProperties.getCaption(Captions.actionYes),
 			I18nProperties.getCaption(Captions.actionNo),
 			null,
 			ret::complete);
 
-		window.addCloseListener(e -> ret.complete(false));
+		VaadinUiUtil.addCloseListener(window, e -> ret.complete(false));
 
 		return ret;
 	}
@@ -99,12 +97,12 @@ public class RelatedLabMessageHandler extends AbstractRelatedLabMessageHandler {
 
 		CompletableFuture<Boolean> ret = new CompletableFuture<>();
 
-		Window window = VaadinUiUtil.createPopupWindow();
-		Label label = new Label(I18nProperties.getString(Strings.confirmExternalMessageCorrectionThrough));
-		label.addStyleName(CssStyles.LABEL_WHITE_SPACE_NORMAL);
-		CommitDiscardWrapperComponent<Label> confirmComponent = new CommitDiscardWrapperComponent<>(label);
-		confirmComponent.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionYes));
-		confirmComponent.getDiscardButton().setCaption(I18nProperties.getCaption(Captions.actionNo));
+		Dialog window = VaadinUiUtil.createPopupWindow();
+		Span label = new Span(I18nProperties.getString(Strings.confirmExternalMessageCorrectionThrough));
+		label.addClassName(CssStyles.LABEL_WHITE_SPACE_NORMAL);
+		CommitDiscardWrapperComponent<Span> confirmComponent = new CommitDiscardWrapperComponent<>(label);
+		confirmComponent.getCommitButton().setText(I18nProperties.getCaption(Captions.actionYes));
+		confirmComponent.getDiscardButton().setText(I18nProperties.getCaption(Captions.actionNo));
 
 		confirmComponent.addCommitListener(() -> ret.complete(true));
 		confirmComponent.addDiscardListener(() -> ret.complete(false));
@@ -126,7 +124,7 @@ public class RelatedLabMessageHandler extends AbstractRelatedLabMessageHandler {
 
 		return VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getString(Strings.headingExternalMessageCorrection),
-			new Label(I18nProperties.getString(Strings.confirmationExternalMessageCorrection), ContentMode.HTML),
+			VaadinUiUtil.createLabel(I18nProperties.getString(Strings.confirmationExternalMessageCorrection), ContentMode.HTML),
 			I18nProperties.getString(Strings.yes),
 			I18nProperties.getString(Strings.no));
 	}
@@ -149,7 +147,7 @@ public class RelatedLabMessageHandler extends AbstractRelatedLabMessageHandler {
 
 		showCorrectionWindow(labMessage, Strings.headingCorrectPerson, personCorrectionPanel, p -> {
 			FacadeProvider.getPersonFacade().save(p);
-			Notification.show(I18nProperties.getString(Strings.messagePersonSaved), Notification.Type.TRAY_NOTIFICATION);
+			NotificationHelper.show(I18nProperties.getString(Strings.messagePersonSaved), NotificationHelper.Type.TRAY_NOTIFICATION);
 		}, chain);
 	}
 
@@ -174,7 +172,7 @@ public class RelatedLabMessageHandler extends AbstractRelatedLabMessageHandler {
 
 		showCorrectionWindow(labMessage, Strings.headingCorrectSample, sampleCorrectionPanel, s -> {
 			FacadeProvider.getSampleFacade().saveSample(s);
-			Notification.show(I18nProperties.getString(Strings.messageSampleSaved), Notification.Type.TRAY_NOTIFICATION);
+			NotificationHelper.show(I18nProperties.getString(Strings.messageSampleSaved), NotificationHelper.Type.TRAY_NOTIFICATION);
 		}, chain);
 	}
 
@@ -199,7 +197,7 @@ public class RelatedLabMessageHandler extends AbstractRelatedLabMessageHandler {
 
 		showCorrectionWindow(labMessage, Strings.headingCorrectPathogenTest, pathogenTestCorrectionPanel, t -> {
 			FacadeProvider.getPathogenTestFacade().savePathogenTest(t);
-			Notification.show(I18nProperties.getString(Strings.messagePathogenTestSavedShort), Notification.Type.TRAY_NOTIFICATION);
+			NotificationHelper.show(I18nProperties.getString(Strings.messagePathogenTestSavedShort), NotificationHelper.Type.TRAY_NOTIFICATION);
 		}, chain);
 	}
 
@@ -210,7 +208,7 @@ public class RelatedLabMessageHandler extends AbstractRelatedLabMessageHandler {
 		SampleDto sample,
 		RelatedLabMessageHandlerChain chain) {
 
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 
 		int caseSampleCount = ControllerProvider.getSampleController().caseSampleCountOf(sample);
 
@@ -237,7 +235,7 @@ public class RelatedLabMessageHandler extends AbstractRelatedLabMessageHandler {
 			window.close();
 		});
 
-		window.addCloseListener(e -> {
+		VaadinUiUtil.addCloseListener(window, e -> {
 			if (!chain.done()) {
 				chain.cancel();
 			}
@@ -271,7 +269,7 @@ public class RelatedLabMessageHandler extends AbstractRelatedLabMessageHandler {
 		Consumer<T> save,
 		RelatedLabMessageHandlerChain chain) {
 
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 
 		correctionPanel.setCancelListener(e -> {
 			chain.cancel();
@@ -296,7 +294,7 @@ public class RelatedLabMessageHandler extends AbstractRelatedLabMessageHandler {
 				window.close();
 			}
 		});
-		window.addCloseListener(e -> {
+		VaadinUiUtil.addCloseListener(window, e -> {
 			if (!chain.done()) {
 				chain.cancel();
 			}
@@ -305,22 +303,23 @@ public class RelatedLabMessageHandler extends AbstractRelatedLabMessageHandler {
 		HorizontalLayout toolbar = new HorizontalLayout(
 			ButtonHelper.createIconButton(
 				null,
-				VaadinIcons.EYE,
+				VaadinIcon.EYE,
 				e -> ControllerProvider.getExternalMessageController().showExternalMessage(labMessage.getUuid(), false, null)));
-		toolbar.setMargin(new MarginInfo(true, true, false, true));
+		// was MarginInfo(true, true, false, true): partial V8 margins become no padding (look only)
+		toolbar.setPadding(false);
 
 		VerticalLayout content = new VerticalLayout(toolbar, correctionPanel);
-		content.setMargin(false);
+		content.setPadding(false);
 		content.setSpacing(false);
-		content.setExpandRatio(toolbar, 0);
-		content.setExpandRatio(correctionPanel, 1);
+		content.setFlexGrow(0, toolbar);
+		content.setFlexGrow(1, correctionPanel);
 
 		content.setSizeFull();
 
-		window.setContent(content);
+		window.add(content);
 		window.setSizeFull();
-		window.setCaption(I18nProperties.getString(titleTag));
+		window.setHeaderTitle(I18nProperties.getString(titleTag));
 
-		UI.getCurrent().addWindow(window);
+		window.open();
 	}
 }

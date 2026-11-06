@@ -25,11 +25,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Unit;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -51,6 +47,10 @@ import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.DateComparisonValidator;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class PreviousHospitalizationEditForm extends AbstractEditForm<PreviousHospitalizationDto> {
 
@@ -164,7 +164,7 @@ public class PreviousHospitalizationEditForm extends AbstractEditForm<PreviousHo
 			true);
 
 		regionCombo.addValueChangeListener(e -> {
-			RegionReferenceDto regionDto = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto regionDto = (RegionReferenceDto) e.getValue();
 			boolean isEmpty = regionDto == null || regionDto.equals(unknownRegion);
 
 			FieldHelper.removeItems(districtCombo);
@@ -173,7 +173,7 @@ public class PreviousHospitalizationEditForm extends AbstractEditForm<PreviousHo
 				addUnknown(isEmpty ? null : FacadeProvider.getDistrictFacade().getAllActiveByRegion(regionDto.getUuid()), unknownDistrict));
 		});
 		districtCombo.addValueChangeListener(e -> {
-			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getProperty().getValue();
+			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getValue();
 			boolean isEmpty = districtDto == null || districtDto.equals(unknownDistrict);
 
 			FieldHelper.removeItems(healthFacilityCombo);
@@ -185,7 +185,7 @@ public class PreviousHospitalizationEditForm extends AbstractEditForm<PreviousHo
 				addUnknown(isEmpty ? null : FacadeProvider.getFacilityFacade().getActiveHospitalsByDistrict(districtDto, true), unknownFacility));
 		});
 		facilityCommunity.addValueChangeListener(e -> {
-			CommunityReferenceDto communityDto = (CommunityReferenceDto) e.getProperty().getValue();
+			CommunityReferenceDto communityDto = (CommunityReferenceDto) e.getValue();
 			DistrictReferenceDto district = (DistrictReferenceDto) districtCombo.getValue();
 			boolean isDistrictEmpty = district == null || district.equals(unknownDistrict);
 
@@ -204,9 +204,9 @@ public class PreviousHospitalizationEditForm extends AbstractEditForm<PreviousHo
 		regionCombo.addItems(addUnknown(FacadeProvider.getRegionFacade().getAllActiveByServerCountry(), unknownRegion));
 
 		healthFacilityCombo.addValueChangeListener(e -> {
-			if (e.getProperty().getValue() != null) {
-				boolean otherHealthFacility = ((FacilityReferenceDto) e.getProperty().getValue()).getUuid().equals(FacilityDto.OTHER_FACILITY_UUID);
-				boolean noneHealthFacility = ((FacilityReferenceDto) e.getProperty().getValue()).getUuid().equals(FacilityDto.NONE_FACILITY_UUID);
+			if (e.getValue() != null) {
+				boolean otherHealthFacility = ((FacilityReferenceDto) e.getValue()).getUuid().equals(FacilityDto.OTHER_FACILITY_UUID);
+				boolean noneHealthFacility = ((FacilityReferenceDto) e.getValue()).getUuid().equals(FacilityDto.NONE_FACILITY_UUID);
 				boolean visibleAndRequired = otherHealthFacility || noneHealthFacility;
 
 				healthFacilityDetails.setVisible(visibleAndRequired);
@@ -317,9 +317,13 @@ public class PreviousHospitalizationEditForm extends AbstractEditForm<PreviousHo
 		return withUnknown;
 	}
 
+	/**
+	 * Was {@code getInternalValue()}, which Vaadin 7 {@code getValue()} returned for this form (it has no data source):
+	 * the "unknown" placeholders become {@code null}.
+	 */
 	@Override
-	protected PreviousHospitalizationDto getInternalValue() {
-		PreviousHospitalizationDto internalValue = super.getInternalValue();
+	public PreviousHospitalizationDto getValue() {
+		PreviousHospitalizationDto internalValue = super.getValue();
 
 		if (internalValue != null) {
 			if (unknownRegion.equals(internalValue.getRegion())) {
@@ -337,7 +341,7 @@ public class PreviousHospitalizationEditForm extends AbstractEditForm<PreviousHo
 	}
 
 	@Override
-	public void setValue(PreviousHospitalizationDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(PreviousHospitalizationDto newFieldValue) {
 		super.setValue(newFieldValue);
 
 		if (!create && newFieldValue != null) {

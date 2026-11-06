@@ -15,6 +15,7 @@
 
 package de.symeda.sormas.ui.exposure;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -24,13 +25,10 @@ import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.Label;
-import com.vaadin.v7.ui.Table;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.EntityDto;
@@ -154,9 +152,9 @@ public class ExposuresField extends AbstractTableField<ExposureDto> {
 		table.addGeneratedColumn(COLUMN_DESCRIPTION, (Table.ColumnGenerator) (source, itemId, columnId) -> {
 			ExposureDto exposure = (ExposureDto) itemId;
 
-			Label descriptionLabel = new Label(StringUtils.abbreviate(exposure.getDescription(), 75));
+			Span descriptionLabel = new Span(StringUtils.abbreviate(exposure.getDescription(), 75));
 			if (StringUtils.isNotBlank(exposure.getDescription())) {
-				descriptionLabel.setDescription(exposure.getDescription());
+				descriptionLabel.setTitle(exposure.getDescription());
 			}
 
 			return descriptionLabel;
@@ -218,9 +216,9 @@ public class ExposuresField extends AbstractTableField<ExposureDto> {
 
 		final CommitDiscardWrapperComponent<ExposureForm> component =
 			new CommitDiscardWrapperComponent<>(exposureForm, UiUtil.permitted(isEditAllowed, UserRight.CASE_EDIT), exposureForm.getFieldGroup());
-		component.getCommitButton().setCaption(I18nProperties.getString(Strings.done));
+		component.getCommitButton().setText(I18nProperties.getString(Strings.done));
 
-		Window popupWindow = VaadinUiUtil.showModalPopupWindow(component, I18nProperties.getString(Strings.entityExposure));
+		Dialog popupWindow = VaadinUiUtil.showModalPopupWindow(component, I18nProperties.getString(Strings.entityExposure));
 		popupWindow.setHeight(90, Unit.PERCENTAGE);
 
 		if (isEditAllowed) {
@@ -271,8 +269,8 @@ public class ExposuresField extends AbstractTableField<ExposureDto> {
 	}
 
 	@Override
-	public void setPropertyDataSource(Property newDataSource) {
-		super.setPropertyDataSource(newDataSource);
+	public void setValue(Collection newDataSource) {
+		super.setValue(newDataSource);
 
 		if (getValue() != null) {
 			updateAddButtonVisibility(getValue().size());
@@ -305,41 +303,29 @@ public class ExposuresField extends AbstractTableField<ExposureDto> {
 
 	private void showMultipleInfectionEnvironmentsPopup(ExposureDto entry) {
 		VerticalLayout warningLayout = VaadinUiUtil.createWarningLayout();
-		Window popupWindow = VaadinUiUtil.showPopupWindow(warningLayout);
-		com.vaadin.ui.Label infoLabel = new com.vaadin.ui.Label(I18nProperties.getValidationError(Validations.caseMultipleInfectionEnvironments));
+		Dialog popupWindow = VaadinUiUtil.showPopupWindow(warningLayout);
+		Span infoLabel = new Span(I18nProperties.getValidationError(Validations.caseMultipleInfectionEnvironments));
 		CssStyles.style(infoLabel, CssStyles.LABEL_LARGE, CssStyles.LABEL_WHITE_SPACE_NORMAL);
-		warningLayout.addComponent(infoLabel);
+		warningLayout.add(infoLabel);
 		ConfirmationComponent yesNo = VaadinUiUtil.buildYesNoConfirmationComponent();
-		yesNo.getConfirmButton().addClickListener(new Button.ClickListener() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void buttonClick(Button.ClickEvent event) {
-				popupWindow.close();
-				for (ExposureDto exposure : getValue()) {
-					if (exposure.isProbableInfectionEnvironment() && !exposure.getUuid().equals(entry.getUuid())) {
-						exposure.setProbableInfectionEnvironment(false);
-					}
+		yesNo.getConfirmButton().addClickListener(event -> {
+			popupWindow.close();
+			for (ExposureDto exposure : getValue()) {
+				if (exposure.isProbableInfectionEnvironment() && !exposure.getUuid().equals(entry.getUuid())) {
+					exposure.setProbableInfectionEnvironment(false);
 				}
-				getTable().refreshRowCache();
 			}
+			getTable().refreshRowCache();
 		});
 
-		yesNo.getCancelButton().addClickListener(new Button.ClickListener() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void buttonClick(Button.ClickEvent event) {
-				popupWindow.close();
-				entry.setProbableInfectionEnvironment(false);
-				getTable().refreshRowCache();
-			}
+		yesNo.getCancelButton().addClickListener(event -> {
+			popupWindow.close();
+			entry.setProbableInfectionEnvironment(false);
+			getTable().refreshRowCache();
 		});
 
-		warningLayout.addComponent(yesNo);
-		popupWindow.setWidth(800, Sizeable.Unit.PIXELS);
-		popupWindow.setClosable(false);
+		warningLayout.add(yesNo);
+		popupWindow.setWidth(800, Unit.PIXELS);
+		VaadinUiUtil.setClosable(popupWindow, false);
 	}
 }

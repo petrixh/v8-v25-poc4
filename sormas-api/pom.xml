@@ -24,8 +24,8 @@
 		<!-- *** Payara modules *** -->
 
 		<dependency>
-			<groupId>javax</groupId>
-			<artifactId>javaee-web-api</artifactId>
+			<groupId>jakarta.platform</groupId>
+			<artifactId>jakarta.jakartaee-web-api</artifactId>
 		</dependency>
 
 		<!-- *** Payara modules END *** -->

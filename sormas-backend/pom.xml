@@ -17,12 +17,12 @@
 		<!-- *** Payara modules *** -->
 
 		<dependency>
-			<groupId>javax</groupId>
-			<artifactId>javaee-api</artifactId>
+			<groupId>jakarta.platform</groupId>
+			<artifactId>jakarta.jakartaee-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
+			<groupId>jakarta.validation</groupId>
+			<artifactId>jakarta.validation-api</artifactId>
 		</dependency>
 
 		<dependency>
@@ -103,11 +103,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.vladmihalcea</groupId>
-			<artifactId>hibernate-types-55</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
 		</dependency>
@@ -180,12 +175,17 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.hibernate</groupId>
+			<groupId>org.hibernate.orm</groupId>
 			<artifactId>hibernate-core</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-ehcache</artifactId>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-jcache</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ehcache</groupId>
+			<artifactId>ehcache</artifactId>
+			<classifier>jakarta</classifier>
 		</dependency>
 
 		<dependency>
@@ -195,7 +195,7 @@
 
 		<dependency>
 			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-admin-client</artifactId>
+			<artifactId>keycloak-admin-client-jakarta</artifactId>
 		</dependency>
 
 		<dependency>
@@ -234,10 +234,10 @@
 		<!-- *** Test dependencies *** -->
 
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>test</scope>
-			<!-- Avoids java.util.MissingResourceException: Can't find bundle for base name javax.servlet.LocalStrings, locale de_DE -->
+			<!-- Avoids java.util.MissingResourceException: Can't find bundle for base name jakarta.servlet.LocalStrings, locale de_DE -->
 		</dependency>
 
 		<dependency>
@@ -265,13 +265,13 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.geronimo.config</groupId>
-			<artifactId>geronimo-config-impl</artifactId>
+			<groupId>io.smallrye.config</groupId>
+			<artifactId>smallrye-config</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>javax.el</artifactId>
+			<groupId>org.glassfish.expressly</groupId>
+			<artifactId>expressly</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -279,7 +279,13 @@
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
 			<scope>test</scope>
-			<!-- Needed dependency for docx4j-JAXB-ReferenceImpl -->
+			<!-- Jakarta XML Binding runtime for Hibernate in tests (Payara module jaxb-osgi on the server) -->
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
+			<scope>test</scope>
+			<!-- Needed dependency for docx4j-JAXB-ReferenceImpl (javax XML Binding; domain lib on the server) -->
 		</dependency>
 
 		<dependency>

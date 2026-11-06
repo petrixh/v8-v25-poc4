@@ -3,11 +3,10 @@ package de.symeda.sormas.ui.samples;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.RadioButtonGroup;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.customfield.CustomField;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -33,22 +32,24 @@ public class PathogenTestSelectionField extends CustomField<PathogenTestDto> {
 		this.infoText = infoText;
 
 		initializeGrid();
+		// Vaadin 8 built the content on first attach; a Flow custom field holds it from the start
+		add(initContent());
 	}
 
 	private void addInfoComponent() {
-		mainLayout.addComponent(VaadinUiUtil.createInfoComponent(infoText));
+		mainLayout.add(VaadinUiUtil.createInfoComponent(infoText));
 	}
 
 	private void initializeGrid() {
 		testSelectionGrid = new PathogenTestSelectionGrid(tests);
 
 		testSelectionGrid.addSelectionListener(e -> {
-			if (e.getSelected().size() > 0) {
+			if (e.getAllSelectedItems().size() > 0) {
 				rbCreateTest.setValue(null);
 			}
 
 			if (selectionChangeCallback != null) {
-				selectionChangeCallback.accept(!e.getSelected().isEmpty());
+				selectionChangeCallback.accept(!e.getAllSelectedItems().isEmpty());
 			}
 		});
 	}
@@ -57,7 +58,7 @@ public class PathogenTestSelectionField extends CustomField<PathogenTestDto> {
 
 		rbSelectTest = new RadioButtonGroup<>();
 		rbSelectTest.setItems(SELECT_TEST);
-		rbSelectTest.setItemCaptionGenerator((item) -> I18nProperties.getCaption(Captions.pathogenTestSelect));
+		rbSelectTest.setItemLabelGenerator((item) -> I18nProperties.getCaption(Captions.pathogenTestSelect));
 		CssStyles.style(rbSelectTest, CssStyles.VSPACE_NONE);
 		rbSelectTest.addValueChangeListener(e -> {
 			if (e.getValue() != null) {
@@ -69,14 +70,14 @@ public class PathogenTestSelectionField extends CustomField<PathogenTestDto> {
 			}
 		});
 
-		mainLayout.addComponent(rbSelectTest);
+		mainLayout.add(rbSelectTest);
 	}
 
 	private void addCreateTestRadioGroup() {
 
 		rbCreateTest = new RadioButtonGroup<>();
 		rbCreateTest.setItems(CREATE_TEST);
-		rbCreateTest.setItemCaptionGenerator((item) -> I18nProperties.getCaption(Captions.pathogenTestCreateNew));
+		rbCreateTest.setItemLabelGenerator((item) -> I18nProperties.getCaption(Captions.pathogenTestCreateNew));
 		rbCreateTest.addValueChangeListener(e -> {
 			if (e.getValue() != null) {
 				rbSelectTest.setValue(null);
@@ -88,7 +89,7 @@ public class PathogenTestSelectionField extends CustomField<PathogenTestDto> {
 			}
 		});
 
-		mainLayout.addComponent(rbCreateTest);
+		mainLayout.add(rbCreateTest);
 	}
 
 	/**
@@ -98,17 +99,16 @@ public class PathogenTestSelectionField extends CustomField<PathogenTestDto> {
 		this.selectionChangeCallback = callback;
 	}
 
-	@Override
 	protected Component initContent() {
 		mainLayout = new VerticalLayout();
 		mainLayout.setSpacing(true);
-		mainLayout.setMargin(false);
+		mainLayout.setPadding(false);
 		mainLayout.setSizeUndefined();
-		mainLayout.setWidth(100, Sizeable.Unit.PERCENTAGE);
+		mainLayout.setWidthFull();
 
 		addInfoComponent();
 		addSelectTestRadioGroup();
-		mainLayout.addComponent(testSelectionGrid);
+		mainLayout.add(testSelectionGrid);
 		addCreateTestRadioGroup();
 
 		rbSelectTest.setValue(SELECT_TEST);
@@ -117,7 +117,7 @@ public class PathogenTestSelectionField extends CustomField<PathogenTestDto> {
 	}
 
 	@Override
-	protected void doSetValue(PathogenTestDto testDto) {
+	protected void setPresentationValue(PathogenTestDto testDto) {
 		rbSelectTest.setValue(SELECT_TEST);
 
 		if (testDto != null) {
@@ -126,9 +126,17 @@ public class PathogenTestSelectionField extends CustomField<PathogenTestDto> {
 	}
 
 	@Override
+	protected PathogenTestDto generateModelValue() {
+		return getValue();
+	}
+
+	/**
+	 * As in Vaadin 8, the value is read from the grid selection, not from a stored model value.
+	 */
+	@Override
 	public PathogenTestDto getValue() {
 		if (testSelectionGrid != null) {
-			PathogenTestDto value = (PathogenTestDto) testSelectionGrid.getSelectedRow();
+			PathogenTestDto value = testSelectionGrid.getSelectedRow();
 			return value;
 		}
 

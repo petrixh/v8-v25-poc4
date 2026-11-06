@@ -16,14 +16,15 @@ package de.symeda.sormas.ui.samples.sampleLink;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.feature.FeatureType;
@@ -57,66 +58,66 @@ public class SampleListEntry extends SideComponentField {
 		this.sampleListEntryDto = sampleListEntryDto;
 
 		HorizontalLayout topLayout = new HorizontalLayout();
-		topLayout.setWidth(100, Unit.PERCENTAGE);
-		topLayout.setMargin(false);
+		topLayout.setWidthFull();
+		topLayout.setPadding(false);
 		topLayout.setSpacing(false);
 		addComponentToField(topLayout);
 
 		VerticalLayout topLeftLayout = new VerticalLayout();
 		{
-			topLeftLayout.setMargin(false);
+			topLeftLayout.setPadding(false);
 			topLeftLayout.setSpacing(false);
 
-			Label materialLabel = new Label(DataHelper.toStringNullable(sampleListEntryDto.getSampleMaterial()));
+			Span materialLabel = new Span(DataHelper.toStringNullable(sampleListEntryDto.getSampleMaterial()));
 			CssStyles.style(materialLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
 			materialLabel.setWidth(50, Unit.PERCENTAGE);
-			topLeftLayout.addComponent(materialLabel);
+			topLeftLayout.add(materialLabel);
 
-			Label resultLabel = new Label();
+			Span resultLabel = new Span();
 			CssStyles.style(resultLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
 			if (sampleListEntryDto.getPathogenTestResult() != null) {
-				resultLabel.setValue(DataHelper.toStringNullable(sampleListEntryDto.getPathogenTestResult()));
+				resultLabel.setText(DataHelper.toStringNullable(sampleListEntryDto.getPathogenTestResult()));
 				if (sampleListEntryDto.getPathogenTestResult() == PathogenTestResultType.POSITIVE) {
-					resultLabel.addStyleName(CssStyles.LABEL_CRITICAL);
+					resultLabel.addClassName(CssStyles.LABEL_CRITICAL);
 				} else if (sampleListEntryDto.getPathogenTestResult() == PathogenTestResultType.INDETERMINATE) {
-					resultLabel.addStyleName(CssStyles.LABEL_WARNING);
+					resultLabel.addClassName(CssStyles.LABEL_WARNING);
 				}
 			} else if (sampleListEntryDto.getSpecimenCondition() == SpecimenCondition.NOT_ADEQUATE) {
-				resultLabel.setValue(DataHelper.toStringNullable(sampleListEntryDto.getSpecimenCondition()));
-				resultLabel.addStyleName(CssStyles.LABEL_WARNING);
+				resultLabel.setText(DataHelper.toStringNullable(sampleListEntryDto.getSpecimenCondition()));
+				resultLabel.addClassName(CssStyles.LABEL_WARNING);
 			}
-			topLeftLayout.addComponent(resultLabel);
+			topLeftLayout.add(resultLabel);
 
-			Label referredLabel = new Label();
+			Span referredLabel = new Span();
 			CssStyles.style(referredLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
 			if (sampleListEntryDto.isReferred()) {
-				referredLabel.setValue(I18nProperties.getCaption(Captions.sampleReferredShort));
-				referredLabel.addStyleName(CssStyles.LABEL_NOT);
+				referredLabel.setText(I18nProperties.getCaption(Captions.sampleReferredShort));
+				referredLabel.addClassName(CssStyles.LABEL_NOT);
 			} else if (sampleListEntryDto.getSamplePurpose() != SamplePurpose.INTERNAL) {
 				if (sampleListEntryDto.isReceived()) {
-					referredLabel.setValue(
+					referredLabel.setText(
 						I18nProperties.getCaption(Captions.sampleReceived) + " " + DateFormatHelper.formatDate(sampleListEntryDto.getReceivedDate()));
 				} else if (sampleListEntryDto.isShipped()) {
-					referredLabel.setValue(
+					referredLabel.setText(
 						I18nProperties.getCaption(Captions.sampleShipped) + " "
 							+ DateFormatHelper.formatDate((sampleListEntryDto.getShipmentDate())));
 				} else {
-					referredLabel.setValue(I18nProperties.getCaption(Captions.sampleNotShippedLong));
+					referredLabel.setText(I18nProperties.getCaption(Captions.sampleNotShippedLong));
 				}
 			}
-			topLeftLayout.addComponent(referredLabel);
+			topLeftLayout.add(referredLabel);
 
-			Label dateTimeLabel = new Label(
+			Span dateTimeLabel = new Span(
 				I18nProperties.getPrefixCaption(SampleListEntryDto.I18N_PREFIX, SampleListEntryDto.SAMPLE_DATE_TIME) + ": "
 					+ DateFormatHelper.formatDate(sampleListEntryDto.getSampleDateTime()));
-			topLeftLayout.addComponent(dateTimeLabel);
+			topLeftLayout.add(dateTimeLabel);
 
 			if (sampleListEntryDto.getSamplePurpose() == SamplePurpose.INTERNAL) {
-				Label purposeLabel = new Label(SamplePurpose.INTERNAL.toString());
-				topLeftLayout.addComponent(purposeLabel);
+				Span purposeLabel = new Span(SamplePurpose.INTERNAL.toString());
+				topLeftLayout.add(purposeLabel);
 			} else {
-				Label labLabel = new Label(DataHelper.toStringNullable(sampleListEntryDto.getLab()));
-				topLeftLayout.addComponent(labLabel);
+				Span labLabel = new Span(DataHelper.toStringNullable(sampleListEntryDto.getLab()));
+				topLeftLayout.add(labLabel);
 			}
 
 			SamplingReason samplingReason = sampleListEntryDto.getSamplingReason();
@@ -125,80 +126,80 @@ public class SampleListEntry extends SideComponentField {
 				if (samplingReason == SamplingReason.OTHER_REASON && sampleListEntryDto.getSamplingReasonDetails() != null) {
 					samplingReasonCaption = sampleListEntryDto.getSamplingReasonDetails();
 				}
-				Label samplingReasonLabel = new Label(
+				Span samplingReasonLabel = new Span(
 					I18nProperties.getPrefixCaption(SampleListEntryDto.I18N_PREFIX, SampleListEntryDto.SAMPLING_REASON) + ": "
 						+ samplingReasonCaption);
-				topLeftLayout.addComponent(samplingReasonLabel);
+				topLeftLayout.add(samplingReasonLabel);
 			}
 
-			Label testCountLabel = new Label(
+			Span testCountLabel = new Span(
 				I18nProperties.getPrefixCaption(SampleListEntryDto.I18N_PREFIX, SampleListEntryDto.PATHOGEN_TEST_COUNT) + ": "
 					+ sampleListEntryDto.getPathogenTestCount());
-			topLeftLayout.addComponent(testCountLabel);
+			topLeftLayout.add(testCountLabel);
 
 			if (sampleListEntryDto.getPathogenTestCount() > 0) {
 				VerticalLayout latestTestLayout = new VerticalLayout();
-				latestTestLayout.setMargin(false);
+				latestTestLayout.setPadding(false);
 				latestTestLayout.setSpacing(false);
 
-				Label heading = new Label(I18nProperties.getCaption(Captions.latestPathogenTest));
+				Span heading = new Span(I18nProperties.getCaption(Captions.latestPathogenTest));
 				CssStyles.style(heading, CssStyles.LABEL_BOLD);
 				PathogenTestDto latestTest = FacadeProvider.getPathogenTestFacade().getLatestPathogenTest(sampleListEntryDto.getUuid());
-				Label testDate = new Label(
+				Span testDate = new Span(
 					I18nProperties.getPrefixCaption(PathogenTestDto.I18N_PREFIX, PathogenTestDto.TEST_DATE_TIME) + ": "
 						+ DateFormatHelper.formatLocalDateTime(latestTest.getTestDateTime()));
 				HorizontalLayout bottomLayout = new HorizontalLayout();
-				Label testType = new Label(latestTest.getTestType().toString());
-				bottomLayout.addComponent(testType);
+				Span testType = new Span(latestTest.getTestType().toString());
+				bottomLayout.add(testType);
 				if (latestTest.getCqValue() != null) {
-					Label cqValue = new Label(
+					Span cqValue = new Span(
 						I18nProperties.getPrefixCaption(PathogenTestDto.I18N_PREFIX, PathogenTestDto.CQ_VALUE) + ": " + latestTest.getCqValue());
-					cqValue.addStyleName(CssStyles.ALIGN_RIGHT);
-					bottomLayout.addComponent(cqValue);
+					cqValue.addClassName(CssStyles.ALIGN_RIGHT);
+					bottomLayout.add(cqValue);
 				}
 				// Need to include the variants
 				String variant = determineSideComponentVariant(latestTest);
 
 				if (StringUtils.isNotBlank(variant)) {
-					Label variantLabel = new Label(DataHelper.toStringNullable(variant == null ? latestTest.getTestResult() : variant));
+					Span variantLabel = new Span(DataHelper.toStringNullable(variant == null ? latestTest.getTestResult() : variant));
 					if (latestTest.getTestResult() == PathogenTestResultType.POSITIVE) {
 						CssStyles.style(variantLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_CRITICAL);
 					} else {
 						CssStyles.style(variantLabel, CssStyles.LABEL_WARNING);
 					}
-					bottomLayout.addComponent(variantLabel);
+					bottomLayout.add(variantLabel);
 				}
-				latestTestLayout.addComponents(heading, testDate, bottomLayout);
-				topLeftLayout.addComponent(latestTestLayout);
+				latestTestLayout.add(heading, testDate, bottomLayout);
+				topLeftLayout.add(latestTestLayout);
 			}
 		}
 
-		topLayout.addComponent(topLeftLayout);
-		topLayout.setComponentAlignment(topLeftLayout, Alignment.TOP_LEFT);
+		topLayout.add(topLeftLayout);
+		topLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, topLeftLayout);
 
 		if (sampleListEntryDto.getAdditionalTestingStatus() != AdditionalTestingStatus.NOT_REQUESTED
 			&& UiUtil.permitted(FeatureType.ADDITIONAL_TESTS, UserRight.ADDITIONAL_TEST_VIEW)) {
-			Label labelAdditionalTests = new Label(
+			Span labelAdditionalTests = new Span(
 				I18nProperties.getString(Strings.entityAdditionalTests) + " "
 					+ sampleListEntryDto.getAdditionalTestingStatus().toString().toLowerCase());
 			addComponentToField(labelAdditionalTests);
 		}
 	}
 
-	public void addAssociatedLabMessagesListener(ClickListener associatedLabMessagesClickListener) {
+	public void addAssociatedLabMessagesListener(ComponentEventListener<ClickEvent<Button>> associatedLabMessagesClickListener) {
 		if (associatedLabMessagesButton == null) {
 			associatedLabMessagesButton = ButtonHelper.createIconButtonWithCaption(
 				"see-associated-lab-messages-" + sampleListEntryDto.getUuid(),
 				null,
-				VaadinIcons.NOTEBOOK,
+				VaadinIcon.NOTEBOOK,
 				associatedLabMessagesClickListener,
-				ValoTheme.BUTTON_LINK,
+				CssStyles.BUTTON_LINK,
 				CssStyles.BUTTON_COMPACT);
 
-			addComponent(associatedLabMessagesButton);
-			setComponentAlignment(associatedLabMessagesButton, Alignment.TOP_RIGHT);
-			setExpandRatio(associatedLabMessagesButton, 0);
-			associatedLabMessagesButton.setDescription(I18nProperties.getDescription(Descriptions.Sample_associatedLabMessages));
+			add(associatedLabMessagesButton);
+			setVerticalComponentAlignment(FlexComponent.Alignment.START, associatedLabMessagesButton);
+			setFlexGrow(0, associatedLabMessagesButton);
+			associatedLabMessagesButton.setTooltipText(I18nProperties.getDescription(Descriptions.Sample_associatedLabMessages));
 		}
 	}
 

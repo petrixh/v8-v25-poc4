@@ -15,11 +15,11 @@
 
 package de.symeda.sormas.ui.samples;
 
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.utils.criteria.BaseCriteria;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import de.symeda.sormas.ui.utils.ReloadableGrid;
 
 public abstract class SampleGridComponent<T, C extends BaseCriteria> extends VerticalLayout {

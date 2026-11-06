@@ -6,10 +6,8 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocsCss;
 import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 
-import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Validations;
@@ -18,6 +16,9 @@ import de.symeda.sormas.api.sample.SampleDto;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.DateComparisonValidator;
 import de.symeda.sormas.ui.utils.DateTimeField;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class AdditionalTestForm extends AbstractEditForm<AdditionalTestDto> {
 
@@ -64,9 +65,9 @@ public class AdditionalTestForm extends AbstractEditForm<AdditionalTestDto> {
 			return;
 		}
 
-		Label bloodGasHeadingLabel =
-			new Label(I18nProperties.getPrefixCaption(AdditionalTestDto.I18N_PREFIX, AdditionalTestDto.ARTERIAL_VENOUS_BLOOD_GAS));
-		bloodGasHeadingLabel.addStyleName(H4);
+		Span bloodGasHeadingLabel =
+			new Span(I18nProperties.getPrefixCaption(AdditionalTestDto.I18N_PREFIX, AdditionalTestDto.ARTERIAL_VENOUS_BLOOD_GAS));
+		bloodGasHeadingLabel.addClassName(H4);
 		getContent().addComponent(bloodGasHeadingLabel, BLOOD_GAS_HEADING_LOC);
 
 		DateTimeField testDateTimeField = addField(AdditionalTestDto.TEST_DATE_TIME, DateTimeField.class);

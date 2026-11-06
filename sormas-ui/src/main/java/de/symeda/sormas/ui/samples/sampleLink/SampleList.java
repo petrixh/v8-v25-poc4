@@ -19,8 +19,7 @@ package de.symeda.sormas.ui.samples.sampleLink;
 
 import java.util.List;
 
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.externalmessage.ExternalMessageDto;
@@ -40,13 +39,13 @@ public class SampleList extends PaginationList<SampleListEntryDto> {
 	private static final int MAX_DISPLAYED_ENTRIES = 5;
 
 	private final SampleCriteria sampleCriteria;
-	private final Label noSamplesLabel;
+	private final Span noSamplesLabel;
 	private final boolean isEditAllowed;
 
 	public SampleList(SampleCriteria sampleCriteria, boolean isEditAllowed) {
 		super(MAX_DISPLAYED_ENTRIES);
 		this.sampleCriteria = sampleCriteria;
-		noSamplesLabel = new Label(buildNoSamplesCaption(sampleCriteria.getSampleAssociationType()));
+		noSamplesLabel = new Span(buildNoSamplesCaption(sampleCriteria.getSampleAssociationType()));
 		this.isEditAllowed = isEditAllowed;
 	}
 
@@ -58,9 +57,9 @@ public class SampleList extends PaginationList<SampleListEntryDto> {
 		if (!samples.isEmpty()) {
 			showPage(1);
 		} else {
-			listLayout.removeAllComponents();
+			listLayout.removeAll();
 			updatePaginationLayout();
-			listLayout.addComponent(noSamplesLabel);
+			listLayout.add(noSamplesLabel);
 		}
 	}
 
@@ -81,11 +80,11 @@ public class SampleList extends PaginationList<SampleListEntryDto> {
 			if (userHasSampleEdit && userHasLaboratoryProcessing) {
 				listEntry.addEditButton(
 					"edit-sample-" + sampleUuid,
-					(ClickListener) event -> ControllerProvider.getSampleController().navigateToData(sampleUuid));
+					event -> ControllerProvider.getSampleController().navigateToData(sampleUuid));
 			} else {
 				listEntry.addViewButton(
 					"view-sample" + sampleUuid,
-					(ClickListener) event -> ControllerProvider.getSampleController().navigateToData(sampleUuid));
+					event -> ControllerProvider.getSampleController().navigateToData(sampleUuid));
 			}
 
 			listEntry.setEnabled(isEditAllowed);
@@ -99,7 +98,7 @@ public class SampleList extends PaginationList<SampleListEntryDto> {
 				}
 			}
 
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 

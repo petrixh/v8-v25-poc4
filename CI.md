@@ -7,13 +7,15 @@ CI is one GitHub Actions workflow, [`.github/workflows/ci.yml`](.github/workflow
 On every push to any branch (there is no pull request trigger: a pushed commit's checks show on its PR), one job on `ubuntu-latest`:
 
 1. **Skip if already green.** If this commit already has a successful run of this workflow (for example a branch created at a commit that was already checked, or a re-run of a green run), the job ends after this step.
-2. Checkout, JDK 11 (Temurin), Maven dependency cache (Actions cache, keyed on the `pom.xml` files).
+2. Checkout, JDK 21 (Temurin), Maven dependency cache (Actions cache, keyed on the `pom.xml` files).
 3. `mvn -B -ntp clean install` in `sormas-base` with the default profiles (the Android app profile `with-app` is not built). This compiles all modules and runs the unit tests of `sormas-api`, `sormas-backend`, `sormas-rest` and `sormas-ui`.
 4. **Test report:** test counts per module go in the job summary. The job fails if `HistoryTablesTest` (the Testcontainers test that starts PostgreSQL in Docker) did not run and pass: without a usable Docker it is skipped silently. The workflow sets the Docker API version for Testcontainers (see below): the Ubuntu 24.04 runner (Docker 28) does not need it, the Ubuntu 26.04 runner (Docker 29) does, and `ubuntu-latest` moves to 26.04 in November 2026.
-5. **Smoke**, on the artefacts this build just made (see "Smoke" below): start one app copy with `env/`, log in as each web test user, stop the copy.
+5. **Smoke**, on the artefacts this build just made (see "Smoke" below): start one app copy with `env/`, log in as each web test user, stop the copy. **Non-blocking until migration ticket 1a-22** (see below).
 6. On failure only: the surefire reports, the smoke screenshots and results and the app's server log are uploaded as a diagnostics artifact kept for 3 days. Nothing else is uploaded; the built war and ear files are not kept.
 
 ## Smoke
+
+**Non-blocking during migration stage 1a, until ticket 1a-22.** The app is built for Java 21 (`maven.compiler.release` 21), but `env/` still runs Payara 5.2022.5 on JDK 11, which cannot read Java 21 classes ("Unsupported class file major version 65" while Payara scans the archives): the app does not come up, so the smoke fails. Every smoke step has `continue-on-error: true`, the start waits 5 minutes instead of 15 (`APP_ENV_WAIT_S=300`), the logins run only when the start succeeded, and the step "Smoke: result" reports the outcome as a warning and in the job summary. A green job therefore says nothing about the smoke until then. Ticket 1a-22 brings the Payara 7 environment on JDK 21 and makes the smoke blocking again.
 
 The smoke steps use the reproducible environment ([`env/README.md`](env/README.md)) with its defaults (port 18080, project `sormas-old-env`):
 
@@ -27,7 +29,7 @@ The smoke uses a real-browser user agent (`HeadlessChrome` replaced with `Chrome
 
 ## Run the same locally
 
-You need JDK 11, Maven 3.9 and a running Docker (for `HistoryTablesTest`).
+You need JDK 21, Maven 3.9 and a running Docker (for `HistoryTablesTest`).
 
 ```sh
 # Docker 29 or later only accepts API 1.44 or later; Testcontainers 1.18.3 asks for 1.32 unless told:

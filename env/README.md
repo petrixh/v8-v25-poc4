@@ -4,6 +4,12 @@ One command starts a copy of SORMAS in a known state: Payara 5.2022.5 on JDK 11,
 from a committed snapshot and a local mail sink, in one of two test configurations (C1 default, C2 Germany with optional
 features). Several copies can run side by side, each with its own port, containers, database and configuration.
 
+**Java 21 build, Payara 5 runtime (migration stage 1a, until ticket 1a-22).** `build.sh` builds with JDK 21 and the app
+targets Java 21 (`maven.compiler.release` 21). The image is still Payara 5.2022.5 on JDK 11, which cannot load Java 21
+classes ("Unsupported class file major version 65"): the build succeeds, but the app does not come up and `up.sh`
+stops with "app did not come up".
+Ticket 1a-22 brings the Payara 7 environment on JDK 21. Until then a copy of the app cannot be started from this branch.
+
 ```sh
 env/up.sh                        # build, start C1 with its snapshot: http://localhost:18080/sormas-ui/
 env/reset.sh                     # back to the snapshot state
@@ -55,7 +61,7 @@ These scripts follow the replay runner's env-script contract (`up.sh [--no-build
 `up.sh [--no-build]`
 1. Refuses to start when this copy's containers already exist (run `down.sh` first).
 2. Builds (`build.sh`), unless `--no-build` is given and the image and the built artefacts exist:
-   - `mvn clean install -DskipTests` with Maven 3.9 on JDK 11 in a container (`maven:3.9-eclipse-temurin-11`), default
+   - `mvn clean install -DskipTests` with Maven 3.9 on JDK 21 in a container (`maven:3.9-eclipse-temurin-21`), default
      profiles, on a clean clone of this checkout's **committed HEAD** in `env/.state/build/src` (uncommitted changes
      are not built; `up.sh` warns). The files under `env/` are used from the working tree.
    - collects the ear, the two wars, the server libraries and `sormas-base/setup` files into `env/.state/build/deploy`.

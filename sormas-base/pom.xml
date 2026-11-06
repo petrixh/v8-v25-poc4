@@ -9,7 +9,7 @@
 
 	<properties>
 		<maven.minimum.version>3.6.3</maven.minimum.version>
-		<maven.compiler.release>11</maven.compiler.release>
+		<maven.compiler.release>21</maven.compiler.release>
 		<maven.javadoc.doclint>none</maven.javadoc.doclint>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -41,10 +41,12 @@
 		<kotlin-stdlib.version>1.9.0</kotlin-stdlib.version>
 		<xdocreport.version>2.0.4</xdocreport.version>
 		<docx4j.version>8.3.9</docx4j.version>
-		<archunit.version>1.0.1</archunit.version>
+		<archunit.version>1.1.0</archunit.version>
 		<junit.version>5.9.3</junit.version>
 		<hamcrest.version>2.2</hamcrest.version>
 		<mockito.version>5.2.0</mockito.version>
+		<!-- Java 21: first Byte Buddy release that supports Java 21 (Mockito and Hibernate 5.6 proxies); managed version only -->
+		<byte-buddy.version>1.14.3</byte-buddy.version>
 		<apache-tika.version>2.8.0</apache-tika.version>
 		<temportal-tables.version>0.4.2</temportal-tables.version>
 
@@ -1311,6 +1313,17 @@
 				<version>${mockito.version}</version>
 				<scope>test</scope>
 			</dependency>
+			<!-- Version only, no scope: each module keeps the scope it gets the jar with (Mockito: test, Hibernate: provided) -->
+			<dependency>
+				<groupId>net.bytebuddy</groupId>
+				<artifactId>byte-buddy</artifactId>
+				<version>${byte-buddy.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.bytebuddy</groupId>
+				<artifactId>byte-buddy-agent</artifactId>
+				<version>${byte-buddy.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.apache.geronimo.config</groupId>
@@ -1507,7 +1520,7 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.10</version>
+					<version>0.8.11</version>
 					<inherited>true</inherited>
 					<executions>
 						<execution>

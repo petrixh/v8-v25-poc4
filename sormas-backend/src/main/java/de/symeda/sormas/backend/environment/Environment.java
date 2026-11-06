@@ -25,7 +25,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
 
 import de.symeda.sormas.api.caze.InvestigationStatus;
 import de.symeda.sormas.api.environment.EnvironmentInfrastructureDetails;
@@ -197,7 +197,7 @@ public class Environment extends CoreAdo {
 		this.otherInfrastructureDetails = otherInfrastructureDetails;
 	}
 
-	@Type(type = ModelConstants.HIBERNATE_TYPE_JSON)
+	@JdbcTypeCode(ModelConstants.HIBERNATE_TYPE_JSON)
 	@Column(columnDefinition = ModelConstants.COLUMN_DEFINITION_JSON)
 	public Map<WaterUse, Boolean> getWaterUse() {
 		return waterUse;

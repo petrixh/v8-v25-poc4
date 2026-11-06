@@ -28,7 +28,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
 
 import de.symeda.sormas.api.messaging.MessageType;
 import de.symeda.sormas.api.utils.FieldConstraints;
@@ -127,7 +127,7 @@ public class ManualMessageLog extends AbstractDomainObject {
 		this.usedTemplate = usedTemplate;
 	}
 
-	@Type(type = ModelConstants.HIBERNATE_TYPE_JSON)
+	@JdbcTypeCode(ModelConstants.HIBERNATE_TYPE_JSON)
 	@Column(columnDefinition = ModelConstants.COLUMN_DEFINITION_JSON)
 	public List<String> getAttachedDocuments() {
 		return attachedDocuments;

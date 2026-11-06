@@ -31,10 +31,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-
-import com.vladmihalcea.hibernate.type.array.ListArrayType;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import de.symeda.sormas.api.sample.GenoType;
 import de.symeda.sormas.api.sample.PCRTestSpecification;
@@ -52,7 +50,6 @@ import de.symeda.sormas.backend.common.AbstractDomainObject;
 import de.symeda.sormas.backend.infrastructure.country.Country;
 
 @Entity(name = TestReport.TABLE_NAME)
-@TypeDef(name = "list-array", typeClass = ListArrayType.class)
 public class TestReport extends AbstractDomainObject {
 
 	private static final long serialVersionUID = -9164498173635523905L;
@@ -195,7 +192,7 @@ public class TestReport extends AbstractDomainObject {
 		this.testLabName = testLabName;
 	}
 
-	@Type(type = "list-array")
+	@JdbcTypeCode(SqlTypes.ARRAY)
 	@Column(name = "testlabexternalids", columnDefinition = "VARCHAR(255) ARRAY")
 	public List<String> getTestLabExternalIds() {
 		return testLabExternalIds;

@@ -14,7 +14,7 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.contact.QuarantineType;
@@ -322,7 +322,7 @@ public class TravelEntry extends CoreAdo implements IsTravelEntry {
 		this.testedNegative = testedNegative;
 	}
 
-	@Type(type = ModelConstants.HIBERNATE_TYPE_JSON)
+	@JdbcTypeCode(ModelConstants.HIBERNATE_TYPE_JSON)
 	@Column(columnDefinition = ModelConstants.COLUMN_DEFINITION_JSON)
 	public List<DeaContentEntry> getDeaContent() {
 		return deaContent;

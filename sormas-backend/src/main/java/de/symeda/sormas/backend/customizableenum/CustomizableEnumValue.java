@@ -26,7 +26,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 
 import de.symeda.sormas.api.customizableenum.CustomizableEnumConverter;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.customizableenum.CustomizableEnumTranslation;
@@ -98,7 +98,7 @@ public class CustomizableEnumValue extends AbstractDomainObject {
 		this.caption = caption;
 	}
 
-	@Type(type = ModelConstants.HIBERNATE_TYPE_JSON)
+	@JdbcTypeCode(ModelConstants.HIBERNATE_TYPE_JSON)
 	@Column(columnDefinition = ModelConstants.COLUMN_DEFINITION_JSON)
 	public List<CustomizableEnumTranslation> getTranslations() {
 		return translations;
@@ -127,7 +127,7 @@ public class CustomizableEnumValue extends AbstractDomainObject {
 		this.description = description;
 	}
 
-	@Type(type = ModelConstants.HIBERNATE_TYPE_JSON)
+	@JdbcTypeCode(ModelConstants.HIBERNATE_TYPE_JSON)
 	@Column(columnDefinition = ModelConstants.COLUMN_DEFINITION_JSON)
 	public List<CustomizableEnumTranslation> getDescriptionTranslations() {
 		return descriptionTranslations;
@@ -137,7 +137,7 @@ public class CustomizableEnumValue extends AbstractDomainObject {
 		this.descriptionTranslations = descriptionTranslations;
 	}
 
-	@Type(type = ModelConstants.HIBERNATE_TYPE_JSON)
+	@JdbcTypeCode(ModelConstants.HIBERNATE_TYPE_JSON)
 	@Column(columnDefinition = ModelConstants.COLUMN_DEFINITION_JSON)
 	public Map<String, Object> getProperties() {
 		return properties;

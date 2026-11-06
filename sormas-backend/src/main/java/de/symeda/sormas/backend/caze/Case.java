@@ -41,7 +41,7 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.caze.CaseClassification;
@@ -1716,7 +1716,7 @@ public class Case extends CoreAdo implements IsCase, SormasToSormasShareable, Ha
 		this.reinfectionStatus = reinfectionStatus;
 	}
 
-	@Type(type = ModelConstants.HIBERNATE_TYPE_JSON)
+	@JdbcTypeCode(ModelConstants.HIBERNATE_TYPE_JSON)
 	@Column(columnDefinition = ModelConstants.COLUMN_DEFINITION_JSON)
 	public Map<ReinfectionDetail, Boolean> getReinfectionDetails() {
 		return reinfectionDetails;
@@ -1866,7 +1866,7 @@ public class Case extends CoreAdo implements IsCase, SormasToSormasShareable, Ha
 		this.quarantineChangeComment = quarantineChangeComment;
 	}
 
-	@Type(type = ModelConstants.HIBERNATE_TYPE_JSON)
+	@JdbcTypeCode(ModelConstants.HIBERNATE_TYPE_JSON)
 	@Column(columnDefinition = ModelConstants.COLUMN_DEFINITION_JSON)
 	public Map<String, String> getExternalData() {
 		return externalData;

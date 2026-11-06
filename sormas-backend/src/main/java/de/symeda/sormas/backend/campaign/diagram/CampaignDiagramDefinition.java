@@ -7,7 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
 
 import de.symeda.sormas.api.campaign.diagram.CampaignDiagramSeries;
 import de.symeda.sormas.api.campaign.diagram.CampaignDiagramTranslations;
@@ -59,7 +59,7 @@ public class CampaignDiagramDefinition extends AbstractDomainObject {
 		this.diagramType = diagramType;
 	}
 
-	@Type(type = ModelConstants.HIBERNATE_TYPE_JSON)
+	@JdbcTypeCode(ModelConstants.HIBERNATE_TYPE_JSON)
 	@Column(columnDefinition = ModelConstants.COLUMN_DEFINITION_JSON)
 	public List<CampaignDiagramSeries> getCampaignDiagramSeries() {
 		return campaignDiagramSeries;
@@ -69,7 +69,7 @@ public class CampaignDiagramDefinition extends AbstractDomainObject {
 		this.campaignDiagramSeries = campaignDiagramSeries;
 	}
 
-	@Type(type = ModelConstants.HIBERNATE_TYPE_JSON)
+	@JdbcTypeCode(ModelConstants.HIBERNATE_TYPE_JSON)
 	@Column(columnDefinition = ModelConstants.COLUMN_DEFINITION_JSON)
 	public List<CampaignDiagramSeries> getCampaignSeriesTotal() {
 		return campaignSeriesTotal;
@@ -88,7 +88,7 @@ public class CampaignDiagramDefinition extends AbstractDomainObject {
 		this.percentageDefault = percentageDefault;
 	}
 
-	@Type(type = ModelConstants.HIBERNATE_TYPE_JSON)
+	@JdbcTypeCode(ModelConstants.HIBERNATE_TYPE_JSON)
 	@Column(columnDefinition = ModelConstants.COLUMN_DEFINITION_JSON)
 	public List<CampaignDiagramTranslations> getCampaignDiagramTranslations() {
 		return campaignDiagramTranslations;

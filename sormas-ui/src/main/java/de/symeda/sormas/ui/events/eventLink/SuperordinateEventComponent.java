@@ -17,12 +17,11 @@ package de.symeda.sormas.ui.events.eventLink;
 
 import java.util.function.Consumer;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.event.EventCriteria;
@@ -54,21 +53,21 @@ public class SuperordinateEventComponent extends VerticalLayout {
 
 	private void initialize() {
 		setWidthFull();
-		setMargin(false);
+		setPadding(false);
 		setSpacing(false);
 
-		Label lblHeading = new Label(I18nProperties.getCaption(Captions.eventSuperordinateEvent));
-		lblHeading.addStyleName(CssStyles.H3);
-		addComponent(lblHeading);
+		Span lblHeading = new Span(I18nProperties.getCaption(Captions.eventSuperordinateEvent));
+		lblHeading.addClassName(CssStyles.H3);
+		add(lblHeading);
 
 		HorizontalLayout buttonLayout = new HorizontalLayout();
-		buttonLayout.setMargin(false);
+		buttonLayout.setPadding(false);
 		buttonLayout.setSpacing(true);
-		buttonLayout.setWidth(100, Unit.PERCENTAGE);
+		buttonLayout.setWidthFull();
 		CssStyles.style(buttonLayout, CssStyles.VSPACE_TOP_3);
 
 		if (subordinateEvent.getSuperordinateEvent() != null) {
-			addComponent(
+			add(
 				new SuperordinateEventInfoLayout(
 					FacadeProvider.getEventFacade().getEventByUuid(subordinateEvent.getSuperordinateEvent().getUuid(), false)));
 
@@ -76,34 +75,34 @@ public class SuperordinateEventComponent extends VerticalLayout {
 				Button btnUnlinkEvent = ButtonHelper.createIconButtonWithCaption(
 					"unlinkSuperordinateEvent",
 					I18nProperties.getCaption(Captions.eventUnlinkEvent),
-					VaadinIcons.UNLINK,
+					VaadinIcon.UNLINK,
 					e -> actionCallback.accept(
 						() -> ControllerProvider.getEventController()
 							.removeSuperordinateEvent(
 								subordinateEvent,
 								true,
 								I18nProperties.getString(Strings.messageEventSuperordinateEventUnlinked))),
-					ValoTheme.BUTTON_PRIMARY);
+					CssStyles.BUTTON_PRIMARY);
 				btnUnlinkEvent.setWidthFull();
-				buttonLayout.addComponent(btnUnlinkEvent);
+				buttonLayout.add(btnUnlinkEvent);
 
 				Button btnOpenEvent = ButtonHelper.createIconButtonWithCaption(
 					"openSuperordinateEvent",
 					I18nProperties.getCaption(Captions.eventOpenSuperordinateEvent),
-					VaadinIcons.EYE,
+					VaadinIcon.EYE,
 					e -> ControllerProvider.getEventController().navigateToData(subordinateEvent.getSuperordinateEvent().getUuid()),
-					ValoTheme.BUTTON_PRIMARY);
+					CssStyles.BUTTON_PRIMARY);
 				btnOpenEvent.setWidthFull();
-				buttonLayout.addComponent(btnOpenEvent);
+				buttonLayout.add(btnOpenEvent);
 			}
 		} else {
-			addComponent(new Label(I18nProperties.getString(Strings.infoNoSuperordinateEvent)));
+			add(new Span(I18nProperties.getString(Strings.infoNoSuperordinateEvent)));
 
 			if (UiUtil.permitted(UserRight.EVENT_CREATE, UserRight.EVENT_EDIT)) {
 				Button btnLinkEvent = ButtonHelper.createIconButtonWithCaption(
 					"linkSuperordinateEvent",
 					I18nProperties.getCaption(Captions.linkEvent),
-					VaadinIcons.PLUS_CIRCLE,
+					VaadinIcon.PLUS_CIRCLE,
 					thisEvent -> {
 						long events = FacadeProvider.getEventFacade().count(new EventCriteria());
 						if (events > 0) {
@@ -114,12 +113,12 @@ public class SuperordinateEventComponent extends VerticalLayout {
 								.accept(() -> ControllerProvider.getEventController().createSuperordinateEvent(subordinateEvent.toReference()));
 						}
 					},
-					ValoTheme.BUTTON_PRIMARY);
-				buttonLayout.addComponent(btnLinkEvent);
+					CssStyles.BUTTON_PRIMARY);
+				buttonLayout.add(btnLinkEvent);
 			}
 		}
 
-		addComponent(buttonLayout);
+		add(buttonLayout);
 	}
 
 	private class SuperordinateEventInfoLayout extends AbstractInfoLayout<EventDto> {
@@ -132,22 +131,22 @@ public class SuperordinateEventComponent extends VerticalLayout {
 			super(EventDto.class, FieldAccessHelper.getFieldAccessCheckers(superordinateEvent));
 			this.superordinateEvent = superordinateEvent;
 			setSpacing(true);
-			setMargin(false);
+			setPadding(false);
 			setWidthFull();
 			initialize();
 		}
 
 		private void initialize() {
 			VerticalLayout leftColumnLayout = new VerticalLayout();
-			leftColumnLayout.setMargin(false);
+			leftColumnLayout.setPadding(false);
 			leftColumnLayout.setSpacing(true);
 			{
-				final Label uuidLabel = addDescLabel(
+				final Span uuidLabel = addDescLabel(
 					leftColumnLayout,
 					EventDto.UUID,
 					DataHelper.getShortUuid(superordinateEvent.getUuid()),
 					I18nProperties.getPrefixCaption(EventDto.I18N_PREFIX, EventDto.UUID));
-				uuidLabel.setDescription(subordinateEvent.getUuid());
+				uuidLabel.setTitle(subordinateEvent.getUuid());
 
 				addDescLabel(
 					leftColumnLayout,
@@ -161,10 +160,10 @@ public class SuperordinateEventComponent extends VerticalLayout {
 					EventHelper.buildEventDateString(superordinateEvent.getStartDate(), superordinateEvent.getEndDate()),
 					I18nProperties.getCaption(Captions.singleDayEventDate));
 			}
-			addComponent(leftColumnLayout);
+			add(leftColumnLayout);
 
 			VerticalLayout rightColumnLayout = new VerticalLayout();
-			rightColumnLayout.setMargin(false);
+			rightColumnLayout.setPadding(false);
 			rightColumnLayout.setSpacing(true);
 			{
 				addDescLabel(
@@ -179,7 +178,7 @@ public class SuperordinateEventComponent extends VerticalLayout {
 					superordinateEvent.getEventStatus().toString(),
 					I18nProperties.getPrefixCaption(EventDto.I18N_PREFIX, EventDto.EVENT_STATUS));
 			}
-			addComponent(rightColumnLayout);
+			add(rightColumnLayout);
 		}
 	}
 

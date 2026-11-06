@@ -23,10 +23,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import com.opencsv.exceptions.CsvValidationException;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.event.EventParticipantDto;
@@ -45,6 +43,7 @@ import de.symeda.sormas.ui.importer.ImportSimilarityResultOption;
 import de.symeda.sormas.ui.importer.PersonImportSimilarityResult;
 import de.symeda.sormas.ui.person.PersonSelectionField;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 /**
@@ -71,7 +70,7 @@ public class EventImporter extends DataImporter {
 	}
 
 	@Override
-	public void startImport(Consumer<StreamResource> addErrorReportToLayoutCallback, UI currentUI, boolean duplicatesPossible)
+	public void startImport(Consumer<StreamSourceDownloadHandler> addErrorReportToLayoutCallback, UI currentUI, boolean duplicatesPossible)
 		throws IOException, CsvValidationException {
 
 		this.currentUI = currentUI;
@@ -158,7 +157,7 @@ public class EventImporter extends DataImporter {
 		currentUI.accessSynchronously(() -> {
 			PersonSelectionField personSelect =
 				new PersonSelectionField(newPerson, I18nProperties.getString(Strings.infoSelectOrCreatePersonForImport));
-			personSelect.setWidth(1024, Unit.PIXELS);
+			personSelect.setWidth("1024px");
 
 			if (personSelect.hasMatches()) {
 				final CommitDiscardWrapperComponent<PersonSelectionField> component = new CommitDiscardWrapperComponent<>(personSelect);
@@ -175,8 +174,10 @@ public class EventImporter extends DataImporter {
 
 				personSelect.setSelectionChangeCallback((commitAllowed) -> component.getCommitButton().setEnabled(commitAllowed));
 
-				Window window = VaadinUiUtil.showModalPopupWindow(component, I18nProperties.getString(Strings.headingPickOrCreatePerson));
-				window.addCloseListener(event -> resultConsumer.accept(new PersonImportSimilarityResult(null, ImportSimilarityResultOption.SKIP)));
+				Dialog window = VaadinUiUtil.showModalPopupWindow(component, I18nProperties.getString(Strings.headingPickOrCreatePerson));
+				VaadinUiUtil.addCloseListener(
+					window,
+					event -> resultConsumer.accept(new PersonImportSimilarityResult(null, ImportSimilarityResultOption.SKIP)));
 
 				personSelect.selectBestMatch();
 			} else {

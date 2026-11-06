@@ -1,12 +1,13 @@
 package de.symeda.sormas.ui.events.eventParticipantLink;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Language;
 import de.symeda.sormas.api.event.EventDto;
@@ -29,59 +30,61 @@ public class EventParticipantListEntry extends HorizontalLayout {
 	public EventParticipantListEntry(EventParticipantListEntryDto eventParticipantListEntryDto) {
 		this.eventParticipantListEntryDto = eventParticipantListEntryDto;
 		setSpacing(true);
-		setWidth(100, Unit.PERCENTAGE);
-		addStyleName(CssStyles.SORMAS_LIST_ENTRY);
+		setWidthFull();
+		addClassName(CssStyles.SORMAS_LIST_ENTRY);
 
 		VerticalLayout mainLayout = new VerticalLayout();
-		mainLayout.setWidth(100, Unit.PERCENTAGE);
-		mainLayout.setMargin(false);
+		mainLayout.setWidthFull();
+		mainLayout.setPadding(false);
 		mainLayout.setSpacing(false);
-		addComponent(mainLayout);
-		setExpandRatio(mainLayout, 1);
+		add(mainLayout);
+		setFlexGrow(1, mainLayout);
 
 		HorizontalLayout idLayout = new HorizontalLayout();
-		Label eventParticipantUuidLabel = new Label(
+		Span eventParticipantUuidLabel = new Span(
 			I18nProperties.getPrefixCaption(EventParticipantDto.I18N_PREFIX, EventParticipantDto.UUID)
 				+ SEPARATOR
 				+ DataHelper.toStringNullable(DataHelper.getShortUuid(eventParticipantListEntryDto.getUuid())));
-		eventParticipantUuidLabel.setDescription(eventParticipantListEntryDto.getUuid());
-		Label eventUuidLabel = new Label(
+		eventParticipantUuidLabel.setTitle(eventParticipantListEntryDto.getUuid());
+		Span eventUuidLabel = new Span(
 			I18nProperties.getPrefixCaption(EventDto.I18N_PREFIX, EventDto.UUID)
 				+ SEPARATOR
 				+ DataHelper.toStringNullable(DataHelper.getShortUuid(eventParticipantListEntryDto.getEventUuid())));
-		eventUuidLabel.setDescription(eventParticipantListEntryDto.getEventUuid());
+		eventUuidLabel.setTitle(eventParticipantListEntryDto.getEventUuid());
 
-		idLayout.addComponent(eventParticipantUuidLabel);
-		idLayout.addComponent(eventUuidLabel);
+		idLayout.add(eventParticipantUuidLabel);
+		idLayout.add(eventUuidLabel);
 		idLayout.setWidthFull();
-		idLayout.setComponentAlignment(eventParticipantUuidLabel, Alignment.MIDDLE_LEFT);
-		idLayout.setComponentAlignment(eventUuidLabel, Alignment.MIDDLE_RIGHT);
-		mainLayout.addComponent(idLayout);
+		// was each label aligned left and right in its half
+		idLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+		idLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+		mainLayout.add(idLayout);
 
 		HorizontalLayout diseaseStatusLayout = new HorizontalLayout();
 		String eventDiseaseString = eventParticipantListEntryDto.getDisease() != null
 			? eventParticipantListEntryDto.getDisease().toString()
 			: I18nProperties.getCaption(Captions.eventNoDisease);
-		Label diseaseLabel = new Label(eventDiseaseString);
-		diseaseLabel.addStyleNames(CssStyles.LABEL_BOLD);
-		diseaseLabel.setDescription(eventDiseaseString);
-		diseaseStatusLayout.addComponent(diseaseLabel);
+		Span diseaseLabel = new Span(eventDiseaseString);
+		diseaseLabel.addClassNames(CssStyles.LABEL_BOLD);
+		diseaseLabel.setTitle(eventDiseaseString);
+		diseaseStatusLayout.add(diseaseLabel);
 
-		Label statusLabel = new Label(eventParticipantListEntryDto.getEventStatus().toString());
-		statusLabel.addStyleNames(CssStyles.LABEL_BOLD);
-		statusLabel.setDescription(eventParticipantListEntryDto.getEventStatus().toString());
-		diseaseStatusLayout.addComponent(statusLabel);
+		Span statusLabel = new Span(eventParticipantListEntryDto.getEventStatus().toString());
+		statusLabel.addClassNames(CssStyles.LABEL_BOLD);
+		statusLabel.setTitle(eventParticipantListEntryDto.getEventStatus().toString());
+		diseaseStatusLayout.add(statusLabel);
 
-		diseaseStatusLayout.addComponent(diseaseLabel);
-		diseaseStatusLayout.addComponent(statusLabel);
+		diseaseStatusLayout.add(diseaseLabel);
+		diseaseStatusLayout.add(statusLabel);
 		diseaseStatusLayout.setWidthFull();
-		diseaseStatusLayout.setComponentAlignment(diseaseLabel, Alignment.MIDDLE_LEFT);
-		diseaseStatusLayout.setComponentAlignment(statusLabel, Alignment.MIDDLE_RIGHT);
-		mainLayout.addComponent(diseaseStatusLayout);
+		// was each label aligned left and right in its half
+		diseaseStatusLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+		diseaseStatusLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+		mainLayout.add(diseaseStatusLayout);
 
-		Label titleLabel = new Label(eventParticipantListEntryDto.getEventTitle());
-		titleLabel.setDescription(eventParticipantListEntryDto.getEventTitle());
-		mainLayout.addComponent(titleLabel);
+		Span titleLabel = new Span(eventParticipantListEntryDto.getEventTitle());
+		titleLabel.setTitle(eventParticipantListEntryDto.getEventTitle());
+		mainLayout.add(titleLabel);
 
 		if (eventParticipantListEntryDto.getEventStartDate() != null) {
 			Language userLanguage = I18nProperties.getUserLanguage();
@@ -94,31 +97,31 @@ public class EventParticipantListEntry extends HorizontalLayout {
 					DateHelper.formatLocalDate(eventParticipantListEntryDto.getEventStartDate(), userLanguage),
 					DateHelper.formatLocalDate(eventParticipantListEntryDto.getEventEndDate(), userLanguage));
 			}
-			Label eventDateLabel = new Label(I18nProperties.getCaption(Captions.singleDayEventDate) + ": " + eventDate);
-			mainLayout.addComponent(eventDateLabel);
+			Span eventDateLabel = new Span(I18nProperties.getCaption(Captions.singleDayEventDate) + ": " + eventDate);
+			mainLayout.add(eventDateLabel);
 		}
 	}
 
-	public void addEditListener(int rowIndex, Button.ClickListener editClickListener) {
+	public void addEditListener(int rowIndex, ComponentEventListener<ClickEvent<Button>> editClickListener) {
 		if (editButton == null) {
 			editButton = ButtonHelper.createIconButtonWithCaption(
 				"edit-participant-" + rowIndex,
 				null,
-				VaadinIcons.PENCIL,
+				VaadinIcon.PENCIL,
 				null,
-				ValoTheme.BUTTON_LINK,
+				CssStyles.BUTTON_LINK,
 				CssStyles.BUTTON_COMPACT);
 
-			addComponent(editButton);
-			setComponentAlignment(editButton, Alignment.MIDDLE_RIGHT);
-			setExpandRatio(editButton, 0);
+			add(editButton);
+			setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, editButton);
+			setFlexGrow(0, editButton);
 		}
 
 		editButton.addClickListener(editClickListener);
 	}
 
 	public void setActive() {
-		addStyleName(CssStyles.ACTIVE_SIDE_COMPONENT_ELEMENT);
+		addClassName(CssStyles.ACTIVE_SIDE_COMPONENT_ELEMENT);
 	}
 
 	public EventParticipantListEntryDto getEventParticipantListEntryDto() {

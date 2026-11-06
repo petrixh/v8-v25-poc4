@@ -3,9 +3,8 @@ package de.symeda.sormas.ui.events.eventParticipantLink;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.event.EventCriteria;
@@ -48,16 +47,16 @@ public class EventParticipantListComponent extends SideComponent {
 
 		eventParticipantList = new EventParticipantList(personReferenceDto);
 		eventParticipantList.setActiveUuid(activeUuid);
-		addComponent(eventParticipantList);
+		add(eventParticipantList);
 		eventParticipantList.reload();
 
 		if (!eventParticipantList.isEmpty()) {
 			final Button seeEvents = ButtonHelper.createButton(I18nProperties.getCaption(Captions.personLinkToEvents));
-			CssStyles.style(seeEvents, ValoTheme.BUTTON_PRIMARY);
+			CssStyles.style(seeEvents, CssStyles.BUTTON_PRIMARY);
 			seeEvents
 				.addClickListener(clickEvent -> ControllerProvider.getEventController().navigateTo(new EventCriteria().person(personReferenceDto)));
-			addComponent(seeEvents);
-			setComponentAlignment(seeEvents, Alignment.MIDDLE_LEFT);
+			add(seeEvents);
+			setHorizontalComponentAlignment(FlexComponent.Alignment.START, seeEvents);
 		}
 	}
 

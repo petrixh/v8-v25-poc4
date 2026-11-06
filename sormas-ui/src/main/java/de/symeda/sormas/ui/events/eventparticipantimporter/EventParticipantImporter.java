@@ -31,8 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.opencsv.exceptions.CsvValidationException;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.UI;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.BirthDateDto;
@@ -66,6 +65,7 @@ import de.symeda.sormas.ui.importer.ImportLineResult;
 import de.symeda.sormas.ui.importer.ImportSimilarityResultOption;
 import de.symeda.sormas.ui.importer.ImporterPersonHelper;
 import de.symeda.sormas.ui.importer.PersonImportSimilarityResult;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
 
 /**
  * Data importer that is used to import event participant.
@@ -95,7 +95,7 @@ public class EventParticipantImporter extends DataImporter {
 	}
 
 	@Override
-	public void startImport(Consumer<StreamResource> addErrorReportToLayoutCallback, UI currentUI, boolean duplicatesPossible)
+	public void startImport(Consumer<StreamSourceDownloadHandler> addErrorReportToLayoutCallback, UI currentUI, boolean duplicatesPossible)
 		throws IOException, CsvValidationException {
 
 		this.currentUI = currentUI;

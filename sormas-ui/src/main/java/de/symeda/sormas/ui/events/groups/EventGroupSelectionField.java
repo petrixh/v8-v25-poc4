@@ -23,12 +23,12 @@ package de.symeda.sormas.ui.events.groups;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.RadioButtonGroup;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import de.symeda.sormas.api.event.EventGroupCriteria;
 import de.symeda.sormas.api.event.EventGroupIndexDto;
@@ -39,6 +39,7 @@ import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 
 @SuppressWarnings("serial")
 public class EventGroupSelectionField extends CustomField<EventGroupIndexDto> {
@@ -74,13 +75,13 @@ public class EventGroupSelectionField extends CustomField<EventGroupIndexDto> {
 	}
 
 	private void addInfoComponent() {
-		mainLayout.addComponent(VaadinUiUtil.createInfoComponent(infoPickOrCreateEventGroup));
+		mainLayout.add(VaadinUiUtil.createInfoComponent(infoPickOrCreateEventGroup));
 	}
 
 	private void addSelectEventGroupRadioGroup() {
 		rbSelectEventGroup = new RadioButtonGroup<>();
 		rbSelectEventGroup.setItems(SELECT_EVENT_GROUP);
-		rbSelectEventGroup.setItemCaptionGenerator((item) -> {
+		rbSelectEventGroup.setItemLabelGenerator((item) -> {
 			return I18nProperties.getCaption(Captions.eventSelectGroup);
 		});
 		CssStyles.style(rbSelectEventGroup, CssStyles.VSPACE_NONE);
@@ -93,7 +94,7 @@ public class EventGroupSelectionField extends CustomField<EventGroupIndexDto> {
 			}
 		});
 
-		mainLayout.addComponent(rbSelectEventGroup);
+		mainLayout.add(rbSelectEventGroup);
 	}
 
 	public void initializeGrid() {
@@ -110,7 +111,7 @@ public class EventGroupSelectionField extends CustomField<EventGroupIndexDto> {
 	private void addCreateEventGroupRadioGroup() {
 		rbCreateEventGroup = new RadioButtonGroup<>();
 		rbCreateEventGroup.setItems(CREATE_EVENT_GROUP);
-		rbCreateEventGroup.setItemCaptionGenerator((item) -> I18nProperties.getCaption(Captions.eventNewEventGroup));
+		rbCreateEventGroup.setItemLabelGenerator((item) -> I18nProperties.getCaption(Captions.eventNewEventGroup));
 		rbCreateEventGroup.addValueChangeListener(e -> {
 			if (e.getValue() != null) {
 				if (UiUtil.permitted(UserRight.EVENTGROUP_LINK, UserRight.EVENTGROUP_CREATE)) {
@@ -124,7 +125,7 @@ public class EventGroupSelectionField extends CustomField<EventGroupIndexDto> {
 			}
 		});
 
-		mainLayout.addComponent(rbCreateEventGroup);
+		mainLayout.add(rbCreateEventGroup);
 	}
 
 	@Override
@@ -132,25 +133,25 @@ public class EventGroupSelectionField extends CustomField<EventGroupIndexDto> {
 
 		mainLayout = new VerticalLayout();
 		mainLayout.setSpacing(true);
-		mainLayout.setMargin(false);
+		mainLayout.setPadding(false);
 		mainLayout.setSizeUndefined();
-		mainLayout.setWidth(100, Unit.PERCENTAGE);
+		mainLayout.setWidthFull();
 
 		addInfoComponent();
 
 		VerticalLayout filterLayout = new VerticalLayout();
 		filterLayout.setSpacing(false);
-		filterLayout.setMargin(false);
-		filterLayout.setWidth(100, Unit.PERCENTAGE);
+		filterLayout.setPadding(false);
+		filterLayout.setWidthFull();
 
-		filterLayout.addComponent(createFilterBar());
+		filterLayout.add(createFilterBar());
 
-		mainLayout.addComponent(filterLayout);
+		mainLayout.add(filterLayout);
 
 		if (UiUtil.permitted(UserRight.EVENTGROUP_LINK)) {
 			addSelectEventGroupRadioGroup();
 		}
-		mainLayout.addComponent(eventGroupGrid);
+		mainLayout.add(eventGroupGrid);
 		if (UiUtil.permitted(UserRight.EVENTGROUP_CREATE)) {
 			addCreateEventGroupRadioGroup();
 		}
@@ -165,7 +166,7 @@ public class EventGroupSelectionField extends CustomField<EventGroupIndexDto> {
 	}
 
 	@Override
-	protected void doSetValue(EventGroupIndexDto newValue) {
+	protected void setPresentationValue(EventGroupIndexDto newValue) {
 		rbSelectEventGroup.setValue(SELECT_EVENT_GROUP);
 
 		if (newValue != null) {
@@ -192,26 +193,29 @@ public class EventGroupSelectionField extends CustomField<EventGroupIndexDto> {
 
 		HorizontalLayout filterLayout = new HorizontalLayout();
 		filterLayout.setSpacing(true);
-		filterLayout.setMargin(false);
+		filterLayout.setPadding(false);
 		filterLayout.setSizeUndefined();
 
 		searchField.setId("search");
-		searchField.setWidth(200, Unit.PIXELS);
+		searchField.setWidth("200px");
 
-		searchField.setCaption(I18nProperties.getString(Strings.promptEventGroupSearchField));
+		searchField.setLabel(I18nProperties.getString(Strings.promptEventGroupSearchField));
 
+		// Vaadin 8 text fields sent their value while typing (lazy, 400 ms)
+		searchField.setValueChangeMode(ValueChangeMode.LAZY);
 		searchField.addValueChangeListener(e -> updateFreeTextFilter(e.getValue()));
 
-		filterLayout.addComponent(searchField);
+		filterLayout.add(searchField);
 
 		searchEventField.setId("searchEvent");
-		searchEventField.setWidth(200, Unit.PIXELS);
+		searchEventField.setWidth("200px");
 
-		searchEventField.setCaption(I18nProperties.getString(Strings.promptEventGroupSearchFieldEvent));
+		searchEventField.setLabel(I18nProperties.getString(Strings.promptEventGroupSearchFieldEvent));
 
+		searchEventField.setValueChangeMode(ValueChangeMode.LAZY);
 		searchEventField.addValueChangeListener(e -> updateFreeTextEventFilter(e.getValue()));
 
-		filterLayout.addComponent(searchEventField);
+		filterLayout.add(searchEventField);
 
 		return filterLayout;
 	}

@@ -8,13 +8,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.vaadin.server.ExternalResource;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Link;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.ui.CustomField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.AnchorTarget;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.event.EventParticipantSelectionDto;
 import de.symeda.sormas.api.event.EventReferenceDto;
@@ -22,10 +21,11 @@ import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.utils.DataHelper;
-import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.events.EventDataView;
+import de.symeda.sormas.ui.navigation.Navigator;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 
 public class PickLeadEventParticipant extends CustomField<List<String>> {
 
@@ -45,17 +45,17 @@ public class PickLeadEventParticipant extends CustomField<List<String>> {
 	protected Component initContent() {
 		mainLayout = new VerticalLayout();
 		mainLayout.setSpacing(true);
-		mainLayout.setMargin(false);
+		mainLayout.setPadding(false);
 		mainLayout.setSizeUndefined();
-		mainLayout.setWidth(100, Unit.PERCENTAGE);
+		mainLayout.setWidthFull();
 
 		HorizontalLayout infoLayout = new HorizontalLayout();
-		infoLayout.addComponent(VaadinUiUtil.createInfoComponent(I18nProperties.getString(Strings.infoPickEventParticipantsForPersonMerge)));
-		mainLayout.addComponent(infoLayout);
+		infoLayout.add(VaadinUiUtil.createInfoComponent(I18nProperties.getString(Strings.infoPickEventParticipantsForPersonMerge)));
+		mainLayout.add(infoLayout);
 
 		eventParticipantSelectGrids.forEach((key, value) -> {
-			mainLayout.addComponent(value.getEventTitle());
-			mainLayout.addComponent(value.eventParticipantMergeSelectionGrid);
+			mainLayout.add(value.getEventTitle());
+			mainLayout.add(value.eventParticipantMergeSelectionGrid);
 		});
 
 		return mainLayout;
@@ -122,35 +122,34 @@ public class PickLeadEventParticipant extends CustomField<List<String>> {
 	private Component buildEventComponent(String eventUuid, String eventTitle) {
 		HorizontalLayout eventLayout = new HorizontalLayout();
 		eventLayout.setSpacing(true);
-		eventLayout.setMargin(false);
+		eventLayout.setPadding(false);
 
 		VerticalLayout eventUuidLayout = new VerticalLayout();
-		eventUuidLayout.setMargin(false);
+		eventUuidLayout.setPadding(false);
 		eventUuidLayout.setSpacing(false);
-		Label eventUuidLabel = new Label(I18nProperties.getCaption(Captions.Event_uuid));
-		eventUuidLabel.setStyleName(CssStyles.LABEL_BOLD);
-		eventUuidLabel.setStyleName(CssStyles.VSPACE_NONE, true);
-		eventUuidLayout.addComponent(eventUuidLabel);
+		Span eventUuidLabel = new Span(I18nProperties.getCaption(Captions.Event_uuid));
+		eventUuidLabel.setClassName(CssStyles.LABEL_BOLD);
+		eventUuidLabel.addClassName(CssStyles.VSPACE_NONE);
+		eventUuidLayout.add(eventUuidLabel);
 
-		Link linkUuidData = new Link(
-			DataHelper.getShortUuid(eventUuid),
-			new ExternalResource(SormasUI.get().getPage().getLocation().getRawPath() + "#!" + EventDataView.VIEW_NAME + "/" + eventUuid));
-		linkUuidData.setTargetName("_blank");
-		eventUuidLayout.addComponent(linkUuidData);
-		eventLayout.addComponent(eventUuidLayout);
+		// was a #! link (decision 2026-11-05: routes without #!)
+		Anchor linkUuidData = new Anchor(Navigator.getUrl(EventDataView.VIEW_NAME + "/" + eventUuid), DataHelper.getShortUuid(eventUuid));
+		linkUuidData.setTarget(AnchorTarget.BLANK);
+		eventUuidLayout.add(linkUuidData);
+		eventLayout.add(eventUuidLayout);
 
 		VerticalLayout eventTitleLayout = new VerticalLayout();
-		eventTitleLayout.setMargin(false);
+		eventTitleLayout.setPadding(false);
 		eventTitleLayout.setSpacing(false);
-		Label eventTitleLabel = new Label(I18nProperties.getCaption(Captions.Event_eventTitle));
-		eventTitleLabel.setStyleName(CssStyles.LABEL_BOLD);
-		eventTitleLabel.setStyleName(CssStyles.VSPACE_NONE, true);
-		eventTitleLayout.addComponent(eventTitleLabel);
+		Span eventTitleLabel = new Span(I18nProperties.getCaption(Captions.Event_eventTitle));
+		eventTitleLabel.setClassName(CssStyles.LABEL_BOLD);
+		eventTitleLabel.addClassName(CssStyles.VSPACE_NONE);
+		eventTitleLayout.add(eventTitleLabel);
 
-		Label eventTitleData = new Label(eventTitle);
-		eventTitleData.addStyleName(CssStyles.VSPACE_TOP_NONE);
-		eventTitleLayout.addComponent(eventTitleData);
-		eventLayout.addComponent(eventTitleLayout);
+		Span eventTitleData = new Span(eventTitle);
+		eventTitleData.addClassName(CssStyles.VSPACE_TOP_NONE);
+		eventTitleLayout.add(eventTitleData);
+		eventLayout.add(eventTitleLayout);
 
 		return eventLayout;
 	}

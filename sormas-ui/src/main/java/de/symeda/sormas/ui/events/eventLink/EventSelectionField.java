@@ -24,17 +24,14 @@ import java.util.Date;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import com.vaadin.server.ErrorMessage;
-import com.vaadin.shared.ui.ErrorLevel;
-import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.RadioButtonGroup;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.EntityRelevanceStatus;
@@ -54,6 +51,7 @@ import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.EpiWeekAndDateFilterComponent;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 
 @SuppressWarnings("serial")
 public class EventSelectionField extends CustomField<EventIndexDto> {
@@ -126,7 +124,7 @@ public class EventSelectionField extends CustomField<EventIndexDto> {
 		EventDto eventDto,
 		EventSelectionField eventSelectionField,
 		Date selectedToDate,
-		AbstractComponent component) {
+		HasValidation component) {
 		boolean isSelectedDateAfterEventDate = true;
 		Date eventStartOrEndDate = EventHelper.getStartOrEndDate(eventDto.getStartDate(), eventDto.getEndDate());
 		if (eventStartOrEndDate != null) {
@@ -134,20 +132,9 @@ public class EventSelectionField extends CustomField<EventIndexDto> {
 		}
 		eventSelectionField.applyButton.setEnabled(isSelectedDateAfterEventDate);
 		if (isSelectedDateAfterEventDate) {
-			component.setComponentError(null);
+			setComponentError(component, null);
 		} else {
-			component.setComponentError(new ErrorMessage() {
-
-				@Override
-				public ErrorLevel getErrorLevel() {
-					return ErrorLevel.ERROR;
-				}
-
-				@Override
-				public String getFormattedHtmlMessage() {
-					return I18nProperties.getValidationError(Validations.eventSuperordinateEventToDateFilterValidation);
-				}
-			});
+			setComponentError(component, I18nProperties.getValidationError(Validations.eventSuperordinateEventToDateFilterValidation));
 		}
 	}
 
@@ -184,7 +171,7 @@ public class EventSelectionField extends CustomField<EventIndexDto> {
 		EventDto eventDto,
 		EventSelectionField eventSelectionField,
 		Date selectedFromDate,
-		AbstractComponent component) {
+		HasValidation component) {
 		boolean isSelectedDateBeforeEventDate = true;
 		Date eventStartOrEndDate = EventHelper.getStartOrEndDate(eventDto.getStartDate(), eventDto.getEndDate());
 		if (eventStartOrEndDate != null) {
@@ -192,21 +179,20 @@ public class EventSelectionField extends CustomField<EventIndexDto> {
 		}
 		eventSelectionField.applyButton.setEnabled(isSelectedDateBeforeEventDate);
 		if (isSelectedDateBeforeEventDate) {
-			component.setComponentError(null);
+			setComponentError(component, null);
 		} else {
-			component.setComponentError(new ErrorMessage() {
-
-				@Override
-				public ErrorLevel getErrorLevel() {
-					return ErrorLevel.ERROR;
-				}
-
-				@Override
-				public String getFormattedHtmlMessage() {
-					return I18nProperties.getValidationError(Validations.eventSubordinateEventFromDateFilterValidation);
-				}
-			});
+			setComponentError(component, I18nProperties.getValidationError(Validations.eventSubordinateEventFromDateFilterValidation));
 		}
+	}
+
+	/**
+	 * Vaadin 8 {@code setComponentError} with {@code ErrorLevel.ERROR}: the field shows the message as invalid until it is
+	 * cleared here. Manual validation keeps the field's own validation (on blur) from clearing it.
+	 */
+	private static void setComponentError(HasValidation component, String message) {
+		component.setManualValidation(true);
+		component.setErrorMessage(message);
+		component.setInvalid(message != null);
 	}
 
 	public EventSelectionField(Set<String> excludedUuids) {
@@ -224,7 +210,7 @@ public class EventSelectionField extends CustomField<EventIndexDto> {
 	}
 
 	private void addInfoComponent() {
-		mainLayout.addComponent(VaadinUiUtil.createInfoComponent(infoPickOrCreateEvent));
+		mainLayout.add(VaadinUiUtil.createInfoComponent(infoPickOrCreateEvent));
 	}
 
 	private void addSelectEventRadioGroup() {
@@ -234,7 +220,7 @@ public class EventSelectionField extends CustomField<EventIndexDto> {
 		}
 		rbSelectEvent = new RadioButtonGroup<>();
 		rbSelectEvent.setItems(SELECT_EVENT);
-		rbSelectEvent.setItemCaptionGenerator((item) -> I18nProperties.getCaption(Captions.eventSelect));
+		rbSelectEvent.setItemLabelGenerator((item) -> I18nProperties.getCaption(Captions.eventSelect));
 		CssStyles.style(rbSelectEvent, CssStyles.VSPACE_NONE);
 		rbSelectEvent.addValueChangeListener(e -> {
 			if (e.getValue() != null) {
@@ -247,7 +233,7 @@ public class EventSelectionField extends CustomField<EventIndexDto> {
 			}
 		});
 
-		mainLayout.addComponent(rbSelectEvent);
+		mainLayout.add(rbSelectEvent);
 	}
 
 	public void initializeGrid() {
@@ -271,7 +257,7 @@ public class EventSelectionField extends CustomField<EventIndexDto> {
 
 		rbCreateEvent = new RadioButtonGroup<>();
 		rbCreateEvent.setItems(CREATE_EVENT);
-		rbCreateEvent.setItemCaptionGenerator((item) -> I18nProperties.getCaption(Captions.eventNewEvent));
+		rbCreateEvent.setItemLabelGenerator((item) -> I18nProperties.getCaption(Captions.eventNewEvent));
 		rbCreateEvent.addValueChangeListener(e -> {
 			if (e.getValue() != null) {
 				rbSelectEvent.setValue(null);
@@ -283,7 +269,7 @@ public class EventSelectionField extends CustomField<EventIndexDto> {
 			}
 		});
 
-		mainLayout.addComponent(rbCreateEvent);
+		mainLayout.add(rbCreateEvent);
 	}
 
 	@Override
@@ -291,23 +277,23 @@ public class EventSelectionField extends CustomField<EventIndexDto> {
 
 		mainLayout = new VerticalLayout();
 		mainLayout.setSpacing(true);
-		mainLayout.setMargin(false);
+		mainLayout.setPadding(false);
 		mainLayout.setSizeUndefined();
-		mainLayout.setWidth(100, Unit.PERCENTAGE);
+		mainLayout.setWidthFull();
 
 		addInfoComponent();
 
 		VerticalLayout filterLayout = new VerticalLayout();
 		filterLayout.setSpacing(false);
-		filterLayout.setMargin(false);
-		filterLayout.setWidth(100, Unit.PERCENTAGE);
+		filterLayout.setPadding(false);
+		filterLayout.setWidthFull();
 
-		filterLayout.addComponent(createFilterBar());
-		filterLayout.addComponent(weekAndDateFilterLayout);
+		filterLayout.add(createFilterBar());
+		filterLayout.add(weekAndDateFilterLayout);
 
-		mainLayout.addComponent(filterLayout);
+		mainLayout.add(filterLayout);
 		addSelectEventRadioGroup();
-		mainLayout.addComponent(eventGrid);
+		mainLayout.add(eventGrid);
 		addCreateEventRadioGroup();
 
 		if (rbSelectEvent != null) {
@@ -318,7 +304,7 @@ public class EventSelectionField extends CustomField<EventIndexDto> {
 	}
 
 	@Override
-	protected void doSetValue(EventIndexDto newValue) {
+	protected void setPresentationValue(EventIndexDto newValue) {
 		if (rbSelectEvent != null) {
 			rbSelectEvent.setValue(SELECT_EVENT);
 		}
@@ -346,17 +332,19 @@ public class EventSelectionField extends CustomField<EventIndexDto> {
 
 		HorizontalLayout filterLayout = new HorizontalLayout();
 		filterLayout.setSpacing(true);
-		filterLayout.setMargin(false);
+		filterLayout.setPadding(false);
 		filterLayout.setSizeUndefined();
 
 		searchField.setId("search");
-		searchField.setWidth(200, Unit.PIXELS);
+		searchField.setWidth("200px");
 
-		searchField.setCaption(I18nProperties.getString(Strings.promptEventsSearchField));
+		searchField.setLabel(I18nProperties.getString(Strings.promptEventsSearchField));
 
+		// Vaadin 8 text fields sent their value while typing (lazy, 400 ms)
+		searchField.setValueChangeMode(ValueChangeMode.LAZY);
 		searchField.addValueChangeListener(e -> updateGrid(e.getValue()));
 
-		filterLayout.addComponent(searchField);
+		filterLayout.add(searchField);
 
 		return filterLayout;
 	}
@@ -403,7 +391,7 @@ public class EventSelectionField extends CustomField<EventIndexDto> {
 				toDate = toDate == null ? defaultCriteria.getEventDateTo() : toDate;
 			}
 
-			applyButton.removeStyleName(ValoTheme.BUTTON_PRIMARY);
+			CssStyles.removeStyles(applyButton, CssStyles.BUTTON_PRIMARY);
 			criteria.eventDateBetween(fromDate, toDate, EventCriteriaDateType.EVENT_DATE, dateFilterOption);
 			eventGrid.setCriteria(criteria);
 			eventGrid.getSelectedItems();
@@ -433,9 +421,9 @@ public class EventSelectionField extends CustomField<EventIndexDto> {
 		dateFilterRowLayout.setSpacing(true);
 		dateFilterRowLayout.setSizeUndefined();
 
-		dateFilterRowLayout.addComponent(weekAndDateFilter);
-		dateFilterRowLayout.addComponent(applyButton);
-		dateFilterRowLayout.addComponent(resetButton);
+		dateFilterRowLayout.add(weekAndDateFilter);
+		dateFilterRowLayout.add(applyButton);
+		dateFilterRowLayout.add(resetButton);
 
 		return dateFilterRowLayout;
 	}

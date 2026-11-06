@@ -8,10 +8,18 @@ On every push to any branch (there is no pull request trigger: a pushed commit's
 
 1. **Skip if already green.** If this commit already has a successful run of this workflow (for example a branch created at a commit that was already checked, or a re-run of a green run), the job ends after this step.
 2. Checkout, JDK 21 (Temurin), Maven dependency cache (Actions cache, keyed on the `pom.xml` files).
-3. `mvn -B -ntp clean install` in `sormas-base` with the default profiles (the Android app profile `with-app` is not built). This compiles all modules and runs the unit tests of `sormas-api`, `sormas-backend`, `sormas-rest` and `sormas-ui`.
+3. `mvn -B -ntp clean install` in `sormas-base` with the default profiles (the Android app profile `with-app` is not built). This compiles all modules and runs the unit tests of `sormas-api`, `sormas-backend`, `sormas-rest` and `sormas-ui`, and builds the `sormas-ui` frontend in production mode, which needs a Vaadin licence key (see "Vaadin licence key" below).
 4. **Test report:** test counts per module go in the job summary. The job fails if `HistoryTablesTest` (the Testcontainers test that starts PostgreSQL in Docker) did not run and pass: without a usable Docker it is skipped silently. The workflow sets the Docker API version for Testcontainers (see below): the Ubuntu 24.04 runner (Docker 28) does not need it, the Ubuntu 26.04 runner (Docker 29) does, and `ubuntu-latest` moves to 26.04 in November 2026.
 5. **Smoke**, on the artefacts this build just made (see "Smoke" below): start one app copy with `env/`, log in as each web test user, stop the copy. **Non-blocking until migration ticket 1a-91** (see below).
 6. On failure only: the surefire reports, the smoke screenshots and results and the app's server log are uploaded as a diagnostics artifact kept for 3 days. Nothing else is uploaded; the built war and ear files are not kept.
+
+## Vaadin licence key
+
+`sormas-ui` uses a Vaadin commercial component, the Rich Text Editor (see the notice at the top of [`README.md`](README.md)). Vaadin's prebuilt frontend bundle does not contain it, so the production build of `sormas-ui` (`vaadin-maven-plugin` goal `build-frontend`) builds the bundle itself (it downloads Node to `~/.vaadin` and the npm packages) and checks the commercial licence. Without a valid key it stops with `Commercial features require a subscription` and the build fails.
+
+- **CI:** the build step gets the key from the repository secret `VAADIN_PRODMODE_CI_SERVER_KEY` as the environment variable `VAADIN_OFFLINE_KEY`. It is a Vaadin CI server key, valid for production-mode builds only. The workflow never prints it; when the secret is missing (for example in a fork) the step logs a warning and the build then fails at the licence check.
+- **Locally:** the build reads your Vaadin pro key from `~/.vaadin/proKey` or the environment variable `VAADIN_PRO_KEY`. When Maven runs in a container, pass the variable by name only (`docker run -e VAADIN_PRO_KEY ...`) or mount the key file read-only; never write the key into an image, a file in the repository or a log.
+- Vaadin also offers a watermarked build without a key (`-Dvaadin.commercialWithBanner`); this project does not use it: the banner it shows can get in the way of clicks.
 
 ## Smoke
 
@@ -29,7 +37,7 @@ The smoke uses a real-browser user agent (`HeadlessChrome` replaced with `Chrome
 
 ## Run the same locally
 
-You need JDK 21, Maven 3.9 and a running Docker (for `HistoryTablesTest`).
+You need JDK 21, Maven 3.9, a running Docker (for `HistoryTablesTest`) and a Vaadin licence key (see "Vaadin licence key").
 
 ```sh
 # Docker 29 or later only accepts API 1.44 or later; Testcontainers 1.18.3 asks for 1.32 unless told:

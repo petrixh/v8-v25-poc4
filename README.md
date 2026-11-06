@@ -1,3 +1,5 @@
+> **Licence notice for this migrated version.** This migrated version of SORMAS uses Vaadin commercial components (Rich Text Editor; Charts and Map where they replace earlier add-ons), which are licensed under the [Vaadin Commercial License and Service Terms](https://vaadin.com/commercial-license-and-service-terms), not under the project's own license (GPL v3). Building it, or running it in development mode, requires a valid Vaadin subscription: the production build checks for a Vaadin licence key and fails without one (see [CI.md](CI.md)).
+
 <p align="center">
   <a href="https://sormas.org/">
     <img

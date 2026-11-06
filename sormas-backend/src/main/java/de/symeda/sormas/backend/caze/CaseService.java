@@ -500,7 +500,7 @@ public class CaseService extends AbstractCoreAdoService<Case, CaseJoins> {
 			regexPattern,
 			regexReplacement,
 			regexFlags);
-		cq.orderBy(cb.desc(cb.concat("0", epidNumberSuffixClean).as(Integer.class)));
+		cq.orderBy(cb.desc(cb.concat("0", epidNumberSuffixClean).cast(Integer.class)));
 		cq.select(caze.get(Case.EPID_NUMBER));
 		TypedQuery<String> query = em.createQuery(cq);
 		query.setParameter(regexPattern, "\\D"); // Non-digits

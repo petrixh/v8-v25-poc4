@@ -19,10 +19,6 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 
 import java.util.Date;
 
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
-
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -30,6 +26,9 @@ import de.symeda.sormas.api.symptoms.SymptomsDto;
 import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.FieldAccessHelper;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 /**
  * Header form of the case "Laboratory results" tab (#13948, issue #13955). The symptom-onset date is shown

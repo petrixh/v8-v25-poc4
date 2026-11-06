@@ -14,15 +14,9 @@ import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -65,9 +59,14 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.AbstractFilterForm;
 import de.symeda.sormas.ui.utils.BirthdateRangeFilterComponent;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.EpiWeekAndDateFilterComponent;
 import de.symeda.sormas.ui.utils.FieldConfiguration;
 import de.symeda.sormas.ui.utils.FieldHelper;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class CaseFilterForm extends AbstractFilterForm<CaseCriteria> {
 
@@ -164,7 +163,7 @@ public class CaseFilterForm extends AbstractFilterForm<CaseCriteria> {
 			addField(FieldConfiguration.pixelSized(CaseDataDto.CASE_CLASSIFICATION, 140));
 		} else {
 			final ComboBox caseClassification = addField(CaseDataDto.CASE_CLASSIFICATION, ComboBox.class);
-			caseClassification.setWidth(140, Sizeable.Unit.PIXELS);
+			caseClassification.setWidth(140, Unit.PIXELS);
 			caseClassification.removeItem(CaseClassification.CONFIRMED_NO_SYMPTOMS);
 			caseClassification.removeItem(CaseClassification.CONFIRMED_UNKNOWN_SYMPTOMS);
 		}
@@ -476,7 +475,7 @@ public class CaseFilterForm extends AbstractFilterForm<CaseCriteria> {
 	}
 
 	@Override
-	protected void applyDependenciesOnFieldChange(String propertyId, Property.ValueChangeEvent event) {
+	protected void applyDependenciesOnFieldChange(String propertyId, HasValue.ValueChangeEvent<?> event) {
 		super.applyDependenciesOnFieldChange(propertyId, event);
 
 		final CaseCriteria criteria = getValue();
@@ -495,7 +494,7 @@ public class CaseFilterForm extends AbstractFilterForm<CaseCriteria> {
 
 		switch (propertyId) {
 		case CaseDataDto.REGION: {
-			final RegionReferenceDto region = user.getRegion() != null ? user.getRegion() : (RegionReferenceDto) event.getProperty().getValue();
+			final RegionReferenceDto region = user.getRegion() != null ? user.getRegion() : (RegionReferenceDto) event.getValue();
 
 			if (!DataHelper.equal(region, criteria.getRegion())) {
 				final ComboBox officerField = getField(CaseDataDto.SURVEILLANCE_OFFICER);
@@ -518,7 +517,7 @@ public class CaseFilterForm extends AbstractFilterForm<CaseCriteria> {
 			break;
 		}
 		case CaseDataDto.DISTRICT: {
-			final DistrictReferenceDto newDistrict = (DistrictReferenceDto) event.getProperty().getValue();
+			final DistrictReferenceDto newDistrict = (DistrictReferenceDto) event.getValue();
 
 			if (!DataHelper.equal(newDistrict, criteria.getDistrict())) {
 				final ComboBox officerField = getField(CaseDataDto.SURVEILLANCE_OFFICER);
@@ -561,7 +560,7 @@ public class CaseFilterForm extends AbstractFilterForm<CaseCriteria> {
 			break;
 		}
 		case CaseDataDto.COMMUNITY: {
-			CommunityReferenceDto community = (CommunityReferenceDto) event.getProperty().getValue();
+			CommunityReferenceDto community = (CommunityReferenceDto) event.getValue();
 			if (!DataHelper.equal(community, criteria.getCommunity())) {
 				if (facilityField != null) {
 					facilityField.setValue(null);
@@ -586,7 +585,7 @@ public class CaseFilterForm extends AbstractFilterForm<CaseCriteria> {
 			break;
 		}
 		case CaseCriteria.FACILITY_TYPE_GROUP: {
-			FacilityTypeGroup typeGroup = (FacilityTypeGroup) event.getProperty().getValue();
+			FacilityTypeGroup typeGroup = (FacilityTypeGroup) event.getValue();
 			if (!DataHelper.equal(typeGroup, criteria.getFacilityTypeGroup())) {
 				if (typeGroup != null) {
 					enableFields(CaseDataDto.FACILITY_TYPE);
@@ -600,7 +599,7 @@ public class CaseFilterForm extends AbstractFilterForm<CaseCriteria> {
 			break;
 		}
 		case CaseCriteria.FACILITY_TYPE: {
-			FacilityType facilityType = (FacilityType) event.getProperty().getValue();
+			FacilityType facilityType = (FacilityType) event.getValue();
 			if (!DataHelper.equal(facilityType, criteria.getFacilityType())) {
 				if (facilityType == null) {
 					clearAndDisableFields(facilityField);
@@ -623,7 +622,7 @@ public class CaseFilterForm extends AbstractFilterForm<CaseCriteria> {
 			break;
 		}
 		case CaseCriteria.BIRTHDATE_MM: {
-			Integer birthMM = (Integer) event.getProperty().getValue();
+			Integer birthMM = (Integer) event.getValue();
 
 			ComboBox birthDayDD = getField(CaseCriteria.BIRTHDATE_DD);
 			birthDayDD.setEnabled(birthMM != null);
@@ -637,7 +636,7 @@ public class CaseFilterForm extends AbstractFilterForm<CaseCriteria> {
 		}
 		case CaseDataDto.CASE_ORIGIN: {
 			if (pointOfEntryField != null) {
-				CaseOrigin caseOrigin = (CaseOrigin) event.getProperty().getValue();
+				CaseOrigin caseOrigin = (CaseOrigin) event.getValue();
 				if (caseOrigin == CaseOrigin.POINT_OF_ENTRY && currentDistrict != null) {
 					pointOfEntryField.setEnabled(true);
 					FieldHelper.updateItems(
@@ -652,9 +651,9 @@ public class CaseFilterForm extends AbstractFilterForm<CaseCriteria> {
 		case CaseDataDto.DISEASE: {
 			ComboBox diseaseVariantField = getField(CaseDataDto.DISEASE_VARIANT);
 			ComboBox presentConditionField = getField(PersonDto.PRESENT_CONDITION);
-			Disease disease = (Disease) event.getProperty().getValue();
+			Disease disease = (Disease) event.getValue();
 			if (disease == null) {
-				FieldHelper.updateItems(diseaseVariantField, Collections.emptyList());
+				FieldHelper.updateItems(diseaseVariantField, Collections.<DiseaseVariant> emptyList());
 				FieldHelper.setEnabled(false, diseaseVariantField);
 				FieldHelper.updateEnumData(presentConditionField, Arrays.asList(PresentCondition.values()));
 			} else {
@@ -689,7 +688,7 @@ public class CaseFilterForm extends AbstractFilterForm<CaseCriteria> {
 		HorizontalLayout dateFilterLayout = (HorizontalLayout) getMoreFiltersContainer().getComponent(WEEK_AND_DATE_FILTER);
 		@SuppressWarnings("unchecked")
 		EpiWeekAndDateFilterComponent<NewCaseDateType> weekAndDateFilter =
-			(EpiWeekAndDateFilterComponent<NewCaseDateType>) dateFilterLayout.getComponent(0);
+			(EpiWeekAndDateFilterComponent<NewCaseDateType>) dateFilterLayout.getComponentAt(0);
 
 		return super.streamFieldsForEmptyCheck(layout).filter(f -> f != weekAndDateFilter.getDateFilterOptionFilter());
 	}
@@ -787,7 +786,7 @@ public class CaseFilterForm extends AbstractFilterForm<CaseCriteria> {
 		HorizontalLayout dateFilterLayout = (HorizontalLayout) getMoreFiltersContainer().getComponent(WEEK_AND_DATE_FILTER);
 		@SuppressWarnings("unchecked")
 		EpiWeekAndDateFilterComponent<NewCaseDateType> weekAndDateFilter =
-			(EpiWeekAndDateFilterComponent<NewCaseDateType>) dateFilterLayout.getComponent(0);
+			(EpiWeekAndDateFilterComponent<NewCaseDateType>) dateFilterLayout.getComponentAt(0);
 
 		weekAndDateFilter.getDateTypeSelector().setValue(criteria.getNewCaseDateType());
 		weekAndDateFilter.getDateFilterOptionFilter().setValue(criteria.getDateFilterOption());
@@ -805,7 +804,7 @@ public class CaseFilterForm extends AbstractFilterForm<CaseCriteria> {
 
 		//Birthdate Filter
 		HorizontalLayout birthdateFilterForm = (HorizontalLayout) getMoreFiltersContainer().getComponent(BIRTHDATE_RANGE_FILTER);
-		BirthdateRangeFilterComponent birtdateFilter = (BirthdateRangeFilterComponent) birthdateFilterForm.getComponent(0);
+		BirthdateRangeFilterComponent birtdateFilter = (BirthdateRangeFilterComponent) birthdateFilterForm.getComponentAt(0);
 		birtdateFilter.getDateFromFilter().setValue(criteria.getBirthdateFrom());
 		birtdateFilter.getDateToFilter().setValue(criteria.getBirthdateTo());
 		birtdateFilter.getIncludePartialMatch().setValue(criteria.isIncludePartialMatch());
@@ -826,7 +825,7 @@ public class CaseFilterForm extends AbstractFilterForm<CaseCriteria> {
 		ComboBox diseaseVariantField = getField(CaseDataDto.DISEASE_VARIANT);
 		Disease disease = (Disease) diseaseField.getValue();
 		if (disease == null) {
-			FieldHelper.updateItems(diseaseVariantField, Collections.emptyList());
+			FieldHelper.updateItems(diseaseVariantField, Collections.<DiseaseVariant> emptyList());
 			FieldHelper.setEnabled(false, diseaseVariantField);
 		} else {
 			List<DiseaseVariant> diseaseVariants =
@@ -857,7 +856,7 @@ public class CaseFilterForm extends AbstractFilterForm<CaseCriteria> {
 		dateFilterRowLayout.setSpacing(true);
 		dateFilterRowLayout.setSizeUndefined();
 
-		dateFilterRowLayout.addComponent(weekAndDateFilter);
+		dateFilterRowLayout.add(weekAndDateFilter);
 
 		return dateFilterRowLayout;
 	}
@@ -870,7 +869,7 @@ public class CaseFilterForm extends AbstractFilterForm<CaseCriteria> {
 		dateFilterRowLayout.setSpacing(true);
 		dateFilterRowLayout.setSizeUndefined();
 
-		dateFilterRowLayout.addComponent(birthdateRangeFilterComponent);
+		dateFilterRowLayout.add(birthdateRangeFilterComponent);
 
 		return dateFilterRowLayout;
 	}
@@ -931,7 +930,7 @@ public class CaseFilterForm extends AbstractFilterForm<CaseCriteria> {
 	}
 
 	@Override
-	public void setValue(CaseCriteria newCriteria) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(CaseCriteria newCriteria) {
 
 		super.setValue(newCriteria);
 		ComboBox typeField = getField(CaseCriteria.FACILITY_TYPE);

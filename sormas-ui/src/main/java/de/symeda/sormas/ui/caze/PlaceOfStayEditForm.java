@@ -23,11 +23,7 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 import java.util.Arrays;
 import java.util.Collections;
 
-import com.vaadin.ui.Label;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -42,6 +38,9 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.InfrastructureFieldsHelper;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 @SuppressWarnings("ALL")
 public class PlaceOfStayEditForm extends AbstractEditForm<CaseDataDto> {
@@ -85,8 +84,8 @@ public class PlaceOfStayEditForm extends AbstractEditForm<CaseDataDto> {
 	@Override
 	protected void addFields() {
 
-		Label infoPlaceOfStayInHospital = new Label(I18nProperties.getString(Strings.infoPlaceOfStayInHospital));
-		infoPlaceOfStayInHospital.addStyleNames(VSPACE_3, LABEL_WHITE_SPACE_NORMAL);
+		Span infoPlaceOfStayInHospital = new Span(I18nProperties.getString(Strings.infoPlaceOfStayInHospital));
+		infoPlaceOfStayInHospital.addClassNames(VSPACE_3, LABEL_WHITE_SPACE_NORMAL);
 		getContent().addComponent(infoPlaceOfStayInHospital, SELECT_PLACE_OF_STAY_LABEL_LOC);
 
 		responsibleRegion = addInfrastructureField(CaseDataDto.RESPONSIBLE_REGION);
@@ -140,13 +139,13 @@ public class PlaceOfStayEditForm extends AbstractEditForm<CaseDataDto> {
 
 		regionCombo.addItems(FacadeProvider.getRegionFacade().getAllActiveByServerCountry());
 		regionCombo.addValueChangeListener(e -> {
-			RegionReferenceDto regionDto = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto regionDto = (RegionReferenceDto) e.getValue();
 			FieldHelper
 				.updateItems(districtCombo, regionDto != null ? FacadeProvider.getDistrictFacade().getAllActiveByRegion(regionDto.getUuid()) : null);
 			updateFacility();
 		});
 		districtCombo.addValueChangeListener(e -> {
-			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getProperty().getValue();
+			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getValue();
 			FieldHelper.updateItems(
 				communityCombo,
 				districtDto != null ? FacadeProvider.getCommunityFacade().getAllActiveByDistrict(districtDto.getUuid()) : null);
@@ -192,7 +191,7 @@ public class PlaceOfStayEditForm extends AbstractEditForm<CaseDataDto> {
 	}
 
 	@Override
-	public void setValue(CaseDataDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(CaseDataDto newFieldValue) {
 		super.setValue(newFieldValue);
 		if (newFieldValue.getRegion() != null && newFieldValue.getRegion().getUuid() != newFieldValue.getResponsibleRegion().getUuid()) {
 			differentPlaceOfStayJurisdiction.setValue(true);

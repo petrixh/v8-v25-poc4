@@ -6,11 +6,7 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocsCss;
 
 import java.util.Arrays;
 
-import com.vaadin.v7.data.Validator;
-import com.vaadin.v7.data.validator.EmailValidator;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.data.binder.Validator;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -24,6 +20,9 @@ import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.PhoneNumberValidator;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class PersonContactDetailEditForm extends AbstractEditForm<PersonContactDetailDto> {
 
@@ -91,7 +90,7 @@ public class PersonContactDetailEditForm extends AbstractEditForm<PersonContactD
 
 		addFieldListeners(PersonContactDetailDto.PERSON_CONTACT_DETAILS_TYPE, e -> {
 			final Field<?> contactInformationField = getFieldGroup().getField(PersonContactDetailDto.CONTACT_INFORMATION);
-			final PersonContactDetailType value = (PersonContactDetailType) e.getProperty().getValue();
+			final PersonContactDetailType value = (PersonContactDetailType) e.getValue();
 			for (Validator validator : contactInformationField.getValidators()) {
 				contactInformationField.removeValidator(validator);
 			}
@@ -100,7 +99,8 @@ public class PersonContactDetailEditForm extends AbstractEditForm<PersonContactD
 					new PhoneNumberValidator(I18nProperties.getValidationError(Validations.validPhoneNumber, contactInformationField.getCaption())));
 			} else if (value == PersonContactDetailType.EMAIL) {
 				contactInformationField.addValidator(
-					new EmailValidator(I18nProperties.getValidationError(Validations.validEmailAddress, contactInformationField.getCaption())));
+					PersonFormHelper.createEmailValidator(
+						I18nProperties.getValidationError(Validations.validEmailAddress, contactInformationField.getCaption())));
 			}
 		});
 	}

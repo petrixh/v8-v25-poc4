@@ -31,26 +31,15 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.ErrorMessage;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.shared.ui.ErrorLevel;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.PopupView;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.data.validator.EmailValidator;
-import com.vaadin.v7.ui.AbstractField;
-import com.vaadin.v7.ui.AbstractSelect;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.data.converter.Converter;
+import com.vaadin.flow.data.validator.RegexpValidator;
+import com.vaadin.flow.shared.Registration;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;
@@ -91,12 +80,20 @@ import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.ComboBoxHelper;
 import de.symeda.sormas.ui.utils.ComboBoxWithPlaceholder;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.InfrastructureFieldsHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 import de.symeda.sormas.ui.utils.PhoneNumberValidator;
+import de.symeda.sormas.ui.utils.PopupButton;
 import de.symeda.sormas.ui.utils.StringToAngularLocationConverter;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class LocationEditForm extends AbstractEditForm<LocationDto> {
 
@@ -105,6 +102,11 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 	private static final String FACILITY_TYPE_GROUP_LOC = "typeGroupLoc";
 	private static final String GEO_BUTTONS_LOC = "geoButtons";
 	private static final String COUNTRY_HINT_LOC = "countryHintLoc";
+
+	/**
+	 * The pattern of the Vaadin 7 {@code EmailValidator}.
+	 */
+	private static final String V7_EMAIL_PATTERN = "^([a-zA-Z0-9_\\.\\-+])+@[a-zA-Z0-9-.]+\\.[a-zA-Z0-9-]{2,}$";
 
 	private static final String HTML_LAYOUT =
 		//XXX #1620 are the divs needed?
@@ -165,13 +167,22 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 		return facilityType;
 	}
 
+	/**
+	 * Was V7 {@code AbstractField.setConvertedValue}: the model value is converted to the field value with the field's
+	 * converter.
+	 */
+	@SuppressWarnings({
+		"unchecked",
+		"rawtypes" })
 	private void setConvertedValue(String propertyId, Object value) {
-		((AbstractField<?>) getField(propertyId)).setConvertedValue(value);
+		Field field = getField(propertyId);
+		Converter converter = field.getConverter();
+		field.setValue(converter != null ? converter.convertToPresentation(value, field.createValueContext()) : value);
 	}
 
 	@SuppressWarnings("unchecked")
 	private <T> T getConvertedValue(String propertyId) {
-		return (T) ((AbstractField<?>) getField(propertyId)).getConvertedValue();
+		return (T) getField(propertyId).getConvertedValue();
 	}
 
 	public void setFieldsRequirement(boolean required, String... fieldIds) {
@@ -191,7 +202,7 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 		final PersonAddressType[] personAddressTypeValues = PersonAddressType.getValues(FacadeProvider.getConfigFacade().getCountryCode());
 		if (!isConfiguredServer("ch")) {
 			addressType.removeAllItems();
-			addressType.setItemCaptionMode(AbstractSelect.ItemCaptionMode.ID);
+			// was setItemCaptionMode(ID): the shim shows toString() of items without an explicit caption
 			addressType.addItems(personAddressTypeValues);
 		}
 		TextField addressTypeDetails = addField(LocationDto.ADDRESS_TYPE_DETAILS, TextField.class);
@@ -251,8 +262,17 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 		contactPersonPhone
 			.addValidator(new PhoneNumberValidator(I18nProperties.getValidationError(Validations.validPhoneNumber, contactPersonPhone.getCaption())));
 		contactPersonEmail = addField(LocationDto.CONTACT_PERSON_EMAIL, TextField.class);
-		contactPersonEmail
-			.addValidator(new EmailValidator(I18nProperties.getValidationError(Validations.validEmailAddress, contactPersonEmail.getCaption())));
+		// was the Vaadin 7 EmailValidator: same pattern, and an empty value is valid as in Vaadin 7
+		contactPersonEmail.addValidator(
+			new RegexpValidator(I18nProperties.getValidationError(Validations.validEmailAddress, contactPersonEmail.getCaption()), V7_EMAIL_PATTERN) {
+
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				protected boolean isValid(String value) {
+					return value == null || value.isEmpty() || super.isValid(value);
+				}
+			});
 
 		final AccessibleTextField tfLatitude = addField(LocationDto.LATITUDE, AccessibleTextField.class);
 		final AccessibleTextField tfLongitude = addField(LocationDto.LONGITUDE, AccessibleTextField.class);
@@ -283,9 +303,13 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 			FieldHelper.setComboInaccessible(facilityTypeGroup);
 		}
 
-		ValueChangeListener continentValueListener = e -> {
+		// Flow removes a listener through its registration (V7: removeValueChangeListener(listener))
+		final Registration[] continentListenerRegistration = new Registration[1];
+		final Registration[] subcontinentListenerRegistration = new Registration[1];
+
+		Field.ValueChangeListener<Object> continentValueListener = e -> {
 			if (continent.isVisible()) {
-				ContinentReferenceDto continentReferenceDto = (ContinentReferenceDto) e.getProperty().getValue();
+				ContinentReferenceDto continentReferenceDto = (ContinentReferenceDto) e.getValue();
 				if (subcontinent.getValue() == null) {
 					FieldHelper.updateItems(
 						country,
@@ -303,14 +327,14 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 			}
 		};
 
-		ValueChangeListener subContinentValueListener = e -> {
+		Field.ValueChangeListener<Object> subContinentValueListener = e -> {
 			if (subcontinent.isVisible()) {
-				SubcontinentReferenceDto subcontinentReferenceDto = (SubcontinentReferenceDto) e.getProperty().getValue();
+				SubcontinentReferenceDto subcontinentReferenceDto = (SubcontinentReferenceDto) e.getValue();
 
 				if (subcontinentReferenceDto != null) {
-					continent.removeValueChangeListener(continentValueListener);
+					continentListenerRegistration[0].remove();
 					continent.setValue(FacadeProvider.getContinentFacade().getBySubcontinent(subcontinentReferenceDto));
-					continent.addValueChangeListener(continentValueListener);
+					continentListenerRegistration[0] = continent.addValueChangeListener(continentValueListener);
 				}
 
 				country.setValue(null);
@@ -326,27 +350,27 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 			}
 		};
 
-		continent.addValueChangeListener(continentValueListener);
-		subcontinent.addValueChangeListener(subContinentValueListener);
+		continentListenerRegistration[0] = continent.addValueChangeListener(continentValueListener);
+		subcontinentListenerRegistration[0] = subcontinent.addValueChangeListener(subContinentValueListener);
 		skipCountryValueChange = false;
 		country.addValueChangeListener(e -> {
 			if (!skipCountryValueChange) {
-				CountryReferenceDto countryDto = (CountryReferenceDto) e.getProperty().getValue();
+				CountryReferenceDto countryDto = (CountryReferenceDto) e.getValue();
 				if (countryDto != null) {
 					final ContinentReferenceDto countryContinent = FacadeProvider.getContinentFacade().getByCountry(countryDto);
 					final SubcontinentReferenceDto countrySubcontinent = FacadeProvider.getSubcontinentFacade().getByCountry(countryDto);
 					if (countryContinent != null) {
-						continent.removeValueChangeListener(continentValueListener);
+						continentListenerRegistration[0].remove();
 						if (continent.isVisible()) {
 							skipCountryValueChange = true;
 							FieldHelper.updateItems(country, FacadeProvider.getCountryFacade().getAllActiveByContinent(countryContinent.getUuid()));
 							skipCountryValueChange = false;
 						}
 						continent.setValue(countryContinent);
-						continent.addValueChangeListener(continentValueListener);
+						continentListenerRegistration[0] = continent.addValueChangeListener(continentValueListener);
 					}
 					if (countrySubcontinent != null) {
-						subcontinent.removeValueChangeListener(subContinentValueListener);
+						subcontinentListenerRegistration[0].remove();
 						if (subcontinent.isVisible()) {
 							skipCountryValueChange = true;
 							if (countryContinent != null) {
@@ -359,19 +383,19 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 							skipCountryValueChange = false;
 						}
 						subcontinent.setValue(countrySubcontinent);
-						subcontinent.addValueChangeListener(subContinentValueListener);
+						subcontinentListenerRegistration[0] = subcontinent.addValueChangeListener(subContinentValueListener);
 					}
 				}
 			}
 		});
 
 		region.addValueChangeListener(e -> {
-			RegionReferenceDto regionDto = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto regionDto = (RegionReferenceDto) e.getValue();
 			FieldHelper
 				.updateItems(district, regionDto != null ? FacadeProvider.getDistrictFacade().getAllActiveByRegion(regionDto.getUuid()) : null);
 		});
 		district.addValueChangeListener(e -> {
-			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getProperty().getValue();
+			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getValue();
 			FieldHelper.updateItems(
 				community,
 				districtDto != null ? FacadeProvider.getCommunityFacade().getAllActiveByDistrict(districtDto.getUuid()) : null);
@@ -380,22 +404,13 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 				// Add a visual indictator reminding the user to select a district
 
 				if (UiUtil.disabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {
-					facility.setComponentError(new ErrorMessage() {
-
-						@Override
-						public ErrorLevel getErrorLevel() {
-							return ErrorLevel.INFO;
-						}
-
-						@Override
-						public String getFormattedHtmlMessage() {
-							return I18nProperties.getString(Strings.infoFacilityNeedsDistrict);
-						}
-					});
+					// was setComponentError(ErrorMessage with ErrorLevel.INFO): a non-blocking hint, so helper text, not
+					// the invalid state
+					facility.setHelperText(I18nProperties.getString(Strings.infoFacilityNeedsDistrict));
 				}
 			} else if (facilityType.getValue() != null) {
-				facility.setComponentError(null);
-				facility.markAsDirty();
+				// was setComponentError(null) and markAsDirty() (Flow sends component changes without it)
+				facility.setHelperText(null);
 				FieldHelper.updateItems(
 					facility,
 					FacadeProvider.getFacilityFacade()
@@ -403,7 +418,7 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 			}
 		});
 		community.addValueChangeListener(e -> {
-			CommunityReferenceDto communityDto = (CommunityReferenceDto) e.getProperty().getValue();
+			CommunityReferenceDto communityDto = (CommunityReferenceDto) e.getValue();
 			if (facilityType.getValue() != null) {
 				FieldHelper.updateItems(
 					facility,
@@ -430,8 +445,8 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 		});
 		facilityType.addValueChangeListener(e -> {
 			FieldHelper.removeItems(facility);
-			facility.setComponentError(null);
-			facility.markAsDirty();
+			// was setComponentError(null) and markAsDirty() (Flow sends component changes without it)
+			facility.setHelperText(null);
 			if (facilityType.getValue() != null && facilityTypeGroup.getValue() == null) {
 				facilityTypeGroup.setValue(((FacilityType) facilityType.getValue()).getFacilityTypeGroup());
 			}
@@ -457,18 +472,8 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 				}
 			} else if (facilityType.getValue() != null && district.getValue() == null) {
 				// Add a visual indictator reminding the user to select a district
-				facility.setComponentError(new ErrorMessage() {
-
-					@Override
-					public ErrorLevel getErrorLevel() {
-						return ErrorLevel.INFO;
-					}
-
-					@Override
-					public String getFormattedHtmlMessage() {
-						return I18nProperties.getString(Strings.infoFacilityNeedsDistrict);
-					}
-				});
+				// (was setComponentError(ErrorMessage with ErrorLevel.INFO): a non-blocking hint, so helper text)
+				facility.setHelperText(I18nProperties.getString(Strings.infoFacilityNeedsDistrict));
 			}
 
 			// Only show contactperson-details if at least a faciltytype has been set
@@ -537,7 +542,7 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 
 							VaadinUiUtil.showConfirmationPopup(
 								I18nProperties.getString(Strings.headingLocation),
-								new Label(I18nProperties.getString(Strings.confirmationLocationFacilityAddressOverride)),
+								new Span(I18nProperties.getString(Strings.confirmationLocationFacilityAddressOverride)),
 								I18nProperties.getString(Strings.yes),
 								I18nProperties.getString(Strings.no),
 								640,
@@ -599,7 +604,7 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 	}
 
 	@Override
-	public void setValue(LocationDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(LocationDto newFieldValue) {
 		super.setValue(newFieldValue);
 
 		// HACK: Binding to the fields will call field listeners that may clear/modify the values of other fields.
@@ -607,9 +612,12 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 		discard();
 	}
 
+	/**
+	 * Was {@code setInternalValue(LocationDto)}.
+	 */
 	@Override
-	protected void setInternalValue(LocationDto newValue) {
-		super.setInternalValue(newValue);
+	protected void setPresentationValue(LocationDto newValue) {
+		super.setPresentationValue(newValue);
 
 		if (UiUtil.enabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {
 			hideAndFillJurisdictionFields();
@@ -628,7 +636,7 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 				facilityTypeGroup.setValue(null);
 			}
 			facility.setValue(locationDto.getFacility());
-			facility.setComponentError(null);
+			facility.setHelperText(null);
 			facilityDetails.setValue(locationDto.getFacilityDetails());
 
 			if (UiUtil.enabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {
@@ -656,8 +664,8 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 		((TextField) getField(LocationDto.CONTACT_PERSON_LAST_NAME)).setValue(facilityDto.getContactPersonLastName());
 		((TextField) getField(LocationDto.CONTACT_PERSON_PHONE)).setValue(facilityDto.getContactPersonPhone());
 		((TextField) getField(LocationDto.CONTACT_PERSON_EMAIL)).setValue(facilityDto.getContactPersonEmail());
-		((AccessibleTextField) getField(LocationDto.LATITUDE)).setConvertedValue(facilityDto.getLatitude());
-		((AccessibleTextField) getField(LocationDto.LONGITUDE)).setConvertedValue(facilityDto.getLongitude());
+		setConvertedValue(LocationDto.LATITUDE, facilityDto.getLatitude());
+		setConvertedValue(LocationDto.LONGITUDE, facilityDto.getLongitude());
 	}
 
 	private void setOldFacilityValuesIfPossible(
@@ -673,13 +681,13 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 
 	private HorizontalLayout createGeoButton() {
 		HorizontalLayout geoButtonLayout = new HorizontalLayout();
-		geoButtonLayout.setMargin(false);
+		geoButtonLayout.setPadding(false);
 		geoButtonLayout.setSpacing(false);
 
-		Button geocodeButton = ButtonHelper.createIconButtonWithCaption("geocodeButton", null, VaadinIcons.MAP_MARKER, e -> {
+		Button geocodeButton = ButtonHelper.createIconButtonWithCaption("geocodeButton", null, VaadinIcon.MAP_MARKER, e -> {
 			triggerGeocoding();
-			e.getButton().removeStyleName(CssStyles.GEOCODE_BUTTON_HIGHLIGHT);
-		}, ValoTheme.BUTTON_ICON_ONLY, ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_LARGE);
+			e.getSource().removeClassName(CssStyles.GEOCODE_BUTTON_HIGHLIGHT);
+		}, CssStyles.BUTTON_ICON_ONLY, CssStyles.BUTTON_BORDERLESS, CssStyles.BUTTON_LARGE);
 
 		Field[] locationGeoFields = Stream.of(LocationDto.STREET, LocationDto.POSTAL_CODE, LocationDto.CITY, LocationDto.HOUSE_NUMBER)
 			.map(field -> (Field) getField(field))
@@ -688,23 +696,22 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 		// Highlight geocode-button when the address changes
 		Stream.of(locationGeoFields).forEach(field -> field.addValueChangeListener(e -> {
 			if (isAllFieldsEmpty(locationGeoFields)) {
-				geocodeButton.removeStyleName(CssStyles.GEOCODE_BUTTON_HIGHLIGHT);
+				geocodeButton.removeClassName(CssStyles.GEOCODE_BUTTON_HIGHLIGHT);
 			} else if (field.isModified()) {
-				geocodeButton.addStyleName(CssStyles.GEOCODE_BUTTON_HIGHLIGHT);
+				geocodeButton.addClassName(CssStyles.GEOCODE_BUTTON_HIGHLIGHT);
 			}
 		}));
 
-		geoButtonLayout.addComponent(geocodeButton);
-		geoButtonLayout.setComponentAlignment(geocodeButton, Alignment.BOTTOM_RIGHT);
+		geoButtonLayout.add(geocodeButton);
+		geoButtonLayout.setVerticalComponentAlignment(FlexComponent.Alignment.END, geocodeButton);
 
 		leafletMapPopup = new MapPopupView();
-		leafletMapPopup.setCaption(" ");
+		// V8 setCaption(" ") only reserved a caption row for alignment (look, ignored at this stage)
 		leafletMapPopup.setEnabled(false);
-		leafletMapPopup.setStyleName(ValoTheme.BUTTON_LARGE);
-		leafletMapPopup.addStyleName(ValoTheme.BUTTON_ICON_ONLY);
+		CssStyles.style(leafletMapPopup, CssStyles.BUTTON_LARGE, CssStyles.BUTTON_ICON_ONLY);
 
-		geoButtonLayout.addComponent(leafletMapPopup);
-		geoButtonLayout.setComponentAlignment(leafletMapPopup, Alignment.BOTTOM_RIGHT);
+		geoButtonLayout.add(leafletMapPopup);
+		geoButtonLayout.setVerticalComponentAlignment(FlexComponent.Alignment.END, leafletMapPopup);
 
 		return geoButtonLayout;
 	}
@@ -748,30 +755,33 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 			setConvertedValue(LocationDto.LATITUDE, latLon.getLat());
 			setConvertedValue(LocationDto.LONGITUDE, latLon.getLon());
 		} catch (GeocodingInsufficientAddressException e) {
-			showGeocodingNotification(Strings.messageGeocodingInsufficientAddress, e.getMessage(), Notification.Type.WARNING_MESSAGE);
+			showGeocodingNotification(Strings.messageGeocodingInsufficientAddress, e.getMessage(), NotificationHelper.Type.WARNING_MESSAGE);
 		} catch (GeocodingNoResultException e) {
-			showGeocodingNotification(Strings.messageGeocodingNoResult, e.getMessage(), Notification.Type.WARNING_MESSAGE);
+			showGeocodingNotification(Strings.messageGeocodingNoResult, e.getMessage(), NotificationHelper.Type.WARNING_MESSAGE);
 		} catch (GeocodingConfigurationException e) {
 			// special handling as configuration has parameter
 			final String message = I18nProperties.getString(Strings.errorGeocodingConfigurationInvalidParameter, e.getMessage());
-			showGeocodingNotification(null, String.format(message, e.getParameterName()), Notification.Type.ERROR_MESSAGE);
+			showGeocodingNotification(null, String.format(message, e.getParameterName()), NotificationHelper.Type.ERROR_MESSAGE);
 		} catch (GeocodingConnectionException | GeocodingResponseException e) {
-			showGeocodingNotification(Strings.errorGeocodingUnavailable, e.getMessage(), Notification.Type.ERROR_MESSAGE);
+			showGeocodingNotification(Strings.errorGeocodingUnavailable, e.getMessage(), NotificationHelper.Type.ERROR_MESSAGE);
 		} catch (GeocodingResultFormatException e) {
-			showGeocodingNotification(Strings.errorGeocodingInvalidResponse, e.getMessage(), Notification.Type.ERROR_MESSAGE);
+			showGeocodingNotification(Strings.errorGeocodingInvalidResponse, e.getMessage(), NotificationHelper.Type.ERROR_MESSAGE);
 		} catch (GeocodingException e) {
-			showGeocodingNotification(Strings.errorGeocodingFailed, "Geocoding failed. Please try again later.", Notification.Type.ERROR_MESSAGE);
+			showGeocodingNotification(
+				Strings.errorGeocodingFailed,
+				"Geocoding failed. Please try again later.",
+				NotificationHelper.Type.ERROR_MESSAGE);
 		}
 	}
 
-	private void showGeocodingNotification(String key, String defaultMessage, Notification.Type notificationType) {
+	private void showGeocodingNotification(String key, String defaultMessage, NotificationHelper.Type notificationType) {
 
 		if (key == null || key.isBlank()) {
-			Notification.show(defaultMessage, notificationType);
+			NotificationHelper.show(defaultMessage, notificationType);
 			return;
 		}
 
-		Notification.show(I18nProperties.getString(key, defaultMessage), notificationType);
+		NotificationHelper.show(I18nProperties.getString(key, defaultMessage), notificationType);
 	}
 
 	public void showAddressType() {
@@ -792,9 +802,10 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 
 	public void setCountryDisabledWithHint(String hint) {
 		country.setEnabled(false);
-		Label infoLabel = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
+		Span infoLabel = VaadinUiUtil.createLabel(HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE), ContentMode.HTML);
 		infoLabel.setSizeUndefined();
-		infoLabel.setDescription(hint, ContentMode.HTML);
+		// was an HTML description: Flow tooltips are text (the hint has no markup)
+		infoLabel.setTitle(hint);
 		CssStyles.style(infoLabel, CssStyles.LABEL_XLARGE, CssStyles.LABEL_SECONDARY, CssStyles.VSPACE_TOP_3);
 		getContent().addComponent(infoLabel, COUNTRY_HINT_LOC);
 	}
@@ -828,7 +839,7 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 			facilityDetails.clear();
 			facilityType.clear();
 			facilityTypeGroup.clear();
-			facility.setComponentError(null);
+			facility.setHelperText(null);
 		}
 	}
 
@@ -888,30 +899,24 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 		this.hasEventParticipantsWithoutJurisdiction = hasEventParticipantsWithoutJurisdiction;
 	}
 
-	private static class MapPopupView extends PopupView {
+	/**
+	 * Was a Vaadin 8 {@code PopupView} showing an eye icon that opens the map in a popup. Now an eye icon button with a
+	 * popover (the 1a-31 {@link PopupButton}); as {@code getPopupComponent()} did, the map is created each time the popup
+	 * opens, at the current coordinates.
+	 */
+	private static class MapPopupView extends PopupButton {
 
 		private static final long serialVersionUID = 6119339732442336000L;
-
-		//eye-icon styled as button
-		private static final String MINNIMIZED_HTML =
-			"<div tabindex=\"0\" role=\"button\" class=\"v-button v-widget icon-only v-button-icon-only borderless v-button-borderless large v-button-large\"><span class=\"v-button-wrap\">"
-				+ VaadinIcons.EYE.getHtml() + "<span class=\"v-button-caption\"></span></span></div>";
 
 		private GeoLatLon coordinates = null;
 
 		public MapPopupView() {
-			setContent(new Content() {
-
-				private static final long serialVersionUID = -1709597624862512304L;
-
-				@Override
-				public String getMinimizedValueAsHTML() {
-					return MINNIMIZED_HTML;
-				}
-
-				@Override
-				public Component getPopupComponent() {
-					return createLeafletMap();
+			//eye-icon styled as button
+			ButtonHelper.setIcon(this, VaadinIcon.EYE);
+			CssStyles.style(this, CssStyles.BUTTON_BORDERLESS);
+			getPopover().addOpenedChangeListener(e -> {
+				if (e.isOpened()) {
+					setContent(createLeafletMap());
 				}
 			});
 		}
@@ -919,8 +924,8 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 		private LeafletMap createLeafletMap() {
 
 			LeafletMap map = new LeafletMap();
-			map.setWidth(420, Unit.PIXELS);
-			map.setHeight(420, Unit.PIXELS);
+			map.setWidth("420px");
+			map.setHeight("420px");
 			map.setZoom(12);
 
 			map.setCenter(coordinates);

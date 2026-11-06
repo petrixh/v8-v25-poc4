@@ -15,11 +15,8 @@
 
 package de.symeda.sormas.ui.person;
 
-import com.vaadin.server.UserError;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.AbstractField;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Field;
+import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.HasValue;
 
 import de.symeda.sormas.api.caze.CaseDataDto;
 import de.symeda.sormas.api.i18n.Captions;
@@ -32,6 +29,8 @@ import de.symeda.sormas.ui.utils.AbstractFilterForm;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FieldConfiguration;
 import de.symeda.sormas.ui.utils.FieldHelper;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.Field;
 
 public class PersonSelectionFilterForm extends AbstractFilterForm<PersonSimilarityCriteria> {
 
@@ -69,8 +68,10 @@ public class PersonSelectionFilterForm extends AbstractFilterForm<PersonSimilari
 
 		if (getFieldGroup().getFields().stream().allMatch(Field::isEmpty)) {
 			getFieldGroup().getFields().forEach(f -> {
-				if (AbstractField.class.isAssignableFrom(f.getClass())) {
-					((AbstractField<?>) f).setComponentError(new UserError(validationError));
+				// was setComponentError(new UserError(..)) on V7 fields: the field's red error state
+				if (f instanceof HasValidation) {
+					((HasValidation) f).setErrorMessage(validationError);
+					((HasValidation) f).setInvalid(true);
 				}
 			});
 
@@ -82,19 +83,20 @@ public class PersonSelectionFilterForm extends AbstractFilterForm<PersonSimilari
 
 	public void clearValidation() {
 		getFieldGroup().getFields().forEach(f -> {
-			if (AbstractField.class.isAssignableFrom(f.getClass())) {
-				((AbstractField<?>) f).setComponentError(null);
+			if (f instanceof HasValidation) {
+				((HasValidation) f).setErrorMessage(null);
+				((HasValidation) f).setInvalid(false);
 			}
 		});
 	}
 
 	@Override
-	protected void applyDependenciesOnFieldChange(String propertyId, Property.ValueChangeEvent event) {
+	protected void applyDependenciesOnFieldChange(String propertyId, HasValue.ValueChangeEvent<?> event) {
 		super.applyDependenciesOnFieldChange(propertyId, event);
 
 		switch (propertyId) {
 		case PersonSimilarityCriteria.BIRTHDATE_MM: {
-			Integer birthMM = (Integer) event.getProperty().getValue();
+			Integer birthMM = (Integer) event.getValue();
 
 			ComboBox birthDayDD = getField(PersonSimilarityCriteria.BIRTHDATE_DD);
 			birthDayDD.setEnabled(birthMM != null);

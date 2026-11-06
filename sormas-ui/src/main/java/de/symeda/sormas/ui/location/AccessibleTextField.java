@@ -1,10 +1,10 @@
 package de.symeda.sormas.ui.location;
 
-import com.vaadin.v7.shared.ui.textfield.AbstractTextFieldState;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
-public class AccessibleTextField extends com.vaadin.v7.ui.TextField {
-    @Override
-    public AbstractTextFieldState getState() {
-        return super.getState();
-    }
+/**
+ * Was a Vaadin 7 text field that made {@code getState()} public, so callers could read its "modified" flag. Flow fields
+ * have no shared state: callers use {@code isModified()} (the same flag). The class stays as the type callers check for.
+ */
+public class AccessibleTextField extends TextField {
 }

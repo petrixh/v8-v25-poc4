@@ -22,14 +22,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.shared.Registration;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -234,7 +233,7 @@ public class LabMessageProcessingFlow extends AbstractLabMessageProcessingFlow {
 		});
 		sampleCreateComponent.addDiscardListener(callback::cancel);
 
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 		ExternalMessageProcessingUIHelper.showFormWithLabMessage(
 			labMessage,
 			sampleCreateComponent,
@@ -245,7 +244,7 @@ public class LabMessageProcessingFlow extends AbstractLabMessageProcessingFlow {
 
 	@Override
 	protected void handleCreateContact(ContactDto contact, PersonDto person, ExternalMessageDto labMessage, HandlerCallback<ContactDto> callback) {
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 
 		CommitDiscardWrapperComponent<ContactCreateForm> contactCreateComponent =
 			ControllerProvider.getContactController().getContactCreateComponent(null, false, null, true);
@@ -276,9 +275,9 @@ public class LabMessageProcessingFlow extends AbstractLabMessageProcessingFlow {
 	protected void handlePickOrCreateEvent(ExternalMessageDto labMessage, HandlerCallback<PickOrCreateEventResult> callback) {
 		EventSelectionField eventSelect =
 			new EventSelectionField(labMessage.getDisease(), I18nProperties.getString(Strings.infoPickOrCreateEventForLabMessage), null);
-		eventSelect.setWidth(1024, Sizeable.Unit.PIXELS);
+		eventSelect.setWidth(1024, Unit.PIXELS);
 
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 
 		final CommitDiscardWrapperComponent<EventSelectionField> component = new CommitDiscardWrapperComponent<>(eventSelect);
 		component.addCommitListener(() -> {
@@ -293,7 +292,7 @@ public class LabMessageProcessingFlow extends AbstractLabMessageProcessingFlow {
 			callback.done(result);
 		});
 		component.addDiscardListener(callback::cancel);
-		Registration closeListener = window.addCloseListener((e -> component.discard()));
+		Registration closeListener = VaadinUiUtil.addCloseListener(window, e -> component.discard());
 		component.addDoneListener(() -> {
 			closeListener.remove();
 			window.close();
@@ -301,9 +300,9 @@ public class LabMessageProcessingFlow extends AbstractLabMessageProcessingFlow {
 
 		eventSelect.setSelectionChangeCallback(commitAllowed -> component.getCommitButton().setEnabled(commitAllowed));
 
-		window.setContent(component);
-		window.setCaption(I18nProperties.getString(Strings.headingPickOrCreateEvent));
-		UI.getCurrent().addWindow(window);
+		window.add(component);
+		window.setHeaderTitle(I18nProperties.getString(Strings.headingPickOrCreateEvent));
+		window.open();
 	}
 
 	@Override
@@ -314,27 +313,27 @@ public class LabMessageProcessingFlow extends AbstractLabMessageProcessingFlow {
 		final CommitDiscardWrapperComponent<EventDataForm> editView =
 			new CommitDiscardWrapperComponent<>(eventCreateForm, UiUtil.permitted(UserRight.EVENT_CREATE), eventCreateForm.getFieldGroup());
 
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 		editView.addCommitListener(() -> {
 			if (!eventCreateForm.getFieldGroup().isModified()) {
 				EventDto dto = eventCreateForm.getValue();
 
 				EventDto savedEvent = FacadeProvider.getEventFacade().save(dto);
-				Notification.show(I18nProperties.getString(Strings.messageEventCreated), Notification.Type.WARNING_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageEventCreated), NotificationHelper.Type.WARNING_MESSAGE);
 
 				callback.done(savedEvent);
 			}
 		});
 		editView.addDiscardListener(callback::cancel);
-		Registration closeListener = window.addCloseListener((e -> editView.discard()));
+		Registration closeListener = VaadinUiUtil.addCloseListener(window, e -> editView.discard());
 		editView.addDoneListener(() -> {
 			closeListener.remove();
 			window.close();
 		});
 
-		window.setContent(editView);
-		window.setCaption(I18nProperties.getString(Strings.headingCreateNewEvent));
-		UI.getCurrent().addWindow(window);
+		window.add(editView);
+		window.setHeaderTitle(I18nProperties.getString(Strings.headingCreateNewEvent));
+		window.open();
 	}
 
 	@Override
@@ -343,7 +342,7 @@ public class LabMessageProcessingFlow extends AbstractLabMessageProcessingFlow {
 		EventDto event,
 		ExternalMessageDto labMessage,
 		HandlerCallback<EventParticipantDto> callback) {
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 
 		EventParticipantCreateForm createForm = new EventParticipantCreateForm(
 			event.getEventLocation().getRegion() == null && event.getEventLocation().getDistrict() == null,
@@ -358,7 +357,7 @@ public class LabMessageProcessingFlow extends AbstractLabMessageProcessingFlow {
 
 				FacadeProvider.getPersonFacade().save(dto.getPerson());
 				EventParticipantDto savedDto = FacadeProvider.getEventParticipantFacade().save(dto);
-				Notification.show(I18nProperties.getString(Strings.messageEventParticipantCreated), Notification.Type.ASSISTIVE_NOTIFICATION);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageEventParticipantCreated), NotificationHelper.Type.ASSISTIVE_NOTIFICATION);
 
 				ExternalMessageProcessingUIHelper.updateAddressAndSavePerson(
 					savedDto.getPerson() != null ? savedDto.getPerson().getUuid() : null,
@@ -378,9 +377,9 @@ public class LabMessageProcessingFlow extends AbstractLabMessageProcessingFlow {
 		CompletableFuture<Boolean> ret = new CompletableFuture<>();
 
 		CommitDiscardWrapperComponent<VerticalLayout> commitDiscardWrapperComponent =
-			new CommitDiscardWrapperComponent<>(new VerticalLayout(new Label(I18nProperties.getString(Strings.infoEventParticipantAlreadyExisting))));
-		commitDiscardWrapperComponent.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionContinue));
-		commitDiscardWrapperComponent.getDiscardButton().setCaption(I18nProperties.getCaption(Captions.actionBack));
+			new CommitDiscardWrapperComponent<>(new VerticalLayout(new Span(I18nProperties.getString(Strings.infoEventParticipantAlreadyExisting))));
+		commitDiscardWrapperComponent.getCommitButton().setText(I18nProperties.getCaption(Captions.actionContinue));
+		commitDiscardWrapperComponent.getDiscardButton().setText(I18nProperties.getCaption(Captions.actionBack));
 
 		commitDiscardWrapperComponent.addCommitListener(() -> ret.complete(true));
 		commitDiscardWrapperComponent.addDiscardListener(() -> ret.complete(false));
@@ -422,11 +421,11 @@ public class LabMessageProcessingFlow extends AbstractLabMessageProcessingFlow {
 		SampleSelectionField selectField =
 			new SampleSelectionField(similarSamples, otherSamples, I18nProperties.getString(Strings.infoPickOrCreateSample), sampleDetailsLayout);
 
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 
 		final CommitDiscardWrapperComponent<SampleSelectionField> selectionField = new CommitDiscardWrapperComponent<>(selectField);
-		selectionField.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionConfirm));
-		selectionField.setWidth(1280, Sizeable.Unit.PIXELS);
+		selectionField.getCommitButton().setText(I18nProperties.getCaption(Captions.actionConfirm));
+		selectionField.setWidth(1280, Unit.PIXELS);
 		selectionField.addCommitListener(() -> {
 			PickOrCreateSampleResult result = new PickOrCreateSampleResult();
 

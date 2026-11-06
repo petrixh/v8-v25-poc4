@@ -16,8 +16,15 @@ package de.symeda.sormas.ui.externalmessage.surveyresponse;
 
 import java.util.*;
 
-import com.vaadin.ui.*;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.externalmessage.ExternalMessageDto;
@@ -33,20 +40,27 @@ import de.symeda.sormas.api.patch.DataPatchFailure;
 import de.symeda.sormas.api.patch.partial_retrieval.DisplayablePartialRetrievalResponse;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.grid.Grid;
 
 /**
  * Modal editor window allowing users to correct failed survey response fields and reprocess.
  * Each failed field can be ignored (excluded from reprocessing) or have its key renamed.
  */
-public class SurveyResponseFailureEditor extends Window {
+public class SurveyResponseFailureEditor extends Dialog {
 
 	private static final long serialVersionUID = 4912870523418167234L;
 
 	public SurveyResponseFailureEditor(ExternalMessageDto externalMessage, DisplayablePartialRetrievalResponse displayData, Runnable onReprocessed) {
-		setCaption(I18nProperties.getString(Strings.headingSurveyResponseCorrectAndReprocess));
+		setHeaderTitle(I18nProperties.getString(Strings.headingSurveyResponseCorrectAndReprocess));
 		setModal(true);
 		setResizable(true);
 		setWidth(700, Unit.PIXELS);
+		// Vaadin 8 Window defaults: movable, closable, no close on an outside click
+		setDraggable(true);
+		setCloseOnOutsideClick(false);
+		VaadinUiUtil.setClosable(this, true);
 
 		ExternalMessageSurveyResponseWrapper latest = externalMessage.getSurveyResponseData().getLatest();
 
@@ -58,19 +72,20 @@ public class SurveyResponseFailureEditor extends Window {
 			: new LinkedHashMap<>();
 
 		VerticalLayout mainLayout = new VerticalLayout();
-		mainLayout.setMargin(true);
+		mainLayout.setPadding(true);
 		mainLayout.setSpacing(true);
 
 		// --- Failed fields (editable) ---
 		if (!failures.isEmpty()) {
-			Label failuresHeading = new Label(I18nProperties.getString(Strings.headingSurveyResponseFailures));
+			Span failuresHeading = new Span(I18nProperties.getString(Strings.headingSurveyResponseFailures));
 			CssStyles.style(failuresHeading, CssStyles.H3);
-			mainLayout.addComponent(failuresHeading);
+			mainLayout.add(failuresHeading);
 
 			FormLayout failuresForm = new FormLayout();
-			failuresForm.setMargin(false);
+			// one column, as the Vaadin 8 form layout
+			failuresForm.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
-			Map<PatchField, CheckBox> ignoreCheckboxes = new HashMap<>();
+			Map<PatchField, Checkbox> ignoreCheckboxes = new HashMap<>();
 			Map<PatchField, TextField> pathEditors = new HashMap<>();
 			Map<PatchField, TextField> valueEditors = new HashMap<>();
 
@@ -85,29 +100,29 @@ public class SurveyResponseFailureEditor extends Window {
 					failure.getDataPatchFailureCause() != null ? I18nProperties.getEnumCaption(failure.getDataPatchFailureCause()) : "";
 
 				VerticalLayout fieldContainer = new VerticalLayout();
-				fieldContainer.setMargin(false);
+				fieldContainer.setPadding(false);
 				fieldContainer.setSpacing(false);
 
 				// Ignore checkbox
-				CheckBox ignoreCheckbox = new CheckBox(I18nProperties.getCaption(Captions.surveyResponseIgnoreField));
+				Checkbox ignoreCheckbox = new Checkbox(I18nProperties.getCaption(Captions.surveyResponseIgnoreField));
 				ignoreCheckboxes.put(patchField, ignoreCheckbox);
-				fieldContainer.addComponent(ignoreCheckbox);
+				fieldContainer.add(ignoreCheckbox);
 
-				Label causeLabel = new Label(I18nProperties.getCaption(Captions.surveyResponseFailureCause) + ": " + causeName);
+				Span causeLabel = new Span(I18nProperties.getCaption(Captions.surveyResponseFailureCause) + ": " + causeName);
 				CssStyles.style(causeLabel, CssStyles.LABEL_SMALL, CssStyles.LABEL_SECONDARY);
-				fieldContainer.addComponent(causeLabel);
+				fieldContainer.add(causeLabel);
 
-				Label currentValueLabel =
-					new Label(I18nProperties.getCaption(Captions.surveyResponseCurrentCaseValue) + ": " + (currentValue != null ? currentValue : ""));
+				Span currentValueLabel =
+					new Span(I18nProperties.getCaption(Captions.surveyResponseCurrentCaseValue) + ": " + (currentValue != null ? currentValue : ""));
 				CssStyles.style(currentValueLabel, CssStyles.LABEL_SMALL, CssStyles.LABEL_SECONDARY);
-				fieldContainer.addComponent(currentValueLabel);
+				fieldContainer.add(currentValueLabel);
 
 				// Key rename field
 				TextField keyField = new TextField(I18nProperties.getCaption(Captions.surveyResponseKeyName));
 				keyField.setValue(fieldPath);
 				keyField.setWidth(100, Unit.PERCENTAGE);
 				pathEditors.put(patchField, keyField);
-				fieldContainer.addComponent(keyField);
+				fieldContainer.add(keyField);
 
 				// Value field
 				TextField valueField = new TextField(fieldLabel);
@@ -116,7 +131,7 @@ public class SurveyResponseFailureEditor extends Window {
 					valueField.setValue(failure.getProvidedFieldValue().toString());
 				}
 				valueEditors.put(patchField, valueField);
-				fieldContainer.addComponent(valueField);
+				fieldContainer.add(valueField);
 
 				// Wire ignore checkbox to disable key/value fields
 				ignoreCheckbox.addValueChangeListener(event -> {
@@ -125,16 +140,16 @@ public class SurveyResponseFailureEditor extends Window {
 					valueField.setEnabled(!ignored);
 				});
 
-				failuresForm.addComponent(fieldContainer);
+				failuresForm.add(fieldContainer);
 			}
 
-			mainLayout.addComponent(failuresForm);
+			mainLayout.add(failuresForm);
 
 			// --- Valid fields (read-only context) ---§
 			if (!validValues.isEmpty()) {
-				Label validHeading = new Label(I18nProperties.getCaption(Captions.surveyResponseValidFields));
+				Span validHeading = new Span(I18nProperties.getCaption(Captions.surveyResponseValidFields));
 				CssStyles.style(validHeading, CssStyles.H4);
-				mainLayout.addComponent(validHeading);
+				mainLayout.add(validHeading);
 
 				List<Map.Entry<PatchField, Object>> validEntries = new ArrayList<>(validValues.entrySet());
 
@@ -155,7 +170,7 @@ public class SurveyResponseFailureEditor extends Window {
 					.setCaption(I18nProperties.getCaption(Captions.surveyResponseCurrentCaseValue))
 					.setExpandRatio(2);
 
-				mainLayout.addComponent(validGrid);
+				mainLayout.add(validGrid);
 			}
 
 			// --- Buttons ---
@@ -166,7 +181,7 @@ public class SurveyResponseFailureEditor extends Window {
 				ButtonHelper.createButton(Captions.actionSaveAndReprocess, I18nProperties.getCaption(Captions.actionSaveAndReprocess), e -> {
 					LinkedHashMap<PatchField, Object> correctedDictionary = new LinkedHashMap<>(validValues);
 					for (PatchField patchField : valueEditors.keySet()) {
-						CheckBox ignoreCheckbox = ignoreCheckboxes.get(patchField);
+						Checkbox ignoreCheckbox = ignoreCheckboxes.get(patchField);
 						if (ignoreCheckbox != null && Boolean.TRUE.equals(ignoreCheckbox.getValue())) {
 							continue;
 						}
@@ -183,24 +198,24 @@ public class SurveyResponseFailureEditor extends Window {
 						.overwriteSurveyResponse(externalMessage.getUuid(), new PatchDictionary().setDictionary(correctedDictionary));
 
 					if (externalMessageDto.getStatus() == ExternalMessageStatus.PROCESSED) {
-						Notification.show(I18nProperties.getString(Strings.messageSurveyResponseReprocessed), Notification.Type.HUMANIZED_MESSAGE);
+						NotificationHelper.show(I18nProperties.getString(Strings.messageSurveyResponseReprocessed), NotificationHelper.Type.HUMANIZED_MESSAGE);
 					} else {
-						Notification
-							.show(I18nProperties.getString(Strings.messageSurveyResponseReprocessedFailure), Notification.Type.HUMANIZED_MESSAGE);
+						NotificationHelper
+							.show(I18nProperties.getString(Strings.messageSurveyResponseReprocessedFailure), NotificationHelper.Type.HUMANIZED_MESSAGE);
 					}
 
 					close();
 					onReprocessed.run();
-				}, ValoTheme.BUTTON_PRIMARY);
+				}, CssStyles.BUTTON_PRIMARY);
 
 			Button cancelButton = ButtonHelper.createButton(Captions.actionCancel, I18nProperties.getCaption(Captions.actionCancel), e -> close());
 
-			buttonsLayout.addComponent(saveAndReprocessButton);
-			buttonsLayout.addComponent(cancelButton);
-			mainLayout.addComponent(buttonsLayout);
+			buttonsLayout.add(saveAndReprocessButton);
+			buttonsLayout.add(cancelButton);
+			mainLayout.add(buttonsLayout);
 		}
 
-		setContent(mainLayout);
+		add(mainLayout);
 	}
 
 }

@@ -2,11 +2,11 @@ package de.symeda.sormas.ui.externalmessage.doctordeclaration;
 
 import java.util.List;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.externalmessage.ExternalMessageDto;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -28,37 +28,37 @@ public class DoctorDeclarationSlider {
 
 	public DoctorDeclarationSlider(List<ExternalMessageDto> doctorDeclarations) {
 		VerticalLayout layout = new VerticalLayout();
-		layout.setMargin(true);
+		layout.setPadding(true);
 		VaadinUiUtil.showPopupWindow(layout, I18nProperties.getString(Strings.headingShowExternalMessage));
 
 		this.index = 0;
 		this.doctorDeclarations = doctorDeclarations;
 
-		this.topLeftButton = ButtonHelper.createIconButton("", VaadinIcons.ANGLE_LEFT, (clickEvent) -> this.previous());
-		this.topRightButton = ButtonHelper.createIconButton("", VaadinIcons.ANGLE_RIGHT, (clickEvent) -> this.next());
+		this.topLeftButton = ButtonHelper.createIconButton("", VaadinIcon.ANGLE_LEFT, (clickEvent) -> this.previous());
+		this.topRightButton = ButtonHelper.createIconButton("", VaadinIcon.ANGLE_RIGHT, (clickEvent) -> this.next());
 
 		HorizontalLayout topNavigator = new HorizontalLayout();
-		topNavigator.setStyleName(CssStyles.FLOAT_RIGHT);
-		topNavigator.addComponent(topLeftButton);
-		topNavigator.addComponent(topRightButton);
+		topNavigator.setClassName(CssStyles.FLOAT_RIGHT);
+		topNavigator.add(topLeftButton);
+		topNavigator.add(topRightButton);
 
-		layout.addComponent(topNavigator);
+		layout.add(topNavigator);
 
 		ExternalMessageForm form = new ExternalMessageForm();
-		form.setWidth(550, Sizeable.Unit.PIXELS);
+		form.setWidth(550, Unit.PIXELS);
 		form.setValue(doctorDeclarations.get(index));
 		this.form = form;
-		layout.addComponent(this.form);
-		layout.addStyleName("doctor-declaration-slider");
+		layout.add(this.form);
+		layout.addClassName("doctor-declaration-slider");
 
-		this.bottomLeftButton = ButtonHelper.createIconButton("", VaadinIcons.ANGLE_LEFT, (clickEvent) -> this.previous());
-		this.bottomRightButton = ButtonHelper.createIconButton("", VaadinIcons.ANGLE_RIGHT, (clickEvent) -> this.next());
+		this.bottomLeftButton = ButtonHelper.createIconButton("", VaadinIcon.ANGLE_LEFT, (clickEvent) -> this.previous());
+		this.bottomRightButton = ButtonHelper.createIconButton("", VaadinIcon.ANGLE_RIGHT, (clickEvent) -> this.next());
 		HorizontalLayout bottomNavigator = new HorizontalLayout();
-		bottomNavigator.setStyleName(CssStyles.FLOAT_RIGHT);
-		bottomNavigator.addComponent(bottomLeftButton);
-		bottomNavigator.addComponent(bottomRightButton);
+		bottomNavigator.setClassName(CssStyles.FLOAT_RIGHT);
+		bottomNavigator.add(bottomLeftButton);
+		bottomNavigator.add(bottomRightButton);
 
-		layout.addComponent(bottomNavigator);
+		layout.add(bottomNavigator);
 
 		this.enableButtons();
 	}

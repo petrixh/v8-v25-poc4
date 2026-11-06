@@ -21,15 +21,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import de.symeda.sormas.ui.navigation.Navigator;
-import com.vaadin.flow.component.Unit;
-import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.ui.TextArea;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 
 import de.symeda.sormas.api.EntityDto;
 import de.symeda.sormas.api.FacadeProvider;
@@ -62,7 +61,9 @@ import de.symeda.sormas.api.sormastosormas.validation.ValidationErrors;
 import de.symeda.sormas.api.utils.DataHelper;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.SormasUI;
+import de.symeda.sormas.ui.navigation.Navigator;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
@@ -318,7 +319,7 @@ public class SormasToSormasController {
 		Runnable callback) {
 		VaadinUiUtil.showThreeOptionsPopup(
 			I18nProperties.getString(Strings.headingSormasToSormasDuplicateDetection),
-			new Span(I18nProperties.getString(messageI18nProperty), ContentMode.HTML),
+			VaadinUiUtil.createLabel(I18nProperties.getString(messageI18nProperty), ContentMode.HTML),
 			I18nProperties.getCaption(Captions.actionOkay),
 			I18nProperties.getCaption(Captions.actionCancel),
 			I18nProperties.getCaption(thirdActionI18nProperty),
@@ -377,7 +378,7 @@ public class SormasToSormasController {
 
 		CommitDiscardWrapperComponent<SormasToSormasOptionsForm> optionsCommitDiscard =
 			new CommitDiscardWrapperComponent<>(optionsForm, optionsForm.getFieldGroup());
-		optionsCommitDiscard.getCommitButton().setCaption(I18nProperties.getCaption(Captions.sormasToSormasShare));
+		optionsCommitDiscard.getCommitButton().setText(I18nProperties.getCaption(Captions.sormasToSormasShare));
 		optionsCommitDiscard.setWidthFull();
 
 		Dialog optionsPopup = VaadinUiUtil.showPopupWindow(optionsCommitDiscard, I18nProperties.getCaption(Captions.sormasToSormasShare));
@@ -408,7 +409,7 @@ public class SormasToSormasController {
 			} else {
 				Component messageComponent =
 					buildShareErrorMessage(ex.getHumanMessage() + " " + I18nProperties.getString(Strings.reloadPageToSeeChanges), ex.getErrors());
-				messageComponent.setWidthFull();
+				((HasSize) messageComponent).setWidthFull();
 				VaadinUiUtil.showPopupWindowWithWidth(
 					new VerticalLayout(messageComponent),
 					I18nProperties.getCaption(Captions.sormasToSormasErrorDialogTitle),
@@ -416,7 +417,7 @@ public class SormasToSormasController {
 			}
 		} catch (SormasToSormasValidationException ex) {
 			Component messageComponent = buildShareErrorMessage(ex.getMessage(), ex.getErrors());
-			messageComponent.setWidthFull();
+			((HasSize) messageComponent).setWidthFull();
 			VaadinUiUtil.showPopupWindowWithWidth(
 				new VerticalLayout(messageComponent),
 				I18nProperties.getCaption(Captions.sormasToSormasErrorDialogTitle),
@@ -425,7 +426,7 @@ public class SormasToSormasController {
 	}
 
 	private Component buildShareErrorMessage(String message, List<ValidationErrors> errors) {
-		Span errorMessageLabel = new Span(message, ContentMode.HTML);
+		Span errorMessageLabel = VaadinUiUtil.createLabel(message, ContentMode.HTML);
 		errorMessageLabel.addClassName(CssStyles.LABEL_WHITE_SPACE_NORMAL);
 
 		if (errors == null || errors.isEmpty()) {

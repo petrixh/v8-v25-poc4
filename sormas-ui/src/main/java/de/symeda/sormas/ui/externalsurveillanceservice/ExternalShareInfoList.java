@@ -62,7 +62,7 @@ public class ExternalShareInfoList extends PaginationList<ExternalShareInfoDto> 
 			updatePaginationLayout();
 			listLayout.add(placeholderLabel);
 		} else {
-			listLayout.removeComponent(placeholderLabel);
+			listLayout.remove(placeholderLabel);
 			showPage(1);
 		}
 	}
@@ -85,10 +85,10 @@ public class ExternalShareInfoList extends PaginationList<ExternalShareInfoDto> 
 		private static final String TIMESTAMP_LOC = "timestamp";
 
 		public ExternalShareInfoListEntry(ExternalShareInfoDto shareInfo, Language userLanguage) {
-			setMargin(false);
+			setPadding(false);
 			setSpacing(true);
 			setWidthFull();
-			addStyleName(CssStyles.SORMAS_LIST_ENTRY);
+			addClassName(CssStyles.SORMAS_LIST_ENTRY);
 
 			CustomLayout infoLayout = new CustomLayout();
 			infoLayout.setTemplateContents(buildLayout(shareInfo.getStatus()));

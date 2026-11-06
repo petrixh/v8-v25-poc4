@@ -197,7 +197,7 @@ public class ExternalSurveillanceServiceGateway {
 
 	private static void handleGatewayCall(GatewayCall gatewayCall, @Nullable String successMessage) {
 
-		Notification.Type notificationType;
+		NotificationHelper.Type notificationType;
 		String notificationMessage;
 
 		try {

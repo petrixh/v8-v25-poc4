@@ -33,13 +33,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.flow.component.html.Span;
-import de.symeda.sormas.ui.utils.fields.CheckBox;
-import de.symeda.sormas.ui.utils.fields.ComboBox;
-import de.symeda.sormas.ui.utils.fields.Field;
-import de.symeda.sormas.ui.utils.fields.TextArea;
+import com.vaadin.flow.component.icon.VaadinIcon;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -55,9 +50,16 @@ import de.symeda.sormas.api.sormastosormas.SormasToSormasOriginInfoDto;
 import de.symeda.sormas.api.sormastosormas.share.incoming.ShareRequestStatus;
 import de.symeda.sormas.api.sormastosormas.share.outgoing.SormasToSormasShareInfoDto;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.LayoutUtil;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class SormasToSormasOptionsForm extends AbstractEditForm<SormasToSormasOptionsDto> {
 
@@ -373,7 +375,7 @@ public class SormasToSormasOptionsForm extends AbstractEditForm<SormasToSormasOp
 					String validationMessage = targetValidator.apply(selectedServer);
 
 					if (StringUtils.isNoneBlank(validationMessage)) {
-						Span messageLabel = new Span(VaadinIcon.WARNING.getHtml() + " " + validationMessage, ContentMode.HTML);
+						Span messageLabel = VaadinUiUtil.createLabel(HtmlRenderer.iconHtml(VaadinIcon.WARNING) + " " + validationMessage, ContentMode.HTML);
 						messageLabel.addClassNames(LABEL_WHITE_SPACE_NORMAL, VSPACE_4, VSPACE_TOP_5);
 						getContent().addComponent(messageLabel, TARGET_VALIDATION_ERROR_LOC);
 					} else {
@@ -456,7 +458,7 @@ public class SormasToSormasOptionsForm extends AbstractEditForm<SormasToSormasOp
 
 	public void disableAllOptions() {
 		getFieldGroup().getFields().forEach(f -> {
-			if (!SormasToSormasOptionsDto.COMMENT.equals(f.getId())) {
+			if (!SormasToSormasOptionsDto.COMMENT.equals(f.getId().orElse(null))) {
 				f.setEnabled(false);
 			}
 		});

@@ -24,6 +24,7 @@ import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.utils.AbstractView;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
 
 public class ShareRequestsView extends AbstractView {
 

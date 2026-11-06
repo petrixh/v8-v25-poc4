@@ -64,7 +64,7 @@ public class ContactsPreviewGrid extends BasePreviewGrid<SormasToSormasContactPr
 			}
 
 			return new Span(diseaseText);
-		}).setId(SormasToSormasContactPreview.DISEASE);
+		}).setKey(SormasToSormasContactPreview.DISEASE);
 
 		List<String> columnConfig = new ArrayList<>();
 		columnConfig.addAll(
@@ -83,7 +83,7 @@ public class ContactsPreviewGrid extends BasePreviewGrid<SormasToSormasContactPr
 				SormasToSormasContactPreview.COMMUNITY,
 				SormasToSormasContactPreview.LAST_CONTACT_DATE));
 
-		setColumns(columnConfig);
+		setColumns(columnConfig.toArray(new String[0]));
 
 		((Column<SormasToSormasContactPreview, String>) getColumn(SormasToSormasContactPreview.UUID)).setRenderer(new UuidRenderer());
 		((Column<SormasToSormasContactPreview, Date>) getColumn(SormasToSormasContactPreview.REPORT_DATE_TIME))
@@ -95,9 +95,9 @@ public class ContactsPreviewGrid extends BasePreviewGrid<SormasToSormasContactPr
 		getColumn(SormasToSormasCasePreview.DISTRICT).setRenderer(new CaptionRenderer());
 		getColumn(SormasToSormasCasePreview.COMMUNITY).setRenderer(new CaptionRenderer());
 
-		for (Column<?, ?> column : getColumns()) {
+		for (Column<?, ?> column : getAllColumns()) {
 			column.setCaption(
-				I18nProperties.findPrefixCaption(column.getId(), SormasToSormasContactPreview.I18N_PREFIX, SormasToSormasPersonPreview.I18N_PREFIX));
+				I18nProperties.findPrefixCaption(column.getKey(), SormasToSormasContactPreview.I18N_PREFIX, SormasToSormasPersonPreview.I18N_PREFIX));
 		}
 	}
 }

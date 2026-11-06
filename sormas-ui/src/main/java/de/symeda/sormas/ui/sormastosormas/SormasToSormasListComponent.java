@@ -26,13 +26,16 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.ui.AbstractOrderedLayout;
-import com.vaadin.ui.Alignment;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
@@ -143,12 +146,15 @@ public class SormasToSormasListComponent extends VerticalLayout {
 			null);
 	}
 
-	private void initLayout(SormasToSormasOriginInfoDto originInfo, ShareDataLoader loadShares, Button.ClickListener shareButtonClickListener) {
+	private void initLayout(
+		SormasToSormasOriginInfoDto originInfo,
+		ShareDataLoader loadShares,
+		ComponentEventListener<ClickEvent<Button>> shareButtonClickListener) {
 		this.originInfo = originInfo;
 		this.loadShares = loadShares;
 
 		setWidthFull();
-		setMargin(false);
+		setPadding(false);
 		setSpacing(false);
 
 		HorizontalLayout componentHeader = new HorizontalLayout();
@@ -166,7 +172,9 @@ public class SormasToSormasListComponent extends VerticalLayout {
 				ButtonHelper.createIconButton(Captions.sormasToSormasShare, VaadinIcon.SHARE, shareButtonClickListener, CssStyles.BUTTON_PRIMARY);
 
 			componentHeader.add(shareButtonButton);
-			componentHeader.setComponentAlignment(shareButtonButton, Alignment.MIDDLE_RIGHT);
+			// was Alignment.MIDDLE_RIGHT
+			componentHeader.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, shareButtonButton);
+			shareButtonButton.getStyle().set("margin-left", "auto");
 		}
 
 		contentLayout = new VerticalLayout();
@@ -185,21 +193,23 @@ public class SormasToSormasListComponent extends VerticalLayout {
 		Span placeHolder = new Span(I18nProperties.getString(Strings.sormasToSormasLoadingShares));
 		contentLayout.add(placeHolder);
 
+		// Flow: UI state changes need the session lock, so the poll interval is set here (request thread), not in the
+		// loading thread; set in this response, the client polls for the result even when loading ends before it is sent
+		currentUI.setPollInterval(300);
+
 		Thread loadSharesThread = new Thread(() -> {
 			try {
-				currentUI.setPollInterval(300);
-
 				try {
-					reloadListWithWrapper(currentUI::access);
+					reloadListWithWrapper(uiChanges -> currentUI.access(uiChanges::run));
 				} finally {
-					currentUI.setPollInterval(-1);
+					currentUI.access(() -> currentUI.setPollInterval(-1));
 				}
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 
-				currentUI.setPollInterval(-1);
 				currentUI.access(() -> {
-					placeHolder.setValue(I18nProperties.getString(Strings.errorSormasToSormasLoadShares));
+					currentUI.setPollInterval(-1);
+					placeHolder.setText(I18nProperties.getString(Strings.errorSormasToSormasLoadShares));
 				});
 			}
 		});
@@ -243,7 +253,7 @@ public class SormasToSormasListComponent extends VerticalLayout {
 
 				// render the owner of the entity
 				if (!isOwnedByCurrentOrg && !isOwnedByOrigin) {
-					AbstractOrderedLayout ownerLayout = null;
+					Component ownerLayout = null;
 					if (isOwnedByRootOrg) {
 						ownerLayout = buildSormasOriginInfo(rootOrigin, true);
 					} else if (ownerShare != null && !ownerShare.getTargetDescriptor().getId().equals(currentServerOrgId)) {
@@ -251,7 +261,7 @@ public class SormasToSormasListComponent extends VerticalLayout {
 					}
 
 					if (ownerLayout != null) {
-						ownerLayout.addClassName(CssStyles.VSPACE_3);
+						((HasStyle) ownerLayout).addClassName(CssStyles.VSPACE_3);
 						contentLayout.add(ownerLayout);
 					}
 				}
@@ -559,10 +569,10 @@ public class SormasToSormasListComponent extends VerticalLayout {
 		private static final long serialVersionUID = 7462585357530141263L;
 
 		public SormasToSormasShareListEntry(SormasToSormasShareListEntryData data, Runnable revokeCallback) {
-			setMargin(false);
+			setPadding(false);
 			setSpacing(true);
 			setWidthFull();
-			addStyleName(CssStyles.SORMAS_LIST_ENTRY);
+			addClassName(CssStyles.SORMAS_LIST_ENTRY);
 
 			VerticalLayout infoLayout = new VerticalLayout();
 			infoLayout.setWidthFull();

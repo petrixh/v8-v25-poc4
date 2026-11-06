@@ -36,7 +36,7 @@ public class ShareRequestGridComponent extends VerticalLayout {
 		this.criteria = criteria;
 
 		setSizeFull();
-		setMargin(false);
+		setPadding(false);
 
 		grid = new ShareRequestGrid(viewConfiguration.isInEagerMode(), criteria, viewConfiguration.getViewType());
 		grid.setSizeFull();

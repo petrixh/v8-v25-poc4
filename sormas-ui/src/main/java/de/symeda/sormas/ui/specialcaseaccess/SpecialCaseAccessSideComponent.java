@@ -44,7 +44,7 @@ public class SpecialCaseAccessSideComponent extends SideComponent {
 		super(I18nProperties.getString(Strings.headingSpecailCaseAccess));
 
 		setWidthFull();
-		setMargin(false);
+		setPadding(false);
 		setSpacing(false);
 
 		SpecialCaseAccessList list = new SpecialCaseAccessList(caze);

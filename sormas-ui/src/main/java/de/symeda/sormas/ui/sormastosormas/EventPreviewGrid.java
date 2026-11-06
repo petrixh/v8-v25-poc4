@@ -66,11 +66,11 @@ public class EventPreviewGrid extends BasePreviewGrid<SormasToSormasEventPreview
 				}
 			}
 			return new Span(diseaseText);
-		}).setId(SormasToSormasEventPreview.DISEASE);
+		}).setKey(SormasToSormasEventPreview.DISEASE);
 
 		removeColumn(SormasToSormasEventPreview.EVENT_LOCATION);
 		addComponentColumn(previewData -> new Span(LocationHelper.buildLocationString(previewData.getEventLocation())))
-			.setId(SormasToSormasEventPreview.EVENT_LOCATION);
+			.setKey(SormasToSormasEventPreview.EVENT_LOCATION);
 
 		setColumns(
 			SormasToSormasEventPreview.UUID,
@@ -84,9 +84,9 @@ public class EventPreviewGrid extends BasePreviewGrid<SormasToSormasEventPreview
 		((Column<SormasToSormasEventPreview, Date>) getColumn(SormasToSormasEventPreview.REPORT_DATE_TIME))
 			.setRenderer(new DateRenderer(DateHelper.getLocalDateTimeFormat(userLanguage)));
 
-		for (Column<?, ?> column : getColumns()) {
+		for (Column<?, ?> column : getAllColumns()) {
 			column.setCaption(
-				I18nProperties.findPrefixCaption(column.getId(), SormasToSormasEventPreview.I18N_PREFIX, SormasToSormasPersonPreview.I18N_PREFIX));
+				I18nProperties.findPrefixCaption(column.getKey(), SormasToSormasEventPreview.I18N_PREFIX, SormasToSormasPersonPreview.I18N_PREFIX));
 		}
 	}
 }

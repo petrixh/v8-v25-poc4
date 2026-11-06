@@ -19,6 +19,7 @@ import static de.symeda.sormas.ui.utils.CssStyles.H3;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -62,7 +63,7 @@ public class ShareRequestLayout extends VerticalLayout {
 				contactsGrid.addNavigateListener(this::onNavigateFromGrid);
 				casesGrid.getSelectionModel().addSelectionListener(event -> {
 					event.getFirstSelectedItem().ifPresent(casePreview -> {
-						contactsGrid.setItems(contacts.stream().filter(c -> DataHelper.isSame(c.getCaze(), casePreview)));
+						contactsGrid.setItems(contacts.stream().filter(c -> DataHelper.isSame(c.getCaze(), casePreview)).collect(Collectors.toList()));
 					});
 				});
 			}
@@ -97,7 +98,11 @@ public class ShareRequestLayout extends VerticalLayout {
 				event.getFirstSelectedItem().ifPresent(eventPreview -> {
 					if (shareRequest.getEventParticipants() != null) {
 						eventParticipantsGrid
-							.setItems(shareRequest.getEventParticipants().stream().filter(ep -> DataHelper.isSame(ep.getEvent(), eventPreview)));
+							.setItems(
+								shareRequest.getEventParticipants()
+									.stream()
+									.filter(ep -> DataHelper.isSame(ep.getEvent(), eventPreview))
+									.collect(Collectors.toList()));
 					}
 				});
 			});

@@ -14,6 +14,8 @@
  */
 package de.symeda.sormas.ui.utils.grid.renderers;
 
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 import com.vaadin.flow.component.UI;
@@ -55,7 +57,8 @@ public abstract class ConvertingHtmlRenderer extends ValueRenderer<Object> {
 
 	/**
 	 * The Vaadin 7 grid's presentation of a model value: converted with the SORMAS default converters where one exists,
-	 * else {@code toString()}.
+	 * a {@link Date} in the medium date-time format of the UI locale (V7 {@code StringToDateConverter}), else
+	 * {@code toString()}.
 	 */
 	@SuppressWarnings({
 		"unchecked",
@@ -67,10 +70,13 @@ public abstract class ConvertingHtmlRenderer extends ValueRenderer<Object> {
 		if (value instanceof String) {
 			return (String) value;
 		}
+		UI ui = UI.getCurrent();
+		Locale locale = ui != null ? ui.getLocale() : Locale.getDefault();
+		if (value instanceof Date) {
+			return DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale).format((Date) value);
+		}
 		Converter converter = SormasDefaultConverterFactory.createStringConverter(value.getClass());
 		if (converter != null) {
-			UI ui = UI.getCurrent();
-			Locale locale = ui != null ? ui.getLocale() : Locale.getDefault();
 			Object presentation = converter.convertToPresentation(value, new ValueContext(locale));
 			return presentation != null ? presentation.toString() : null;
 		}

@@ -1080,12 +1080,23 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 				return;
 			}
 			this.buffered = buffered;
+			// re-reading the bean into the fields is not a change: the modified state of the group and of each field stays as
+			// it was (V7 setBuffered did not touch it)
+			boolean wasModified = modified;
+			Set<Field<?>> modifiedFields = new HashSet<>();
+			bindings.keySet().forEach(f -> {
+				if (ComponentUtil.getData(f.asComponent(), Field.DATA_MODIFIED) != null) {
+					modifiedFields.add(f);
+				}
+			});
 			if (buffered) {
 				binder.removeBean();
 				binder.readBean(bean);
 			} else {
 				binder.setBean(bean);
 			}
+			modified = wasModified;
+			bindings.keySet().forEach(f -> setFieldModified(f, modifiedFields.contains(f)));
 		}
 
 		@Override

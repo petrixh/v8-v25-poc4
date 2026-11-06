@@ -34,7 +34,9 @@ import de.symeda.sormas.api.AuthProvider;
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
 import de.symeda.sormas.api.i18n.I18nProperties;
+import de.symeda.sormas.api.user.UserDto;
 import de.symeda.sormas.api.user.UserRight;
+import de.symeda.sormas.api.user.UserRoleDto;
 
 public final class LoginHelper {
 
@@ -92,7 +94,18 @@ public final class LoginHelper {
 	 */
 	public static boolean isLoggedInToWebUi() {
 		VaadinServletRequest request = VaadinServletRequest.getCurrent();
-		return request != null && request.isUserInRole(UserRight.SORMAS_UI.name());
+		return request != null && request.getUserPrincipal() != null && currentUserHasWebUiRight();
+	}
+
+	/**
+	 * Whether the logged-in caller has the right {@link UserRight#SORMAS_UI}: the user rights of the user's roles, the same
+	 * set the login gives the caller as groups (and so as roles). Not {@code isUserInRole}: on Payara 7 the web role check
+	 * fails with an exception when the request's authorization context is not set, which is the case for this app
+	 * (migration ticket 1a-91).
+	 */
+	public static boolean currentUserHasWebUiRight() {
+		UserDto user = FacadeProvider.getUserFacade().getCurrentUser();
+		return user != null && UserRoleDto.getUserRights(FacadeProvider.getUserFacade().getUserRoles(user)).contains(UserRight.SORMAS_UI);
 	}
 
 	/**

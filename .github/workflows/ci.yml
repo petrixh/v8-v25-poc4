@@ -120,20 +120,14 @@ jobs:
           EOF
 
       # Smoke, in this job on the artefacts just built: start one app copy with env/, log in as each
-      # web test user, stop the copy. See CI.md and env/README.md ("Smoke check").
-      #
-      # NON-BLOCKING until ticket 1a-91 (migration stage 1a): env/ runs Payara 7 (Jakarta EE 11) on
-      # JDK 21 since 1a-22, but the app is still being ported to Jakarta EE and does not deploy on it
-      # until 1a-91, so the app does not come up. The logins run only when the start succeeded.
-      # Every smoke step has continue-on-error: its result shows in the log and the job stays green.
-      # 1a-91 removes continue-on-error again (CI.md "Smoke").
+      # web test user and open the routes in env/smoke-users.json by URL, stop the copy. A smoke
+      # failure fails the job. See CI.md and env/README.md ("Smoke check").
       #
       # env/up.sh --no-build reuses the image and env/.state/build/deploy only; it cannot take the
       # target/ directories of this build (without them it would build the app a second time). This
       # step puts this build's artefacts where env/build.sh would and builds the same Payara image.
       # Keep it in step with env/build.sh (collect and image).
       - name: 'Smoke: env/ artefacts and Payara image from this build'
-        continue-on-error: true # non-blocking until 1a-91, see above
         if: steps.dedupe.outputs.skip != 'true'
         run: |
           source env/lib.sh
@@ -153,14 +147,12 @@ jobs:
           ls -l "$D/apps"; echo "server libs: $(find "$D/serverlibs" -name "*.jar" | wc -l)"
 
       - name: 'Smoke: Node 22'
-        continue-on-error: true # non-blocking until 1a-91, see above
         if: steps.dedupe.outputs.skip != 'true'
         uses: actions/setup-node@v7
         with:
           node-version: '22'
 
       - name: 'Smoke: Playwright 1.63 and Chromium'
-        continue-on-error: true # non-blocking until 1a-91, see above
         if: steps.dedupe.outputs.skip != 'true'
         run: |
           npm install -g --no-fund --no-audit playwright@1.63.0
@@ -168,42 +160,26 @@ jobs:
 
       # One copy with the env/ defaults (port 18080, project sormas-new-env): start, seed, snapshot.
       - name: 'Smoke: start the app (env/up.sh --no-build)'
-        continue-on-error: true # non-blocking until 1a-91, see above
         id: smoke_up
         if: steps.dedupe.outputs.skip != 'true'
-        # Until 1a-91 the app never answers: wait 5 min, not the default 15
-        env:
-          APP_ENV_WAIT_S: '300'
         run: env/up.sh --no-build
 
-      # Each web test user logs in and the first view loads with no console error and no HTTP >= 400;
-      # PoeInf is refused. Passwords are read from DefaultEntityHelper.java, never printed or written.
-      - name: 'Smoke: log in as each web test user'
-        continue-on-error: true # non-blocking until 1a-91, see above
+      # Each web test user logs in, the first view and each route of env/smoke-users.json (opened by
+      # its own URL) load with no console error and no HTTP >= 400; PoeInf is refused. Passwords are
+      # read from DefaultEntityHelper.java, never printed or written.
+      - name: 'Smoke: log in as each web test user and open the routes'
         id: smoke_login
-        if: steps.dedupe.outputs.skip != 'true' && steps.smoke_up.outcome == 'success'
+        if: steps.dedupe.outputs.skip != 'true'
         run: node env/smoke.cjs env/.state/smoke
 
       # Always, also on failure or cancel, once the start step has run.
       - name: 'Smoke: app log, stop the app (env/down.sh)'
-        continue-on-error: true # non-blocking until 1a-91, see above
         if: ${{ always() && steps.smoke_up.outcome != 'skipped' && steps.dedupe.outputs.skip != 'true' }}
         run: |
           source env/lib.sh
           mkdir -p env/.state/smoke
           docker logs "$APP_ENV_CONTAINER" > env/.state/smoke/app.log 2>&1 || true
           env/down.sh
-
-      # Until 1a-91: the smoke result as a warning and in the job summary, since it cannot fail the job.
-      - name: 'Smoke: result (non-blocking until 1a-91)'
-        if: ${{ always() && steps.dedupe.outputs.skip != 'true' }}
-        env:
-          UP: ${{ steps.smoke_up.outcome }}
-          LOGIN: ${{ steps.smoke_login.outcome }}
-        run: |
-          msg="Smoke (non-blocking until 1a-91, the app does not deploy on Payara 7 before it): start $UP, logins $LOGIN"
-          echo "$msg" | tee -a "$GITHUB_STEP_SUMMARY"
-          if [ "$UP" != success ] || [ "$LOGIN" != success ]; then echo "::warning::$msg"; fi
 
       # Diagnostics only on failure; never artefacts. continue-on-error so a full storage quota
       # never turns a result red. The smoke files hold no passwords: screenshots (the password field

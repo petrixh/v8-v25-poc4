@@ -44,6 +44,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.shared.Registration;
 
 import de.symeda.sormas.api.CountryHelper;
@@ -628,18 +629,20 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 		});
 
 		// Update the list of days according to the selected month and year
-		// (V8 markAsDirty() calls dropped: Flow sends component changes without it)
 		birthDateYear.addValueChangeListener(e -> {
 			updateListOfDays((Integer) e.getValue(), (Integer) birthDateMonth.getValue());
+			validateBirthDateFields(birthDateMonth, birthDateDay);
 			deathDate.setValidationVisible(!deathDate.isValid());
 			burialDate.setValidationVisible(!burialDate.isValid());
 		});
 		birthDateMonth.addValueChangeListener(e -> {
 			updateListOfDays((Integer) birthDateYear.getValue(), (Integer) e.getValue());
+			validateBirthDateFields(birthDateYear, birthDateDay);
 			deathDate.setValidationVisible(!deathDate.isValid());
 			burialDate.setValidationVisible(!burialDate.isValid());
 		});
 		birthDateDay.addValueChangeListener(e -> {
+			validateBirthDateFields(birthDateYear, birthDateMonth);
 			deathDate.setValidationVisible(!deathDate.isValid());
 			burialDate.setValidationVisible(!burialDate.isValid());
 		});
@@ -882,6 +885,20 @@ public class PersonEditForm extends AbstractEditForm<PersonDto> {
 			}
 		}
 
+	}
+
+	/**
+	 * Was V8 {@code markAsDirty()} on the sibling birth date fields: Vaadin 7 repainted them, so their validators' result
+	 * showed at once. Flow shows a field's error when its binding validates, so the siblings' bindings are validated here;
+	 * the form's status handler still honours {@code isValidationVisible()}, as the V7 repaint did.
+	 */
+	private void validateBirthDateFields(Field<?>... fields) {
+		for (Field<?> field : fields) {
+			Binder.Binding<PersonDto, ?> binding = getFieldGroup().getBinding(field);
+			if (binding != null) {
+				binding.validate();
+			}
+		}
 	}
 
 	private void updateListOfDays(Integer selectedYear, Integer selectedMonth) {

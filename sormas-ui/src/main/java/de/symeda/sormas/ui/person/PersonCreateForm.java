@@ -37,6 +37,7 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.data.binder.Binder;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -66,6 +67,7 @@ import de.symeda.sormas.ui.utils.components.SormasTextField;
 import de.symeda.sormas.ui.utils.fields.CheckBox;
 import de.symeda.sormas.ui.utils.fields.ComboBox;
 import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.Field;
 import de.symeda.sormas.ui.utils.fields.SelectField;
 import de.symeda.sormas.ui.utils.fields.TextField;
 
@@ -173,12 +175,16 @@ public class PersonCreateForm extends AbstractEditForm<PersonDto> {
 				.validateBirthDate((Integer) e, (Integer) birthDateMonth.getValue(), (Integer) birthDateDay.getValue()));
 
 		// Update the list of days according to the selected month and year
-		// V8 markAsDirty() calls dropped: Flow sends component changes without it
 		birthDateYear.addValueChangeListener(e -> {
 			updateListOfDays((Integer) e.getValue(), (Integer) birthDateMonth.getValue());
+			validateBirthDateFields(birthDateMonth, birthDateDay);
 		});
 		birthDateMonth.addValueChangeListener(e -> {
 			updateListOfDays((Integer) birthDateYear.getValue(), (Integer) e.getValue());
+			validateBirthDateFields(birthDateYear, birthDateDay);
+		});
+		birthDateDay.addValueChangeListener(e -> {
+			validateBirthDateFields(birthDateYear, birthDateMonth);
 		});
 
 		ComboBox sex = addField(PersonDto.SEX, ComboBox.class);
@@ -231,6 +237,20 @@ public class PersonCreateForm extends AbstractEditForm<PersonDto> {
 		months.setItemCaption(10, I18nProperties.getEnumCaption(Month.OCTOBER));
 		months.setItemCaption(11, I18nProperties.getEnumCaption(Month.NOVEMBER));
 		months.setItemCaption(12, I18nProperties.getEnumCaption(Month.DECEMBER));
+	}
+
+	/**
+	 * Was V8 {@code markAsDirty()} on the sibling birth date fields: Vaadin 7 repainted them, so their validators' result
+	 * showed at once. Flow shows a field's error when its binding validates, so the siblings' bindings are validated here;
+	 * the form's status handler still honours {@code isValidationVisible()}, as the V7 repaint did.
+	 */
+	private void validateBirthDateFields(Field<?>... fields) {
+		for (Field<?> field : fields) {
+			Binder.Binding<PersonDto, ?> binding = getFieldGroup().getBinding(field);
+			if (binding != null) {
+				binding.validate();
+			}
+		}
 	}
 
 	private void updateListOfDays(Integer selectedYear, Integer selectedMonth) {

@@ -1463,12 +1463,12 @@ public class CaseDataForm extends AbstractEditForm<CaseDataDto> {
 					dfFollowUpUntil.addValueChangeListener(valueChangeEvent -> {
 
 						if (DateHelper.getEndOfDay(dfFollowUpUntil.getValue()).before(minimumFollowUpUntilDate)) {
-							// was setComponentError(ErrorMessage with ErrorLevel.INFO): Flow fields have one invalid state
-							dfFollowUpUntil.setErrorMessage(
+							// was setComponentError(ErrorMessage with ErrorLevel.INFO): a non-blocking hint, so helper text, not
+							// the invalid state; like the V8 component error it is not cleared when the date changes again
+							dfFollowUpUntil.setHelperText(
 								I18nProperties.getValidationError(
 									Validations.contactFollowUpUntilDateSoftValidation,
 									I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.FOLLOW_UP_UNTIL)));
-							dfFollowUpUntil.setInvalid(true);
 						}
 					});
 				} else {
@@ -2122,7 +2122,8 @@ public class CaseDataForm extends AbstractEditForm<CaseDataDto> {
 		if (epidField.isVisible()
 			&& StringUtils.isNotEmpty(fieldValue)
 			&& FacadeProvider.getCaseFacade().doesEpidNumberExist(fieldValue, getValue().getUuid(), getValue().getDisease())) {
-			// was setComponentError(new UserError(..)): the field's error state
+			// was setComponentError(new UserError(..)), ErrorLevel.ERROR (the UserError default): the field's red error
+			// state, not helper text; it does not block saving (no validator), as in V8
 			epidField.setErrorMessage(I18nProperties.getValidationError(Validations.duplicateEpidNumber));
 			epidField.setInvalid(true);
 			assignNewEpidNumberButton.setVisible(true);

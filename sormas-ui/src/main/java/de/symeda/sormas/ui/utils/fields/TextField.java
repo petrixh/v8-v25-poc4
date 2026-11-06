@@ -15,7 +15,7 @@
 package de.symeda.sormas.ui.utils.fields;
 
 /**
- * Flow text field as a SORMAS {@link Field} (replaces {@code com.vaadin.v7.ui.TextField}). The value is never null: an empty field has the value "".
+ * Flow text field as a SORMAS {@link Field} (replaces {@code com.vaadin.v7.ui.TextField}). The value is never null: an empty field has the value ""; {@code setValue(null)} sets the null representation ("" by default).
  */
 public class TextField extends com.vaadin.flow.component.textfield.TextField implements AbstractTextField {
 
@@ -31,6 +31,15 @@ public class TextField extends com.vaadin.flow.component.textfield.TextField imp
 
 	public TextField(String caption, String value) {
 		super(caption, value, (String) null);
+	}
+
+	/**
+	 * V7 behaviour: {@code null} shows the {@link #getNullRepresentation() null representation} (Flow rejects
+	 * {@code null}).
+	 */
+	@Override
+	public void setValue(String value) {
+		super.setValue(value != null ? value : getNullRepresentation());
 	}
 
 	// Flow implements these as interface defaults; declared here because Field declares them too

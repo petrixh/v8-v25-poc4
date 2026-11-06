@@ -1098,7 +1098,11 @@ public class SampleService extends AbstractDeletableAdoService<Sample>
 		cu.where(cb.equal(root.get(Sample.UUID), sample.getUuid()));
 
 		em.createQuery(cu).executeUpdate();
-
+		// The bulk update bypasses the managed instance; without this, Hibernate 7 refuses to flush it while it still references
+		// the event participant that is removed next
+		if (em.contains(sample)) {
+			em.refresh(sample);
+		}
 	}
 
 	private void deleteSampleLinks(Sample sample) {

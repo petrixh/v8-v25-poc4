@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.ui.configuration.disease;
 
-import com.vaadin.ui.Notification;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.disease.DiseaseConfigurationDto;
@@ -37,7 +37,7 @@ public class DiseaseConfigurationController {
 		cdw.addCommitListener(() -> {
 			FacadeProvider.getDiseaseConfigurationFacade().saveDiseaseConfiguration(editForm.getValue());
 			FacadeProvider.getDiseaseConfigurationFacade().loadData();
-			Notification.show(I18nProperties.getString(Strings.messageDiseaseConfigurationSaved), Notification.Type.ASSISTIVE_NOTIFICATION);
+			NotificationHelper.show(I18nProperties.getString(Strings.messageDiseaseConfigurationSaved), NotificationHelper.Type.ASSISTIVE_NOTIFICATION);
 			SormasUI.get().getNavigator().navigateTo(DiseaseConfigurationView.VIEW_NAME);
 		});
 

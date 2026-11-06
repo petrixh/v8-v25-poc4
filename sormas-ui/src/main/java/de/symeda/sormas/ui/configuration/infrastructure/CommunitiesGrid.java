@@ -69,8 +69,8 @@ public class CommunitiesGrid extends FilteredGrid<CommunityDto, CommunityCriteri
 		Optional.ofNullable(((Column<CommunityDto, Boolean>) getColumn(CommunityDto.DEFAULT_INFRASTRUCTURE)))
 			.ifPresent(c -> c.setRenderer(new BooleanRenderer()));
 
-		for (Column<?, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(CommunityDto.I18N_PREFIX, column.getId(), column.getCaption()));
+		for (Column<?, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(CommunityDto.I18N_PREFIX, column.getKey(), column.getCaption()));
 		}
 	}
 

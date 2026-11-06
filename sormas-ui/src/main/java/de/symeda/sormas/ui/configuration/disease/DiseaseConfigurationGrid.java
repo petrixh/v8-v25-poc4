@@ -66,8 +66,8 @@ public class DiseaseConfigurationGrid extends FilteredGrid<DiseaseConfigurationI
 
 		addEditColumn(e -> ControllerProvider.getDiseaseConfirgurationController().editDiseaseConfiguration(e.getUuid()));
 
-		for (Column<?, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(DiseaseConfigurationDto.I18N_PREFIX, column.getId(), column.getCaption()));
+		for (Column<?, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(DiseaseConfigurationDto.I18N_PREFIX, column.getKey(), column.getCaption()));
 		}
 
 		getColumn(DiseaseConfigurationIndexDto.ACTIVE).setRenderer(new BooleanRenderer());

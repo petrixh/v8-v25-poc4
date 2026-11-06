@@ -30,20 +30,21 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import com.vaadin.data.Binder;
-import com.vaadin.data.BinderValidationStatus;
-import com.vaadin.data.Converter;
-import com.vaadin.data.Result;
-import com.vaadin.data.ValidationException;
-import com.vaadin.data.converter.StringToIntegerConverter;
-import com.vaadin.data.validator.StringLengthValidator;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.DateField;
-import com.vaadin.ui.DateTimeField;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.BinderValidationStatus;
+import com.vaadin.flow.data.converter.Converter;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.converter.StringToIntegerConverter;
+import com.vaadin.flow.data.validator.StringLengthValidator;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
+import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.TextField;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -57,10 +58,10 @@ import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.i18n.Validations;
 import de.symeda.sormas.api.utils.DateFormatHelper;
-import de.symeda.sormas.api.utils.DateHelper;
 import de.symeda.sormas.api.utils.YesNoUnknown;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.components.CheckboxSet;
+import de.symeda.sormas.ui.utils.fields.KeepValueComboBox;
 
 /**
  * Edit form for creating and editing customizable field metadata.
@@ -107,16 +108,16 @@ public class CustomizableFieldEditForm extends CustomLayout {
 	//@formatter:on
 
     private final Binder<CustomizableFieldMetadataDto> binder = new Binder<>(CustomizableFieldMetadataDto.class);
-    private final ComboBox<CustomizableFieldGroup> groupCombo;
+    private final KeepValueComboBox<CustomizableFieldGroup> groupCombo;
     private final CheckboxSet<Disease> cbsDiseases;
     private final TextField defaultValueField;
-    private final ComboBox<String> defaultValueCombo;
+    private final KeepValueComboBox<String> defaultValueCombo;
     private final ComboBox<Boolean> defaultValueCheckboxCombo;
     private final ComboBox<YesNoUnknown> defaultValueYesNoUnknownCombo;
-    private final DateField defaultValueDateField;
-    private final DateTimeField defaultValueDateTimeField;
+    private final DatePicker defaultValueDateField;
+    private final DateTimePicker defaultValueDateTimeField;
     private final CustomizableFieldOptionsComponent optionsComponent;
-    private final Label optionsHeading;
+    private final Span optionsHeading;
     private final CustomizableFieldTranslationsComponent translationsComponent;
 
     private CustomizableFieldMetadataDto dto;
@@ -127,16 +128,16 @@ public class CustomizableFieldEditForm extends CustomLayout {
         setWidth(840, Unit.PIXELS);
 
         // Section headings
-        Label basicsHeading = new Label(I18nProperties.getString(Strings.headingCustomizableFieldBasics));
-        basicsHeading.addStyleName(H3);
+        Span basicsHeading = new Span(I18nProperties.getString(Strings.headingCustomizableFieldBasics));
+        basicsHeading.addClassName(H3);
         addComponent(basicsHeading, BASICS_HEADING_LOC);
 
-        Label placementHeading = new Label(I18nProperties.getString(Strings.headingCustomizableFieldPlacement));
-        placementHeading.addStyleName(H3);
+        Span placementHeading = new Span(I18nProperties.getString(Strings.headingCustomizableFieldPlacement));
+        placementHeading.addClassName(H3);
         addComponent(placementHeading, PLACEMENT_HEADING_LOC);
 
-        Label behaviorHeading = new Label(I18nProperties.getString(Strings.headingCustomizableFieldBehavior));
-        behaviorHeading.addStyleName(H3);
+        Span behaviorHeading = new Span(I18nProperties.getString(Strings.headingCustomizableFieldBehavior));
+        behaviorHeading.addClassName(H3);
         addComponent(behaviorHeading, BEHAVIOR_HEADING_LOC);
 
         // --- BASICS ---
@@ -155,9 +156,8 @@ public class CustomizableFieldEditForm extends CustomLayout {
 
         ComboBox<CustomizableFieldType> fieldTypeCombo = new ComboBox<>(caption(CustomizableFieldMetadataDto.FIELD_TYPE));
         fieldTypeCombo.setWidth(100, Unit.PERCENTAGE);
-        fieldTypeCombo.setEmptySelectionAllowed(false);
         fieldTypeCombo.setItems(CustomizableFieldType.values());
-        fieldTypeCombo.setItemCaptionGenerator(I18nProperties::getEnumCaption);
+        fieldTypeCombo.setItemLabelGenerator(I18nProperties::getEnumCaption);
         fieldTypeCombo.setRequiredIndicatorVisible(true);
         if (isEdit) {
             fieldTypeCombo.setEnabled(false);
@@ -166,7 +166,14 @@ public class CustomizableFieldEditForm extends CustomLayout {
         binder.forField(fieldTypeCombo)
             .asRequired(I18nProperties.getValidationError(Validations.required, caption(CustomizableFieldMetadataDto.FIELD_TYPE)))
             .bind(CustomizableFieldMetadataDto::getFieldType, CustomizableFieldMetadataDto::setFieldType);
-        fieldTypeCombo.addValueChangeListener(e -> updateOptionsVisibility(e.getValue()));
+        fieldTypeCombo.addValueChangeListener(e -> {
+            if (e.isFromClient() && e.getValue() == null) {
+                // was setEmptySelectionAllowed(false): a Flow combo box has no empty item, but the user can clear it
+                fieldTypeCombo.setValue(e.getOldValue());
+                return;
+            }
+            updateOptionsVisibility(e.getValue());
+        });
 
         TextField descriptionField = new TextField(caption(CustomizableFieldMetadataDto.DESCRIPTION));
         descriptionField.setWidth(100, Unit.PERCENTAGE);
@@ -186,32 +193,41 @@ public class CustomizableFieldEditForm extends CustomLayout {
                 errorMessage -> getDefaultValueErrorMessage(fieldTypeCombo.getValue()))
             .bind(CustomizableFieldMetadataDto::getDefaultValue, CustomizableFieldMetadataDto::setDefaultValue);
 
-        defaultValueCombo = new ComboBox<>(defaultValueCaption);
+        defaultValueCombo = new KeepValueComboBox<>(defaultValueCaption);
         defaultValueCombo.setWidth(100, Unit.PERCENTAGE);
-        defaultValueCombo.setEmptySelectionAllowed(true);
+        // was setEmptySelectionAllowed(true): the empty item is the clear button
+        defaultValueCombo.setClearButtonVisible(true);
 
         defaultValueCheckboxCombo = new ComboBox<>(defaultValueCaption);
         defaultValueCheckboxCombo.setWidth(100, Unit.PERCENTAGE);
-        defaultValueCheckboxCombo.setEmptySelectionAllowed(true);
+        // was setEmptySelectionAllowed(true): the empty item is the clear button
+        defaultValueCheckboxCombo.setClearButtonVisible(true);
         defaultValueCheckboxCombo.setItems(Boolean.TRUE, Boolean.FALSE);
-        defaultValueCheckboxCombo.setItemCaptionGenerator(value -> Boolean.TRUE.equals(value) ? "True" : "False");
+        defaultValueCheckboxCombo.setItemLabelGenerator(value -> Boolean.TRUE.equals(value) ? "True" : "False");
 
         defaultValueYesNoUnknownCombo = new ComboBox<>(defaultValueCaption);
         defaultValueYesNoUnknownCombo.setWidth(100, Unit.PERCENTAGE);
-        defaultValueYesNoUnknownCombo.setEmptySelectionAllowed(true);
+        // was setEmptySelectionAllowed(true): the empty item is the clear button
+        defaultValueYesNoUnknownCombo.setClearButtonVisible(true);
         defaultValueYesNoUnknownCombo.setItems(YesNoUnknown.values());
-        defaultValueYesNoUnknownCombo.setItemCaptionGenerator(I18nProperties::getEnumCaption);
+        defaultValueYesNoUnknownCombo.setItemLabelGenerator(I18nProperties::getEnumCaption);
 
-        defaultValueDateField = new DateField(defaultValueCaption);
+        defaultValueDateField = new DatePicker(defaultValueCaption);
         defaultValueDateField.setWidth(100, Unit.PERCENTAGE);
-        defaultValueDateField.setDateFormat(DateFormatHelper.getDateFormatPattern());
+        DatePicker.DatePickerI18n dateI18n = new DatePicker.DatePickerI18n();
+        dateI18n.setDateFormat(DateFormatHelper.getDateFormatPattern());
+        defaultValueDateField.setI18n(dateI18n);
 
-        defaultValueDateTimeField = new DateTimeField(defaultValueCaption);
+        defaultValueDateTimeField = new DateTimePicker(defaultValueCaption);
         defaultValueDateTimeField.setWidth(100, Unit.PERCENTAGE);
-        defaultValueDateTimeField.setDateFormat(DateHelper.getLocalDateTimeFormat(I18nProperties.getUserLanguage()).toPattern());
+        // was setDateFormat(<user's date-time pattern>): the Flow picker formats the date part with the user's date
+        // pattern and the time part by locale (as CustomizableFieldInputDateTime)
+        DatePicker.DatePickerI18n dateTimeI18n = new DatePicker.DatePickerI18n();
+        dateTimeI18n.setDateFormat(DateFormatHelper.getDateFormatPattern());
+        defaultValueDateTimeField.setDatePickerI18n(dateTimeI18n);
 
-        optionsHeading = new Label(I18nProperties.getString(Strings.labelCustomizableFieldOptions));
-        optionsHeading.addStyleName(CssStyles.VAADIN_CAPTION);
+        optionsHeading = new Span(I18nProperties.getString(Strings.labelCustomizableFieldOptions));
+        optionsHeading.addClassName(CssStyles.VAADIN_CAPTION);
         optionsHeading.setVisible(false);
         addComponent(optionsHeading, OPTIONS_HEADING_LOC);
 
@@ -229,19 +245,23 @@ public class CustomizableFieldEditForm extends CustomLayout {
 
         ComboBox<CustomizableFieldContext> contextCombo = new ComboBox<>(caption(CustomizableFieldMetadataDto.CONTEXT_CLASS));
         contextCombo.setWidth(100, Unit.PERCENTAGE);
-        contextCombo.setEmptySelectionAllowed(false);
         contextCombo.setItems(CustomizableFieldContext.values());
-        contextCombo.setItemCaptionGenerator(I18nProperties::getEnumCaption);
+        contextCombo.setItemLabelGenerator(I18nProperties::getEnumCaption);
         contextCombo.setRequiredIndicatorVisible(true);
         addComponent(contextCombo, CustomizableFieldMetadataDto.CONTEXT_CLASS);
         binder.forField(contextCombo)
             .asRequired(I18nProperties.getValidationError(Validations.required, caption(CustomizableFieldMetadataDto.CONTEXT_CLASS)))
             .bind(CustomizableFieldMetadataDto::getContextClass, CustomizableFieldMetadataDto::setContextClass);
 
-        groupCombo = new ComboBox<>(caption(CustomizableFieldMetadataDto.UI_GROUP));
+        groupCombo = new KeepValueComboBox<>(caption(CustomizableFieldMetadataDto.UI_GROUP));
         groupCombo.setWidth(100, Unit.PERCENTAGE);
-        groupCombo.setEmptySelectionAllowed(false);
-        groupCombo.setItemCaptionGenerator(I18nProperties::getEnumCaption);
+        // was setEmptySelectionAllowed(false): a Flow combo box has no empty item, but the user can clear it
+        groupCombo.addValueChangeListener(e -> {
+            if (e.isFromClient() && e.getValue() == null) {
+                groupCombo.setValue(e.getOldValue());
+            }
+        });
+        groupCombo.setItemLabelGenerator(I18nProperties::getEnumCaption);
         groupCombo.setRequiredIndicatorVisible(true);
         addComponent(groupCombo, CustomizableFieldMetadataDto.UI_GROUP);
         binder.forField(groupCombo)
@@ -250,6 +270,11 @@ public class CustomizableFieldEditForm extends CustomLayout {
 
         // Repopulate group items when context changes; clear value first, then retain only if still valid
         contextCombo.addValueChangeListener(e -> {
+            if (e.isFromClient() && e.getValue() == null) {
+                // was setEmptySelectionAllowed(false): a Flow combo box has no empty item, but the user can clear it
+                contextCombo.setValue(e.getOldValue());
+                return;
+            }
             CustomizableFieldContext ctx = e.getValue();
             CustomizableFieldGroup current = groupCombo.getValue();
             groupCombo.setValue(null);
@@ -283,22 +308,22 @@ public class CustomizableFieldEditForm extends CustomLayout {
 
         // --- BEHAVIOR ---
 
-        CheckBox activeBox = new CheckBox(caption(CustomizableFieldMetadataDto.ACTIVE));
+        Checkbox activeBox = new Checkbox(caption(CustomizableFieldMetadataDto.ACTIVE));
         addComponent(activeBox, CustomizableFieldMetadataDto.ACTIVE);
         binder.forField(activeBox).bind(d -> d.isActive(), (d, v) -> d.setActive(Boolean.TRUE.equals(v)));
 
-        CheckBox readOnlyBox = new CheckBox(caption(CustomizableFieldMetadataDto.READ_ONLY));
+        Checkbox readOnlyBox = new Checkbox(caption(CustomizableFieldMetadataDto.READ_ONLY));
         addComponent(readOnlyBox, CustomizableFieldMetadataDto.READ_ONLY);
         binder.forField(readOnlyBox).bind(d -> d.isReadOnly(), (d, v) -> d.setReadOnly(Boolean.TRUE.equals(v)));
 
-        CheckBox mandatoryBox = new CheckBox(caption(CustomizableFieldMetadataDto.MANDATORY));
+        Checkbox mandatoryBox = new Checkbox(caption(CustomizableFieldMetadataDto.MANDATORY));
         addComponent(mandatoryBox, CustomizableFieldMetadataDto.MANDATORY);
         binder.forField(mandatoryBox).bind(d -> d.isMandatory(), (d, v) -> d.setMandatory(Boolean.TRUE.equals(v)));
 
         // --- VISIBILITY ---
 
-        Label visibilityHeading = new Label(I18nProperties.getString(Strings.headingCustomizableFieldVisibility));
-        visibilityHeading.addStyleName(H3);
+        Span visibilityHeading = new Span(I18nProperties.getString(Strings.headingCustomizableFieldVisibility));
+        visibilityHeading.addClassName(H3);
         addComponent(visibilityHeading, VISIBILITY_HEADING_LOC);
 
         cbsDiseases = new CheckboxSet<>();
@@ -311,8 +336,8 @@ public class CustomizableFieldEditForm extends CustomLayout {
 
         // --- TRANSLATIONS ---
 
-        Label translationsHeading = new Label(I18nProperties.getString(Strings.headingCustomizableFieldTranslations));
-        translationsHeading.addStyleName(H3);
+        Span translationsHeading = new Span(I18nProperties.getString(Strings.headingCustomizableFieldTranslations));
+        translationsHeading.addClassName(H3);
         addComponent(translationsHeading, TRANSLATIONS_HEADING_LOC);
 
         translationsComponent = new CustomizableFieldTranslationsComponent();
@@ -562,7 +587,7 @@ public class CustomizableFieldEditForm extends CustomLayout {
         return new Converter<String, Float>() {
 
             @Override
-            public Result<Float> convertToModel(String value, com.vaadin.data.ValueContext context) {
+            public Result<Float> convertToModel(String value, com.vaadin.flow.data.binder.ValueContext context) {
                 if (value == null || value.trim().isEmpty()) {
                     return Result.ok(null);
                 }
@@ -574,7 +599,7 @@ public class CustomizableFieldEditForm extends CustomLayout {
             }
 
             @Override
-            public String convertToPresentation(Float value, com.vaadin.data.ValueContext context) {
+            public String convertToPresentation(Float value, com.vaadin.flow.data.binder.ValueContext context) {
                 return value == null ? "" : value.toString();
             }
         };

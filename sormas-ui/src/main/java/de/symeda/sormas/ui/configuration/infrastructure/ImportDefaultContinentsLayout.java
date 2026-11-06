@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 
 import com.opencsv.exceptions.CsvValidationException;
-import com.vaadin.ui.CheckBox;
+import com.vaadin.flow.component.checkbox.Checkbox;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Strings;
@@ -31,7 +31,7 @@ import de.symeda.sormas.ui.importer.InfrastructureImporter;
 
 public class ImportDefaultContinentsLayout extends AbstractImportDefaultCsvLayout {
 
-	private CheckBox allowOverwrite;
+	private Checkbox allowOverwrite;
 
 	public ImportDefaultContinentsLayout() {
 		super();

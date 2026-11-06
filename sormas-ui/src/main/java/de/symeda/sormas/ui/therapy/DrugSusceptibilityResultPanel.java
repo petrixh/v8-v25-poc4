@@ -40,14 +40,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.Component;
+import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.v7.ui.AbstractField;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -112,7 +111,7 @@ public class DrugSusceptibilityResultPanel extends CustomLayout {
 
 	public DrugSusceptibilityResultPanel(PathogenTestDto pathogenTestDto) {
 		setWidth(100, Sizeable.Unit.PERCENTAGE);
-		this.addStyleNames(CssStyles.VSPACE_TOP_3, CssStyles.VSPACE_3);
+		this.addClassNames(CssStyles.VSPACE_TOP_3, CssStyles.VSPACE_3);
 		setTemplateContents(HTML_LAYOUT);
 
 		this.pathogenTestDto = pathogenTestDto;
@@ -121,8 +120,8 @@ public class DrugSusceptibilityResultPanel extends CustomLayout {
 
 	private void addFields() {
 		if (pathogenTestDto != null) {
-			Label formHeadingLabel = new Label(I18nProperties.getString(Strings.headingDrugSusceptibility));
-			formHeadingLabel.addStyleName(H3);
+			Span formHeadingLabel = new Span(I18nProperties.getString(Strings.headingDrugSusceptibility));
+			formHeadingLabel.addClassName(H3);
 			addComponent(formHeadingLabel, FORM_HEADING_LOC);
 
 			if (pathogenTestDto.getTestType() == PathogenTestType.ANTIBIOTIC_SUSCEPTIBILITY) {
@@ -269,7 +268,7 @@ public class DrugSusceptibilityResultPanel extends CustomLayout {
 				customLayout.setTemplateContents(DRUG_RIFAMPICIN_LAYOUT);
 			}
 
-			Label lblDrug = new Label(I18nProperties.getEnumCaption(Drug.valueOf(fieldIdUpperCase)));
+			Span lblDrug = new Span(I18nProperties.getEnumCaption(Drug.valueOf(fieldIdUpperCase)));
 			customLayout.addComponent(lblDrug, "LBL_" + fieldIdUpperCase);
 			addComponent(customLayout, "LAYOUT_" + fieldIdUpperCase);
 

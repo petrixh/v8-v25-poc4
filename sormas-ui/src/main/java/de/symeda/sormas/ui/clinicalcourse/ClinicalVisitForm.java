@@ -3,7 +3,7 @@ package de.symeda.sormas.ui.clinicalcourse;
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;

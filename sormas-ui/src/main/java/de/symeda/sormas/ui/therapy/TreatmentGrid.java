@@ -2,12 +2,9 @@ package de.symeda.sormas.ui.therapy;
 
 import java.util.List;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.data.util.GeneratedPropertyContainer;
-import com.vaadin.v7.ui.Grid;
-import com.vaadin.v7.ui.Grid.SelectionModel.HasUserSelectionAllowed;
-import com.vaadin.v7.ui.renderers.DateRenderer;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
@@ -46,7 +43,7 @@ public class TreatmentGrid extends Grid implements V7AbstractGrid<TreatmentCrite
 
 		BeanItemContainer<TreatmentIndexDto> container = new BeanItemContainer<>(TreatmentIndexDto.class);
 		GeneratedPropertyContainer generatedContainer = new GeneratedPropertyContainer(container);
-		VaadinUiUtil.addIconColumn(generatedContainer, ACTION_BTN_ID, isEditAllowed ? VaadinIcons.EDIT : VaadinIcons.EYE);
+		VaadinUiUtil.addIconColumn(generatedContainer, ACTION_BTN_ID, isEditAllowed ? VaadinIcon.EDIT : VaadinIcon.EYE);
 		setContainerDataSource(generatedContainer);
 
 		setColumns(

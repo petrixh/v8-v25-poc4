@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -62,7 +62,7 @@ public class VaccinationList extends PaginationList<VaccinationListEntryDto> {
 			showPage(1);
 		} else {
 			updatePaginationLayout();
-			Label noVaccinationsLabel = new Label(
+			Span noVaccinationsLabel = new Span(
 				I18nProperties.getCaption(
 					disease != null ? Captions.vaccinationNoVaccinationsForPersonAndDisease : Captions.vaccinationNoVaccinationsForPerson));
 			listLayout.addComponent(noVaccinationsLabel);

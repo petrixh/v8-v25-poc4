@@ -25,9 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -77,21 +77,21 @@ public class DrugSusceptibilityForm extends AbstractEditForm<DrugSusceptibilityD
 	private static final String CEFOTAXIME_LABEL_LOC = "cefotaximeLabelLoc";
 	private static final String TRIMETHOPRIM_SULFAMETHOXAZOLE_LABEL_LOC = "trimethoprimSulfamethoxazoleLabelLoc";
 
-	private Label formHeadingLabel;
+	private Span formHeadingLabel;
 
 	/**
 	 * Column-header labels (Method / Value / Interpretation), shown/hidden together with the form heading.
 	 * Lazily initialised because {@link AbstractEditForm}'s constructor calls {@code addFields()} before
 	 * subclass field initialisers run, so an inline initialiser would still be null at that point.
 	 */
-	private List<Label> columnHeaderLabels;
+	private List<Span> columnHeaderLabels;
 
 	/**
 	 * Drug-name labels keyed by the drug's MIC field id, so their visibility tracks the drug's fields.
 	 * Lazily initialised because {@link AbstractEditForm}'s constructor calls {@code addFields()} before
 	 * subclass field initialisers run, so an inline initialiser would still be null at that point.
 	 */
-	private Map<String, Label> drugLabelsByMicFieldId;
+	private Map<String, Span> drugLabelsByMicFieldId;
 
 	//@formatter:off
     private static final String HTML_LAYOUT =
@@ -123,7 +123,7 @@ public class DrugSusceptibilityForm extends AbstractEditForm<DrugSusceptibilityD
 
 	public DrugSusceptibilityForm(FieldVisibilityCheckers fieldVisibilityCheckers, UiFieldAccessCheckers fieldAccessCheckers) {
 		super(DrugSusceptibilityDto.class, I18N_PREFIX, true, fieldVisibilityCheckers, fieldAccessCheckers);
-		//this.addStyleNames(CssStyles.VIEW_SECTION, CssStyles.VSPACE_2);
+		//this.addClassNames(CssStyles.VIEW_SECTION, CssStyles.VSPACE_2);
 	}
 
 	@Override
@@ -133,8 +133,8 @@ public class DrugSusceptibilityForm extends AbstractEditForm<DrugSusceptibilityD
 
 	@Override
 	protected void addFields() {
-		formHeadingLabel = new Label(I18nProperties.getString(Strings.headingDrugSusceptibility));
-		formHeadingLabel.addStyleName(H3);
+		formHeadingLabel = new Span(I18nProperties.getString(Strings.headingDrugSusceptibility));
+		formHeadingLabel.addClassName(H3);
 		getContent().addComponent(formHeadingLabel, FORM_HEADING_LOC);
 		formHeadingLabel.setVisible(false);
 
@@ -297,8 +297,8 @@ public class DrugSusceptibilityForm extends AbstractEditForm<DrugSusceptibilityD
 		if (columnHeaderLabels == null) {
 			columnHeaderLabels = new java.util.ArrayList<>();
 		}
-		Label label = new Label(caption);
-		label.addStyleName(CssStyles.LABEL_BOLD);
+		Span label = new Span(caption);
+		label.addClassName(CssStyles.LABEL_BOLD);
 		label.setVisible(false);
 		getContent().addComponent(label, headerLoc);
 		columnHeaderLabels.add(label);
@@ -312,8 +312,8 @@ public class DrugSusceptibilityForm extends AbstractEditForm<DrugSusceptibilityD
 		if (drugLabelsByMicFieldId == null) {
 			drugLabelsByMicFieldId = new java.util.HashMap<>();
 		}
-		Label label = new Label(I18nProperties.getEnumCaption(drug));
-		label.addStyleName(CssStyles.LABEL_BOLD);
+		Span label = new Span(I18nProperties.getEnumCaption(drug));
+		label.addClassName(CssStyles.LABEL_BOLD);
 		getContent().addComponent(label, labelLoc);
 		drugLabelsByMicFieldId.put(micFieldId, label);
 	}

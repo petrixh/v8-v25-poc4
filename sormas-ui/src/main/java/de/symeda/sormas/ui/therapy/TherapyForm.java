@@ -23,19 +23,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.shared.ui.grid.HeightMode;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.button.Button;
+import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -151,16 +150,16 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 		boolean isLuxembourgServer = FacadeProvider.getConfigFacade().isConfiguredCountry(CountryHelper.COUNTRY_CODE_LUXEMBOURG);
 
 		CheckBox dotField = addField(TherapyDto.DIRECTLY_OBSERVED_TREATMENT, CheckBox.class);
-		dotField.addStyleName(VSPACE_3);
+		dotField.addClassName(VSPACE_3);
 		dotField.setVisible(isLuxembourgServer && disease == Disease.TUBERCULOSIS);
 
 		mdrXdrTuberculosisField = addField(TherapyDto.MDR_XDR_TUBERCULOSIS, CheckBox.class);
-		mdrXdrTuberculosisField.addStyleName(VSPACE_3);
+		mdrXdrTuberculosisField.addClassName(VSPACE_3);
 		mdrXdrTuberculosisField.setVisible(isLuxembourgServer && disease == Disease.TUBERCULOSIS);
 		mdrXdrTuberculosisField.setEnabled(false);
 
 		beijingLineageField = addField(TherapyDto.BEIJING_LINEAGE, CheckBox.class);
-		beijingLineageField.addStyleName(VSPACE_3);
+		beijingLineageField.addClassName(VSPACE_3);
 		beijingLineageField.setVisible(isLuxembourgServer && disease == Disease.TUBERCULOSIS);
 
 		List<SampleDto> samples = FacadeProvider.getSampleFacade().getByCaseUuids(Collections.singletonList(caze.getUuid()));
@@ -188,7 +187,7 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 
 		drugSusceptibilityResultPanel = new DrugSusceptibilityResultPanel(latestAntibioticTest);
 		getContent().addComponent(drugSusceptibilityResultPanel, DRUD_SUSCEPTIBILITY_LOC);
-		drugSusceptibilityResultPanel.addStyleNames(VSPACE_TOP_4, VSPACE_3);
+		drugSusceptibilityResultPanel.addClassNames(VSPACE_TOP_4, VSPACE_3);
 
 		//prescription
 		CustomLayout prescriptionsLayout = new CustomLayout();
@@ -246,7 +245,7 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 		headlineRow.setSpacing(true);
 		headlineRow.setWidth(100, Unit.PERCENTAGE);
 		{
-			Label prescriptionsLabel = new Label(I18nProperties.getString(Strings.entityPrescriptions));
+			Span prescriptionsLabel = new Span(I18nProperties.getString(Strings.entityPrescriptions));
 			CssStyles.style(prescriptionsLabel, CssStyles.H3);
 			headlineRow.addComponent(prescriptionsLabel);
 			headlineRow.setExpandRatio(prescriptionsLabel, 1);
@@ -255,7 +254,7 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 			if (UiUtil.permitted(isEditAllowed(), UserRight.PERFORM_BULK_OPERATIONS, UserRight.CASE_EDIT)) {
 				MenuBar bulkOperationsDropdown = MenuBarHelper.createDropDown(
 					Captions.bulkActions,
-					new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkDelete), VaadinIcons.TRASH, selectedItem -> {
+					new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkDelete), VaadinIcon.TRASH, selectedItem -> {
 						ControllerProvider.getTherapyController().deleteAllSelectedPrescriptions(prescriptionGrid.getSelectedRows(), new Runnable() {
 
 							public void run() {
@@ -265,19 +264,19 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 					}));
 
 				headlineRow.addComponent(bulkOperationsDropdown);
-				headlineRow.setComponentAlignment(bulkOperationsDropdown, Alignment.MIDDLE_RIGHT);
+				headlineRow.setComponentAlignment(bulkOperationsDropdown, FlexComponent.Alignment.CENTER);
 			}
 
 			if (UiUtil.permitted(isEditAllowed(), UserRight.CASE_EDIT)) {
 				Button newPrescriptionButton = ButtonHelper.createButton(Captions.prescriptionNewPrescription, e -> {
 					ControllerProvider.getTherapyController()
 						.openPrescriptionCreateForm(prescriptionCriteria.getTherapy(), this::reloadPrescriptionGrid);
-				}, ValoTheme.BUTTON_PRIMARY);
+				}, CssStyles.BUTTON_PRIMARY);
 				if (!UiUtil.permitted(UserRight.PRESCRIPTION_CREATE)) {
 					newPrescriptionButton.setEnabled(false);
 				}
 				headlineRow.addComponent(newPrescriptionButton);
-				headlineRow.setComponentAlignment(newPrescriptionButton, Alignment.MIDDLE_RIGHT);
+				headlineRow.setComponentAlignment(newPrescriptionButton, FlexComponent.Alignment.CENTER);
 			}
 
 		}
@@ -292,7 +291,7 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 			prescriptionTypeFilter.setInputPrompt(I18nProperties.getPrefixCaption(PrescriptionDto.I18N_PREFIX, PrescriptionDto.PRESCRIPTION_TYPE));
 			prescriptionTypeFilter.addItems((Object[]) TreatmentType.values());
 			prescriptionTypeFilter.addValueChangeListener(e -> {
-				prescriptionCriteria.prescriptionType(((TreatmentType) e.getProperty().getValue()));
+				prescriptionCriteria.prescriptionType(((TreatmentType) e.getValue()));
 				ControllerProvider.getTherapyController().navigateTo(prescriptionApplyingCriteria, true, prescriptionCriteria);
 
 				prescriptionApplyingCriteria = false;
@@ -325,7 +324,7 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 		headlineRow.setSpacing(true);
 		headlineRow.setWidth(100, Unit.PERCENTAGE);
 		{
-			Label treatmentsLabel = new Label(I18nProperties.getString(Strings.headingTreatments));
+			Span treatmentsLabel = new Span(I18nProperties.getString(Strings.headingTreatments));
 			CssStyles.style(treatmentsLabel, CssStyles.H3);
 			headlineRow.addComponent(treatmentsLabel);
 			headlineRow.setExpandRatio(treatmentsLabel, 1);
@@ -334,7 +333,7 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 			if (UiUtil.permitted(isEditAllowed(), UserRight.PERFORM_BULK_OPERATIONS, UserRight.CASE_EDIT)) {
 				MenuBar bulkOperationsDropdown = MenuBarHelper.createDropDown(
 					Captions.bulkActions,
-					new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkDelete), VaadinIcons.TRASH, selectedItem -> {
+					new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkDelete), VaadinIcon.TRASH, selectedItem -> {
 						ControllerProvider.getTherapyController().deleteAllSelectedTreatments(treatmentGrid.getSelectedRows(), new Runnable() {
 
 							public void run() {
@@ -344,7 +343,7 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 					}));
 
 				headlineRow.addComponent(bulkOperationsDropdown);
-				headlineRow.setComponentAlignment(bulkOperationsDropdown, Alignment.MIDDLE_RIGHT);
+				headlineRow.setComponentAlignment(bulkOperationsDropdown, FlexComponent.Alignment.CENTER);
 			}
 
 			if (UiUtil.permitted(isEditAllowed(), UserRight.CASE_EDIT)) {
@@ -355,7 +354,7 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 					newTreatmentButton.setEnabled(false);
 				}
 				headlineRow.addComponent(newTreatmentButton);
-				headlineRow.setComponentAlignment(newTreatmentButton, Alignment.MIDDLE_RIGHT);
+				headlineRow.setComponentAlignment(newTreatmentButton, FlexComponent.Alignment.CENTER);
 			}
 
 		}
@@ -370,7 +369,7 @@ public class TherapyForm extends AbstractEditForm<TherapyDto> {
 			treatmentTypeFilter.setInputPrompt(I18nProperties.getPrefixCaption(TreatmentDto.I18N_PREFIX, TreatmentDto.TREATMENT_TYPE));
 			treatmentTypeFilter.addItems((Object[]) TreatmentType.values());
 			treatmentTypeFilter.addValueChangeListener(e -> {
-				treatmentCriteria.treatmentType(((TreatmentType) e.getProperty().getValue()));
+				treatmentCriteria.treatmentType(((TreatmentType) e.getValue()));
 				ControllerProvider.getTherapyController().navigateTo(treatmentApplyingCriteria, true, treatmentCriteria);
 
 				treatmentApplyingCriteria = false;

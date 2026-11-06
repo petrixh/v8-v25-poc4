@@ -25,8 +25,8 @@ import java.util.Collections;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.Field;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.fields.Field;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -109,7 +109,7 @@ public class VaccinationEditForm extends AbstractEditForm<VaccinationDto> {
 
 		// Disable the manufacturer and type fields if the vaccine has its values.
 		vaccineName.addValueChangeListener(e -> {
-			Vaccine vaccine = (Vaccine) e.getProperty().getValue();
+			Vaccine vaccine = (Vaccine) e.getValue();
 			if (vaccine != null) {
 				vaccineManufacturer.setValue(vaccine.getManufacturer().isEmpty() ? null : vaccine.getManufacturer().get());
 
@@ -196,8 +196,8 @@ public class VaccinationEditForm extends AbstractEditForm<VaccinationDto> {
 		}
 
 		if (pregnantField.isVisible()) {
-			Label medicalInformationCaptionLabel = new Label(I18nProperties.getString(Strings.headingMedicalInformation));
-			medicalInformationCaptionLabel.addStyleName(H3);
+			Span medicalInformationCaptionLabel = new Span(I18nProperties.getString(Strings.headingMedicalInformation));
+			medicalInformationCaptionLabel.addClassName(H3);
 			getContent().addComponent(medicalInformationCaptionLabel, MEDICAL_INFORMATION_LOC);
 		}
 	}

@@ -5,9 +5,9 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 
 import java.util.Arrays;
 
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.therapy.TreatmentDto;
@@ -79,7 +79,7 @@ public class TreatmentForm extends AbstractEditForm<TreatmentDto> {
 			.setVisibleWhen(getFieldGroup(), TreatmentDto.TYPE_OF_DRUG, TreatmentDto.TREATMENT_TYPE, Arrays.asList(TreatmentType.DRUG_INTAKE), true);
 
 		treatmentTypeField.addValueChangeListener(e -> {
-			if (e.getProperty().getValue() == TreatmentType.DRUG_INTAKE) {
+			if (e.getValue() == TreatmentType.DRUG_INTAKE) {
 				treatmentDetailsField.setCaption(I18nProperties.getPrefixCaption(TreatmentDto.I18N_PREFIX, TreatmentDto.DRUG_INTAKE_DETAILS));
 			} else {
 				treatmentDetailsField.setCaption(I18nProperties.getPrefixCaption(TreatmentDto.I18N_PREFIX, TreatmentDto.TREATMENT_DETAILS));

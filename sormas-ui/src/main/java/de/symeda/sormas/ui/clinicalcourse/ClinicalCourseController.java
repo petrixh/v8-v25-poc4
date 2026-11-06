@@ -2,11 +2,10 @@ package de.symeda.sormas.ui.clinicalcourse;
 
 import java.util.Collection;
 
-import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.Unit;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -49,7 +48,7 @@ public class ClinicalCourseController {
 				if (!form.getFieldGroup().isModified()) {
 					ClinicalVisitDto dto = form.getValue();
 					dto = FacadeProvider.getClinicalVisitFacade().saveClinicalVisit(dto, caseUuid);
-					Notification.show(I18nProperties.getString(Strings.messageClinicalVisitCreated), Type.TRAY_NOTIFICATION);
+					NotificationHelper.show(I18nProperties.getString(Strings.messageClinicalVisitCreated), Type.TRAY_NOTIFICATION);
 					if (callback != null) {
 						callback.run();
 					}
@@ -57,7 +56,7 @@ public class ClinicalCourseController {
 			}
 		});
 
-		Window popupWindow = VaadinUiUtil.showModalPopupWindow(view, I18nProperties.getString(Strings.headingCreateNewClinicalVisit));
+		Dialog popupWindow = VaadinUiUtil.showModalPopupWindow(view, I18nProperties.getString(Strings.headingCreateNewClinicalVisit));
 		// Clinical visit form is too big for typical screens
 		popupWindow.setWidth(form.getWidth() + 90, Unit.PIXELS);
 		popupWindow.setHeight(80, Unit.PERCENTAGE);
@@ -84,7 +83,7 @@ public class ClinicalCourseController {
 			new CommitDiscardWrapperComponent<>(form, isEditOrDeleteAllowed, form.getFieldGroup());
 		view.setWidth(100, Unit.PERCENTAGE);
 
-		Window popupWindow = VaadinUiUtil.showModalPopupWindow(
+		Dialog popupWindow = VaadinUiUtil.showModalPopupWindow(
 			view,
 			I18nProperties.getString(!isEditAllowed ? Strings.headingViewClinicalVisit : Strings.headingEditClinicalVisit));
 		popupWindow.setWidth(form.getWidth() + 90, Unit.PIXELS);
@@ -99,7 +98,7 @@ public class ClinicalCourseController {
 						ClinicalVisitDto dto = form.getValue();
 						FacadeProvider.getClinicalVisitFacade().saveClinicalVisit(dto, caseUuid);
 						popupWindow.close();
-						Notification.show(I18nProperties.getString(Strings.messageClinicalVisitSaved), Type.TRAY_NOTIFICATION);
+						NotificationHelper.show(I18nProperties.getString(Strings.messageClinicalVisitSaved), Type.TRAY_NOTIFICATION);
 						if (callback != null) {
 							callback.run();
 						}

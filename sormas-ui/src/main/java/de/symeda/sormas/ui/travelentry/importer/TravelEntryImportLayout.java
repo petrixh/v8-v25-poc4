@@ -15,20 +15,18 @@
 
 package de.symeda.sormas.ui.travelentry.importer;
 
-import static com.vaadin.ui.Notification.Type;
-
 import java.io.IOException;
 
 import com.opencsv.exceptions.CsvValidationException;
-import com.vaadin.server.ClassResource;
-import com.vaadin.server.Page;
-import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.importexport.ValueSeparator;
 import de.symeda.sormas.ui.importer.AbstractImportLayout;
 import de.symeda.sormas.ui.importer.ImportReceiver;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 
 public class TravelEntryImportLayout extends AbstractImportLayout {
 
@@ -38,7 +36,7 @@ public class TravelEntryImportLayout extends AbstractImportLayout {
 
 		super();
 
-		addDownloadResourcesComponent(1, new ClassResource("/SORMAS_Travel_Entry_Import_Guide.pdf"));
+		addDownloadResourcesComponent(1, DownloadHandler.forClassResource(TravelEntryImportLayout.class, "/SORMAS_Travel_Entry_Import_Guide.pdf"));
 		addImportCsvComponent(2, new ImportReceiver("_travel_entry_import_", file -> {
 
 			resetDownloadErrorReportButton();
@@ -46,11 +44,11 @@ public class TravelEntryImportLayout extends AbstractImportLayout {
 				TravelEntryImporter importer = new TravelEntryImporter(file, false, currentUser, (ValueSeparator) separator.getValue());
 				importer.startImport(this::extendDownloadErrorReportButton, currentUI, true);
 			} catch (IOException | CsvValidationException e) {
-				new Notification(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.headingImportFailed),
 					I18nProperties.getString(Strings.messageImportFailed),
 					Type.ERROR_MESSAGE,
-					false).show(Page.getCurrent());
+					false);
 			}
 		}));
 		addDownloadErrorReportComponent(3);

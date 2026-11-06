@@ -15,13 +15,9 @@ import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.v7.data.util.converter.Converter;
-import de.symeda.sormas.ui.utils.fields.CheckBox;
-import de.symeda.sormas.ui.utils.fields.ComboBox;
-import de.symeda.sormas.ui.utils.fields.DateField;
-import de.symeda.sormas.ui.utils.fields.TextField;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -49,6 +45,10 @@ import de.symeda.sormas.ui.travelentry.DEAFormBuilder;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.InfrastructureFieldsHelper;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class TravelEntryCreateForm extends AbstractEditForm<TravelEntryDto> {
 
@@ -220,7 +220,7 @@ public class TravelEntryCreateForm extends AbstractEditForm<TravelEntryDto> {
 			getPointsOfEntryForDistrict(districtDto);
 		});
 
-		diseaseField.addValueChangeListener((ValueChangeListener) valueChangeEvent -> {
+		diseaseField.addValueChangeListener(valueChangeEvent -> {
 			Disease disease = (Disease) valueChangeEvent.getValue();
 			List<DiseaseVariant> diseaseVariants =
 				FacadeProvider.getCustomizableEnumFacade().getEnumValues(CustomizableEnumType.DISEASE_VARIANT, disease);

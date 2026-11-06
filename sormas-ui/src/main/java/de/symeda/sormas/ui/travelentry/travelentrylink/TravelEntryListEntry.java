@@ -15,9 +15,9 @@
 
 package de.symeda.sormas.ui.travelentry.travelentrylink;
 
-import com.vaadin.ui.Alignment;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.travelentry.TravelEntryListEntryDto;
@@ -37,39 +37,41 @@ public class TravelEntryListEntry extends SideComponentField {
 		this.travelEntry = travelEntry;
 
 		HorizontalLayout uuidReportDateLayout = new HorizontalLayout();
-		uuidReportDateLayout.setMargin(false);
+		uuidReportDateLayout.setPadding(false);
 		uuidReportDateLayout.setSpacing(true);
 
 		Span travelEntryUuidLabel = new Span(DataHelper.getShortUuid(travelEntry.getUuid()));
-		travelEntryUuidLabel.setDescription(travelEntry.getUuid());
-		uuidReportDateLayout.addComponent(travelEntryUuidLabel);
+		travelEntryUuidLabel.setTitle(travelEntry.getUuid());
+		uuidReportDateLayout.add(travelEntryUuidLabel);
 
 		Span reportDateLabel = new Span(
 			I18nProperties.getPrefixCaption(TravelEntryListEntryDto.I18N_PREFIX, TravelEntryListEntryDto.REPORT_DATE)
 				+ SEPARATOR
 				+ DateFormatHelper.formatDate(travelEntry.getReportDate()));
-		uuidReportDateLayout.addComponent(reportDateLabel);
+		uuidReportDateLayout.add(reportDateLabel);
 
 		uuidReportDateLayout.setWidthFull();
-		uuidReportDateLayout.setComponentAlignment(travelEntryUuidLabel, Alignment.MIDDLE_LEFT);
-		uuidReportDateLayout.setComponentAlignment(reportDateLabel, Alignment.MIDDLE_RIGHT);
+		// was MIDDLE_LEFT / MIDDLE_RIGHT alignment of the two labels
+		uuidReportDateLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+		uuidReportDateLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 		addComponentToField(uuidReportDateLayout);
 
 		HorizontalLayout diseasePointOfEntryLayout = new HorizontalLayout();
-		diseasePointOfEntryLayout.setMargin(false);
+		diseasePointOfEntryLayout.setPadding(false);
 		diseasePointOfEntryLayout.setSpacing(true);
 
 		Span diseaseLabel = new Span(DataHelper.toStringNullable(travelEntry.getDisease()));
 		CssStyles.style(diseaseLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
-		diseasePointOfEntryLayout.addComponent(diseaseLabel);
+		diseasePointOfEntryLayout.add(diseaseLabel);
 
 		Span pointOfEntryLabel =
 			new Span(I18nProperties.getPrefixCaption(TravelEntryListEntryDto.POINT_OF_ENTRY_I18N_PREFIX, travelEntry.getPointOfEntryName()));
-		diseasePointOfEntryLayout.addComponent(pointOfEntryLabel);
+		diseasePointOfEntryLayout.add(pointOfEntryLabel);
 
 		diseasePointOfEntryLayout.setWidthFull();
-		diseasePointOfEntryLayout.setComponentAlignment(diseaseLabel, Alignment.MIDDLE_LEFT);
-		diseasePointOfEntryLayout.setComponentAlignment(pointOfEntryLabel, Alignment.MIDDLE_RIGHT);
+		// was MIDDLE_LEFT / MIDDLE_RIGHT alignment of the two labels
+		diseasePointOfEntryLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+		diseasePointOfEntryLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 		addComponentToField(diseasePointOfEntryLayout);
 	}
 

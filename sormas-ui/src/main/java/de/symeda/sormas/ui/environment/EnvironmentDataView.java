@@ -1,5 +1,7 @@
 package de.symeda.sormas.ui.environment;
 
+import com.vaadin.flow.component.Unit;
+
 import de.symeda.sormas.api.EditPermissionType;
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.environment.EnvironmentDto;
@@ -38,7 +40,7 @@ public class EnvironmentDataView extends AbstractEnvironmentView implements HasN
 
 	@Override
 	protected void initView(String params) {
-		setHeightUndefined();
+		setHeight(null);
 
 		environment = FacadeProvider.getEnvironmentFacade().getByUuid(getReference().getUuid());
 
@@ -47,12 +49,12 @@ public class EnvironmentDataView extends AbstractEnvironmentView implements HasN
 
 		DetailSubComponentWrapper container = new DetailSubComponentWrapper(() -> editComponent);
 		container.setWidth(100, Unit.PERCENTAGE);
-		container.setMargin(true);
+		container.setPadding(true);
 		setSubComponent(container);
 		container.setEnabled(true);
 
 		LayoutWithSidePanel layout = new LayoutWithSidePanel(editComponent, TASKS_LOC, SAMPLES_LOC, EVENTS_LOC);
-		container.addComponent(layout);
+		container.add(layout);
 
 		boolean isEditAllowed = isEditAllowed();
 

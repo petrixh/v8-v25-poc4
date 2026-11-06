@@ -5,11 +5,7 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 import java.util.Date;
 import java.util.stream.Stream;
 
-import de.symeda.sormas.ui.utils.CustomLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import de.symeda.sormas.ui.utils.fields.CheckBox;
-import de.symeda.sormas.ui.utils.fields.Field;
-import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -23,8 +19,12 @@ import de.symeda.sormas.api.utils.EpiWeek;
 import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.utils.AbstractFilterForm;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.EpiWeekAndDateFilterComponent;
 import de.symeda.sormas.ui.utils.FieldConfiguration;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class TravelEntryFilterForm extends AbstractFilterForm<TravelEntryCriteria> {
 
@@ -117,7 +117,7 @@ public class TravelEntryFilterForm extends AbstractFilterForm<TravelEntryCriteri
 		dateFilterRowLayout.setSpacing(true);
 		dateFilterRowLayout.setSizeUndefined();
 
-		dateFilterRowLayout.addComponent(weekAndDateFilter);
+		dateFilterRowLayout.add(weekAndDateFilter);
 
 		return dateFilterRowLayout;
 	}
@@ -150,7 +150,7 @@ public class TravelEntryFilterForm extends AbstractFilterForm<TravelEntryCriteri
 
 		final HorizontalLayout dateFilterLayout = (HorizontalLayout) getMoreFiltersContainer().getComponent(WEEK_AND_DATE_FILTER);
 		final EpiWeekAndDateFilterComponent<DateFilterOption> weekAndDateFilter;
-		weekAndDateFilter = (EpiWeekAndDateFilterComponent<DateFilterOption>) dateFilterLayout.getComponent(0);
+		weekAndDateFilter = (EpiWeekAndDateFilterComponent<DateFilterOption>) dateFilterLayout.getComponentAt(0);
 
 		final DateFilterOption dateFilterOption = criteria.getDateFilterOption();
 		final Date dateFrom = criteria.getReportDateFrom();
@@ -170,7 +170,7 @@ public class TravelEntryFilterForm extends AbstractFilterForm<TravelEntryCriteri
 	protected Stream<Field> streamFieldsForEmptyCheck(CustomLayout layout) {
 		final HorizontalLayout dateFilterLayout = (HorizontalLayout) getMoreFiltersContainer().getComponent(WEEK_AND_DATE_FILTER);
 		final EpiWeekAndDateFilterComponent<DateFilterOption> weekAndDateFilter;
-		weekAndDateFilter = (EpiWeekAndDateFilterComponent<DateFilterOption>) dateFilterLayout.getComponent(0);
+		weekAndDateFilter = (EpiWeekAndDateFilterComponent<DateFilterOption>) dateFilterLayout.getComponentAt(0);
 
 		return super.streamFieldsForEmptyCheck(layout).filter(f -> f != weekAndDateFilter.getDateFilterOptionFilter());
 	}

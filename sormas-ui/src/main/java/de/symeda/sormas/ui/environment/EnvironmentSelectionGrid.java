@@ -2,9 +2,6 @@ package de.symeda.sormas.ui.environment;
 
 import java.util.Date;
 
-import de.symeda.sormas.ui.utils.grid.HeightMode;
-import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
-
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
 import de.symeda.sormas.api.environment.EnvironmentCriteria;
@@ -13,6 +10,8 @@ import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.utils.DateHelper;
 import de.symeda.sormas.ui.utils.FilteredGrid;
 import de.symeda.sormas.ui.utils.GridHeightResizer;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 public class EnvironmentSelectionGrid extends FilteredGrid<EnvironmentIndexDto, EnvironmentCriteria> {
 

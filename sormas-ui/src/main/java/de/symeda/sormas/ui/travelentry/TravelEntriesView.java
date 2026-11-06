@@ -3,18 +3,15 @@ package de.symeda.sormas.ui.travelentry;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import de.symeda.sormas.ui.navigation.ViewChangeListener;
-import de.symeda.sormas.ui.utils.ContentMode;
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.menubar.MenuBar;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.ui.themes.ValoTheme;
-import de.symeda.sormas.ui.utils.fields.ComboBox;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;
@@ -29,16 +26,20 @@ import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import de.symeda.sormas.ui.travelentry.importer.TravelEntryImportLayout;
 import de.symeda.sormas.ui.utils.AbstractView;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.ComboBoxHelper;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FilteredGrid;
 import de.symeda.sormas.ui.utils.MenuBarHelper;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
 import de.symeda.sormas.ui.utils.components.expandablebutton.ExpandableButton;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class TravelEntriesView extends AbstractView {
 
@@ -69,23 +70,23 @@ public class TravelEntriesView extends AbstractView {
 		grid = new TravelEntryGrid(criteria);
 
 		final VerticalLayout gridLayout = new VerticalLayout();
-		gridLayout.addComponent(createFilterBar());
-		gridLayout.addComponent(createStatusFilterBar());
-		gridLayout.addComponent(grid);
+		gridLayout.add(createFilterBar());
+		gridLayout.add(createStatusFilterBar());
+		gridLayout.add(grid);
 
-		gridLayout.setMargin(true);
+		gridLayout.setPadding(true);
 		gridLayout.setSpacing(false);
 		gridLayout.setSizeFull();
-		gridLayout.setExpandRatio(grid, 1);
-		gridLayout.setStyleName("crud-main-layout");
+		gridLayout.setFlexGrow(1, grid);
+		gridLayout.setClassName("crud-main-layout");
 
 		addComponent(gridLayout);
 
 		if (UiUtil.permitted(UserRight.TRAVEL_ENTRY_CREATE)) {
 			addHeaderComponent(ButtonHelper.createIconButton(I18nProperties.getCaption(Captions.actionImport), VaadinIcon.UPLOAD, e -> {
 				Dialog popupWindow = VaadinUiUtil.showPopupWindow(new TravelEntryImportLayout());
-				popupWindow.setCaption(I18nProperties.getString(Strings.headingImportTravelEntries));
-				popupWindow.addCloseListener(c -> ((TravelEntryGrid) grid).reload());
+				popupWindow.setHeaderTitle(I18nProperties.getString(Strings.headingImportTravelEntries));
+				VaadinUiUtil.addCloseListener(popupWindow, c -> ((TravelEntryGrid) grid).reload());
 			}));
 
 			long countTravelEntries = FacadeProvider.getTravelEntryFacade().count(new TravelEntryCriteria(), true);
@@ -103,7 +104,7 @@ public class TravelEntriesView extends AbstractView {
 			addHeaderComponent(btnEnterBulkEditMode);
 
 			Button btnLeaveBulkEditMode =
-				ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcon.CLOSE, null, ValoTheme.BUTTON_PRIMARY);
+				ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcon.CLOSE, null, CssStyles.BUTTON_PRIMARY);
 			btnLeaveBulkEditMode.setVisible(viewConfiguration.isInEagerMode());
 			addHeaderComponent(btnLeaveBulkEditMode);
 
@@ -156,7 +157,7 @@ public class TravelEntriesView extends AbstractView {
 	public VerticalLayout createFilterBar() {
 		VerticalLayout filterLayout = new VerticalLayout();
 		filterLayout.setSpacing(false);
-		filterLayout.setMargin(false);
+		filterLayout.setPadding(false);
 		filterLayout.setWidth(100, Unit.PERCENTAGE);
 
 		filterForm = new TravelEntryFilterForm();
@@ -172,7 +173,7 @@ public class TravelEntriesView extends AbstractView {
 		});
 
 		filterForm.addApplyHandler(clickEvent -> ((TravelEntryGrid) grid).reload());
-		filterLayout.addComponent(filterForm);
+		filterLayout.add(filterForm);
 
 		return filterLayout;
 	}
@@ -180,7 +181,7 @@ public class TravelEntriesView extends AbstractView {
 	public HorizontalLayout createStatusFilterBar() {
 		HorizontalLayout statusFilterLayout = new HorizontalLayout();
 		statusFilterLayout.setSpacing(true);
-		statusFilterLayout.setMargin(false);
+		statusFilterLayout.setPadding(false);
 		statusFilterLayout.setWidth(100, Unit.PERCENTAGE);
 		statusFilterLayout.addClassName(CssStyles.VSPACE_3);
 
@@ -199,14 +200,14 @@ public class TravelEntriesView extends AbstractView {
 						FeatureTypeProperty.THRESHOLD_IN_DAYS,
 						Integer.class);
 				if (daysAfterTravelEntryGetsArchived > 0) {
-					relevanceStatusInfoLabel = new Span(
-						VaadinIcon.INFO_CIRCLE.getHtml() + " "
+					relevanceStatusInfoLabel = VaadinUiUtil.createLabel(
+						HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " "
 							+ String.format(I18nProperties.getString(Strings.infoArchivedTravelEntries), daysAfterTravelEntryGetsArchived),
 						ContentMode.HTML);
 					relevanceStatusInfoLabel.setVisible(false);
 					relevanceStatusInfoLabel.addClassName(CssStyles.LABEL_VERTICAL_ALIGN_SUPER);
-					actionButtonsLayout.addComponent(relevanceStatusInfoLabel);
-					actionButtonsLayout.setComponentAlignment(relevanceStatusInfoLabel, Alignment.MIDDLE_RIGHT);
+					actionButtonsLayout.add(relevanceStatusInfoLabel);
+					actionButtonsLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, relevanceStatusInfoLabel);
 				}
 			}
 			relevanceStatusFilter = ComboBoxHelper.createComboBoxV7();
@@ -249,7 +250,7 @@ public class TravelEntriesView extends AbstractView {
 				criteria.relevanceStatus((EntityRelevanceStatus) e.getValue());
 				navigateTo(criteria);
 			});
-			actionButtonsLayout.addComponent(relevanceStatusFilter);
+			actionButtonsLayout.add(relevanceStatusFilter);
 		}
 
 		// Bulk operation dropdown
@@ -283,14 +284,16 @@ public class TravelEntriesView extends AbstractView {
 			bulkOperationsDropdown = MenuBarHelper.createDropDown(Captions.bulkActions, bulkActions);
 
 			bulkOperationsDropdown.setVisible(viewConfiguration.isInEagerMode());
-			bulkOperationsDropdown.setCaption("");
-			actionButtonsLayout.addComponent(bulkOperationsDropdown);
+			// was setCaption(""): a Flow menu bar has no caption
+			actionButtonsLayout.add(bulkOperationsDropdown);
 		}
 
 		if (actionButtonsLayout.getComponentCount() > 0) {
-			statusFilterLayout.addComponent(actionButtonsLayout);
-			statusFilterLayout.setComponentAlignment(actionButtonsLayout, Alignment.TOP_RIGHT);
-			statusFilterLayout.setExpandRatio(actionButtonsLayout, 1);
+			statusFilterLayout.add(actionButtonsLayout);
+			// was Alignment.TOP_RIGHT: the layout grows, its content goes right
+			statusFilterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, actionButtonsLayout);
+			statusFilterLayout.setFlexGrow(1, actionButtonsLayout);
+			actionButtonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 		}
 
 		return statusFilterLayout;

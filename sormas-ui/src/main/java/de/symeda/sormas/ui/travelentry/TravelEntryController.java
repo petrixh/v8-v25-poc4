@@ -7,9 +7,6 @@ import java.util.function.Consumer;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import de.symeda.sormas.ui.navigation.Navigator;
-import com.vaadin.server.Page;
-import de.symeda.sormas.ui.utils.NotificationHelper;
 import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
@@ -33,11 +30,13 @@ import de.symeda.sormas.api.utils.DataHelper;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.UiUtil;
+import de.symeda.sormas.ui.navigation.Navigator;
 import de.symeda.sormas.ui.person.PersonSelectionGrid;
 import de.symeda.sormas.ui.travelentry.components.TravelEntryCreateForm;
 import de.symeda.sormas.ui.utils.ArchiveHandlers;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.DeleteRestoreHandlers;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.automaticdeletion.DeletionLabel;
 import de.symeda.sormas.ui.utils.components.page.title.TitleLayout;
@@ -112,12 +111,16 @@ public class TravelEntryController {
 				if (dto.getPerson() == null) {
 					final PersonDto person = createForm.getPerson();
 					if (createForm.getWarningSimilarPersons() != null) {
+						// the similar-persons popup is a Dialog (1a-51); its first child is the wrapper component
+						@SuppressWarnings("unchecked")
 						CommitDiscardWrapperComponent<PersonSelectionGrid> warningPopUpDuplicatePerson =
 							(CommitDiscardWrapperComponent<PersonSelectionGrid>) editView.getWrappedComponent()
 								.getWarningSimilarPersons()
-								.getContent();
+								.getChildren()
+								.findFirst()
+								.orElse(null);
 						warningPopUpDuplicatePerson.getDiscardButton().setVisible(true);
-						warningPopUpDuplicatePerson.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionContinue));
+						warningPopUpDuplicatePerson.getCommitButton().setText(I18nProperties.getCaption(Captions.actionContinue));
 						warningPopUpDuplicatePerson.addDoneListener(() -> {
 							if (!travelEntrySaveTriggered) {
 								VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getString(Strings.headingCreateNewImmunization));
@@ -278,7 +281,7 @@ public class TravelEntryController {
 
 			travelEntryGrid.reload();
 			if (CollectionUtils.isNotEmpty(remainingTravelEntries)) {
-				travelEntryGrid.asMultiSelect().selectItems(remainingTravelEntries.toArray(new TravelEntryIndexDto[0]));
+				travelEntryGrid.asMultiSelect().select(remainingTravelEntries.toArray(new TravelEntryIndexDto[0]));
 			} else {
 				noEntriesRemainingCallback.run();
 			}
@@ -287,11 +290,11 @@ public class TravelEntryController {
 
 	public void sendEmailsToAllSelectedItems(Collection<TravelEntryIndexDto> selectedRows, TravelEntryGrid travelEntryGrid) {
 		if (selectedRows.size() == 0) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingNoContactsSelected),
 				I18nProperties.getString(Strings.messageNoContactsSelected),
 				NotificationHelper.Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				false);
 		} else {
 			ControllerProvider.getExternalEmailController()
 				.sendBulkEmail(

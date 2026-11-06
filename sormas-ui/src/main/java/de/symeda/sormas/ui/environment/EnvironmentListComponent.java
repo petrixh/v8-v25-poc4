@@ -2,13 +2,12 @@ package de.symeda.sormas.ui.environment;
 
 import java.util.function.Consumer;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.ui.Alignment;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.environment.EnvironmentCriteria;
@@ -55,41 +54,43 @@ public class EnvironmentListComponent extends VerticalLayout {
 		Runnable linkEnvironmentCallback,
 		boolean isEditAllowed) {
 
-		setWidth(100, Unit.PERCENTAGE);
-		setMargin(false);
+		setWidthFull();
+		setPadding(false);
 		setSpacing(false);
 		Button createButton;
 
 		HorizontalLayout componentHeader = new HorizontalLayout();
-		componentHeader.setMargin(false);
+		componentHeader.setPadding(false);
 		componentHeader.setSpacing(false);
-		componentHeader.setWidth(100, Unit.PERCENTAGE);
-		addComponent(componentHeader);
+		componentHeader.setWidthFull();
+		add(componentHeader);
 
-		addComponent(environmentList);
+		add(environmentList);
 		environmentList.reload();
 
 		Span environmentLabel = new Span(heading);
 		environmentLabel.addClassName(CssStyles.H3);
-		componentHeader.addComponent(environmentLabel);
+		componentHeader.add(environmentLabel);
+		// Vaadin 8: the heading's slot took the free space, the button sat right in its own slot
+		componentHeader.setFlexGrow(1, environmentLabel);
 
 		if (UiUtil.permitted(isEditAllowed, UserRight.ENVIRONMENT_CREATE)) {
 			createButton = ButtonHelper.createButton(I18nProperties.getCaption(Captions.linkEnvironment));
-			createButton.setIcon(VaadinIcon.PLUS_CIRCLE);
+			ButtonHelper.setIcon(createButton, VaadinIcon.PLUS_CIRCLE);
 			createButton.addClickListener(e -> actionCallback.accept(linkEnvironmentCallback));
-			createButton.addClassName(ValoTheme.BUTTON_PRIMARY);
+			CssStyles.style(createButton, CssStyles.BUTTON_PRIMARY);
 
 			if (bottomCreateButton) {
 				HorizontalLayout buttonLayout = new HorizontalLayout();
 				buttonLayout.setSpacing(true);
-				buttonLayout.setMargin(false);
-				buttonLayout.setWidth(100, Unit.PERCENTAGE);
-				buttonLayout.addComponent(createButton);
+				buttonLayout.setPadding(false);
+				buttonLayout.setWidthFull();
+				buttonLayout.add(createButton);
 				CssStyles.style(buttonLayout, CssStyles.VSPACE_TOP_3);
-				addComponent(buttonLayout);
+				add(buttonLayout);
 			} else {
-				componentHeader.addComponent(createButton);
-				componentHeader.setComponentAlignment(createButton, Alignment.MIDDLE_RIGHT);
+				componentHeader.add(createButton);
+				componentHeader.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, createButton);
 			}
 		}
 	}

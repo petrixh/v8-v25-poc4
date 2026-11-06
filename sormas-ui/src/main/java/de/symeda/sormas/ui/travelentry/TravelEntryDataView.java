@@ -1,7 +1,7 @@
 package de.symeda.sormas.ui.travelentry;
 
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.ui.themes.ValoTheme;
 
 import de.symeda.sormas.api.EditPermissionType;
 import de.symeda.sormas.api.FacadeProvider;
@@ -49,7 +49,7 @@ public class TravelEntryDataView extends AbstractTravelEntryView {
 
 	@Override
 	protected void initView(String params) {
-		setHeightUndefined();
+		setHeight(null);
 
 		TravelEntryDto travelEntryDto = FacadeProvider.getTravelEntryFacade().getByUuid(getReference().getUuid());
 
@@ -57,7 +57,7 @@ public class TravelEntryDataView extends AbstractTravelEntryView {
 
 		DetailSubComponentWrapper container = new DetailSubComponentWrapper(() -> editComponent);
 		container.setWidth(100, Unit.PERCENTAGE);
-		container.setMargin(true);
+		container.setPadding(true);
 		setSubComponent(container);
 		container.setEnabled(true);
 
@@ -69,7 +69,7 @@ public class TravelEntryDataView extends AbstractTravelEntryView {
 			TASKS_LOC,
 			EXTERNAL_EMAILS_LOC);
 
-		container.addComponent(layout);
+		container.add(layout);
 
 		boolean caseButtonVisible = UiUtil.permitted(FeatureType.CASE_SURVEILANCE, UserRight.CASE_CREATE);
 		CaseReferenceDto resultingCase = travelEntryDto.getResultingCase();
@@ -78,7 +78,7 @@ public class TravelEntryDataView extends AbstractTravelEntryView {
 				// Re-retrieve the travel entry from the database in case there were unsaved changes
 				TravelEntryDto updatedTravelEntry = FacadeProvider.getTravelEntryFacade().getByUuid(travelEntryDto.getUuid());
 				ControllerProvider.getCaseController().createFromTravelEntry(updatedTravelEntry);
-			}), ValoTheme.BUTTON_PRIMARY, CssStyles.VSPACE_2);
+			}), CssStyles.BUTTON_PRIMARY, CssStyles.VSPACE_2);
 			layout.addSidePanelComponent(createCaseButton, CASE_LOC);
 		} else if (resultingCase != null) {
 			layout.addSidePanelComponent(createCaseInfoLayout(resultingCase.getUuid()), CASE_LOC);

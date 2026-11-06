@@ -18,9 +18,7 @@ package de.symeda.sormas.ui.environment.importer;
 import java.io.IOException;
 
 import com.opencsv.exceptions.CsvValidationException;
-import com.vaadin.server.ClassResource;
-import com.vaadin.server.Page;
-import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -29,6 +27,7 @@ import de.symeda.sormas.api.importexport.ImportFacade;
 import de.symeda.sormas.api.importexport.ValueSeparator;
 import de.symeda.sormas.ui.importer.AbstractImportLayout;
 import de.symeda.sormas.ui.importer.ImportReceiver;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 public class EnvironmentImportLayout extends AbstractImportLayout {
 
@@ -40,7 +39,7 @@ public class EnvironmentImportLayout extends AbstractImportLayout {
 
 		ImportFacade importFacade = FacadeProvider.getImportFacade();
 
-		addDownloadResourcesComponent(1, new ClassResource("/SORMAS_Environment_Import_Guide.pdf"));
+		addDownloadResourcesComponent(1, DownloadHandler.forClassResource(EnvironmentImportLayout.class, "/SORMAS_Environment_Import_Guide.pdf"));
 		addDownloadImportTemplateComponent(
 			2,
 			importFacade.getEnvironmentImportTemplateFilePath(),
@@ -52,11 +51,11 @@ public class EnvironmentImportLayout extends AbstractImportLayout {
 				EnvironmentImporter importer = new EnvironmentImporter(file, true, currentUser, (ValueSeparator) separator.getValue());
 				importer.startImport(EnvironmentImportLayout.this::extendDownloadErrorReportButton, currentUI, true);
 			} catch (IOException | CsvValidationException e) {
-				new Notification(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.headingImportFailed),
 					I18nProperties.getString(Strings.messageImportFailed),
 					NotificationHelper.Type.ERROR_MESSAGE,
-					false).show(Page.getCurrent());
+					false);
 			}
 		}));
 		addDownloadErrorReportComponent(4);

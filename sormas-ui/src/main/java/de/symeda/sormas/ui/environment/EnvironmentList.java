@@ -2,7 +2,6 @@ package de.symeda.sormas.ui.environment;
 
 import java.util.List;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
@@ -43,9 +42,9 @@ public class EnvironmentList extends PaginationList<EnvironmentIndexDto> {
 		if (!envs.isEmpty()) {
 			showPage(1);
 		} else {
-			listLayout.removeAllComponents();
+			listLayout.removeAll();
 			updatePaginationLayout();
-			listLayout.addComponent(noEnvironmentLabel);
+			listLayout.add(noEnvironmentLabel);
 		}
 	}
 
@@ -57,7 +56,7 @@ public class EnvironmentList extends PaginationList<EnvironmentIndexDto> {
 			EnvironmentListEntry listEntry = new EnvironmentListEntry(environmentIndex);
 
 			if (UiUtil.permitted(UserRight.ENVIRONMENT_CREATE)) {
-				listEntry.addUnlinkEnvironmentListener(i, (Button.ClickListener) clickEvent -> {
+				listEntry.addUnlinkEnvironmentListener(i, clickEvent -> {
 					VaadinUiUtil.showConfirmationPopup(
 						I18nProperties.getString(Strings.headingUnlinkEnvironmentFromEvent),
 						new Span(I18nProperties.getString(Strings.confirmationUnlinkEnvironmentFromEvent)),
@@ -76,11 +75,11 @@ public class EnvironmentList extends PaginationList<EnvironmentIndexDto> {
 			if (UiUtil.permitted(UserRight.ENVIRONMENT_EDIT)) {
 				listEntry.addActionButton(
 					String.valueOf(i),
-					(Button.ClickListener) event -> ControllerProvider.getEnvironmentController().navigateToData(environmentIndex.getUuid(), false),
+					event -> ControllerProvider.getEnvironmentController().navigateToData(environmentIndex.getUuid(), false),
 					hasEditOrDeleteRights());
 			}
 			listEntry.setEnabled(isEditAllowed);
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 

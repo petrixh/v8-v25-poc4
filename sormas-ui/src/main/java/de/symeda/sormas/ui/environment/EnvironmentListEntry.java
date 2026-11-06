@@ -1,12 +1,13 @@
 package de.symeda.sormas.ui.environment;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.ui.Alignment;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
 
 import de.symeda.sormas.api.environment.EnvironmentIndexDto;
 import de.symeda.sormas.api.i18n.Captions;
@@ -27,81 +28,81 @@ public class EnvironmentListEntry extends SideComponentField {
 		this.environment = environment;
 
 		HorizontalLayout topLayout = new HorizontalLayout();
-		topLayout.setMargin(false);
+		topLayout.setPadding(false);
 		topLayout.setSpacing(false);
-		topLayout.setWidth(100, Unit.PERCENTAGE);
+		topLayout.setWidthFull();
 		addComponentToField(topLayout);
 
 		VerticalLayout leftColumnLayout = new VerticalLayout();
-		leftColumnLayout.setMargin(false);
+		leftColumnLayout.setPadding(false);
 		leftColumnLayout.setSpacing(false);
 
 		// TOP LEFT
 		VerticalLayout topLeftLayout = new VerticalLayout();
 		{
-			topLeftLayout.setMargin(false);
+			topLeftLayout.setPadding(false);
 			topLeftLayout.setSpacing(false);
 			Span environmentNameLabel = new Span(DataHelper.toStringNullable(environment.getEnvironmentName()));
 			CssStyles.style(environmentNameLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
-			topLeftLayout.addComponent(environmentNameLabel);
+			topLeftLayout.add(environmentNameLabel);
 			Span environmentMediaLabel = new Span(
 				I18nProperties.getCaption(Captions.Event_environmentMedia) + ": " + DataHelper.toStringNullable(environment.getEnvironmentMedia()));
 			CssStyles.style(environmentMediaLabel, CssStyles.HSPACE_RIGHT_4);
-			topLeftLayout.addComponent(environmentMediaLabel);
+			topLeftLayout.add(environmentMediaLabel);
 			Span investigationStatusLabel = new Span(
 				I18nProperties.getCaption(Captions.Event_environment_investigationStatus) + ": "
 					+ DataHelper.toStringNullable(environment.getInvestigationStatus()));
 			CssStyles.style(investigationStatusLabel);
-			topLeftLayout.addComponent(investigationStatusLabel);
+			topLeftLayout.add(investigationStatusLabel);
 			Span envReportDtLabel = new Span(
 				I18nProperties.getCaption(Captions.Event_environmentReportDate) + ": "
 					+ DataHelper.toStringNullable(DateHelper.formatLocalDate(environment.getReportDate(), I18nProperties.getUserLanguage())));
 			CssStyles.style(envReportDtLabel);
-			envReportDtLabel.setWidth(100, Unit.PERCENTAGE);
-			topLeftLayout.addComponent(envReportDtLabel);
-			topLayout.addComponent(topLeftLayout);
-			topLayout.setComponentAlignment(topLeftLayout, Alignment.TOP_LEFT);
+			envReportDtLabel.setWidthFull();
+			topLeftLayout.add(envReportDtLabel);
+			topLayout.add(topLeftLayout);
+			topLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, topLeftLayout);
 			// TOP RIGHT
 			VerticalLayout topRightLayout = new VerticalLayout();
 			topRightLayout.addClassName(CssStyles.ALIGN_RIGHT);
-			topLayout.addComponent(topRightLayout);
-			topLayout.setComponentAlignment(topRightLayout, Alignment.TOP_RIGHT);
+			topLayout.add(topRightLayout);
+			topLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, topRightLayout);
 		}
 
 	}
 
-	public void addEditListener(int rowIndex, Button.ClickListener editClickListener) {
+	public void addEditListener(int rowIndex, ComponentEventListener<ClickEvent<Button>> editClickListener) {
 		if (editButton == null) {
 			editButton = ButtonHelper.createIconButtonWithCaption(
 				"edit-environment-" + rowIndex,
 				null,
 				VaadinIcon.PENCIL,
 				null,
-				ValoTheme.BUTTON_LINK,
+				CssStyles.BUTTON_LINK,
 				CssStyles.BUTTON_COMPACT);
 
-			addComponent(editButton);
-			setComponentAlignment(editButton, Alignment.TOP_RIGHT);
-			setExpandRatio(editButton, 0);
+			add(editButton);
+			setVerticalComponentAlignment(FlexComponent.Alignment.START, editButton);
+			setFlexGrow(0, editButton);
 		}
 
 		editButton.addClickListener(editClickListener);
 	}
 
-	public void addUnlinkEnvironmentListener(int rowIndex, Button.ClickListener unlinkEventClickListener) {
+	public void addUnlinkEnvironmentListener(int rowIndex, ComponentEventListener<ClickEvent<Button>> unlinkEventClickListener) {
 		if (unlinkEnvironmentButton == null) {
 			unlinkEnvironmentButton = ButtonHelper.createIconButtonWithCaption(
 				"unlink-environment-" + rowIndex,
 				null,
 				VaadinIcon.UNLINK,
 				null,
-				ValoTheme.BUTTON_LINK,
+				CssStyles.BUTTON_LINK,
 				CssStyles.BUTTON_COMPACT);
-			unlinkEnvironmentButton.setDescription(I18nProperties.getCaption(Captions.eventUnlinkEnvironment));
+			unlinkEnvironmentButton.setTooltipText(I18nProperties.getCaption(Captions.eventUnlinkEnvironment));
 
-			addComponent(unlinkEnvironmentButton);
-			setComponentAlignment(unlinkEnvironmentButton, Alignment.MIDDLE_RIGHT);
-			setExpandRatio(unlinkEnvironmentButton, 0);
+			add(unlinkEnvironmentButton);
+			setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, unlinkEnvironmentButton);
+			setFlexGrow(0, unlinkEnvironmentButton);
 		}
 
 		unlinkEnvironmentButton.addClickListener(unlinkEventClickListener);

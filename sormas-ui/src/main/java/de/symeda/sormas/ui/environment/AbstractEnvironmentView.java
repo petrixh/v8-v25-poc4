@@ -1,7 +1,5 @@
 package de.symeda.sormas.ui.environment;
 
-import de.symeda.sormas.ui.navigation.ViewChangeListener;
-
 import de.symeda.sormas.api.EditPermissionFacade;
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.environment.EnvironmentDto;
@@ -10,6 +8,7 @@ import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.SubMenu;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import de.symeda.sormas.ui.utils.AbstractEditAllowedDetailView;
 
 public abstract class AbstractEnvironmentView extends AbstractEditAllowedDetailView<EnvironmentReferenceDto> {

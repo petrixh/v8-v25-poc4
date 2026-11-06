@@ -4,28 +4,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.ui.GridLayout;
-import de.symeda.sormas.ui.utils.fields.Field;
-import de.symeda.sormas.ui.utils.fields.TextField;
+import com.vaadin.flow.component.formlayout.FormLayout;
 
 import de.symeda.sormas.api.travelentry.DeaContentEntry;
 import de.symeda.sormas.api.utils.fieldaccess.UiFieldAccessCheckers;
 import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class DEAFormBuilder {
 
 	private List<DeaContentEntry> deaContentEntries;
-	private GridLayout gridLayout;
+	private FormLayout gridLayout;
 	private Boolean isCreate;
 	private List<Field<?>> fields;
 
 	public DEAFormBuilder(List<DeaContentEntry> deaContentEntries, Boolean isCreate) {
 		this.deaContentEntries = deaContentEntries;
-		this.gridLayout = new GridLayout(2, deaContentEntries.size() > 1 ? deaContentEntries.size() / 2 : 1);
+		// was a GridLayout of 2 columns, filled row by row
+		this.gridLayout = new FormLayout();
+		this.gridLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 2));
 		this.gridLayout.setWidthFull();
-		this.gridLayout.setSpacing(true);
 		CssStyles.style(this.gridLayout, CssStyles.VSPACE_3);
 		this.isCreate = isCreate;
 		this.fields = new ArrayList<>();
@@ -53,7 +54,7 @@ public class DEAFormBuilder {
 			if (!isCreate) {
 				textField.setValue(deaContentEntry.getValue());
 			}
-			gridLayout.addComponent(textField);
+			gridLayout.add(textField);
 			fields.add(textField);
 		}
 	}

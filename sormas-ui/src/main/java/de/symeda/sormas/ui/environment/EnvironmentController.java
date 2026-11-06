@@ -17,11 +17,9 @@ package de.symeda.sormas.ui.environment;
 
 import java.util.List;
 
-import de.symeda.sormas.ui.navigation.Navigator;
-import com.vaadin.server.Page;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
-import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.notification.Notification;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.common.DeletionReason;
@@ -42,8 +40,10 @@ import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.UserProvider;
 import de.symeda.sormas.ui.events.EventDataView;
+import de.symeda.sormas.ui.navigation.Navigator;
 import de.symeda.sormas.ui.utils.ArchiveHandlers;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.automaticdeletion.DeletionLabel;
 import de.symeda.sormas.ui.utils.components.page.title.TitleLayout;
@@ -72,7 +72,7 @@ public class EnvironmentController {
 
 	public void selectOrCreateEnvironment(EventDto eventDto) {
 		EnvironmentSelectionField selectionField = new EnvironmentSelectionField();
-		selectionField.setWidth(1100, Sizeable.Unit.PIXELS);
+		selectionField.setWidth(1100, Unit.PIXELS);
 
 		final CommitDiscardWrapperComponent<EnvironmentSelectionField> component = new CommitDiscardWrapperComponent<>(selectionField);
 		component.addCommitListener(() -> {
@@ -94,12 +94,13 @@ public class EnvironmentController {
 					}
 					NotificationHelper.show(I18nProperties.getString(Strings.messageEnvironmentLinkedToEvent), NotificationHelper.Type.TRAY_NOTIFICATION);
 				} else {
-					Notification notification = new Notification(
+					Notification notification = NotificationHelper.createNotification(
 						I18nProperties.getString(Strings.messageEnvironmentAlreadyLinkedToEvent),
 						"",
-						NotificationHelper.Type.HUMANIZED_MESSAGE);
-					notification.setDelayMsec(10000);
-					notification.show(Page.getCurrent());
+						NotificationHelper.Type.HUMANIZED_MESSAGE,
+						false);
+					NotificationHelper.setDelayMsec(notification, 10000);
+					notification.open();
 				}
 
 			} else {
@@ -123,7 +124,7 @@ public class EnvironmentController {
 
 	private void pageNavigate(boolean openTab, String navigationState) {
 		if (openTab) {
-			SormasUI.get().getPage().open(SormasUI.get().getPage().getLocation().getRawPath() + "#!" + navigationState, "_blank", false);
+			SormasUI.get().getPage().open(Navigator.getUrl(navigationState), "_blank");
 		} else {
 			SormasUI.get().getNavigator().navigateTo(navigationState);
 		}

@@ -17,13 +17,6 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.v7.data.util.converter.Converter;
-import de.symeda.sormas.ui.utils.fields.CheckBox;
-import de.symeda.sormas.ui.utils.fields.ComboBox;
-import de.symeda.sormas.ui.utils.fields.DateField;
-import de.symeda.sormas.ui.utils.fields.Field;
-import de.symeda.sormas.ui.utils.fields.TextArea;
-import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -56,6 +49,12 @@ import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.InfrastructureFieldsHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
 import de.symeda.sormas.ui.utils.UserField;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class TravelEntryDataForm extends AbstractEditForm<TravelEntryDto> {
 
@@ -191,7 +190,7 @@ public class TravelEntryDataForm extends AbstractEditForm<TravelEntryDto> {
 
 		differentPointOfEntryJurisdiction.addValueChangeListener(e -> {
 			if (!ignoreDifferentPointOfEntryJurisdiction) {
-				if (differentPointOfEntryJurisdiction.booleanValue()) {
+				if (differentPointOfEntryJurisdiction.getValue()) {
 					districtCombo.setValue(null);
 				}
 				cbPointOfEntry.setValue(null);
@@ -211,7 +210,7 @@ public class TravelEntryDataForm extends AbstractEditForm<TravelEntryDto> {
 				.updateItems(districtCombo, regionDto != null ? FacadeProvider.getDistrictFacade().getAllActiveByRegion(regionDto.getUuid()) : null);
 		});
 		districtCombo.addValueChangeListener(e -> {
-			if (differentPointOfEntryJurisdiction.booleanValue()) {
+			if (differentPointOfEntryJurisdiction.getValue()) {
 				updatePointsOfEntry();
 			}
 		});
@@ -377,12 +376,12 @@ public class TravelEntryDataForm extends AbstractEditForm<TravelEntryDto> {
 		setReadOnly(true, TravelEntryDto.UUID, TravelEntryDto.REPORTING_USER);
 
 		responsibleDistrict.addValueChangeListener(e -> {
-			if (!differentPointOfEntryJurisdiction.booleanValue()) {
+			if (!differentPointOfEntryJurisdiction.getValue()) {
 				updatePointsOfEntry();
 			}
 		});
 
-		diseaseField.addValueChangeListener((ValueChangeListener) valueChangeEvent -> {
+		diseaseField.addValueChangeListener(valueChangeEvent -> {
 			Disease disease = (Disease) valueChangeEvent.getValue();
 			List<DiseaseVariant> diseaseVariants =
 				FacadeProvider.getCustomizableEnumFacade().getEnumValues(CustomizableEnumType.DISEASE_VARIANT, disease);
@@ -405,7 +404,7 @@ public class TravelEntryDataForm extends AbstractEditForm<TravelEntryDto> {
 
 	private void updatePointsOfEntry() {
 		DistrictReferenceDto districtDto =
-			(DistrictReferenceDto) (differentPointOfEntryJurisdiction.booleanValue() ? districtCombo.getValue() : responsibleDistrict.getValue());
+			(DistrictReferenceDto) (differentPointOfEntryJurisdiction.getValue() ? districtCombo.getValue() : responsibleDistrict.getValue());
 
 		updatePointsOfEntryForDistrict(districtDto);
 	}

@@ -4,8 +4,7 @@ import java.io.IOException;
 
 import com.opencsv.exceptions.CsvValidationException;
 import com.vaadin.server.ClassResource;
-import com.vaadin.server.Page;
-import com.vaadin.ui.Notification;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -34,11 +33,11 @@ public class SelfReportImportLayout extends AbstractImportLayout {
 				SelfReportImporter importer = new SelfReportImporter(file, true, currentUser, (ValueSeparator) separator.getValue());
 				importer.startImport(SelfReportImportLayout.this::extendDownloadErrorReportButton, currentUI, true);
 			} catch (IOException | CsvValidationException e) {
-				new Notification(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.headingImportFailed),
 					I18nProperties.getString(Strings.messageImportFailed),
-					Notification.Type.ERROR_MESSAGE,
-					false).show(Page.getCurrent());
+					NotificationHelper.Type.ERROR_MESSAGE,
+					false);
 			}
 		}));
 		addDownloadErrorReportComponent(4);

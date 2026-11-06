@@ -1,6 +1,6 @@
 package de.symeda.sormas.ui.survey;
 
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.survey.SurveyCriteria;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
@@ -25,7 +25,7 @@ public class SurveyGridComponent extends VerticalLayout {
 		filterForm.addResetHandler(e -> filterResetHandler.run());
 
 		addComponents(filterForm, grid);
-		setExpandRatio(grid, 1);
+		setFlexGrow(1, grid);
 	}
 
 	public void reload() {

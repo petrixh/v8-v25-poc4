@@ -28,12 +28,12 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.vaadin.shared.ui.ErrorLevel;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.v7.data.validator.EmailValidator;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.OptionGroup;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -131,7 +131,7 @@ public class SelfReportDataForm extends AbstractEditForm<SelfReportDto> {
 				.setRequiredWhen(getFieldGroup(), SelfReportDto.DISEASE, Arrays.asList(SelfReportDto.DISEASE_DETAILS), Arrays.asList(Disease.OTHER));
 		}
 		diseaseField.addValueChangeListener((ValueChangeListener) valueChangeEvent -> {
-			Disease disease = (Disease) valueChangeEvent.getProperty().getValue();
+			Disease disease = (Disease) valueChangeEvent.getValue();
 			List<DiseaseVariant> diseaseVariants =
 				FacadeProvider.getCustomizableEnumFacade().getEnumValues(CustomizableEnumType.DISEASE_VARIANT, disease);
 			FieldHelper.updateItems(diseaseVariantField, diseaseVariants);
@@ -139,7 +139,7 @@ public class SelfReportDataForm extends AbstractEditForm<SelfReportDto> {
 				.setVisible(disease != null && isVisibleAllowed(SelfReportDto.DISEASE_VARIANT) && CollectionUtils.isNotEmpty(diseaseVariants));
 		});
 		diseaseVariantField.addValueChangeListener(e -> {
-			DiseaseVariant diseaseVariant = (DiseaseVariant) e.getProperty().getValue();
+			DiseaseVariant diseaseVariant = (DiseaseVariant) e.getValue();
 			diseaseVariantDetailsField.setVisible(diseaseVariant != null && diseaseVariant.matchPropertyValue(DiseaseVariant.HAS_DETAILS, true));
 		});
 
@@ -154,13 +154,13 @@ public class SelfReportDataForm extends AbstractEditForm<SelfReportDto> {
 		addField(SelfReportDto.SEX, ComboBox.class).setRequired(true);
 
 		TextField nationalHealthIdField = addField(PersonDto.NATIONAL_HEALTH_ID);
-		Label nationalHealthIdWarningLabel = new Label(I18nProperties.getString(Strings.messagePersonNationalHealthIdInvalid));
-		nationalHealthIdWarningLabel.addStyleNames(VSPACE_3, LABEL_WHITE_SPACE_NORMAL);
+		Span nationalHealthIdWarningLabel = new Span(I18nProperties.getString(Strings.messagePersonNationalHealthIdInvalid));
+		nationalHealthIdWarningLabel.addClassNames(VSPACE_3, LABEL_WHITE_SPACE_NORMAL);
 		nationalHealthIdWarningLabel.setVisible(false);
 		getContent().addComponent(nationalHealthIdWarningLabel, NATIONAL_HEALTH_ID_WARNING_LABEL);
 
 		//address
-		Label addressHeader = new Label(I18nProperties.getPrefixCaption(SelfReportDto.I18N_PREFIX, SelfReportDto.ADDRESS));
+		Span addressHeader = new Span(I18nProperties.getPrefixCaption(SelfReportDto.I18N_PREFIX, SelfReportDto.ADDRESS));
 		CssStyles.style(CssStyles.H3, addressHeader);
 		getContent().addComponent(addressHeader, ADDRESS_HEADER_LOC);
 

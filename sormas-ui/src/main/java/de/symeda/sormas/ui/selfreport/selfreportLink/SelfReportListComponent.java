@@ -13,12 +13,12 @@ public class SelfReportListComponent extends SideComponent {
 
 	public SelfReportListComponent(SelfReportType selfReportType, SelfReportCriteria selfReportCriteria) {
 		super(I18nProperties.getString(Strings.headingSelfReportSideComponent));
-		setWidth(100, Unit.PERCENTAGE);
+		setWidthFull();
 		setMargin(false);
 		setSpacing(false);
 
 		SelfReportList selfReportList = new SelfReportList(selfReportCriteria);
-		addComponent(selfReportList);
+		add(selfReportList);
 		selfReportList.reload();
 
 	}

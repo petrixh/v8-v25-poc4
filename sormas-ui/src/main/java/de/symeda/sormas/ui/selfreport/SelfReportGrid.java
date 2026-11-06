@@ -22,12 +22,11 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.renderers.DateRenderer;
-import com.vaadin.ui.renderers.TextRenderer;
-import com.vaadin.ui.themes.ValoTheme;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;
@@ -159,10 +158,10 @@ public class SelfReportGrid extends FilteredGrid<SelfReportIndexDto, SelfReportC
 			// build process button
 			return ButtonHelper.createButton(Captions.selfReportProcess, e -> {
 				ControllerProvider.getSelfReportController().processSelfReport(indexDto.getUuid());
-			}, ValoTheme.BUTTON_PRIMARY);
+			}, CssStyles.BUTTON_PRIMARY);
 		} else {
 			// build placeholder necessary to circumvent a vaadin scaling issue (see #7681)
-			Label placeholder = new Label(PLACEHOLDER_SPACE);
+			Span placeholder = new Span(PLACEHOLDER_SPACE);
 			placeholder.setContentMode(ContentMode.HTML);
 			return placeholder;
 		}

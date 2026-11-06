@@ -20,8 +20,8 @@ import java.util.concurrent.CompletionStage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.navigator.Navigator;
-import com.vaadin.ui.Notification;
+import de.symeda.sormas.ui.navigation.Navigator;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.DiseaseHelper;
 import de.symeda.sormas.api.FacadeProvider;
@@ -96,7 +96,7 @@ public class SelfReportController {
 			if (!editForm.getFieldGroup().isModified()) {
 				FacadeProvider.getSelfReportFacade().save(selfReport);
 
-				Notification.show(I18nProperties.getString(Strings.messageSelfReportSaved), Notification.Type.WARNING_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageSelfReportSaved), NotificationHelper.Type.WARNING_MESSAGE);
 				SormasUI.refreshView();
 			}
 		});
@@ -153,10 +153,10 @@ public class SelfReportController {
 			if (throwable != null) {
 				logger.error("Unexpected exception while processing self report", throwable);
 
-				Notification.show(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.errorOccurred, I18nProperties.getString(Strings.errorOccurred)),
 					I18nProperties.getString(Strings.errorWasReported),
-					Notification.Type.ERROR_MESSAGE);
+					NotificationHelper.Type.ERROR_MESSAGE);
 			} else {
 				SelfReportProcessingResult processingResultData = processingResult.getData();
 

@@ -20,16 +20,15 @@ import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.vaadin.hene.popupbutton.PopupButton;
+import de.symeda.sormas.ui.utils.PopupButton;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;
@@ -80,11 +79,11 @@ public class SelfReportsView extends AbstractView {
 		addComponent(gridComponent);
 
 		if (UiUtil.permitted(UserRight.SELF_REPORT_IMPORT)) {
-			Button importButton = ButtonHelper.createIconButton(Captions.actionImport, VaadinIcons.UPLOAD, e -> {
-				Window popupWindow = VaadinUiUtil.showPopupWindow(new SelfReportImportLayout());
+			Button importButton = ButtonHelper.createIconButton(Captions.actionImport, VaadinIcon.UPLOAD, e -> {
+				Dialog popupWindow = VaadinUiUtil.showPopupWindow(new SelfReportImportLayout());
 				popupWindow.setCaption(I18nProperties.getString(Strings.headingImportSelfReports));
 				popupWindow.addCloseListener(c -> gridComponent.reload());
-			}, ValoTheme.BUTTON_PRIMARY);
+			}, CssStyles.BUTTON_PRIMARY);
 
 			addHeaderComponent(importButton);
 		}
@@ -112,18 +111,18 @@ public class SelfReportsView extends AbstractView {
 	private void addExportButton() {
 		VerticalLayout exportLayout = new VerticalLayout();
 		exportLayout.setSpacing(true);
-		exportLayout.setMargin(true);
-		exportLayout.addStyleName(CssStyles.LAYOUT_MINIMAL);
+		exportLayout.setPadding(true);
+		exportLayout.addClassName(CssStyles.LAYOUT_MINIMAL);
 		exportLayout.setWidth(200, Unit.PIXELS);
 
-		PopupButton exportButton = ButtonHelper.createIconPopupButton(Captions.export, VaadinIcons.DOWNLOAD, exportLayout);
+		PopupButton exportButton = ButtonHelper.createIconPopupButton(Captions.export, VaadinIcon.DOWNLOAD, exportLayout);
 		addHeaderComponent(exportButton);
 
-		Button basicExportButton = ButtonHelper.createIconButton(Captions.exportBasic, VaadinIcons.TABLE, null, ValoTheme.BUTTON_PRIMARY);
+		Button basicExportButton = ButtonHelper.createIconButton(Captions.exportBasic, VaadinIcon.TABLE, null, CssStyles.BUTTON_PRIMARY);
 		basicExportButton.setDescription(I18nProperties.getString(Strings.infoBasicExport));
-		basicExportButton.setWidth(100, Unit.PERCENTAGE);
+		basicExportButton.setWidthFull();
 
-		exportLayout.addComponent(basicExportButton);
+		exportLayout.add(basicExportButton);
 
 		SelfReportGrid grid = gridComponent.getGrid();
 		StreamResource streamResource =
@@ -160,7 +159,7 @@ public class SelfReportsView extends AbstractView {
 			extendedExportStreamResource,
 			exportButton,
 			exportLayout,
-			VaadinIcons.FILE_TEXT,
+			VaadinIcon.FILE_TEXT,
 			Captions.exportDetailed,
 			Strings.infoDetailedExport);
 	}

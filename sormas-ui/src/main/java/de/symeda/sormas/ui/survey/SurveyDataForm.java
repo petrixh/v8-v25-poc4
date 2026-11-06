@@ -3,8 +3,8 @@ package de.symeda.sormas.ui.survey;
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.docgeneneration.DocumentTemplateCriteria;
 import de.symeda.sormas.api.docgeneneration.DocumentWorkflow;
@@ -55,15 +55,15 @@ public class SurveyDataForm extends AbstractEditForm<SurveyDto> {
 			false,
 			new SurveyEmailTemplateReceiver(DocumentWorkflow.SURVEY_EMAIL, surveyReference));
 
-		documentTemplateSection.setMargin(false);
-		emailTemplateSection.setMargin(false);
+		documentTemplateSection.setPadding(false);
+		emailTemplateSection.setPadding(false);
 
 		gridLayout = new VerticalLayout(documentTemplateSection, emailTemplateSection);
 
-		gridLayout.setWidth(100, Unit.PERCENTAGE);
+		gridLayout.setWidthFull();
 		gridLayout.setMargin(new MarginInfo(true, false, true, false));
 		gridLayout.setSpacing(true);
-		gridLayout.setStyleName("crud-main-layout");
+		gridLayout.setClassName("crud-main-layout");
 
 		getContent().addComponent(gridLayout, SURVEY_DOCUMENT_SECTION);
 

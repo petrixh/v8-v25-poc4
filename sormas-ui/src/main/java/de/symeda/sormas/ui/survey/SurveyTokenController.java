@@ -15,9 +15,9 @@
 
 package de.symeda.sormas.ui.survey;
 
-import com.vaadin.navigator.Navigator;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.ui.Notification;
+import de.symeda.sormas.ui.navigation.Navigator;
+import com.vaadin.flow.component.Unit;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -117,7 +117,7 @@ public class SurveyTokenController {
 
 	private void saveSurveyToken(SurveyTokenDto surveyToken) {
 		FacadeProvider.getSurveyTokenFacade().save(surveyToken);
-		Notification.show(I18nProperties.getString(Strings.messageSurveyTokenSaved), Notification.Type.WARNING_MESSAGE);
+		NotificationHelper.show(I18nProperties.getString(Strings.messageSurveyTokenSaved), NotificationHelper.Type.WARNING_MESSAGE);
 		SormasUI.refreshView();
 	}
 }

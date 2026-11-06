@@ -26,19 +26,19 @@ import javax.naming.CannotProceedException;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.server.Sizeable;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.shared.Registration;
-import com.vaadin.shared.ui.ContentMode;
+import de.symeda.sormas.ui.utils.ContentMode;
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -125,7 +125,7 @@ public class SelfReportProcessingFLow extends AbstractSelfReportProcessingFlow {
 		boolean isNewPerson,
 		SelfReportDto selfReport,
 		HandlerCallback<EntityAndOptions<CaseDataDto>> callback) {
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 
 		CommitDiscardWrapperComponent<CaseCreateForm> caseCreateComponent =
 			ControllerProvider.getCaseController().getCaseCreateComponent(null, null, null, null, null, true, true);
@@ -156,7 +156,7 @@ public class SelfReportProcessingFLow extends AbstractSelfReportProcessingFlow {
 		boolean isNewPerson,
 		SelfReportDto selfReport,
 		HandlerCallback<EntityAndOptions<ContactDto>> callback) {
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 
 		CommitDiscardWrapperComponent<ContactCreateForm> contactCreateComponent =
 			ControllerProvider.getContactController().getContactCreateComponent(null, false, null, true);
@@ -183,7 +183,7 @@ public class SelfReportProcessingFLow extends AbstractSelfReportProcessingFlow {
 	protected CompletionStage<Boolean> confirmLinkContactsToCase() {
 		return VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getString(Strings.headingSelfReportContactsWithCaseReferenceFound),
-			new Label(I18nProperties.getString(Strings.confirmationSelfReportLinkContactsByCaseReference), ContentMode.HTML),
+			new Span(I18nProperties.getString(Strings.confirmationSelfReportLinkContactsByCaseReference), ContentMode.HTML),
 			I18nProperties.getCaption(Captions.actionYes),
 			I18nProperties.getCaption(Captions.actionNo));
 	}
@@ -192,7 +192,7 @@ public class SelfReportProcessingFLow extends AbstractSelfReportProcessingFlow {
 	protected CompletionStage<Boolean> confirmContinueWithoutProcessingReferencedCaseReport() {
 		return VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getString(Strings.headingSelfReportCaseReportWithSameReferenceFound),
-			new Label(I18nProperties.getString(Strings.confirmationSelfReportCaseReportWithSameReferenceFound), ContentMode.HTML),
+			new Span(I18nProperties.getString(Strings.confirmationSelfReportCaseReportWithSameReferenceFound), ContentMode.HTML),
 			I18nProperties.getCaption(Captions.actionYes),
 			I18nProperties.getCaption(Captions.actionNo));
 	}
@@ -201,7 +201,7 @@ public class SelfReportProcessingFLow extends AbstractSelfReportProcessingFlow {
 	protected CompletionStage<Boolean> confirmLinkContactToCaseByReferenceNumber() {
 		return VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getString(Strings.headingSelfReportCaseWithSameReferenceNumberFound),
-			new Label(I18nProperties.getString(Strings.confirmationSelfReportLinkContactToCaseWithSameReferenceNumber), ContentMode.HTML),
+			new Span(I18nProperties.getString(Strings.confirmationSelfReportLinkContactToCaseWithSameReferenceNumber), ContentMode.HTML),
 			I18nProperties.getCaption(Captions.actionYes),
 			I18nProperties.getCaption(Captions.actionNo));
 	}
@@ -209,18 +209,18 @@ public class SelfReportProcessingFLow extends AbstractSelfReportProcessingFlow {
 	public static void showFormWithSelfReport(
 		SelfReportDto selfReport,
 		CommitDiscardWrapperComponent<? extends Component> editComponent,
-		Window window,
+		Dialog window,
 		String heading,
 		boolean discardOnClose,
 		String saveAndOpenCaptionTag,
 		Consumer<Boolean> commitHandler) {
 
 		addProcessedInMeantimeCheck(editComponent, selfReport);
-		editComponent.addStyleName(CssStyles.VSPACE_TOP_3);
+		editComponent.addClassName(CssStyles.VSPACE_TOP_3);
 
 		// add save and open button
 		HorizontalLayout buttonsPanel = editComponent.getButtonsPanel();
-		buttonsPanel.addComponent(
+		buttonsPanel.add(
 			createSaveAndOpenButton(editComponent, saveAndOpenCaptionTag, () -> commitHandler.accept(true)),
 			buttonsPanel.getComponentCount() - 1);
 		// add the commit handler after adding save and open to avoid calling it twice: `createSaveAndOpenButton` copies commit button listeners
@@ -229,15 +229,15 @@ public class SelfReportProcessingFLow extends AbstractSelfReportProcessingFlow {
 		// self report selfReportForm
 		SelfReportDataForm selfReportForm =
 			new SelfReportDataForm(selfReport.getDisease(), selfReport.isInJurisdiction(), selfReport.isPseudonymized());
-		selfReportForm.setWidth(550, Sizeable.Unit.PIXELS);
-		selfReportForm.addStyleName(CssStyles.VSPACE_TOP_3);
+		selfReportForm.setWidth(550, Unit.PIXELS);
+		selfReportForm.addClassName(CssStyles.VSPACE_TOP_3);
 
 		// layout
 		HorizontalSplitPanel horizontalSplitPanel = new HorizontalSplitPanel();
 		horizontalSplitPanel.setFirstComponent(selfReportForm);
 		horizontalSplitPanel.setSecondComponent(editComponent);
-		horizontalSplitPanel.setSplitPosition(569, Sizeable.Unit.PIXELS); // This is just the position it needs to avoid vertical scroll bars.
-		horizontalSplitPanel.addStyleName("lab-message-processing");
+		horizontalSplitPanel.setSplitPosition(569, Unit.PIXELS); // This is just the position it needs to avoid vertical scroll bars.
+		horizontalSplitPanel.addClassName("lab-message-processing");
 
 		Panel panel = new Panel();
 		panel.setHeightFull();
@@ -250,7 +250,7 @@ public class SelfReportProcessingFLow extends AbstractSelfReportProcessingFlow {
 		window.setHeightFull();
 		window.setContent(layout);
 		window.setCaption(heading);
-		UI.getCurrent().addWindow(window);
+		window.open();
 
 		// set value on self report form
 		selfReportForm.setValue(selfReport);
@@ -285,7 +285,7 @@ public class SelfReportProcessingFLow extends AbstractSelfReportProcessingFlow {
 		saveAndOpenButton.addClickListener(clickEvent -> commitHandler.run());
 		saveAndOpenButton.setCaption(I18nProperties.getCaption(saveAndOpenCaptionTag));
 
-		saveAndOpenButton.setStyleName(editComponent.getCommitButton().getStyleName());
+		saveAndOpenButton.setClassName(editComponent.getCommitButton().getStyleName());
 
 		saveAndOpenButton.setId("saveAndOpenButton");
 
@@ -304,11 +304,11 @@ public class SelfReportProcessingFLow extends AbstractSelfReportProcessingFlow {
 
 	public static void showAlreadyProcessedPopup() {
 		VerticalLayout warningLayout = VaadinUiUtil.createWarningLayout();
-		Window popupWindow = VaadinUiUtil.showPopupWindow(warningLayout);
-		Label infoLabel = new Label(I18nProperties.getValidationError(Validations.selfReportAlreadyProcessedError));
+		Dialog popupWindow = VaadinUiUtil.showPopupWindow(warningLayout);
+		Span infoLabel = new Span(I18nProperties.getValidationError(Validations.selfReportAlreadyProcessedError));
 		CssStyles.style(infoLabel, CssStyles.LABEL_LARGE, CssStyles.LABEL_WHITE_SPACE_NORMAL);
-		warningLayout.addComponent(infoLabel);
+		warningLayout.add(infoLabel);
 		popupWindow.addCloseListener(e -> popupWindow.close());
-		popupWindow.setWidth(400, Sizeable.Unit.PIXELS);
+		popupWindow.setWidth(400, Unit.PIXELS);
 	}
 }

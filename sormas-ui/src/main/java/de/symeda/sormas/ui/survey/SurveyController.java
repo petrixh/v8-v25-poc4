@@ -1,7 +1,7 @@
 package de.symeda.sormas.ui.survey;
 
-import com.vaadin.navigator.Navigator;
-import com.vaadin.ui.Notification;
+import de.symeda.sormas.ui.navigation.Navigator;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -41,7 +41,7 @@ public class SurveyController {
 
 	private static void saveSurvey(SurveyDto survey) {
 		FacadeProvider.getSurveyFacade().save(survey);
-		Notification.show(I18nProperties.getString(Strings.messageSurveySaved), Notification.Type.WARNING_MESSAGE);
+		NotificationHelper.show(I18nProperties.getString(Strings.messageSurveySaved), NotificationHelper.Type.WARNING_MESSAGE);
 		SormasUI.refreshView();
 	}
 
@@ -69,7 +69,7 @@ public class SurveyController {
 				if (!surveyCreateForm.getFieldGroup().isModified()) {
 					SurveyDto dto = surveyCreateForm.getValue();
 					FacadeProvider.getSurveyFacade().save(dto);
-					Notification.show(I18nProperties.getString(Strings.messageSurveySaved), Notification.Type.WARNING_MESSAGE);
+					NotificationHelper.show(I18nProperties.getString(Strings.messageSurveySaved), NotificationHelper.Type.WARNING_MESSAGE);
 
 					navigateToSurvey(dto.getUuid());
 				}

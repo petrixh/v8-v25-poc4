@@ -1,6 +1,6 @@
 package de.symeda.sormas.ui.survey;
 
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.docgeneneration.DocumentTemplateDto;
@@ -31,7 +31,7 @@ public class SurveyEmailTemplateReceiver extends DocumentTemplateReceiver {
 	protected void duplicateTemplateFileResponse(String filename) {
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getString(Strings.headingFileExists),
-			new Label(String.format(I18nProperties.getString(Strings.infoDocumentAlreadyExistsCannotUploadAnotherOne), filename)),
+			new Span(String.format(I18nProperties.getString(Strings.infoDocumentAlreadyExistsCannotUploadAnotherOne), filename)),
 			I18nProperties.getCaption(Captions.actionOkay),
 			null);
 	}

@@ -49,13 +49,13 @@ public class SelfReportDataView extends AbstractSelfReportView implements HasNam
 			ControllerProvider.getSelfReportController().getSelfReportEditComponent(selfReport);
 
 		DetailSubComponentWrapper container = new DetailSubComponentWrapper(() -> editComponent);
-		container.setWidth(100, Unit.PERCENTAGE);
-		container.setMargin(true);
+		container.setWidthFull();
+		container.setPadding(true);
 		setSubComponent(container);
 		container.setEnabled(true);
 
 		LayoutWithSidePanel layout = new LayoutWithSidePanel(editComponent);
-		container.addComponent(layout);
+		container.add(layout);
 
 		EditPermissionType editPermission = FacadeProvider.getSelfReportFacade().getEditPermissionType(selfReport.getUuid());
 		layout.disableIfNecessary(selfReport.isDeleted(), editPermission);

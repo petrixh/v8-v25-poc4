@@ -60,6 +60,7 @@ public class Grid<T> extends com.vaadin.flow.component.grid.Grid<T> {
 
 	public Grid() {
 		super();
+		initSorting();
 	}
 
 	/**
@@ -68,6 +69,14 @@ public class Grid<T> extends com.vaadin.flow.component.grid.Grid<T> {
 	 */
 	public Grid(Class<T> beanType) {
 		super(beanType);
+		initSorting();
+	}
+
+	/**
+	 * Vaadin 7/8: a click on a header sorts by that column, a shift-click adds it as a further sort column.
+	 */
+	private void initSorting() {
+		setMultiSort(true, MultiSortPriority.APPEND, true);
 	}
 
 	@Override

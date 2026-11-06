@@ -36,10 +36,19 @@ public class TreeGrid<T> extends com.vaadin.flow.component.treegrid.TreeGrid<T> 
 
 	public TreeGrid() {
 		super();
+		initSorting();
 	}
 
 	public TreeGrid(Class<T> beanType) {
 		super(beanType);
+		initSorting();
+	}
+
+	/**
+	 * Vaadin 7/8: a click on a header sorts by that column, a shift-click adds it as a further sort column.
+	 */
+	private void initSorting() {
+		setMultiSort(true, MultiSortPriority.APPEND, true);
 	}
 
 	@Override

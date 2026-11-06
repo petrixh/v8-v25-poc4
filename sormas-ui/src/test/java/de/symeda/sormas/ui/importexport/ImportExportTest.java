@@ -38,7 +38,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
 import com.opencsv.exceptions.CsvException;
-import com.vaadin.server.StreamResource;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.caze.CaseClassification;
@@ -125,7 +125,7 @@ public class ImportExportTest extends AbstractUiBeanTest {
 
 		getPersonFacade().save(person);
 
-		StreamResource exportStreamResource =
+		StreamSourceDownloadHandler exportStreamResource =
 			CaseDownloadUtil.createCaseExportResource(new CaseCriteria(), Collections::emptySet, CaseExportType.CASE_SURVEILLANCE, null);
 
 		List<String[]> rows = CSVUtils.createBomCsvReader(exportStreamResource.getStreamSource().getStream()).readAll();
@@ -283,7 +283,7 @@ public class ImportExportTest extends AbstractUiBeanTest {
 
 		getPersonFacade().save(person);
 
-		StreamResource exportStreamResource = ContactDownloadUtil.createContactExportResource(new ContactCriteria(), Collections::emptySet, null);
+		StreamSourceDownloadHandler exportStreamResource = ContactDownloadUtil.createContactExportResource(new ContactCriteria(), Collections::emptySet, null);
 
 		List<String[]> rows = CSVUtils.createBomCsvReader(exportStreamResource.getStreamSource().getStream()).readAll();
 

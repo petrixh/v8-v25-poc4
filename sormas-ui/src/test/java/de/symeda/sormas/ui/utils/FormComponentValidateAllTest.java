@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
-import com.vaadin.v7.data.Validator.InvalidValueException;
 
 /**
  * Unit tests for {@link FormComponent#validateAll(Runnable...)} — the accumulation that lets a single save

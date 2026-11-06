@@ -12,7 +12,6 @@ import java.util.Date;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
-import com.vaadin.server.StreamResource;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -92,7 +91,7 @@ public class DownloadUtilTest extends AbstractUiBeanTest {
 			creator.createVisit(caze.getDisease(), contactPerson3.toReference(), new Date(), VisitStatus.COOPERATIVE, VisitOrigin.USER);
 		}
 
-		StreamResource contactVisitsExport =
+		StreamSourceDownloadHandler contactVisitsExport =
 			DownloadUtil.createVisitsExportStreamResource(new ContactCriteria(), Collections::emptySet, ExportEntityName.CONTACT_FOLLOW_UPS);
 
 		String expectedFileName = DownloadUtil.createFileNameWithCurrentDate(ExportEntityName.CONTACT_FOLLOW_UPS, ".csv");

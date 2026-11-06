@@ -5,17 +5,19 @@ import static de.symeda.sormas.api.report.AggregateReportGroupingLevel.HEALTH_FA
 import static de.symeda.sormas.api.report.AggregateReportGroupingLevel.POINT_OF_ENTRY;
 import static de.symeda.sormas.api.report.AggregateReportGroupingLevel.REGION;
 
-import com.vaadin.ui.ComboBox;
+import com.vaadin.flow.component.combobox.ComboBox;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
+import de.symeda.sormas.api.report.AggregateReportGroupingLevel;
 
-public class AggregateReportGroupingSelector extends ComboBox {
+public class AggregateReportGroupingSelector extends ComboBox<AggregateReportGroupingLevel> {
 
 	public AggregateReportGroupingSelector() {
-		setCaption(I18nProperties.getCaption(Captions.AggregateReport_grouping));
+		setLabel(I18nProperties.getCaption(Captions.AggregateReport_grouping));
 		setItems(REGION, DISTRICT, HEALTH_FACILITY, POINT_OF_ENTRY);
-		setEmptySelectionAllowed(true);
+		// was setEmptySelectionAllowed(true): the empty item is the clear button
+		setClearButtonVisible(true);
 		setValue(REGION);
 	}
 

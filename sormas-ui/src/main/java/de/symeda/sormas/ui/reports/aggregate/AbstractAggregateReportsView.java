@@ -1,7 +1,7 @@
 package de.symeda.sormas.ui.reports.aggregate;
 
-import com.vaadin.navigator.Navigator;
-import com.vaadin.ui.Component;
+import de.symeda.sormas.ui.navigation.Navigator;
+import com.vaadin.flow.component.Component;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.report.AggregateReportCriteria;

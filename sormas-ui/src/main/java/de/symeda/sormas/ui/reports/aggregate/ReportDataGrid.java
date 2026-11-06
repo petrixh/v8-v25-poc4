@@ -1,8 +1,7 @@
 package de.symeda.sormas.ui.reports.aggregate;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.button.Button;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -33,8 +32,8 @@ public class ReportDataGrid extends FilteredGrid<AggregateReportDto, AggregateRe
 		addDefaultColumns();
 		this.editCallback = editCallback;
 
-		for (Column<AggregateReportDto, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.findPrefixCaptionWithDefault(column.getId(), column.getCaption(), AggregateReportDto.I18N_PREFIX));
+		for (Column<AggregateReportDto, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.findPrefixCaptionWithDefault(column.getKey(), column.getCaption(), AggregateReportDto.I18N_PREFIX));
 		}
 
 		setStyleGenerator(aggregateReportDto -> {
@@ -66,14 +65,14 @@ public class ReportDataGrid extends FilteredGrid<AggregateReportDto, AggregateRe
 	}
 
 	protected void addEditColumn() {
-		addComponentColumn(this::createEditButton).setId(EDIT_AGGREGATE_REPORT).setSortable(false);
+		addComponentColumn(this::createEditButton).setKey(EDIT_AGGREGATE_REPORT).setSortable(false);
 	}
 
 	private Button createEditButton(AggregateReportDto aggregateReport) {
 
 		if (!aggregateReport.isDuplicate()) {
-			Button editButton = ButtonHelper.createIconButton(VaadinIcons.EDIT);
-			editButton.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+			Button editButton = ButtonHelper.createIconButton(VaadinIcon.EDIT);
+			CssStyles.style(editButton, CssStyles.BUTTON_BORDERLESS);
 			editButton.addClickListener(clickEvent -> {
 				ControllerProvider.getAggregateReportController()
 					.openEditOrCreateWindow( editCallback, true, aggregateReport);
@@ -85,14 +84,14 @@ public class ReportDataGrid extends FilteredGrid<AggregateReportDto, AggregateRe
 	}
 
 	protected void addDeleteColumn() {
-		addComponentColumn(this::createDeleteButton).setId(DELETE_AGGREGATE_REPORT).setSortable(false);
+		addComponentColumn(this::createDeleteButton).setKey(DELETE_AGGREGATE_REPORT).setSortable(false);
 	}
 
 	private Button createDeleteButton(AggregateReportDto aggregateReport) {
 
 		if (aggregateReport.isDuplicate()) {
-			Button deleteButton = ButtonHelper.createIconButton(VaadinIcons.TRASH);
-			deleteButton.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+			Button deleteButton = ButtonHelper.createIconButton(VaadinIcon.TRASH);
+			CssStyles.style(deleteButton, CssStyles.BUTTON_BORDERLESS);
 			deleteButton.addClickListener(clickEvent -> {
 				ControllerProvider.getAggregateReportController().deleteAggregateReport(aggregateReport.getUuid(), this::reload);
 			});

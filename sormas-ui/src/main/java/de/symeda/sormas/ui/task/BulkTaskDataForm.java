@@ -29,11 +29,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.utils.ContentMode;
+import com.vaadin.flow.component.html.Span;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -56,6 +57,8 @@ import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class BulkTaskDataForm extends AbstractEditForm<TaskDto> {
 
@@ -104,7 +107,7 @@ public class BulkTaskDataForm extends AbstractEditForm<TaskDto> {
 		status.setEnabled(false);
 		FieldHelper.setRequiredWhen(getFieldGroup(), taskStatusCheckbox, Arrays.asList(TaskBulkEditData.TASK_STATUS), Arrays.asList(true));
 		taskStatusCheckbox.addValueChangeListener(e -> {
-			status.setEnabled((boolean) e.getProperty().getValue());
+			status.setEnabled((boolean) e.getValue());
 		});
 
 		priorityCheckbox = new CheckBox(I18nProperties.getCaption(Captions.bulkTaskPriority));
@@ -112,22 +115,22 @@ public class BulkTaskDataForm extends AbstractEditForm<TaskDto> {
 		NullableOptionGroup priority = addField(TaskBulkEditData.PRIORITY, NullableOptionGroup.class);
 		priority.setEnabled(false);
 		FieldHelper.setRequiredWhen(getFieldGroup(), priorityCheckbox, Arrays.asList(TaskBulkEditData.PRIORITY), Arrays.asList(true));
-		priorityCheckbox.addValueChangeListener(e -> priority.setEnabled((boolean) e.getProperty().getValue()));
+		priorityCheckbox.addValueChangeListener(e -> priority.setEnabled((boolean) e.getValue()));
 
 		assigneeCheckbox = new CheckBox(I18nProperties.getCaption(Captions.bulkTaskAssignee));
 		getContent().addComponent(assigneeCheckbox, ASSIGNEE_CHECKBOX);
 		ComboBox assignee = addField(TaskBulkEditData.ASSIGNEE_USER, ComboBox.class);
 		assignee.setEnabled(false);
 
-		Label assigneeHint = new Label();
+		Span assigneeHint = new Span();
 		getContent().addComponent(assigneeHint, ASSIGNEE_HINT);
 		CssStyles.style(assigneeHint, VSPACE_4, VSPACE_TOP_5);
 		assigneeHint.setVisible(false);
 		assigneeHint.setWidthFull();
-		assigneeHint.setContentMode(ContentMode.HTML);
+		// was setContentMode(ContentMode.HTML): the text is set with VaadinUiUtil.setLabelValue(.., ContentMode.HTML)
 
 		assigneeCheckbox.addValueChangeListener(e -> {
-			boolean changeAssignee = (boolean) e.getProperty().getValue();
+			boolean changeAssignee = (boolean) e.getValue();
 			assignee.setEnabled(changeAssignee);
 			assignee.setRequired(changeAssignee);
 
@@ -174,14 +177,16 @@ public class BulkTaskDataForm extends AbstractEditForm<TaskDto> {
 			}
 
 			if (changeAssignee && lowestCommonJurisdictionLevel.getOrder() < 5 && lowestCommonJurisdictionLevel != JurisdictionLevel.POINT_OF_ENTRY) {
-				assigneeHint.setValue(
-					VaadinIcons.INFO_CIRCLE.getHtml() + " "
+				VaadinUiUtil.setLabelValue(
+					assigneeHint,
+					HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " "
 						+ String.format(
 							I18nProperties.getString(Strings.infoTasksWithMultipleJurisdictionsSelected),
-							lowestCommonJurisdictionLevel.toString()));
+							lowestCommonJurisdictionLevel.toString()),
+					ContentMode.HTML);
 				assigneeHint.setVisible(true);
 			} else {
-				assigneeHint.setValue("");
+				VaadinUiUtil.setLabelValue(assigneeHint, "", ContentMode.HTML);
 				assigneeHint.setVisible(false);
 			}
 		});

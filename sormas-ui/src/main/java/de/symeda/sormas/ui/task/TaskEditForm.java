@@ -30,14 +30,13 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.AbstractSelect.ItemCaptionMode;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextArea;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import de.symeda.sormas.ui.utils.ContentMode;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextArea;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -65,6 +64,7 @@ import de.symeda.sormas.ui.utils.NullableOptionGroup;
 import de.symeda.sormas.ui.utils.TaskStatusValidator;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.MultiSelect;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 @SuppressWarnings("deprecation")
 public class TaskEditForm extends AbstractEditForm<TaskDto> {
@@ -138,10 +138,10 @@ public class TaskEditForm extends AbstractEditForm<TaskDto> {
 		taskContext.addValueChangeListener(event -> updateByTaskContext());
 
 		ComboBox taskTypeField = addField(TaskDto.TASK_TYPE, ComboBox.class);
-		taskTypeField.setItemCaptionMode(ItemCaptionMode.ID_TOSTRING);
+		// was setItemCaptionMode(ID_TOSTRING): items without an explicit caption show toString()
 		taskTypeField.setImmediate(true);
 		taskTypeField.addValueChangeListener(e -> {
-			TaskType taskType = (TaskType) e.getProperty().getValue();
+			TaskType taskType = (TaskType) e.getValue();
 			if (taskType != null) {
 				setRequired(taskType.isCreatorCommentRequired(), TaskDto.CREATOR_COMMENT);
 			}
@@ -152,7 +152,7 @@ public class TaskEditForm extends AbstractEditForm<TaskDto> {
 			updateObserversList();
 			updateByCreatingAndAssignee();
 			checkIfUserEmailOrPhoneIsProvided(
-				(UserReferenceDto) e.getProperty().getValue(),
+				(UserReferenceDto) e.getValue(),
 				Strings.infoAssigneeMissingEmail,
 				Strings.infoAssigneeMissingEmailOrPhoneNumber,
 				ASSIGNEE_MISSING_INFO);
@@ -170,7 +170,7 @@ public class TaskEditForm extends AbstractEditForm<TaskDto> {
 
 		MultiSelect<UserReferenceDto> observerUsers = addField(TaskDto.OBSERVER_USERS, MultiSelect.class);
 		observerUsers.addValueChangeListener(e -> {
-			Collection<UserReferenceDto> userReferences = (Collection<UserReferenceDto>) e.getProperty().getValue();
+			Collection<UserReferenceDto> userReferences = (Collection<UserReferenceDto>) e.getValue();
 			// to avoid NPE
 			userReferences = userReferences == null ? Collections.emptyList() : userReferences;
 			for (UserReferenceDto userReference : userReferences) {
@@ -201,9 +201,11 @@ public class TaskEditForm extends AbstractEditForm<TaskDto> {
 
 				if (!editedFromTaskGrid) {
 					final HorizontalLayout saveInfoLayout = new HorizontalLayout(
-						new Label(VaadinIcons.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoSaveOfTask), ContentMode.HTML));
+						VaadinUiUtil.createLabel(
+							HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " " + I18nProperties.getString(Strings.infoSaveOfTask),
+							ContentMode.HTML));
 					saveInfoLayout.setSpacing(true);
-					saveInfoLayout.setMargin(new MarginInfo(true, false, true, false));
+					// was a top and bottom margin (MarginInfo); spacing details belong to the theme work
 					getContent().addComponent(saveInfoLayout, SAVE_INFO);
 				}
 			}
@@ -282,7 +284,7 @@ public class TaskEditForm extends AbstractEditForm<TaskDto> {
 		// As we removed everything from observers field, let's apply again its value
 		Set<UserReferenceDto> filteredObservers =
 			selectedObservers.stream().filter(userReferenceDto -> !userReferenceDto.equals(assigneeField.getValue())).collect(Collectors.toSet());
-		observersField.setValue(filteredObservers, true);
+		observersField.setValue(filteredObservers);
 	}
 
 	private void checkIfUserEmailOrPhoneIsProvided(
@@ -311,12 +313,12 @@ public class TaskEditForm extends AbstractEditForm<TaskDto> {
 	}
 
 	private HorizontalLayout getMissingInfoComponent(String caption) {
-		Label assigneeMissingInfoLabel = new Label(VaadinIcons.INFO_CIRCLE.getHtml() + " " + caption, ContentMode.HTML);
+		Span assigneeMissingInfoLabel = VaadinUiUtil.createLabel(HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " " + caption, ContentMode.HTML);
 		assigneeMissingInfoLabel.setWidthFull();
 
 		final HorizontalLayout assigneeMissingInfo = new HorizontalLayout(assigneeMissingInfoLabel);
 		assigneeMissingInfo.setSpacing(true);
-		assigneeMissingInfo.setMargin(new MarginInfo(false, false, true, false));
+		// was a bottom-only margin (MarginInfo); spacing details belong to the theme work
 		assigneeMissingInfo.setWidthFull();
 
 		return assigneeMissingInfo;

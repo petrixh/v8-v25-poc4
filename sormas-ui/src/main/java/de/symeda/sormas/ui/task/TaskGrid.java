@@ -19,10 +19,10 @@ package de.symeda.sormas.ui.task;
 
 import java.util.Date;
 
-import com.vaadin.data.provider.DataProviderListener;
-import com.vaadin.ui.renderers.DateRenderer;
-import com.vaadin.ui.renderers.HtmlRenderer;
-import com.vaadin.ui.renderers.TextRenderer;
+import com.vaadin.flow.data.provider.DataProviderListener;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
@@ -155,8 +155,8 @@ public class TaskGrid extends FilteredGrid<TaskIndexDto, TaskCriteria> {
 			return null;
 		});
 
-		for (Column<?, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(TaskIndexDto.I18N_PREFIX, column.getId(), column.getCaption()));
+		for (Column<?, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(TaskIndexDto.I18N_PREFIX, column.getKey(), column.getCaption()));
 		}
 
 		if (UiUtil.enabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {
@@ -173,7 +173,7 @@ public class TaskGrid extends FilteredGrid<TaskIndexDto, TaskCriteria> {
 	}
 
 	public void reload() {
-		if (getSelectionModel().isUserSelectionAllowed()) {
+		if (isUserSelectionAllowed()) {
 			deselectAll();
 		}
 

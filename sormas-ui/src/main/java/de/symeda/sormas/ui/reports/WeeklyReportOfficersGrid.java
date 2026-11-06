@@ -17,20 +17,19 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.reports;
 
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.v7.data.Item;
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.data.util.GeneratedPropertyContainer;
-import com.vaadin.v7.data.util.PropertyValueGenerator;
-import com.vaadin.v7.event.ItemClickEvent;
-import com.vaadin.v7.event.ItemClickEvent.ItemClickListener;
-import com.vaadin.v7.shared.ui.grid.HeightMode;
-import com.vaadin.v7.ui.Grid;
-import com.vaadin.v7.ui.renderers.HtmlRenderer;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.grid.HeaderRow;
+import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
+import com.vaadin.flow.component.grid.ItemClickEvent;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -39,12 +38,21 @@ import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.infrastructure.region.RegionReferenceDto;
 import de.symeda.sormas.api.report.WeeklyReportOfficerSummaryDto;
 import de.symeda.sormas.api.utils.EpiWeek;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.PercentageRenderer;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
+import de.symeda.sormas.ui.utils.grid.renderers.ConvertingHtmlRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
+/**
+ * Was a Vaadin 7 container grid; the items are now set with {@link #setItems}.
+ */
 @SuppressWarnings("serial")
-public class WeeklyReportOfficersGrid extends Grid implements ItemClickListener {
+public class WeeklyReportOfficersGrid extends Grid<WeeklyReportOfficerSummaryDto> {
 
 	private static final String VIEW_DETAILS_BTN_ID = "viewDetails";
 
@@ -53,58 +61,40 @@ public class WeeklyReportOfficersGrid extends Grid implements ItemClickListener 
 	private int week;
 	private int year;
 
-	private final class WeeklyReportGridCellStyleGenerator implements CellStyleGenerator {
-
-		@Override
-		public String getStyle(CellReference cell) {
-			String css;
-			if (WeeklyReportOfficerSummaryDto.INFORMANTS.equals(cell.getPropertyId())
-				|| WeeklyReportOfficerSummaryDto.INFORMANT_REPORTS.equals(cell.getPropertyId())
-				|| WeeklyReportOfficerSummaryDto.INFORMANT_REPORT_PERCENTAGE.equals(cell.getPropertyId())
-				|| WeeklyReportOfficerSummaryDto.INFORMANT_ZERO_REPORTS.equals(cell.getPropertyId())) {
-				css = CssStyles.GRID_CELL_ODD;
-			} else {
-				css = "";
-			}
-
-			if (WeeklyReportOfficerSummaryDto.INFORMANT_REPORT_PERCENTAGE.equals(cell.getPropertyId())) {
-				Integer reportPercentage = (Integer) cell.getProperty().getValue();
-				if (reportPercentage >= 90) {
-					css += " " + CssStyles.GRID_CELL_PRIORITY_LOW;
-				} else if (reportPercentage >= 60) {
-					css += " " + CssStyles.GRID_CELL_PRIORITY_NORMAL;
-				} else {
-					css += " " + CssStyles.GRID_CELL_PRIORITY_HIGH;
-				}
-			}
-			return css;
+	/**
+	 * Was the V7 cell style generator: the informant columns are shaded, the percentage is coloured by its value.
+	 */
+	private static String getCellStyle(String columnId, WeeklyReportOfficerSummaryDto summary) {
+		String css;
+		if (WeeklyReportOfficerSummaryDto.INFORMANTS.equals(columnId)
+			|| WeeklyReportOfficerSummaryDto.INFORMANT_REPORTS.equals(columnId)
+			|| WeeklyReportOfficerSummaryDto.INFORMANT_REPORT_PERCENTAGE.equals(columnId)
+			|| WeeklyReportOfficerSummaryDto.INFORMANT_ZERO_REPORTS.equals(columnId)) {
+			css = CssStyles.GRID_CELL_ODD;
+		} else {
+			css = "";
 		}
+
+		if (WeeklyReportOfficerSummaryDto.INFORMANT_REPORT_PERCENTAGE.equals(columnId)) {
+			Integer reportPercentage = summary.getInformantReportPercentage();
+			if (reportPercentage >= 90) {
+				css += " " + CssStyles.GRID_CELL_PRIORITY_LOW;
+			} else if (reportPercentage >= 60) {
+				css += " " + CssStyles.GRID_CELL_PRIORITY_NORMAL;
+			} else {
+				css += " " + CssStyles.GRID_CELL_PRIORITY_HIGH;
+			}
+		}
+		return css.trim().isEmpty() ? null : css.trim();
 	}
 
 	public WeeklyReportOfficersGrid() {
+		super(WeeklyReportOfficerSummaryDto.class);
 		setSizeFull();
 
-		BeanItemContainer<WeeklyReportOfficerSummaryDto> container =
-			new BeanItemContainer<WeeklyReportOfficerSummaryDto>(WeeklyReportOfficerSummaryDto.class);
-		GeneratedPropertyContainer generatedContainer = new GeneratedPropertyContainer(container);
-		setContainerDataSource(generatedContainer);
-
-		generatedContainer.addGeneratedProperty(VIEW_DETAILS_BTN_ID, new PropertyValueGenerator<String>() {
-
-			@Override
-			public String getValue(Item item, Object itemId, Object propertyId) {
-				if (((WeeklyReportOfficerSummaryDto) itemId).getInformants() > 0) {
-					return VaadinIcons.EYE.getHtml();
-				} else {
-					return "";
-				}
-			}
-
-			@Override
-			public Class<String> getType() {
-				return String.class;
-			}
-		});
+		// was a generated container property with the icon's HTML (empty without informants)
+		addColumn(summary -> summary.getInformants() > 0 ? HtmlRenderer.iconHtml(VaadinIcon.EYE) : "", new HtmlRenderer())
+			.setKey(VIEW_DETAILS_BTN_ID);
 
 		setColumns(
 			VIEW_DETAILS_BTN_ID,
@@ -117,7 +107,7 @@ public class WeeklyReportOfficersGrid extends Grid implements ItemClickListener 
 			WeeklyReportOfficerSummaryDto.INFORMANT_REPORT_PERCENTAGE,
 			WeeklyReportOfficerSummaryDto.INFORMANT_ZERO_REPORTS);
 
-		for (Column column : getColumns()) {
+		for (Column<WeeklyReportOfficerSummaryDto, ?> column : getAllColumns()) {
 			if (column.getPropertyId().equals(VIEW_DETAILS_BTN_ID)) {
 				column.setHeaderCaption("");
 			} else {
@@ -127,38 +117,60 @@ public class WeeklyReportOfficersGrid extends Grid implements ItemClickListener 
 			}
 		}
 
-		HeaderRow headerRow = getHeaderRow(0);
-		headerRow.getCell(WeeklyReportOfficerSummaryDto.INFORMANTS).setStyleName(CssStyles.GRID_CELL_ODD);
-		headerRow.getCell(WeeklyReportOfficerSummaryDto.INFORMANT_REPORTS).setStyleName(CssStyles.GRID_CELL_ODD);
-		headerRow.getCell(WeeklyReportOfficerSummaryDto.INFORMANT_REPORT_PERCENTAGE).setStyleName(CssStyles.GRID_CELL_ODD);
-		headerRow.getCell(WeeklyReportOfficerSummaryDto.INFORMANT_ZERO_REPORTS).setStyleName(CssStyles.GRID_CELL_ODD);
+		// was setStyleName on the header cells: part names in Flow
+		HeaderRow headerRow = getDefaultHeaderRow();
+		headerRow.getCell(getColumn(WeeklyReportOfficerSummaryDto.INFORMANTS)).setPartName(CssStyles.GRID_CELL_ODD);
+		headerRow.getCell(getColumn(WeeklyReportOfficerSummaryDto.INFORMANT_REPORTS)).setPartName(CssStyles.GRID_CELL_ODD);
+		headerRow.getCell(getColumn(WeeklyReportOfficerSummaryDto.INFORMANT_REPORT_PERCENTAGE)).setPartName(CssStyles.GRID_CELL_ODD);
+		headerRow.getCell(getColumn(WeeklyReportOfficerSummaryDto.INFORMANT_ZERO_REPORTS)).setPartName(CssStyles.GRID_CELL_ODD);
 
 		HeaderRow preHeaderRow = prependHeaderRow();
 		HeaderCell preHeaderCell = preHeaderRow.join(
-			WeeklyReportOfficerSummaryDto.INFORMANTS,
-			WeeklyReportOfficerSummaryDto.INFORMANT_REPORTS,
-			WeeklyReportOfficerSummaryDto.INFORMANT_REPORT_PERCENTAGE,
-			WeeklyReportOfficerSummaryDto.INFORMANT_ZERO_REPORTS);
-		preHeaderCell.setHtml(I18nProperties.getCaption(Captions.weeklyReportOfficerInformants));
-		preHeaderCell.setStyleName(CssStyles.GRID_CELL_ODD);
+			getColumn(WeeklyReportOfficerSummaryDto.INFORMANTS),
+			getColumn(WeeklyReportOfficerSummaryDto.INFORMANT_REPORTS),
+			getColumn(WeeklyReportOfficerSummaryDto.INFORMANT_REPORT_PERCENTAGE),
+			getColumn(WeeklyReportOfficerSummaryDto.INFORMANT_ZERO_REPORTS));
+		// was setHtml
+		preHeaderCell.setComponent(VaadinUiUtil.createLabel(I18nProperties.getCaption(Captions.weeklyReportOfficerInformants), ContentMode.HTML));
+		preHeaderCell.setPartName(CssStyles.GRID_CELL_ODD);
 
-		getColumn(VIEW_DETAILS_BTN_ID).setRenderer(new HtmlRenderer());
 		getColumn(VIEW_DETAILS_BTN_ID).setWidth(60);
 
-		getColumn(WeeklyReportOfficerSummaryDto.OFFICER_REPORT_DATE)
-			.setRenderer(new HtmlRenderer(I18nProperties.getCaption(Captions.weeklyReportNoReport)));
+		setV7ColumnRenderers();
 		getColumn(WeeklyReportOfficerSummaryDto.INFORMANT_REPORT_PERCENTAGE).setRenderer(new PercentageRenderer());
 
-		setCellStyleGenerator(new WeeklyReportGridCellStyleGenerator());
+		for (Column<WeeklyReportOfficerSummaryDto, ?> column : getAllColumns()) {
+			String columnId = column.getKey();
+			column.setStyleGenerator(summary -> getCellStyle(columnId, summary));
+		}
 
 		setSelectionMode(SelectionMode.NONE);
-		addItemClickListener(this);
+		addItemClickListener(this::itemClick);
 	}
 
+	/**
+	 * The Vaadin 7 grid showed the property values through the session's default converters: references as their
+	 * caption, numbers in the UI locale, the report date in the medium date-time format of the UI locale (V7
+	 * {@code StringToDateConverter}) inside the HTML renderer.
+	 */
 	@SuppressWarnings("unchecked")
-	private BeanItemContainer<WeeklyReportOfficerSummaryDto> getContainer() {
-		GeneratedPropertyContainer container = (GeneratedPropertyContainer) super.getContainerDataSource();
-		return (BeanItemContainer<WeeklyReportOfficerSummaryDto>) container.getWrappedContainer();
+	private void setV7ColumnRenderers() {
+		for (String columnId : new String[] {
+			WeeklyReportOfficerSummaryDto.OFFICER,
+			WeeklyReportOfficerSummaryDto.DISTRICT,
+			WeeklyReportOfficerSummaryDto.TOTAL_CASE_COUNT,
+			WeeklyReportOfficerSummaryDto.INFORMANTS,
+			WeeklyReportOfficerSummaryDto.INFORMANT_REPORTS,
+			WeeklyReportOfficerSummaryDto.INFORMANT_ZERO_REPORTS }) {
+			((Column<WeeklyReportOfficerSummaryDto, Object>) getColumn(columnId)).setRenderer(ConvertingHtmlRenderer::toPresentation, new TextRenderer());
+		}
+
+		UI ui = UI.getCurrent();
+		Locale locale = ui != null ? ui.getLocale() : Locale.getDefault();
+		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale);
+		((Column<WeeklyReportOfficerSummaryDto, Date>) getColumn(WeeklyReportOfficerSummaryDto.OFFICER_REPORT_DATE)).setRenderer(
+			date -> date != null ? dateFormat.format(date) : null,
+			new HtmlRenderer(I18nProperties.getCaption(Captions.weeklyReportNoReport)));
 	}
 
 	public void reload(RegionReferenceDto region, int year, int week) {
@@ -167,29 +179,27 @@ public class WeeklyReportOfficersGrid extends Grid implements ItemClickListener 
 		this.week = week;
 		this.year = year;
 
-		getContainer().removeAllItems();
 		EpiWeek epiWeek = new EpiWeek(year, week);
 
 		List<WeeklyReportOfficerSummaryDto> summaryDtos = FacadeProvider.getWeeklyReportFacade().getSummariesPerOfficer(region, epiWeek);
-		summaryDtos.forEach(s -> getContainer().addItem(s));
+		setItems(summaryDtos);
 	}
 
-	@Override
-	public void itemClick(ItemClickEvent event) {
-		if (event.getPropertyId().equals(VIEW_DETAILS_BTN_ID)) {
-			WeeklyReportOfficerSummaryDto summaryDto = (WeeklyReportOfficerSummaryDto) event.getItemId();
+	public void itemClick(ItemClickEvent<WeeklyReportOfficerSummaryDto> event) {
+		if (event.getColumn() != null && VIEW_DETAILS_BTN_ID.equals(event.getColumn().getKey())) {
+			WeeklyReportOfficerSummaryDto summaryDto = event.getItem();
 			if (summaryDto.getInformants() > 0) {
 				VerticalLayout layout = new VerticalLayout();
 				layout.setSizeUndefined();
-				layout.setMargin(true);
-				Window window = VaadinUiUtil.showPopupWindow(layout);
+				layout.setPadding(true);
+				Dialog window = VaadinUiUtil.showPopupWindow(layout);
 
 				WeeklyReportInformantsGrid grid = new WeeklyReportInformantsGrid(summaryDto.getOfficer(), new EpiWeek(year, week));
 				grid.setWidth(960, Unit.PIXELS);
 				grid.setHeightMode(HeightMode.ROW);
 				grid.setHeightUndefined();
-				layout.addComponent(grid);
-				window.setCaption(
+				layout.add(grid);
+				window.setHeaderTitle(
 					String.format(I18nProperties.getCaption(Captions.weeklyReportsInDistrict), summaryDto.getDistrict().buildCaption()) + " - "
 						+ I18nProperties.getString(Strings.epiWeek) + " " + week + "/" + year);
 			}

@@ -62,6 +62,13 @@ public class ComboBox extends com.vaadin.flow.component.combobox.ComboBox<Object
 		setItemLabelGenerator(selectItems::getCaption);
 		setClearButtonVisible(selectItems.isNullSelectionAllowed());
 		selectItems.setOnNullSelectionAllowedChange(() -> setClearButtonVisible(selectItems.isNullSelectionAllowed()));
+		// V7 showed the value with its current item caption; Flow sends the caption only when the value is set, so a
+		// caption set afterwards (or an item added after the value) would not show
+		selectItems.setOnRefresh(() -> {
+			if (getValue() != null) {
+				refreshValue();
+			}
+		});
 		addCustomValueSetListener(e -> {
 			if (!isNewItemsAllowed()) {
 				return;

@@ -16,6 +16,7 @@ package de.symeda.sormas.ui.utils.fields;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -125,6 +126,10 @@ public class SelectItemsValueTest {
 			}
 
 			assertEquals(user("U2"), assignee.getValue(), buffered ? "buffered" : "unbuffered");
+			// the client shows the value with the caption set after it (V7: the item caption of the value)
+			assignee.getSelectItems().flushRefresh();
+			String selectedItem = String.valueOf(assignee.getElement().getPropertyRaw("selectedItem"));
+			assertTrue(selectedItem.contains("FirstU2 LASTU2 (0)"), selectedItem);
 			assertEquals(user("U2"), task.getAssigneeUser());
 			group.commit();
 			assertEquals(user("U2"), task.getAssigneeUser());

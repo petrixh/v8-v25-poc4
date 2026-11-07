@@ -218,7 +218,8 @@ public class SelectItems implements Serializable {
 	}
 
 	/**
-	 * Run after each full data provider refresh (Flow's radio button and check box groups clear their selection on it).
+	 * Run after each data provider refresh, full or of single items (Flow's radio button and check box groups clear their
+	 * selection on a full refresh; Flow's combo box keeps showing the old caption of its value).
 	 */
 	public void setOnRefresh(Runnable onRefresh) {
 		this.onRefresh = onRefresh;
@@ -278,6 +279,9 @@ public class SelectItems implements Serializable {
 			List<Object> items = new ArrayList<>(refreshItemsPending);
 			refreshItemsPending.clear();
 			items.forEach(dataProvider::refreshItem);
+			if (onRefresh != null) {
+				onRefresh.run();
+			}
 		}
 	}
 }

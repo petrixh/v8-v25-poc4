@@ -83,7 +83,7 @@ if [ "$APP_ENV_DEPLOY" = 0 ]; then
 else
   # The env needs the app, not its tests: they are neither compiled nor run here (CI does both)
   profiles=(); [ "$APP_ENV_MODE" = prod ] || profiles=(-Pdev)
-  log "build: mvn clean install -Dmaven.test.skip=true ${profiles[*]} (JDK 21 container; log: $LOG)"
+  log "build: mvn clean install -Dmaven.test.skip=true${profiles[*]:+ ${profiles[*]}} (JDK 21 container; log: $LOG)"
   mvn_run build clean install -Dmaven.test.skip=true "${profiles[@]}" >> "$LOG" 2>&1 || die "maven build failed (log: $LOG)"
   for f in sormas-ear/target/sormas-ear.ear sormas-ui/target/sormas-ui.war sormas-rest/target/sormas-rest.war; do
     [ -s "$SRC/$f" ] || die "missing $f after the build"

@@ -937,3 +937,102 @@ vaadin-grid::part(follow-up-not-symptomatic-external) { background-color: var(--
 vaadin-grid::part(follow-up-unavailable-external) { background-color: #6277cc; }
 vaadin-grid::part(follow-up-uncooperative-external) { background-color: #ff19ff; }
 vaadin-grid::part(follow-up-not-performed-external) { background-color: var(--sormas-minor-color); }
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 12. Option groups and small items. Option groups (utils.fields.OptionGroup and NullableOptionGroup, a
+ *     vaadin-custom-field around a vaadin-radio-group or vaadin-checkbox-group, and the Flow groups converted from
+ *     Vaadin 8 RadioButtonGroup and CheckBoxGroup) get the Vaadin 8 orientation and caption placement of the style
+ *     names the code sets (Valo _optiongroup.scss, components/optiongroup.scss). The Lumo radio button and check box
+ *     shapes stay (2a-01). Outbreak overview cells drawn as Valo buttons (OutbreakOverviewGrid).
+ * ------------------------------------------------------------------------------------------------------------- */
+
+/* Vaadin 8 lists the options one per line; the style name "horizontal" (SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL,
+   ValoTheme.OPTIONGROUP_HORIZONTAL) puts them side by side. The style name is on the group itself or, for the shim's
+   option groups, on the vaadin-custom-field around it. Lumo lays groups out side by side by default. */
+:is(vaadin-radio-group, vaadin-checkbox-group)::part(group-field) {
+  flex-direction: column;
+}
+
+:is(vaadin-radio-group, vaadin-checkbox-group):is(.horizontal, .checkboxes-horizontal)::part(group-field),
+vaadin-custom-field:is(.horizontal, .checkboxes-horizontal) > :is(vaadin-radio-group, vaadin-checkbox-group)::part(group-field) {
+  flex-direction: row;
+}
+
+/* CssStyles.OPTIONGROUP_CHECKBOXES_HORIZONTAL (optiongroup.scss): side by side with 10px after each option */
+:is(vaadin-checkbox-group.checkboxes-horizontal, vaadin-custom-field.checkboxes-horizontal > vaadin-checkbox-group) > vaadin-checkbox {
+  padding-right: 10px;
+}
+
+/* CssStyles.OPTIONGROUP_CAPTION_INLINE (optiongroup.scss .v-caption-caption-inline; set on every Yes/No/Unknown and symptom
+   field by SormasFieldGroupFieldFactory): the caption on the left in the options' row, not upper case, 12px; the options at
+   the right end of the field. Vaadin 8 floated the caption; here the options come first and the caption is moved up into
+   their row (35px: the Lumo group's height), so a caption that wraps makes the field taller as the float did. The caption
+   keeps clear of the options (Vaadin 8: 160px for the narrower Valo buttons; three Lumo options take up to about 205px). */
+vaadin-custom-field.caption-inline {
+  padding-top: 0;
+}
+
+vaadin-custom-field.caption-inline::part(input-fields) {
+  order: -1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+vaadin-custom-field.caption-inline::part(label) {
+  margin: -35px 210px 0 0;
+  padding: 8px 0 0 0;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16.5px;
+  text-transform: none;
+  white-space: normal;
+  text-align: left;
+}
+
+/* CssStyles.OPTIONGROUP_GRID_LAYOUT (optiongroup.scss): two options per row, each half the width */
+:is(vaadin-radio-group.grid-layout, vaadin-checkbox-group.grid-layout,
+    vaadin-custom-field.grid-layout > :is(vaadin-radio-group, vaadin-checkbox-group)) > :is(vaadin-radio-button, vaadin-checkbox) {
+  box-sizing: border-box;
+  width: 50%;
+}
+
+/* CssStyles.OPTIONGROUP_MAX_HEIGHT_150 (optiongroup.scss): the option list scrolls past 150px */
+:is(vaadin-radio-group.max-height-150, vaadin-checkbox-group.max-height-150,
+    vaadin-custom-field.max-height-150 > :is(vaadin-radio-group, vaadin-checkbox-group))::part(group-field) {
+  flex-wrap: nowrap;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+/* Outbreak overview (OutbreakOverviewGrid): the cells are HTML "div.v-button" (CssStyles.buildVaadinStyle), which Valo drew
+   as a button (button.scss, measured on the old app: 32px high, 14px side padding, 2px primary border, 4px radius,
+   12px upper case); critical and warning are filled in the status colour with a 25% darker border */
+vaadin-grid-cell-content > div.v-button {
+  display: inline-block;
+  box-sizing: border-box;
+  height: 32px;
+  padding: 0 14px;
+  border: 2px solid var(--sormas-primary-color);
+  border-radius: 4px;
+  background-color: var(--sormas-background-color);
+  color: var(--sormas-font-color);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 28px;
+  text-align: center;
+  text-transform: uppercase;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+vaadin-grid-cell-content > div.v-button.v-button-critical {
+  border-color: rgb(72, 0, 0);
+  background-color: var(--sormas-critical-color);
+  color: #FFFFFF;
+}
+
+vaadin-grid-cell-content > div.v-button.v-button-warning {
+  border-color: rgb(63, 35, 0);
+  background-color: var(--sormas-warning-color);
+  color: #FFFFFF;
+}

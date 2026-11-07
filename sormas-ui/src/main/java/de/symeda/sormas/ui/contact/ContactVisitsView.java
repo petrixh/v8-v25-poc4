@@ -26,6 +26,7 @@ import com.vaadin.flow.component.grid.GridMultiSelectionModel;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.server.streams.DownloadHandler;
@@ -101,6 +102,8 @@ public class ContactVisitsView extends AbstractContactView {
 				topLayout.add(bulkOperationsDropdown);
 				topLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, bulkOperationsDropdown);
 				topLayout.setFlexGrow(1, bulkOperationsDropdown);
+				// was expand ratio 1 and Alignment.MIDDLE_RIGHT: the dropdown takes the free width, its button sits at the right end
+				bulkOperationsDropdown.addThemeVariants(MenuBarVariant.LUMO_END_ALIGNED);
 			}
 
 			if (UiUtil.permitted(UserRight.VISIT_EXPORT)) {

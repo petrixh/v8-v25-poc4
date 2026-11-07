@@ -59,12 +59,17 @@ public abstract class AbstractInfoLayout<T> extends HorizontalLayout {
 		String contentString = content != null ? content.toString() : "";
 		Span label = new Span(contentString);
 		label.setWidthFull();
+		// Vaadin 8 sized a 100 % wide label in a layout of undefined width (the age / sex row) by its content; in a Flow row
+		// the labels would share the row's width and cut the longer value
+		boolean contentWidth = layout instanceof HorizontalLayout && ((HorizontalLayout) layout).getWidth() == null;
 		if (caption != null) {
 			// Flow components have no caption: the caption goes above the label, as Vaadin 8 rendered it
 			Span captionLabel = new Span(caption);
 			captionLabel.addClassName("v-caption");
 			Div captionedLabel = new Div(captionLabel, new Div(label));
-			captionedLabel.setWidthFull();
+			if (!contentWidth) {
+				captionedLabel.setWidthFull();
+			}
 			layout.add(captionedLabel);
 		} else {
 			layout.add(label);

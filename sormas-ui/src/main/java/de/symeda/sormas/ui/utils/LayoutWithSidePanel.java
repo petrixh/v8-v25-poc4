@@ -59,6 +59,9 @@ public class LayoutWithSidePanel extends HorizontalLayout {
 		}
 		add(sidePanel);
 		setFlexGrow(4, sidePanel);
+		// was a fluid bootstrap row: the edit component and the side panel keep their own heights (no stretch to the taller
+		// one), so the Save / Discard footer of a short form follows the form
+		setAlignItems(Alignment.START);
 	}
 
 	public void addSidePanelComponent(Component component, String loc) {

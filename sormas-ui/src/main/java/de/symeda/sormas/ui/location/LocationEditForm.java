@@ -805,7 +805,7 @@ public class LocationEditForm extends AbstractEditForm<LocationDto> {
 		Span infoLabel = VaadinUiUtil.createLabel(HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE), ContentMode.HTML);
 		infoLabel.setSizeUndefined();
 		// was an HTML description: Flow tooltips are text (the hint has no markup)
-		infoLabel.setTitle(hint);
+		VaadinUiUtil.setDescription(infoLabel, hint);
 		CssStyles.style(infoLabel, CssStyles.LABEL_XLARGE, CssStyles.LABEL_SECONDARY, CssStyles.VSPACE_TOP_3);
 		getContent().addComponent(infoLabel, COUNTRY_HINT_LOC);
 	}

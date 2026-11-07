@@ -20,16 +20,28 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.provider.ListDataProvider;
 
+import de.symeda.sormas.api.utils.HasCaption;
+
 /**
- * Item ids, captions and enabled state of a {@link SelectField}, backed by one {@link ListDataProvider}. After each
- * change the owner refreshes its component and keeps its value if the value is still an item (V7 behaviour).
+ * Item ids, captions and enabled state of a {@link SelectField}, backed by one {@link ListDataProvider}. After a removal
+ * the owner drops the removed items from its value (V7 {@code removeItem} unselected the item, {@code removeAllItems} set
+ * the value to {@code null}). Adding items never changes the value: a value that is not (yet) an item stays, as V7 kept
+ * a bound property's value whatever the container held (forms fill their selects after the bean is read). The data
+ * provider refresh, which makes
+ * Flow reset the client side of the component, is done once per round trip ({@link UI#beforeClientResponse}) however
+ * many items were added, removed or re-captioned (V7 sent the container once per response too).
  */
 public class SelectItems implements Serializable {
 
@@ -39,12 +51,32 @@ public class SelectItems implements Serializable {
 	private final Map<Object, String> captions = new HashMap<>();
 	private final Set<Object> disabled = new HashSet<>();
 	private final ListDataProvider<Object> dataProvider = new ListDataProvider<>(itemIds);
-	private final Runnable onChange;
+	private final Component owner;
+	private final Consumer<Predicate<Object>> onRemove;
 	private boolean nullSelectionAllowed = true;
 	private Runnable onNullSelectionAllowedChange;
+	private Runnable onRefresh;
+	private boolean refreshAllPending;
+	private final Set<Object> refreshItemsPending = new LinkedHashSet<>();
+	private boolean refreshScheduled;
 
-	public SelectItems(Runnable onChange) {
-		this.onChange = onChange;
+	/**
+	 * @param onRemove
+	 *            called after items were removed, with a test that is true for each removed item id (for every id after
+	 *            {@link #removeAll()})
+	 */
+	public SelectItems(Consumer<Predicate<Object>> onRemove) {
+		this(null, onRemove);
+	}
+
+	/**
+	 * @param owner
+	 *            the component showing the items; its data provider refreshes are coalesced once per round trip. Without
+	 *            an owner every change refreshes at once.
+	 */
+	public SelectItems(Component owner, Consumer<Predicate<Object>> onRemove) {
+		this.owner = owner;
+		this.onRemove = onRemove;
 	}
 
 	public ListDataProvider<Object> getDataProvider() {
@@ -56,7 +88,7 @@ public class SelectItems implements Serializable {
 			return false;
 		}
 		itemIds.add(itemId);
-		changed();
+		refreshAll();
 		return true;
 	}
 
@@ -71,7 +103,7 @@ public class SelectItems implements Serializable {
 			}
 		}
 		if (added) {
-			changed();
+			refreshAll();
 		}
 	}
 
@@ -80,7 +112,7 @@ public class SelectItems implements Serializable {
 		captions.remove(itemId);
 		disabled.remove(itemId);
 		if (removed) {
-			changed();
+			removed(itemId::equals);
 		}
 		return removed;
 	}
@@ -90,7 +122,7 @@ public class SelectItems implements Serializable {
 		itemIds.clear();
 		captions.clear();
 		disabled.clear();
-		changed();
+		removed(id -> true);
 		return hadItems;
 	}
 
@@ -98,11 +130,13 @@ public class SelectItems implements Serializable {
 	 * Keeps only the ids the filter accepts (used by subclasses that keep special items such as a placeholder).
 	 */
 	public boolean retainAll(Collection<?> ids) {
+		Set<Object> removedIds = new HashSet<>(itemIds);
 		boolean changed = itemIds.retainAll(ids);
+		removedIds.removeAll(itemIds);
 		captions.keySet().retainAll(ids);
 		disabled.retainAll(ids);
 		if (changed) {
-			changed();
+			removed(removedIds::contains);
 		}
 		return changed;
 	}
@@ -112,7 +146,7 @@ public class SelectItems implements Serializable {
 	 */
 	public void sort(java.util.Comparator<Object> comparator) {
 		itemIds.sort(comparator);
-		dataProvider.refreshAll();
+		refreshAll();
 	}
 
 	public Collection<?> getItemIds() {
@@ -130,19 +164,27 @@ public class SelectItems implements Serializable {
 			captions.put(itemId, caption);
 		}
 		if (itemIds.contains(itemId)) {
-			dataProvider.refreshItem(itemId);
+			refreshItem(itemId);
 		}
 	}
 
 	/**
-	 * Explicit caption, else {@code toString()} (V7 caption mode EXPLICIT_DEFAULTS_ID).
+	 * Explicit caption, else the item id as text (V7 caption mode EXPLICIT_DEFAULTS_ID). V7 converted the id with the
+	 * session converter factory ({@code SormasDefaultConverterFactory}): a {@link HasCaption} (reference DTOs) shows
+	 * {@code buildCaption()}, not its {@code toString()} (class name and uuid); other ids show {@code toString()}.
 	 */
 	public String getCaption(Object itemId) {
 		if (itemId == null) {
 			return "";
 		}
 		String caption = captions.get(itemId);
-		return caption != null ? caption : Objects.toString(itemId, "");
+		if (caption != null) {
+			return caption;
+		}
+		if (itemId instanceof HasCaption) {
+			return Objects.toString(((HasCaption) itemId).buildCaption(), "");
+		}
+		return Objects.toString(itemId, "");
 	}
 
 	public void setEnabled(Object itemId, boolean enabled) {
@@ -152,7 +194,7 @@ public class SelectItems implements Serializable {
 			disabled.add(itemId);
 		}
 		if (itemIds.contains(itemId)) {
-			dataProvider.refreshItem(itemId);
+			refreshItem(itemId);
 		}
 	}
 
@@ -175,10 +217,71 @@ public class SelectItems implements Serializable {
 		this.onNullSelectionAllowedChange = onNullSelectionAllowedChange;
 	}
 
-	private void changed() {
-		dataProvider.refreshAll();
-		if (onChange != null) {
-			onChange.run();
+	/**
+	 * Run after each data provider refresh, full or of single items (Flow's radio button and check box groups clear their
+	 * selection on a full refresh; Flow's combo box keeps showing the old caption of its value).
+	 */
+	public void setOnRefresh(Runnable onRefresh) {
+		this.onRefresh = onRefresh;
+	}
+
+	private void removed(Predicate<Object> wasRemoved) {
+		refreshAll();
+		if (onRemove != null) {
+			onRemove.accept(wasRemoved);
+		}
+	}
+
+	private void refreshAll() {
+		refreshAllPending = true;
+		refreshItemsPending.clear();
+		scheduleRefresh();
+	}
+
+	private void refreshItem(Object itemId) {
+		if (!refreshAllPending) {
+			refreshItemsPending.add(itemId);
+			scheduleRefresh();
+		}
+	}
+
+	/**
+	 * Runs the pending refresh before the next response. Flow keeps the task until the owner is attached, so a form
+	 * built while detached refreshes once when it is shown. Without an owner or a UI (e.g. unit tests outside a
+	 * request) it refreshes at once.
+	 */
+	private void scheduleRefresh() {
+		if (refreshScheduled) {
+			return;
+		}
+		UI ui = owner == null ? null : owner.getUI().orElseGet(UI::getCurrent);
+		if (ui == null) {
+			flushRefresh();
+			return;
+		}
+		refreshScheduled = true;
+		ui.beforeClientResponse(owner, context -> flushRefresh());
+	}
+
+	/**
+	 * Refreshes the data provider now if a change is pending (also called by the owner before it relies on the
+	 * component's item state).
+	 */
+	public void flushRefresh() {
+		refreshScheduled = false;
+		if (refreshAllPending) {
+			refreshAllPending = false;
+			dataProvider.refreshAll();
+			if (onRefresh != null) {
+				onRefresh.run();
+			}
+		} else if (!refreshItemsPending.isEmpty()) {
+			List<Object> items = new ArrayList<>(refreshItemsPending);
+			refreshItemsPending.clear();
+			items.forEach(dataProvider::refreshItem);
+			if (onRefresh != null) {
+				onRefresh.run();
+			}
 		}
 	}
 }

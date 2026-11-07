@@ -65,6 +65,7 @@ public class CampaignFormDataEditForm extends AbstractEditForm<CampaignFormDataD
 	private static final long serialVersionUID = -8974009722689546941L;
 
 	private CampaignFormBuilder campaignFormBuilder;
+	private boolean settingValue;
 
 	public CampaignFormDataEditForm(boolean create) {
 		super(CampaignFormDataDto.class, CampaignFormDataDto.I18N_PREFIX);
@@ -181,6 +182,12 @@ public class CampaignFormDataEditForm extends AbstractEditForm<CampaignFormDataD
 	public CampaignFormDataDto getValue() {
 		CampaignFormDataDto value = super.getValue();
 
+		if (settingValue) {
+			// Flow reads the value for the value change event inside super.setValue, before the campaign form of the
+			// new value is built; Vaadin 8 did not read it there
+			return value;
+		}
+
 		if (campaignFormBuilder == null) {
 			throw new RuntimeException("Campaign form builder has not been initialized");
 		}
@@ -192,7 +199,12 @@ public class CampaignFormDataEditForm extends AbstractEditForm<CampaignFormDataD
 
 	@Override
 	public void setValue(CampaignFormDataDto newFieldValue) {
-		super.setValue(newFieldValue);
+		settingValue = true;
+		try {
+			super.setValue(newFieldValue);
+		} finally {
+			settingValue = false;
+		}
 
 		buildCampaignForm(newFieldValue);
 	}

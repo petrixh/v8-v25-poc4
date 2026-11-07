@@ -48,9 +48,11 @@ Each script reads these variables; the defaults start one copy.
 | `APP_ENV_UI_URL` | `https://localhost:<APP_ENV_PORT>/sormas-ui/` | `ui.url` of the copy: the link target in notification mails (see "Integrations") |
 | `APP_ENV_PWCHECK` | `off` | `on`: the "Security Alert: default password" dialog after a default-user login (`skipDefaultPasswordCheck=false`) |
 | `APP_ENV_SEED` | `snapshot` | `up.sh` data: `snapshot` (the committed `env/seed/snapshot-<C>.pgdump`) or `rest` (only the small REST seed; `env/seed/generate.sh` uses it) |
+| `APP_ENV_MODE` | `prod` | Vaadin mode of the app: `prod` (production build, as CI) or `dev` (Vaadin development mode, for checks only; see "Development mode"). `dev` builds in its own state dir by default (`env/.state-dev`) |
 | `APP_ENV_DEPLOY` | `1` | `0`: the domain only. `build.sh` does not build the app, the container does not deploy it, `up.sh` waits for `GET /` (Payara's default page) instead of the login page and takes the reset point right after loading the snapshot. Needs `APP_ENV_SEED=snapshot`. Was used in migration stage 1a while the app did not deploy on Payara 7 (until ticket 1a-91) |
 
-Use the same variables for `up.sh`, `reset.sh` and `down.sh` of one copy. `APP_ENV_CONFIG`, `APP_ENV_PWCHECK`,
+Use the same variables for `up.sh`, `reset.sh` and `down.sh` of one copy (`APP_ENV_MODE` too: it selects the state
+dir and the compose files). `APP_ENV_CONFIG`, `APP_ENV_PWCHECK`,
 `APP_ENV_UI_URL`, `APP_ENV_SEED` and `APP_ENV_DEPLOY` matter to `up.sh` only: the copy keeps them until `down.sh`
 (`APP_ENV_CONFIG` also tells the smoke check which users the copy has; `up.sh` records `APP_ENV_DEPLOY` in the copy's
 state directory for `reset.sh`; it counts only while the copy's app container exists, so a record left by an
@@ -80,8 +82,8 @@ These scripts follow the replay runner's env-script contract (`up.sh [--no-build
      `env/.state/build/deploy`.
    - unless `APP_ENV_DEPLOY=0`: `mvn clean install -Dmaven.test.skip=true` (the tests are neither compiled nor run;
      CI does both) with Maven 3.9 on JDK 21 in a container (`maven:3.9-eclipse-temurin-21`), default profiles, and
-     collects the ear and the two wars. The production frontend build of `sormas-ui` checks the Vaadin commercial
-     licence (Rich Text Editor): `build.sh` passes `VAADIN_PRO_KEY` to the container by name
+     collects the ear and the two wars (`APP_ENV_MODE=dev`: with `-Pdev`, see "Development mode"). The production frontend build of `sormas-ui` checks the Vaadin commercial
+     licence (Rich Text Editor): `build.sh` passes `VAADIN_PRO_KEY` or `VAADIN_OFFLINE_KEY` to the container by name
      when set, else mounts `~/.vaadin/proKey` read-only. Without a key the build fails. This is the local and release build: a real key, no banner. CI builds with `-Dvaadin.commercialWithBanner` instead (see `CI.md`); a banner-built artefact must never be shipped or deployed outside CI.
    - A lock makes a second build wait for the first. Log: `env/.state/build/build.log`.
 3. Generates a throwaway database password for this copy (`env/.state/copies/<project>/db.env`, mode 600; never in an
@@ -143,6 +145,50 @@ Payara 7 with the app, `APP_ENV_DEPLOY=1` (same host, 2026-11-06, ticket 1a-91, 
 | Build (warm Maven repository, tests not compiled; frontend production bundle) | about 50 to 60 s |
 | `up.sh` after the build (snapshot, C1) | about 55 s: loading the snapshot 4 s, the app answers after 30 s (deploy of the ear about 15 s), reset point about 25 s; 107 s including the build |
 | Memory per copy | app about 2.3 GB after the first logins (heap limit 4 GB), database about 0.09 GB |
+
+## Development mode
+
+`APP_ENV_MODE=dev` starts a copy with the app in Vaadin development mode, for the dev-mode check (migration stage 1b) and
+for looking at Flow's dev warnings. Releases, CI and every other copy stay in production mode (the default, `prod`).
+
+```sh
+APP_ENV_MODE=dev APP_ENV_PORT=18083 APP_ENV_PROJECT=sormas-new-dev env/up.sh
+APP_ENV_MODE=dev APP_ENV_PORT=18083 APP_ENV_PROJECT=sormas-new-dev env/down.sh
+```
+
+- **Build:** `mvn clean install -Dmaven.test.skip=true -Pdev`. The `dev` profile of `sormas-ui` adds `vaadin-dev` to the
+  war and leaves out `build-frontend`, so there is no production bundle and no build-time licence check, and the build
+  info (`flow-build-info.json`, written by `prepare-frontend`) says `productionMode: false`. It wins over the
+  `productionMode` context parameter in `web.xml`, which stays `true` for production builds. Without `-Pdev` the build
+  is unchanged.
+- **State dir:** `env/.state-dev` unless `APP_ENV_STATE_DIR` is set, so a production copy never deploys a dev war and a
+  production build never cleans the clone a dev copy runs from. Build (`up.sh` without `--no-build`) only while no dev
+  copy of that state dir runs. `up.sh --no-build` builds anyway when the artefacts were built in the other mode.
+- **Project folder:** Flow dev mode refuses to start without the project folder named in the build info. `compose.dev.yml`
+  (added to `compose.yml` by the scripts) mounts the build clone `<state dir>/build/src` into the app container at the
+  same path, read-write. At deploy time Flow installs the npm packages there and builds its development bundle, so the
+  first start downloads Node and the packages (network needed). These files are created by root in the container;
+  the next `build.sh` gives them back to your user with a `chown` in a container before it cleans the clone.
+- **Vaadin key:** dev mode checks the commercial components' licence at run time: `compose.dev.yml` passes
+  `VAADIN_PRO_KEY` to the app container by name. Set it in the shell (`~/.vaadin/proKey` is not mounted; `build.sh`
+  warns when it is missing). `VAADIN_OFFLINE_KEY` is for production builds only.
+- **Dev tools:** the browser reaches Payara through Docker's port mapping, so Flow sees the Docker gateway's address,
+  not a loopback one, and refuses the dev-tools websocket ("Dev tools functionality denied for this host").
+  `compose.dev.yml` sets `-Dvaadin.devmode.hostsAllowed=*` for Payara's JVM (`JAVA_TOOL_OPTIONS`; the JVMs in the
+  container print "Picked up JAVA_TOOL_OPTIONS"). The port is published on 127.0.0.1 only.
+- **Theme images:** the images and the favicon of the legacy `sormas` theme are in
+  `sormas-ui/src/main/frontend/themes/sormas/`. Dev mode serves every `/VAADIN/themes/<name>/` request from that
+  folder of the project (else HTTP 500, "Asset ... is not found in project frontend directory"); the war plugin copies
+  the folder to `VAADIN/themes/sormas/` in the war for production mode. Same URLs in both modes. No theme is activated
+  (no `@Theme`, no `theme.json`).
+- The server log is at debug level in this mode (lines marked `D`). Some debug lines carry stack traces that are not
+  errors (e.g. `OSHI library not found` with `NoClassDefFoundError: oshi/SystemInfo`, `Assuming
+  ExtendedWatchEventModifier.FILE_TREE is not supported` with `UnsupportedOperationException`).
+- `up.sh` stops the domain once for the reset point. A development-bundle build still running then is interrupted (an
+  `E` line "Error when running `npm install`" with an `InterruptedException`) and runs again at the next start.
+- Measured (same host, 2026-11-07, one C1 copy): build about 50 s (no frontend build); `up.sh` after it about 115 s
+  (the app answers after about 40 s); the development bundle is built in about 11 s after the restart (npm install about
+  9 s, Node already downloaded by the first start in that container).
 
 ## Configurations
 
@@ -313,11 +359,17 @@ APP_ENV_PORT=18091 APP_ENV_PROJECT=sormas-new-smoke env/down.sh
 ## Logs and troubleshooting
 
 - App: `docker logs <APP_ENV_CONTAINER>` (the Payara server log).
-- Build: `env/.state/build/build.log`.
+- Build: `env/.state/build/build.log` (`APP_ENV_MODE=dev`: `env/.state-dev/build/build.log`).
 - Known, from the app (not changed here): on the Payara 5 environment of the old app, deployment logs `SEVERE` lines
   (e.g. `@Lock is only permitted for singleton session beans`, annotation processing of `sormas-backend`) that do not
   stop the app. Payara 7 logs the same ones (checked in ticket 1a-91), plus a deprecation warning for each
   `glassfish-web.xml` and, when the domain stops, a `SEVERE` about a ThreadLocal of Payara's ORB left in `/sormas-ui`.
+- A view stays blank, the browser reports an empty response (`ERR_EMPTY_RESPONSE`) for a UI request and the server
+  logs `IOException: Connection is closed`: the response was larger than Grizzly's write queue hard limit (16 x the
+  transport's `socket-write-buffer-size`, see "Payara 7 domain"). Check the setting with `asadmin get
+  configs.config.server-config.network-config.transports.transport.tcp.socket-write-buffer-size` in the app container.
+  Logging `org.glassfish.grizzly.nio.AbstractNIOAsyncQueueWriter` at `FINEST` shows the size and the limit
+  (`Asynchronous write queue hard limit exceeded ... size=..., hardLimit=...`).
 - `server.log` in a fresh container starts with the image build's own domain start (`WARNING` lines "cannot take effect
   without server restart" for the JVM options set then); they are from the build, not from this start.
 
@@ -337,6 +389,7 @@ and password from the container env at run time (`${ENV=SORMAS_DB_HOST}`, `${ENV
 | JVM | `-Xmx4096m`, `-XX:+IgnoreUnrecognizedVMOptions`, logback configuration `config/logback.xml`, `-DlogbackDisableServletContainerInitializer=true`; time zone Europe/Berlin from the container's `TZ` (the JVM reports `user.timezone = Europe/Berlin`) |
 | Class loading | system property `fish.payara.classloading.delegate=false` |
 | Pools | EJB `max-pool-size` 128, HTTP thread pool max 50 |
+| Transport | TCP transport `socket-write-buffer-size` 1048576 (1 MiB), as `server-setup.sh`. Payara 7's Grizzly closes the connection when a write would leave more than 16 x this size pending on it; unset (-1), the size is the kernel's socket send buffer (the limit was 696,320 bytes on the test host) and a larger UI response is never sent. With 1 MiB the limit is 16 MiB (see "Logs and troubleshooting") |
 | Domain lib | the server libraries (`sormas-serverlibs`, collected by `build.sh`) copied to `domains/sormas/lib/` at container start; also holds the PostgreSQL driver the JDBC pool needs |
 | Login | none in the domain: SORMAS authenticates in the app (Jakarta Security: `SormasIdentityStore` and `MultiAuthenticationMechanism` in the two wars) and maps its user rights to roles through `glassfish-ejb-jar.xml` / `glassfish-web.xml`; the setup scripts create no realm, as before. No Keycloak |
 | Directories | `/opt/sormas/{custom,documents,temp,generated}`; login pages from `sormas-base/setup` into `custom` at start |
@@ -352,6 +405,8 @@ Differences to the Payara 5 environment of the old app (`sormas-old-env-payara:5
 - The domain lib holds today's server library list (`sormas-serverlibs/pom.xml` at HEAD). Migration ticket 1a-02
   changes that list to Jakarta EE 11 artefacts; `build.sh` collects whatever the pom says, so nothing changes here.
   Ticket 1a-91 deployed the app with it: no missing class at deploy or on the screens it opened.
+- Transport write buffer (new): `socket-write-buffer-size` is 1 MiB. Payara 5's Grizzly (2.4.4) had no hard limit on
+  a connection's write queue, so the old environment left it unset.
 - `APP_ENV_DEPLOY=0` (new): the domain without the app.
 - Payara 7's own defaults differ from Payara 5's (e.g. its default JVM options with `--add-opens` for JDK 21); the
   setup does not change them.

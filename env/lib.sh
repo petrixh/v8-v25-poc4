@@ -10,8 +10,15 @@ export APP_ENV_PROJECT=${APP_ENV_PROJECT:-sormas-new-env}
 export APP_ENV_CONTAINER=${APP_ENV_CONTAINER:-$APP_ENV_PROJECT-app}
 # Mail sink web UI and API on 127.0.0.1; empty = a free port chosen by Docker (up.sh prints it)
 export APP_ENV_MAIL_PORT=${APP_ENV_MAIL_PORT:-}
-# Generated files: build output shared by all copies, per-copy secrets. Git-ignored (env/.gitignore).
-export APP_ENV_STATE_DIR=${APP_ENV_STATE_DIR:-$ENV_DIR/.state}
+# Vaadin mode of the app: prod (default; production build, as CI and releases) or dev (Flow development mode, for the
+# dev-mode check: sormas-ui built with -Pdev, the build clone mounted into the app container; env/README.md "Development mode")
+export APP_ENV_MODE=${APP_ENV_MODE:-prod}
+[[ "$APP_ENV_MODE" =~ ^(prod|dev)$ ]] || { echo "APP_ENV_MODE must be prod or dev: $APP_ENV_MODE" >&2; exit 2; }
+# Generated files: build output shared by all copies, per-copy secrets. Git-ignored (env/.gitignore). A dev build has its
+# own default state dir, so a production copy never deploys a dev war and a build for other copies never cleans the
+# clone a running dev copy uses
+if [ "$APP_ENV_MODE" = dev ]; then export APP_ENV_STATE_DIR=${APP_ENV_STATE_DIR:-$ENV_DIR/.state-dev}
+else export APP_ENV_STATE_DIR=${APP_ENV_STATE_DIR:-$ENV_DIR/.state}; fi
 APP_ENV_M2_REPO=${APP_ENV_M2_REPO:-$HOME/.m2/repository}
 APP_ENV_WAIT_S=${APP_ENV_WAIT_S:-900}
 # reset.sh: restart (default; DB from the snapshot and a fresh app JVM) or db (DB only, app keeps running)
@@ -39,6 +46,8 @@ MVN_IMAGE=maven:3.9-eclipse-temurin-21
 
 BUILD_DIR=$APP_ENV_STATE_DIR/build
 export APP_ENV_DEPLOY_DIR=$BUILD_DIR/deploy
+# Clean clone of HEAD that build.sh builds; APP_ENV_MODE=dev mounts it into the app container at the same path
+export APP_ENV_SRC_DIR=$BUILD_DIR/src
 COPY_DIR=$APP_ENV_STATE_DIR/copies/$APP_ENV_PROJECT
 export APP_ENV_COPY_DIR=$COPY_DIR
 # 1: build and deploy the app (default). 0: the Payara domain, database and mail sink only, no app build and no deploy
@@ -61,7 +70,12 @@ SNAPSHOT_META=$ENV_DIR/seed/snapshot-$APP_ENV_CONFIG.json
 log() { echo "[$(date -u +%H:%M:%S)] $APP_ENV_PROJECT: $*" >&2; }
 die() { log "ERROR: $*"; exit 1; }
 
-compose() { docker compose -p "$APP_ENV_PROJECT" -f "$ENV_DIR/compose.yml" "$@"; }
+# APP_ENV_MODE=dev adds env/compose.dev.yml (project folder mount, dev-tools host rule, Vaadin key by name)
+compose() {
+  local files=(-f "$ENV_DIR/compose.yml")
+  [ "$APP_ENV_MODE" = prod ] || files+=(-f "$ENV_DIR/compose.dev.yml")
+  docker compose -p "$APP_ENV_PROJECT" "${files[@]}" "$@"
+}
 
 # psql as the postgres superuser inside this copy's db container, on the maintenance database
 db_psql() { compose exec -T -e PGOPTIONS=--client-min-messages=warning "$DB_SVC" psql -v ON_ERROR_STOP=1 -qAt -U postgres -d postgres "$@"; }

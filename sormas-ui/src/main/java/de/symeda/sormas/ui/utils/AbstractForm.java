@@ -1,7 +1,11 @@
 package de.symeda.sormas.ui.utils;
 
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -746,6 +750,46 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 			return wrapperType(property.getType());
 		}
 
+		/**
+		 * The property type the field factory gets, as in Vaadin 7: {@code BeanFieldGroup.getPropertyType} returned the
+		 * declared type (a primitive stays primitive) while no bean was set, and the wrapper type once a bean was set. The
+		 * factory makes a check box for a primitive {@code boolean} and a Yes/No option group for a {@code Boolean}.
+		 */
+		private Class<?> getFieldFactoryType(Object propertyId) {
+			Class<?> propertyType = getPropertyType(propertyId);
+			if (bean != null || !isWrapperType(propertyType)) {
+				return propertyType;
+			}
+			// the Flow property set reports primitives as wrapper types: read the declared type from the bean class
+			try {
+				Class<?> declaredType = beanType;
+				for (String name : propertyId.toString().split("\\.")) {
+					PropertyDescriptor descriptor = Arrays.stream(Introspector.getBeanInfo(declaredType).getPropertyDescriptors())
+						.filter(d -> d.getName().equals(name))
+						.findFirst()
+						.orElse(null);
+					if (descriptor == null || descriptor.getPropertyType() == null) {
+						return propertyType;
+					}
+					declaredType = descriptor.getPropertyType();
+				}
+				return declaredType;
+			} catch (IntrospectionException e) {
+				return propertyType;
+			}
+		}
+
+		private static boolean isWrapperType(Class<?> type) {
+			return type == Boolean.class
+				|| type == Integer.class
+				|| type == Long.class
+				|| type == Double.class
+				|| type == Float.class
+				|| type == Short.class
+				|| type == Byte.class
+				|| type == Character.class;
+		}
+
 		private static Class<?> wrapperType(Class<?> type) {
 			if (!type.isPrimitive()) {
 				return type;
@@ -775,7 +819,7 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 		 */
 		@SuppressWarnings("rawtypes")
 		public <F extends Field> F buildAndBind(String caption, Object propertyId, Class<F> fieldType) {
-			Class<?> propertyType = getPropertyType(propertyId);
+			Class<?> propertyType = getFieldFactoryType(propertyId);
 			F field = fieldFactory.createField(propertyType, fieldType);
 			if (field == null) {
 				throw new IllegalStateException("Unable to build a field of type " + fieldType.getName() + " for editing " + propertyType.getName());

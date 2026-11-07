@@ -731,6 +731,9 @@ public class EventFacadeEjb extends AbstractCoreFacadeEjb<Event, EventDto, Event
 		selections.addAll(sortBy(sortProperties, eventQueryContext));
 
 		cq.multiselect(selections);
+		// The user filter and some criteria join to-many associations (participants, their cases and contacts, groups):
+		// page over distinct events, as count() does, or a page holds the same event several times
+		cq.distinct(true);
 
 		Predicate filter = null;
 

@@ -850,11 +850,24 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> impl
 			if (columnGenerators.remove(columnId) == null) {
 				return false;
 			}
-			if (!propertySet.getProperty(columnId.toString()).isPresent()) {
+			if (!isContainerProperty(columnId)) {
 				visibleColumns.remove(columnId);
 			}
 			updateColumns();
 			return true;
+		}
+
+		/**
+		 * Vaadin 7 {@code getContainerPropertyIds().contains(id)}. An id with a dot (e.g. a caption key such as
+		 * {@code Location.street}) is not a property: the Flow property set throws for a dotted name it cannot resolve as
+		 * a nested path, where Vaadin 7 said no.
+		 */
+		private boolean isContainerProperty(Object id) {
+			try {
+				return propertySet.getProperty(id.toString()).isPresent();
+			} catch (IllegalArgumentException e) {
+				return false;
+			}
 		}
 
 		/**
@@ -869,7 +882,7 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> impl
 
 		public void setVisibleColumns(Object... visibleColumns) {
 			for (Object id : visibleColumns) {
-				if (!columnGenerators.containsKey(id) && !propertySet.getProperty(id.toString()).isPresent()) {
+				if (!columnGenerators.containsKey(id) && !isContainerProperty(id)) {
 					throw new IllegalArgumentException("Ids must exist in the Container or as a generated column, missing id: " + id);
 				}
 			}

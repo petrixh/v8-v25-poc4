@@ -158,6 +158,7 @@ public class SurveyDocumentController {
 
 		private VerticalLayout additionalVariablesComponent;
 		private Consumer<Boolean> surveyErrorCallback;
+		private boolean settingValue;
 
 		protected SurveyDocumentOptionsForm(Disease disease, boolean forEmail, PersonDto person, boolean attachmentAvailable) {
 			super(SurveyDocumentOptionsDto.class, SurveyDocumentOptionsDto.I18N_PREFIX, false);
@@ -290,10 +291,25 @@ public class SurveyDocumentController {
 		@Override
 		public SurveyDocumentOptionsDto getValue() {
 			SurveyDocumentOptionsDto options = super.getValue();
+			if (settingValue) {
+				// Flow reads the value for the value change event inside super.setValue, before a survey is chosen;
+				// Vaadin 8 did not read it there
+				return options;
+			}
 			options.setSurvey(((SurveyDto) getSurveyCombo().getValue()).toReference());
 			options.setTemplateProperties(readAdditionalVariables());
 
 			return options;
+		}
+
+		@Override
+		public void setValue(SurveyDocumentOptionsDto newFieldValue) {
+			settingValue = true;
+			try {
+				super.setValue(newFieldValue);
+			} finally {
+				settingValue = false;
+			}
 		}
 
 		public void setSurveyErrorCallback(Consumer<Boolean> callback) {

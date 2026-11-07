@@ -778,3 +778,92 @@ vaadin-text-area.resizable::part(input-field) { resize: vertical; overflow: auto
 .background-disease-salmonellosis.background-darker { background-color: #a04000; fill: #a04000; }
 .background-disease-shigellosis { background-color: #bd1307; fill: #bd1307; }
 .background-disease-shigellosis.background-darker { background-color: #DAAA69; fill: #DAAA69; }
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 9. Grids (components/grid.scss on the Valo grid; Lumo's vaadin-grid styled through its part names). Column widths
+ *    come from the utils.grid Grid shim (content width, Vaadin 8 expand ratios); these rules give the cells the old
+ *    density, header style and frame, the per-column width limits and the cell and row style classes (CssStyles
+ *    GRID_*), which the shim sets as part names.
+ * ------------------------------------------------------------------------------------------------------------- */
+vaadin-grid {
+  --sormas-grid-row-height: 38px;            /* Valo $v-grid-row-height 32px line + 3px padding */
+  --vaadin-grid-cell-padding: 3px 6px;       /* grid.scss .v-grid-cell padding */
+}
+
+/* Frame: top and bottom lines only (grid.scss: no left and right border on the table wrapper) */
+vaadin-grid:not([theme~="no-border"]) {
+  border-color: var(--sormas-focus-color);
+  border-left-width: 0;
+  border-right-width: 0;
+}
+
+vaadin-grid::part(cell) {
+  border-top-color: var(--sormas-focus-color);
+}
+
+vaadin-grid::part(body-cell) {
+  min-height: var(--sormas-grid-row-height);
+}
+
+/* Header: small, semi-bold, upper case captions over a 2px line */
+vaadin-grid::part(header-cell) {
+  min-height: var(--sormas-grid-row-height);
+  background-color: var(--sormas-background-color);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+vaadin-grid::part(last-header-row-cell) {
+  border-bottom: 2px solid var(--sormas-focus-color);
+}
+
+/* Vaadin 8 column minimum and maximum widths (Grid.Column setMinimumWidth / setMaximumWidth): part names
+   sormas-col-min-<px> and sormas-col-max-<px> on the header, body and footer cells of the column. One rule per width
+   the app uses; a new width needs a rule here. */
+vaadin-grid::part(sormas-col-min-150) { min-width: 150px; }
+vaadin-grid::part(sormas-col-min-180) { min-width: 180px; }
+vaadin-grid::part(sormas-col-min-260) { min-width: 260px; }
+vaadin-grid::part(sormas-col-min-280) { min-width: 280px; }
+vaadin-grid::part(sormas-col-max-50) { max-width: 50px; }
+vaadin-grid::part(sormas-col-max-120) { max-width: 120px; }
+vaadin-grid::part(sormas-col-max-150) { max-width: 150px; }
+vaadin-grid::part(sormas-col-max-200) { max-width: 200px; }
+vaadin-grid::part(sormas-col-max-300) { max-width: 300px; }
+vaadin-grid::part(sormas-col-max-700) { max-width: 700px; }
+
+/* Cell and row style classes (CssStyles GRID_CELL_*, GRID_ROW_*) */
+vaadin-grid::part(link) { cursor: pointer; }
+vaadin-grid::part(priority-high) { color: var(--sormas-important-color); font-weight: 600; }
+vaadin-grid::part(priority-normal) { color: var(--sormas-default-color); }
+vaadin-grid::part(warning) { color: var(--sormas-warning-color); font-weight: 600; }
+vaadin-grid::part(status-pending) { color: var(--sormas-warning-color); }
+vaadin-grid::part(status-in-progress) { color: var(--sormas-neutral-color); }
+vaadin-grid::part(status-completed) { color: var(--sormas-positive-color); }
+vaadin-grid::part(status-failed) { color: var(--sormas-critical-color); }
+vaadin-grid::part(status-cancelled) { color: var(--sormas-font-color); }
+vaadin-grid::part(odd) { background-color: #eee; }
+vaadin-grid::part(row-title) { text-transform: uppercase; font-weight: 600; font-size: 10px; }
+vaadin-grid::part(status-discarded) { text-decoration: line-through; color: #888; }
+vaadin-grid::part(status-done) { color: #888; }
+vaadin-grid::part(status-not) { color: #C44; }
+vaadin-grid::part(follow-up-symptomatic) { background-color: var(--sormas-critical-color); }
+vaadin-grid::part(follow-up-not-symptomatic) { background-color: var(--sormas-positive-color); }
+vaadin-grid::part(follow-up-unavailable) { background-color: #6277cc; }
+vaadin-grid::part(follow-up-uncooperative) { background-color: #ff19ff; }
+vaadin-grid::part(follow-up-not-performed) { background-color: var(--sormas-minor-color); }
+vaadin-grid::part(follow-up-symptomatic-external),
+vaadin-grid::part(follow-up-not-symptomatic-external),
+vaadin-grid::part(follow-up-unavailable-external),
+vaadin-grid::part(follow-up-uncooperative-external),
+vaadin-grid::part(follow-up-not-performed-external) {
+  background-image: url(img/smartphone.png);
+  background-repeat: no-repeat;
+  background-size: 40% 80%;
+  background-position: center;
+}
+vaadin-grid::part(follow-up-symptomatic-external) { background-color: var(--sormas-critical-color); }
+vaadin-grid::part(follow-up-not-symptomatic-external) { background-color: var(--sormas-positive-color); }
+vaadin-grid::part(follow-up-unavailable-external) { background-color: #6277cc; }
+vaadin-grid::part(follow-up-uncooperative-external) { background-color: #ff19ff; }
+vaadin-grid::part(follow-up-not-performed-external) { background-color: var(--sormas-minor-color); }

@@ -3,7 +3,7 @@
 # Usage: env/up.sh [--no-build]     --no-build: reuse the image and the built artefacts when they exist (else build)
 # APP_ENV_CONFIG=C1|C2 selects the test configuration, APP_ENV_PWCHECK=on the default-password dialog, APP_ENV_SEED=rest
 # the small REST seed instead of the committed snapshot, APP_ENV_DEPLOY=0 the domain without the app (not built, not
-# deployed). Returns 0 once GET /sormas-ui/login (with APP_ENV_DEPLOY=0: GET /) answers 200 on the seeded copy.
+# deployed), APP_ENV_MODE=dev the app in Vaadin development mode. Returns 0 once GET /sormas-ui/login (with APP_ENV_DEPLOY=0: GET /) answers 200 on the seeded copy.
 # See env/README.md.
 set -euo pipefail
 source "$(dirname "$0")/lib.sh"
@@ -19,7 +19,8 @@ done
 
 # Built artefacts this mode needs: the app, or with APP_ENV_DEPLOY=0 only the server libs and setup files
 if [ "$APP_ENV_DEPLOY" = 1 ]; then built=$APP_ENV_DEPLOY_DIR/apps/sormas-ui.war; else built=$APP_ENV_DEPLOY_DIR/setup/logback.xml; fi
-if [ $NO_BUILD = 1 ] && docker image inspect "$APP_ENV_IMAGE" >/dev/null 2>&1 && [ -s "$built" ]; then
+if [ $NO_BUILD = 1 ] && docker image inspect "$APP_ENV_IMAGE" >/dev/null 2>&1 && [ -s "$built" ] &&
+   [ "$(cat "$APP_ENV_DEPLOY_DIR/mode" 2>/dev/null || echo prod)" = "$APP_ENV_MODE" ]; then
   log "using the existing image and artefacts (commit $(cut -c1-10 "$APP_ENV_DEPLOY_DIR/commit"))"
 else
   "$ENV_DIR/build.sh"
@@ -43,7 +44,7 @@ fi
 } > "$COPY_DIR/sormas.properties"
 
 t1=$SECONDS
-log "configuration $APP_ENV_CONFIG (default-password check $APP_ENV_PWCHECK, data: $APP_ENV_SEED, deploy app: $APP_ENV_DEPLOY)"
+log "configuration $APP_ENV_CONFIG (default-password check $APP_ENV_PWCHECK, data: $APP_ENV_SEED, deploy app: $APP_ENV_DEPLOY, Vaadin mode: $APP_ENV_MODE)"
 log "starting db, mail and app (app container $APP_ENV_CONTAINER, port $APP_ENV_PORT)"
 if [ "$APP_ENV_SEED" = snapshot ]; then
   # The database first, loaded from the committed snapshot, so that the app's first start already finds the data

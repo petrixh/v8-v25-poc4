@@ -371,10 +371,16 @@
 				<artifactId>vaadin-maven-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>prepare-frontend</id>
+						<goals>
+							<goal>prepare-frontend</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>build-frontend</id>
 						<goals>
 							<!-- Production mode. The Rich Text Editor is not in Vaadin's prebuilt bundle, so build-frontend builds the bundle
 								(downloads Node to ~/.vaadin and the npm packages) and checks the commercial licence: it fails without a key -->
-							<goal>prepare-frontend</goal>
 							<goal>build-frontend</goal>
 						</goals>
 					</execution>
@@ -382,5 +388,35 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<!-- Vaadin development mode (-Pdev), for checks only (env/README.md "Development mode"; never a release or CI build): the war
+			has vaadin-dev and no production bundle; flow-build-info.json (prepare-frontend) says productionMode false, which wins over
+			the productionMode context-param of web.xml. At deploy time Flow needs the project folder (the token file names it) and
+			builds its development bundle there -->
+		<profile>
+			<id>dev</id>
+			<dependencies>
+				<dependency>
+					<groupId>com.vaadin</groupId>
+					<artifactId>vaadin-dev</artifactId>
+				</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.vaadin</groupId>
+						<artifactId>vaadin-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>build-frontend</id>
+								<phase>none</phase>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 </project>

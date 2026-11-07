@@ -6,7 +6,8 @@
 #      server libs (sormas-serverlibs) into $APP_ENV_STATE_DIR/build/deploy
 #   3. unless APP_ENV_DEPLOY=0: mvn clean install -Dmaven.test.skip=true (tests neither compiled nor run), Maven 3.9 on
 #      JDK 21 in a container (default profiles, no Android app, the Vaadin key by name), and collect the ear and the wars.
-#      With APP_ENV_DEPLOY=0 the app is not built and not collected.
+#      With APP_ENV_DEPLOY=0 the app is not built and not collected. APP_ENV_MODE=dev adds -Pdev (sormas-ui in Vaadin
+#      development mode); the dev copy then runs Flow in this clone (compose.dev.yml).
 # Usually run by up.sh. Holds a lock so two copies never build at once.
 set -euo pipefail
 source "$(dirname "$0")/lib.sh"
@@ -30,8 +31,14 @@ docker build -q -t "$APP_ENV_IMAGE" "$BUILD_DIR/ctx" >> "$LOG" 2>&1 || die "imag
 
 # Build a clean clone of HEAD in the state dir: a known commit, no build output in the checkout, and it works from a
 # git worktree too (the git-commit-id plugin, which writes git.properties for the About view, cannot read worktrees).
-SRC=$BUILD_DIR/src
+SRC=$APP_ENV_SRC_DIR
 git -C "$APP_ROOT" diff --quiet HEAD 2>/dev/null || log "WARNING: uncommitted changes in $APP_ROOT are not built (HEAD is)"
+# A dev copy (APP_ENV_MODE=dev) runs Flow as root in this clone (node_modules, frontend/generated, the dev bundle): give
+# those files back before the clone is cleaned. Build only while no dev copy runs from this state dir.
+if [ -d "$SRC" ] && [ -n "$(find "$SRC" ! -user "$(id -u)" -print -quit 2>/dev/null)" ]; then
+  log "build: files of a dev-mode copy in $SRC are owned by another user; chown them back (container)"
+  docker run --rm -v "$SRC:$SRC" "$MVN_IMAGE" chown -R "$(id -u):$(id -g)" "$SRC" >> "$LOG" 2>&1 || die "chown of $SRC failed"
+fi
 [ -d "$SRC/.git" ] || git clone -q --no-checkout "$APP_ROOT" "$SRC"
 git -C "$SRC" fetch -q "$APP_ROOT" HEAD && git -C "$SRC" checkout -q --detach FETCH_HEAD && git -C "$SRC" clean -qfdx
 mounts=(-v "$SRC:$SRC")
@@ -42,6 +49,9 @@ keys=(-e VAADIN_PRO_KEY -e VAADIN_OFFLINE_KEY)
 if [ -z "${VAADIN_PRO_KEY:-}" ] && [ -z "${VAADIN_OFFLINE_KEY:-}" ]; then
   if [ -s "$HOME/.vaadin/proKey" ]; then keys+=(-v "$HOME/.vaadin/proKey:/home/build/.vaadin/proKey:ro")
   elif [ "$APP_ENV_DEPLOY" = 1 ]; then log "WARNING: no Vaadin key (VAADIN_PRO_KEY, VAADIN_OFFLINE_KEY, ~/.vaadin/proKey): the sormas-ui build fails its licence check"; fi
+fi
+if [ "$APP_ENV_MODE" = dev ] && [ -z "${VAADIN_PRO_KEY:-}" ]; then
+  log "WARNING: APP_ENV_MODE=dev without VAADIN_PRO_KEY: Flow dev mode checks the commercial components' licence at run time"
 fi
 
 mvn_run() { # mvn_run <name> <mvn args...>
@@ -66,13 +76,15 @@ mvn_run serverlibs -f ../sormas-serverlibs/pom.xml -DincludeScope=compile \
   die "server libs failed (log: $LOG)"
 mv "$SRC/sormas-serverlibs/target/collected-serverlibs" "$D/serverlibs"
 git -C "$SRC" rev-parse HEAD > "$D/commit" 2>/dev/null || echo unknown > "$D/commit"
+echo "$APP_ENV_MODE" > "$D/mode"   # up.sh --no-build rebuilds when the mode differs
 
 if [ "$APP_ENV_DEPLOY" = 0 ]; then
   log "build: APP_ENV_DEPLOY=0, the app is not built"
 else
   # The env needs the app, not its tests: they are neither compiled nor run here (CI does both)
-  log "build: mvn clean install -Dmaven.test.skip=true (JDK 21 container; log: $LOG)"
-  mvn_run build clean install -Dmaven.test.skip=true >> "$LOG" 2>&1 || die "maven build failed (log: $LOG)"
+  profiles=(); [ "$APP_ENV_MODE" = prod ] || profiles=(-Pdev)
+  log "build: mvn clean install -Dmaven.test.skip=true ${profiles[*]} (JDK 21 container; log: $LOG)"
+  mvn_run build clean install -Dmaven.test.skip=true "${profiles[@]}" >> "$LOG" 2>&1 || die "maven build failed (log: $LOG)"
   for f in sormas-ear/target/sormas-ear.ear sormas-ui/target/sormas-ui.war sormas-rest/target/sormas-rest.war; do
     [ -s "$SRC/$f" ] || die "missing $f after the build"
   done

@@ -1332,3 +1332,61 @@ vaadin-grid-cell-content div.v-button.v-button-warning {
   color: #000000;
   font-weight: 600;
 }
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 13. Maps. The Leaflet zoom control of the Vaadin 8 maps (dashboards, location map, statistics map), drawn by
+ *     LeafletMap as two Flow buttons over the top left corner of the map: Leaflet's touch style that Chromium got
+ *     (VAADIN/map/leaflet.css .leaflet-touch .leaflet-bar): 30px buttons in a 2px translucent frame, 10px from the
+ *     corner, bold 22px monospace + and -.
+ * ------------------------------------------------------------------------------------------------------------- */
+.sormas-map-zoom {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  background-clip: padding-box;
+}
+
+.sormas-map-zoom vaadin-button {
+  --vaadin-button-background: #FFFFFF;
+  --vaadin-button-text-color: #000000;
+  --vaadin-button-border-radius: 0;
+  --vaadin-button-padding: 0;
+  --vaadin-button-margin: 0;
+  --vaadin-button-height: 30px;
+  --vaadin-button-min-width: 30px;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  background-color: #FFFFFF;
+  color: #000000;
+  font: bold 22px 'Lucida Console', Monaco, monospace;
+  text-indent: 1px;
+}
+
+.sormas-map-zoom vaadin-button:first-child {
+  border-bottom: 1px solid #CCCCCC;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+}
+
+.sormas-map-zoom vaadin-button:last-child {
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+}
+
+.sormas-map-zoom vaadin-button:hover {
+  background-color: #F4F4F4;
+}
+
+.sormas-map-zoom vaadin-button[disabled] {
+  background-color: #F4F4F4;
+  color: #BBBBBB;
+}

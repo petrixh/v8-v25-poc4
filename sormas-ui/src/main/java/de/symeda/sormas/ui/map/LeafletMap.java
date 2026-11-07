@@ -74,6 +74,9 @@ import de.symeda.sormas.api.geo.GeoLatLon;
  * fillColor, fillOpacity) sets the stroke and fill. The polygon caption is not shown (Leaflet showed it as a tooltip on
  * hover; Vaadin Map has no hover tooltips).</li>
  * <li>Full screen: a button in the top right corner, as the Leaflet full-screen control.</li>
+ * <li>Zoom: + and - buttons in the top left corner, as the Leaflet zoom control (Vaadin Map's own zoom control sits in the
+ * bottom right corner and cannot be moved, so it is hidden). Mouse-wheel, double-click and keyboard zoom are Vaadin Map's
+ * defaults.</li>
  * </ul>
  */
 @StyleSheet("context://VAADIN/map/MarkerCluster.css") // marker legends of the dashboards (MarkerIcon.getHtmlElement)
@@ -86,6 +89,7 @@ public class LeafletMap extends Composite<Div> implements HasSize, HasStyle {
 		"&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors. Tiles courtesy of Humanitarian OpenStreetMap Team";
 	/** Leaflet's default maximum zoom of a tile layer */
 	private static final int MAX_ZOOM = 18;
+	private static final int MIN_ZOOM = 0;
 	/** Markers are clustered up to this zoom level, above it they are shown one by one */
 	private static final int MAX_CLUSTER_ZOOM = MAX_ZOOM - 1;
 	/** Leaflet marker cluster maxClusterRadius */
@@ -114,6 +118,9 @@ public class LeafletMap extends Composite<Div> implements HasSize, HasStyle {
 	private final Map<Feature, MarkerRef> featureRefs = new IdentityHashMap<>();
 	private final Map<String, Icon> icons = new HashMap<>();
 
+	private Button zoomInButton;
+	private Button zoomOutButton;
+
 	/**
 	 * Creates the map object.
 	 */
@@ -127,6 +134,8 @@ public class LeafletMap extends Composite<Div> implements HasSize, HasStyle {
 		map.getStyle().set("background-color", "#555");
 		map.getView().setMaxZoom(MAX_ZOOM);
 		map.setZoom(5);
+		// the zoom buttons are drawn top left by createZoomControl, where Leaflet had them
+		map.getControls().getZoom().setVisible(false);
 
 		attributions.add(DEFAULT_TILES_ATTRIBUTION);
 		String configuredTilesUrl = FacadeProvider.getConfigFacade().getMapTilersUrl();
@@ -148,7 +157,9 @@ public class LeafletMap extends Composite<Div> implements HasSize, HasStyle {
 		// Leaflet marker cluster: a click on a cluster zooms to its markers
 		map.addClusterClickListener(event -> map.zoomToFit(event.getFeatures()));
 
-		content.add(map, createFullscreenButton());
+		map.addViewMoveEndListener(event -> updateZoomButtons());
+		content.add(map, createZoomControl(), createFullscreenButton());
+		updateZoomButtons();
 
 		// credit where credit's due
 		String attribution = FacadeProvider.getGeoShapeProvider().loadShapefileAttributions();
@@ -169,6 +180,36 @@ public class LeafletMap extends Composite<Div> implements HasSize, HasStyle {
 		button.addClickListener(
 			e -> getElement().executeJs("if (document.fullscreenElement === this) { document.exitFullscreen(); } else { this.requestFullscreen(); }"));
 		return button;
+	}
+
+	/**
+	 * The Leaflet zoom control: a + and a - button in the top left corner (sormas.css "13. Maps"). A click zooms one level from
+	 * the current whole zoom level, as Leaflet did (zoomSnap 1); a button is disabled at the maximum or minimum zoom.
+	 */
+	private Div createZoomControl() {
+		zoomInButton = createZoomButton("+", "Zoom in", 1);
+		zoomOutButton = createZoomButton("\u2212", "Zoom out", -1);
+		Div control = new Div(zoomInButton, zoomOutButton);
+		control.addClassName("sormas-map-zoom");
+		return control;
+	}
+
+	private Button createZoomButton(String text, String title, int delta) {
+		Button button = new Button(text);
+		button.addClassName(delta > 0 ? "sormas-map-zoom-in" : "sormas-map-zoom-out");
+		button.setTooltipText(title);
+		button.setAriaLabel(title);
+		button.addClickListener(e -> {
+			map.setZoom(Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Math.round(map.getZoom()) + delta)));
+			updateZoomButtons();
+		});
+		return button;
+	}
+
+	private void updateZoomButtons() {
+		double zoom = map.getZoom();
+		zoomInButton.setEnabled(zoom < MAX_ZOOM);
+		zoomOutButton.setEnabled(zoom > MIN_ZOOM);
 	}
 
 	/**
@@ -200,6 +241,7 @@ public class LeafletMap extends Composite<Div> implements HasSize, HasStyle {
 
 	public void setZoom(int zoom) {
 		map.setZoom(zoom);
+		updateZoomButtons();
 	}
 
 	public int getZoom() {

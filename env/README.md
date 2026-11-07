@@ -179,8 +179,9 @@ APP_ENV_MODE=dev APP_ENV_PORT=18083 APP_ENV_PROJECT=sormas-new-dev env/down.sh
 - **Theme images:** the images and the favicon of the legacy `sormas` theme are in
   `sormas-ui/src/main/frontend/themes/sormas/`. Dev mode serves every `/VAADIN/themes/<name>/` request from that
   folder of the project (else HTTP 500, "Asset ... is not found in project frontend directory"); the war plugin copies
-  the folder to `VAADIN/themes/sormas/` in the war for production mode. Same URLs in both modes. No theme is activated
-  (no `@Theme`, no `theme.json`).
+  the folder to `VAADIN/themes/sormas/` in the war for production mode. Same URLs in both modes. The global theme
+  files are there too (`sormas.css`, `bootstrap-grid.min.css`, `fonts/`): `SormasAppShell` loads them and Lumo with
+  `@StyleSheet` (no `@Theme`, no `theme.json`), so they are served like the images.
 - The server log is at debug level in this mode (lines marked `D`). Some debug lines carry stack traces that are not
   errors (e.g. `OSHI library not found` with `NoClassDefFoundError: oshi/SystemInfo`, `Assuming
   ExtendedWatchEventModifier.FILE_TREE is not supported` with `UnsupportedOperationException`).

@@ -100,6 +100,8 @@ public class SurveillanceDiseaseCarouselLayout extends VerticalLayout {
 		CheckBox autoSlide = this.setupSlideShow();
 		layout.add(autoSlide);
 		layout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, autoSlide);
+		// keeps its natural width next to the full-width tab bar, as in Vaadin 8 (the caption does not wrap)
+		layout.setFlexShrink(0, autoSlide);
 
 		carouselMenu = new SubMenu();
 

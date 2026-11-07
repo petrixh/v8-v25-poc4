@@ -27,6 +27,8 @@ import java.util.Set;
 
 import com.vaadin.flow.data.provider.ListDataProvider;
 
+import de.symeda.sormas.api.utils.HasCaption;
+
 /**
  * Item ids, captions and enabled state of a {@link SelectField}, backed by one {@link ListDataProvider}. After each
  * change the owner refreshes its component and keeps its value if the value is still an item (V7 behaviour).
@@ -135,14 +137,22 @@ public class SelectItems implements Serializable {
 	}
 
 	/**
-	 * Explicit caption, else {@code toString()} (V7 caption mode EXPLICIT_DEFAULTS_ID).
+	 * Explicit caption, else the item id as text (V7 caption mode EXPLICIT_DEFAULTS_ID). V7 converted the id with the
+	 * session converter factory ({@code SormasDefaultConverterFactory}): a {@link HasCaption} (reference DTOs) shows
+	 * {@code buildCaption()}, not its {@code toString()} (class name and uuid); other ids show {@code toString()}.
 	 */
 	public String getCaption(Object itemId) {
 		if (itemId == null) {
 			return "";
 		}
 		String caption = captions.get(itemId);
-		return caption != null ? caption : Objects.toString(itemId, "");
+		if (caption != null) {
+			return caption;
+		}
+		if (itemId instanceof HasCaption) {
+			return Objects.toString(((HasCaption) itemId).buildCaption(), "");
+		}
+		return Objects.toString(itemId, "");
 	}
 
 	public void setEnabled(Object itemId, boolean enabled) {

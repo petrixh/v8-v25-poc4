@@ -33,7 +33,7 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 
 	private static final long serialVersionUID = 1L;
 
-	private final SelectItems selectItems = new SelectItems(this, this::itemsChanged);
+	private final SelectItems selectItems = new SelectItems(this, this::itemsRemoved);
 	private boolean multiSelect;
 	private RadioButtonGroup<Object> radioGroup;
 	private CheckboxGroup<Object> checkboxGroup;
@@ -184,18 +184,20 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 	}
 
 	/**
-	 * V7: removing the selected item removes it from the value.
+	 * V7: removing a selected item removes it from the value; removing all items empties it. Adding items or removing
+	 * other items keeps the value, also a part that is not an item (yet); the inner group shows it once its item is
+	 * there (after the refresh, see the constructor).
 	 */
-	protected void itemsChanged() {
+	protected void itemsRemoved(java.util.function.Predicate<Object> wasRemoved) {
 		Object value = getValue();
 		if (multiSelect && value instanceof Collection) {
 			Set<Object> retained = new LinkedHashSet<>((Collection<?>) value);
-			retained.retainAll(selectItems.getItemIds());
+			retained.removeIf(wasRemoved);
 			if (retained.size() != ((Collection<?>) value).size()) {
 				setValue(retained);
 				return;
 			}
-		} else if (!multiSelect && value != null && !selectItems.contains(value)) {
+		} else if (!multiSelect && value != null && wasRemoved.test(value)) {
 			setValue(null);
 			return;
 		}

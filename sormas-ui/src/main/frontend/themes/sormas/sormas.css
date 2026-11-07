@@ -1009,7 +1009,9 @@ vaadin-dialog::part(header-content) {
 
 vaadin-dialog::part(backdrop) {
   background-color: rgba(34, 34, 34, 0.8);
+}
 
+/* ---------------------------------------------------------------------------------------------------------------
  * 11. Dashboards, login, statistics (views/dashboard.scss, components/countelement.scss, components/svg.scss,
  *     views/login.scss, views/statistics.scss). Class names as the Flow code sets them (DashboardCssStyles, CssStyles).
  * ------------------------------------------------------------------------------------------------------------- */

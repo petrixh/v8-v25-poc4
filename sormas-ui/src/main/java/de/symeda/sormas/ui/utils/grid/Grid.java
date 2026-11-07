@@ -263,6 +263,9 @@ public class Grid<T> extends com.vaadin.flow.component.grid.Grid<T> {
 		private double maximumWidth = -1;
 		/** The cell part names set by the caller ({@link #setStyleGenerator}), without the width limit part names. */
 		private SerializableFunction<T, String> cellPartNameGenerator;
+		/** The header and footer part names set by the caller (Vaadin 8 header cell style names). */
+		private String headerPartName;
+		private String footerPartName;
 
 		/**
 		 * Vaadin 8 column sizing: the width comes from the content (header and the rendered rows) and the column takes an
@@ -578,8 +581,8 @@ public class Grid<T> extends com.vaadin.flow.component.grid.Grid<T> {
 		 */
 		private void updatePartNames() {
 			String limits = GridSupport.widthLimitPartNames(minimumWidth, maximumWidth);
-			setLimitPartName("headerPartName", limits);
-			setLimitPartName("footerPartName", limits);
+			super.setHeaderPartName(GridSupport.joinPartNames(headerPartName, limits));
+			super.setFooterPartName(GridSupport.joinPartNames(footerPartName, limits));
 			SerializableFunction<T, String> generator = cellPartNameGenerator;
 			if (limits == null) {
 				super.setPartNameGenerator(generator != null ? generator : item -> null);
@@ -590,12 +593,40 @@ public class Grid<T> extends com.vaadin.flow.component.grid.Grid<T> {
 			}
 		}
 
-		private void setLimitPartName(String property, String limits) {
-			if (limits == null) {
-				getElement().removeProperty(property);
-			} else {
-				getElement().setProperty(property, limits);
-			}
+		/**
+		 * The header cell's part names (Vaadin 8 header cell style name), plus the column's width limit part names.
+		 */
+		@Override
+		public com.vaadin.flow.component.grid.Grid.Column<T> setHeaderPartName(String partName) {
+			this.headerPartName = partName;
+			updatePartNames();
+			return this;
+		}
+
+		/**
+		 * @return the header part names set with {@link #setHeaderPartName(String)}, without the width limits
+		 */
+		@Override
+		public String getHeaderPartName() {
+			return headerPartName;
+		}
+
+		/**
+		 * The footer cell's part names, plus the column's width limit part names.
+		 */
+		@Override
+		public com.vaadin.flow.component.grid.Grid.Column<T> setFooterPartName(String partName) {
+			this.footerPartName = partName;
+			updatePartNames();
+			return this;
+		}
+
+		/**
+		 * @return the footer part names set with {@link #setFooterPartName(String)}, without the width limits
+		 */
+		@Override
+		public String getFooterPartName() {
+			return footerPartName;
 		}
 
 		@Override

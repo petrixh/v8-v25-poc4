@@ -106,8 +106,16 @@ final class GridSupport {
 		return names.length() > 0 ? names.toString() : null;
 	}
 
-	static String joinPartNames(String generated, String limits) {
-		return generated == null || generated.isEmpty() ? limits : generated + " " + limits;
+	/**
+	 * @return the part names of both arguments, or {@code null} if both are empty
+	 */
+	static String joinPartNames(String partNames, String limits) {
+		boolean hasPartNames = partNames != null && !partNames.isEmpty();
+		boolean hasLimits = limits != null && !limits.isEmpty();
+		if (hasPartNames && hasLimits) {
+			return partNames + " " + limits;
+		}
+		return hasPartNames ? partNames : hasLimits ? limits : null;
 	}
 
 	static String pixels(double pixels) {

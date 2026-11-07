@@ -87,5 +87,9 @@ public class GridColumnSizingTest {
 
 		a.setStyleGenerator(s -> null);
 		assertEquals("sormas-col-min-150 sormas-col-max-300", a.getPartNameGenerator().apply("x"));
+
+		a.setHeaderPartName("odd");
+		assertEquals("odd", a.getHeaderPartName());
+		assertEquals("odd sormas-col-min-150 sormas-col-max-300", a.getElement().getProperty("headerPartName"));
 	}
 }

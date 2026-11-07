@@ -976,6 +976,8 @@ hr { margin-top: 0; margin-bottom: 0; }
 
 /* Info icons next to dashboard headings: the size of the heading's text, as the Vaadin 8 icon font */
 .dashboard-screen span > vaadin-icon { width: 1em; height: 1em; }
+/* an info icon next to a heading moved up with vspace-top-5 sits on the heading's line (Vaadin 8 slot alignment) */
+.dashboard-screen span.vspace-top-5 + span.h3:has(> vaadin-icon) { margin-top: 2px; }
 
 /* Count elements: the count over a 4px line in the element's colour (countelement.scss) */
 .count-element > :first-child { border-bottom: 4px solid; align-self: stretch !important; text-align: center; }

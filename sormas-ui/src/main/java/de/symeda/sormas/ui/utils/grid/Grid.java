@@ -164,10 +164,11 @@ public class Grid<T> extends com.vaadin.flow.component.grid.Grid<T> {
 	}
 
 	/**
-	 * Vaadin 8 row style generator: the class names become part names of the row.
+	 * Vaadin 8 row style generator: the class names become part names of the row's cells, prefixed with {@code row-}
+	 * ({@link GridSupport#rowPartNames}), so that a row style does not match a cell style of the same name.
 	 */
 	public void setStyleGenerator(SerializableFunction<T, String> styleGenerator) {
-		setPartNameGenerator(styleGenerator);
+		setPartNameGenerator(item -> GridSupport.rowPartNames(styleGenerator.apply(item)));
 	}
 
 	/**

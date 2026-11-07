@@ -117,8 +117,11 @@ public class TreeGrid<T> extends com.vaadin.flow.component.treegrid.TreeGrid<T> 
 		GridSupport.setColumns(this, columnIds);
 	}
 
+	/**
+	 * Vaadin 8 row style generator, as {@link Grid#setStyleGenerator(SerializableFunction)}.
+	 */
 	public void setStyleGenerator(SerializableFunction<T, String> styleGenerator) {
-		setPartNameGenerator(styleGenerator);
+		setPartNameGenerator(item -> GridSupport.rowPartNames(styleGenerator.apply(item)));
 	}
 
 	@Override

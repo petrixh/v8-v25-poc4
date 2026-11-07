@@ -832,7 +832,7 @@ vaadin-grid::part(sormas-col-max-200) { max-width: 200px; }
 vaadin-grid::part(sormas-col-max-300) { max-width: 300px; }
 vaadin-grid::part(sormas-col-max-700) { max-width: 700px; }
 
-/* Cell and row style classes (CssStyles GRID_CELL_*, GRID_ROW_*) */
+/* Cell style classes (CssStyles GRID_CELL_*) */
 vaadin-grid::part(link) { cursor: pointer; }
 vaadin-grid::part(priority-high) { color: var(--sormas-important-color); font-weight: 600; }
 vaadin-grid::part(priority-normal) { color: var(--sormas-default-color); }
@@ -844,9 +844,13 @@ vaadin-grid::part(status-failed) { color: var(--sormas-critical-color); }
 vaadin-grid::part(status-cancelled) { color: var(--sormas-font-color); }
 vaadin-grid::part(odd) { background-color: #eee; }
 vaadin-grid::part(row-title) { text-transform: uppercase; font-weight: 600; font-size: 10px; }
-vaadin-grid::part(status-discarded) { text-decoration: line-through; color: #888; }
-vaadin-grid::part(status-done) { color: #888; }
-vaadin-grid::part(status-not) { color: #C44; }
+/* Row styles (Grid.setStyleGenerator): the shim puts them on the row's cells with the prefix row- */
+vaadin-grid::part(row-status-discarded) { text-decoration: line-through; color: #888; }
+vaadin-grid::part(row-status-done) { color: #888; }
+vaadin-grid::part(row-status-not) { color: #C44; }
+vaadin-grid::part(row-v-treegrid-parent-row) { background-color: var(--sormas-focus-light-color); }
+vaadin-grid::part(row-v-treegrid-child-row) { border-bottom: 3px solid var(--sormas-focus-color); }
+vaadin-grid::part(row-background-duplicate-aggregate-report) { background-color: var(--sormas-critical-most-transparent-color); }
 vaadin-grid::part(follow-up-symptomatic) { background-color: var(--sormas-critical-color); }
 vaadin-grid::part(follow-up-not-symptomatic) { background-color: var(--sormas-positive-color); }
 vaadin-grid::part(follow-up-unavailable) { background-color: #6277cc; }

@@ -16,7 +16,9 @@ package de.symeda.sormas.ui.utils.grid;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.function.ValueProvider;
@@ -29,6 +31,7 @@ import de.symeda.sormas.ui.utils.GridExportStreamResource;
 final class GridSupport {
 
 	static final String WIDTH_LIMIT_PART_PREFIX = "sormas-col-";
+	static final String ROW_PART_PREFIX = "row-";
 
 	private GridSupport() {
 	}
@@ -104,6 +107,20 @@ final class GridSupport {
 			names.append(WIDTH_LIMIT_PART_PREFIX).append("max-").append(BigDecimal.valueOf(maximumWidth).stripTrailingZeros().toPlainString());
 		}
 		return names.length() > 0 ? names.toString() : null;
+	}
+
+	/**
+	 * Vaadin 8 row style names as part names: Flow puts a row's part names on each of its cells, where a row style
+	 * {@code status-pending} would also match the cell style {@code status-pending}. Each name gets the prefix
+	 * {@code row-} ({@code sormas.css} "Grids" styles the rows by these names).
+	 *
+	 * @return the prefixed names, or {@code null} for no names
+	 */
+	static String rowPartNames(String styleNames) {
+		if (styleNames == null || styleNames.isBlank()) {
+			return null;
+		}
+		return Arrays.stream(styleNames.trim().split("\\s+")).map(name -> ROW_PART_PREFIX + name).collect(Collectors.joining(" "));
 	}
 
 	/**

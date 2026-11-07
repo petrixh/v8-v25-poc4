@@ -109,4 +109,13 @@ public class GridColumnSizingTest {
 		assertTrue(grid.isAllRowsVisible());
 		assertEquals("100%", grid.getWidth());
 	}
+
+	@Test
+	public void testRowStylesArePrefixed() {
+		Grid<String> grid = new Grid<>();
+		grid.setStyleGenerator(s -> s);
+
+		assertEquals("row-status-pending row-x", grid.getPartNameGenerator().apply("status-pending  x"));
+		assertNull(grid.getPartNameGenerator().apply(""));
+	}
 }

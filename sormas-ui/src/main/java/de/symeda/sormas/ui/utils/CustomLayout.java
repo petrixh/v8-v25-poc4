@@ -135,8 +135,9 @@ public class CustomLayout extends Component implements HasSize, HasStyle {
 
 		String location = source.attr(LOCATION_ATTRIBUTE);
 		if (source.hasAttr(LOCATION_ATTRIBUTE)) {
-			// as in Vaadin 8, the content of a slot is replaced by its component
-			slotElements.putIfAbsent(location, element);
+			// as in Vaadin 8, the content of a slot is replaced by its component; a location that is in the template more
+			// than once is the last of its slots (Vaadin 8 VCustomLayout.scanForLocations), the others stay empty
+			slotElements.put(location, element);
 			return element;
 		}
 

@@ -20,13 +20,19 @@ package de.symeda.sormas.ui.utils;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
-import java.util.Optional;
 
-import com.vaadin.v7.data.util.converter.StringToDoubleConverter;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.converter.StringToDoubleConverter;
 
 public final class StringToAngularLocationConverter extends StringToDoubleConverter {
 
 	private static final long serialVersionUID = -8697124581004777191L;
+
+	public StringToAngularLocationConverter() {
+		// V7 default conversion error message
+		super("Could not convert value to Double");
+	}
 
 	@Override
 	protected NumberFormat getFormat(Locale locale) {
@@ -43,8 +49,11 @@ public final class StringToAngularLocationConverter extends StringToDoubleConver
 	}
 
 	@Override
-	protected Number convertToNumber(String value, Class<? extends Number> targetType, Locale locale) throws ConversionException {
+	protected Result<Number> convertToNumber(String value, ValueContext context) {
 
-		return Optional.ofNullable(value).map(v -> v.replace(',', '.')).map(v -> super.convertToNumber(v, targetType, Locale.ENGLISH)).orElse(null);
+		if (value == null) {
+			return Result.ok(null);
+		}
+		return super.convertToNumber(value.replace(',', '.'), new ValueContext(Locale.ENGLISH));
 	}
 }

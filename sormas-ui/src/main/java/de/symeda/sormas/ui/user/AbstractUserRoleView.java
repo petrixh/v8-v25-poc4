@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.ui.user;
 
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.button.Button;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;

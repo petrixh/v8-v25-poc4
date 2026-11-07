@@ -18,9 +18,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.Remote;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import jakarta.ejb.Remote;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.BaseFacade;
 import de.symeda.sormas.api.Disease;

@@ -19,15 +19,26 @@ import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.server.UserError;
-import com.vaadin.shared.ui.ErrorLevel;
-import com.vaadin.ui.Label;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.shared.Registration;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class ValidationUtils {
+
+	private static final String DATA_LISTENER_REGISTRATION = "sormas.componentErrorValidator";
+
+	/**
+	 * V8 {@code com.vaadin.shared.ui.ErrorLevel} for {@link #initComponentErrorValidator}. {@link #ERROR} shows the
+	 * message as the field's error (red invalid state, as the V8 error indicator); {@link #WARNING} shows it as the
+	 * field's helper text without the invalid state (V8 showed a non-red warning indicator). Neither blocks saving.
+	 */
+	public enum ErrorLevel {
+		ERROR,
+		WARNING
+	}
 
 	private ValidationUtils() {
 	}
@@ -36,7 +47,7 @@ public class ValidationUtils {
 		TextField field,
 		String initialFieldValue,
 		String validationMessageTag,
-		Label warningLabel,
+		Component warningLabel,
 		Function<String, Boolean> exists) {
 		initComponentErrorValidator(field, initialFieldValue, validationMessageTag, warningLabel, exists, ErrorLevel.ERROR);
 	}
@@ -45,7 +56,7 @@ public class ValidationUtils {
 		TextField field,
 		String initialFieldValue,
 		String validationMessageTag,
-		Label warningLabel,
+		Component warningLabel,
 		Function<String, Boolean> isInvlaid,
 		ErrorLevel errorLevel) {
 		if (field == null) {
@@ -53,19 +64,29 @@ public class ValidationUtils {
 		}
 
 		// already initialized
-		if (field.getData() != null) {
+		Object oldRegistration = ComponentUtil.getData(field, DATA_LISTENER_REGISTRATION);
+		if (oldRegistration instanceof Registration) {
 			// remove old listener
-			if (Property.ValueChangeListener.class.isAssignableFrom(field.getData().getClass())) {
-				field.removeValueChangeListener((Property.ValueChangeListener) field.getData());
-			}
+			((Registration) oldRegistration).remove();
 		}
 
 		Function<String, Void> validateExternalToken = (String value) -> {
 			if (field.isVisible() && !StringUtils.isEmpty(value) && isInvlaid.apply(value)) {
-				field.setComponentError(new UserError(I18nProperties.getValidationError(validationMessageTag), null, errorLevel));
+				String message = I18nProperties.getValidationError(validationMessageTag);
+				if (errorLevel == ErrorLevel.WARNING) {
+					field.setHelperText(message);
+				} else {
+					field.setErrorMessage(message);
+					field.setInvalid(true);
+				}
 				warningLabel.setVisible(true);
 			} else {
-				field.setComponentError(null);
+				if (errorLevel == ErrorLevel.WARNING) {
+					field.setHelperText(null);
+				} else {
+					field.setErrorMessage(null);
+					field.setInvalid(false);
+				}
 				warningLabel.setVisible(false);
 			}
 
@@ -73,8 +94,7 @@ public class ValidationUtils {
 		};
 
 		validateExternalToken.apply(initialFieldValue);
-		Property.ValueChangeListener valueChangeListener = f -> validateExternalToken.apply((String) f.getProperty().getValue());
-		field.addValueChangeListener(valueChangeListener);
-		field.setData(valueChangeListener);
+		Registration registration = field.addValueChangeListener(f -> validateExternalToken.apply(f.getValue()));
+		ComponentUtil.setData(field, DATA_LISTENER_REGISTRATION, registration);
 	}
 }

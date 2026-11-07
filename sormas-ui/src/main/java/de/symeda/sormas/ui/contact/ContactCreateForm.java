@@ -20,22 +20,13 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.AbstractField;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.OptionGroup;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -61,11 +52,21 @@ import de.symeda.sormas.ui.person.PersonCreateForm;
 import de.symeda.sormas.ui.person.PersonFormHelper;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateComparisonValidator;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.LayoutUtil;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class ContactCreateForm extends AbstractEditForm<ContactDto> {
 
@@ -114,7 +115,7 @@ public class ContactCreateForm extends AbstractEditForm<ContactDto> {
 	private TextField contactProximityDetails;
 
 	private PersonCreateForm personCreateForm;
-	private Label prophylaxisLabel;
+	private Span prophylaxisLabel;
 
 	DateField reportDate;
 	CheckBox multiDayContact;
@@ -128,7 +129,7 @@ public class ContactCreateForm extends AbstractEditForm<ContactDto> {
 	ComboBox community;
 
 	private final boolean showPersonSearchButton;
-	private Window warningSimilarPersons;
+	private Dialog warningSimilarPersons;
 
 	public ContactCreateForm(Disease disease, boolean hasCaseRelation, boolean asSourceContact, boolean showPersonSearchButton) {
 		this(disease, hasCaseRelation, asSourceContact, showPersonSearchButton, false);
@@ -199,10 +200,10 @@ public class ContactCreateForm extends AbstractEditForm<ContactDto> {
 		multiDayContact = addField(ContactDto.MULTI_DAY_CONTACT, CheckBox.class);
 		firstContactDate = addField(ContactDto.FIRST_CONTACT_DATE, DateField.class);
 		lastContactDate = addField(ContactDto.LAST_CONTACT_DATE, DateField.class);
-		firstContactDate.addValueChangeListener(event -> lastContactDate.setRequired(event.getProperty().getValue() != null));
+		firstContactDate.addValueChangeListener(event -> lastContactDate.setRequired(event.getValue() != null));
 		multiDayContact.addValueChangeListener(event -> updateDateComparison());
 
-		List<AbstractField<Date>> validatedFields = Arrays.asList(firstContactDate, lastContactDate, reportDate);
+		List<DateField> validatedFields = Arrays.asList(firstContactDate, lastContactDate, reportDate);
 		validatedFields.forEach(field -> field.addValueChangeListener(r -> {
 			validatedFields.forEach(otherField -> {
 				otherField.setValidationVisible(!otherField.isValid());
@@ -216,7 +217,7 @@ public class ContactCreateForm extends AbstractEditForm<ContactDto> {
 		contactProximities = addField(ContactDto.CONTACT_PROXIMITIES, OptionGroup.class);
 		contactProximities.setCaption(I18nProperties.getCaption(Captions.Contact_contactProximityLongForm));
 		contactProximities.setMultiSelect(true);
-		contactProximities.removeStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
+		contactProximities.removeStyleName(SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL);
 		if (isConfiguredServer(CountryHelper.COUNTRY_CODE_GERMANY)) {
 			contactProximities.addValueChangeListener(e -> {
 				Object value = contactProximities.getValue();
@@ -241,8 +242,8 @@ public class ContactCreateForm extends AbstractEditForm<ContactDto> {
 		addField(ContactDto.CASE_OR_EVENT_INFORMATION, TextArea.class).setRows(4);
 
 		// Prophylaxis details for IMI (Luxembourg only) - mirrors ContactDataForm
-		prophylaxisLabel = new Label(I18nProperties.getString(Strings.headingProphylaxisLoc));
-		prophylaxisLabel.addStyleName(CssStyles.H3);
+		prophylaxisLabel = new Span(I18nProperties.getString(Strings.headingProphylaxisLoc));
+		prophylaxisLabel.addClassName(CssStyles.H3);
 		getContent().addComponent(prophylaxisLabel, PROPHYLAXIS_LOC);
 		prophylaxisLabel.setVisible(Disease.INVASIVE_MENINGOCOCCAL_INFECTION == disease);
 
@@ -254,13 +255,13 @@ public class ContactCreateForm extends AbstractEditForm<ContactDto> {
 		initializeVisibilitiesAndAllowedVisibilities();
 
 		region.addValueChangeListener(e -> {
-			RegionReferenceDto regionDto = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto regionDto = (RegionReferenceDto) e.getValue();
 			FieldHelper
 				.updateItems(district, regionDto != null ? FacadeProvider.getDistrictFacade().getAllActiveByRegion(regionDto.getUuid()) : null);
 		});
 		region.addItems(FacadeProvider.getRegionFacade().getAllActiveByServerCountry());
 		district.addValueChangeListener(e -> {
-			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getProperty().getValue();
+			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getValue();
 			FieldHelper.updateItems(
 				community,
 				districtDto != null ? FacadeProvider.getCommunityFacade().getAllActiveByDistrict(districtDto.getUuid()) : null);
@@ -296,7 +297,7 @@ public class ContactCreateForm extends AbstractEditForm<ContactDto> {
 			Arrays.asList(Drug.OTHER));
 
 		cbDisease.addValueChangeListener(e -> {
-			disease = (Disease) e.getProperty().getValue();
+			disease = (Disease) e.getValue();
 			setVisible(disease != null, ContactDto.CONTACT_PROXIMITIES);
 			if (isConfiguredServer(CountryHelper.COUNTRY_CODE_GERMANY)) {
 				setVisible(disease == Disease.CORONAVIRUS, ContactDto.CONTACT_CATEGORY, ContactDto.CONTACT_PROXIMITY_DETAILS);
@@ -307,9 +308,9 @@ public class ContactCreateForm extends AbstractEditForm<ContactDto> {
 		updateProphylaxisSectionVisibility();
 
 		if (!hasCaseRelation) {
-			Label caseInfoLabel = new Label(I18nProperties.getString(Strings.infoNoSourceCaseSelected), ContentMode.HTML);
-			Button chooseCaseButton = ButtonHelper.createButton(Captions.contactChooseCase, null, ValoTheme.BUTTON_PRIMARY, CssStyles.VSPACE_2);
-			Button removeCaseButton = ButtonHelper.createButton(Captions.contactRemoveCase, null, ValoTheme.BUTTON_LINK);
+			Span caseInfoLabel = VaadinUiUtil.createLabel(I18nProperties.getString(Strings.infoNoSourceCaseSelected), ContentMode.HTML);
+			Button chooseCaseButton = ButtonHelper.createButton(Captions.contactChooseCase, null, CssStyles.BUTTON_PRIMARY, CssStyles.VSPACE_2);
+			Button removeCaseButton = ButtonHelper.createButton(Captions.contactRemoveCase, null, CssStyles.BUTTON_LINK);
 
 			CssStyles.style(caseInfoLabel, CssStyles.VSPACE_TOP_4);
 			getContent().addComponent(caseInfoLabel, CASE_INFO_LOC);
@@ -317,14 +318,16 @@ public class ContactCreateForm extends AbstractEditForm<ContactDto> {
 			chooseCaseButton.addClickListener(e -> {
 				ControllerProvider.getContactController().openSelectCaseForContactWindow((Disease) cbDisease.getValue(), selectedCase -> {
 					if (selectedCase != null) {
-						caseInfoLabel.setValue(
+						VaadinUiUtil.setLabelValue(
+							caseInfoLabel,
 							String.format(
 								I18nProperties.getString(Strings.infoContactCreationSourceCase),
 								selectedCase.getPersonFirstName() + " " + selectedCase.getPersonLastName() + " " + "("
-									+ DataHelper.getShortUuid(selectedCase.getUuid()) + ")"));
-						caseInfoLabel.removeStyleName(CssStyles.VSPACE_TOP_4);
+									+ DataHelper.getShortUuid(selectedCase.getUuid()) + ")"),
+							ContentMode.HTML);
+						caseInfoLabel.removeClassName(CssStyles.VSPACE_TOP_4);
 						removeCaseButton.setVisible(true);
-						chooseCaseButton.setCaption(I18nProperties.getCaption(Captions.contactChangeCase));
+						chooseCaseButton.setText(I18nProperties.getCaption(Captions.contactChangeCase));
 
 						getValue().setCaze(selectedCase.toReference());
 						cbDisease.setValue(selectedCase.getDisease());
@@ -337,10 +340,10 @@ public class ContactCreateForm extends AbstractEditForm<ContactDto> {
 			removeCaseButton.addClickListener(e -> {
 				getValue().setCaze(null);
 				cbDisease.setValue(null);
-				caseInfoLabel.setValue(I18nProperties.getString(Strings.infoNoSourceCaseSelected));
-				caseInfoLabel.addStyleName(CssStyles.VSPACE_TOP_4);
+				VaadinUiUtil.setLabelValue(caseInfoLabel, I18nProperties.getString(Strings.infoNoSourceCaseSelected), ContentMode.HTML);
+				caseInfoLabel.addClassName(CssStyles.VSPACE_TOP_4);
 				removeCaseButton.setVisible(false);
-				chooseCaseButton.setCaption(I18nProperties.getCaption(Captions.contactChooseCase));
+				chooseCaseButton.setText(I18nProperties.getCaption(Captions.contactChooseCase));
 
 				updateFieldVisibilitiesByCase(false);
 			});
@@ -387,7 +390,7 @@ public class ContactCreateForm extends AbstractEditForm<ContactDto> {
 	private void updateFieldVisibilitiesByCase(boolean caseSelected) {
 		setVisible(!caseSelected, ContactDto.DISEASE, ContactDto.CASE_ID_EXTERNAL_SYSTEM, ContactDto.CASE_OR_EVENT_INFORMATION);
 		setRequired(!caseSelected, ContactDto.DISEASE, ContactDto.REGION, ContactDto.DISTRICT);
-		ValueChangeListener valueChangeListener = e -> {
+		Field.ValueChangeListener<Object> valueChangeListener = e -> {
 			boolean sameHousehold = ContactRelation.SAME_HOUSEHOLD.equals(relationToCase.getValue());
 			adoptAddressLayout.setVisible(sameHousehold);
 			adoptAddressLayout.setAdoptAddress(sameHousehold);
@@ -400,7 +403,8 @@ public class ContactCreateForm extends AbstractEditForm<ContactDto> {
 				adoptAddressLayout.setAdoptAddress(sameHousehold);
 			}
 		} else {
-			relationToCase.removeValueChangeListener(valueChangeListener);
+			// was relationToCase.removeValueChangeListener(valueChangeListener): that removed the listener created just above,
+			// which was never added, so it removed nothing. Flow has no removeValueChangeListener; nothing to remove here.
 			adoptAddressLayout.setVisible(false);
 			adoptAddressLayout.setAdoptAddress(false);
 		}
@@ -514,7 +518,7 @@ public class ContactCreateForm extends AbstractEditForm<ContactDto> {
 		}
 	}
 
-	public Window getWarningSimilarPersons() {
+	public Dialog getWarningSimilarPersons() {
 		return warningSimilarPersons;
 	}
 }

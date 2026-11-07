@@ -2,7 +2,7 @@ package de.symeda.sormas.backend.patch.partial_retrieval.impl;
 
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.backend.patch.partial_retrieval.TypeToDisplayValueMapper;

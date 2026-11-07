@@ -17,8 +17,7 @@ package de.symeda.sormas.ui.vaccination;
 
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.Table;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.EntityDto;
@@ -83,11 +82,11 @@ public class VaccinationsField extends AbstractTableField<VaccinationDto> {
 		Table table = super.createTable();
 
 		table.addGeneratedColumn(VaccinationDto.UUID, (Table.ColumnGenerator) (source, itemId, columnId) -> {
-			Label textField = new Label(DataHelper.getShortUuid(((EntityDto) itemId).getUuid()));
+			Span textField = new Span(DataHelper.getShortUuid(((EntityDto) itemId).getUuid()));
 			return textField;
 		});
 		table.addGeneratedColumn(VaccinationDto.VACCINATION_DATE, (Table.ColumnGenerator) (source, itemId, columnId) -> {
-			Label textField = new Label(DateFormatHelper.formatDate(((VaccinationDto) itemId).getVaccinationDate()));
+			Span textField = new Span(DateFormatHelper.formatDate(((VaccinationDto) itemId).getVaccinationDate()));
 			return textField;
 		});
 

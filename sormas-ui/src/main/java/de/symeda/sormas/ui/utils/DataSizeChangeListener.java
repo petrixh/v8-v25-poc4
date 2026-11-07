@@ -15,13 +15,18 @@
 
 package de.symeda.sormas.ui.utils;
 
-import com.vaadin.event.SerializableEventListener;
+import com.vaadin.flow.component.ComponentEventListener;
 
-public interface DataSizeChangeListener extends SerializableEventListener {
+public interface DataSizeChangeListener extends ComponentEventListener<DataSizeChangeEvent> {
 
 	/**
 	 * @param event
 	 *            If the data changes, this {@code event} notifies the new data size.
 	 */
 	void dataSizeChange(DataSizeChangeEvent event);
+
+	@Override
+	default void onComponentEvent(DataSizeChangeEvent event) {
+		dataSizeChange(event);
+	}
 }

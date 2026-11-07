@@ -17,7 +17,7 @@ package de.symeda.sormas.api.sormastosormas;
 
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import de.symeda.sormas.api.feature.FeatureType;
 import de.symeda.sormas.api.sormastosormas.share.incoming.ShareRequestDataType;

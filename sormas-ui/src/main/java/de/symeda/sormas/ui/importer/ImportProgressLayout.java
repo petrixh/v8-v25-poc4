@@ -17,8 +17,8 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.importer;
 
-import com.vaadin.ui.Label;
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.UI;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -28,13 +28,13 @@ import de.symeda.sormas.ui.utils.components.progress.AbstractProgressLayout;
 
 public class ImportProgressLayout extends AbstractProgressLayout<ImportProgressUpdateInfo> {
 
-	private Label successfulImportsLabel;
+	private Span successfulImportsLabel;
 	private int successfulImportsCount;
-	private Label failedImportsLabel;
+	private Span failedImportsLabel;
 	private int failedImportsCount;
-	private Label skippedImportsLabel;
+	private Span skippedImportsLabel;
 	private int skippedImportsCount;
-	private Label duplicateImportsLabel;
+	private Span duplicateImportsLabel;
 	private int duplicateImportsCount;
 
 	boolean showDuplicates;
@@ -54,22 +54,22 @@ public class ImportProgressLayout extends AbstractProgressLayout<ImportProgressU
 
 	protected void initAdditionalProgressStatusComponents() {
 
-		successfulImportsLabel = new Label(String.format(I18nProperties.getCaption(Captions.importImports), 0));
+		successfulImportsLabel = new Span(String.format(I18nProperties.getCaption(Captions.importImports), 0));
 		CssStyles.style(successfulImportsLabel, CssStyles.LABEL_POSITIVE);
-		progressStatusLayout.addComponent(successfulImportsLabel);
-		failedImportsLabel = new Label(String.format(I18nProperties.getCaption(Captions.importErrors), 0));
+		progressStatusLayout.add(successfulImportsLabel);
+		failedImportsLabel = new Span(String.format(I18nProperties.getCaption(Captions.importErrors), 0));
 		CssStyles.style(failedImportsLabel, CssStyles.LABEL_CRITICAL);
-		progressStatusLayout.addComponent(failedImportsLabel);
+		progressStatusLayout.add(failedImportsLabel);
 
 		if (showDuplicates) {
-			duplicateImportsLabel = new Label(String.format(I18nProperties.getCaption(Captions.importDuplicates), 0));
+			duplicateImportsLabel = new Span(String.format(I18nProperties.getCaption(Captions.importDuplicates), 0));
 			CssStyles.style(duplicateImportsLabel, CssStyles.LABEL_WARNING);
-			progressStatusLayout.addComponent(duplicateImportsLabel);
+			progressStatusLayout.add(duplicateImportsLabel);
 		}
 		if (showSkips) {
-			skippedImportsLabel = new Label(String.format(I18nProperties.getCaption(Captions.importSkips), 0));
+			skippedImportsLabel = new Span(String.format(I18nProperties.getCaption(Captions.importSkips), 0));
 			CssStyles.style(skippedImportsLabel, CssStyles.LABEL_MINOR);
-			progressStatusLayout.addComponent(skippedImportsLabel);
+			progressStatusLayout.add(skippedImportsLabel);
 		}
 	}
 
@@ -84,16 +84,16 @@ public class ImportProgressLayout extends AbstractProgressLayout<ImportProgressU
 		ImportLineResult result = progressUpdateInfo.getImportLineResult();
 		if (result == ImportLineResult.SUCCESS) {
 			successfulImportsCount++;
-			successfulImportsLabel.setValue(String.format(I18nProperties.getCaption(Captions.importImports), successfulImportsCount));
+			successfulImportsLabel.setText(String.format(I18nProperties.getCaption(Captions.importImports), successfulImportsCount));
 		} else if (result == ImportLineResult.ERROR) {
 			failedImportsCount++;
-			failedImportsLabel.setValue(String.format(I18nProperties.getCaption(Captions.importErrors), failedImportsCount));
+			failedImportsLabel.setText(String.format(I18nProperties.getCaption(Captions.importErrors), failedImportsCount));
 		} else if (result == ImportLineResult.SKIPPED) {
 			skippedImportsCount++;
-			skippedImportsLabel.setValue(String.format(I18nProperties.getCaption(Captions.importSkips), skippedImportsCount));
+			skippedImportsLabel.setText(String.format(I18nProperties.getCaption(Captions.importSkips), skippedImportsCount));
 		} else if (result == ImportLineResult.DUPLICATE) {
 			duplicateImportsCount++;
-			duplicateImportsLabel.setValue(String.format(I18nProperties.getCaption(Captions.importDuplicates), duplicateImportsCount));
+			duplicateImportsLabel.setText(String.format(I18nProperties.getCaption(Captions.importDuplicates), duplicateImportsCount));
 		}
 	}
 

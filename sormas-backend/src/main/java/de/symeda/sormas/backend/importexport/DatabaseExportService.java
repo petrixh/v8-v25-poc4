@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
 import java.io.Writer;
-import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
@@ -28,11 +27,11 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.hibernate.Session;
 import org.postgresql.PGConnection;
@@ -273,7 +272,7 @@ public class DatabaseExportService {
 	}
 
 	private int getColumnCount(String tableName) {
-		BigInteger bigIntegerResult = (BigInteger) em.createNativeQuery(COUNT_TABLE_COLUMNS).setParameter("tableName", tableName).getSingleResult();
+		Number bigIntegerResult = (Number) em.createNativeQuery(COUNT_TABLE_COLUMNS).setParameter("tableName", tableName).getSingleResult();
 		return bigIntegerResult.intValue();
 	}
 

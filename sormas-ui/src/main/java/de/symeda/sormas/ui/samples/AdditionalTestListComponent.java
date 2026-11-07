@@ -2,7 +2,7 @@ package de.symeda.sormas.ui.samples;
 
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.button.Button;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -22,7 +22,7 @@ public class AdditionalTestListComponent extends SideComponent {
 		super(I18nProperties.getString(Strings.headingAdditionalTests), actionCallback);
 
 		list = new AdditionalTestList(sampleUuid, actionCallback, isEditAllowed);
-		addComponent(list);
+		add(list);
 		list.reload();
 
 		if (UiUtil.permitted(isEditAllowed, UserRight.ADDITIONAL_TEST_CREATE)) {

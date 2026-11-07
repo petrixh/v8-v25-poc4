@@ -20,8 +20,8 @@ import static de.symeda.sormas.api.utils.FieldConstraints.CHARACTER_LIMIT_UUID_M
 
 import java.util.Date;
 
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.i18n.Validations;

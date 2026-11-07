@@ -4,8 +4,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.ejb.EJB;
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.ejb.EJB;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;

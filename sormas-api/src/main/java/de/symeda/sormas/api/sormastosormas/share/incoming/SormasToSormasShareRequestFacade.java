@@ -20,8 +20,8 @@ package de.symeda.sormas.api.sormastosormas.share.incoming;
 
 import java.util.List;
 
-import javax.ejb.Remote;
-import javax.validation.Valid;
+import jakarta.ejb.Remote;
+import jakarta.validation.Valid;
 
 import de.symeda.sormas.api.caze.CaseReferenceDto;
 import de.symeda.sormas.api.common.Page;

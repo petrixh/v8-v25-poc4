@@ -23,14 +23,12 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.Page;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.PopupDateField;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.shared.Tooltip;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -38,6 +36,8 @@ import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.utils.DateFilterOption;
 import de.symeda.sormas.api.utils.DateHelper;
 import de.symeda.sormas.api.utils.EpiWeek;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.PopupDateField;
 
 public class EpiWeekAndDateFilterComponent<DATE_TYPE> extends HorizontalLayout {
 
@@ -79,18 +79,18 @@ public class EpiWeekAndDateFilterComponent<DATE_TYPE> extends HorizontalLayout {
 		dateFilterOptionFilter.setWidth(200, Unit.PIXELS);
 		dateFilterOptionFilter.addItems((Object[]) DateFilterOption.values());
 		dateFilterOptionFilter.setNullSelectionAllowed(false);
-		dateFilterOptionFilter.select(DateFilterOption.EPI_WEEK);
+		dateFilterOptionFilter.setValue(DateFilterOption.EPI_WEEK);
 		if (showCaption) {
 			dateFilterOptionFilter.setCaption(I18nProperties.getCaption(Captions.dashboardCustomPeriod));
 		}
 
 		dateFilterOptionFilter.addValueChangeListener(e -> {
-			if (e.getProperty().getValue() == DateFilterOption.DATE) {
-				int newIndex = getComponentIndex(weekFromFilter);
-				removeComponent(weekFromFilter);
-				removeComponent(weekToFilter);
-				addComponent(dateFromFilter, newIndex);
-				addComponent(dateToFilter, newIndex + 1);
+			if (e.getValue() == DateFilterOption.DATE) {
+				int newIndex = indexOf(weekFromFilter);
+				remove(weekFromFilter);
+				remove(weekToFilter);
+				addComponentAtIndex(newIndex, dateFromFilter);
+				addComponentAtIndex(newIndex + 1, dateToFilter);
 
 				if (fillAutomatically) {
 					dateFromFilter.setValue(DateHelper.subtractDays(c.getTime(), 7));
@@ -98,12 +98,12 @@ public class EpiWeekAndDateFilterComponent<DATE_TYPE> extends HorizontalLayout {
 				if (fillAutomatically) {
 					dateToFilter.setValue(c.getTime());
 				}
-			} else if (getComponentIndex(dateFromFilter) != -1) {
-				int newIndex = getComponentIndex(dateFromFilter);
-				removeComponent(dateFromFilter);
-				removeComponent(dateToFilter);
-				addComponent(weekFromFilter, newIndex);
-				addComponent(weekToFilter, newIndex + 1);
+			} else if (indexOf(dateFromFilter) != -1) {
+				int newIndex = indexOf(dateFromFilter);
+				remove(dateFromFilter);
+				remove(dateToFilter);
+				addComponentAtIndex(newIndex, weekFromFilter);
+				addComponentAtIndex(newIndex + 1, weekToFilter);
 
 				if (fillAutomatically) {
 					weekFromFilter.setValue(DateHelper.getEpiWeek(c.getTime()));
@@ -113,7 +113,7 @@ public class EpiWeekAndDateFilterComponent<DATE_TYPE> extends HorizontalLayout {
 				}
 			}
 		});
-		addComponent(dateFilterOptionFilter);
+		add(dateFilterOptionFilter);
 
 		// New case date type selector
 		if (dateTypes != null) {
@@ -124,19 +124,20 @@ public class EpiWeekAndDateFilterComponent<DATE_TYPE> extends HorizontalLayout {
 				dateTypeSelector.setInputPrompt(dateTypePrompt);
 			}
 			if (defaultDateType != null) {
-				dateTypeSelector.select(defaultDateType);
+				dateTypeSelector.setValue(defaultDateType);
 			}
 			if (showCaption) {
 				CssStyles.style(dateTypeSelector, CssStyles.FORCE_CAPTION);
 			}
-			addComponent(dateTypeSelector);
+			add(dateTypeSelector);
 
 			if (!StringUtils.isEmpty(infoText)) {
-				Label infoLabel = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
+				Span infoLabel = new Span(VaadinIcon.INFO_CIRCLE.create());
 				infoLabel.setSizeUndefined();
-				infoLabel.setDescription(infoText, ContentMode.HTML);
+				// was setDescription(infoText, ContentMode.HTML): the tooltip renders the HTML through Markdown
+				Tooltip.forComponent(infoLabel).setMarkdown(infoText);
 				CssStyles.style(infoLabel, CssStyles.LABEL_XLARGE, CssStyles.LABEL_SECONDARY);
-				addComponent(infoLabel);
+				add(infoLabel);
 			}
 		}
 
@@ -155,7 +156,7 @@ public class EpiWeekAndDateFilterComponent<DATE_TYPE> extends HorizontalLayout {
 		if (showCaption) {
 			weekFromFilter.setCaption(I18nProperties.getCaption(Captions.epiWeekFrom));
 		}
-		addComponent(weekFromFilter);
+		add(weekFromFilter);
 
 		weekToFilter.setId("weekTo");
 		weekToFilter.setWidth(200, Unit.PIXELS);
@@ -169,7 +170,7 @@ public class EpiWeekAndDateFilterComponent<DATE_TYPE> extends HorizontalLayout {
 		if (showCaption) {
 			weekToFilter.setCaption(I18nProperties.getCaption(Captions.epiWeekTo));
 		}
-		addComponent(weekToFilter);
+		add(weekToFilter);
 
 		// Date filter
 		dateFromFilter.setId("dateFrom");
@@ -198,20 +199,20 @@ public class EpiWeekAndDateFilterComponent<DATE_TYPE> extends HorizontalLayout {
 		DateFilterOption dateFilterOption = (DateFilterOption) dateFilterOptionFilter.getValue();
 		Notification notification;
 		if (dateFilterOption == DateFilterOption.DATE) {
-			notification = new Notification(
+			notification = NotificationHelper.createNotification(
 				I18nProperties.getString(Strings.headingMissingDateFilter),
 				I18nProperties.getString(Strings.messageMissingDateFilter),
-				Notification.Type.WARNING_MESSAGE,
+				NotificationHelper.Type.WARNING_MESSAGE,
 				false);
 		} else {
-			notification = new Notification(
+			notification = NotificationHelper.createNotification(
 				I18nProperties.getString(Strings.headingMissingEpiWeekFilter),
 				I18nProperties.getString(Strings.messageMissingEpiWeekFilter),
-				Notification.Type.WARNING_MESSAGE,
+				NotificationHelper.Type.WARNING_MESSAGE,
 				false);
 		}
-		notification.setDelayMsec(-1);
-		notification.show(Page.getCurrent());
+		NotificationHelper.setDelayMsec(notification, -1);
+		notification.open();
 	}
 
 	public ComboBox getDateFilterOptionFilter() {

@@ -19,12 +19,11 @@ package de.symeda.sormas.ui.contact;
 
 import java.util.List;
 
-import com.vaadin.navigator.View;
-
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.contact.ContactCriteria;
 import de.symeda.sormas.api.contact.ContactIndexDto;
 import de.symeda.sormas.api.utils.SortProperty;
+import de.symeda.sormas.ui.navigation.View;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
 
 @SuppressWarnings("serial")

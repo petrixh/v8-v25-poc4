@@ -17,12 +17,12 @@ package de.symeda.sormas.backend.util;
 
 import java.util.HashMap;
 
-import javax.annotation.Resource;
-import javax.annotation.security.PermitAll;
-import javax.ejb.EJB;
-import javax.ejb.SessionContext;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.InvocationContext;
+import jakarta.annotation.Resource;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ejb.EJB;
+import jakarta.ejb.SessionContext;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.InvocationContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

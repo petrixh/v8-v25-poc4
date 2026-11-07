@@ -17,7 +17,7 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.utils;
 
-import com.vaadin.v7.data.validator.AbstractValidator;
+import de.symeda.sormas.ui.utils.fields.AbstractValidator;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseLogic;

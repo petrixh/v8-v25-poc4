@@ -18,10 +18,10 @@ package de.symeda.sormas.ui.utils.components.customizablefield;
 import java.util.Collections;
 import java.util.List;
 
-import com.vaadin.data.ValueProvider;
-import com.vaadin.server.Setter;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.RadioButtonGroup;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.data.binder.Setter;
+import com.vaadin.flow.function.ValueProvider;
 
 import de.symeda.sormas.api.customizablefield.CustomizableFieldCustomProperties;
 import de.symeda.sormas.api.customizablefield.CustomizableFieldMetadataDto;
@@ -31,7 +31,7 @@ import de.symeda.sormas.api.customizablefield.CustomizableFieldValueDto;
  * Concrete {@link CustomizableFieldInput} for
  * {@link de.symeda.sormas.api.customizablefield.CustomizableFieldType#RADIO_BUTTON_LIST}.
  * <p>
- * Renders a Vaadin v8 {@link RadioButtonGroup} populated with the string options defined in the
+ * Renders a Flow {@link RadioButtonGroup} populated with the string options defined in the
  * field's {@link CustomizableFieldMetadataDto#getCustomProperties() customProperties} under
  * {@link CustomizableFieldCustomProperties#getOptions()}.
  * <p>
@@ -48,7 +48,7 @@ public class CustomizableFieldInputRadioButtonList extends CustomizableFieldInpu
 
     private RadioButtonGroup<String> radioButtonGroup;
     /**
-     * Holds a value that was pushed via {@link #doSetValue(String)} before
+     * Holds a value that was pushed via {@link #setPresentationValue(Object)} before
      * {@link #buildInputComponent()} had a chance to create the {@link RadioButtonGroup}.
      * Applied to the group on first render.
      */

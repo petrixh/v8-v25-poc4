@@ -20,10 +20,10 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.feature.FeatureType;
@@ -52,32 +52,32 @@ public class FeatureConfigurationView extends AbstractConfigurationView {
 	private static final List<FeatureType> CONFIGURABLE_FEATURES =
 		Arrays.asList(FeatureType.SAMPLE_ADD_PATHOGEN_TEST, FeatureType.PATHOGEN_TEST_RESULT_REQUIRED);
 
-	private final Map<FeatureType, CheckBox> checkBoxes = new EnumMap<>(FeatureType.class);
+	private final Map<FeatureType, Checkbox> checkBoxes = new EnumMap<>(FeatureType.class);
 
 	public FeatureConfigurationView() {
 
 		super(VIEW_NAME);
 
 		VerticalLayout layout = new VerticalLayout();
-		layout.setMargin(true);
+		layout.setPadding(true);
 		layout.setSpacing(true);
-		layout.setStyleName("crud-main-layout");
+		layout.setClassName("crud-main-layout");
 
-		Label heading = new Label(I18nProperties.getCaption(Captions.featureConfiguration));
-		heading.addStyleName(CssStyles.H2);
-		layout.addComponent(heading);
+		Span heading = new Span(I18nProperties.getCaption(Captions.featureConfiguration));
+		heading.addClassName(CssStyles.H2);
+		layout.add(heading);
 
-		Label info = new Label(I18nProperties.getString(Strings.infoFeatureConfiguration));
+		Span info = new Span(I18nProperties.getString(Strings.infoFeatureConfiguration));
 		CssStyles.style(info, CssStyles.VSPACE_3);
-		layout.addComponent(info);
+		layout.add(info);
 
 		for (FeatureType featureType : CONFIGURABLE_FEATURES) {
-			CheckBox checkBox = new CheckBox(featureType.toString());
+			Checkbox checkBox = new Checkbox(featureType.toString());
 			checkBoxes.put(featureType, checkBox);
-			layout.addComponent(checkBox);
+			layout.add(checkBox);
 		}
 
-		layout.addComponent(ButtonHelper.createButton(Captions.actionSave, e -> save(), CssStyles.FORCE_CAPTION));
+		layout.add(ButtonHelper.createButton(Captions.actionSave, e -> save(), CssStyles.FORCE_CAPTION));
 
 		addComponent(layout);
 	}

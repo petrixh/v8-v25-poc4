@@ -1,7 +1,5 @@
 package de.symeda.sormas.ui.dashboard.campaigns;
 
-import static com.vaadin.ui.Notification.Type.ERROR_MESSAGE;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collection;
@@ -19,10 +17,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.text.StringEscapeUtils;
 
-import com.vaadin.ui.JavaScript;
-import com.vaadin.ui.JavaScriptFunction;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Language;
 import de.symeda.sormas.api.campaign.CampaignJurisdictionLevel;
@@ -37,6 +32,7 @@ import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.highcharts.HighChart;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 public class CampaignDashboardDiagramComponent extends VerticalLayout {
 
@@ -75,8 +71,8 @@ public class CampaignDashboardDiagramComponent extends VerticalLayout {
 		setSizeFull();
 		campaignColumnChart.setSizeFull();
 
-		setMargin(false);
-		addComponent(campaignColumnChart);
+		setPadding(false);
+		add(campaignColumnChart);
 
 		final Map<Object, String> axisInfo = new HashMap<>();
 		for (CampaignDiagramDataDto diagramData : diagramDataList) {
@@ -103,17 +99,17 @@ public class CampaignDashboardDiagramComponent extends VerticalLayout {
 			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
 		// TODO would be cleaner to extend the HighChart class to provide customizable toggle options
-		JavaScript.getCurrent().addFunction("changeDiagramPercentage_" + diagramDefinition.getDiagramId(), (JavaScriptFunction) jsonArray -> {
+		campaignColumnChart.addJsFunction("changeDiagramPercentage_" + diagramDefinition.getDiagramId(), () -> {
 			setShowPercentages(!isShowPercentages());
 			buildDiagramChart(getDiagramCaption(), campaignJurisdictionLevelGroupBy);
 		});
 
-		JavaScript.getCurrent().addFunction("changeDiagramLabels_" + diagramDefinition.getDiagramId(), (JavaScriptFunction) jsonArray -> {
+		campaignColumnChart.addJsFunction("changeDiagramLabels_" + diagramDefinition.getDiagramId(), () -> {
 			setShowDataLabels(!isShowDataLabels());
 			buildDiagramChart(getDiagramCaption(), campaignJurisdictionLevelGroupBy);
 		});
 
-		JavaScript.getCurrent().addFunction("changeDiagramChartType_" + diagramDefinition.getDiagramId(), (JavaScriptFunction) jsonArray -> {
+		campaignColumnChart.addJsFunction("changeDiagramChartType_" + diagramDefinition.getDiagramId(), () -> {
 			setShowAsColumnChart(!isShowAsColumnChart());
 			buildDiagramChart(getDiagramCaption(), campaignJurisdictionLevelGroupBy);
 		});
@@ -344,9 +340,9 @@ public class CampaignDashboardDiagramComponent extends VerticalLayout {
 							totalValuesWithoutStacks ? null : series.getStack()));
 					if (totalValue == null) {
 						if (!isCommunityGrouping && !ignoreTotalsError) {
-							Notification.show(
+							NotificationHelper.show(
 								String.format(I18nProperties.getString(Strings.errorCampaignDiagramTotalsCalculationError), getDiagramCaption()),
-								ERROR_MESSAGE);
+								NotificationHelper.Type.ERROR_MESSAGE);
 							ignoreTotalsError = true; // only show once
 						}
 					} else if (totalValue > 0) {

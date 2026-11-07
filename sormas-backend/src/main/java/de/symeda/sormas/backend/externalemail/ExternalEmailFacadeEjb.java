@@ -32,12 +32,12 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.security.PermitAll;
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.mail.MessagingException;
-import javax.validation.Valid;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.mail.MessagingException;
+import jakarta.validation.Valid;
 
 import de.symeda.sormas.api.survey.SurveyTokenCriteria;
 import org.apache.commons.collections4.CollectionUtils;

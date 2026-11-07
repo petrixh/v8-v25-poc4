@@ -51,14 +51,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.v7.data.fieldgroup.FieldGroup;
-import com.vaadin.v7.ui.AbstractSelect;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -76,8 +69,14 @@ import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.FieldGroup;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class HealthConditionsForm extends AbstractEditForm<HealthConditionsDto> {
 
@@ -166,8 +165,8 @@ public class HealthConditionsForm extends AbstractEditForm<HealthConditionsDto> 
 	@Override
 	protected void addFields() {
 
-		Label healthConditionsHeadingLabel = new Label(I18nProperties.getString(Strings.headingHealthConditions));
-		healthConditionsHeadingLabel.addStyleName(H3);
+		Span healthConditionsHeadingLabel = new Span(I18nProperties.getString(Strings.headingHealthConditions));
+		healthConditionsHeadingLabel.addClassName(H3);
 		getContent().addComponent(healthConditionsHeadingLabel, HEALTH_CONDITIONS_HEADINGS_LOC);
 
 		addFields(fieldsList);
@@ -192,7 +191,7 @@ public class HealthConditionsForm extends AbstractEditForm<HealthConditionsDto> 
 		NullableOptionGroup immunodeficiencyField = (NullableOptionGroup) getFieldGroup().getField(IMMUNODEFICIENCY_OTHER_THAN_HIV);
 		if (aspleniaField != null) {
 			aspleniaField.addValueChangeListener(e -> {
-				Object rawValue = e.getProperty().getValue();
+				Object rawValue = e.getValue();
 				if (rawValue instanceof Set) {
 					@SuppressWarnings("unchecked")
 					Set<Object> aspleniaValue = (Set<Object>) rawValue;
@@ -219,7 +218,7 @@ public class HealthConditionsForm extends AbstractEditForm<HealthConditionsDto> 
 				infectionYearLayout.setTemplateContents(TB_INFECTION_YEAR_LAYOUT);
 
 				// infection year label
-				Label lblInfectionYear = new Label(I18nProperties.getCaption(Captions.HealthConditions_tuberculosisInfectionYear));
+				Span lblInfectionYear = new Span(I18nProperties.getCaption(Captions.HealthConditions_tuberculosisInfectionYear));
 				infectionYearLayout.addComponent(lblInfectionYear, "LBL_TUBERCULOSIS_INFECTION_YEAR");
 				getContent().addComponent(infectionYearLayout, "TUBERCULOSIS_INFECTION_YEAR_LAYOUT");
 
@@ -227,7 +226,7 @@ public class HealthConditionsForm extends AbstractEditForm<HealthConditionsDto> 
 				ComboBox tempInfectionYearCB = addField(infectionYearLayout, TUBERCULOSIS_INFECTION_YEAR, ComboBox.class);
 				tempInfectionYearCB.addItems(DateHelper.getYearsToNow());
 				tempInfectionYearCB.setNullSelectionAllowed(true);
-				tempInfectionYearCB.setItemCaptionMode(AbstractSelect.ItemCaptionMode.ID_TOSTRING);
+				// was setItemCaptionMode(ID_TOSTRING): items without an explicit caption show toString()
 				tempInfectionYearCB.setInputPrompt(I18nProperties.getString(Strings.year));
 				tempInfectionYearCB.setCaption(null);
 				infectionYearLayout.addComponent(tempInfectionYearCB, TUBERCULOSIS_INFECTION_YEAR);
@@ -238,11 +237,11 @@ public class HealthConditionsForm extends AbstractEditForm<HealthConditionsDto> 
 				// compliance with treatment layout
 				CustomLayout complianceTreatmentLayout = new CustomLayout();
 				complianceTreatmentLayout.setTemplateContents(TBA_LAYOUT);
-				complianceTreatmentLayout.setStyleName("compliance-padding");
+				complianceTreatmentLayout.setClassName("compliance-padding");
 				complianceTreatmentLayout.setVisible(true);
 
 				// compliance with treatment label
-				Label lblComplianceWithTreatment = new Label(I18nProperties.getCaption(Captions.HealthConditions_complianceWithTreatment));
+				Span lblComplianceWithTreatment = new Span(I18nProperties.getCaption(Captions.HealthConditions_complianceWithTreatment));
 				complianceTreatmentLayout.addComponent(lblComplianceWithTreatment, "LBL_COMPLIANCE_WITH_TREATMENT");
 
 				// compliance with treatment combobox
@@ -267,10 +266,10 @@ public class HealthConditionsForm extends AbstractEditForm<HealthConditionsDto> 
 				// Immuno deficiency layout
 				CustomLayout immuneDeficiencyLayout = new CustomLayout();
 				immuneDeficiencyLayout.setTemplateContents(IMMUNODEFICIENCY_LAYOUT);
-				immuneDeficiencyLayout.setStyleName("compliance-padding");
+				immuneDeficiencyLayout.setClassName("compliance-padding");
 				immuneDeficiencyLayout.setVisible(true);
 
-				Label lblImmunoDeficiency = new Label(I18nProperties.getCaption(Captions.HealthConditions_immunodeficiencyOtherThanHivText));
+				Span lblImmunoDeficiency = new Span(I18nProperties.getCaption(Captions.HealthConditions_immunodeficiencyOtherThanHivText));
 				immuneDeficiencyLayout.addComponent(lblImmunoDeficiency, "LBL_IMMUNODEFICIENCY");
 				TextField immuneDeficiencyText = addField(IMMUNODEFICIENCY_OTHER_THAN_HIV_TEXT, TextField.class);
 				immuneDeficiencyText.setCaption(null);
@@ -283,11 +282,11 @@ public class HealthConditionsForm extends AbstractEditForm<HealthConditionsDto> 
 				// Exposed to mosquito borne viruses
 				CustomLayout exposedToMosquitoBorneVirusesLayout = new CustomLayout();
 				exposedToMosquitoBorneVirusesLayout.setTemplateContents(EXPOSED_TO_MOSQUITO_BORNE_VIRUSES_LAYOUT);
-				exposedToMosquitoBorneVirusesLayout.setStyleName("compliance-padding");
+				exposedToMosquitoBorneVirusesLayout.setClassName("compliance-padding");
 				exposedToMosquitoBorneVirusesLayout.setVisible(true);
 
-				Label lblExposedToMosquitoBorneViruses =
-					new Label(I18nProperties.getCaption(Captions.HealthConditions_exposedToMosquitoBorneVirusesText));
+				Span lblExposedToMosquitoBorneViruses =
+					new Span(I18nProperties.getCaption(Captions.HealthConditions_exposedToMosquitoBorneVirusesText));
 				exposedToMosquitoBorneVirusesLayout.addComponent(lblExposedToMosquitoBorneViruses, "LBL_EXPOSED_TO_BORNE_VIRUSES");
 
 				TextField exposedToMosquitoBorneViruses = addField(EXPOSED_TO_MOSQUITO_BORNE_VIRUSES_TEXT, TextField.class);
@@ -322,7 +321,7 @@ public class HealthConditionsForm extends AbstractEditForm<HealthConditionsDto> 
 			malariaInfectedYearLayout.setTemplateContents(MALARIA_YEAR_LAYOUT);
 
 			// infected year label
-			Label lblInfectedYear = new Label(I18nProperties.getCaption(Captions.HealthConditions_malariaInfectedYear));
+			Span lblInfectedYear = new Span(I18nProperties.getCaption(Captions.HealthConditions_malariaInfectedYear));
 			malariaInfectedYearLayout.addComponent(lblInfectedYear, "LBL_MALARIA_INFECTED_YEAR");
 			getContent().addComponent(malariaInfectedYearLayout, "MALARIA_INFECTED_YEAR_LAYOUT");
 
@@ -332,7 +331,7 @@ public class HealthConditionsForm extends AbstractEditForm<HealthConditionsDto> 
 			malInfectedYearCB.setNullSelectionAllowed(true);
 			malInfectedYearCB.setCaption(null);
 			malInfectedYearCB.addItems(DateHelper.getYearsToNow());
-			malInfectedYearCB.setItemCaptionMode(AbstractSelect.ItemCaptionMode.ID_TOSTRING);
+			// was setItemCaptionMode(ID_TOSTRING): items without an explicit caption show toString()
 			malariaInfectedYearLayout.addComponent(malInfectedYearCB, MALARIA_INFECTED_YEAR);
 			fieldVisibilityCheck(getField(MALARIA), malInfectedYearCB, lblInfectedYear);
 		}
@@ -346,7 +345,7 @@ public class HealthConditionsForm extends AbstractEditForm<HealthConditionsDto> 
 	 */
 	private void fieldVisibilityCheck(FieldGroup fieldGroup, List<String> visibilities) {
 		fieldGroup.getFields().stream().forEach(field -> {
-			if (!visibilities.contains(field.getId())) {
+			if (!visibilities.contains(field.getId().orElse(null))) {
 				field.setVisible(false);
 				field.clear();
 			}
@@ -360,7 +359,7 @@ public class HealthConditionsForm extends AbstractEditForm<HealthConditionsDto> 
 	 * @param field
 	 * @param label
 	 */
-	private void fieldVisibilityCheck(NullableOptionGroup input, Field field, Label label) {
+	private void fieldVisibilityCheck(NullableOptionGroup input, Field field, Span label) {
 		input.addValueChangeListener(event -> updateFieldVisibility(input, field, label));
 		updateFieldVisibility(input, field, label);
 	}
@@ -396,8 +395,8 @@ public class HealthConditionsForm extends AbstractEditForm<HealthConditionsDto> 
 			getFieldGroup().unbind(field);
 		});
 
-		Label confidentialLabel = new Label(I18nProperties.getCaption(Captions.inaccessibleValue));
-		confidentialLabel.addStyleName(CssStyles.INACCESSIBLE_LABEL);
+		Span confidentialLabel = new Span(I18nProperties.getCaption(Captions.inaccessibleValue));
+		confidentialLabel.addClassName(CssStyles.INACCESSIBLE_LABEL);
 		getContent().addComponent(confidentialLabel, CONFIDENTIAL_LABEL_LOC);
 	}
 }

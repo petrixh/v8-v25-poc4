@@ -5,11 +5,7 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 import com.opencsv.exceptions.CsvValidationException;
-import com.vaadin.server.ClassResource;
-import com.vaadin.server.Page;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -18,6 +14,8 @@ import de.symeda.sormas.api.importexport.ImportFacade;
 import de.symeda.sormas.api.importexport.ValueSeparator;
 import de.symeda.sormas.ui.importer.AbstractImportLayout;
 import de.symeda.sormas.ui.importer.ImportReceiver;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 
 public class LineListingImportLayout extends AbstractImportLayout {
 
@@ -29,7 +27,7 @@ public class LineListingImportLayout extends AbstractImportLayout {
 
 		ImportFacade importFacade = FacadeProvider.getImportFacade();
 
-		addDownloadResourcesComponent(1, new ClassResource("/SORMAS_Line_Listing_Import_Guide.pdf"));
+		addDownloadResourcesComponent(1, DownloadHandler.forClassResource(LineListingImportLayout.class, "/SORMAS_Line_Listing_Import_Guide.pdf"));
 		addDownloadImportTemplateComponent(
 			2,
 			importFacade.getCaseLineListingImportTemplateFilePath(),
@@ -41,11 +39,11 @@ public class LineListingImportLayout extends AbstractImportLayout {
 				CaseImporter importer = new CaseImporter(file, false, currentUser, (ValueSeparator) separator.getValue());
 				importer.startImport(this::extendDownloadErrorReportButton, currentUI, true);
 			} catch (IOException | CsvValidationException e) {
-				new Notification(
+				NotificationHelper.show(
 					I18nProperties.getString(Strings.headingImportFailed),
 					I18nProperties.getString(Strings.messageImportFailed),
 					Type.ERROR_MESSAGE,
-					false).show(Page.getCurrent());
+					false);
 			}
 		}));
 		addDownloadErrorReportComponent(4);

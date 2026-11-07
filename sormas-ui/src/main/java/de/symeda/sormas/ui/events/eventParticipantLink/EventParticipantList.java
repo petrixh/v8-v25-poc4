@@ -2,8 +2,7 @@ package de.symeda.sormas.ui.events.eventParticipantLink;
 
 import java.util.List;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.event.EventParticipantCriteria;
@@ -19,12 +18,12 @@ import de.symeda.sormas.ui.utils.PaginationList;
 public class EventParticipantList extends PaginationList<EventParticipantListEntryDto> {
 
 	private final EventParticipantCriteria eventParticipantCriteria = new EventParticipantCriteria();
-	private final Label noEventParticipantLabel;
+	private final Span noEventParticipantLabel;
 
 	public EventParticipantList(PersonReferenceDto personRef) {
 		super(5);
 		eventParticipantCriteria.setPerson(personRef);
-		noEventParticipantLabel = new Label(I18nProperties.getCaption(Captions.personNoEventParticipantLinkedToPerson));
+		noEventParticipantLabel = new Span(I18nProperties.getCaption(Captions.personNoEventParticipantLinkedToPerson));
 	}
 
 	@Override
@@ -36,9 +35,9 @@ public class EventParticipantList extends PaginationList<EventParticipantListEnt
 		if (!eventParticipants.isEmpty()) {
 			showPage(1);
 		} else {
-			listLayout.removeAllComponents();
+			listLayout.removeAll();
 			updatePaginationLayout();
-			listLayout.addComponent(noEventParticipantLabel);
+			listLayout.add(noEventParticipantLabel);
 		}
 	}
 
@@ -55,11 +54,11 @@ public class EventParticipantList extends PaginationList<EventParticipantListEnt
 			if (UiUtil.permitted(UserRight.EVENTPARTICIPANT_EDIT) && !isActiveEventParticipant) {
 				listEntry.addEditListener(
 					i,
-					(Button.ClickListener) event -> ControllerProvider.getEventParticipantController()
+					event -> ControllerProvider.getEventParticipantController()
 						.navigateToData(listEntry.getEventParticipantListEntryDto().getUuid()));
 			}
 
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 }

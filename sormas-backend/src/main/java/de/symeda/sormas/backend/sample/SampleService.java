@@ -34,25 +34,25 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.persistence.Tuple;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.CriteriaUpdate;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Selection;
-import javax.persistence.criteria.Subquery;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.CriteriaUpdate;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Selection;
+import jakarta.persistence.criteria.Subquery;
 
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -251,7 +251,7 @@ public class SampleService extends AbstractDeletableAdoService<Sample>
 			Root<PathogenTest> testCountRoot = testCountSq.from(PathogenTest.class);
 			testCountSq.where(cb.equal(testCountRoot.get(PathogenTest.SAMPLE), sample), cb.isFalse(testCountRoot.get(PathogenTest.DELETED)));
 			testCountSq.select(cb.countDistinct(testCountRoot.get(PathogenTest.ID)));
-			selections.add(testCountSq.getSelection());
+			selections.add(testCountSq);
 
 			selections.addAll(getJurisdictionSelections(sampleQueryContext));
 
@@ -490,7 +490,7 @@ public class SampleService extends AbstractDeletableAdoService<Sample>
 		Root<PathogenTest> testCountRoot = testCountSq.from(PathogenTest.class);
 		testCountSq.where(cb.equal(testCountRoot.get(PathogenTest.SAMPLE), sample), cb.isFalse(testCountRoot.get(PathogenTest.DELETED)));
 		testCountSq.select(cb.countDistinct(testCountRoot.get(PathogenTest.ID)));
-		selections.add(testCountSq.getSelection());
+		selections.add(testCountSq);
 
 		selections.addAll(getJurisdictionSelections(sampleQueryContext));
 		cq.multiselect(selections);
@@ -1098,7 +1098,11 @@ public class SampleService extends AbstractDeletableAdoService<Sample>
 		cu.where(cb.equal(root.get(Sample.UUID), sample.getUuid()));
 
 		em.createQuery(cu).executeUpdate();
-
+		// The bulk update bypasses the managed instance; without this, Hibernate 7 refuses to flush it while it still references
+		// the event participant that is removed next
+		if (em.contains(sample)) {
+			em.refresh(sample);
+		}
 	}
 
 	private void deleteSampleLinks(Sample sample) {

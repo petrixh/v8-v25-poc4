@@ -10,26 +10,23 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import de.symeda.sormas.api.person.SymptomJournalStatus;
 import de.symeda.sormas.api.sormastosormas.SormasToSormasShareableDto;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.vaadin.hene.popupbutton.PopupButton;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.server.StreamResource;
-import com.vaadin.server.ThemeResource;
-import com.vaadin.ui.BrowserFrame;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Image;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.html.IFrame;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.externaljournal.ExternalJournalFacade;
@@ -95,30 +92,30 @@ public class ExternalJournalUtil {
 	private static Button createSymptomJournalOptionsButton(PersonDto person) {
 		VerticalLayout popupLayout = new VerticalLayout();
 		popupLayout.setSpacing(true);
-		popupLayout.setMargin(true);
-		popupLayout.addStyleName(CssStyles.LAYOUT_MINIMAL);
+		popupLayout.setPadding(true);
+		popupLayout.addClassName(CssStyles.LAYOUT_MINIMAL);
 		PopupButton ediaryButton =
-			ButtonHelper.createPopupButton(I18nProperties.getCaption(Captions.symptomJournalOptionsButton), popupLayout, ValoTheme.BUTTON_PRIMARY);
-		Button.ClickListener openListener = clickEvent -> {
+			ButtonHelper.createPopupButton(I18nProperties.getCaption(Captions.symptomJournalOptionsButton), popupLayout, CssStyles.BUTTON_PRIMARY);
+		ComponentEventListener<ClickEvent<Button>> openListener = clickEvent -> {
 			openSymptomJournalWindow(person);
 			ediaryButton.setPopupVisible(false);
 		};
 		// TODO: implement cancel for PIA
-		Button.ClickListener cancelListener = clickEvent -> {
+		ComponentEventListener<ClickEvent<Button>> cancelListener = clickEvent -> {
 			showForceDeletionPrompt(I18nProperties.getString(Strings.messageDeletionUnsupportedByExternalJournalWarning), person);
 		};
 		Button cancelButton =
-			ButtonHelper.createButton(I18nProperties.getCaption(Captions.cancelExternalFollowUpButton), cancelListener, ValoTheme.BUTTON_PRIMARY);
+			ButtonHelper.createButton(I18nProperties.getCaption(Captions.cancelExternalFollowUpButton), cancelListener, CssStyles.BUTTON_PRIMARY);
 		Button openButton =
-			ButtonHelper.createButton(I18nProperties.getCaption(Captions.openInSymptomJournalButton), openListener, ValoTheme.BUTTON_PRIMARY);
-		popupLayout.addComponent(cancelButton);
-		popupLayout.addComponent(openButton);
+			ButtonHelper.createButton(I18nProperties.getCaption(Captions.openInSymptomJournalButton), openListener, CssStyles.BUTTON_PRIMARY);
+		popupLayout.add(cancelButton);
+		popupLayout.add(openButton);
 		return ediaryButton;
 	}
 
 	private static Button createSymptomJournalRegisterButton(PersonDto person) {
 		Button btnCreateSymptomJournalAccount = ButtonHelper.createButton(I18nProperties.getCaption(Captions.createSymptomJournalAccountButton));
-		CssStyles.style(btnCreateSymptomJournalAccount, ValoTheme.BUTTON_PRIMARY);
+		CssStyles.style(btnCreateSymptomJournalAccount, CssStyles.BUTTON_PRIMARY);
 		btnCreateSymptomJournalAccount.addClickListener(clickEvent -> enrollPatientInSymptomJournal(person));
 		return btnCreateSymptomJournalAccount;
 	}
@@ -126,30 +123,30 @@ public class ExternalJournalUtil {
 	private static Button createPatientDiaryOptionsButton(PersonDto person) {
 		VerticalLayout popupLayout = new VerticalLayout();
 		popupLayout.setSpacing(true);
-		popupLayout.setMargin(true);
-		popupLayout.addStyleName(CssStyles.LAYOUT_MINIMAL);
+		popupLayout.setPadding(true);
+		popupLayout.addClassName(CssStyles.LAYOUT_MINIMAL);
 		PopupButton ediaryButton =
-			ButtonHelper.createPopupButton(I18nProperties.getCaption(Captions.patientDiaryOptionsButton), popupLayout, ValoTheme.BUTTON_PRIMARY);
-		Button.ClickListener cancelListener = clickEvent -> {
+			ButtonHelper.createPopupButton(I18nProperties.getCaption(Captions.patientDiaryOptionsButton), popupLayout, CssStyles.BUTTON_PRIMARY);
+		ComponentEventListener<ClickEvent<Button>> cancelListener = clickEvent -> {
 			showCancelFollowUpConfirmationPopup(person);
 			ediaryButton.setPopupVisible(false);
 		};
-		Button.ClickListener openListener = clickEvent -> {
+		ComponentEventListener<ClickEvent<Button>> openListener = clickEvent -> {
 			openPatientDiaryPage(person.getUuid());
 			ediaryButton.setPopupVisible(false);
 		};
 		Button cancelButton =
-			ButtonHelper.createButton(I18nProperties.getCaption(Captions.cancelExternalFollowUpButton), cancelListener, ValoTheme.BUTTON_PRIMARY);
+			ButtonHelper.createButton(I18nProperties.getCaption(Captions.cancelExternalFollowUpButton), cancelListener, CssStyles.BUTTON_PRIMARY);
 		Button openButton =
-			ButtonHelper.createButton(I18nProperties.getCaption(Captions.openInPatientDiaryButton), openListener, ValoTheme.BUTTON_PRIMARY);
-		popupLayout.addComponent(cancelButton);
-		popupLayout.addComponent(openButton);
+			ButtonHelper.createButton(I18nProperties.getCaption(Captions.openInPatientDiaryButton), openListener, CssStyles.BUTTON_PRIMARY);
+		popupLayout.add(cancelButton);
+		popupLayout.add(openButton);
 		return ediaryButton;
 	}
 
 	private static Button createPatientDiaryRegisterButton(PersonDto person) {
 		Button btnPatientDiaryAccount = ButtonHelper.createButton(I18nProperties.getCaption(Captions.registerInPatientDiaryButton));
-		CssStyles.style(btnPatientDiaryAccount, ValoTheme.BUTTON_PRIMARY);
+		CssStyles.style(btnPatientDiaryAccount, CssStyles.BUTTON_PRIMARY);
 		btnPatientDiaryAccount.addClickListener(clickEvent -> enrollPatientInPatientDiary(person));
 		return btnPatientDiaryAccount;
 	}
@@ -172,7 +169,9 @@ public class ExternalJournalUtil {
 	 */
 	private static void openSymptomJournalWindow(PersonDto person) {
 		String authToken = externalJournalFacade.getSymptomJournalAuthToken();
-		BrowserFrame frame = new BrowserFrame(null, new StreamResource(() -> {
+		// was a BrowserFrame showing a StreamResource
+		IFrame frame = new IFrame();
+		frame.setSrc(new StreamSourceDownloadHandler(() -> {
 			String formUrl = FacadeProvider.getConfigFacade().getSymptomJournalConfig().getUrl();
 			Map<String, String> parameters = new LinkedHashMap<>();
 			parameters.put("token", authToken);
@@ -183,17 +182,17 @@ public class ExternalJournalUtil {
 			byte[] document = createSymptomJournalForm(formUrl, parameters);
 
 			return new ByteArrayInputStream(document);
-		}, "symptomJournal.html"));
+		}, "symptomJournal.html", "text/html").inline());
 		frame.setWidth("100%");
 		frame.setHeight("100%");
 
-		Window window = VaadinUiUtil.createPopupWindow();
-		window.setContent(frame);
-		window.setCaption(I18nProperties.getString(Strings.headingSymptomJournalAccountCreation));
-		window.setWidth(80, Sizeable.Unit.PERCENTAGE);
-		window.setHeight(80, Sizeable.Unit.PERCENTAGE);
+		Dialog window = VaadinUiUtil.createPopupWindow();
+		window.add(frame);
+		window.setHeaderTitle(I18nProperties.getString(Strings.headingSymptomJournalAccountCreation));
+		window.setWidth("80%");
+		window.setHeight("80%");
 
-		UI.getCurrent().addWindow(window);
+		window.open();
 	}
 
 	/**
@@ -218,7 +217,7 @@ public class ExternalJournalUtil {
 	private static void showCancelFollowUpConfirmationPopup(PersonDto personDto) {
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getCaption(Captions.cancelExternalFollowUpPopupTitle),
-			new Label(I18nProperties.getString(Strings.confirmationCancelExternalFollowUpPopup)),
+			new Span(I18nProperties.getString(Strings.confirmationCancelExternalFollowUpPopup)),
 			I18nProperties.getString(Strings.yes),
 			I18nProperties.getString(Strings.no),
 			600,
@@ -263,59 +262,58 @@ public class ExternalJournalUtil {
 
 	private static void showExternalJournalWarningPopup(String message) {
 		VerticalLayout warningLayout = new VerticalLayout();
-		warningLayout.setMargin(true);
-		Image warningIcon = new Image(null, new ThemeResource("img/warning-icon.png"));
-		warningIcon.setHeight(35, Sizeable.Unit.PIXELS);
-		warningIcon.setWidth(35, Sizeable.Unit.PIXELS);
+		warningLayout.setPadding(true);
+		Image warningIcon = new Image(VaadinUiUtil.THEME_IMAGE_PATH + "img/warning-icon.png", "");
+		warningIcon.setHeight("35px");
+		warningIcon.setWidth("35px");
 		warningLayout.addComponentAsFirst(warningIcon);
-		Window popupWindow = VaadinUiUtil.showPopupWindow(warningLayout);
-		Label messageLabel = new Label(I18nProperties.getValidationError(Validations.externalJournalPersonValidationError));
+		Dialog popupWindow = VaadinUiUtil.showPopupWindow(warningLayout);
+		Span messageLabel = new Span(I18nProperties.getValidationError(Validations.externalJournalPersonValidationError));
 		CssStyles.style(messageLabel, CssStyles.LABEL_LARGE, CssStyles.LABEL_WHITE_SPACE_NORMAL);
-		warningLayout.addComponent(messageLabel);
-		Label infoLabel = new Label(message);
+		warningLayout.add(messageLabel);
+		Span infoLabel = new Span(message);
 		CssStyles.style(infoLabel, CssStyles.LABEL_LARGE, CssStyles.LABEL_WHITE_SPACE_NORMAL);
-		warningLayout.addComponent(infoLabel);
+		warningLayout.add(infoLabel);
 		CssStyles.style(warningLayout, CssStyles.ALIGN_CENTER);
-		popupWindow.addCloseListener(e -> popupWindow.close());
-		popupWindow.setWidth(400, Sizeable.Unit.PIXELS);
+		VaadinUiUtil.addCloseListener(popupWindow, e -> popupWindow.close());
+		popupWindow.setWidth("400px");
 	}
 
 	private static void showPatientDiaryResultPopup(PatientDiaryResult result, String errorMessage) {
 		VerticalLayout resultLayout = new VerticalLayout();
-		resultLayout.setMargin(true);
-		Image errorIcon = new Image(null, new ThemeResource("img/error-icon.png"));
-		errorIcon.setHeight(35, Sizeable.Unit.PIXELS);
-		errorIcon.setWidth(35, Sizeable.Unit.PIXELS);
-		Image successIcon = new Image(null, new ThemeResource("img/success-icon.png"));
-		successIcon.setHeight(35, Sizeable.Unit.PIXELS);
-		successIcon.setWidth(35, Sizeable.Unit.PIXELS);
+		resultLayout.setPadding(true);
+		Image errorIcon = new Image(VaadinUiUtil.THEME_IMAGE_PATH + "img/error-icon.png", "");
+		errorIcon.setHeight("35px");
+		errorIcon.setWidth("35px");
+		Image successIcon = new Image(VaadinUiUtil.THEME_IMAGE_PATH + "img/success-icon.png", "");
+		successIcon.setHeight("35px");
+		successIcon.setWidth("35px");
 		CssStyles.style(resultLayout, CssStyles.ALIGN_CENTER);
 		if (result.isSuccess()) {
-			resultLayout.removeComponent(errorIcon);
+			// (removeComponent of the other icon, never in the layout, was a no-op)
 			resultLayout.addComponentAsFirst(successIcon);
 		} else {
-			resultLayout.removeComponent(successIcon);
 			resultLayout.addComponentAsFirst(errorIcon);
-			Label infoLabel = new Label();
+			Span infoLabel = new Span();
 			CssStyles.style(infoLabel, CssStyles.LABEL_LARGE, CssStyles.LABEL_WHITE_SPACE_NORMAL);
-			resultLayout.addComponent(infoLabel);
-			infoLabel.setValue(errorMessage);
+			resultLayout.add(infoLabel);
+			infoLabel.setText(errorMessage);
 		}
-		Label messageLabel = new Label();
+		Span messageLabel = new Span();
 		CssStyles.style(messageLabel, CssStyles.LABEL_LARGE, CssStyles.LABEL_WHITE_SPACE_NORMAL);
-		resultLayout.addComponent(messageLabel);
-		messageLabel.setValue(result.getMessage());
-		Window popupWindow = VaadinUiUtil.showPopupWindow(resultLayout);
-		popupWindow.addCloseListener(e -> popupWindow.close());
-		popupWindow.setWidth(400, Sizeable.Unit.PIXELS);
+		resultLayout.add(messageLabel);
+		messageLabel.setText(result.getMessage());
+		Dialog popupWindow = VaadinUiUtil.showPopupWindow(resultLayout);
+		VaadinUiUtil.addCloseListener(popupWindow, e -> popupWindow.close());
+		popupWindow.setWidth("400px");
 	}
 
 	private static void showForceDeletionPrompt(String errorMessage, PersonDto person) {
 
 		HorizontalLayout errorLayout = VaadinUiUtil.createErrorComponent(errorMessage);
-		Label forceDeletionQuestion = new Label(I18nProperties.getString(Strings.promptExternalJournalForceDeletion));
-		forceDeletionQuestion.setWidth(500, Sizeable.Unit.PIXELS);
-		errorLayout.addComponent(forceDeletionQuestion);
+		Span forceDeletionQuestion = new Span(I18nProperties.getString(Strings.promptExternalJournalForceDeletion));
+		forceDeletionQuestion.setWidth("500px");
+		errorLayout.add(forceDeletionQuestion);
 		VerticalLayout errorAndQuestion = new VerticalLayout(errorLayout, forceDeletionQuestion);
 
 		Consumer<Boolean> resultConsumer = new Consumer<Boolean>() {

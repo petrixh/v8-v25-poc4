@@ -15,9 +15,8 @@
 
 package de.symeda.sormas.ui.sormastosormas;
 
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.OptionGroup;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.sormastosormas.share.ShareRequestCriteria;
@@ -25,6 +24,7 @@ import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.utils.AbstractView;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
 
 public class ShareRequestsView extends AbstractView {
 
@@ -43,7 +43,7 @@ public class ShareRequestsView extends AbstractView {
 
 		OptionGroup viewSwitcher = new OptionGroup();
 		viewSwitcher.setId("viewSwitcher");
-		CssStyles.style(viewSwitcher, CssStyles.FORCE_CAPTION, ValoTheme.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_HORIZONTAL_PRIMARY);
+		CssStyles.style(viewSwitcher, CssStyles.FORCE_CAPTION, SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_HORIZONTAL_PRIMARY);
 		viewSwitcher.addItem(ShareRequestViewType.INCOMING);
 		viewSwitcher.setItemCaption(ShareRequestViewType.INCOMING, I18nProperties.getEnumCaption(ShareRequestViewType.INCOMING));
 
@@ -52,7 +52,7 @@ public class ShareRequestsView extends AbstractView {
 
 		viewSwitcher.setValue(viewConfiguration.getViewType());
 		viewSwitcher.addValueChangeListener(e -> {
-			ShareRequestViewType viewType = (ShareRequestViewType) e.getProperty().getValue();
+			ShareRequestViewType viewType = (ShareRequestViewType) e.getValue();
 
 			viewConfiguration.setViewType(viewType);
 			SormasUI.get().getNavigator().navigateTo(VIEW_NAME);

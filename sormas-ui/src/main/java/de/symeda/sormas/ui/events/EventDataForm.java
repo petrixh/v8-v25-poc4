@@ -35,17 +35,9 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.data.fieldgroup.FieldGroup;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.data.validator.EmailValidator;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.validator.RegexpValidator;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -91,6 +83,13 @@ import de.symeda.sormas.ui.utils.PhoneNumberValidator;
 import de.symeda.sormas.ui.utils.ResizableTextAreaWrapper;
 import de.symeda.sormas.ui.utils.UserField;
 import de.symeda.sormas.ui.utils.ValidationUtils;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.FieldGroup;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 @SuppressWarnings("deprecation")
 public class EventDataForm extends AbstractEditForm<EventDto> {
@@ -108,6 +107,9 @@ public class EventDataForm extends AbstractEditForm<EventDto> {
 	private static final String EVENT_ENTITY = "Event";
 	private static final String EVOLUTION_DATE_WITH_STATUS = "eventEvolutionDateWithStatus";
 	private static final String EVOLUTION_COMMENT_WITH_STATUS = "eventEvolutionCommentWithStatus";
+
+	/** The pattern of the Vaadin 7 {@code EmailValidator}, which Flow's own e-mail validator does not match exactly. */
+	private static final String V7_EMAIL_PATTERN = "^([a-zA-Z0-9_\\.\\-+])+@[a-zA-Z0-9-.]+\\.[a-zA-Z0-9-]{2,}$";
 
 	//@formatter:off
 	private static final String HTML_LAYOUT =
@@ -184,7 +186,7 @@ public class EventDataForm extends AbstractEditForm<EventDto> {
 		}
 		VerticalLayout statusChangeLayout = new VerticalLayout();
 		statusChangeLayout.setSpacing(false);
-		statusChangeLayout.setMargin(false);
+		statusChangeLayout.setPadding(false);
 		getContent().addComponent(statusChangeLayout, STATUS_CHANGE);
 
 		addFields();
@@ -208,16 +210,16 @@ public class EventDataForm extends AbstractEditForm<EventDto> {
 			return;
 		}
 
-		Label eventDataHeadingLabel = new Label(I18nProperties.getString(Strings.headingEventData));
-		eventDataHeadingLabel.addStyleName(H3);
+		Span eventDataHeadingLabel = new Span(I18nProperties.getString(Strings.headingEventData));
+		eventDataHeadingLabel.addClassName(H3);
 		getContent().addComponent(eventDataHeadingLabel, EVENT_DATA_HEADING_LOC);
 
-		Label informationSourceHeadingLabel = new Label(I18nProperties.getString(Strings.headingInformationSource));
-		informationSourceHeadingLabel.addStyleName(H3);
+		Span informationSourceHeadingLabel = new Span(I18nProperties.getString(Strings.headingInformationSource));
+		informationSourceHeadingLabel.addClassName(H3);
 		getContent().addComponent(informationSourceHeadingLabel, INFORMATION_SOURCE_HEADING_LOC);
 
-		Label locationHeadingLabel = new Label(I18nProperties.getString(Strings.headingLocation));
-		locationHeadingLabel.addStyleName(H3);
+		Span locationHeadingLabel = new Span(I18nProperties.getString(Strings.headingLocation));
+		locationHeadingLabel.addClassName(H3);
 		getContent().addComponent(locationHeadingLabel, LOCATION_HEADING_LOC);
 
 		addField(EventDto.UUID, TextField.class);
@@ -230,8 +232,8 @@ public class EventDataForm extends AbstractEditForm<EventDto> {
 		diseaseVariantDetailsField.setVisible(false);
 
 		TextField externalTokenField = addField(EventDto.EXTERNAL_TOKEN);
-		Label externalTokenWarningLabel = new Label(I18nProperties.getString(Strings.messageEventExternalTokenWarning));
-		externalTokenWarningLabel.addStyleNames(VSPACE_3, LABEL_WHITE_SPACE_NORMAL);
+		Span externalTokenWarningLabel = new Span(I18nProperties.getString(Strings.messageEventExternalTokenWarning));
+		externalTokenWarningLabel.addClassNames(VSPACE_3, LABEL_WHITE_SPACE_NORMAL);
 		getContent().addComponent(externalTokenWarningLabel, EXTERNAL_TOKEN_WARNING_LOC);
 
 		addField(EventDto.INTERNAL_TOKEN);
@@ -345,7 +347,7 @@ public class EventDataForm extends AbstractEditForm<EventDto> {
 			true);
 
 		getField(EventDto.MEANS_OF_TRANSPORT).addValueChangeListener(e -> {
-			if (e.getProperty().getValue() == MeansOfTransport.PLANE) {
+			if (e.getValue() == MeansOfTransport.PLANE) {
 				getField(EventDto.CONNECTION_NUMBER).setCaption(I18nProperties.getCaption(Captions.exposureFlightNumber));
 			} else {
 				getField(EventDto.CONNECTION_NUMBER).setCaption(I18nProperties.getPrefixCaption(EventDto.I18N_PREFIX, EventDto.CONNECTION_NUMBER));
@@ -366,7 +368,15 @@ public class EventDataForm extends AbstractEditForm<EventDto> {
 		TextField srcTelNo = addField(EventDto.SRC_TEL_NO, TextField.class);
 		TextField srcEmail = addField(EventDto.SRC_EMAIL, TextField.class);
 		srcTelNo.addValidator(new PhoneNumberValidator(I18nProperties.getValidationError(Validations.validPhoneNumber, srcTelNo.getCaption())));
-		srcEmail.addValidator(new EmailValidator(I18nProperties.getValidationError(Validations.validEmailAddress, srcEmail.getCaption())));
+		// was the Vaadin 7 EmailValidator: same pattern, and an empty value is valid as in Vaadin 7
+		srcEmail.addValidator(
+			new RegexpValidator(I18nProperties.getValidationError(Validations.validEmailAddress, srcEmail.getCaption()), V7_EMAIL_PATTERN) {
+
+				@Override
+				protected boolean isValid(String value) {
+					return value == null || value.isEmpty() || super.isValid(value);
+				}
+			});
 
 		TextField srcMediaWebsite = addField(EventDto.SRC_MEDIA_WEBSITE, TextField.class);
 		TextField srcMediaName = addField(EventDto.SRC_MEDIA_NAME, TextField.class);
@@ -436,8 +446,8 @@ public class EventDataForm extends AbstractEditForm<EventDto> {
 
 		// Customizable enum fields visibilities
 		diseaseVariantField.setVisible(false);
-		diseaseField.addValueChangeListener((ValueChangeListener) valueChangeEvent -> {
-			Disease disease = (Disease) valueChangeEvent.getProperty().getValue();
+		diseaseField.addValueChangeListener(valueChangeEvent -> {
+			Disease disease = (Disease) valueChangeEvent.getValue();
 			// Disease variants
 			List<DiseaseVariant> diseaseVariants =
 				FacadeProvider.getCustomizableEnumFacade().getEnumValues(CustomizableEnumType.DISEASE_VARIANT, disease);
@@ -450,7 +460,7 @@ public class EventDataForm extends AbstractEditForm<EventDto> {
 			specificRiskField.setVisible(isVisibleAllowed(EventDto.SPECIFIC_RISK) && CollectionUtils.isNotEmpty(specificRiskValues));
 		});
 		diseaseVariantField.addValueChangeListener(e -> {
-			DiseaseVariant diseaseVariant = (DiseaseVariant) e.getProperty().getValue();
+			DiseaseVariant diseaseVariant = (DiseaseVariant) e.getValue();
 			diseaseVariantDetailsField.setVisible(diseaseVariant != null && diseaseVariant.matchPropertyValue(DiseaseVariant.HAS_DETAILS, true));
 		});
 
@@ -528,7 +538,7 @@ public class EventDataForm extends AbstractEditForm<EventDto> {
 				true);
 
 			epidemiologicalEvidence.addValueChangeListener(valueChangeEvent -> {
-				if (((NullableOptionGroup) valueChangeEvent.getProperty()).getNullableValue() == YesNoUnknown.YES) {
+				if (((NullableOptionGroup) valueChangeEvent.getHasValue()).getNullableValue() == YesNoUnknown.YES) {
 					epidemiologicalEvidenceCheckBoxTree.setVisible(true);
 				} else {
 					epidemiologicalEvidenceCheckBoxTree.clear();
@@ -545,7 +555,7 @@ public class EventDataForm extends AbstractEditForm<EventDto> {
 				true);
 
 			laboratoryDiagnosticEvidence.addValueChangeListener(valueChangeEvent -> {
-				if (((NullableOptionGroup) valueChangeEvent.getProperty()).getNullableValue() == YesNoUnknown.YES) {
+				if (((NullableOptionGroup) valueChangeEvent.getHasValue()).getNullableValue() == YesNoUnknown.YES) {
 					laboratoryDiagnosticEvidenceDetailCheckBoxTree.setVisible(true);
 				} else {
 					laboratoryDiagnosticEvidenceDetailCheckBoxTree.clear();
@@ -570,7 +580,7 @@ public class EventDataForm extends AbstractEditForm<EventDto> {
 			.setVisibleWhen(getFieldGroup(), EventDto.TYPE_OF_PLACE_TEXT, EventDto.TYPE_OF_PLACE, Collections.singletonList(TypeOfPlace.OTHER), true);
 		setTypeOfPlaceTextRequirement();
 		locationForm.setFacilityFieldsVisible(getField(EventDto.TYPE_OF_PLACE).getValue() == TypeOfPlace.FACILITY, true);
-		typeOfPlace.addValueChangeListener(e -> locationForm.setFacilityFieldsVisible(e.getProperty().getValue() == TypeOfPlace.FACILITY, true));
+		typeOfPlace.addValueChangeListener(e -> locationForm.setFacilityFieldsVisible(e.getValue() == TypeOfPlace.FACILITY, true));
 
 		regionField.addValueChangeListener(e -> {
 			RegionReferenceDto region = (RegionReferenceDto) regionField.getValue();
@@ -644,7 +654,7 @@ public class EventDataForm extends AbstractEditForm<EventDto> {
 		endDate.removeAllValidators(); // make sure the end date does not come with a future date validator
 
 		multiDayCheckbox.addValueChangeListener(e -> {
-			if ((Boolean) e.getProperty().getValue()) {
+			if ((Boolean) e.getValue()) {
 				startDate.addValidator(startDateValidator);
 				endDate.addValidator(endDateValidator);
 				DateComparisonValidator.dateFieldDependencyValidationVisibility(startDate, endDate);
@@ -675,7 +685,7 @@ public class EventDataForm extends AbstractEditForm<EventDto> {
 	}
 
 	@Override
-	public void setValue(EventDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(EventDto newFieldValue) {
 		if (!isCreateForm && FacadeProvider.getEventFacade().hasAnyEventParticipantWithoutJurisdiction(newFieldValue.getUuid())) {
 			locationForm.setHasEventParticipantsWithoutJurisdiction(true);
 			locationForm.setFieldsRequirement(true, LocationDto.REGION, LocationDto.DISTRICT);

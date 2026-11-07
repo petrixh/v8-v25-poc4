@@ -20,10 +20,11 @@ package de.symeda.sormas.ui;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
-import com.vaadin.navigator.View;
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.UI;
+
+import de.symeda.sormas.ui.navigation.View;
 
 public class ViewModelProviders {
 
@@ -48,9 +49,9 @@ public class ViewModelProviders {
 	@NotNull
 	private static ViewModelProviders getCurrent() {
 
-		UI currentUI = UI.getCurrent();
-		if (currentUI instanceof HasViewModelProviders) {
-			return ((HasViewModelProviders) currentUI).getViewModelProviders();
+		SormasUI currentUI = SormasUI.get();
+		if (currentUI != null) {
+			return currentUI.getViewModelProviders();
 		}
 		throw new IllegalStateException("UI.getCurrent did not an instance that implements HasViewModelProviders");
 	}

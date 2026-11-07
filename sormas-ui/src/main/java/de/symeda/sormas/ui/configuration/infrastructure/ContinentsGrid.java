@@ -54,8 +54,8 @@ public class ContinentsGrid extends FilteredGrid<ContinentIndexDto, ContinentCri
 			addEditColumn(e -> ControllerProvider.getInfrastructureController().editContinent(e.getUuid()));
 		}
 
-		for (Column<?, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(ContinentIndexDto.I18N_PREFIX, column.getId(), column.getCaption()));
+		for (Column<?, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(ContinentIndexDto.I18N_PREFIX, column.getKey(), column.getCaption()));
 		}
 	}
 

@@ -5,12 +5,16 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.Page;
-import com.vaadin.ui.*;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.Validator;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.FacadeProvider;
@@ -35,6 +39,8 @@ import de.symeda.sormas.ui.utils.DateTimeField;
 public class ExternalMessagesView extends AbstractView {
 
 	private static final String SURVEY_FETCH_BUTTON_ENABLED = "SURVEY_FETCH_BUTTON_ENABLED";
+	// was Button.setData(status)
+	private static final String STATUS_DATA = "status";
 
 	public static final String VIEW_NAME = "messages";
 
@@ -65,9 +71,9 @@ public class ExternalMessagesView extends AbstractView {
 		}
 
 		if (FacadeProvider.getFeatureConfigurationFacade().isPropertyValueTrue(FeatureType.EXTERNAL_MESSAGES, FeatureTypeProperty.FETCH_MODE)) {
-			addHeaderComponent(ButtonHelper.createIconButton(Captions.externalMessageFetch, VaadinIcons.REFRESH, e -> {
+			addHeaderComponent(ButtonHelper.createIconButton(Captions.externalMessageFetch, VaadinIcon.REFRESH, e -> {
 				checkForConcurrentEventsAndFetch(false);
-			}, ValoTheme.BUTTON_PRIMARY));
+			}, CssStyles.BUTTON_PRIMARY));
 		}
 
 		if (FacadeProvider.getFeatureConfigurationFacade()
@@ -75,21 +81,21 @@ public class ExternalMessagesView extends AbstractView {
 			addHeaderComponent(
 				ButtonHelper.createIconButton(
 					Captions.surveyFetch,
-					VaadinIcons.REFRESH,
+					VaadinIcon.REFRESH,
 					e -> checkForConcurrentEventsAndFetch(true),
-					ValoTheme.BUTTON_PRIMARY));
+					CssStyles.BUTTON_PRIMARY));
 		}
 
 		if (isBulkEditAllowed()) {
-			btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcons.CHECK_SQUARE_O, e -> {
+			btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcon.CHECK_SQUARE_O, e -> {
 				enterBulkEditMode();
-			}, ValoTheme.BUTTON_PRIMARY);
+			}, CssStyles.BUTTON_PRIMARY);
 			btnEnterBulkEditMode.setVisible(!viewConfiguration.isInEagerMode());
 			addHeaderComponent(btnEnterBulkEditMode);
 
-			btnLeaveBulkEditMode = ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcons.CLOSE, e -> {
+			btnLeaveBulkEditMode = ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcon.CLOSE, e -> {
 				leaveBulkEditMode();
-			}, ValoTheme.BUTTON_PRIMARY);
+			}, CssStyles.BUTTON_PRIMARY);
 			btnLeaveBulkEditMode.setVisible(viewConfiguration.isInEagerMode());
 			addHeaderComponent(btnLeaveBulkEditMode);
 		}
@@ -97,16 +103,16 @@ public class ExternalMessagesView extends AbstractView {
 		VerticalLayout gridLayout = new VerticalLayout();
 		addComponent(gridLayout);
 
-		gridLayout.addComponent(createFilterBar());
+		gridLayout.add(createFilterBar());
 
-		gridLayout.addComponent(createStatusFilterBar());
+		gridLayout.add(createStatusFilterBar());
 
 		grid = new ExternalMessageGrid(criteria);
 		grid.addDataSizeChangeListener(e -> updateStatusButtons());
 
-		gridLayout.addComponent(grid);
+		gridLayout.add(grid);
 
-		gridLayout.setMargin(true);
+		gridLayout.setPadding(true);
 		styleGridLayout(gridLayout);
 	}
 
@@ -124,10 +130,10 @@ public class ExternalMessagesView extends AbstractView {
 	public HorizontalLayout createFilterBar() {
 
 		HorizontalLayout filterLayout = new HorizontalLayout();
-		filterLayout.setMargin(false);
+		filterLayout.setPadding(false);
 		filterLayout.setSpacing(true);
 		filterLayout.setSizeUndefined();
-		filterLayout.addStyleName("wrap");
+		filterLayout.addClassName("wrap");
 
 		filterForm = new ExternalMessageGridFilterForm();
 		filterForm.addValueChangeListener(e -> {
@@ -143,7 +149,7 @@ public class ExternalMessagesView extends AbstractView {
 			SormasUI.get().getNavigator().navigateTo(ExternalMessagesView.VIEW_NAME);
 			grid.reload();
 		});
-		filterLayout.addComponent(filterForm);
+		filterLayout.add(filterForm);
 
 		return filterLayout;
 	}
@@ -151,9 +157,9 @@ public class ExternalMessagesView extends AbstractView {
 	public HorizontalLayout createStatusFilterBar() {
 		HorizontalLayout statusFilterLayout = new HorizontalLayout();
 		statusFilterLayout.setWidthFull();
-		statusFilterLayout.setMargin(false);
+		statusFilterLayout.setPadding(false);
 		statusFilterLayout.setSpacing(true);
-		statusFilterLayout.addStyleName(CssStyles.VSPACE_3);
+		statusFilterLayout.addClassName(CssStyles.VSPACE_3);
 
 		statusButtons = new HashMap<>();
 
@@ -168,12 +174,14 @@ public class ExternalMessagesView extends AbstractView {
 
 		HorizontalLayout actionButtonsLayout = new HorizontalLayout();
 		actionButtonsLayout.setSpacing(true);
-		statusFilterLayout.addComponent(actionButtonsLayout);
-		statusFilterLayout.setComponentAlignment(actionButtonsLayout, Alignment.TOP_RIGHT);
-		statusFilterLayout.setExpandRatio(actionButtonsLayout, 1);
+		statusFilterLayout.add(actionButtonsLayout);
+		// was Alignment.TOP_RIGHT: the layout grows, its content goes right
+		statusFilterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, actionButtonsLayout);
+		statusFilterLayout.setFlexGrow(1, actionButtonsLayout);
+		actionButtonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
 		bulkOperationsDropdown = createBulkOperationsDropdown();
-		actionButtonsLayout.addComponent(bulkOperationsDropdown);
+		actionButtonsLayout.add(bulkOperationsDropdown);
 
 		return statusFilterLayout;
 	}
@@ -183,7 +191,7 @@ public class ExternalMessagesView extends AbstractView {
 
 		if (UiUtil.permitted(UserRight.EXTERNAL_MESSAGE_LABORATORY_DELETE)
 			|| UiUtil.permitted(UserRight.EXTERNAL_MESSAGE_DOCTOR_DECLARATION_DELETE)) {
-			menuBarItems.add(new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkDelete), VaadinIcons.TRASH, mi -> {
+			menuBarItems.add(new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkDelete), VaadinIcon.TRASH, mi -> {
 				ControllerProvider.getExternalMessageController()
 					.deleteAllSelectedItems(grid.asMultiSelect().getSelectedItems(), grid, () -> navigateTo(criteria));
 			}, true));
@@ -194,7 +202,7 @@ public class ExternalMessagesView extends AbstractView {
 			menuBarItems.add(
 				new MenuBarHelper.MenuBarItem(
 					I18nProperties.getCaption(Captions.bulkEditAssignee),
-					VaadinIcons.ELLIPSIS_H,
+					VaadinIcon.ELLIPSIS_H,
 					mi -> ControllerProvider.getExternalMessageController()
 						.assignAllSelectedItems(grid.asMultiSelect().getSelectedItems(), () -> navigateTo(criteria)),
 					true));
@@ -209,8 +217,8 @@ public class ExternalMessagesView extends AbstractView {
 	private void styleGridLayout(VerticalLayout gridLayout) {
 		gridLayout.setSpacing(false);
 		gridLayout.setSizeFull();
-		gridLayout.setExpandRatio(grid, 1);
-		gridLayout.setStyleName("crud-main-layout");
+		gridLayout.setFlexGrow(1, grid);
+		gridLayout.setClassName("crud-main-layout");
 	}
 
 	private void updateFilterComponents() {
@@ -223,17 +231,21 @@ public class ExternalMessagesView extends AbstractView {
 	private void updateStatusButtons() {
 		statusButtons.keySet().forEach(b -> {
 			CssStyles.style(b, CssStyles.BUTTON_FILTER_LIGHT);
-			b.setCaption(statusButtons.get(b));
-			if (b.getData() == criteria.getExternalMessageStatus()) {
+			b.setText(statusButtons.get(b));
+			b.setSuffixComponent(null);
+			if (ComponentUtil.getData(b, STATUS_DATA) == criteria.getExternalMessageStatus()) {
 				activeStatusButton = b;
 			}
 		});
 		ExternalMessageStatus activeStatus = null;
 		if (activeStatusButton != null) {
 			CssStyles.removeStyles(activeStatusButton, CssStyles.BUTTON_FILTER_LIGHT);
-			activeStatusButton
-				.setCaption(statusButtons.get(activeStatusButton) + LayoutUtil.spanCss(CssStyles.BADGE, String.valueOf(grid.getDataSize())));
-			activeStatus = (ExternalMessageStatus) activeStatusButton.getData();
+			// was an HTML caption with LayoutUtil.spanCss(BADGE, count): the count is a badge after the text
+			activeStatusButton.setText(statusButtons.get(activeStatusButton));
+			Span badge = new Span(String.valueOf(grid.getDataSize()));
+			badge.addClassName(CssStyles.BADGE);
+			activeStatusButton.setSuffixComponent(badge);
+			activeStatus = (ExternalMessageStatus) ComponentUtil.getData(activeStatusButton, STATUS_DATA);
 		}
 
 		boolean processingPossible = UiUtil.permitted(FeatureType.CASE_SURVEILANCE, UserRight.CASE_CREATE, UserRight.CASE_EDIT)
@@ -246,16 +258,14 @@ public class ExternalMessagesView extends AbstractView {
 		Button button = ButtonHelper.createButton(status == null ? I18nProperties.getCaption(Captions.all) : status.toString(), e -> {
 			criteria.externalMessageStatus(status);
 			navigateTo(criteria);
-		}, ValoTheme.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER, CssStyles.BUTTON_FILTER_LIGHT);
+		}, CssStyles.BUTTON_BORDERLESS, CssStyles.BUTTON_FILTER, CssStyles.BUTTON_FILTER_LIGHT);
 
 		if (status != null) {
-			button.setData(status);
+			ComponentUtil.setData(button, STATUS_DATA, status);
 		}
 
-		button.setCaptionAsHtml(true);
-
-		buttonLayout.addComponent(button);
-		statusButtons.put(button, button.getCaption());
+		buttonLayout.add(button);
+		statusButtons.put(button, button.getText());
 
 		return button;
 	}
@@ -265,7 +275,7 @@ public class ExternalMessagesView extends AbstractView {
 		if (fetchAlreadyStarted) {
 			VaadinUiUtil.showConfirmationPopup(
 				I18nProperties.getString(Strings.headingFetchExternalMessages),
-				new Label(I18nProperties.getString(Strings.confirmationFetchExternalMessages)),
+				new Span(I18nProperties.getString(Strings.confirmationFetchExternalMessages)),
 				I18nProperties.getString(Strings.yes),
 				I18nProperties.getString(Strings.no),
 				480,
@@ -316,22 +326,22 @@ public class ExternalMessagesView extends AbstractView {
 
 	private void showSinceDateSelectionWindow(Consumer<Date> dateConsumer) {
 		VerticalLayout verticalLayout = new VerticalLayout();
-		Label label = new Label(I18nProperties.getString(Strings.confirmationSinceExternalMessages));
-		verticalLayout.addComponent(label);
+		Span label = new Span(I18nProperties.getString(Strings.confirmationSinceExternalMessages));
+		verticalLayout.add(label);
 
 		HorizontalLayout horizontalLayout = new HorizontalLayout();
 		Button yesButton = ButtonHelper.createButton(Captions.actionYes);
 		Button noButton = ButtonHelper.createButton(Captions.actionNo);
 		Button cancelButton = ButtonHelper.createButton(Captions.actionCancel);
-		cancelButton.setStyleName(ValoTheme.BUTTON_PRIMARY);
+		CssStyles.style(cancelButton, CssStyles.BUTTON_PRIMARY);
 
-		horizontalLayout.addComponent(yesButton);
-		horizontalLayout.addComponent(noButton);
-		horizontalLayout.addComponent(cancelButton);
-		horizontalLayout.setStyleName(CssStyles.FLOAT_RIGHT);
-		verticalLayout.addComponent(horizontalLayout);
+		horizontalLayout.add(yesButton);
+		horizontalLayout.add(noButton);
+		horizontalLayout.add(cancelButton);
+		horizontalLayout.setClassName(CssStyles.FLOAT_RIGHT);
+		verticalLayout.add(horizontalLayout);
 
-		Window window = VaadinUiUtil.showPopupWindow(verticalLayout);
+		Dialog window = VaadinUiUtil.showPopupWindow(verticalLayout);
 
 		cancelButton.addClickListener(event -> window.close());
 		noButton.addClickListener(event -> {
@@ -339,31 +349,31 @@ public class ExternalMessagesView extends AbstractView {
 			window.close();
 		});
 		yesButton.addClickListener(yesEvent -> {
-			horizontalLayout.removeComponent(yesButton);
-			horizontalLayout.removeComponent(noButton);
-			horizontalLayout.removeComponent(cancelButton);
+			horizontalLayout.remove(yesButton);
+			horizontalLayout.remove(noButton);
+			horizontalLayout.remove(cancelButton);
 
 			Button confirmButton = ButtonHelper.createButton(Captions.actionConfirm);
-			confirmButton.setStyleName(ValoTheme.BUTTON_PRIMARY);
+			CssStyles.style(confirmButton, CssStyles.BUTTON_PRIMARY);
 
 			DateTimeField dateTimeField = new DateTimeField();
 			dateTimeField.addValidator(date -> {
 				if (date == null) {
-					throw new Validator.InvalidValueException("Since date has to be set");
+					throw new InvalidValueException("Since date has to be set");
 				}
 			});
 			dateTimeField.addValidator(new FutureDateValidator(dateTimeField, 0, null));
 
-			horizontalLayout.addComponent(dateTimeField);
-			horizontalLayout.addComponent(confirmButton);
+			horizontalLayout.add(dateTimeField);
+			horizontalLayout.add(confirmButton);
 
 			confirmButton.addClickListener(confirmEvent -> {
 				if (dateTimeField.isValid()) {
 					dateConsumer.accept(dateTimeField.getValue());
 					window.close();
 				} else {
-					new Notification(I18nProperties.getString(Strings.messageCheckInputData), null, Notification.Type.ERROR_MESSAGE, true)
-						.show(Page.getCurrent());
+					NotificationHelper
+						.show(I18nProperties.getString(Strings.messageCheckInputData), null, NotificationHelper.Type.ERROR_MESSAGE, true);
 				}
 			});
 		});

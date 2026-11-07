@@ -17,9 +17,8 @@ package de.symeda.sormas.ui.samples.sampleLink;
 
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -62,7 +61,7 @@ public class SampleListComponent extends SideComponent {
 				}
 			}, UserRight.SAMPLE_CREATE);
 		}
-		addComponent(sampleList);
+		add(sampleList);
 		sampleList.reload();
 		if (!sampleList.isEmpty()) {
 
@@ -82,10 +81,10 @@ public class SampleListComponent extends SideComponent {
 			}
 			final Button seeSamples = ButtonHelper.createButton(buttonCaption);
 
-			CssStyles.style(seeSamples, ValoTheme.BUTTON_PRIMARY);
+			CssStyles.style(seeSamples, CssStyles.BUTTON_PRIMARY);
 			seeSamples.addClickListener(clickEvent -> ControllerProvider.getSampleController().navigateTo(sampleCriteria));
-			addComponent(seeSamples);
-			setComponentAlignment(seeSamples, Alignment.MIDDLE_LEFT);
+			add(seeSamples);
+			setHorizontalComponentAlignment(FlexComponent.Alignment.START, seeSamples);
 		}
 	}
 }

@@ -17,11 +17,11 @@ package de.symeda.sormas.ui.utils;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.navigator.ViewBeforeLeaveEvent;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.ui.UI;
-
 import de.symeda.sormas.api.ReferenceDto;
+import de.symeda.sormas.ui.SormasUI;
+import de.symeda.sormas.ui.navigation.HasViewParameters;
+import de.symeda.sormas.ui.navigation.ViewBeforeLeaveEvent;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 
 /**
  * A detail view shows specific details of an object identified by the URL parameter.
@@ -29,7 +29,8 @@ import de.symeda.sormas.api.ReferenceDto;
  * @param <R>
  *            {@link ReferenceDto} with the uuid as parsed from the URL.
  */
-public abstract class AbstractDetailView<R extends ReferenceDto> extends AbstractSubNavigationView<DirtyStateComponent> {
+public abstract class AbstractDetailView<R extends ReferenceDto> extends AbstractSubNavigationView<DirtyStateComponent>
+	implements HasViewParameters {
 
 	private static final long serialVersionUID = -8898842364286757415L;
 
@@ -48,7 +49,7 @@ public abstract class AbstractDetailView<R extends ReferenceDto> extends Abstrac
 	protected void initOrRedirect(ViewChangeEvent event) {
 
 		if (getReference() == null) {
-			UI.getCurrent().getNavigator().navigateTo(getRootViewName());
+			SormasUI.get().getNavigator().navigateTo(getRootViewName());
 		} else {
 			initView(event.getParameters().trim());
 		}

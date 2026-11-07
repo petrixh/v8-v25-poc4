@@ -20,9 +20,9 @@ package de.symeda.sormas.ui.samples.diseasesection;
 import java.util.Arrays;
 import java.util.List;
 
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.TextField;
 
 import de.symeda.sormas.api.sample.PathogenTestDto;
 import de.symeda.sormas.api.sample.PathogenTestResultType;
@@ -46,7 +46,7 @@ public class DengueSectionComponent extends AbstractDiseaseSectionComponent {
 
 	private ComboBox<Serotype> serotypeField;
 	private TextField serotypeTextField;
-	private Label serotypeTextSpacer;
+	private Span serotypeTextSpacer;
 	private TextField antibodyTitreField;
 
 	private PathogenTestType currentTestType;
@@ -55,7 +55,7 @@ public class DengueSectionComponent extends AbstractDiseaseSectionComponent {
 	@Override
 	protected void buildLayout() {
 		serotypeField = createComboBox(PathogenTestDto.SEROTYPE);
-		serotypeField.setItemCaptionGenerator(Serotype::toString);
+		serotypeField.setItemLabelGenerator(Serotype::toString);
 		serotypeField.setVisible(false);
 		updateComboBoxByDisease(serotypeField, Serotype.class, disease);
 

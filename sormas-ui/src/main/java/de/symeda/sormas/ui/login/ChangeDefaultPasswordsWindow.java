@@ -18,8 +18,6 @@
 package de.symeda.sormas.ui.login;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -27,19 +25,15 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.opencsv.CSVWriter;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinResponse;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.components.grid.MultiSelectionModel;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridMultiSelectionModel;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -48,110 +42,106 @@ import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.user.UserDto;
 import de.symeda.sormas.api.utils.CSVUtils;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.DownloadUtil;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
 
-public class ChangeDefaultPasswordsWindow extends Window {
+public class ChangeDefaultPasswordsWindow extends Dialog {
 
 	public ChangeDefaultPasswordsWindow(Runnable onContinue, List<UserDto> otherUsersWithDefaultPassword) {
-		setCaption(" " + I18nProperties.getString(Strings.headingSecurityAlert));
-		setIcon(VaadinIcons.WARNING);
-		setWidth(40, Unit.PERCENTAGE);
+		setHeaderTitle(" " + I18nProperties.getString(Strings.headingSecurityAlert));
+		getHeader().add(VaadinIcon.WARNING.create());
+		setWidth("40%");
 		final VerticalLayout content = new VerticalLayout();
-		content.setMargin(true);
+		content.setPadding(true);
 		content.setWidthFull();
 
-		Label introductionLabel = new Label(I18nProperties.getString(Strings.DefaultPassword_otherUsersIntroduction));
+		Span introductionLabel = new Span(I18nProperties.getString(Strings.DefaultPassword_otherUsersIntroduction));
 		introductionLabel.setWidthFull();
-		introductionLabel.setStyleName(ValoTheme.LAYOUT_HORIZONTAL_WRAPPING);
-		content.addComponent(introductionLabel);
+		content.add(introductionLabel);
 
-		Label actionLabel = new Label(I18nProperties.getString(Strings.DefaultPassword_otherUsersAction));
+		Span actionLabel = new Span(I18nProperties.getString(Strings.DefaultPassword_otherUsersAction));
 		actionLabel.setWidthFull();
-		actionLabel.setStyleName(ValoTheme.LAYOUT_HORIZONTAL_WRAPPING);
-		content.addComponent(actionLabel);
+		content.add(actionLabel);
 
 		List<MutablePair<UserDto, String>> usersWithNewPassword =
 			otherUsersWithDefaultPassword.stream().map(u -> new MutablePair<UserDto, String>(u, null)).collect(Collectors.toList());
 		Grid<MutablePair<UserDto, String>> userGrid = new Grid<>();
 		userGrid.setWidthFull();
-		userGrid.setHeight(250, Unit.PIXELS);
-		MultiSelectionModel<MutablePair<UserDto, String>> selectionModel =
-			(MultiSelectionModel<MutablePair<UserDto, String>>) userGrid.setSelectionMode(Grid.SelectionMode.MULTI);
+		userGrid.setHeight("250px");
+		@SuppressWarnings("unchecked")
+		GridMultiSelectionModel<MutablePair<UserDto, String>> selectionModel =
+			(GridMultiSelectionModel<MutablePair<UserDto, String>>) userGrid.setSelectionMode(Grid.SelectionMode.MULTI);
 		userGrid.setItems(usersWithNewPassword);
-		userGrid.addComponentColumn(element -> new Label(element.getLeft().getUserName()))
-			.setCaption(I18nProperties.getCaption(Captions.User_userName));
-		userGrid.addComponentColumn(element -> new Label(getNewPasswordOrUnchangedText(element.getRight())))
-			.setCaption(I18nProperties.getString(Strings.DefaultPassword_newPassword));
+		userGrid.addComponentColumn(element -> new Span(element.getLeft().getUserName()))
+			.setHeader(I18nProperties.getCaption(Captions.User_userName));
+		userGrid.addComponentColumn(element -> new Span(getNewPasswordOrUnchangedText(element.getRight())))
+			.setHeader(I18nProperties.getString(Strings.DefaultPassword_newPassword));
 		selectionModel.selectAll();
-		content.addComponent(userGrid);
+		content.add(userGrid);
 
-		Label newPasswordSetHintsLabel = new Label(I18nProperties.getString(Strings.DefaultPassword_otherUsersNewPasswordSetHints));
+		Span newPasswordSetHintsLabel = new Span(I18nProperties.getString(Strings.DefaultPassword_otherUsersNewPasswordSetHints));
 		newPasswordSetHintsLabel.setWidthFull();
-		newPasswordSetHintsLabel.setStyleName(ValoTheme.LAYOUT_HORIZONTAL_WRAPPING);
-		newPasswordSetHintsLabel.setStyleName(ValoTheme.LABEL_SUCCESS, true);
+		CssStyles.style(newPasswordSetHintsLabel, CssStyles.LABEL_POSITIVE);
 		newPasswordSetHintsLabel.setVisible(false);
 
-		Button continueButton = ButtonHelper.createButton(Captions.actionRemindMeLater, (Button.ClickListener) clickEvent -> {
+		Button continueButton = ButtonHelper.createButton(Captions.actionRemindMeLater, clickEvent -> {
 			close();
 			onContinue.run();
-		}, ValoTheme.BUTTON_PRIMARY);
+		}, CssStyles.BUTTON_PRIMARY);
 
-		FileDownloader fileDownloader = new OnDemandFileDownloader(new OnDemandFileDownloader.OnDemandStreamResource() {
-
-			@Override
-			public String getFilename() {
-				return "sormas-defaultusers.csv";
-			}
-
-			@Override
-			public InputStream getStream() {
-				StringWriter stringWriter = new StringWriter();
-				CSVWriter csvWriter = CSVUtils.createCSVWriter(stringWriter, ',');
-				csvWriter.writeNext(
-					new String[] {
-						I18nProperties.getCaption(Captions.User_userName),
-						I18nProperties.getString(Strings.DefaultPassword_newPassword) });
-				for (MutablePair<UserDto, String> item : usersWithNewPassword) {
-					if (item.getRight() != null) {
-						csvWriter.writeNext(
-							new String[] {
-								item.getLeft().getUserName(),
-								getNewPasswordOrUnchangedText(item.getRight()) });
-					}
-
+		// was an on-demand FileDownloader: file name and content are made when the user clicks, not cached
+		StreamSourceDownloadHandler csvDownload = new StreamSourceDownloadHandler(() -> {
+			StringWriter stringWriter = new StringWriter();
+			CSVWriter csvWriter = CSVUtils.createCSVWriter(stringWriter, ',');
+			csvWriter.writeNext(
+				new String[] {
+					I18nProperties.getCaption(Captions.User_userName),
+					I18nProperties.getString(Strings.DefaultPassword_newPassword) });
+			for (MutablePair<UserDto, String> item : usersWithNewPassword) {
+				if (item.getRight() != null) {
+					csvWriter.writeNext(
+						new String[] {
+							item.getLeft().getUserName(),
+							getNewPasswordOrUnchangedText(item.getRight()) });
 				}
-				return new ByteArrayInputStream(stringWriter.toString().getBytes(StandardCharsets.UTF_8));
-			}
-		});
 
-		Button exportToCsvButton = ButtonHelper.createButton(Captions.export, (Button.ClickListener) clickEvent -> {
+			}
+			return new ByteArrayInputStream(stringWriter.toString().getBytes(StandardCharsets.UTF_8));
+		}, "sormas-defaultusers.csv");
+
+		Button exportToCsvButton = ButtonHelper.createButton(Captions.export, clickEvent -> {
 		});
 		exportToCsvButton.setEnabled(false);
+		Anchor exportToCsvLink = DownloadUtil.createDownloadLink(exportToCsvButton, csvDownload);
+		// a disabled button inside a link would still start the download
+		exportToCsvLink.setEnabled(false);
 
-		fileDownloader.extend(exportToCsvButton);
-
-		Button generateNewPasswordsButton = ButtonHelper.createButton(Captions.actionGenerateNewPasswords, (Button.ClickListener) clickEvent -> {
+		Button generateNewPasswordsButton = ButtonHelper.createButton(Captions.actionGenerateNewPasswords, clickEvent -> {
 			selectionModel.getSelectedItems().forEach(item -> {
 				item.setRight(FacadeProvider.getUserFacade().resetPassword(item.getLeft().getUuid()));
 				userGrid.getDataProvider().refreshItem(item);
 			});
 			selectionModel.deselectAll();
 			newPasswordSetHintsLabel.setVisible(true);
-			continueButton.setCaption(I18nProperties.getCaption(Captions.actionContinue));
+			continueButton.setText(I18nProperties.getCaption(Captions.actionContinue));
 			exportToCsvButton.setEnabled(true);
-			center();
+			exportToCsvLink.setEnabled(true);
 		});
 
 		HorizontalLayout buttonBarLayout = new HorizontalLayout();
-		buttonBarLayout.addComponent(generateNewPasswordsButton);
-		buttonBarLayout.addComponent(exportToCsvButton);
-		content.addComponent(buttonBarLayout);
-		content.addComponent(newPasswordSetHintsLabel);
-		content.addComponent(continueButton);
+		buttonBarLayout.add(generateNewPasswordsButton);
+		buttonBarLayout.add(exportToCsvLink);
+		content.add(buttonBarLayout);
+		content.add(newPasswordSetHintsLabel);
+		content.add(continueButton);
 
 		setModal(true);
 		setResizable(false);
-		setClosable(false);
-		setContent(content);
+		// not closable, as in Vaadin 8: no close button, Escape and a click outside do nothing
+		setCloseOnEsc(false);
+		setCloseOnOutsideClick(false);
+		add(content);
 		setDraggable(false);
 	}
 
@@ -211,47 +201,6 @@ public class ChangeDefaultPasswordsWindow extends Window {
 		@Override
 		public int hashCode() {
 			return Objects.hash(left);
-		}
-	}
-
-	/**
-	 * This specializes {@link FileDownloader} in a way, such that both the file name and content can be determined
-	 * on-demand, i.e. when the user has clicked the component.
-	 *
-	 * Based on https://vaadin.com/docs/v8/framework/articles/LettingTheUserDownloadAFile
-	 * Cache time set to 0 to prevent caching of on demand generated content
-	 */
-	private static class OnDemandFileDownloader extends FileDownloader {
-
-		private static final long serialVersionUID = 1L;
-		private final OnDemandStreamResource onDemandStreamResource;
-
-		public OnDemandFileDownloader(OnDemandStreamResource onDemandStreamResource) {
-			super(new StreamResource(onDemandStreamResource, ""));
-			this.onDemandStreamResource = onDemandStreamResource;
-		}
-
-		@Override
-		public boolean handleConnectorRequest(VaadinRequest request, VaadinResponse response, String path) throws IOException {
-			getResource().setFilename(onDemandStreamResource.getFilename());
-			getResource().setCacheTime(0);
-			return super.handleConnectorRequest(request, response, path);
-		}
-
-		private StreamResource getResource() {
-			StreamResource result;
-			this.getSession().lock();
-			try {
-				result = (StreamResource) this.getResource("dl");
-			} finally {
-				this.getSession().unlock();
-			}
-			return result;
-		}
-
-		public interface OnDemandStreamResource extends StreamResource.StreamSource {
-
-			String getFilename();
 		}
 	}
 }

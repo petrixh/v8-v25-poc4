@@ -49,7 +49,7 @@ public class UserRoleNotificationsForm extends AbstractUserRoleForm {
 
 	void applyTemplateData(UserRoleDto templateRole) {
 		if (templateRole != null) {
-			notificationTypesCbSet.setInternalValue(templateRole.getNotificationTypes());
+			notificationTypesCbSet.setValue(templateRole.getNotificationTypes());
 		}
 	}
 

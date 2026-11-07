@@ -18,9 +18,10 @@
 package de.symeda.sormas.ui.utils;
 
 import java.util.Date;
-import java.util.Locale;
 
-import com.vaadin.v7.data.util.converter.Converter;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.converter.Converter;
 
 import de.symeda.sormas.api.utils.DateHelper;
 
@@ -28,21 +29,19 @@ import de.symeda.sormas.api.utils.DateHelper;
 public class DateConverter implements Converter<Date, Date> {
 
 	@Override
-	public Date convertToModel(Date value, Class<? extends Date> targetType, Locale locale) throws ConversionException {
-		return DateHelper.toCorrectCentury(value);
+	public Result<Date> convertToModel(Date value, ValueContext context) {
+		return Result.ok(DateHelper.toCorrectCentury(value));
 	}
 
 	@Override
-	public Date convertToPresentation(Date value, Class<? extends Date> targetType, Locale locale) throws ConversionException {
+	public Date convertToPresentation(Date value, ValueContext context) {
 		return value;
 	}
 
-	@Override
 	public Class<Date> getModelType() {
 		return Date.class;
 	}
 
-	@Override
 	public Class<Date> getPresentationType() {
 		return Date.class;
 	}

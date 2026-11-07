@@ -1,14 +1,14 @@
 package de.symeda.sormas.ui.utils;
 
-import com.vaadin.ui.Alignment;
-import com.vaadin.v7.ui.HorizontalLayout;
-import com.vaadin.v7.ui.Label;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 
 public class RowCount extends HorizontalLayout {
 
-	private Label labelValue;
+	private Span labelValue;
 
 	public RowCount(String labelCaption, int rowsCount) {
 		createLayout(labelCaption, rowsCount);
@@ -16,26 +16,26 @@ public class RowCount extends HorizontalLayout {
 
 	private void createLayout(String caption, int rowsCount) {
 
-		setMargin(false);
-		addStyleName(CssStyles.VSPACE_4);
+		setPadding(false);
+		addClassName(CssStyles.VSPACE_4);
 		setSpacing(true);
-		setWidth(100, Unit.PERCENTAGE);
-		setDefaultComponentAlignment(Alignment.MIDDLE_RIGHT);
+		setWidthFull();
+		setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
 
-		Label labelCaption = new Label(I18nProperties.getString(caption) + ":");
-		labelCaption.addStyleNames(CssStyles.LABEL_BOLD, CssStyles.VSPACE_TOP_NONE, CssStyles.ALIGN_RIGHT);
-		labelCaption.setSizeFull();
-		addComponent(labelCaption);
-		setExpandRatio(labelCaption, 1);
+		Span labelCaption = new Span(I18nProperties.getString(caption) + ":");
+		labelCaption.addClassNames(CssStyles.LABEL_BOLD, CssStyles.VSPACE_TOP_NONE, CssStyles.ALIGN_RIGHT);
+		labelCaption.setWidthFull();
+		add(labelCaption);
+		setFlexGrow(1, labelCaption);
 
-		labelValue = new Label(String.valueOf(rowsCount));
-		labelValue.addStyleNames(CssStyles.LABEL_BOLD, CssStyles.VSPACE_TOP_NONE, CssStyles.ALIGN_RIGHT);
+		labelValue = new Span(String.valueOf(rowsCount));
+		labelValue.addClassNames(CssStyles.LABEL_BOLD, CssStyles.VSPACE_TOP_NONE, CssStyles.ALIGN_RIGHT);
 		labelValue.setSizeUndefined();
-		addComponent(labelValue);
+		add(labelValue);
 	}
 
 	public void update(int rowsCount) {
-		labelValue.setValue(String.valueOf(rowsCount));
+		labelValue.setText(String.valueOf(rowsCount));
 	}
 
 }

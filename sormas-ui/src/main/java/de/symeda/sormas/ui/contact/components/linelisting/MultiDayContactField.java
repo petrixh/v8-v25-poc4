@@ -1,6 +1,6 @@
 package de.symeda.sormas.ui.contact.components.linelisting;
 
-import com.vaadin.ui.DateField;
+import com.vaadin.flow.component.datepicker.DatePicker;
 
 import de.symeda.sormas.api.contact.ContactDto;
 import de.symeda.sormas.ui.utils.components.multidayselector.MultiDaySelectorField;
@@ -9,7 +9,7 @@ public class MultiDayContactField extends MultiDaySelectorField {
 
 	private static final long serialVersionUID = -6701828483472269106L;
 
-	public MultiDayContactField(DateField reportDate) {
+	public MultiDayContactField(DatePicker reportDate) {
 		super(reportDate);
 		properties.setProperty("prefix", ContactDto.I18N_PREFIX);
 		properties.setProperty("multiDay", ContactDto.MULTI_DAY_CONTACT);

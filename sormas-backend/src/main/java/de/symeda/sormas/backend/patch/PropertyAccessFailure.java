@@ -1,6 +1,6 @@
 package de.symeda.sormas.backend.patch;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.patch.DataPatchFailureCause;
 import de.symeda.sormas.api.patch.partial_retrieval.PartialRetrievalFailureCause;

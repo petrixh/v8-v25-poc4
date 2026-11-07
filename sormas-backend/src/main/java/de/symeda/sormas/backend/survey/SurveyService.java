@@ -15,11 +15,11 @@
 
 package de.symeda.sormas.backend.survey;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 import de.symeda.sormas.api.survey.SurveyCriteria;
 import de.symeda.sormas.backend.common.BaseAdoService;

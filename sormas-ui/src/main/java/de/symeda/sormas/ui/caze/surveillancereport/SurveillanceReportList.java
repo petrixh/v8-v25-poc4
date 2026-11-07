@@ -17,15 +17,16 @@ package de.symeda.sormas.ui.caze.surveillancereport;
 
 import java.util.List;
 
-import javax.validation.constraints.Null;
+import jakarta.validation.constraints.Null;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
@@ -74,10 +75,10 @@ public class SurveillanceReportList extends PaginationList<SurveillanceReportDto
 		if (!reports.isEmpty()) {
 			showPage(1);
 		} else {
-			listLayout.removeAllComponents();
+			listLayout.removeAll();
 			updatePaginationLayout();
-			Label noSamplesLabel = new Label(I18nProperties.getCaption(Captions.surveillanceReportNoReportsForCase));
-			listLayout.addComponent(noSamplesLabel);
+			Span noSamplesLabel = new Span(I18nProperties.getCaption(Captions.surveillanceReportNoReportsForCase));
+			listLayout.add(noSamplesLabel);
 		}
 	}
 
@@ -164,13 +165,13 @@ public class SurveillanceReportList extends PaginationList<SurveillanceReportDto
 				// phone notifications are only editable from the case page notification box
 				listEntry.addActionButton(
 					report.getUuid(),
-					(Button.ClickListener) event -> ControllerProvider.getCaseNotifierSideViewController()
+					event -> ControllerProvider.getCaseNotifierSideViewController()
 						.editPhoneNotification(caseRef, this::reload, false),
 					false);
 			} else {
 				listEntry.addActionButton(
 					report.getUuid(),
-					(Button.ClickListener) event -> ControllerProvider.getSurveillanceReportController()
+					event -> ControllerProvider.getSurveillanceReportController()
 						.editSurveillanceReport(listEntry.getReport(), this::reload, isEditable),
 					isEditable);
 			}
@@ -185,7 +186,7 @@ public class SurveillanceReportList extends PaginationList<SurveillanceReportDto
 					clickEvent -> ControllerProvider.getExternalMessageController().showExternalMessage(externalMessage.getUuid(), false, null));
 			}
 
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 
@@ -203,21 +204,21 @@ public class SurveillanceReportList extends PaginationList<SurveillanceReportDto
 			this.fieldAccessCheckers = FieldAccessHelper.getFieldAccessCheckers(report);
 
 			VerticalLayout mainLayout = new VerticalLayout();
-			mainLayout.setWidth(100, Unit.PERCENTAGE);
-			mainLayout.setMargin(false);
+			mainLayout.setWidthFull();
+			mainLayout.setPadding(false);
 			mainLayout.setSpacing(false);
 			addComponentToField(mainLayout);
 
 			Language userLanguage = UiUtil.getUser().getLanguage();
-			mainLayout.addComponent(createRow(null, report.getReportingType(), SurveillanceReportDto.REPORTING_TYPE));
-			mainLayout.addComponent(
+			mainLayout.add(createRow(null, report.getReportingType(), SurveillanceReportDto.REPORTING_TYPE));
+			mainLayout.add(
 				createRow(
 					I18nProperties.getPrefixCaption(SurveillanceReportDto.I18N_PREFIX, SurveillanceReportDto.REPORT_DATE),
 					DateHelper.formatLocalDate(report.getReportDate(), userLanguage),
 					SurveillanceReportDto.REPORT_DATE));
 
 			if (report.getDateOfDiagnosis() != null) {
-				mainLayout.addComponent(
+				mainLayout.add(
 					createRow(
 						I18nProperties.getPrefixCaption(SurveillanceReportDto.I18N_PREFIX, SurveillanceReportDto.DATE_OF_DIAGNOSIS),
 						DateHelper.formatLocalDate(report.getDateOfDiagnosis(), userLanguage),
@@ -230,7 +231,7 @@ public class SurveillanceReportList extends PaginationList<SurveillanceReportDto
 				String facilityName = isOtherFacility ? report.getFacilityDetails() : facility.getCaption();
 				String propertyId = isOtherFacility ? SurveillanceReportDto.FACILITY_DETAILS : SurveillanceReportDto.FACILITY;
 
-				mainLayout.addComponent(
+				mainLayout.add(
 					createRow(
 						I18nProperties.getPrefixCaption(SurveillanceReportDto.I18N_PREFIX, propertyId),
 						facilityName,
@@ -242,19 +243,18 @@ public class SurveillanceReportList extends PaginationList<SurveillanceReportDto
 			return report;
 		}
 
-		public void addEditListener(int rowIndex, Button.ClickListener clickListener) {
+		public void addEditListener(int rowIndex, ComponentEventListener<ClickEvent<Button>> clickListener) {
 			if (editButton == null) {
 				editButton = ButtonHelper.createIconButtonWithCaption(
 					"edit-sample-" + rowIndex,
 					null,
-					VaadinIcons.PENCIL,
+					VaadinIcon.PENCIL,
 					null,
-					ValoTheme.BUTTON_LINK,
+					CssStyles.BUTTON_LINK,
 					CssStyles.BUTTON_COMPACT);
 
-				addComponent(editButton);
-				setComponentAlignment(editButton, Alignment.TOP_RIGHT);
-				setExpandRatio(editButton, 0);
+				add(editButton);
+				setVerticalComponentAlignment(FlexComponent.Alignment.START, editButton);
 			}
 
 			editButton.addClickListener(clickListener);
@@ -262,43 +262,42 @@ public class SurveillanceReportList extends PaginationList<SurveillanceReportDto
 
 		private HorizontalLayout createRow(@Null String label, Object value, String propertyId) {
 			HorizontalLayout row = new HorizontalLayout();
-			row.setMargin(false);
+			row.setPadding(false);
 			row.setSpacing(false);
-			row.setWidth(100, Unit.PERCENTAGE);
+			row.setWidthFull();
 
 			if (label != null) {
-				Label rowLabel = new Label(DataHelper.toStringNullable(label) + ":");
+				Span rowLabel = new Span(DataHelper.toStringNullable(label) + ":");
 				CssStyles.style(rowLabel, CssStyles.HSPACE_RIGHT_4);
-				row.addComponent(rowLabel);
+				row.add(rowLabel);
 			}
 
-			Label rowValue = new Label(DataHelper.toStringNullable(value));
-			rowValue.addStyleName(CssStyles.LABEL_WHITE_SPACE_NORMAL);
+			Span rowValue = new Span(DataHelper.toStringNullable(value));
+			rowValue.addClassName(CssStyles.LABEL_WHITE_SPACE_NORMAL);
 			if (!fieldAccessCheckers.isAccessible(SurveillanceReportDto.class, propertyId)) {
-				rowValue.addStyleName(CssStyles.INACCESSIBLE_LABEL);
+				rowValue.addClassName(CssStyles.INACCESSIBLE_LABEL);
 			}
 			if (label == null) {
-				rowValue.addStyleName(CssStyles.LABEL_BOLD);
+				rowValue.addClassName(CssStyles.LABEL_BOLD);
 			}
-			row.addComponent(rowValue);
+			row.add(rowValue);
 
 			return row;
 		}
 
-		public void addAssociatedMessageListener(Button.ClickListener associatedMessageClickListener) {
+		public void addAssociatedMessageListener(ComponentEventListener<ClickEvent<Button>> associatedMessageClickListener) {
 			if (associatedMessageButton == null) {
 				associatedMessageButton = ButtonHelper.createIconButtonWithCaption(
 					"see-associated-message-" + report.getUuid(),
 					null,
-					VaadinIcons.NOTEBOOK,
+					VaadinIcon.NOTEBOOK,
 					associatedMessageClickListener,
-					ValoTheme.BUTTON_LINK,
+					CssStyles.BUTTON_LINK,
 					CssStyles.BUTTON_COMPACT);
 
-				addComponent(associatedMessageButton);
-				setComponentAlignment(associatedMessageButton, Alignment.TOP_RIGHT);
-				setExpandRatio(associatedMessageButton, 0);
-				associatedMessageButton.setDescription(I18nProperties.getDescription(Descriptions.SurveillanceReport_associatedMessage));
+				add(associatedMessageButton);
+				setVerticalComponentAlignment(FlexComponent.Alignment.START, associatedMessageButton);
+				associatedMessageButton.setTooltipText(I18nProperties.getDescription(Descriptions.SurveillanceReport_associatedMessage));
 			}
 		}
 	}

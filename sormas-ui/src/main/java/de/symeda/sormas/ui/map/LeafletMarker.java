@@ -18,8 +18,6 @@
 package de.symeda.sormas.ui.map;
 
 import de.symeda.sormas.api.geo.GeoLatLon;
-import elemental.json.Json;
-import elemental.json.JsonArray;
 
 public class LeafletMarker {
 
@@ -27,18 +25,6 @@ public class LeafletMarker {
 	private double longitude;
 	private MarkerIcon icon;
 	private int markerCount = 1;
-
-	/**
-	 * lat & lon is less precise to save bandwidth
-	 */
-	public JsonArray toJson() {
-		JsonArray marker = Json.createArray();
-		marker.set(0, (int) (latitude * 10000.0) / 10000.0);
-		marker.set(1, (int) (longitude * 10000.0) / 10000.0);
-		marker.set(2, icon.ordinal());
-		marker.set(3, markerCount);
-		return marker;
-	}
 
 	public double getLatitude() {
 		return latitude;

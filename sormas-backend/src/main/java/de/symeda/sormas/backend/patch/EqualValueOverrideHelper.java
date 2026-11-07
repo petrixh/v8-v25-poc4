@@ -6,8 +6,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.ejb.EJB;
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.ejb.EJB;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import org.jetbrains.annotations.NotNull;
 

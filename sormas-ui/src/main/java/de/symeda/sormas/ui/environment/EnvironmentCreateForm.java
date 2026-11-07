@@ -8,10 +8,7 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 
 import java.util.List;
 
-import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.environment.EnvironmentDto;
@@ -29,6 +26,9 @@ import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.location.LocationEditForm;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.FieldHelper;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class EnvironmentCreateForm extends AbstractEditForm<EnvironmentDto> {
 
@@ -70,8 +70,8 @@ public class EnvironmentCreateForm extends AbstractEditForm<EnvironmentDto> {
 		vectorType.setVisible(false);
 		addField(EnvironmentDto.ENVIRONMENT_NAME, TextField.class);
 
-		Label locationHeadingLabel = new Label(I18nProperties.getString(Strings.headingLocation));
-		locationHeadingLabel.addStyleName(H3);
+		Span locationHeadingLabel = new Span(I18nProperties.getString(Strings.headingLocation));
+		locationHeadingLabel.addClassName(H3);
 		getContent().addComponent(locationHeadingLabel, LOCATION_HEADING_LOC);
 
 		LocationEditForm locationForm = addField(EnvironmentDto.LOCATION, LocationEditForm.class);
@@ -89,7 +89,7 @@ public class EnvironmentCreateForm extends AbstractEditForm<EnvironmentDto> {
 		FieldHelper.updateItems(responsibleUserField, responsibleUsers);
 
 		environmentMedia.addValueChangeListener(valueChangeEvent -> {
-			if (EnvironmentMedia.VECTORS.equals(valueChangeEvent.getProperty().getValue())) {
+			if (EnvironmentMedia.VECTORS.equals(valueChangeEvent.getValue())) {
 				vectorType.setVisible(true);
 			} else {
 				vectorType.setVisible(false);
@@ -98,7 +98,7 @@ public class EnvironmentCreateForm extends AbstractEditForm<EnvironmentDto> {
 
 		regionField.addValueChangeListener(e -> {
 			List<UserReferenceDto> filteredResponsibleUsers;
-			RegionReferenceDto region = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto region = (RegionReferenceDto) e.getValue();
 			if (region == null) {
 				filteredResponsibleUsers = FacadeProvider.getUserFacade()
 					.getUserRefsByInfrastructure(null, JurisdictionLevel.NATION, JurisdictionLevel.NATION, null, UserRight.ENVIRONMENT_EDIT);

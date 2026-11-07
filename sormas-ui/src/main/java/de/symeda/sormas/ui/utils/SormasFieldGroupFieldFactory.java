@@ -4,19 +4,6 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.Item;
-import com.vaadin.v7.data.fieldgroup.DefaultFieldGroupFieldFactory;
-import com.vaadin.v7.shared.ui.combobox.FilteringMode;
-import com.vaadin.v7.ui.AbstractSelect;
-import com.vaadin.v7.ui.AbstractTextField;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.OptionGroup;
-import com.vaadin.v7.ui.RichTextArea;
-
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.ReferenceDto;
@@ -46,9 +33,36 @@ import de.symeda.sormas.ui.utils.components.JsonForm;
 import de.symeda.sormas.ui.utils.components.MultiSelect;
 import de.symeda.sormas.ui.utils.components.MultiSelectFiles;
 import de.symeda.sormas.ui.utils.components.SormasTextField;
+import de.symeda.sormas.ui.utils.fields.AbstractTextField;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.FilteringMode;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.PasswordField;
+import de.symeda.sormas.ui.utils.fields.PopupDateField;
+import de.symeda.sormas.ui.utils.fields.SelectField;
+import de.symeda.sormas.ui.utils.fields.SormasRichTextArea;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 import de.symeda.sormas.ui.vaccination.VaccinationsField;
 
-public class SormasFieldGroupFieldFactory extends DefaultFieldGroupFieldFactory {
+/**
+ * Creates the Flow field for a property type and a requested field class, as the V7 field group field factory did.
+ * The requested classes are the SORMAS field types in {@code de.symeda.sormas.ui.utils.fields} (same simple names as
+ * the V7 ones) and the SORMAS custom fields. All created fields implement {@link Field}.
+ */
+public class SormasFieldGroupFieldFactory implements java.io.Serializable {
+
+	/**
+	 * V7 {@code DefaultFieldGroupFieldFactory.CAPTION_PROPERTY_ID}.
+	 */
+	public static final String CAPTION_PROPERTY_ID = "Caption";
+	/**
+	 * V7 Valo style name of a horizontal option group, kept as class name.
+	 */
+	public static final String OPTIONGROUP_HORIZONTAL = "horizontal";
 
 	public static final int TEXT_AREA_MAX_LENGTH = FieldConstraints.CHARACTER_LIMIT_BIG;
 	public static final int TEXT_FIELD_MAX_LENGTH = FieldConstraints.CHARACTER_LIMIT_DEFAULT;
@@ -75,7 +89,6 @@ public class SormasFieldGroupFieldFactory extends DefaultFieldGroupFieldFactory 
 	@SuppressWarnings({
 		"unchecked",
 		"rawtypes" })
-	@Override
 	public <T extends Field> T createField(Class<?> type, Class<T> fieldType) {
 		if (type.isEnum()) {
 			if (fieldType.isAssignableFrom(Field.class) // no specific fieldType defined?
@@ -85,7 +98,8 @@ public class SormasFieldGroupFieldFactory extends DefaultFieldGroupFieldFactory 
 				NullableOptionGroup field = new NullableOptionGroup();
 				field.setImmediate(true);
 				populateWithEnumData(field, (Class<? extends Enum>) type);
-				CssStyles.style(field, ValoTheme.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_CAPTION_INLINE);
+				field.addStyleName(OPTIONGROUP_HORIZONTAL);
+				field.addStyleName(CssStyles.OPTIONGROUP_CAPTION_INLINE);
 				return (T) field;
 			} else {
 				if (Disease.class.isAssignableFrom(type)) {
@@ -96,17 +110,17 @@ public class SormasFieldGroupFieldFactory extends DefaultFieldGroupFieldFactory 
 					populateWithDiseaseData(field);
 					return (T) field;
 				} else {
-					if (!AbstractSelect.class.isAssignableFrom(fieldType)) {
+					if (!SelectField.class.isAssignableFrom(fieldType)) {
 						fieldType = (Class<T>) ComboBox.class;
 					}
-					T field = ComboBoxWithPlaceholder.class == fieldType ? (T) new ComboBoxWithPlaceholder() : super.createField(type, fieldType);
+					T field = ComboBoxWithPlaceholder.class == fieldType ? (T) new ComboBoxWithPlaceholder() : createEnumField(type, fieldType);
 					if (field instanceof OptionGroup) {
-						CssStyles.style(field, ValoTheme.OPTIONGROUP_HORIZONTAL);
+						field.addStyleName(OPTIONGROUP_HORIZONTAL);
 					} else if (fieldType.isAssignableFrom(NullableOptionGroup.class)) {
 						NullableOptionGroup select = new NullableOptionGroup();
 						select.setImmediate(true);
 						populateWithEnumData(select, (Class<? extends Enum>) type);
-						CssStyles.style(select, ValoTheme.OPTIONGROUP_HORIZONTAL);
+						select.addStyleName(OPTIONGROUP_HORIZONTAL);
 						field = (T) select;
 					} else if (field instanceof ComboBox) {
 						((ComboBox) field).setFilteringMode(FilteringMode.CONTAINS);
@@ -129,8 +143,8 @@ public class SormasFieldGroupFieldFactory extends DefaultFieldGroupFieldFactory 
 			optionGroupWithCaption.setImmediate(true);
 
 			return (T) optionGroupWithCaption;
-		} else if (AbstractSelect.class.isAssignableFrom(fieldType)) {
-			AbstractSelect field = createCompatibleSelect((Class<? extends AbstractSelect>) fieldType);
+		} else if (SelectField.class.isAssignableFrom(fieldType)) {
+			SelectField field = createCompatibleSelect((Class<? extends SelectField>) fieldType);
 			field.setNullSelectionAllowed(true);
 			return (T) field;
 		} else if (LocationEditForm.class.isAssignableFrom(fieldType)) {
@@ -139,13 +153,13 @@ public class SormasFieldGroupFieldFactory extends DefaultFieldGroupFieldFactory 
 			return (T) new HealthConditionsForm(fieldVisibilityCheckers, fieldAccessCheckers);
 		} else if (DateTimeField.class.isAssignableFrom(fieldType)) {
 			DateTimeField field = new DateTimeField();
-			field.setConverter(new SormasDefaultConverterFactory().createDateConverter(Date.class));
+			field.setConverter(SormasDefaultConverterFactory.createDateConverter(Date.class));
 			return (T) field;
 		} else if (DateField.class.isAssignableFrom(fieldType)) {
-			DateField field = super.createField(type, DateField.class);
+			DateField field = createDateField(fieldType);
 			field.setDateFormat(DateFormatHelper.getDateFormatPattern());
 			field.setLenient(true);
-			field.setConverter(new SormasDefaultConverterFactory().createDateConverter(Date.class));
+			field.setConverter(SormasDefaultConverterFactory.createDateConverter(Date.class));
 			return (T) field;
 		} else if (PreviousHospitalizationsField.class.isAssignableFrom(fieldType)) {
 			return (T) new PreviousHospitalizationsField(fieldVisibilityCheckers, fieldAccessCheckers, isEditAllowed);
@@ -164,10 +178,10 @@ public class SormasFieldGroupFieldFactory extends DefaultFieldGroupFieldFactory 
 		} else if (fieldType.equals(Field.class)) {
 			// no specific field type defined -> fallbacks
 			if (Date.class.isAssignableFrom(type)) {
-				DateField field = super.createField(type, DateField.class);
+				DateField field = createDateField(DateField.class);
 				field.setDateFormat(DateFormatHelper.getDateFormatPattern());
 				field.setLenient(true);
-				field.setConverter(new SormasDefaultConverterFactory().createDateConverter(Date.class));
+				field.setConverter(SormasDefaultConverterFactory.createDateConverter(Date.class));
 				return (T) field;
 			} else if (ReferenceDto.class.isAssignableFrom(type)) {
 				return (T) ComboBoxHelper.createComboBoxV7();
@@ -196,28 +210,112 @@ public class SormasFieldGroupFieldFactory extends DefaultFieldGroupFieldFactory 
 			return (T) new DrugSusceptibilityForm(fieldVisibilityCheckers, fieldAccessCheckers);
 		} else if (CheckBoxTree.class.isAssignableFrom(fieldType)) {
 			return (T) new CheckBoxTree<>();
-		} else if (RichTextArea.class.isAssignableFrom(fieldType)) {
-			return (T) new RichTextArea();
+		} else if (SormasRichTextArea.class.isAssignableFrom(fieldType)) {
+			return (T) new SormasRichTextArea();
 		} else if (SormasTextField.class.isAssignableFrom(fieldType)) {
 			return (T) new SormasTextField();
 		}
-		return super.createField(type, fieldType);
+		return createDefaultField(type, fieldType);
 	}
 
-	@Override
-	protected AbstractSelect createCompatibleSelect(Class<? extends AbstractSelect> fieldType) {
+	/**
+	 * V7 {@code DefaultFieldGroupFieldFactory.createField} for the cases not handled above.
+	 */
+	@SuppressWarnings({
+		"unchecked",
+		"rawtypes" })
+	protected <T extends Field> T createDefaultField(Class<?> type, Class<T> fieldType) {
+		if (Enum.class.isAssignableFrom(type)) {
+			return createEnumField(type, fieldType);
+		} else if (Date.class.isAssignableFrom(type)) {
+			if (fieldType == Field.class || DateField.class.isAssignableFrom(fieldType)) {
+				return (T) createDateField(fieldType == Field.class ? DateField.class : (Class<? extends DateField>) fieldType);
+			} else if (AbstractTextField.class.isAssignableFrom(fieldType)) {
+				return (T) createAbstractTextField((Class<? extends AbstractTextField>) fieldType);
+			}
+			return null;
+		} else if (Boolean.class.isAssignableFrom(type) || boolean.class.isAssignableFrom(type)) {
+			return createBooleanField(fieldType);
+		}
+		if (AbstractTextField.class.isAssignableFrom(fieldType)) {
+			return (T) createAbstractTextField((Class<? extends AbstractTextField>) fieldType);
+		}
+		if (fieldType.isAssignableFrom(TextField.class)) {
+			return (T) createAbstractTextField(TextField.class);
+		}
+		return createInstance(fieldType);
+	}
+
+	/**
+	 * V7 {@code createEnumField}: a select filled with the enum values, or a text field.
+	 */
+	@SuppressWarnings({
+		"unchecked",
+		"rawtypes" })
+	protected <T extends Field> T createEnumField(Class<?> type, Class<T> fieldType) {
+		Class<? extends SelectField> selectClass = null;
+		if (SelectField.class.isAssignableFrom(fieldType)) {
+			selectClass = (Class<? extends SelectField>) fieldType;
+		} else if (fieldType == Field.class) {
+			selectClass = ComboBox.class;
+		}
+		if (selectClass != null) {
+			SelectField select = createCompatibleSelect(selectClass);
+			populateWithEnumData(select, (Class<? extends Enum>) type);
+			return (T) select;
+		} else if (AbstractTextField.class.isAssignableFrom(fieldType)) {
+			return (T) createAbstractTextField((Class<? extends AbstractTextField>) fieldType);
+		}
+		return null;
+	}
+
+	/**
+	 * V7 {@code createDateField}: a popup date field (Flow date picker) unless a subclass is requested.
+	 */
+	protected DateField createDateField(Class<?> fieldType) {
+		DateField field;
+		if (fieldType == DateField.class || fieldType == PopupDateField.class || !DateField.class.isAssignableFrom(fieldType)) {
+			field = new PopupDateField();
+		} else {
+			field = (DateField) createInstance(fieldType.asSubclass(Field.class));
+		}
+		field.setImmediate(true);
+		return field;
+	}
+
+	protected SelectField createCompatibleSelect(Class<? extends SelectField> fieldType) {
 		if (NullableOptionGroup.class.isAssignableFrom(fieldType)) {
 			return new NullableOptionGroup();
 		}
 		if (ComboBoxWithPlaceholder.class.isAssignableFrom(fieldType)) {
 			return new ComboBoxWithPlaceholder();
 		}
-		return super.createCompatibleSelect(fieldType);
+		SelectField select;
+		if (fieldType.isAssignableFrom(ComboBox.class)) {
+			// V7: a plain combo box without null selection
+			select = new ComboBox();
+			select.setNullSelectionAllowed(false);
+		} else if (fieldType.isAssignableFrom(OptionGroup.class)) {
+			select = new OptionGroup();
+		} else {
+			select = createInstance(fieldType);
+		}
+		select.setImmediate(true);
+		return select;
 	}
 
-	@Override
 	protected <T extends AbstractTextField> T createAbstractTextField(Class<T> fieldType) {
-		T textField = super.createAbstractTextField(fieldType);
+		T textField;
+		if (fieldType == AbstractTextField.class || fieldType == TextField.class) {
+			textField = fieldType.cast(new TextField());
+		} else if (fieldType == TextArea.class) {
+			textField = fieldType.cast(new TextArea());
+		} else if (fieldType == PasswordField.class) {
+			textField = fieldType.cast(new PasswordField());
+		} else {
+			textField = createInstance(fieldType);
+		}
+		textField.setImmediate(true);
 		textField.setNullRepresentation("");
 		return textField;
 	}
@@ -225,20 +323,35 @@ public class SormasFieldGroupFieldFactory extends DefaultFieldGroupFieldFactory 
 	@SuppressWarnings({
 		"unchecked",
 		"rawtypes" })
-	@Override
 	protected <T extends Field> T createBooleanField(Class<T> fieldType) {
 		if (NullableOptionGroup.class.isAssignableFrom(fieldType)) {
-			final AbstractSelect s = new NullableOptionGroup();;
+			final SelectField s = new NullableOptionGroup();
 			s.addItem(Boolean.TRUE);
 			s.setItemCaption(Boolean.TRUE, I18nProperties.getEnumCaption(YesNoUnknown.YES));
 			s.addItem(Boolean.FALSE);
 			s.setItemCaption(Boolean.FALSE, I18nProperties.getEnumCaption(YesNoUnknown.NO));
 
-			CssStyles.style(s, ValoTheme.OPTIONGROUP_HORIZONTAL);
+			s.addStyleName(OPTIONGROUP_HORIZONTAL);
 
 			return (T) s;
-		} else {
-			return super.createBooleanField(fieldType);
+		} else if (fieldType.isAssignableFrom(CheckBox.class)) {
+			CheckBox cb = new CheckBox();
+			cb.setImmediate(true);
+			return (T) cb;
+		} else if (AbstractTextField.class.isAssignableFrom(fieldType)) {
+			return (T) createAbstractTextField((Class<? extends AbstractTextField>) fieldType);
+		}
+		return null;
+	}
+
+	/**
+	 * V7 {@code ReflectTools.createInstance} for field classes with a public no-argument constructor.
+	 */
+	protected <T> T createInstance(Class<T> fieldType) {
+		try {
+			return fieldType.getDeclaredConstructor().newInstance();
+		} catch (ReflectiveOperationException e) {
+			throw new IllegalArgumentException("Could not create a field of type " + fieldType.getName(), e);
 		}
 	}
 
@@ -246,28 +359,17 @@ public class SormasFieldGroupFieldFactory extends DefaultFieldGroupFieldFactory 
 	protected void populateWithDiseaseData(ComboBox diseaseField) {
 
 		diseaseField.removeAllItems();
-		for (Object p : diseaseField.getContainerPropertyIds()) {
-			diseaseField.removeContainerProperty(p);
-		}
-		diseaseField.addContainerProperty(CAPTION_PROPERTY_ID, String.class, "");
-		diseaseField.setItemCaptionPropertyId(CAPTION_PROPERTY_ID);
 		List<Disease> diseases = FacadeProvider.getDiseaseConfigurationFacade().getAllDiseases(true, true, true);
 		for (Object r : diseases) {
-			Item newItem = diseaseField.addItem(r);
-			newItem.getItemProperty(CAPTION_PROPERTY_ID).setValue(r.toString());
+			diseaseField.addItem(r);
+			diseaseField.setItemCaption(r, r.toString());
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	protected void populateWithEnumData(AbstractSelect select, Class<? extends Enum> enumClass) {
+	@SuppressWarnings("rawtypes")
+	protected void populateWithEnumData(SelectField select, Class<? extends Enum> enumClass) {
 
 		select.removeAllItems();
-		for (Object p : select.getContainerPropertyIds()) {
-			select.removeContainerProperty(p);
-		}
-		select.addContainerProperty(CAPTION_PROPERTY_ID, String.class, "");
-		select.setItemCaptionPropertyId(CAPTION_PROPERTY_ID);
 		EnumSet<?> enumSet = EnumSet.allOf(enumClass);
 		for (Object r : enumSet) {
 			boolean visible = true;
@@ -276,8 +378,8 @@ public class SormasFieldGroupFieldFactory extends DefaultFieldGroupFieldFactory 
 			}
 
 			if (visible) {
-				Item newItem = select.addItem(r);
-				newItem.getItemProperty(CAPTION_PROPERTY_ID).setValue(r.toString());
+				select.addItem(r);
+				select.setItemCaption(r, r.toString());
 			}
 		}
 	}

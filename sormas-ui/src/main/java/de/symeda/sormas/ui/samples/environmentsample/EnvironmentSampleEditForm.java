@@ -29,15 +29,7 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.vaadin.ui.Label;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.AbstractField;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.OptionGroup;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -68,6 +60,12 @@ import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
 import de.symeda.sormas.ui.utils.UserField;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class EnvironmentSampleEditForm extends AbstractEditForm<EnvironmentSampleDto> {
 
@@ -120,20 +118,20 @@ public class EnvironmentSampleEditForm extends AbstractEditForm<EnvironmentSampl
 			UiFieldAccessCheckers.getDefault(isPseudonymized, FacadeProvider.getConfigFacade().getCountryLocale()));
 		this.isCreate = isCreate;
 		addFields();
-		addValueChangeListener(e -> defaultValueChangeListener((EnvironmentSampleDto) e.getProperty().getValue()));
+		addValueChangeListener(e -> defaultValueChangeListener((EnvironmentSampleDto) e.getValue()));
 	}
 
 	@NotNull
-	private static Label buildHeadingLabel(String stringProperty) {
-		Label labSampleHeadingLabel = new Label(I18nProperties.getString(stringProperty));
-		labSampleHeadingLabel.addStyleName(H3);
+	private static Span buildHeadingLabel(String stringProperty) {
+		Span labSampleHeadingLabel = new Span(I18nProperties.getString(stringProperty));
+		labSampleHeadingLabel.addClassName(H3);
 		return labSampleHeadingLabel;
 	}
 
 	@NotNull
-	private static Label buildSubHeadingLabel(String stringProperty) {
-		Label labSampleHeadingLabel = new Label(I18nProperties.getString(stringProperty));
-		labSampleHeadingLabel.addStyleName(H4);
+	private static Span buildSubHeadingLabel(String stringProperty) {
+		Span labSampleHeadingLabel = new Span(I18nProperties.getString(stringProperty));
+		labSampleHeadingLabel.addClassName(H4);
 		return labSampleHeadingLabel;
 	}
 
@@ -193,7 +191,7 @@ public class EnvironmentSampleEditForm extends AbstractEditForm<EnvironmentSampl
 		NullableOptionGroup heavyRains = addField(EnvironmentSampleDto.HEAVY_RAIN, NullableOptionGroup.class);
 
 		sampleMaterialField.addValueChangeListener(event -> {
-			if (event.getProperty().getValue() != null && (EnvironmentSampleMaterial.VECTORS.equals(event.getProperty().getValue()))) {
+			if (event.getValue() != null && (EnvironmentSampleMaterial.VECTORS.equals(event.getValue()))) {
 				getContent().removeComponent(SAMPLE_MEASUREMENTS_HEADING_LOC);
 				setVisible(
 					false,
@@ -235,8 +233,7 @@ public class EnvironmentSampleEditForm extends AbstractEditForm<EnvironmentSampl
 		Field labDetailsField = addField(EnvironmentSampleDto.LABORATORY_DETAILS);
 		labDetailsField.setVisible(false);
 		laboratoryField.addValueChangeListener(event -> {
-			if (event.getProperty().getValue() != null
-				&& ((FacilityReferenceDto) event.getProperty().getValue()).getUuid().equals(FacilityDto.OTHER_FACILITY_UUID)) {
+			if (event.getValue() != null && ((FacilityReferenceDto) event.getValue()).getUuid().equals(FacilityDto.OTHER_FACILITY_UUID)) {
 				labDetailsField.setVisible(true);
 			} else {
 				labDetailsField.setVisible(false);
@@ -309,7 +306,7 @@ public class EnvironmentSampleEditForm extends AbstractEditForm<EnvironmentSampl
 
 		getFieldGroup().getFields().forEach(f -> {
 			if (f.isEnabled()) {
-				String propertyId = f.getId();
+				String propertyId = f.getId().orElse(null);
 				boolean isReceivalField = RECEIVAL_FIELDS.contains(propertyId);
 				boolean canEdit =
 					EnvironmentSampleDto.GENERAL_COMMENT.equals(propertyId) || (isReceivalField ? hasEditReceivalRight : canEditDispatchField);
@@ -322,14 +319,14 @@ public class EnvironmentSampleEditForm extends AbstractEditForm<EnvironmentSampl
 	}
 
 	@Override
-	public void setValue(EnvironmentSampleDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(EnvironmentSampleDto newFieldValue) {
 		super.setValue(newFieldValue);
 		disableFieldsBasedOnRights(newFieldValue);
 	}
 
 	protected void defaultValueChangeListener(EnvironmentSampleDto sample) {
 		String reportInfoText = I18nProperties.getString(Strings.reportedOn) + " " + DateFormatHelper.formatLocalDateTime(sample.getReportDate());
-		Label reportInfoLabel = new Label(reportInfoText);
+		Span reportInfoLabel = new Span(reportInfoText);
 		reportInfoLabel.setEnabled(false);
 		getContent().addComponent(reportInfoLabel, REPORT_INFO_LOC);
 	}
@@ -393,7 +390,7 @@ public class EnvironmentSampleEditForm extends AbstractEditForm<EnvironmentSampl
 					Validations.environmentSampleDateTimeAfterPathogenTestDateTime,
 					DateFormatHelper.formatLocalDateTime(this.getEarliestPathogenTestDate()))));
 
-		List<AbstractField<Date>> validatedFields = Arrays.asList(sampleDateField, dispatchDate, reveivalDate);
+		List<DateField> validatedFields = Arrays.asList(sampleDateField, dispatchDate, reveivalDate);
 		validatedFields.forEach(field -> field.addValueChangeListener(r -> {
 			validatedFields.forEach(otherField -> {
 				otherField.setValidationVisible(!otherField.isValid());

@@ -1,6 +1,6 @@
 package de.symeda.sormas.api.survey.alias;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 /**
  * Alias can be (but not exclusively) used for Field ids.

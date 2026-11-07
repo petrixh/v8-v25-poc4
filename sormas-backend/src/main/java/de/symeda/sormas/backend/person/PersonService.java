@@ -33,26 +33,26 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.ParameterExpression;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-import javax.transaction.Transactional;
-import javax.validation.constraints.NotNull;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.ParameterExpression;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
+import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -866,20 +866,20 @@ public class PersonService extends AdoServiceWithUserFilterAndJurisdiction<Perso
 
 			String name = criteria.getFirstName() + " " + criteria.getLastName();
 
-			filter = and(cb, filter, cb.isTrue(cb.function(SIMILARITY_OPERATOR, boolean.class, nameExpr, cb.literal(name))));
+			filter = and(cb, filter, cb.isTrue(cb.function(SIMILARITY_OPERATOR, boolean.class, nameExpr, CriteriaBuilderHelper.value(cb, name))));
 		} else if (!StringUtils.isBlank(criteria.getFirstName())) {
 			filter = and(
 				cb,
 				filter,
-				cb.isTrue(cb.function(SIMILARITY_OPERATOR, boolean.class, personFrom.get(Person.FIRST_NAME), cb.literal(criteria.getFirstName()))));
+				cb.isTrue(cb.function(SIMILARITY_OPERATOR, boolean.class, personFrom.get(Person.FIRST_NAME), CriteriaBuilderHelper.value(cb, criteria.getFirstName()))));
 		} else if (!StringUtils.isBlank(criteria.getLastName())) {
 			filter = and(
 				cb,
 				filter,
-				cb.isTrue(cb.function(SIMILARITY_OPERATOR, boolean.class, personFrom.get(Person.LAST_NAME), cb.literal(criteria.getLastName()))));
+				cb.isTrue(cb.function(SIMILARITY_OPERATOR, boolean.class, personFrom.get(Person.LAST_NAME), CriteriaBuilderHelper.value(cb, criteria.getLastName()))));
 		}
 		if (criteria.getSex() != null) {
-			Expression<Sex> sexExpr = cb.literal(criteria.getSex());
+			Expression<Sex> sexExpr = CriteriaBuilderHelper.value(cb, criteria.getSex());
 
 			Predicate sexFilter = cb.or(
 				cb.or(cb.isNull(personFrom.get(Person.SEX)), cb.isNull(sexExpr)),
@@ -928,10 +928,10 @@ public class PersonService extends AdoServiceWithUserFilterAndJurisdiction<Perso
 					!strictNameComparison ? CriteriaBuilderHelper.unaccentedIlike(cb, personFrom.get(Person.FIRST_NAME), textFilter) : null,
 					!strictNameComparison ? CriteriaBuilderHelper.unaccentedIlike(cb, personFrom.get(Person.LAST_NAME), textFilter) : null,
 					!strictNameComparison
-						? cb.isTrue(cb.function(SIMILARITY_OPERATOR, boolean.class, personFrom.get(Person.FIRST_NAME), cb.literal(textFilter)))
+						? cb.isTrue(cb.function(SIMILARITY_OPERATOR, boolean.class, personFrom.get(Person.FIRST_NAME), CriteriaBuilderHelper.value(cb, textFilter)))
 						: null,
 					!strictNameComparison
-						? cb.isTrue(cb.function(SIMILARITY_OPERATOR, boolean.class, personFrom.get(Person.LAST_NAME), cb.literal(textFilter)))
+						? cb.isTrue(cb.function(SIMILARITY_OPERATOR, boolean.class, personFrom.get(Person.LAST_NAME), CriteriaBuilderHelper.value(cb, textFilter)))
 						: null);
 
 				filter = CriteriaBuilderHelper.and(cb, filter, likeFilters);

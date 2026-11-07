@@ -21,13 +21,13 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 
-import com.vaadin.data.Converter;
-import com.vaadin.data.Result;
-import com.vaadin.data.ValueContext;
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.DateField;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.converter.Converter;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import de.symeda.sormas.api.sample.PathogenTestDto;
 import de.symeda.sormas.ui.samples.events.ViaLimsChangedEvent;
@@ -44,8 +44,8 @@ public class TestIdentificationComponent extends FormComponent<PathogenTestDto> 
 
 	private final FormEventBus eventBus;
 
-	private DateField reportDate;
-	private CheckBox viaLims;
+	private DatePicker reportDate;
+	private Checkbox viaLims;
 	private TextField externalId;
 	private TextField externalOrderId;
 
@@ -63,9 +63,9 @@ public class TestIdentificationComponent extends FormComponent<PathogenTestDto> 
 		addRow(reportDate, viaLims);
 
 		externalId = createTextField(PathogenTestDto.EXTERNAL_ID, PathogenTestDto.I18N_PREFIX);
-		externalId.setValueChangeMode(ValueChangeMode.BLUR);
+		externalId.setValueChangeMode(ValueChangeMode.ON_BLUR);
 		externalOrderId = createTextField(PathogenTestDto.EXTERNAL_ORDER_ID, PathogenTestDto.I18N_PREFIX);
-		externalOrderId.setValueChangeMode(ValueChangeMode.BLUR);
+		externalOrderId.setValueChangeMode(ValueChangeMode.ON_BLUR);
 		addRow(externalId, externalOrderId);
 	}
 
@@ -83,7 +83,7 @@ public class TestIdentificationComponent extends FormComponent<PathogenTestDto> 
 		track(viaLims.addValueChangeListener(e -> eventBus.fire(new ViaLimsChangedEvent(Boolean.TRUE.equals(e.getValue())))));
 	}
 
-	public CheckBox getViaLimsField() {
+	public Checkbox getViaLimsField() {
 		return viaLims;
 	}
 

@@ -1,9 +1,8 @@
 package de.symeda.sormas.ui.dashboard.contacts.components;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -15,6 +14,7 @@ import de.symeda.sormas.ui.dashboard.components.DashboardFilterLayout;
 import de.symeda.sormas.ui.dashboard.contacts.ContactsDashboardView;
 import de.symeda.sormas.ui.utils.ComboBoxHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
 
 public class ContactsFilterLayout extends DashboardFilterLayout<DashboardDataProvider> {
 
@@ -43,9 +43,9 @@ public class ContactsFilterLayout extends DashboardFilterLayout<DashboardDataPro
 	}
 
 	private void createInfoLabel() {
-		Label infoLabel = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
+		Span infoLabel = new Span(VaadinIcon.INFO_CIRCLE.create());
 		infoLabel.setSizeUndefined();
-		infoLabel.setDescription(I18nProperties.getString(Strings.infoContactDashboard));
+		infoLabel.setTitle(I18nProperties.getString(Strings.infoContactDashboard));
 		CssStyles.style(infoLabel, CssStyles.LABEL_XLARGE, CssStyles.LABEL_SECONDARY);
 
 		addCustomComponent(infoLabel, INFO_LABEL);

@@ -22,9 +22,7 @@ package de.symeda.sormas.ui.events.eventLink;
 
 import java.util.Date;
 
-import com.vaadin.data.provider.ConfigurableFilterDataProvider;
-import com.vaadin.shared.ui.grid.HeightMode;
-import com.vaadin.ui.renderers.DateRenderer;
+import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
@@ -37,6 +35,8 @@ import de.symeda.sormas.ui.events.EventIndexLocationRenderer;
 import de.symeda.sormas.ui.utils.FieldAccessColumnStyleGenerator;
 import de.symeda.sormas.ui.utils.FilteredGrid;
 import de.symeda.sormas.ui.utils.GridHeightResizer;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 @SuppressWarnings("serial")
 public class EventSelectionGrid extends FilteredGrid<EventIndexDto, EventCriteria> {
@@ -66,9 +66,9 @@ public class EventSelectionGrid extends FilteredGrid<EventIndexDto, EventCriteri
 			EventIndexDto.EVENT_STATUS,
 			EventIndexDto.REPORT_DATE_TIME);
 
-		for (Column<EventIndexDto, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(EventIndexDto.I18N_PREFIX, column.getId(), column.getCaption()));
-			column.setStyleGenerator(FieldAccessColumnStyleGenerator.forSensitiveData(EventIndexDto.class, column.getId()));
+		for (Column<EventIndexDto, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(EventIndexDto.I18N_PREFIX, column.getKey(), column.getCaption()));
+			column.setStyleGenerator(FieldAccessColumnStyleGenerator.forSensitiveData(EventIndexDto.class, column.getKey()));
 		}
 
 		getColumn(EventIndexDto.EVENT_TITLE).setMaximumWidth(300);

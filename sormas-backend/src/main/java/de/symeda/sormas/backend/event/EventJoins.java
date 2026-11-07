@@ -17,9 +17,9 @@ package de.symeda.sormas.backend.event;
 
 import java.util.Objects;
 
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 
 import de.symeda.sormas.backend.action.Action;
 import de.symeda.sormas.backend.caze.Case;

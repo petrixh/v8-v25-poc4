@@ -27,22 +27,22 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.Query;
-import javax.persistence.criteria.CommonAbstractCriteria;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.Query;
+import jakarta.persistence.criteria.CommonAbstractCriteria;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.person.PersonReferenceDto;
@@ -199,12 +199,12 @@ public class VaccinationService extends AdoServiceWithUserFilterAndJurisdiction<
 	}
 
 	private Expression<Date> getCaseSymptomsExpression(From<?, Case> casePath, CommonAbstractCriteria cq, CriteriaBuilder cb) {
-		Subquery<Symptoms> symptomsSq = cq.subquery(Symptoms.class);
+		Subquery<Date> symptomsSq = cq.subquery(Date.class);
 		Root<Symptoms> symptomsSqRoot = symptomsSq.from(Symptoms.class);
-		symptomsSq.select(symptomsSqRoot.get(Symptoms.ONSET_DATE));
+		symptomsSq.select(symptomsSqRoot.<Date> get(Symptoms.ONSET_DATE));
 		symptomsSq.where(cb.equal(symptomsSqRoot, casePath.get(Case.SYMPTOMS)));
 
-		return symptomsSq.getSelection().as(Date.class);
+		return symptomsSq;
 	}
 
 	/**
@@ -305,7 +305,7 @@ public class VaccinationService extends AdoServiceWithUserFilterAndJurisdiction<
 		if (vaccination == null) {
 			return cb.conjunction(); // Return a predicate that is always true
 		}
-		return getRelevantVaccinationPredicate(cb, cb.literal(getRelevantVaccineDate(vaccination)), primaryDatePath, fallbackDatePath);
+		return getRelevantVaccinationPredicate(cb, CriteriaBuilderHelper.value(cb, getRelevantVaccineDate(vaccination)), primaryDatePath, fallbackDatePath);
 	}
 
 	/**

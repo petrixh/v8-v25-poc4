@@ -22,14 +22,13 @@ package de.symeda.sormas.ui.events.eventLink;
 
 import java.util.function.Consumer;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseReferenceDto;
@@ -90,8 +89,8 @@ public class EventListComponent extends VerticalLayout {
 		}, isEditAllowed);
 
 		if (contact.getCaze() != null) {
-			CheckBox contactOnlyWithSourceCaseInEvent = new CheckBox(I18nProperties.getCaption(Captions.eventOnlyWithContactSourceCaseInvolved));
-			contactOnlyWithSourceCaseInEvent.addStyleNames(CssStyles.CHECKBOX_FILTER_INLINE, CssStyles.VSPACE_4);
+			Checkbox contactOnlyWithSourceCaseInEvent = new Checkbox(I18nProperties.getCaption(Captions.eventOnlyWithContactSourceCaseInvolved));
+			contactOnlyWithSourceCaseInEvent.addClassNames(CssStyles.CHECKBOX_FILTER_INLINE, CssStyles.VSPACE_4);
 			contactOnlyWithSourceCaseInEvent.setWidthFull();
 			contactOnlyWithSourceCaseInEvent.addValueChangeListener(e -> {
 				if (e.getValue()) {
@@ -101,7 +100,7 @@ public class EventListComponent extends VerticalLayout {
 				}
 				eventList.reload();
 			});
-			addComponent(contactOnlyWithSourceCaseInEvent, 1);
+			addComponentAtIndex(1, contactOnlyWithSourceCaseInEvent);
 		}
 	}
 
@@ -144,40 +143,42 @@ public class EventListComponent extends VerticalLayout {
 		Runnable linkEventCallback,
 		boolean isEditAllowed) {
 
-		setWidth(100, Unit.PERCENTAGE);
-		setMargin(false);
+		setWidthFull();
+		setPadding(false);
 		setSpacing(false);
 
 		HorizontalLayout componentHeader = new HorizontalLayout();
-		componentHeader.setMargin(false);
+		componentHeader.setPadding(false);
 		componentHeader.setSpacing(false);
-		componentHeader.setWidth(100, Unit.PERCENTAGE);
-		addComponent(componentHeader);
+		componentHeader.setWidthFull();
+		add(componentHeader);
 
 		list = eventList;
-		addComponent(list);
+		add(list);
 		list.reload();
 
-		Label eventLabel = new Label(heading);
-		eventLabel.addStyleName(CssStyles.H3);
-		componentHeader.addComponent(eventLabel);
+		Span eventLabel = new Span(heading);
+		eventLabel.addClassName(CssStyles.H3);
+		componentHeader.add(eventLabel);
+		// Vaadin 8: the heading's slot took the free space, the button sat right in its own slot
+		componentHeader.setFlexGrow(1, eventLabel);
 
 		if (UiUtil.permitted(isEditAllowed, UserRight.EVENT_CREATE, UserRight.EVENTPARTICIPANT_CREATE)) {
 			createButton = ButtonHelper.createButton(I18nProperties.getCaption(Captions.linkEvent));
-			createButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
-			createButton.setIcon(VaadinIcons.PLUS_CIRCLE);
+			CssStyles.style(createButton, CssStyles.BUTTON_PRIMARY);
+			ButtonHelper.setIcon(createButton, VaadinIcon.PLUS_CIRCLE);
 			createButton.addClickListener(e -> actionCallback.accept(linkEventCallback));
 			if (bottomCreateButton) {
 				HorizontalLayout buttonLayout = new HorizontalLayout();
-				buttonLayout.setMargin(false);
+				buttonLayout.setPadding(false);
 				buttonLayout.setSpacing(true);
-				buttonLayout.setWidth(100, Unit.PERCENTAGE);
+				buttonLayout.setWidthFull();
 				CssStyles.style(buttonLayout, CssStyles.VSPACE_TOP_3);
-				buttonLayout.addComponent(createButton);
-				addComponent(buttonLayout);
+				buttonLayout.add(createButton);
+				add(buttonLayout);
 			} else {
-				componentHeader.addComponent(createButton);
-				componentHeader.setComponentAlignment(createButton, Alignment.MIDDLE_RIGHT);
+				componentHeader.add(createButton);
+				componentHeader.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, createButton);
 			}
 		}
 	}

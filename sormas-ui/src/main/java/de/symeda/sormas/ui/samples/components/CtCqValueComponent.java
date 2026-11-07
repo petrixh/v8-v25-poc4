@@ -17,11 +17,11 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.samples.components;
 
-import com.vaadin.data.ValueProvider;
-import com.vaadin.server.Setter;
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Setter;
+import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.function.ValueProvider;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.sample.PathogenTestDto;
@@ -58,23 +58,23 @@ public class CtCqValueComponent extends FormComponent<PathogenTestDto> {
 
 	private void buildLayout() {
 		// CQ value
-		cqValueField = createTextField(PathogenTestDto.CQ_VALUE, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
+		cqValueField = createTextField(PathogenTestDto.CQ_VALUE, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
 		if (!isLuxembourg) {
 			cqValueField.setVisible(false);
 		}
 		cqRow = addRow(cqValueField);
 
 		// CT values
-		ctValueE = createTextField(PathogenTestDto.CT_VALUE_E, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
-		ctValueN = createTextField(PathogenTestDto.CT_VALUE_N, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
+		ctValueE = createTextField(PathogenTestDto.CT_VALUE_E, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
+		ctValueN = createTextField(PathogenTestDto.CT_VALUE_N, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
 		addRow(ctValueE, ctValueN);
 
-		ctValueRdrp = createTextField(PathogenTestDto.CT_VALUE_RDRP, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
-		ctValueS = createTextField(PathogenTestDto.CT_VALUE_S, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
+		ctValueRdrp = createTextField(PathogenTestDto.CT_VALUE_RDRP, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
+		ctValueS = createTextField(PathogenTestDto.CT_VALUE_S, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
 		addRow(ctValueRdrp, ctValueS);
 
-		ctValueOrf1 = createTextField(PathogenTestDto.CT_VALUE_ORF_1, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
-		ctValueRdrpS = createTextField(PathogenTestDto.CT_VALUE_RDRP_S, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
+		ctValueOrf1 = createTextField(PathogenTestDto.CT_VALUE_ORF_1, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
+		ctValueRdrpS = createTextField(PathogenTestDto.CT_VALUE_RDRP_S, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
 		addRow(ctValueOrf1, ctValueRdrpS);
 
 		// Initially hide CT fields
@@ -92,7 +92,7 @@ public class CtCqValueComponent extends FormComponent<PathogenTestDto> {
 	}
 
 	private void bindFloatField(TextField field, ValueProvider<PathogenTestDto, Float> getter, Setter<PathogenTestDto, Float> setter) {
-		binder.forField(field).withConverter(new StringToFloatNullableConverter(field.getCaption())).bind(getter, setter);
+		binder.forField(field).withConverter(new StringToFloatNullableConverter(field.getLabel())).bind(getter, setter);
 	}
 
 	public void updateCtVisibility(Disease disease, PathogenTestType testType) {

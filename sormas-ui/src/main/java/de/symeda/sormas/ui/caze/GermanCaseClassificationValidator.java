@@ -15,10 +15,9 @@
 
 package de.symeda.sormas.ui.caze;
 
-import com.vaadin.v7.data.validator.AbstractValidator;
-
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseClassification;
+import de.symeda.sormas.ui.utils.fields.AbstractValidator;
 
 public class GermanCaseClassificationValidator extends AbstractValidator<CaseClassification> {
 

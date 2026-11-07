@@ -1,17 +1,19 @@
 package de.symeda.sormas.ui.utils;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.v7.data.Property;
+import com.vaadin.flow.component.Unit;
 
+import de.symeda.sormas.ui.utils.fields.Field;
+
+@SuppressWarnings("rawtypes")
 public final class FieldConfiguration {
 
 	private final String propertyId;
 	private Float width;
-	private Sizeable.Unit widthUnit;
+	private Unit widthUnit;
 	private String caption;
 	private String description;
 	private String style;
-	private Property.ValueChangeListener valueChangeListener;
+	private Field.ValueChangeListener valueChangeListener;
 
 	private String validationMessageProperty;
 
@@ -27,7 +29,7 @@ public final class FieldConfiguration {
 		return width;
 	}
 
-	public Sizeable.Unit getWidthUnit() {
+	public Unit getWidthUnit() {
 		return widthUnit;
 	}
 
@@ -48,7 +50,7 @@ public final class FieldConfiguration {
 	 * 
 	 * @return the listener
 	 */
-	public Property.ValueChangeListener getValueChangeListener() {
+	public Field.ValueChangeListener getValueChangeListener() {
 		return valueChangeListener;
 	}
 
@@ -83,11 +85,11 @@ public final class FieldConfiguration {
 
 		private final String propertyId;
 		private Float width;
-		private Sizeable.Unit widthUnit;
+		private Unit widthUnit;
 		private String caption;
 		private String description;
 		private String style;
-		private Property.ValueChangeListener valueChangeListener;
+		private Field.ValueChangeListener valueChangeListener;
 		private String validationMessageProperty;
 
 		private Builder(String propertyId) {
@@ -96,11 +98,11 @@ public final class FieldConfiguration {
 
 		public Builder widthPx(float width) {
 			this.width = width;
-			this.widthUnit = Sizeable.Unit.PIXELS;
+			this.widthUnit = Unit.PIXELS;
 			return this;
 		}
 
-		public Builder width(float width, Sizeable.Unit unit) {
+		public Builder width(float width, Unit unit) {
 			this.width = width;
 			this.widthUnit = unit;
 			return this;
@@ -121,7 +123,7 @@ public final class FieldConfiguration {
 			return this;
 		}
 
-		public Builder valueChangeListener(Property.ValueChangeListener listener) {
+		public Builder valueChangeListener(Field.ValueChangeListener listener) {
 			this.valueChangeListener = listener;
 			return this;
 		}

@@ -19,14 +19,13 @@ package de.symeda.sormas.ui.utils;
 
 import java.util.Optional;
 
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-
+import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import de.symeda.sormas.ui.SubMenu;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 
 @SuppressWarnings("serial")
-public abstract class AbstractSubNavigationView<SC extends Component> extends AbstractView {
+public abstract class AbstractSubNavigationView<SC extends HasElement> extends AbstractView {
 
 	private final SubMenu subNavigationMenu;
 	private HorizontalLayout buttonsLayout;
@@ -37,7 +36,7 @@ public abstract class AbstractSubNavigationView<SC extends Component> extends Ab
 
 		subNavigationMenu = new SubMenu();
 		addComponent(subNavigationMenu);
-		setExpandRatio(subNavigationMenu, 0);
+		setFlexGrow(0, subNavigationMenu);
 
 		createButtonsLayout().ifPresent(l -> {
 			buttonsLayout = l;
@@ -47,7 +46,7 @@ public abstract class AbstractSubNavigationView<SC extends Component> extends Ab
 
 	protected Optional<HorizontalLayout> createButtonsLayout() {
 		HorizontalLayout buttonsLayout = new HorizontalLayout();
-		buttonsLayout.setMargin(false);
+		buttonsLayout.setPadding(false);
 
 		return Optional.of(buttonsLayout);
 	}
@@ -65,13 +64,13 @@ public abstract class AbstractSubNavigationView<SC extends Component> extends Ab
 	protected void setSubComponent(SC newComponent) {
 
 		if (subComponent != null) {
-			removeComponent(subComponent);
+			getElement().removeChild(subComponent.getElement());
 		}
 		subComponent = newComponent;
 		if (subComponent != null) {
 			// Make sure that the sub component is always the first component below the navigation
-			addComponent(subComponent, 2);
-			setExpandRatio(subComponent, 1);
+			getElement().insertChild(2, subComponent.getElement());
+			setFlexGrow(1, subComponent);
 		}
 	}
 

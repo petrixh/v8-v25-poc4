@@ -20,21 +20,17 @@ import static de.symeda.sormas.api.utils.FieldConstraints.CHARACTER_LIMIT_DEFAUL
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
-import org.hibernate.annotations.TypeDef;
-
-import com.vladmihalcea.hibernate.type.array.ListArrayType;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 import de.symeda.sormas.api.sample.PathogenTestResultType;
 import de.symeda.sormas.api.sample.SampleMaterial;
@@ -44,7 +40,6 @@ import de.symeda.sormas.backend.externalmessage.ExternalMessage;
 import de.symeda.sormas.backend.sample.Sample;
 
 @Entity(name = SampleReport.TABLE_NAME)
-@TypeDef(name = "list-array", typeClass = ListArrayType.class)
 public class SampleReport extends AbstractDomainObject {
 
 	private static final long serialVersionUID = -6907634648584998110L;

@@ -12,21 +12,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.vaadin.server.ErrorMessage;
-import com.vaadin.server.UserError;
-import com.vaadin.shared.ui.ErrorLevel;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.fieldgroup.FieldGroup;
-import com.vaadin.v7.ui.OptionGroup;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -50,6 +45,12 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.EpiWeekFilterOption;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
+import de.symeda.sormas.ui.utils.fields.FieldGroup;
+import de.symeda.sormas.ui.utils.fields.KeepValueComboBox;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 /**
  * @author Christopher Riedel
@@ -62,15 +63,16 @@ public class AggregateReportsEditLayout extends VerticalLayout {
 
 	private static final long serialVersionUID = -7806379599024578146L;
 
-	private Window window;
+	private Dialog window;
 
 	private OptionGroup epiWeekOptions;
 	private ComboBox<Integer> comboBoxYear;
-	private ComboBox<EpiWeek> comboBoxEpiWeek;
+	// the combo boxes whose items change keep their value as Vaadin 8 did (KeepValueComboBox)
+	private KeepValueComboBox<EpiWeek> comboBoxEpiWeek;
 	private ComboBox<RegionReferenceDto> comboBoxRegion;
-	private ComboBox<DistrictReferenceDto> comboBoxDistrict;
-	private ComboBox<FacilityReferenceDto> comboBoxFacility;
-	private ComboBox<PointOfEntryReferenceDto> comboBoxPoe;
+	private KeepValueComboBox<DistrictReferenceDto> comboBoxDistrict;
+	private KeepValueComboBox<FacilityReferenceDto> comboBoxFacility;
+	private KeepValueComboBox<PointOfEntryReferenceDto> comboBoxPoe;
 	private Button deleteButton;
 	private Button cancelButton;
 	private Button saveButton;
@@ -79,11 +81,11 @@ public class AggregateReportsEditLayout extends VerticalLayout {
 	private List<Disease> diseasesWithoutReport = new ArrayList<>();
 	private List<DiseaseAgeGroup> diseaseAgeGroupsWithoutReport = new ArrayList<>();
 	private List<AggregateReportDto> reports;
-	private Label duplicateMessage;
+	private Span duplicateMessage;
 	private boolean existsExpiredAgeGroups = false;
-	private Label expiredAgeGroupsMessage;
+	private Span expiredAgeGroupsMessage;
 
-	public AggregateReportsEditLayout(Window window, boolean edit, AggregateReportDto selectedAggregateReport) {
+	public AggregateReportsEditLayout(Dialog window, boolean edit, AggregateReportDto selectedAggregateReport) {
 
 		setWidth(560, Unit.PIXELS);
 		setSpacing(false);
@@ -92,34 +94,37 @@ public class AggregateReportsEditLayout extends VerticalLayout {
 
 		epiWeekOptions = new OptionGroup();
 		epiWeekOptions.addItems(EpiWeekFilterOption.values());
-		epiWeekOptions.addStyleNames(ValoTheme.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_HORIZONTAL_PRIMARY);
-		CssStyles.style(epiWeekOptions, ValoTheme.OPTIONGROUP_HORIZONTAL);
+		epiWeekOptions.addClassNames(SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_HORIZONTAL_PRIMARY);
+		CssStyles.style(epiWeekOptions, SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL);
 		epiWeekOptions.addValueChangeListener(e -> updateEpiWeekFields());
 		if (!edit) {
-			addComponent(epiWeekOptions);
+			add(epiWeekOptions);
 		}
 
 		comboBoxYear = new ComboBox<>(I18nProperties.getString(Strings.year), DateHelper.getYearsToNow(2000));
 		comboBoxYear.setWidth(250, Unit.PIXELS);
+		initComboBox(comboBoxYear);
 		comboBoxYear.addValueChangeListener(e -> {
 			updateEpiWeekFields();
 			setEpiWeekComponentErrors();
 		});
 		comboBoxYear.setRequiredIndicatorVisible(true);
 
-		comboBoxEpiWeek = new ComboBox<>(I18nProperties.getString(Strings.epiWeek));
+		comboBoxEpiWeek = new KeepValueComboBox<>(I18nProperties.getString(Strings.epiWeek));
 		comboBoxEpiWeek.setWidth(250, Unit.PIXELS);
+		initComboBox(comboBoxEpiWeek);
 		comboBoxEpiWeek.addValueChangeListener(e -> {
 			checkForExistingData(edit);
 			setEpiWeekComponentErrors();
 		});
 		comboBoxEpiWeek.setRequiredIndicatorVisible(true);
-		addComponent(new HorizontalLayout(comboBoxYear, comboBoxEpiWeek));
+		add(new HorizontalLayout(comboBoxYear, comboBoxEpiWeek));
 
 		comboBoxRegion = new ComboBox<>();
 		comboBoxRegion.setWidth(250, Unit.PIXELS);
-		comboBoxRegion.setItemCaptionGenerator(item -> item.buildCaption());
-		comboBoxRegion.setCaption(I18nProperties.getPrefixCaption(AggregateReportDto.I18N_PREFIX, AggregateReportDto.REGION));
+		initComboBox(comboBoxRegion);
+		comboBoxRegion.setItemLabelGenerator(item -> item.buildCaption());
+		comboBoxRegion.setLabel(I18nProperties.getPrefixCaption(AggregateReportDto.I18N_PREFIX, AggregateReportDto.REGION));
 		comboBoxRegion.setItems(FacadeProvider.getRegionFacade().getAllActiveByServerCountry());
 		comboBoxRegion.setRequiredIndicatorVisible(true);
 		comboBoxRegion.addValueChangeListener(e -> {
@@ -127,19 +132,20 @@ public class AggregateReportsEditLayout extends VerticalLayout {
 			comboBoxDistrict.clear();
 			if (region != null) {
 				checkForExistingData(edit);
-				comboBoxRegion.setComponentError(null);
+				setComponentError(comboBoxRegion, null);
 				comboBoxDistrict.setItems(FacadeProvider.getDistrictFacade().getAllActiveByRegion(region.getUuid()));
 				comboBoxDistrict.setEnabled(true);
 			} else {
-				comboBoxRegion.setComponentError(new UserError(I18nProperties.getString(Validations.required)));
+				setComponentError(comboBoxRegion, I18nProperties.getString(Validations.required));
 				comboBoxDistrict.setEnabled(false);
 			}
 		});
 
-		comboBoxDistrict = new ComboBox<>();
-		comboBoxDistrict.setItemCaptionGenerator(item -> item.buildCaption());
+		comboBoxDistrict = new KeepValueComboBox<>();
+		comboBoxDistrict.setItemLabelGenerator(item -> item.buildCaption());
 		comboBoxDistrict.setWidth(250, Unit.PIXELS);
-		comboBoxDistrict.setCaption(I18nProperties.getPrefixCaption(AggregateReportDto.I18N_PREFIX, AggregateReportDto.DISTRICT));
+		initComboBox(comboBoxDistrict);
+		comboBoxDistrict.setLabel(I18nProperties.getPrefixCaption(AggregateReportDto.I18N_PREFIX, AggregateReportDto.DISTRICT));
 		comboBoxDistrict.setRequiredIndicatorVisible(true);
 		comboBoxDistrict.addValueChangeListener(e -> {
 			DistrictReferenceDto district = e.getValue();
@@ -151,7 +157,7 @@ public class AggregateReportsEditLayout extends VerticalLayout {
 			}
 			if (district != null) {
 				checkForExistingData(edit);
-				comboBoxDistrict.setComponentError(null);
+				setComponentError(comboBoxDistrict, null);
 				if (comboBoxFacility != null && !UiUtil.isPortHealthUser()) {
 					comboBoxFacility.setItems(FacadeProvider.getFacilityFacade().getActiveHospitalsByDistrict(district, false));
 					comboBoxFacility.setEnabled(true);
@@ -161,19 +167,20 @@ public class AggregateReportsEditLayout extends VerticalLayout {
 					comboBoxPoe.setEnabled(true);
 				}
 			} else {
-				comboBoxDistrict.setComponentError(new UserError(I18nProperties.getString(Validations.required)));
+				setComponentError(comboBoxDistrict, I18nProperties.getString(Validations.required));
 				comboBoxFacility.setEnabled(false);
 				comboBoxPoe.setEnabled(false);
 			}
 		});
 
 		comboBoxDistrict.setEnabled(false);
-		addComponent(new HorizontalLayout(comboBoxRegion, comboBoxDistrict));
+		add(new HorizontalLayout(comboBoxRegion, comboBoxDistrict));
 
-		comboBoxFacility = new ComboBox<>();
-		comboBoxFacility.setItemCaptionGenerator(item -> item.buildCaption());
+		comboBoxFacility = new KeepValueComboBox<>();
+		comboBoxFacility.setItemLabelGenerator(item -> item.buildCaption());
 		comboBoxFacility.setWidth(250, Unit.PIXELS);
-		comboBoxFacility.setCaption(I18nProperties.getPrefixCaption(AggregateReportDto.I18N_PREFIX, AggregateReportDto.HEALTH_FACILITY));
+		initComboBox(comboBoxFacility);
+		comboBoxFacility.setLabel(I18nProperties.getPrefixCaption(AggregateReportDto.I18N_PREFIX, AggregateReportDto.HEALTH_FACILITY));
 		comboBoxFacility.setEnabled(false);
 		comboBoxFacility.addValueChangeListener(e -> {
 			if (comboBoxFacility.getValue() != null) {
@@ -182,10 +189,11 @@ public class AggregateReportsEditLayout extends VerticalLayout {
 			checkForExistingData(edit);
 		});
 
-		comboBoxPoe = new ComboBox<>();
-		comboBoxPoe.setItemCaptionGenerator(item -> item.buildCaption());
+		comboBoxPoe = new KeepValueComboBox<>();
+		comboBoxPoe.setItemLabelGenerator(item -> item.buildCaption());
 		comboBoxPoe.setWidth(250, Unit.PIXELS);
-		comboBoxPoe.setCaption(I18nProperties.getPrefixCaption(AggregateReportDto.I18N_PREFIX, AggregateReportDto.POINT_OF_ENTRY));
+		initComboBox(comboBoxPoe);
+		comboBoxPoe.setLabel(I18nProperties.getPrefixCaption(AggregateReportDto.I18N_PREFIX, AggregateReportDto.POINT_OF_ENTRY));
 		comboBoxPoe.setEnabled(false);
 		if (UiUtil.isPortHealthUser()) {
 			comboBoxPoe.setRequiredIndicatorVisible(true);
@@ -195,17 +203,17 @@ public class AggregateReportsEditLayout extends VerticalLayout {
 				comboBoxFacility.clear();
 			} else {
 				if (UiUtil.isPortHealthUser()) {
-					comboBoxPoe.setComponentError(new UserError(I18nProperties.getString(Validations.required)));
+					setComponentError(comboBoxPoe, I18nProperties.getString(Validations.required));
 				}
 			}
 			checkForExistingData(edit);
 		});
-		addComponent(new HorizontalLayout(comboBoxFacility, comboBoxPoe));
+		add(new HorizontalLayout(comboBoxFacility, comboBoxPoe));
 
-		duplicateMessage = new Label(I18nProperties.getString(Strings.messageAggregateReportFound));
-		duplicateMessage.addStyleNames(CssStyles.LABEL_WHITE_SPACE_NORMAL, CssStyles.LABEL_CRITICAL);
+		duplicateMessage = new Span(I18nProperties.getString(Strings.messageAggregateReportFound));
+		duplicateMessage.addClassNames(CssStyles.LABEL_WHITE_SPACE_NORMAL, CssStyles.LABEL_CRITICAL);
 		duplicateMessage.setVisible(false);
-		addComponent(new HorizontalLayout(duplicateMessage));
+		add(new HorizontalLayout(duplicateMessage));
 
 		if (edit) {
 			comboBoxYear.setValue(selectedAggregateReport.getYear());
@@ -295,7 +303,7 @@ public class AggregateReportsEditLayout extends VerticalLayout {
 			}
 		}
 
-		Label legend = new Label(
+		Span legend = new Span(
 			String.format(
 				I18nProperties.getString(Strings.aggregateReportLegend),
 				I18nProperties.getCaption(Captions.aggregateReportNewCasesShort),
@@ -304,8 +312,8 @@ public class AggregateReportsEditLayout extends VerticalLayout {
 				I18nProperties.getPrefixCaption(AggregateReportDto.I18N_PREFIX, AggregateReportDto.LAB_CONFIRMATIONS),
 				I18nProperties.getCaption(Captions.aggregateReportDeathsShort),
 				I18nProperties.getPrefixCaption(AggregateReportDto.I18N_PREFIX, AggregateReportDto.DEATHS)));
-		addComponent(legend);
-		legend.addStyleName(CssStyles.VSPACE_TOP_1);
+		add(legend);
+		legend.addClassName(CssStyles.VSPACE_TOP_1);
 
 		editForms = editForms.stream()
 			.sorted(
@@ -314,49 +322,50 @@ public class AggregateReportsEditLayout extends VerticalLayout {
 					.thenComparing(AggregateReportEditForm::getAgeGroup, AgeGroupUtils.getComparator()))
 			.collect(Collectors.toList());
 
-		editForms.forEach(this::addComponent);
+		editForms.forEach(this::add);
 
 		if (!editForms.isEmpty()) {
-			editForms.get(0).addStyleName(CssStyles.VSPACE_TOP_1);
+			editForms.get(0).addClassName(CssStyles.VSPACE_TOP_1);
 		}
 
 		if (existsExpiredAgeGroups) {
-			expiredAgeGroupsMessage = new Label(I18nProperties.getString(Strings.messageAggregateReportExpiredAgeGroups));
-			expiredAgeGroupsMessage.addStyleNames(CssStyles.LABEL_WHITE_SPACE_NORMAL, CssStyles.LABEL_CRITICAL);
+			expiredAgeGroupsMessage = new Span(I18nProperties.getString(Strings.messageAggregateReportExpiredAgeGroups));
+			expiredAgeGroupsMessage.addClassNames(CssStyles.LABEL_WHITE_SPACE_NORMAL, CssStyles.LABEL_CRITICAL);
 			expiredAgeGroupsMessage.setVisible(true);
-			addComponent(new HorizontalLayout(expiredAgeGroupsMessage));
+			add(new HorizontalLayout(expiredAgeGroupsMessage));
 		}
 
 		HorizontalLayout buttonsPanel = new HorizontalLayout();
-		buttonsPanel.setMargin(false);
+		buttonsPanel.setPadding(false);
 		buttonsPanel.setSpacing(true);
-		buttonsPanel.setWidth(100, Unit.PERCENTAGE);
+		buttonsPanel.setWidthFull();
 
 		if (edit) {
 			deleteButton = ButtonHelper.createButton(Captions.actionDelete, clickEvent -> {
 				deleteAggregateReports();
 			});
-			buttonsPanel.addComponent(deleteButton);
-			buttonsPanel.setComponentAlignment(deleteButton, Alignment.BOTTOM_RIGHT);
-			buttonsPanel.setExpandRatio(deleteButton, 0);
+			buttonsPanel.add(deleteButton);
+			buttonsPanel.setVerticalComponentAlignment(FlexComponent.Alignment.END, deleteButton);
+			buttonsPanel.setFlexGrow(0, deleteButton);
 			checkForExistingData(edit);
 		}
 
 		cancelButton = ButtonHelper.createButton(Captions.actionDiscard, e -> window.close());
 
-		buttonsPanel.addComponent(cancelButton);
-		buttonsPanel.setComponentAlignment(cancelButton, Alignment.BOTTOM_RIGHT);
-		buttonsPanel.setExpandRatio(cancelButton, 1);
+		buttonsPanel.add(cancelButton);
+		// was Alignment.BOTTOM_RIGHT in an expanding slot: the button goes right without stretching
+		buttonsPanel.setVerticalComponentAlignment(FlexComponent.Alignment.END, cancelButton);
+		cancelButton.getStyle().set("margin-left", "auto");
 
-		saveButton = ButtonHelper.createButton(Captions.actionSave, event -> save(), ValoTheme.BUTTON_PRIMARY);
+		saveButton = ButtonHelper.createButton(Captions.actionSave, event -> save(), CssStyles.BUTTON_PRIMARY);
 
-		buttonsPanel.addComponent(saveButton);
-		buttonsPanel.setComponentAlignment(saveButton, Alignment.BOTTOM_RIGHT);
-		buttonsPanel.setExpandRatio(saveButton, 0);
+		buttonsPanel.add(saveButton);
+		buttonsPanel.setVerticalComponentAlignment(FlexComponent.Alignment.END, saveButton);
+		buttonsPanel.setFlexGrow(0, saveButton);
 
-		buttonsPanel.addStyleName(CssStyles.VSPACE_TOP_2);
-		addComponent(buttonsPanel);
-		setComponentAlignment(buttonsPanel, Alignment.BOTTOM_RIGHT);
+		buttonsPanel.addClassName(CssStyles.VSPACE_TOP_2);
+		add(buttonsPanel);
+		setHorizontalComponentAlignment(FlexComponent.Alignment.END, buttonsPanel);
 
 		if (!edit) {
 			initialize();
@@ -385,7 +394,7 @@ public class AggregateReportsEditLayout extends VerticalLayout {
 			editForms.stream()
 				.filter(editForm -> editForm.isFirstGroup() || (editForm.getAgeGroup() == null && !editForm.isExpiredAgeGroup()))
 				.forEach(editForm -> {
-					editForm.getContent().getComponent(AggregateReportEditForm.DISEASE_LOC).removeStyleName(CssStyles.LABEL_CRITICAL);
+					((HasStyle) editForm.getContent().getComponent(AggregateReportEditForm.DISEASE_LOC)).removeClassName(CssStyles.LABEL_CRITICAL);
 				});
 
 			//mark duplicate diseases red
@@ -394,7 +403,7 @@ public class AggregateReportsEditLayout extends VerticalLayout {
 					if (editForm.isFirstGroup() || (editForm.getAgeGroup() == null && !editForm.isExpiredAgeGroup())) {
 						if (duplicateReports.stream()
 							.anyMatch(aggregateReportDto -> (aggregateReportDto.getDisease().equals(editForm.getDisease())))) {
-							editForm.getContent().getComponent(AggregateReportEditForm.DISEASE_LOC).addStyleName(CssStyles.LABEL_CRITICAL);
+							((HasStyle) editForm.getContent().getComponent(AggregateReportEditForm.DISEASE_LOC)).addClassName(CssStyles.LABEL_CRITICAL);
 						}
 					}
 				});
@@ -430,7 +439,7 @@ public class AggregateReportsEditLayout extends VerticalLayout {
 
 	private void switchToEditMode() {
 
-		window.setCaption(I18nProperties.getString(Strings.headingEditAggregateReport));
+		window.setHeaderTitle(I18nProperties.getString(Strings.headingEditAggregateReport));
 		for (AggregateReportEditForm editForm : editForms) {
 			String ageGroup = editForm.getAgeGroup();
 			Optional<AggregateReportDto> optionalAggregateReportDto = getReportByDiseaseAndAgeGroup(editForm.getDisease(), ageGroup);
@@ -442,7 +451,7 @@ public class AggregateReportsEditLayout extends VerticalLayout {
 				diseaseAgeGroupsWithoutReport.remove(new DiseaseAgeGroup(editForm.getDisease(), ageGroup));
 			}
 		}
-		removeComponent(epiWeekOptions);
+		remove(epiWeekOptions);
 		comboBoxYear.setEnabled(false);
 		comboBoxEpiWeek.setEnabled(false);
 		comboBoxRegion.setEnabled(false);
@@ -469,35 +478,35 @@ public class AggregateReportsEditLayout extends VerticalLayout {
 	private void save() {
 
 		if (!isValid()) {
-			Notification.show(I18nProperties.getString(Strings.errorIntegerFieldValidationFailed), "", Type.ERROR_MESSAGE);
+			NotificationHelper.show(I18nProperties.getString(Strings.errorIntegerFieldValidationFailed), "", Type.ERROR_MESSAGE);
 			return;
 		}
 
-		if (comboBoxYear.getComponentError() != null) {
-			Notification.show(I18nProperties.getValidationError(Validations.specifyYear), "", Type.ERROR_MESSAGE);
+		if (comboBoxYear.isInvalid()) {
+			NotificationHelper.show(I18nProperties.getValidationError(Validations.specifyYear), "", Type.ERROR_MESSAGE);
 			return;
 		}
 
-		if (comboBoxEpiWeek.getComponentError() != null) {
-			Notification.show(I18nProperties.getValidationError(Validations.specifyEpiWeek), "", Type.ERROR_MESSAGE);
+		if (comboBoxEpiWeek.isInvalid()) {
+			NotificationHelper.show(I18nProperties.getValidationError(Validations.specifyEpiWeek), "", Type.ERROR_MESSAGE);
 			return;
 		}
 
 		if (comboBoxRegion.getValue() == null) {
-			comboBoxRegion.setComponentError(new UserError(I18nProperties.getString(Validations.required)));
-			Notification.show(I18nProperties.getValidationError(Validations.validRegion), "", Type.ERROR_MESSAGE);
+			setComponentError(comboBoxRegion, I18nProperties.getString(Validations.required));
+			NotificationHelper.show(I18nProperties.getValidationError(Validations.validRegion), "", Type.ERROR_MESSAGE);
 			return;
 		}
 
 		if (comboBoxDistrict.getValue() == null) {
-			comboBoxDistrict.setComponentError(new UserError(I18nProperties.getString(Validations.required)));
-			Notification.show(I18nProperties.getValidationError(Validations.validDistrict), "", Type.ERROR_MESSAGE);
+			setComponentError(comboBoxDistrict, I18nProperties.getString(Validations.required));
+			NotificationHelper.show(I18nProperties.getValidationError(Validations.validDistrict), "", Type.ERROR_MESSAGE);
 			return;
 		}
 
 		if (UiUtil.isPortHealthUser() && comboBoxPoe.getValue() == null) {
-			comboBoxPoe.setComponentError(new UserError(I18nProperties.getString(Validations.required)));
-			Notification.show(I18nProperties.getValidationError(Validations.validPointOfEntry), "", Type.ERROR_MESSAGE);
+			setComponentError(comboBoxPoe, I18nProperties.getString(Validations.required));
+			NotificationHelper.show(I18nProperties.getValidationError(Validations.validPointOfEntry), "", Type.ERROR_MESSAGE);
 			return;
 		}
 
@@ -628,31 +637,29 @@ public class AggregateReportsEditLayout extends VerticalLayout {
 
 	private void setEpiWeekComponentErrors() {
 
-		comboBoxYear.setComponentError(comboBoxYear.getValue() == null ? new ErrorMessage() {
+		setComponentError(comboBoxYear, comboBoxYear.getValue() == null ? I18nProperties.getValidationError(Validations.specifyYear) : null);
 
-			@Override
-			public ErrorLevel getErrorLevel() {
-				return ErrorLevel.ERROR;
-			}
+		setComponentError(
+			comboBoxEpiWeek,
+			comboBoxEpiWeek.getValue() == null ? I18nProperties.getValidationError(Validations.specifyEpiWeek) : null);
+	}
 
-			@Override
-			public String getFormattedHtmlMessage() {
-				return I18nProperties.getValidationError(Validations.specifyYear);
-			}
-		} : null);
+	/**
+	 * Vaadin 8 combo boxes: the empty item cleared the value (Flow: the clear button), and the required indicator did not
+	 * validate; the errors are set by this layout ({@link #setComponentError}).
+	 */
+	private static void initComboBox(ComboBox<?> comboBox) {
+		comboBox.setClearButtonVisible(true);
+		comboBox.setManualValidation(true);
+	}
 
-		comboBoxEpiWeek.setComponentError(comboBoxEpiWeek.getValue() == null ? new ErrorMessage() {
-
-			@Override
-			public ErrorLevel getErrorLevel() {
-				return ErrorLevel.ERROR;
-			}
-
-			@Override
-			public String getFormattedHtmlMessage() {
-				return I18nProperties.getValidationError(Validations.specifyEpiWeek);
-			}
-		} : null);
+	/**
+	 * Vaadin 8 {@code setComponentError} with {@code ErrorLevel.ERROR}: the field shows the message as invalid until it is
+	 * cleared here.
+	 */
+	private static void setComponentError(HasValidation component, String message) {
+		component.setErrorMessage(message);
+		component.setInvalid(message != null);
 	}
 
 	public FieldGroup getFieldGroups() {

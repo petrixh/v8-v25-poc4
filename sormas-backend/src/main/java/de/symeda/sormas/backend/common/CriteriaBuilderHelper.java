@@ -11,15 +11,16 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.hibernate.query.criteria.HibernateCriteriaBuilder;
 
 import de.symeda.sormas.api.utils.DataHelper;
 import de.symeda.sormas.api.uuid.HasUuid;
@@ -140,12 +141,20 @@ public class CriteriaBuilderHelper {
 		return CriteriaBuilderHelper.and(cb, filter, or);
 	}
 
+	/**
+	 * A value as a bound query parameter. {@code cb.literal(value)} is rendered inline into the SQL text by Hibernate 7;
+	 * Hibernate 5 bound it ({@code literal_handling_mode=bind}). Use this for values that come from data or user input.
+	 */
+	public static <T> Expression<T> value(CriteriaBuilder cb, T value) {
+		return ((HibernateCriteriaBuilder) cb).value(value);
+	}
+
 	public static Predicate unaccentedIlike(CriteriaBuilder cb, Expression<String> valueExpression, String pattern) {
-		return unaccentedIlike(cb, valueExpression, cb.literal("%" + pattern + "%"));
+		return unaccentedIlike(cb, valueExpression, value(cb, "%" + pattern + "%"));
 	}
 
 	public static Predicate unaccentedIlikePrecise(CriteriaBuilder cb, Expression<String> valueExpression, String value) {
-		return unaccentedIlike(cb, valueExpression, cb.literal(value));
+		return unaccentedIlike(cb, valueExpression, value(cb, value));
 	}
 
 	public static Predicate unaccentedIlike(CriteriaBuilder cb, Expression<String> valueExpression, Expression<String> patternExpression) {
@@ -155,11 +164,11 @@ public class CriteriaBuilderHelper {
 	}
 
 	public static Predicate ilike(CriteriaBuilder cb, Expression<String> valueExpression, String pattern) {
-		return ilike(cb, valueExpression, cb.literal("%" + pattern + "%"));
+		return ilike(cb, valueExpression, value(cb, "%" + pattern + "%"));
 	}
 
 	public static Predicate ilikePrecise(CriteriaBuilder cb, Expression<String> valueExpression, String value) {
-		return ilike(cb, valueExpression, cb.literal(value));
+		return ilike(cb, valueExpression, value(cb, value));
 	}
 
 	public static Predicate ilike(CriteriaBuilder cb, Expression<String> valueExpression, Expression<String> patternExpression) {

@@ -3,8 +3,13 @@ package de.symeda.sormas.ui.utils;
 import java.util.Arrays;
 import java.util.List;
 
-import com.vaadin.server.Resource;
-import com.vaadin.ui.MenuBar;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 
@@ -18,10 +23,17 @@ public class MenuBarHelper {
 		MenuBar menuBar = new MenuBar();
 		menuBar.setId(captionKey);
 
-		MenuBar.MenuItem mainItem = menuBar.addItem(I18nProperties.getCaption(captionKey), null);
+		MenuItem mainItem = menuBar.addItem(I18nProperties.getCaption(captionKey));
 
 		for (MenuBarItem item : items) {
-			MenuBar.MenuItem dropDownItem = mainItem.addItem(item.caption, item.icon, item.command);
+			MenuItem dropDownItem;
+			if (item.icon != null) {
+				// was addItem(caption, icon, command)
+				Span itemContent = new Span(item.icon.create(), new Text(item.caption));
+				dropDownItem = mainItem.getSubMenu().addItem(itemContent, item.command);
+			} else {
+				dropDownItem = mainItem.getSubMenu().addItem(item.caption, item.command);
+			}
 			dropDownItem.setVisible(item.visible);
 		}
 
@@ -31,17 +43,17 @@ public class MenuBarHelper {
 	public static class MenuBarItem {
 
 		private String caption;
-		private Resource icon;
-		private MenuBar.Command command;
+		private VaadinIcon icon;
+		private ComponentEventListener<ClickEvent<MenuItem>> command;
 		private boolean visible = true;
 
-		public MenuBarItem(String caption, Resource icon, MenuBar.Command command) {
+		public MenuBarItem(String caption, VaadinIcon icon, ComponentEventListener<ClickEvent<MenuItem>> command) {
 			this.caption = caption;
 			this.icon = icon;
 			this.command = command;
 		}
 
-		public MenuBarItem(String caption, Resource icon, MenuBar.Command command, Boolean visible) {
+		public MenuBarItem(String caption, VaadinIcon icon, ComponentEventListener<ClickEvent<MenuItem>> command, Boolean visible) {
 			this.caption = caption;
 			this.icon = icon;
 			this.command = command;

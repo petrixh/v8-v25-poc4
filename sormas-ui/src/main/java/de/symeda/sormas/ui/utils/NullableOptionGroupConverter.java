@@ -1,11 +1,12 @@
 package de.symeda.sormas.ui.utils;
 
 import java.util.Collections;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
-import com.vaadin.v7.data.util.converter.Converter;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.converter.Converter;
 
 class NullableOptionGroupConverter implements Converter<Object, Object> {
 
@@ -16,7 +17,7 @@ class NullableOptionGroupConverter implements Converter<Object, Object> {
 	}
 
 	@Override
-	public Object convertToModel(Object ts, Class<? extends Object> aClass, Locale locale) throws ConversionException {
+	public Result<Object> convertToModel(Object ts, ValueContext context) {
 
 		Set newValue = (Set) ts;
 
@@ -37,11 +38,11 @@ class NullableOptionGroupConverter implements Converter<Object, Object> {
 		} else {
 			oldValue = null;
 		}
-		return oldValue;
+		return Result.ok(oldValue);
 	}
 
 	@Override
-	public Object convertToPresentation(Object t, Class<? extends Object> aClass, Locale locale) throws ConversionException {
+	public Object convertToPresentation(Object t, ValueContext context) {
 		if (t != null) {
 			return Collections.singleton(t);
 		} else {
@@ -49,13 +50,4 @@ class NullableOptionGroupConverter implements Converter<Object, Object> {
 		}
 	}
 
-	@Override
-	public Class<Object> getModelType() {
-		return Object.class;
-	}
-
-	@Override
-	public Class<Object> getPresentationType() {
-		return Object.class;
-	}
 }

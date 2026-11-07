@@ -19,9 +19,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vaadin.ui.renderers.DateRenderer;
-import com.vaadin.ui.renderers.TextRenderer;
-
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
 import de.symeda.sormas.api.environment.environmentsample.EnvironmentSampleCriteria;
@@ -46,7 +43,8 @@ import de.symeda.sormas.ui.utils.FieldAccessColumnStyleGenerator;
 import de.symeda.sormas.ui.utils.ReloadableGrid;
 import de.symeda.sormas.ui.utils.ShowDetailsListener;
 import de.symeda.sormas.ui.utils.UuidRenderer;
-import elemental.json.JsonValue;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
 public class EnvironmentSampleGrid extends ReloadableGrid<EnvironmentSampleIndexDto, EnvironmentSampleCriteria> {
 
@@ -128,7 +126,7 @@ public class EnvironmentSampleGrid extends ReloadableGrid<EnvironmentSampleIndex
 		positivePathogenTestsColumn.setRenderer(new TextRenderer() {
 
 			@Override
-			public JsonValue encode(Object value) {
+			public String encode(Object value) {
 				if (value != null) {
 
 					return super.encode(String.join(", ", ((List<Pathogen>) value).stream().map(t -> t.getCaption()).collect(Collectors.toList())));
@@ -140,10 +138,10 @@ public class EnvironmentSampleGrid extends ReloadableGrid<EnvironmentSampleIndex
 
 		((Column<EnvironmentSampleIndexDto, String>) getColumn(EnvironmentSampleIndexDto.NUMBER_OF_TESTS)).setSortable(false);
 
-		for (Column<EnvironmentSampleIndexDto, ?> column : getColumns()) {
-			if (!DELETE_REASON_COLUMN.equals(column.getId())) {
-				column.setCaption(I18nProperties.findPrefixCaption(column.getId(), EnvironmentSampleIndexDto.I18N_PREFIX, LocationDto.I18N_PREFIX));
-				column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getId()));
+		for (Column<EnvironmentSampleIndexDto, ?> column : getAllColumns()) {
+			if (!DELETE_REASON_COLUMN.equals(column.getKey())) {
+				column.setCaption(I18nProperties.findPrefixCaption(column.getKey(), EnvironmentSampleIndexDto.I18N_PREFIX, LocationDto.I18N_PREFIX));
+				column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getKey()));
 			}
 		}
 
@@ -167,7 +165,7 @@ public class EnvironmentSampleGrid extends ReloadableGrid<EnvironmentSampleIndex
 
 	@Override
 	public void reload() {
-		if (getSelectionModel().isUserSelectionAllowed()) {
+		if (isUserSelectionAllowed()) {
 			deselectAll();
 		}
 

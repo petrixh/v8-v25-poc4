@@ -2,13 +2,13 @@ package de.symeda.sormas.ui.caze.messaging;
 
 import java.util.Arrays;
 
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseReferenceDto;
@@ -19,6 +19,7 @@ import de.symeda.sormas.api.messaging.MessageType;
 import de.symeda.sormas.api.person.PersonReferenceDto;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 public class SmsListComponent extends VerticalLayout {
@@ -44,38 +45,40 @@ public class SmsListComponent extends VerticalLayout {
 				confirmationEvent -> {
 					if (confirmationEvent.booleanValue()) {
 						FacadeProvider.getCaseFacade().sendMessage(Arrays.asList(caseRef.getUuid()), "", smsComponent.getValue(), MessageType.SMS);
-						Notification.show(null, I18nProperties.getString(Strings.notificationSmsSent), Notification.Type.TRAY_NOTIFICATION);
+						NotificationHelper.show(null, I18nProperties.getString(Strings.notificationSmsSent), NotificationHelper.Type.TRAY_NOTIFICATION);
 					}
 				});
 		});
 
 	}
 
-	private void createSmsListComponent(SmsList smsList, Button.ClickListener clickListener) {
-		setWidth(100, Unit.PERCENTAGE);
-		setMargin(false);
+	private void createSmsListComponent(SmsList smsList, ComponentEventListener<ClickEvent<Button>> clickListener) {
+		setWidthFull();
+		setPadding(false);
 		setSpacing(false);
 
 		HorizontalLayout componentHeader = new HorizontalLayout();
-		componentHeader.setMargin(false);
+		componentHeader.setPadding(false);
 		componentHeader.setSpacing(false);
-		componentHeader.setWidth(100, Unit.PERCENTAGE);
-		addComponent(componentHeader);
+		componentHeader.setWidthFull();
+		add(componentHeader);
 
 		list = smsList;
-		addComponent(list);
+		add(list);
 		list.reload();
 
-		Label smsHeader = new Label(I18nProperties.getCaption(Captions.messagesSms));
-		smsHeader.addStyleName(CssStyles.H3);
-		componentHeader.addComponent(smsHeader);
+		Span smsHeader = new Span(I18nProperties.getCaption(Captions.messagesSms));
+		smsHeader.addClassName(CssStyles.H3);
+		componentHeader.add(smsHeader);
 
 		if (isEditAllowed) {
 			sendSmsButton = ButtonHelper.createButton(I18nProperties.getCaption(Captions.messagesSendSMS));
-			CssStyles.style(sendSmsButton, ValoTheme.BUTTON_PRIMARY);
+			CssStyles.style(sendSmsButton, CssStyles.BUTTON_PRIMARY);
 			sendSmsButton.addClickListener(clickListener);
-			componentHeader.addComponent(sendSmsButton);
-			componentHeader.setComponentAlignment(sendSmsButton, Alignment.MIDDLE_RIGHT);
+			componentHeader.add(sendSmsButton);
+			// was right-aligned in its half of the header
+			componentHeader.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+			componentHeader.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, sendSmsButton);
 			if (!hasPhoneNumber) {
 				sendSmsButton.setEnabled(false);
 			}

@@ -1,10 +1,9 @@
 package de.symeda.sormas.ui.reports.aggregate;
 
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -22,26 +21,27 @@ public class AggregateReportController {
 	}
 
 	public void openEditOrCreateWindow(Runnable onClose, boolean edit, AggregateReportDto aggregateReportDto) {
-		Window window = VaadinUiUtil.createPopupWindow();
+		Dialog window = VaadinUiUtil.createPopupWindow();
 		AggregateReportsEditLayout createLayout = new AggregateReportsEditLayout(window, edit, aggregateReportDto);
 		window.setHeight(90, Unit.PERCENTAGE);
-		window.setWidth(createLayout.getWidth() + 64 + 20, Unit.PIXELS);
+		// was getWidth() + 64 + 20 pixels (Flow returns the width as a CSS string)
+		window.setWidth("calc(" + createLayout.getWidth() + " + 84px)");
 		if (edit) {
-			window.setCaption(I18nProperties.getString(Strings.headingEditAggregateReport));
+			window.setHeaderTitle(I18nProperties.getString(Strings.headingEditAggregateReport));
 		} else {
-			window.setCaption(I18nProperties.getString(Strings.headingCreateNewAggregateReport));
+			window.setHeaderTitle(I18nProperties.getString(Strings.headingCreateNewAggregateReport));
 		}
-		window.setContent(createLayout);
-		window.addCloseListener(e -> onClose.run());
-		UI.getCurrent().addWindow(window);
+		window.add(createLayout);
+		VaadinUiUtil.addCloseListener(window, e -> onClose.run());
+		window.open();
 	}
 
 	public void deleteAggregateReport(String uuid, Runnable onClose) {
 
 		VerticalLayout verticalLayout = new VerticalLayout();
-		verticalLayout.setMargin(false);
-		Label contentLabel = new Label(I18nProperties.getString(Strings.messageAggregateReportDelete));
-		verticalLayout.addComponent(contentLabel);
+		verticalLayout.setPadding(false);
+		Span contentLabel = new Span(I18nProperties.getString(Strings.messageAggregateReportDelete));
+		verticalLayout.add(contentLabel);
 
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getString(Strings.headingDeleteConfirmation),

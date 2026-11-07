@@ -17,13 +17,12 @@ package de.symeda.sormas.ui.contact;
 
 import java.util.List;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.ReferenceDto;
@@ -55,37 +54,38 @@ public class SourceContactListComponent extends VerticalLayout {
 	}
 
 	private void createSourceContactListComponent(SourceContactList sourceContactList, boolean isEditAllowed) {
-		setWidth(100, Unit.PERCENTAGE);
-		setMargin(false);
+		setWidthFull();
+		setPadding(false);
 		setSpacing(false);
 
 		HorizontalLayout componentHeader = new HorizontalLayout();
-		componentHeader.setMargin(false);
+		componentHeader.setPadding(false);
 		componentHeader.setSpacing(false);
-		componentHeader.setWidth(100, Unit.PERCENTAGE);
-		addComponent(componentHeader);
+		componentHeader.setWidthFull();
+		add(componentHeader);
 
 		list = sourceContactList;
-		addComponent(list);
+		add(list);
 		list.reload();
 
-		Label sourceContactsHeader = new Label(I18nProperties.getString(Strings.headingEpiDataSourceCaseContacts));
-		sourceContactsHeader.addStyleName(CssStyles.H3);
-		componentHeader.addComponent(sourceContactsHeader);
+		Span sourceContactsHeader = new Span(I18nProperties.getString(Strings.headingEpiDataSourceCaseContacts));
+		sourceContactsHeader.addClassName(CssStyles.H3);
+		componentHeader.add(sourceContactsHeader);
+		componentHeader.setFlexGrow(1, sourceContactsHeader);
 
 		if (UiUtil.permitted(isEditAllowed, UserRight.CONTACT_CREATE)) {
 			Button createButton = ButtonHelper.createIconButton(
 				Captions.contactNewContact,
-				VaadinIcons.PLUS_CIRCLE,
+				VaadinIcon.PLUS_CIRCLE,
 					e -> view.showUnsavedChangesPopup(() -> ControllerProvider.getContactController().create(caseReference, true, () -> {
 						// For case classification effectiveness, extra save is needed.
 						// Ideally, we should mark the epi case data form as dirty when a contact is created, but we couldn't find a way to do that.
 						FacadeProvider.getCaseFacade().save(FacadeProvider.getCaseFacade().getByUuid(caseReference.getUuid()));
 						SormasUI.refreshView();
 					})),
-				ValoTheme.BUTTON_PRIMARY);
-			componentHeader.addComponent(createButton);
-			componentHeader.setComponentAlignment(createButton, Alignment.MIDDLE_RIGHT);
+				CssStyles.BUTTON_PRIMARY);
+			componentHeader.add(createButton);
+			componentHeader.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, createButton);
 		}
 	}
 

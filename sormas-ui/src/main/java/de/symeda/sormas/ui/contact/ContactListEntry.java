@@ -17,14 +17,15 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.contact;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.contact.ContactDto;
 import de.symeda.sormas.api.contact.ContactIndexDto;
@@ -45,85 +46,83 @@ public class ContactListEntry extends HorizontalLayout {
 
 		this.contact = contact;
 
-		setMargin(false);
+		setPadding(false);
 		setSpacing(true);
 		setWidth(100, Unit.PERCENTAGE);
-		addStyleName(CssStyles.SORMAS_LIST_ENTRY);
+		addClassName(CssStyles.SORMAS_LIST_ENTRY);
 
 		HorizontalLayout mainLayout = new HorizontalLayout();
 		mainLayout.setWidth(100, Unit.PERCENTAGE);
-		mainLayout.setMargin(false);
+		mainLayout.setPadding(false);
 		mainLayout.setSpacing(false);
-		addComponent(mainLayout);
-		setExpandRatio(mainLayout, 1);
+		add(mainLayout);
+		setFlexGrow(1, mainLayout);
 
 		VerticalLayout leftLayout = new VerticalLayout();
-		leftLayout.setMargin(false);
+		leftLayout.setPadding(false);
 		leftLayout.setSpacing(false);
 
-		Label contactUuid = new Label(DataHelper.toStringNullable(DataHelper.getShortUuid(contact.getUuid())));
-		contactUuid.addStyleNames(CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
-		contactUuid.setDescription(contact.getUuid());
-		leftLayout.addComponent(contactUuid);
+		Span contactUuid = new Span(DataHelper.toStringNullable(DataHelper.getShortUuid(contact.getUuid())));
+		contactUuid.addClassNames(CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
+		contactUuid.setTitle(contact.getUuid());
+		leftLayout.add(contactUuid);
 
-		Label contactClassification = new Label(contact.getContactClassification().toString());
-		contactClassification.addStyleName(CssStyles.LABEL_BOLD);
-		contactClassification.setDescription(contact.getContactClassification().toString());
+		Span contactClassification = new Span(contact.getContactClassification().toString());
+		contactClassification.addClassName(CssStyles.LABEL_BOLD);
+		contactClassification.setTitle(contact.getContactClassification().toString());
 		contactClassification.setWidthFull();
-		leftLayout.addComponent(contactClassification);
+		leftLayout.add(contactClassification);
 
-		Label contactStatus = new Label(contact.getContactStatus().toString());
-		contactStatus.setDescription(contact.getContactStatus().toString());
+		Span contactStatus = new Span(contact.getContactStatus().toString());
+		contactStatus.setTitle(contact.getContactStatus().toString());
 		contactStatus.setWidthFull();
-		leftLayout.addComponent(contactStatus);
+		leftLayout.add(contactStatus);
 
 		if (contact.getLastContactDate() != null) {
-			Label lastContactDate = new Label(
+			Span lastContactDate = new Span(
 				I18nProperties.getPrefixCaption(ContactDto.I18N_PREFIX, ContactDto.LAST_CONTACT_DATE) + ": "
 					+ DateFormatHelper.formatDate(contact.getLastContactDate()));
-			leftLayout.addComponent(lastContactDate);
+			leftLayout.add(lastContactDate);
 		}
-		mainLayout.addComponent(leftLayout);
+		mainLayout.add(leftLayout);
 	}
 
-	public void addEditListener(int rowIndex, ClickListener editClickListener) {
+	public void addEditListener(int rowIndex, ComponentEventListener<ClickEvent<Button>> editClickListener) {
 		if (editButton == null) {
 			editButton = ButtonHelper.createIconButtonWithCaption(
 				"edit-contact-" + rowIndex,
 				null,
-				VaadinIcons.PENCIL,
+				VaadinIcon.PENCIL,
 				null,
-				ValoTheme.BUTTON_LINK,
+				CssStyles.BUTTON_LINK,
 				CssStyles.BUTTON_COMPACT);
 
-			addComponent(editButton);
-			setComponentAlignment(editButton, Alignment.MIDDLE_RIGHT);
-			setExpandRatio(editButton, 0);
+			add(editButton);
+			setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, editButton);
 		}
 
 		editButton.addClickListener(editClickListener);
 	}
 
-	public void addDeleteListener(int rowIndex, ClickListener deleteClickListener) {
+	public void addDeleteListener(int rowIndex, ComponentEventListener<ClickEvent<Button>> deleteClickListener) {
 		if (deleteButton == null) {
 			deleteButton = ButtonHelper.createIconButtonWithCaption(
 				"delete-contact-" + rowIndex,
 				null,
-				VaadinIcons.TRASH,
+				VaadinIcon.TRASH,
 				null,
-				ValoTheme.BUTTON_LINK,
+				CssStyles.BUTTON_LINK,
 				CssStyles.BUTTON_COMPACT);
 
-			addComponent(deleteButton);
-			setComponentAlignment(deleteButton, Alignment.MIDDLE_RIGHT);
-			setExpandRatio(deleteButton, 0);
+			add(deleteButton);
+			setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, deleteButton);
 		}
 
 		deleteButton.addClickListener(deleteClickListener);
 	}
 
 	public void setActive() {
-		addStyleName(CssStyles.ACTIVE_SIDE_COMPONENT_ELEMENT);
+		addClassName(CssStyles.ACTIVE_SIDE_COMPONENT_ELEMENT);
 	}
 
 	public ContactIndexDto getContact() {

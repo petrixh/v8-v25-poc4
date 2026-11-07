@@ -15,8 +15,8 @@
 
 package de.symeda.sormas.backend.infrastructure;
 
-import javax.ejb.EJB;
-import javax.ejb.Singleton;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Singleton;
 
 import de.symeda.sormas.backend.infrastructure.community.Community;
 import de.symeda.sormas.backend.infrastructure.community.CommunityService;

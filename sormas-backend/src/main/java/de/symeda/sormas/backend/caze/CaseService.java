@@ -32,29 +32,29 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.persistence.NoResultException;
-import javax.persistence.Tuple;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.CriteriaUpdate;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.ParameterExpression;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-import javax.transaction.Transactional;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaDelete;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.CriteriaUpdate;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.ParameterExpression;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
+import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -500,7 +500,7 @@ public class CaseService extends AbstractCoreAdoService<Case, CaseJoins> {
 			regexPattern,
 			regexReplacement,
 			regexFlags);
-		cq.orderBy(cb.desc(cb.concat("0", epidNumberSuffixClean).as(Integer.class)));
+		cq.orderBy(cb.desc(cb.concat("0", epidNumberSuffixClean).cast(Integer.class)));
 		cq.select(caze.get(Case.EPID_NUMBER));
 		TypedQuery<String> query = em.createQuery(cq);
 		query.setParameter(regexPattern, "\\D"); // Non-digits
@@ -1081,7 +1081,7 @@ public class CaseService extends AbstractCoreAdoService<Case, CaseJoins> {
 
 		Join<Object, Object> requestsJoin = shareInfoFrom.join(SormasToSormasShareInfo.REQUESTS);
 		sharesQuery.where(
-			cb.equal(shareInfoFrom.get(SormasToSormasShareInfo.CAZE), from.get(Case.ID)),
+			cb.equal(shareInfoFrom.get(SormasToSormasShareInfo.CAZE).get(Case.ID), from.get(Case.ID)),
 			cb.equal(shareInfoFrom.get(SormasToSormasShareInfo.OWNERSHIP_HANDED_OVER), true),
 			cb.equal(
 				requestsJoin.on(cb.equal(requestsJoin.get(ShareRequestInfo.CREATION_DATE), latestRequestDateQuery))
@@ -2524,7 +2524,7 @@ public class CaseService extends AbstractCoreAdoService<Case, CaseJoins> {
 							ExtendedPostgreSQL94Dialect.DATE,
 							Date.class,
 							CriteriaBuilderHelper.coalesce(cb, Date.class, earliestSampleSq, caseRoot.get(Case.REPORT_DATE))),
-						cb.function(ExtendedPostgreSQL94Dialect.DATE, Date.class, cb.literal(dateToCompareTo))),
+						cb.function(ExtendedPostgreSQL94Dialect.DATE, Date.class, CriteriaBuilderHelper.value(cb, dateToCompareTo))),
 					Long.valueOf(TimeUnit.DAYS.toSeconds(threshold)).doubleValue())));
 		cq.orderBy(cb.desc(caseRoot.get(Case.REPORT_DATE)));
 
@@ -2562,7 +2562,7 @@ public class CaseService extends AbstractCoreAdoService<Case, CaseJoins> {
 							ExtendedPostgreSQL94Dialect.DATE,
 							Date.class,
 							CriteriaBuilderHelper.coalesce(cb, Date.class, earliestSampleSq, caseRoot.get(Case.REPORT_DATE))),
-						cb.function(ExtendedPostgreSQL94Dialect.DATE, Date.class, cb.literal(dateToCompareTo))),
+						cb.function(ExtendedPostgreSQL94Dialect.DATE, Date.class, CriteriaBuilderHelper.value(cb, dateToCompareTo))),
 					Long.valueOf(TimeUnit.DAYS.toSeconds(threshold)).doubleValue())));
 		cq.orderBy(cb.desc(caseRoot.get(Case.REPORT_DATE)));
 

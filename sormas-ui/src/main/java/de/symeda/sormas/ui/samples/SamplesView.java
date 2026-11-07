@@ -22,16 +22,11 @@ import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.vaadin.hene.popupbutton.PopupButton;
-
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.OptionGroup;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -51,6 +46,7 @@ import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 import de.symeda.sormas.ui.samples.environmentsample.EnvironmentSampleGridComponent;
 import de.symeda.sormas.ui.samples.humansample.HumanSampleGrid;
 import de.symeda.sormas.ui.samples.humansample.HumanSampleGridComponent;
@@ -61,7 +57,10 @@ import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.DownloadUtil;
 import de.symeda.sormas.ui.utils.ExportEntityName;
 import de.symeda.sormas.ui.utils.GridExportStreamResource;
+import de.symeda.sormas.ui.utils.PopupButton;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 @SuppressWarnings("serial")
 public class SamplesView extends AbstractView implements HasName {
@@ -98,16 +97,15 @@ public class SamplesView extends AbstractView implements HasName {
 		}
 
 		if (isEnvironmentSampleView() && UiUtil.permitted(UserRight.ENVIRONMENT_SAMPLE_EXPORT)) {
-			Button exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcons.TABLE, null, ValoTheme.BUTTON_PRIMARY);
-			exportButton.setDescription(I18nProperties.getDescription(Descriptions.descExportButton));
+			Button exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcon.TABLE, null, CssStyles.BUTTON_PRIMARY);
+			exportButton.setTooltipText(I18nProperties.getDescription(Descriptions.descExportButton));
 			addHeaderComponent(exportButton);
 
-			StreamResource streamResource = GridExportStreamResource.createStreamResourceWithSelectedItems(
+			DownloadHandler streamResource = GridExportStreamResource.createStreamResourceWithSelectedItems(
 				sampleListComponent.getGrid(),
 				this::getSelectedEnvironmentSamples,
 				ExportEntityName.ENVIRONMENT_SAMPLES);
-			FileDownloader fileDownloader = new FileDownloader(streamResource);
-			fileDownloader.extend(exportButton);
+			DownloadUtil.attachDownloader(exportButton, streamResource);
 		}
 
 		if (UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS)) {
@@ -121,7 +119,7 @@ public class SamplesView extends AbstractView implements HasName {
 		CssStyles.style(
 			viewViewSwitch,
 			CssStyles.FORCE_CAPTION,
-			ValoTheme.OPTIONGROUP_HORIZONTAL,
+			SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL,
 			CssStyles.OPTIONGROUP_HORIZONTAL_PRIMARY,
 			CssStyles.VSPACE_TOP_3);
 		viewViewSwitch.addItem(SampleViewType.HUMAN);
@@ -132,7 +130,7 @@ public class SamplesView extends AbstractView implements HasName {
 
 		viewViewSwitch.setValue(viewConfiguration.getViewType());
 		viewViewSwitch.addValueChangeListener(e -> {
-			SampleViewType viewType = (SampleViewType) e.getProperty().getValue();
+			SampleViewType viewType = (SampleViewType) e.getValue();
 
 			viewConfiguration.setViewType(viewType);
 			SormasUI.get().getNavigator().navigateTo(SamplesView.VIEW_NAME);
@@ -151,29 +149,28 @@ public class SamplesView extends AbstractView implements HasName {
 	private void addHumanSampleExportButton() {
 		VerticalLayout exportLayout = new VerticalLayout();
 		exportLayout.setSpacing(true);
-		exportLayout.setMargin(true);
-		exportLayout.addStyleName(CssStyles.LAYOUT_MINIMAL);
+		exportLayout.setPadding(true);
+		exportLayout.addClassName(CssStyles.LAYOUT_MINIMAL);
 		exportLayout.setWidth(200, Unit.PIXELS);
 
-		PopupButton exportButton = ButtonHelper.createIconPopupButton(Captions.export, VaadinIcons.DOWNLOAD, exportLayout);
+		PopupButton exportButton = ButtonHelper.createIconPopupButton(Captions.export, VaadinIcon.DOWNLOAD, exportLayout);
 		addHeaderComponent(exportButton);
 
-		Button basicExportButton = ButtonHelper.createIconButton(Captions.exportBasic, VaadinIcons.TABLE, null, ValoTheme.BUTTON_PRIMARY);
-		basicExportButton.setDescription(I18nProperties.getString(Strings.infoBasicExport));
+		Button basicExportButton = ButtonHelper.createIconButton(Captions.exportBasic, VaadinIcon.TABLE, null, CssStyles.BUTTON_PRIMARY);
+		basicExportButton.setTooltipText(I18nProperties.getString(Strings.infoBasicExport));
 		basicExportButton.setWidth(100, Unit.PERCENTAGE);
 
-		exportLayout.addComponent(basicExportButton);
+		exportLayout.add(basicExportButton);
 
 		HumanSampleGrid grid = ((HumanSampleGridComponent) sampleListComponent).getGrid();
-		StreamResource streamResource = GridExportStreamResource.createStreamResourceWithSelectedItems(
+		DownloadHandler streamResource = GridExportStreamResource.createStreamResourceWithSelectedItems(
 			grid,
 			() -> viewConfiguration.isInEagerMode() ? grid.asMultiSelect().getSelectedItems() : Collections.emptySet(),
 			ExportEntityName.SAMPLES,
 			HumanSampleGrid.ACTION_BTN_ID);
-		FileDownloader fileDownloader = new FileDownloader(streamResource);
-		fileDownloader.extend(basicExportButton);
+		DownloadUtil.attachDownloader(basicExportButton, streamResource);
 
-		StreamResource extendedExportStreamResource =
+		DownloadHandler extendedExportStreamResource =
 			DownloadUtil.createCsvExportStreamResource(SampleExportDto.class, null, (Integer start, Integer max) -> {
 				Set<String> selectedRowUuids = viewConfiguration.isInEagerMode()
 					? grid.asMultiSelect().getSelectedItems().stream().map(SampleIndexDto::getUuid).collect(Collectors.toSet())
@@ -204,21 +201,21 @@ public class SamplesView extends AbstractView implements HasName {
 
 		addExportButton(
 			extendedExportStreamResource,
-			exportButton,
+			exportButton.getPopover(),
 			exportLayout,
-			VaadinIcons.FILE_TEXT,
+			VaadinIcon.FILE_TEXT,
 			Captions.exportDetailed,
 			Strings.infoDetailedExport);
 	}
 
 	private void addBulkModeButtons() {
-		btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcons.CHECK_SQUARE_O, null);
+		btnEnterBulkEditMode = ButtonHelper.createIconButton(Captions.actionEnterBulkEditMode, VaadinIcon.CHECK_SQUARE_O, null);
 		btnEnterBulkEditMode.setVisible(!viewConfiguration.isInEagerMode());
 
 		addHeaderComponent(btnEnterBulkEditMode);
 
 		Button btnLeaveBulkEditMode =
-			ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcons.CLOSE, null, ValoTheme.BUTTON_PRIMARY);
+			ButtonHelper.createIconButton(Captions.actionLeaveBulkEditMode, VaadinIcon.CLOSE, null, CssStyles.BUTTON_PRIMARY);
 		btnLeaveBulkEditMode.setVisible(viewConfiguration.isInEagerMode());
 
 		addHeaderComponent(btnLeaveBulkEditMode);

@@ -18,17 +18,17 @@ package de.symeda.sormas.rest.security;
 import java.lang.annotation.Annotation;
 import org.keycloak.adapters.spi.KeycloakAccount;
 
-import javax.enterprise.inject.Typed;
-import javax.enterprise.inject.spi.CDI;
-import javax.security.enterprise.AuthenticationStatus;
-import javax.security.enterprise.authentication.mechanism.http.HttpAuthenticationMechanism;
-import javax.security.enterprise.authentication.mechanism.http.HttpMessageContext;
-import javax.security.enterprise.credential.CallerOnlyCredential;
-import javax.security.enterprise.credential.Credential;
-import javax.security.enterprise.identitystore.CredentialValidationResult;
-import javax.security.enterprise.identitystore.IdentityStoreHandler;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.enterprise.inject.Typed;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.security.enterprise.AuthenticationStatus;
+import jakarta.security.enterprise.authentication.mechanism.http.HttpAuthenticationMechanism;
+import jakarta.security.enterprise.authentication.mechanism.http.HttpMessageContext;
+import jakarta.security.enterprise.credential.CallerOnlyCredential;
+import jakarta.security.enterprise.credential.Credential;
+import jakarta.security.enterprise.identitystore.CredentialValidationResult;
+import jakarta.security.enterprise.identitystore.IdentityStoreHandler;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.keycloak.KeycloakSecurityContext;

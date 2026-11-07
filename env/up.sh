@@ -1,9 +1,10 @@
 #!/bin/bash
-# Start one app copy (PostgreSQL 14, Payara 5.2022.5 with SORMAS, SMTP sink) in the seed state, on 127.0.0.1:$APP_ENV_PORT.
+# Start one app copy (PostgreSQL 14, Payara 7.2026.10 with SORMAS, SMTP sink) in the seed state, on 127.0.0.1:$APP_ENV_PORT.
 # Usage: env/up.sh [--no-build]     --no-build: reuse the image and the built artefacts when they exist (else build)
 # APP_ENV_CONFIG=C1|C2 selects the test configuration, APP_ENV_PWCHECK=on the default-password dialog, APP_ENV_SEED=rest
-# the small REST seed instead of the committed snapshot. Returns 0 once GET /sormas-ui/login answers 200 on the seeded
-# copy. See env/README.md.
+# the small REST seed instead of the committed snapshot, APP_ENV_DEPLOY=0 the domain without the app (not built, not
+# deployed). Returns 0 once GET /sormas-ui/login (with APP_ENV_DEPLOY=0: GET /) answers 200 on the seeded copy.
+# See env/README.md.
 set -euo pipefail
 source "$(dirname "$0")/lib.sh"
 NO_BUILD=0
@@ -13,9 +14,12 @@ t0=$SECONDS
 for c in "$APP_ENV_CONTAINER" "$APP_ENV_PROJECT-db" "$APP_ENV_PROJECT-mail"; do
   ! docker container inspect "$c" >/dev/null 2>&1 || die "container $c already exists: run env/down.sh with the same APP_ENV_* first"
 done
+[ "$APP_ENV_DEPLOY" = 1 ] || [ "$APP_ENV_SEED" = snapshot ] || die "APP_ENV_SEED=rest needs the app (APP_ENV_DEPLOY=1)"
 [ "$APP_ENV_SEED" = rest ] || [ -s "$SNAPSHOT_DUMP" ] || die "no snapshot $SNAPSHOT_DUMP: make it with env/seed/generate.sh, or use APP_ENV_SEED=rest"
 
-if [ $NO_BUILD = 1 ] && docker image inspect "$APP_ENV_IMAGE" >/dev/null 2>&1 && [ -s "$APP_ENV_DEPLOY_DIR/apps/sormas-ui.war" ]; then
+# Built artefacts this mode needs: the app, or with APP_ENV_DEPLOY=0 only the server libs and setup files
+if [ "$APP_ENV_DEPLOY" = 1 ]; then built=$APP_ENV_DEPLOY_DIR/apps/sormas-ui.war; else built=$APP_ENV_DEPLOY_DIR/setup/logback.xml; fi
+if [ $NO_BUILD = 1 ] && docker image inspect "$APP_ENV_IMAGE" >/dev/null 2>&1 && [ -s "$built" ]; then
   log "using the existing image and artefacts (commit $(cut -c1-10 "$APP_ENV_DEPLOY_DIR/commit"))"
 else
   "$ENV_DIR/build.sh"
@@ -23,20 +27,23 @@ fi
 
 # Per-copy throwaway DB password: generated here, only in the state dir (mode 600) and the containers' env
 mkdir -p "$COPY_DIR"
+echo "$APP_ENV_DEPLOY" > "$COPY_DIR/deploy"   # reset.sh keeps this copy's mode (lib.sh)
 if [ ! -s "$COPY_DIR/db.env" ]; then
   (umask 077; pw=$(head -c 18 /dev/urandom | base64 | tr -dc A-Za-z0-9); printf 'SORMAS_DB_PW=%s\nPOSTGRES_PASSWORD=%s\n' "$pw" "$pw" > "$COPY_DIR/db.env")
 fi
 # This copy's sormas.properties (mounted over the shared one, compose.yml): stock file, env overlay, configuration overlay,
-# and the default-password check when asked for. Later lines win.
+# this copy's UI URL, and the default-password check when asked for. Later lines win.
 {
   cat "$APP_ENV_DEPLOY_DIR/setup/sormas.properties" "$ENV_DIR/sormas.properties.env" "$ENV_DIR/config/$APP_ENV_CONFIG.properties"
+  # Link target of notification mails (task mails): this copy's UI. The app accepts only https here (validateConfigUrls)
+  printf '%s\n' '# --- env/up.sh: this copy ---' "ui.url=$APP_ENV_UI_URL"
   if [ "$APP_ENV_PWCHECK" = on ]; then
     printf '%s\n' '# --- env/up.sh: APP_ENV_PWCHECK=on ---' 'skipDefaultPasswordCheck=false'
   fi
 } > "$COPY_DIR/sormas.properties"
 
 t1=$SECONDS
-log "configuration $APP_ENV_CONFIG (default-password check $APP_ENV_PWCHECK, data: $APP_ENV_SEED)"
+log "configuration $APP_ENV_CONFIG (default-password check $APP_ENV_PWCHECK, data: $APP_ENV_SEED, deploy app: $APP_ENV_DEPLOY)"
 log "starting db, mail and app (app container $APP_ENV_CONTAINER, port $APP_ENV_PORT)"
 if [ "$APP_ENV_SEED" = snapshot ]; then
   # The database first, loaded from the committed snapshot, so that the app's first start already finds the data
@@ -61,11 +68,14 @@ else
 fi
 # The app's cron job computes case completeness every 2 minutes and writes each case once. Wait for it, so the
 # snapshot already holds that write and nothing changes the seeded rows behind a test's back after a reset.
-log "waiting for the app's case completeness job (every 2 min) before the snapshot"
-until [ "$(db_psql -d sormas_db -c "SELECT count(*) FROM cases WHERE completeness IS NULL")" = 0 ]; do
-  [ $((SECONDS - t1)) -lt 300 ] || die "case completeness not computed after 300 s"
-  sleep 5
-done
+# Without the app (APP_ENV_DEPLOY=0) there is no job, and the snapshot is taken as loaded.
+if [ "$APP_ENV_DEPLOY" = 1 ]; then
+  log "waiting for the app's case completeness job (every 2 min) before the snapshot"
+  until [ "$(db_psql -d sormas_db -c "SELECT count(*) FROM cases WHERE completeness IS NULL")" = 0 ]; do
+    [ $((SECONDS - t1)) -lt 300 ] || die "case completeness not computed after 300 s"
+    sleep 5
+  done
+fi
 t_seed=$((SECONDS - t1))
 
 # Stop the app, switch the configuration's features, snapshot, then start the app on it: the copy is now in the state
@@ -79,4 +89,4 @@ wait_ui 300 || die "app did not come back after the snapshot"
 t_snap=$((SECONDS - t1))
 
 mail=$(compose port mail 8025 2>/dev/null || true)
-log "UP $APP_ENV_CONFIG in $((SECONDS - t0)) s (start ${t_start} s, seed ${t_seed} s, snapshot ${t_snap} s; data dated $(cat "$COPY_DIR/seed-date")): $BASE_URL/sormas-ui/ ; mail sink: http://${mail:-?}/"
+log "UP $APP_ENV_CONFIG in $((SECONDS - t0)) s (start ${t_start} s, seed ${t_seed} s, snapshot ${t_snap} s; data dated $(cat "$COPY_DIR/seed-date")): $([ "$APP_ENV_DEPLOY" = 1 ] && echo "$BASE_URL/sormas-ui/" || echo "domain only (APP_ENV_DEPLOY=0) $BASE_URL/") ; mail sink: http://${mail:-?}/"

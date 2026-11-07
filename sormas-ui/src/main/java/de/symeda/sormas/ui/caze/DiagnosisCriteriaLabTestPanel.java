@@ -22,12 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.OptionGroup;
-import com.vaadin.v7.ui.TextField;
-
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -36,7 +30,11 @@ import de.symeda.sormas.api.sample.PathogenTestResultType;
 import de.symeda.sormas.api.sample.PathogenTestType;
 import de.symeda.sormas.api.utils.YesNoUnknown;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class DiagnosisCriteriaLabTestPanel extends CustomLayout {
 
@@ -107,8 +105,8 @@ public class DiagnosisCriteriaLabTestPanel extends CustomLayout {
 	}
 
 	public DiagnosisCriteriaLabTestPanel(Disease disease, List<PathogenTestDto> pathogenTests) {
-		setWidth(100, Sizeable.Unit.PERCENTAGE);
-		this.addStyleNames(CssStyles.VSPACE_3);
+		setWidthFull();
+		this.addClassNames(CssStyles.VSPACE_3);
 		setTemplateContents(HTML_LAYOUT);
 
 		this.disease = disease;
@@ -252,8 +250,8 @@ public class DiagnosisCriteriaLabTestPanel extends CustomLayout {
 		OptionGroup field = new OptionGroup();
 		field.setId(fieldId);
 		field.setCaption(caption);
-		field.setWidth(100, Unit.PERCENTAGE);
-		CssStyles.style(field, ValoTheme.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_CAPTION_INLINE);
+		field.setWidthFull();
+		CssStyles.style(field, SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_CAPTION_INLINE);
 		field.addItems(List.of(TEST_TYPE_YES, TEST_TYPE_NO, TEST_TYPE_NOT_APPLICABLE));
 		field.setItemCaption(TEST_TYPE_YES, I18nProperties.getCaption(Captions.diagnosisCriteriaDetailTestTypeYes));
 		field.setItemCaption(TEST_TYPE_NO, I18nProperties.getCaption(Captions.diagnosisCriteriaDetailTestTypeNo));
@@ -267,8 +265,8 @@ public class DiagnosisCriteriaLabTestPanel extends CustomLayout {
 		OptionGroup field = new OptionGroup();
 		field.setId(fieldId);
 		field.setCaption(I18nProperties.getCaption(Captions.diagnosisCriteriaDetailTestResult));
-		field.setWidth(100, Unit.PERCENTAGE);
-		CssStyles.style(field, ValoTheme.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_CAPTION_INLINE);
+		field.setWidthFull();
+		CssStyles.style(field, SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_CAPTION_INLINE);
 		field.addItems(List.of(TEST_RESULT_POS, TEST_RESULT_NEG, TEST_RESULT_ONGOING));
 		field.setItemCaption(TEST_RESULT_POS, I18nProperties.getCaption(Captions.diagnosisCriteriaDetailTestResultPos));
 		field.setItemCaption(TEST_RESULT_NEG, I18nProperties.getCaption(Captions.diagnosisCriteriaDetailTestResultNeg));
@@ -281,13 +279,13 @@ public class DiagnosisCriteriaLabTestPanel extends CustomLayout {
 	private TextField addTextFieldComponent(String fieldId, String caption, boolean dateValue) {
 		TextField field = new TextField();
 		field.setId(fieldId);
-		field.setWidth(100, Unit.PERCENTAGE);
+		field.setWidthFull();
 		if (dateValue) {
 			field.setCaption(null);
 			field.setInputPrompt(I18nProperties.getCaption(Captions.diagnosisCriteriaDetailTestResultDate));
 		} else {
 			field.setCaption(caption);
-			field.setWidth(153, Unit.PIXELS);
+			field.setWidth("153px");
 			CssStyles.style(field, CssStyles.TEXTFIELD_ROW, CssStyles.TEXTFIELD_CAPTION_INLINE);
 		}
 		field.setEnabled(false);
@@ -299,8 +297,8 @@ public class DiagnosisCriteriaLabTestPanel extends CustomLayout {
 		OptionGroup field = new OptionGroup();
 		field.setId(fieldId);
 		field.setCaption(caption);
-		field.setWidth(100, Unit.PERCENTAGE);
-		CssStyles.style(field, ValoTheme.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_CAPTION_INLINE);
+		field.setWidthFull();
+		CssStyles.style(field, SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_CAPTION_INLINE);
 		field.addItems((Object[]) YesNoUnknown.values());
 		field.setEnabled(false);
 		addComponent(field, fieldId);

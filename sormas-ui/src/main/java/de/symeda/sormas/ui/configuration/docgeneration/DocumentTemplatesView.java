@@ -21,7 +21,7 @@ import static de.symeda.sormas.api.docgeneneration.DocumentWorkflow.QUARANTINE_O
 import static de.symeda.sormas.api.docgeneneration.DocumentWorkflow.QUARANTINE_ORDER_EVENT_PARTICIPANT;
 import static de.symeda.sormas.api.docgeneneration.DocumentWorkflow.QUARANTINE_ORDER_TRAVEL_ENTRY;
 
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.docgeneneration.DocumentTemplateCriteria;
 import de.symeda.sormas.ui.configuration.AbstractConfigurationView;
@@ -58,10 +58,10 @@ public class DocumentTemplatesView extends AbstractConfigurationView {
 				new DocumentTemplateReceiver(QUARANTINE_ORDER_TRAVEL_ENTRY)),
 			new DocumentTemplateSection(new DocumentTemplateCriteria(EVENT_HANDOUT, null, null), true, new DocumentTemplateReceiver(EVENT_HANDOUT)));
 
-		gridLayout.setWidth(100, Unit.PERCENTAGE);
-		gridLayout.setMargin(true);
+		gridLayout.setWidthFull();
+		gridLayout.setPadding(true);
 		gridLayout.setSpacing(true);
-		gridLayout.setStyleName("crud-main-layout");
+		gridLayout.setClassName("crud-main-layout");
 
 		addComponent(gridLayout);
 	}

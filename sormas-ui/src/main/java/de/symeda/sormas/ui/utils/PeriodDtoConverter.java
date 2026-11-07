@@ -1,8 +1,9 @@
 package de.symeda.sormas.ui.utils;
 
-import java.util.Locale;
 
-import com.vaadin.v7.data.util.converter.Converter;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.converter.Converter;
 
 import de.symeda.sormas.api.therapy.PeriodDto;
 
@@ -11,21 +12,19 @@ public class PeriodDtoConverter implements Converter<String, PeriodDto> {
 	private static final long serialVersionUID = 4119205056759462799L;
 
 	@Override
-	public PeriodDto convertToModel(String value, Class<? extends PeriodDto> targetType, Locale locale) throws ConversionException {
+	public Result<PeriodDto> convertToModel(String value, ValueContext context) {
 		throw new RuntimeException("Not implemented");
 	}
 
 	@Override
-	public String convertToPresentation(PeriodDto value, Class<? extends String> targetType, Locale locale) throws ConversionException {
+	public String convertToPresentation(PeriodDto value, ValueContext context) {
 		return value == null ? "" : DateFormatHelper.buildPeriodString(value.getStart(), value.getEnd());
 	}
 
-	@Override
 	public Class<PeriodDto> getModelType() {
 		return PeriodDto.class;
 	}
 
-	@Override
 	public Class<String> getPresentationType() {
 		return String.class;
 	}

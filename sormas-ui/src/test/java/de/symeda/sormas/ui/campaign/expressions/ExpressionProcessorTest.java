@@ -19,16 +19,15 @@ import org.mockito.Mockito;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.server.Page;
-import com.vaadin.shared.ui.ui.PageState;
-import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.UI;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.UI;
 
 import de.symeda.sormas.api.campaign.data.CampaignFormDataEntry;
 import de.symeda.sormas.api.campaign.form.CampaignFormElement;
 import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.campaign.campaigndata.CampaignFormBuilder;
+import de.symeda.sormas.ui.campaign.campaigndata.CampaignFormBuilder.GridLayout;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class ExpressionProcessorTest {
 
@@ -37,13 +36,12 @@ public class ExpressionProcessorTest {
 
 	@BeforeAll
 	public static void setupClass() {
-		UI ui = new SormasUI();
+		// was a SormasUI (a Vaadin 8 UI) as the current UI and a Page mock: SormasUI is now a holder attached to a Flow UI
+		// (1a-30c), and CampaignFormBuilder no longer reads the Page (1a-65)
+		UI ui = new UI();
+		ComponentUtil.setData(ui, SormasUI.class, new SormasUI(ui));
 		final MockedStatic<UI> uiMockedStatic = Mockito.mockStatic(UI.class);
 		uiMockedStatic.when(UI::getCurrent).thenReturn(ui);
-
-		Page page = new Page(UI.getCurrent(), new PageState());
-		MockedStatic<Page> pageMockedStatic = Mockito.mockStatic(Page.class);
-		pageMockedStatic.when(Page::getCurrent).thenReturn(page);
 	}
 
 	@BeforeEach

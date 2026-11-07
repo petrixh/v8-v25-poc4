@@ -20,17 +20,15 @@ package de.symeda.sormas.ui.contact;
 import java.util.Date;
 import java.util.stream.Collectors;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.components.grid.MultiSelectionModelImpl;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.grid.GridMultiSelectionModel;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.contact.ContactDto;
@@ -50,12 +48,15 @@ import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.DetailSubComponentWrapper;
 import de.symeda.sormas.ui.utils.DownloadUtil;
 import de.symeda.sormas.ui.utils.ExportEntityName;
 import de.symeda.sormas.ui.utils.MenuBarHelper;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 import de.symeda.sormas.ui.visit.VisitGrid;
 
 public class ContactVisitsView extends AbstractContactView {
@@ -84,7 +85,7 @@ public class ContactVisitsView extends AbstractContactView {
 		HorizontalLayout topLayout = new HorizontalLayout();
 		topLayout.setSpacing(true);
 		topLayout.setWidth(100, Unit.PERCENTAGE);
-		topLayout.addStyleName(CssStyles.VSPACE_3);
+		topLayout.addClassName(CssStyles.VSPACE_3);
 
 		if (isEditAllowed()) {
 			if (UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS, UserRight.CONTACT_EDIT, UserRight.VISIT_EDIT, UserRight.VISIT_DELETE)) {
@@ -92,33 +93,33 @@ public class ContactVisitsView extends AbstractContactView {
 
 				MenuBar bulkOperationsDropdown = MenuBarHelper.createDropDown(
 					Captions.bulkActions,
-					new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkDelete), VaadinIcons.TRASH, selectedItem -> {
+					new MenuBarHelper.MenuBarItem(I18nProperties.getCaption(Captions.bulkDelete), VaadinIcon.TRASH, selectedItem -> {
 						ControllerProvider.getVisitController()
 							.deleteAllSelectedItems(grid.asMultiSelect().getSelectedItems(), grid, () -> navigateTo(criteria));
 					}));
 
-				topLayout.addComponent(bulkOperationsDropdown);
-				topLayout.setComponentAlignment(bulkOperationsDropdown, Alignment.MIDDLE_RIGHT);
-				topLayout.setExpandRatio(bulkOperationsDropdown, 1);
+				topLayout.add(bulkOperationsDropdown);
+				topLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, bulkOperationsDropdown);
+				topLayout.setFlexGrow(1, bulkOperationsDropdown);
 			}
 
 			if (UiUtil.permitted(UserRight.VISIT_EXPORT)) {
-				Button exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcons.DOWNLOAD, null, ValoTheme.BUTTON_PRIMARY);
+				Button exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcon.DOWNLOAD, null, CssStyles.BUTTON_PRIMARY);
 				{
-					topLayout.addComponent(exportButton);
-					topLayout.setComponentAlignment(exportButton, Alignment.MIDDLE_RIGHT);
+					topLayout.add(exportButton);
+					topLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, exportButton);
 					if (topLayout.getComponentCount() == 1) {
-						topLayout.setExpandRatio(exportButton, 1);
+						topLayout.setFlexGrow(1, exportButton);
 					}
 				}
 
-				StreamResource exportStreamResource = DownloadUtil.createCsvExportStreamResource(
+				DownloadHandler exportStreamResource = DownloadUtil.createCsvExportStreamResource(
 					VisitExportDto.class,
 					VisitExportType.CONTACT_VISITS,
 					(Integer start, Integer max) -> FacadeProvider.getVisitFacade()
 						.getVisitsExportList(
 							grid.getCriteria(),
-							grid.getSelectionModel() instanceof MultiSelectionModelImpl
+							grid.getSelectionModel() instanceof GridMultiSelectionModel
 								? grid.asMultiSelect().getSelectedItems().stream().map(VisitIndexDto::getUuid).collect(Collectors.toSet())
 								: null,
 							VisitExportType.CONTACT_VISITS,
@@ -140,29 +141,29 @@ public class ContactVisitsView extends AbstractContactView {
 					ExportEntityName.CONTACT_VISITS,
 					null);
 
-				new FileDownloader(exportStreamResource).extend(exportButton);
+				DownloadUtil.attachDownloader(exportButton, exportStreamResource);
 			}
 
 			if (UiUtil.permitted(UserRight.VISIT_CREATE, UserRight.CONTACT_EDIT)) {
 				newButton = ButtonHelper.createIconButton(
 					Captions.visitNewVisit,
-					VaadinIcons.PLUS_CIRCLE,
+					VaadinIcon.PLUS_CIRCLE,
 					e -> ControllerProvider.getVisitController().createVisit(this.getContactRef(), r -> navigateTo(criteria)),
-					ValoTheme.BUTTON_PRIMARY);
+					CssStyles.BUTTON_PRIMARY);
 
-				topLayout.addComponent(newButton);
-				topLayout.setComponentAlignment(newButton, Alignment.MIDDLE_RIGHT);
+				topLayout.add(newButton);
+				topLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, newButton);
 
 				final ContactDto contactDto = FacadeProvider.getContactFacade().getByUuid(this.getContactRef().getUuid());
 				if (contactDto.getResultingCase() != null) {
 					newButton.setEnabled(false);
 					if (topLayout.getComponentCount() == 1) {
-						topLayout.setExpandRatio(newButton, 1);
+						topLayout.setFlexGrow(1, newButton);
 					}
-					final Label label = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
-					label.setDescription(I18nProperties.getString(Strings.infoContactAlreadyConvertedToCase));
-					topLayout.addComponent(label);
-					topLayout.setComponentAlignment(label, Alignment.MIDDLE_RIGHT);
+					final Span label = VaadinUiUtil.createLabel(HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE), ContentMode.HTML);
+					label.setTitle(I18nProperties.getString(Strings.infoContactAlreadyConvertedToCase));
+					topLayout.add(label);
+					topLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, label);
 				}
 			}
 		}
@@ -189,11 +190,11 @@ public class ContactVisitsView extends AbstractContactView {
 
 			gridLayout = new DetailSubComponentWrapper(() -> null);
 			gridLayout.setSizeFull();
-			gridLayout.setMargin(true);
+			gridLayout.setPadding(true);
 			gridLayout.setSpacing(false);
-			gridLayout.addComponent(createTopBar());
-			gridLayout.addComponent(grid);
-			gridLayout.setExpandRatio(grid, 1);
+			gridLayout.add(createTopBar());
+			gridLayout.add(grid);
+			gridLayout.setFlexGrow(1, grid);
 			setSubComponent(gridLayout);
 		}
 

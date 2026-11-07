@@ -41,15 +41,9 @@ import java.util.function.Supplier;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -83,12 +77,20 @@ import de.symeda.sormas.api.utils.fieldvisibility.checkers.CountryFieldVisibilit
 import de.symeda.sormas.ui.ActivityAsCase.ActivityAsCaseField;
 import de.symeda.sormas.ui.exposure.ExposuresField;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.FieldAccessHelper;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.CustomizableFieldsGroup;
 import de.symeda.sormas.ui.utils.components.MultilineLabel;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextArea;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 @SuppressWarnings({
 	"java:S110", // suppress sonar too many parents warning
@@ -248,7 +250,7 @@ public class EpiDataForm extends AbstractEditForm<EpiDataDto> {
 
 		if (sourceContactsToggleCallback != null) {
 			ogContactWithSourceCaseKnown.addValueChangeListener(e -> {
-				YesNoUnknown sourceContactsKnown = (YesNoUnknown) FieldHelper.getNullableSourceFieldValue((Field<?>) e.getProperty());
+				YesNoUnknown sourceContactsKnown = (YesNoUnknown) FieldHelper.getNullableSourceFieldValue((Field<?>) e.getHasValue());
 				sourceContactsToggleCallback.accept(YesNoUnknown.YES == sourceContactsKnown);
 			});
 		}
@@ -470,10 +472,9 @@ public class EpiDataForm extends AbstractEditForm<EpiDataDto> {
 	 * @param value
 	 * @return label
 	 */
-	private Label createInfoLabel(String value) {
-		Label label = new Label(value);
+	private Span createInfoLabel(String value) {
+		Span label = VaadinUiUtil.createLabel(value, ContentMode.HTML);
 		CssStyles.style(label, CssStyles.LABEL_BOLD, H5);
-		label.setContentMode(ContentMode.HTML);
 		return label;
 	}
 
@@ -548,8 +549,8 @@ public class EpiDataForm extends AbstractEditForm<EpiDataDto> {
 				ContentMode.HTML),
 			LOC_SOURCE_CASE_CONTACTS_HEADING);
 
-		Label otherInformationLabel = new Label(I18nProperties.getString(Strings.headingEpiDataOtherInformation));
-		otherInformationLabel.addStyleName(H3);
+		Span otherInformationLabel = new Span(I18nProperties.getString(Strings.headingEpiDataOtherInformation));
+		otherInformationLabel.addClassName(H3);
 		getContent().addComponent(otherInformationLabel, LOC_OTHER_INFORMATION_HEADING);
 	}
 
@@ -584,7 +585,7 @@ public class EpiDataForm extends AbstractEditForm<EpiDataDto> {
 	 * @param listener
 	 *            the listener to register on all panels
 	 */
-	public void addCustomizableFieldValueChangeListener(com.vaadin.data.HasValue.ValueChangeListener<?> listener) {
+	public void addCustomizableFieldValueChangeListener(HasValue.ValueChangeListener<?> listener) {
 		for (CustomizableFieldsGroup panel : new CustomizableFieldsGroup[] {
 			exposureInvestigationPanel,
 			activityAsCasePanel,

@@ -21,11 +21,11 @@ package de.symeda.junit.cdi.jee;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 
 import de.hilling.junit.cdi.scope.TestSuiteScoped;
 
@@ -53,7 +53,7 @@ public class EntityManagerResourcesProvider {
 
 	private EntityManagerFactory createEntityManagerFactory(String persistenceUnit) {
 		Map<String, Object> props = new HashMap();
-		props.put("javax.persistence.bean.manager", this.beanManager);
+		props.put("jakarta.persistence.bean.manager", this.beanManager);
 		return Persistence.createEntityManagerFactory(persistenceUnit, props);
 	}
 

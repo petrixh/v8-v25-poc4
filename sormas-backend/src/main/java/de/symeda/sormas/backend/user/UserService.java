@@ -18,13 +18,13 @@ import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
-import javax.transaction.Transactional;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
+import jakarta.transaction.Transactional;
 
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -71,7 +71,7 @@ public class UserService extends AdoServiceWithUserFilterAndJurisdiction<User> {
 	@EJB
 	private PointOfEntryService pointOfEntryService;
 	@Inject
-	private javax.enterprise.event.Event<UserUpdateEvent> userUpdateEvent;
+	private jakarta.enterprise.event.Event<UserUpdateEvent> userUpdateEvent;
 
 	public UserService() {
 		super(User.class);
@@ -735,7 +735,7 @@ public class UserService extends AdoServiceWithUserFilterAndJurisdiction<User> {
 			logger.debug("Requested user rights: [{}]", userRights);
 			Join<User, UserRole> rolesJoin = from.join(User.USER_ROLES, JoinType.LEFT);
 			Join<UserRole, UserRight> rightsJoin = rolesJoin.join(UserRole.USER_RIGHTS, JoinType.LEFT);
-			return rightsJoin.in(Collections.singletonList(userRights));
+			return rightsJoin.in(userRights);
 		}
 
 		return null;

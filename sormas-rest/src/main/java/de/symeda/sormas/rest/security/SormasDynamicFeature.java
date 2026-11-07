@@ -15,13 +15,18 @@
 
 package de.symeda.sormas.rest.security;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.container.DynamicFeature;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.FeatureContext;
-import javax.ws.rs.ext.Provider;
+import java.lang.reflect.Method;
+
+import jakarta.annotation.security.DenyAll;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.container.DynamicFeature;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.FeatureContext;
+import jakarta.ws.rs.ext.Provider;
 
 @Provider
 public class SormasDynamicFeature implements DynamicFeature {
@@ -34,6 +39,27 @@ public class SormasDynamicFeature implements DynamicFeature {
 
 	@Override
 	public void configure(ResourceInfo resourceInfo, FeatureContext context) {
-		context.register(new SormasRestUserRightFilter(request, response));
+		context.register(new SormasRestUserRightFilter(request, response, getRolesAllowed(resourceInfo)));
+	}
+
+	/**
+	 * The rights a resource method needs (any one of them), resolved as Payara's JAX-RS {@code @RolesAllowed} support
+	 * did before the migration: {@code @DenyAll} on the method (none suffices), else {@code @PermitAll} on the method (no
+	 * requirement), else {@code @RolesAllowed} of the method, else of the resource class. {@code null}: no requirement.
+	 */
+	static String[] getRolesAllowed(ResourceInfo resourceInfo) {
+
+		Method method = resourceInfo.getResourceMethod();
+		if (method.isAnnotationPresent(DenyAll.class)) {
+			return new String[0];
+		}
+		if (method.isAnnotationPresent(PermitAll.class)) {
+			return null;
+		}
+		RolesAllowed rolesAllowed = method.getAnnotation(RolesAllowed.class);
+		if (rolesAllowed == null) {
+			rolesAllowed = resourceInfo.getResourceClass().getAnnotation(RolesAllowed.class);
+		}
+		return rolesAllowed != null ? rolesAllowed.value() : null;
 	}
 }

@@ -1,6 +1,6 @@
 package de.symeda.sormas.ui.immunization.components.layout.directory;
 
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.immunization.ImmunizationCriteria;
 import de.symeda.sormas.ui.immunization.components.grid.ImmunizationGrid;
@@ -11,12 +11,12 @@ public class ImmunizationDataLayout extends VerticalLayout {
 
 	public ImmunizationDataLayout(ImmunizationCriteria criteria) {
 		grid = new ImmunizationGrid(criteria);
-		addComponent(grid);
+		add(grid);
 
-		setMargin(false);
+		setPadding(false);
 		setSpacing(false);
 		setSizeFull();
-		setExpandRatio(grid, 1);
+		setFlexGrow(1, grid);
 	}
 
 	public ImmunizationGrid getGrid() {

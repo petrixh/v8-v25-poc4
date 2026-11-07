@@ -23,42 +23,32 @@ import java.time.Instant;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.EntityListeners;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Version;
-import javax.validation.constraints.Size;
+import jakarta.persistence.Basic;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Version;
+import jakarta.validation.constraints.Size;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.proxy.HibernateProxyHelper;
-
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import com.vladmihalcea.hibernate.type.json.JsonType;
+import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.proxy.LazyInitializer;
 
 import de.symeda.sormas.api.utils.DataHelper;
 import de.symeda.sormas.api.uuid.HasUuid;
 import de.symeda.sormas.backend.user.CurrentUserService;
 import de.symeda.sormas.backend.user.User;
 
-/**
- * Note: The hibernate-types article suggests to use JsonBinaryType for Postgres, but doesn't explain why.
- * Since JsonBinaryType does not work with H2, we are using JsonStringType instead
- */
-
-@TypeDef(name = "json", typeClass = JsonType.class)
-@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @MappedSuperclass
 @EntityListeners(AbstractDomainObject.AdoListener.class)
 public abstract class AbstractDomainObject implements Serializable, Cloneable, HasUuid {
@@ -141,7 +131,7 @@ public abstract class AbstractDomainObject implements Serializable, Cloneable, H
 	}
 
 	@Version
-	@Column(nullable = false, columnDefinition = "TIMESTAMP(3) not null")
+	@Column(nullable = false, columnDefinition = "TIMESTAMP(3) not null", secondPrecision = 3)
 	public Timestamp getChangeDate() {
 		return changeDate;
 	}
@@ -170,7 +160,7 @@ public abstract class AbstractDomainObject implements Serializable, Cloneable, H
 			return false;
 		}
 
-		if (HibernateProxyHelper.getClassWithoutInitializingProxy(o) == HibernateProxyHelper.getClassWithoutInitializingProxy(this)) {
+		if (getClassWithoutInitializingProxy(o) == getClassWithoutInitializingProxy(this)) {
 			// this works, because we are using UUIDs
 			AbstractDomainObject ado = (AbstractDomainObject) o;
 			return getUuid().equals(ado.getUuid());
@@ -183,6 +173,15 @@ public abstract class AbstractDomainObject implements Serializable, Cloneable, H
 	@Override
 	public int hashCode() {
 		return getUuid().hashCode();
+	}
+
+	/**
+	 * Same as Hibernate 5's {@code HibernateProxyHelper.getClassWithoutInitializingProxy} (removed in Hibernate 6): the proxy's
+	 * persistent class for a proxy, without initializing it, otherwise the object's class.
+	 */
+	private static Class<?> getClassWithoutInitializingProxy(Object object) {
+		LazyInitializer lazyInitializer = HibernateProxy.extractLazyInitializer(object);
+		return lazyInitializer != null ? lazyInitializer.getPersistentClass() : object.getClass();
 	}
 
 	@Override

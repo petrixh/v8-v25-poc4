@@ -17,15 +17,12 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.dashboard.map;
 
+import java.util.Date;
 import java.util.List;
 
-import com.vaadin.ui.Window;
-import com.vaadin.v7.data.Item;
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.data.util.GeneratedPropertyContainer;
-import com.vaadin.v7.data.util.PropertyValueGenerator;
-import com.vaadin.v7.ui.Grid;
-import com.vaadin.v7.ui.renderers.DateRenderer;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.function.ValueProvider;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -39,10 +36,15 @@ import de.symeda.sormas.api.person.PersonDto;
 import de.symeda.sormas.api.utils.DateHelper;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.dashboard.HasDashboardCasePopupGrid;
+import de.symeda.sormas.ui.utils.GridExportStreamResource;
 import de.symeda.sormas.ui.utils.V7UuidRenderer;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
-@SuppressWarnings("serial")
-public class CasePopupGrid extends Grid {
+@SuppressWarnings({
+	"serial",
+	"unchecked" })
+public class CasePopupGrid extends Grid<CaseDataDto> {
 
 	public static final String DISEASE_SHORT = Captions.columnDiseaseShort;
 	public static final String FIRST_NAME = PersonDto.FIRST_NAME;
@@ -51,8 +53,9 @@ public class CasePopupGrid extends Grid {
 	private final FacilityReferenceDto facility;
 	private final HasDashboardCasePopupGrid dashboardMapComponent;
 
-	public CasePopupGrid(Window window, FacilityReferenceDto facility, HasDashboardCasePopupGrid dashboardMapComponent) {
+	public CasePopupGrid(Dialog window, FacilityReferenceDto facility, HasDashboardCasePopupGrid dashboardMapComponent) {
 
+		super(CaseDataDto.class);
 		this.facility = facility;
 		this.dashboardMapComponent = dashboardMapComponent;
 		setWidth(960, Unit.PIXELS);
@@ -60,53 +63,20 @@ public class CasePopupGrid extends Grid {
 
 		setSelectionMode(SelectionMode.NONE);
 
-		BeanItemContainer<CaseDataDto> container = new BeanItemContainer<CaseDataDto>(CaseDataDto.class);
-		GeneratedPropertyContainer generatedContainer = new GeneratedPropertyContainer(container);
-		setContainerDataSource(generatedContainer);
-
-		generatedContainer.addGeneratedProperty(DISEASE_SHORT, new PropertyValueGenerator<String>() {
-
-			@Override
-			public String getValue(Item item, Object itemId, Object propertyId) {
-				CaseDataDto caseDataDto = (CaseDataDto) itemId;
-				String diseaseName = caseDataDto.getDisease().getName();
-				return Disease.valueOf(diseaseName).toShortString();
-			}
-
-			@Override
-			public Class<String> getType() {
-				return String.class;
-			}
+		// were generated properties of the V7 container
+		addGeneratedColumn(DISEASE_SHORT, caseDataDto -> {
+			String diseaseName = caseDataDto.getDisease().getName();
+			return Disease.valueOf(diseaseName).toShortString();
 		});
 
-		generatedContainer.addGeneratedProperty(FIRST_NAME, new PropertyValueGenerator<String>() {
-
-			@Override
-			public String getValue(Item item, Object itemId, Object propertyId) {
-				CaseDataDto caseDataDto = (CaseDataDto) itemId;
-				PersonDto personDto = FacadeProvider.getPersonFacade().getByUuid(caseDataDto.getPerson().getUuid());
-				return personDto.getFirstName();
-			}
-
-			@Override
-			public Class<String> getType() {
-				return String.class;
-			}
+		addGeneratedColumn(FIRST_NAME, caseDataDto -> {
+			PersonDto personDto = FacadeProvider.getPersonFacade().getByUuid(caseDataDto.getPerson().getUuid());
+			return personDto.getFirstName();
 		});
 
-		generatedContainer.addGeneratedProperty(LAST_NAME, new PropertyValueGenerator<String>() {
-
-			@Override
-			public String getValue(Item item, Object itemId, Object propertyId) {
-				CaseDataDto caseDataDto = (CaseDataDto) itemId;
-				PersonDto personDto = FacadeProvider.getPersonFacade().getByUuid(caseDataDto.getPerson().getUuid());
-				return personDto.getLastName();
-			}
-
-			@Override
-			public Class<String> getType() {
-				return String.class;
-			}
+		addGeneratedColumn(LAST_NAME, caseDataDto -> {
+			PersonDto personDto = FacadeProvider.getPersonFacade().getByUuid(caseDataDto.getPerson().getUuid());
+			return personDto.getLastName();
 		});
 
 		setColumns(
@@ -120,37 +90,34 @@ public class CasePopupGrid extends Grid {
 
 		getColumn(CaseDataDto.UUID).setRenderer(new V7UuidRenderer());
 		Language userLanguage = I18nProperties.getUserLanguage();
-		getColumn(CaseDataDto.REPORT_DATE).setRenderer(new DateRenderer(DateHelper.getLocalDateTimeFormat(userLanguage)));
+		((Column<CaseDataDto, Date>) getColumn(CaseDataDto.REPORT_DATE))
+			.setRenderer(new DateRenderer(DateHelper.getLocalDateTimeFormat(userLanguage)));
 
 		if (facility == null || !FacilityHelper.isOtherOrNoneHealthFacility(facility.getUuid())) {
 			getColumn(CaseDataDto.HEALTH_FACILITY_DETAILS).setHidden(true);
 		}
 
-		for (Column column : getColumns()) {
+		for (Column<CaseDataDto, ?> column : getAllColumns()) {
 			column.setHeaderCaption(
 				I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, column.getPropertyId().toString(), column.getHeaderCaption()));
 		}
 
 		addItemClickListener(e -> {
 			window.close();
-			ControllerProvider.getCaseController().navigateToCase(((CaseDataDto) e.getItemId()).getUuid(), true);
+			ControllerProvider.getCaseController().navigateToCase(e.getItem().getUuid(), true);
 		});
 
 		reload();
 	}
 
-	@SuppressWarnings("unchecked")
-	private BeanItemContainer<CaseDataDto> getContainer() {
-		GeneratedPropertyContainer container = (GeneratedPropertyContainer) super.getContainerDataSource();
-		return (BeanItemContainer<CaseDataDto>) container.getWrappedContainer();
+	private void addGeneratedColumn(String key, ValueProvider<CaseDataDto, String> valueProvider) {
+		GridExportStreamResource.setExportValueProvider(addColumn(valueProvider).setKey(key), valueProvider);
 	}
 
 	public void reload() {
-		getContainer().removeAllItems();
-
 		List<CaseDataDto> cases = dashboardMapComponent.getCasesForFacility(facility);
 
-		getContainer().addAll(cases);
+		setItems(cases);
 		this.setHeightByRows(cases.size());
 	}
 }

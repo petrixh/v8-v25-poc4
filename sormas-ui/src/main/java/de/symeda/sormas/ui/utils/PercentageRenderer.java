@@ -17,18 +17,16 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.utils;
 
-import com.vaadin.v7.ui.renderers.HtmlRenderer;
-
 import de.symeda.sormas.api.utils.HtmlHelper;
-import elemental.json.JsonValue;
+import de.symeda.sormas.ui.utils.grid.renderers.ConvertingHtmlRenderer;
 
 @SuppressWarnings("serial")
-public class PercentageRenderer extends HtmlRenderer {
+public class PercentageRenderer extends ConvertingHtmlRenderer {
 
 	@Override
-	public JsonValue encode(String value) {
+	protected String encodeString(String value) {
 		if (value != null && !value.isEmpty()) {
-			return super.encode(HtmlHelper.cleanHtml(value) + "%");
+			return HtmlHelper.cleanHtml(value) + "%";
 		} else {
 			return null;
 		}

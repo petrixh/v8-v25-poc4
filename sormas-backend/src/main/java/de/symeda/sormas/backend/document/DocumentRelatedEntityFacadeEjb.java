@@ -20,9 +20,9 @@
 
 package de.symeda.sormas.backend.document;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
 
 import de.symeda.sormas.api.document.DocumentReferenceDto;
 import de.symeda.sormas.api.document.DocumentRelatedEntityDto;

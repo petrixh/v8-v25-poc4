@@ -17,13 +17,13 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.utils;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.ComponentContainer;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasElement;
 
-public interface FieldWrapper<T extends Component> {
+public interface FieldWrapper<T extends HasElement> {
 
-	ComponentContainer wrap(T component, String caption, boolean withMargin);
+	Component wrap(T component, String caption, boolean withMargin);
 
-	ComponentContainer wrap(T component, String caption);
+	Component wrap(T component, String caption);
 
 }

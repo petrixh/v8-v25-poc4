@@ -37,8 +37,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityNotFoundException;
-import javax.validation.ValidationException;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ValidationException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

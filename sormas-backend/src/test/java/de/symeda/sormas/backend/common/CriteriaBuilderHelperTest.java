@@ -10,9 +10,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Selection;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Selection;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -93,7 +93,32 @@ public class CriteriaBuilderHelperTest {
 		}
 
 		@Override
+		public Predicate equalTo(Expression<?> value) {
+			return null;
+		}
+
+		@Override
+		public Predicate equalTo(Object value) {
+			return null;
+		}
+
+		@Override
+		public Predicate notEqualTo(Expression<?> value) {
+			return null;
+		}
+
+		@Override
+		public Predicate notEqualTo(Object value) {
+			return null;
+		}
+
+		@Override
 		public <X> Expression<X> as(Class<X> type) {
+			return null;
+		}
+
+		@Override
+		public <X> Expression<X> cast(Class<X> type) {
 			return null;
 		}
 

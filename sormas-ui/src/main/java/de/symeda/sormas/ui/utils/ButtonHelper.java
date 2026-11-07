@@ -2,11 +2,13 @@ package de.symeda.sormas.ui.utils;
 
 import java.util.function.Function;
 
-import org.vaadin.hene.popupbutton.PopupButton;
-
-import com.vaadin.server.Resource;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.shared.Registration;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 
@@ -31,7 +33,7 @@ public class ButtonHelper {
 	 * @param styles
 	 * @return button
 	 */
-	public static Button createButton(String captionKey, Button.ClickListener clickListener, String... styles) {
+	public static Button createButton(String captionKey, ComponentEventListener<ClickEvent<Button>> clickListener, String... styles) {
 		return createButton(captionKey, false, clickListener, styles);
 	}
 
@@ -46,7 +48,7 @@ public class ButtonHelper {
 	 * @param styles
 	 * @return button
 	 */
-	public static Button createButton(String captionKey, boolean enableDoubleClick, Button.ClickListener clickListener, String... styles) {
+	public static Button createButton(String captionKey, boolean enableDoubleClick, ComponentEventListener<ClickEvent<Button>> clickListener, String... styles) {
 		Button button = createButton(captionKey, I18nProperties.getCaption(captionKey), clickListener, styles);
 		if (!enableDoubleClick) {
 			preventDoubleClick(button);
@@ -63,7 +65,7 @@ public class ButtonHelper {
 	 * @param styles
 	 * @return
 	 */
-	public static Button createButton(String id, String caption, Button.ClickListener clickListener, String... styles) {
+	public static Button createButton(String id, String caption, ComponentEventListener<ClickEvent<Button>> clickListener, String... styles) {
 		return createButton(id, caption, false, clickListener, styles);
 	}
 
@@ -78,7 +80,7 @@ public class ButtonHelper {
 	 * @param styles
 	 * @return
 	 */
-	public static Button createButton(String id, String caption, boolean enableDoubleClick, Button.ClickListener clickListener, String... styles) {
+	public static Button createButton(String id, String caption, boolean enableDoubleClick, ComponentEventListener<ClickEvent<Button>> clickListener, String... styles) {
 
 		Button button = createButton(Button::new, id, caption, enableDoubleClick, styles);
 		if (clickListener != null) {
@@ -108,7 +110,7 @@ public class ButtonHelper {
 	 * @param icon
 	 * @return button
 	 */
-	public static Button createIconButton(Resource icon) {
+	public static Button createIconButton(VaadinIcon icon) {
 		return createIconButton("", icon, null);
 	}
 
@@ -122,7 +124,7 @@ public class ButtonHelper {
 	 * @param styles
 	 * @return
 	 */
-	public static Button createIconButton(String captionKey, Resource icon, Button.ClickListener clickListener, String... styles) {
+	public static Button createIconButton(String captionKey, VaadinIcon icon, ComponentEventListener<ClickEvent<Button>> clickListener, String... styles) {
 
 		return createIconButton(captionKey, icon, false, clickListener, styles);
 	}
@@ -141,13 +143,13 @@ public class ButtonHelper {
 	 */
 	public static Button createIconButton(
 		String captionKey,
-		Resource icon,
+		VaadinIcon icon,
 		boolean enableDoubleClick,
-		Button.ClickListener clickListener,
+		ComponentEventListener<ClickEvent<Button>> clickListener,
 		String... styles) {
 
 		Button button = createButton(captionKey, enableDoubleClick, clickListener, styles);
-		button.setIcon(icon);
+		setIcon(button, icon);
 		return button;
 	}
 
@@ -161,7 +163,7 @@ public class ButtonHelper {
 	 * @param styles
 	 * @return
 	 */
-	public static Button createIconButtonWithCaption(String id, String caption, Resource icon, Button.ClickListener clickListener, String... styles) {
+	public static Button createIconButtonWithCaption(String id, String caption, VaadinIcon icon, ComponentEventListener<ClickEvent<Button>> clickListener, String... styles) {
 
 		return createIconButtonWithCaption(id, caption, icon, false, clickListener, styles);
 	}
@@ -181,13 +183,13 @@ public class ButtonHelper {
 	public static Button createIconButtonWithCaption(
 		String id,
 		String caption,
-		Resource icon,
+		VaadinIcon icon,
 		boolean enableDoubleClick,
-		Button.ClickListener clickListener,
+		ComponentEventListener<ClickEvent<Button>> clickListener,
 		String... styles) {
 
 		Button button = createButton(id, caption, enableDoubleClick, clickListener, styles);
-		button.setIcon(icon);
+		setIcon(button, icon);
 		return button;
 	}
 
@@ -230,10 +232,10 @@ public class ButtonHelper {
 	 * @param styles
 	 * @return
 	 */
-	public static PopupButton createIconPopupButton(String captionKey, Resource icon, Component content, String... styles) {
+	public static PopupButton createIconPopupButton(String captionKey, VaadinIcon icon, Component content, String... styles) {
 
 		PopupButton button = createPopupButton(captionKey, content, styles);
-		button.setIcon(icon);
+		setIcon(button, icon);
 		return button;
 	}
 
@@ -256,7 +258,9 @@ public class ButtonHelper {
 		String... styles) {
 
 		T button = buttonFactory.apply(caption);
-		button.setId(id);
+		if (id != null) {
+			button.setId(id);
+		}
 		if (styles != null) {
 			CssStyles.style(button, styles);
 		}
@@ -264,11 +268,25 @@ public class ButtonHelper {
 			preventDoubleClick(button);
 		}
 		CssStyles.style(button, CssStyles.BUTTON_CAPTION_OVERFLOW);
-		button.setDescription(I18nProperties.getCaption(caption));
+		// was setDescription: Vaadin 8 showed the description as tooltip
+		button.setTooltipText(I18nProperties.getCaption(caption));
 		return button;
 	}
 
-	static final Button.ClickListener ENABLE_LISTENER = event -> event.getButton().setEnabled(true);
+	/**
+	 * Was {@code Button.setIcon(Resource)}; {@code null} removes the icon.
+	 */
+	public static <T extends Button> T setIcon(T button, VaadinIcon icon) {
+		button.setIcon(icon != null ? icon.create() : null);
+		return button;
+	}
+
+	static final ComponentEventListener<ClickEvent<Button>> ENABLE_LISTENER = event -> event.getSource().setEnabled(true);
+
+	/**
+	 * Key of the registration of {@link #ENABLE_LISTENER} (Flow removes listeners by registration, not by instance).
+	 */
+	private static final String ENABLE_LISTENER_REGISTRATION = ButtonHelper.class.getName() + ".enableListener";
 
 	/**
 	 * Prevent double-clicks causing the buttons action being executed twice
@@ -279,7 +297,10 @@ public class ButtonHelper {
 	 */
 	public static <T extends Button> T preventDoubleClick(T button) {
 		button.setDisableOnClick(true);
-		button.addClickListener(ENABLE_LISTENER);
+		if (ComponentUtil.getData(button, ENABLE_LISTENER_REGISTRATION) == null) {
+			// Vaadin 8 kept a listener instance once, also when added twice
+			ComponentUtil.setData(button, ENABLE_LISTENER_REGISTRATION, button.addClickListener(ENABLE_LISTENER));
+		}
 		return button;
 	}
 
@@ -293,7 +314,11 @@ public class ButtonHelper {
 	public static <T extends Button> T allowDoubleClick(T button) {
 		button.setEnabled(true); // Make sure the button doesn't end up in a forever-disabled state
 		button.setDisableOnClick(false);
-		button.removeClickListener(ENABLE_LISTENER);
+		Registration registration = (Registration) ComponentUtil.getData(button, ENABLE_LISTENER_REGISTRATION);
+		if (registration != null) {
+			registration.remove();
+			ComponentUtil.setData(button, ENABLE_LISTENER_REGISTRATION, null);
+		}
 		return button;
 	}
 }

@@ -1,12 +1,11 @@
 package de.symeda.sormas.ui.docgeneration;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -20,30 +19,32 @@ public abstract class AbstractDocumentGenerationComponent extends VerticalLayout
 
 		setSpacing(false);
 
-		Label headerDocgeneration = new Label(I18nProperties.getCaption(getComponentLabel()));
-		headerDocgeneration.addStyleName(CssStyles.H3);
-		addComponent(headerDocgeneration);
+		Span headerDocgeneration = new Span(I18nProperties.getCaption(getComponentLabel()));
+		headerDocgeneration.addClassName(CssStyles.H3);
+		add(headerDocgeneration);
 	}
 
 	protected void addDocumentBar(Runnable createHandler, String documentLabel) {
 		HorizontalLayout documentBar = new HorizontalLayout();
-		documentBar.setMargin(false);
+		documentBar.setPadding(false);
 		documentBar.setSpacing(false);
-		documentBar.setWidth(100, Unit.PERCENTAGE);
-		addComponent(documentBar);
+		documentBar.setWidthFull();
+		add(documentBar);
 
-		Label labelDocument = new Label(I18nProperties.getCaption(documentLabel));
-		documentBar.addComponent(labelDocument);
+		Span labelDocument = new Span(I18nProperties.getCaption(documentLabel));
+		documentBar.add(labelDocument);
 
 		Button createButton = ButtonHelper.createButton(I18nProperties.getCaption(Captions.actionCreate));
-		createButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
-		createButton.setIcon(VaadinIcons.FILE_TEXT);
-		createButton.addClickListener((Button.ClickListener) clickEvent -> {
+		CssStyles.style(createButton, CssStyles.BUTTON_PRIMARY);
+		ButtonHelper.setIcon(createButton, VaadinIcon.FILE_TEXT);
+		createButton.addClickListener(clickEvent -> {
 			createHandler.run();
 		});
 
-		documentBar.addComponent(createButton);
-		documentBar.setComponentAlignment(createButton, Alignment.MIDDLE_RIGHT);
+		documentBar.add(createButton);
+		// was Alignment.MIDDLE_RIGHT: the label takes the free width, so the button sits on the right
+		documentBar.setFlexGrow(1, labelDocument);
+		documentBar.setVerticalComponentAlignment(Alignment.CENTER, createButton);
 	}
 
 	protected String getComponentLabel() {

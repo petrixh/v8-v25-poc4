@@ -3,19 +3,19 @@ package de.symeda.sormas.ui.utils.components.multidayselector;
 import java.time.LocalDate;
 import java.util.Properties;
 
-import com.vaadin.data.Binder;
-import com.vaadin.data.BinderValidationStatus;
-import com.vaadin.data.ValidationResult;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.DateField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.BinderValidationStatus;
+import com.vaadin.flow.data.binder.ValidationResult;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Validations;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 
 public class MultiDaySelectorField extends CustomField<MultiDaySelectorDto> {
 
@@ -23,31 +23,33 @@ public class MultiDaySelectorField extends CustomField<MultiDaySelectorDto> {
 
 	private final Binder<MultiDaySelectorDto> binder = new Binder<>(MultiDaySelectorDto.class);
 
-	private final CheckBox multiDaySelect;
-	private final DateField startDate;
-	private final DateField endDate;
-
-	private final DateField reportDate;
+	private final Checkbox multiDaySelect;
+	private final DatePicker startDate;
+	private final DatePicker endDate;
+	private final DatePicker reportDate;
 
 	protected Properties properties;
 
-	public MultiDaySelectorField(DateField reportDate) {
+	public MultiDaySelectorField(DatePicker reportDate) {
 		this.reportDate = reportDate;
 
-		multiDaySelect = new CheckBox();
-		startDate = new DateField();
-		endDate = new DateField();
+		multiDaySelect = new Checkbox();
+		startDate = new DatePicker();
+		endDate = new DatePicker();
 
 		this.properties = new Properties();
 	}
 
+	/**
+	 * Built on first attach, as in Vaadin 8 ({@link CustomField}).
+	 */
 	@Override
 	protected Component initContent() {
 		setValue(new MultiDaySelectorDto());
 
 		VerticalLayout layout = new VerticalLayout();
 		layout.setSpacing(false);
-		layout.setMargin(false);
+		layout.setPadding(false);
 
 		HorizontalLayout selectorLayout = new HorizontalLayout();
 
@@ -58,26 +60,26 @@ public class MultiDaySelectorField extends CustomField<MultiDaySelectorDto> {
 			startDate.setVisible(e.getValue());
 			startDate.setValue(null);
 		});
-		selectorLayout.addComponent(multiDaySelect);
+		selectorLayout.add(multiDaySelect);
 
 		HorizontalLayout datesLayout = new HorizontalLayout();
 
 		startDate.setId("firstDate");
-		startDate.setWidth(150, Unit.PIXELS);
-		startDate.setRangeEnd(LocalDate.now());
+		startDate.setWidth("150px");
+		startDate.setMax(LocalDate.now());
 		startDate.setVisible(getValue().isMultiDay());
 		Binder.BindingBuilder<MultiDaySelectorDto, LocalDate> startDateBindingBuilder = binder.forField(startDate)
 			.withValidator(
 				new DateComparisonValidator(
 					endDate,
 					true,
-					I18nProperties.getValidationError(Validations.beforeDate, startDate.getCaption(), endDate.getCaption())));
+					I18nProperties.getValidationError(Validations.beforeDate, startDate.getLabel(), endDate.getLabel())));
 		if (reportDate != null) {
 			startDateBindingBuilder = startDateBindingBuilder.withValidator(
 				new DateComparisonValidator(
 					reportDate,
 					true,
-					I18nProperties.getValidationError(Validations.beforeDate, startDate.getCaption(), reportDate.getCaption())));
+					I18nProperties.getValidationError(Validations.beforeDate, startDate.getLabel(), reportDate.getLabel())));
 		}
 		startDateBindingBuilder.bind(MultiDaySelectorDto.START_DATE);
 		startDate.addValueChangeListener(e -> {
@@ -89,7 +91,7 @@ public class MultiDaySelectorField extends CustomField<MultiDaySelectorDto> {
 		reportDate.addValueChangeListener(event -> binder.validate());
 
 		endDate.setId("lastDate");
-		endDate.setWidth(150, Unit.PIXELS);
+		endDate.setWidth("150px");
 		Binder.BindingBuilder<MultiDaySelectorDto, LocalDate> endDateBindingBuilder =
 			binder.forField(endDate).asRequired((localDate, valueContext) -> {
 				if (multiDaySelect.getValue() != Boolean.TRUE || startDate.getValue() == null || localDate != null) {
@@ -101,30 +103,34 @@ public class MultiDaySelectorField extends CustomField<MultiDaySelectorDto> {
 					new DateComparisonValidator(
 						startDate,
 						false,
-						I18nProperties.getValidationError(Validations.afterDate, endDate.getCaption(), startDate.getCaption())));
+						I18nProperties.getValidationError(Validations.afterDate, endDate.getLabel(), startDate.getLabel())));
 		if (reportDate != null) {
 			endDateBindingBuilder = endDateBindingBuilder.withValidator(
 				new DateComparisonValidator(
 					reportDate,
 					true,
-					I18nProperties.getValidationError(Validations.beforeDate, endDate.getCaption(), reportDate.getCaption())));
+					I18nProperties.getValidationError(Validations.beforeDate, endDate.getLabel(), reportDate.getLabel())));
 		}
 		endDateBindingBuilder.bind(MultiDaySelectorDto.END_DATE);
-		endDate.setRangeEnd(LocalDate.now());
+		endDate.setMax(LocalDate.now());
 		endDate.addValueChangeListener(e -> getValue().setEndDate(e.getValue()));
 
 		enableValidationForEndDate(false);
 
-		datesLayout.addComponents(startDate, endDate);
-
-		layout.addComponents(selectorLayout, datesLayout);
+		datesLayout.add(startDate, endDate);
+		layout.add(selectorLayout, datesLayout);
 
 		return layout;
 	}
 
 	@Override
-	protected void doSetValue(MultiDaySelectorDto multiDaySelectorDto) {
+	protected void setPresentationValue(MultiDaySelectorDto multiDaySelectorDto) {
 		binder.setBean(multiDaySelectorDto);
+	}
+
+	@Override
+	protected MultiDaySelectorDto generateModelValue() {
+		return binder.getBean();
 	}
 
 	@Override
@@ -138,12 +144,12 @@ public class MultiDaySelectorField extends CustomField<MultiDaySelectorDto> {
 
 	public void showCaptions() {
 		String prefix = properties.getProperty("prefix");
-		multiDaySelect.setCaption(I18nProperties.getPrefixCaption(prefix, properties.getProperty("multiDay")));
-		multiDaySelect.removeStyleName(CssStyles.CAPTION_HIDDEN);
-		startDate.setCaption(I18nProperties.getPrefixCaption(prefix, properties.getProperty("firstDate")));
-		startDate.removeStyleName(CssStyles.CAPTION_HIDDEN);
-		endDate.setCaption(I18nProperties.getPrefixCaption(prefix, properties.getProperty("lastDate")));
-		endDate.removeStyleName(CssStyles.CAPTION_HIDDEN);
+		multiDaySelect.setLabel(I18nProperties.getPrefixCaption(prefix, properties.getProperty("multiDay")));
+		multiDaySelect.removeClassName(CssStyles.CAPTION_HIDDEN);
+		startDate.setLabel(I18nProperties.getPrefixCaption(prefix, properties.getProperty("firstDate")));
+		startDate.removeClassName(CssStyles.CAPTION_HIDDEN);
+		endDate.setLabel(I18nProperties.getPrefixCaption(prefix, properties.getProperty("lastDate")));
+		endDate.removeClassName(CssStyles.CAPTION_HIDDEN);
 	}
 
 	private void enableValidationForEndDate(boolean enable) {

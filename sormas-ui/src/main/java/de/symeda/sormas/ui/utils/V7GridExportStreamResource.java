@@ -31,39 +31,43 @@ import java.util.Date;
 import java.util.List;
 
 import com.opencsv.CSVWriter;
-import com.vaadin.server.Page;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.v7.data.Container.Indexed;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.Grid.Column;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.function.ValueProvider;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.utils.CSVUtils;
 import de.symeda.sormas.api.utils.YesNoUnknown;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 
+/**
+ * CSV export of a grid that was a Vaadin 7 grid (now a Flow grid): one header row with the column captions, then all
+ * items of the grid in their displayed order (the user's sort) and with its filter. Was built on the Vaadin 7 container and its columns.
+ */
 @SuppressWarnings("serial")
-public class V7GridExportStreamResource extends StreamResource {
+public class V7GridExportStreamResource extends StreamSourceDownloadHandler {
 
-	public V7GridExportStreamResource(
-		Indexed container,
-		List<Column> gridColumns,
-		String filename,
-		String... ignoredPropertyIds) {
+	public V7GridExportStreamResource(Grid<?> grid, String filename, String... ignoredPropertyIds) {
 
 		super(new StreamSource() {
 
+			@SuppressWarnings({
+				"unchecked",
+				"rawtypes" })
 			@Override
 			public InputStream getStream() {
 				List<String> ignoredPropertyIdsList = Arrays.asList(ignoredPropertyIds);
-				List<Column> columns = new ArrayList<>(gridColumns);
-				columns.removeIf(Column::isHidden);
-				columns.removeIf(column -> ignoredPropertyIdsList.contains(column.getPropertyId()));
+				List<Column<?>> columns = new ArrayList<>(grid.getColumns());
+				columns.removeIf(column -> !column.isVisible());
+				columns.removeIf(column -> ignoredPropertyIdsList.contains(column.getKey()));
 
-				List<String> headerRow = columns.stream().map(Column::getHeaderCaption).collect(toList());
+				List<String> headerRow = columns.stream().map(Column::getHeaderText).collect(toList());
+				List<ValueProvider> valueProviders =
+					columns.stream().map(column -> GridExportStreamResource.getExportValueProvider(grid, column)).collect(toList());
 
 				try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream()) {
 					try (CSVWriter writer = CSVUtils.createCSVWriter(
@@ -72,20 +76,25 @@ public class V7GridExportStreamResource extends StreamResource {
 
 						writer.writeNext(headerRow.toArray(new String[headerRow.size()]));
 
-						container.getItemIds().forEach(id -> {
+						DataProvider dataProvider = grid.getDataProvider();
+						// All rows in the order and with the filter the grid shows them, as the V7 container did: the grid's
+						// query carries the back-end sort orders (lazy providers), the in-memory comparator (list providers)
+						// and the grid's in-memory filter.
+						Query query = grid.getDataCommunicator().buildQuery(0, Integer.MAX_VALUE);
+						((java.util.stream.Stream<Object>) dataProvider.fetch(query)).forEach(item -> {
 							List<String> row = new ArrayList<>();
-							columns.forEach(column -> {
-								Property<?> property = container.getItem(id).getItemProperty(column.getPropertyId());
-								if (property.getValue() != null) {
-									if (property.getType() == Date.class) {
-										row.add(DateFormatHelper.formatLocalDateTime((Date) property.getValue()));
-									} else if (property.getType() == Boolean.class) {
-										if ((Boolean) property.getValue()) {
+							valueProviders.forEach(valueProvider -> {
+								Object value = valueProvider.apply(item);
+								if (value != null) {
+									if (value instanceof Date) {
+										row.add(DateFormatHelper.formatLocalDateTime((Date) value));
+									} else if (value instanceof Boolean) {
+										if ((Boolean) value) {
 											row.add(I18nProperties.getEnumCaption(YesNoUnknown.YES));
 										} else
 											row.add(I18nProperties.getEnumCaption(YesNoUnknown.NO));
 									} else {
-										row.add(property.getValue().toString());
+										row.add(value.toString());
 									}
 								} else {
 									row.add("");
@@ -101,16 +110,14 @@ public class V7GridExportStreamResource extends StreamResource {
 				} catch (IOException e) {
 					// TODO This currently requires the user to click the "Export" button again or reload the page as the UI
 					// is not automatically updated; this should be changed once Vaadin push is enabled (see #516)
-					new Notification(
+					NotificationHelper.show(
 						I18nProperties.getString(Strings.headingExportFailed),
 						I18nProperties.getString(Strings.messageExportFailed),
 						Type.ERROR_MESSAGE,
-						false).show(Page.getCurrent());
+						false);
 					return null;
 				}
 			}
-		}, filename);
-		setMIMEType("text/csv");
-		setCacheTime(0);
+		}, filename, "text/csv");
 	}
 }

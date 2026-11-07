@@ -23,13 +23,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -38,6 +36,7 @@ import de.symeda.sormas.ui.dashboard.DashboardDataProvider;
 import de.symeda.sormas.ui.dashboard.DashboardType;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.LayoutUtil;
 
 /**
@@ -68,7 +67,8 @@ public abstract class AbstractDashboardStatisticsComponent extends VerticalLayou
 	public AbstractDashboardStatisticsComponent(DashboardDataProvider dashboardDataProvider) {
 		this.dashboardDataProvider = dashboardDataProvider;
 		this.setWidth(100, Unit.PERCENTAGE);
-		this.setMargin(new MarginInfo(true, true, false, true));
+		// was a margin on all sides but the bottom (MarginInfo); spacing details belong to the theme work
+		this.setPadding(true);
 		this.setSpacing(false);
 
 		subComponentsLayout = new CustomLayout();
@@ -85,7 +85,7 @@ public abstract class AbstractDashboardStatisticsComponent extends VerticalLayou
 		addThirdComponent();
 		addFourthComponent();
 
-		addComponent(subComponentsLayout);
+		add(subComponentsLayout);
 
 		if (dashboardDataProvider.getDashboardType() == DashboardType.CONTACTS) {
 			if (FacadeProvider.getDiseaseConfigurationFacade().getAllDiseasesWithFollowUp().size() > 6) {
@@ -160,16 +160,16 @@ public abstract class AbstractDashboardStatisticsComponent extends VerticalLayou
 	private void addShowMoreAndLessButtons() {
 		showMoreButton = ButtonHelper.createIconButton(
 			Captions.dashboardShowAllDiseases,
-			VaadinIcons.CHEVRON_DOWN,
+			VaadinIcon.CHEVRON_DOWN,
 			null,
-			ValoTheme.BUTTON_BORDERLESS,
+			CssStyles.BUTTON_BORDERLESS,
 			CssStyles.VSPACE_TOP_NONE,
 			CssStyles.VSPACE_3);
 		showLessButton = ButtonHelper.createIconButton(
 			Captions.dashboardShowFirstDiseases,
-			VaadinIcons.CHEVRON_UP,
+			VaadinIcon.CHEVRON_UP,
 			null,
-			ValoTheme.BUTTON_BORDERLESS,
+			CssStyles.BUTTON_BORDERLESS,
 			CssStyles.VSPACE_TOP_NONE,
 			CssStyles.VSPACE_3);
 
@@ -185,10 +185,10 @@ public abstract class AbstractDashboardStatisticsComponent extends VerticalLayou
 			updateStatistics(currentDisease);
 		});
 
-		addComponent(showMoreButton);
-		addComponent(showLessButton);
-		setComponentAlignment(showMoreButton, Alignment.MIDDLE_CENTER);
-		setComponentAlignment(showLessButton, Alignment.MIDDLE_CENTER);
+		add(showMoreButton);
+		add(showLessButton);
+		setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, showMoreButton);
+		setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, showLessButton);
 		showLessButton.setVisible(false);
 	}
 

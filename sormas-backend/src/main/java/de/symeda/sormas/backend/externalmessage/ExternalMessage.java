@@ -22,25 +22,22 @@ import static de.symeda.sormas.api.utils.FieldConstraints.CHARACTER_LIMIT_TEXT;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
-
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.caze.CaseClassification;
@@ -67,8 +64,6 @@ import de.symeda.sormas.backend.user.User;
 
 @Entity(name = ExternalMessage.TABLE_NAME)
 
-@TypeDefs({
-	@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class) })
 public class ExternalMessage extends AbstractDomainObject {
 
 	public static final String TABLE_NAME = "externalmessage";
@@ -344,7 +339,7 @@ public class ExternalMessage extends AbstractDomainObject {
 		this.reporterName = labName;
 	}
 
-	@Type(type = "list-array")
+	@JdbcTypeCode(SqlTypes.ARRAY)
 	@Column(name = "reporterexternalids", columnDefinition = "VARCHAR(255) ARRAY")
 	public List<String> getReporterExternalIds() {
 		return reporterExternalIds;
@@ -834,7 +829,7 @@ public class ExternalMessage extends AbstractDomainObject {
 	}
 
 	@Column(columnDefinition = "jsonb")
-	@Type(type = "jsonb")
+	@JdbcTypeCode(SqlTypes.JSON)
 	public String getActivitiesAsCase() {
 		return activitiesAsCase;
 	}
@@ -844,7 +839,7 @@ public class ExternalMessage extends AbstractDomainObject {
 	}
 
 	@Column(columnDefinition = "jsonb")
-	@Type(type = "jsonb")
+	@JdbcTypeCode(SqlTypes.JSON)
 	public String getAdditionalPersonContactDetails() {
 		return additionalPersonContactDetails;
 	}
@@ -854,7 +849,7 @@ public class ExternalMessage extends AbstractDomainObject {
 	}
 
 	@Column(columnDefinition = "jsonb")
-	@Type(type = "jsonb")
+	@JdbcTypeCode(SqlTypes.JSON)
 	public String getAdditionalPersonAddresses() {
 		return additionalPersonAddresses;
 	}
@@ -864,7 +859,7 @@ public class ExternalMessage extends AbstractDomainObject {
 	}
 
 	@Column(columnDefinition = "jsonb")
-	@Type(type = "jsonb")
+	@JdbcTypeCode(SqlTypes.JSON)
 	public String getExposures() {
 		return exposures;
 	}
@@ -1065,7 +1060,7 @@ public class ExternalMessage extends AbstractDomainObject {
 	}
 
 	@Column(columnDefinition = "json")
-	@Type(type = "json")
+	@JdbcTypeCode(SqlTypes.JSON)
 	public String getAdditionalDataJson() {
 		return additionalDataJson;
 	}

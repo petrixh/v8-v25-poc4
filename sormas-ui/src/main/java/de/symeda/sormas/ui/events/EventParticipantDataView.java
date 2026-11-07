@@ -20,8 +20,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.EditPermissionType;
@@ -97,7 +98,7 @@ public class EventParticipantDataView extends AbstractEventParticipantView imple
 
 		EventParticipantDto eventParticipant = FacadeProvider.getEventParticipantFacade().getEventParticipantByUuid(getReference().getUuid());
 
-		setHeightUndefined();
+		setHeight(null);
 
 		final EventParticipantReferenceDto eventParticipantRef = getReference();
 		final String uuid = eventParticipantRef.getUuid();
@@ -105,7 +106,7 @@ public class EventParticipantDataView extends AbstractEventParticipantView imple
 
 		DetailSubComponentWrapper container = new DetailSubComponentWrapper(() -> editComponent);
 		container.setWidth(100, Unit.PERCENTAGE);
-		container.setMargin(true);
+		container.setPadding(true);
 		setSubComponent(container);
 
 		LayoutWithSidePanel layout = new LayoutWithSidePanel(
@@ -118,7 +119,7 @@ public class EventParticipantDataView extends AbstractEventParticipantView imple
 			SORMAS_TO_SORMAS_LOC,
 			EXTERNAL_EMAILS_LOC);
 
-		container.addComponent(layout);
+		container.add(layout);
 
 		EventDto event = FacadeProvider.getEventFacade().getEventByUuid(eventParticipant.getEvent().getUuid(), false);
 
@@ -141,12 +142,12 @@ public class EventParticipantDataView extends AbstractEventParticipantView imple
 
 		if (UiUtil.permitted(UserRight.CONTACT_VIEW)) {
 			VerticalLayout contactsLayout = new VerticalLayout();
-			contactsLayout.setMargin(false);
+			contactsLayout.setPadding(false);
 			contactsLayout.setSpacing(false);
 
 			ContactListComponent contactList = new ContactListComponent(eventParticipantRef, this::showUnsavedChangesPopup, editAllowed);
-			contactList.addStyleName(CssStyles.SIDE_COMPONENT);
-			contactsLayout.addComponent(contactList);
+			contactList.addClassName(CssStyles.SIDE_COMPONENT);
+			contactsLayout.add(contactList);
 
 			layout.addSidePanelComponent(contactsLayout, CONTACTS_LOC);
 		}
@@ -154,12 +155,12 @@ public class EventParticipantDataView extends AbstractEventParticipantView imple
 		boolean sormasToSormasEnabled = FacadeProvider.getSormasToSormasFacade().isAnyFeatureConfigured(FeatureType.SORMAS_TO_SORMAS_SHARE_EVENTS);
 		if (sormasToSormasEnabled || eventParticipant.getSormasToSormasOriginInfo() != null || eventParticipant.isOwnershipHandedOver()) {
 			VerticalLayout sormasToSormasLocLayout = new VerticalLayout();
-			sormasToSormasLocLayout.setMargin(false);
+			sormasToSormasLocLayout.setPadding(false);
 			sormasToSormasLocLayout.setSpacing(false);
 
 			SormasToSormasListComponent sormasToSormasListComponent = new SormasToSormasListComponent(eventParticipant);
-			sormasToSormasListComponent.addStyleNames(CssStyles.SIDE_COMPONENT);
-			sormasToSormasLocLayout.addComponent(sormasToSormasListComponent);
+			sormasToSormasListComponent.addClassNames(CssStyles.SIDE_COMPONENT);
+			sormasToSormasLocLayout.add(sormasToSormasListComponent);
 
 			layout.addSidePanelComponent(sormasToSormasLocLayout, SORMAS_TO_SORMAS_LOC);
 		}
@@ -226,7 +227,7 @@ public class EventParticipantDataView extends AbstractEventParticipantView imple
 	private void showVaccinationStatusUpdateDialog(EventParticipantDto eventParticipant) {
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getCaption(Captions.CaseData_vaccinationStatusUpdate),
-			new Label(I18nProperties.getString(Strings.confirmationVaccinationStatusSync)),
+			new Span(I18nProperties.getString(Strings.confirmationVaccinationStatusSync)),
 			I18nProperties.getString(Strings.yes),
 			I18nProperties.getString(Strings.no),
 			600,

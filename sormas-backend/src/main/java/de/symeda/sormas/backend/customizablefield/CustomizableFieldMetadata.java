@@ -15,15 +15,13 @@
 
 package de.symeda.sormas.backend.customizablefield;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import de.symeda.sormas.api.customizablefield.CustomizableFieldContext;
 import de.symeda.sormas.api.customizablefield.CustomizableFieldGroup;
@@ -35,7 +33,6 @@ import de.symeda.sormas.backend.common.CoreAdo;
  * Stores the configuration for custom fields that can be added to entities.
  */
 @Entity(name = "customizablefieldmetadata")
-@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @SuppressWarnings({
 	"java:S1845", // suppress sonar field name clash warning
 	"java:S2160" // suppress missing equals handled in AbstractDomainObject
@@ -179,7 +176,7 @@ public class CustomizableFieldMetadata extends CoreAdo {
 
 	// JSON-serialized properties
 	@Column(columnDefinition = "jsonb")
-	@Type(type = "jsonb")
+	@JdbcTypeCode(SqlTypes.JSON)
 	public String getVisibilityRestrictions() {
 		return visibilityRestrictions;
 	}
@@ -189,7 +186,7 @@ public class CustomizableFieldMetadata extends CoreAdo {
 	}
 
 	@Column(columnDefinition = "jsonb")
-	@Type(type = "jsonb")
+	@JdbcTypeCode(SqlTypes.JSON)
 	public String getCustomProperties() {
 		return customProperties;
 	}
@@ -199,7 +196,7 @@ public class CustomizableFieldMetadata extends CoreAdo {
 	}
 
 	@Column(columnDefinition = "jsonb")
-	@Type(type = "jsonb")
+	@JdbcTypeCode(SqlTypes.JSON)
 	public String getTranslations() {
 		return translations;
 	}

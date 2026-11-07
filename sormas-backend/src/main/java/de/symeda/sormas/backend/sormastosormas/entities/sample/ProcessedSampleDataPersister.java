@@ -20,9 +20,9 @@ import static de.symeda.sormas.backend.sormastosormas.ValidationHelper.buildSamp
 import static de.symeda.sormas.backend.sormastosormas.ValidationHelper.buildValidationGroupName;
 import static de.symeda.sormas.backend.sormastosormas.ValidationHelper.handleValidationError;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.sample.AdditionalTestDto;

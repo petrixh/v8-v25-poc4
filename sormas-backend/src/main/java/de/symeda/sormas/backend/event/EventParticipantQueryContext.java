@@ -1,10 +1,10 @@
 package de.symeda.sormas.backend.event;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
 
 import de.symeda.sormas.backend.common.AbstractDomainObject;
 import de.symeda.sormas.backend.common.DeletableAdo;
@@ -31,7 +31,7 @@ public class EventParticipantQueryContext extends QueryContext<EventParticipant,
 			samples.on(
 				cb.and(
 					cb.isFalse(samples.get(DeletableAdo.DELETED)),
-					cb.equal(samples.get(Sample.ASSOCIATED_EVENT_PARTICIPANT), eventParticipant.get(AbstractDomainObject.ID))));
+					cb.equal(samples.get(Sample.ASSOCIATED_EVENT_PARTICIPANT).get(AbstractDomainObject.ID), eventParticipant.get(AbstractDomainObject.ID))));
 		}
 		return samples;
 	}

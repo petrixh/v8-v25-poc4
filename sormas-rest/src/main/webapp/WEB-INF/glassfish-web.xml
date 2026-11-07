@@ -1241,4 +1241,9 @@
         <group-name>CUSTOMIZABLE_FIELD_MANAGEMENT</group-name>
     </security-role-mapping>
 
+    <!-- Payara's own JAX-RS @RolesAllowed filter is off: on Payara 7 its role check fails with an exception after a
+         remote EJB call (no authorization context). SormasRestUserRightFilter checks @RolesAllowed instead
+         (migration ticket 1a-30e). -->
+    <jaxrs-roles-allowed-enabled>false</jaxrs-roles-allowed-enabled>
+
 </glassfish-web-app>

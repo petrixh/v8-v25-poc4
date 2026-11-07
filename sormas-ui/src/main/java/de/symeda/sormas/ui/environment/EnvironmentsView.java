@@ -18,13 +18,10 @@ package de.symeda.sormas.ui.environment;
 import java.util.Collections;
 import java.util.Set;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.environment.EnvironmentCriteria;
@@ -38,8 +35,11 @@ import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.environment.importer.EnvironmentImportLayout;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import de.symeda.sormas.ui.utils.AbstractView;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.DownloadUtil;
 import de.symeda.sormas.ui.utils.ExportEntityName;
 import de.symeda.sormas.ui.utils.GridExportStreamResource;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
@@ -70,32 +70,31 @@ public class EnvironmentsView extends AbstractView {
 		addComponent(gridComponent);
 
 		if (UiUtil.permitted(UserRight.ENVIRONMENT_IMPORT)) {
-			Button importButton = ButtonHelper.createIconButton(Captions.actionImport, VaadinIcons.UPLOAD, e -> {
-				Window popupWindow = VaadinUiUtil.showPopupWindow(new EnvironmentImportLayout());
-				popupWindow.setCaption(I18nProperties.getString(Strings.headingImportEnvironments));
-				popupWindow.addCloseListener(c -> gridComponent.reload());
-			}, ValoTheme.BUTTON_PRIMARY);
+			Button importButton = ButtonHelper.createIconButton(Captions.actionImport, VaadinIcon.UPLOAD, e -> {
+				Dialog popupWindow = VaadinUiUtil.showPopupWindow(new EnvironmentImportLayout());
+				popupWindow.setHeaderTitle(I18nProperties.getString(Strings.headingImportEnvironments));
+				VaadinUiUtil.addCloseListener(popupWindow, c -> gridComponent.reload());
+			}, CssStyles.BUTTON_PRIMARY);
 
 			addHeaderComponent(importButton);
 		}
 
 		if (UiUtil.permitted(UserRight.ENVIRONMENT_EXPORT)) {
-			Button exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcons.TABLE, null, ValoTheme.BUTTON_PRIMARY);
-			exportButton.setDescription(I18nProperties.getDescription(Descriptions.descExportButton));
+			Button exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcon.TABLE, null, CssStyles.BUTTON_PRIMARY);
+			exportButton.setTooltipText(I18nProperties.getDescription(Descriptions.descExportButton));
 			addHeaderComponent(exportButton);
 
-			StreamResource streamResource = GridExportStreamResource
+			DownloadHandler streamResource = GridExportStreamResource
 				.createStreamResourceWithSelectedItems(gridComponent.getGrid(), this::getSelectedRows, ExportEntityName.ENVIRONMENTS);
-			FileDownloader fileDownloader = new FileDownloader(streamResource);
-			fileDownloader.extend(exportButton);
+			DownloadUtil.attachDownloader(exportButton, streamResource);
 		}
 
 		if (UiUtil.permitted(UserRight.ENVIRONMENT_CREATE)) {
 			final Button btnNewContact = ButtonHelper.createIconButton(
 				Captions.environmentNewEnvironment,
-				VaadinIcons.PLUS_CIRCLE,
+				VaadinIcon.PLUS_CIRCLE,
 				e -> ControllerProvider.getEnvironmentController().create(),
-				ValoTheme.BUTTON_PRIMARY);
+				CssStyles.BUTTON_PRIMARY);
 			addHeaderComponent(btnNewContact);
 		}
 

@@ -1,8 +1,8 @@
 package de.symeda.sormas.backend.immunization.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 import de.symeda.sormas.backend.vaccination.FirstVaccinationDate;
 import de.symeda.sormas.backend.vaccination.LastVaccinationDate;

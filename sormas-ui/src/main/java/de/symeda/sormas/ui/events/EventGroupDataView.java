@@ -17,8 +17,8 @@ package de.symeda.sormas.ui.events;
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidColumnLoc;
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRow;
 
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.ui.CustomLayout;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.Unit;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.event.EventGroupDto;
@@ -30,9 +30,11 @@ import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.SubMenu;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.events.groups.EventGroupMemberListComponent;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
 import de.symeda.sormas.ui.utils.AbstractDetailView;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.DetailSubComponentWrapper;
 
 public class EventGroupDataView extends AbstractDetailView<EventGroupReferenceDto> {
@@ -61,7 +63,7 @@ public class EventGroupDataView extends AbstractDetailView<EventGroupReferenceDt
 	@Override
 	protected void initView(String params) {
 
-		setHeightUndefined();
+		setHeight(null);
 
 		String htmlLayout = fluidRow(
 			fluidColumnLoc(8, 0, 12, 0, EVENT_GROUP_LOC),
@@ -69,20 +71,20 @@ public class EventGroupDataView extends AbstractDetailView<EventGroupReferenceDt
 
 		DetailSubComponentWrapper container = new DetailSubComponentWrapper(() -> editComponent);
 		container.setWidth(100, Unit.PERCENTAGE);
-		container.setMargin(true);
+		container.setPadding(true);
 		setSubComponent(container);
 		CustomLayout layout = new CustomLayout();
 		layout.addStyleName(CssStyles.ROOT_COMPONENT);
 		layout.setTemplateContents(htmlLayout);
 		layout.setWidth(100, Unit.PERCENTAGE);
 		layout.setHeightUndefined();
-		container.addComponent(layout);
+		container.add(layout);
 
 		editComponent = ControllerProvider.getEventGroupController().getEventGroupEditComponent(getReference().getUuid());
-		editComponent.setMargin(false);
+		editComponent.setPadding(false);
 		editComponent.setWidth(100, Unit.PERCENTAGE);
-		editComponent.getWrappedComponent().setWidth(100, Unit.PERCENTAGE);
-		editComponent.addStyleName(CssStyles.MAIN_COMPONENT);
+		((HasSize) editComponent.getWrappedComponent()).setWidth(100, Unit.PERCENTAGE);
+		editComponent.addClassName(CssStyles.MAIN_COMPONENT);
 		layout.addComponent(editComponent, EVENT_GROUP_LOC);
 
 		EventGroupMemberListComponent eventGroupMemberListComponent = new EventGroupMemberListComponent(getReference());
@@ -90,7 +92,7 @@ public class EventGroupDataView extends AbstractDetailView<EventGroupReferenceDt
 		CssStyles.style(eventGroupMemberListComponent, CssStyles.VSPACE_TOP_2);
 
 		if (!UiUtil.permitted(UserRight.EVENTGROUP_EDIT)) {
-			layout.getComponent(EVENTS_LOC).setEnabled(false);
+			layout.getComponent(EVENTS_LOC).getElement().setEnabled(false);
 		}
 	}
 

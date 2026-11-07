@@ -43,7 +43,7 @@ public class PathogenTestListComponent extends SideComponent {
 		}
 
 		PathogenTestList pathogenTestList = new PathogenTestList(sampleRef, actionCallback, isEditAllowed);
-		addComponent(pathogenTestList);
+		add(pathogenTestList);
 		pathogenTestList.reload();
 	}
 
@@ -58,7 +58,7 @@ public class PathogenTestListComponent extends SideComponent {
 		}
 
 		PathogenTestList pathogenTestList = new PathogenTestList(sampleRef, actionCallback, isEditAllowed);
-		addComponent(pathogenTestList);
+		add(pathogenTestList);
 		pathogenTestList.reload();
 
 	}

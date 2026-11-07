@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.vaadin.ui.AbstractComponent;
+import com.vaadin.flow.component.Component;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.dashboard.EpiCurveGrouping;
@@ -41,11 +41,11 @@ public class SampleEpiCurveComponent extends AbstractEpiCurveComponent<SampleDas
 
 	public SampleEpiCurveComponent(SampleDashboardDataProvider dashboardDataProvider) {
 		super(dashboardDataProvider, Descriptions.sampleDashboardHumans);
-		epiCurveLabel.setValue(I18nProperties.getString(Strings.headingSampleDashboardEpiCurve));
+		epiCurveLabel.setText(I18nProperties.getString(Strings.headingSampleDashboardEpiCurve));
 	}
 
 	@Override
-	protected AbstractComponent createEpiCurveModeSelector() {
+	protected Component createEpiCurveModeSelector() {
 		return null;
 	}
 

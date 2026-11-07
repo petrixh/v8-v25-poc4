@@ -1,13 +1,11 @@
 package de.symeda.sormas.ui.events.eventParticipantMerge;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.data.provider.DataProvider;
-import com.vaadin.data.provider.ListDataProvider;
-import com.vaadin.server.ExternalResource;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Link;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.AnchorTarget;
 
 import de.symeda.sormas.api.event.EventParticipantDto;
 import de.symeda.sormas.api.event.EventParticipantSelectionDto;
@@ -16,11 +14,13 @@ import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.location.LocationDto;
 import de.symeda.sormas.api.person.PersonDto;
 import de.symeda.sormas.api.utils.DataHelper;
-import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.caze.CaseDataView;
 import de.symeda.sormas.ui.events.EventParticipantDataView;
+import de.symeda.sormas.ui.navigation.Navigator;
+import de.symeda.sormas.ui.utils.GridExportStreamResource;
 import de.symeda.sormas.ui.utils.UuidRenderer;
+import de.symeda.sormas.ui.utils.grid.Grid;
 
 public class EventParticipantMergeSelectionGrid extends Grid<EventParticipantSelectionDto> {
 
@@ -38,25 +38,30 @@ public class EventParticipantMergeSelectionGrid extends Grid<EventParticipantSel
 	private void buildGrid() {
 		setWidthFull();
 		setSelectionMode(SelectionMode.SINGLE);
-		setHeight(150, Unit.PIXELS);
+		setHeight("150px");
 
-		addComponentColumn(indexDto -> {
-			Link link = new Link(
-				DataHelper.getShortUuid(indexDto.getUuid()),
-				new ExternalResource(
-					SormasUI.get().getPage().getLocation().getRawPath() + "#!" + EventParticipantDataView.VIEW_NAME + "/" + indexDto.getUuid()));
-			link.setTargetName("_blank");
+		Column<EventParticipantSelectionDto, Anchor> eventParticipantColumn = addComponentColumn(indexDto -> {
+			// was a #! link (decision 2026-11-05: routes without #!)
+			Anchor link = new Anchor(
+				Navigator.getUrl(EventParticipantDataView.VIEW_NAME + "/" + indexDto.getUuid()),
+				DataHelper.getShortUuid(indexDto.getUuid()));
+			link.setTarget(AnchorTarget.BLANK);
 			return link;
-		}).setId(EVENT_PARTICIPANT_COLUMN_UUID);
+		});
+		eventParticipantColumn.setId(EVENT_PARTICIPANT_COLUMN_UUID);
+		GridExportStreamResource.setExportValueProvider(eventParticipantColumn, indexDto -> DataHelper.getShortUuid(indexDto.getUuid()));
 
-		addComponentColumn(indexDto -> {
-			Link link = new Link(
-				DataHelper.getShortUuid(indexDto.getResultingCaseUuid()),
-				new ExternalResource(
-					SormasUI.get().getPage().getLocation().getRawPath() + "#!" + CaseDataView.VIEW_NAME + "/" + indexDto.getResultingCaseUuid()));
-			link.setTargetName("_blank");
+		Column<EventParticipantSelectionDto, Anchor> resultingCaseColumn = addComponentColumn(indexDto -> {
+			// was a #! link (decision 2026-11-05: routes without #!)
+			Anchor link = new Anchor(
+				Navigator.getUrl(CaseDataView.VIEW_NAME + "/" + indexDto.getResultingCaseUuid()),
+				DataHelper.getShortUuid(indexDto.getResultingCaseUuid()));
+			link.setTarget(AnchorTarget.BLANK);
 			return link;
-		}).setId(RESULTING_CASE_UUID);
+		});
+		resultingCaseColumn.setId(RESULTING_CASE_UUID);
+		GridExportStreamResource
+			.setExportValueProvider(resultingCaseColumn, indexDto -> DataHelper.getShortUuid(indexDto.getResultingCaseUuid()));
 
 		setColumns(
 			EVENT_PARTICIPANT_COLUMN_UUID,
@@ -70,10 +75,10 @@ public class EventParticipantMergeSelectionGrid extends Grid<EventParticipantSel
 			RESULTING_CASE_UUID,
 			EventParticipantSelectionDto.CONTACT_COUNT);
 
-		for (Column<EventParticipantSelectionDto, ?> column : getColumns()) {
+		for (Column<EventParticipantSelectionDto, ?> column : getAllColumns()) {
 			column.setCaption(
 				I18nProperties.findPrefixCaptionWithDefault(
-					column.getId(),
+					column.getKey(),
 					column.getCaption(),
 					EventParticipantSelectionDto.I18N_PREFIX,
 					EventParticipantDto.I18N_PREFIX,
@@ -92,10 +97,9 @@ public class EventParticipantMergeSelectionGrid extends Grid<EventParticipantSel
 	}
 
 	/**
-	 * @see DataProvider#fromStream
+	 * Vaadin 8 {@code DataProvider.fromStream}: an in-memory list of the given items.
 	 */
 	public void setDataProvider(Stream<EventParticipantSelectionDto> items) {
-		ListDataProvider<EventParticipantSelectionDto> dataProvider = DataProvider.fromStream(items);
-		setDataProvider(dataProvider);
+		setItems(items.collect(Collectors.toList()));
 	}
 }

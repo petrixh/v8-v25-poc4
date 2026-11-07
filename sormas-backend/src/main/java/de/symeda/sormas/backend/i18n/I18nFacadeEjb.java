@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.backend.i18n;
 
-import javax.ejb.Stateless;
+import jakarta.ejb.Stateless;
 
 import de.symeda.sormas.api.Language;
 import de.symeda.sormas.api.audit.AuditIgnore;

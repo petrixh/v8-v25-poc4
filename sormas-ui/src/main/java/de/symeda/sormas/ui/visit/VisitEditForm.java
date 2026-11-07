@@ -22,12 +22,10 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 import java.util.Arrays;
 import java.util.Date;
 
-import com.vaadin.server.ExternalResource;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Link;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.data.Validator;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.caze.CaseDataDto;
@@ -50,6 +48,8 @@ import de.symeda.sormas.ui.utils.DateTimeField;
 import de.symeda.sormas.ui.utils.FieldAccessHelper;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class VisitEditForm extends AbstractEditForm<VisitDto> {
 
@@ -109,12 +109,12 @@ public class VisitEditForm extends AbstractEditForm<VisitDto> {
 	}
 
 	@Override
-	protected void setInternalValue(VisitDto newValue) {
+	protected void setPresentationValue(VisitDto newValue) {
 
 		if (!disease.equals(newValue.getDisease())) {
 			throw new IllegalArgumentException("Visit's disease doesn't match the form configuration");
 		}
-		super.setInternalValue(newValue);
+		super.setPresentationValue(newValue);
 	}
 
 	@Override
@@ -127,14 +127,14 @@ public class VisitEditForm extends AbstractEditForm<VisitDto> {
 
 		VerticalLayout layoutPhoneLink = new VerticalLayout();
 		layoutPhoneLink.setSpacing(false);
-		layoutPhoneLink.setMargin(false);
+		layoutPhoneLink.setPadding(false);
 		layoutPhoneLink.setWidth(100, Unit.PERCENTAGE);
-		Label labelPhoneLink = new Label((I18nProperties.getCaption(Captions.contactPersonPhoneNumber)));
-		labelPhoneLink.setPrimaryStyleName("v-caption");
-		layoutPhoneLink.addComponent(labelPhoneLink);
-		Link linkPhone = new Link(this.person.getPhone(), new ExternalResource(PHONE_LINK_PREFIX + this.person.getPhone()));
+		Span labelPhoneLink = new Span((I18nProperties.getCaption(Captions.contactPersonPhoneNumber)));
+		labelPhoneLink.setClassName("v-caption");
+		layoutPhoneLink.add(labelPhoneLink);
+		Anchor linkPhone = new Anchor(PHONE_LINK_PREFIX + this.person.getPhone(), this.person.getPhone());
 		linkPhone.setWidth(100, Unit.PERCENTAGE);
-		layoutPhoneLink.addComponent(linkPhone);
+		layoutPhoneLink.add(linkPhone);
 		getContent().addComponent(layoutPhoneLink, CONTACT_PERSON_PHONE_NUMBER_LOC);
 
 		addField(VisitDto.VISIT_DATE_TIME, DateTimeField.class);
@@ -176,16 +176,16 @@ public class VisitEditForm extends AbstractEditForm<VisitDto> {
 
 	private void addDateValidation(Date startDate, Date referenceStartDate, String errorMessageDateTooEarly, Date endDate) {
 
-		getField(VisitDto.VISIT_DATE_TIME).addValidator((Validator) value -> {
+		getField(VisitDto.VISIT_DATE_TIME).addValidator((Field.ValueValidator<Object>) value -> {
 			Date visitDateTime = (Date) getFieldGroup().getField(VisitDto.VISIT_DATE_TIME).getValue();
 			if (visitDateTime.before(startDate) && DateHelper.getDaysBetween(visitDateTime, referenceStartDate) > FollowUpLogic.ALLOWED_DATE_OFFSET) {
-				throw new Validator.InvalidValueException(
+				throw new InvalidValueException(
 					I18nProperties.getValidationError(errorMessageDateTooEarly, FollowUpLogic.ALLOWED_DATE_OFFSET));
 			}
 			if (endDate != null
 				&& visitDateTime.after(endDate)
 				&& DateHelper.getDaysBetween(endDate, visitDateTime) > FollowUpLogic.ALLOWED_DATE_OFFSET) {
-				throw new Validator.InvalidValueException(
+				throw new InvalidValueException(
 					I18nProperties.getValidationError(Validations.visitAfterFollowUp, FollowUpLogic.ALLOWED_DATE_OFFSET));
 			}
 		});

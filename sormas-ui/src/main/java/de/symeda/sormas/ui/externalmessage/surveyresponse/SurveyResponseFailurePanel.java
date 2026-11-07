@@ -18,8 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+
+import de.symeda.sormas.ui.utils.grid.Grid;
 
 import de.symeda.sormas.api.externalmessage.survey.PatchField;
 import de.symeda.sormas.api.i18n.Captions;
@@ -48,7 +49,7 @@ public class SurveyResponseFailurePanel extends VerticalLayout {
 
 		grid.addColumn(entry -> SurveyResponseDisplayUtils.resolveFieldName(entry.getKey(), displayData))
 			.setCaption(I18nProperties.getCaption(Captions.surveyResponseField))
-			.setId("field")
+			.setKey("field")
 			.setExpandRatio(2);
 
 		grid.addColumn(
@@ -56,22 +57,22 @@ public class SurveyResponseFailurePanel extends VerticalLayout {
 				? I18nProperties.getEnumCaption(entry.getValue().getDataPatchFailureCause())
 				: "")
 			.setCaption(I18nProperties.getCaption(Captions.surveyResponseFailureCause))
-			.setId("cause")
+			.setKey("cause")
 			.setExpandRatio(2);
 
 		grid.addColumn(entry -> entry.getValue().getProvidedFieldValue() != null ? entry.getValue().getProvidedFieldValue().toString() : "")
 			.setCaption(I18nProperties.getCaption(Captions.surveyResponseSubmittedValue))
-			.setId("submittedValue")
+			.setKey("submittedValue")
 			.setExpandRatio(2);
 
 		grid.addColumn(entry -> SurveyResponseDisplayUtils.resolveCurrentValue(entry.getKey(), displayData))
 			.setCaption(I18nProperties.getCaption(Captions.surveyResponseCurrentCaseValue))
-			.setId("currentValue")
+			.setKey("currentValue")
 			.setExpandRatio(2);
 
 		grid.setHeightByRows(Math.max(failureEntries.size(), 1));
 
-		addComponent(grid);
+		add(grid);
 	}
 
 }

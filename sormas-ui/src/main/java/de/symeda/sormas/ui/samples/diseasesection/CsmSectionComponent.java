@@ -17,7 +17,7 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.samples.diseasesection;
 
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.textfield.TextField;
 
 import de.symeda.sormas.api.sample.PathogenTestDto;
 import de.symeda.sormas.api.sample.PathogenTestResultType;

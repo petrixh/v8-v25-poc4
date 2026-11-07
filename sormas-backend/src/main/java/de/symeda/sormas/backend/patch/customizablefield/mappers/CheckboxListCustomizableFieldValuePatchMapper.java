@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import de.symeda.sormas.api.customizablefield.CustomizableFieldType;
 import de.symeda.sormas.api.customizablefield.CustomizableFieldValueDto;

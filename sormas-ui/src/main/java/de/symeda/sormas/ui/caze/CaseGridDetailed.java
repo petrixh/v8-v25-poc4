@@ -4,9 +4,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.vaadin.ui.renderers.DateRenderer;
-import com.vaadin.ui.renderers.TextRenderer;
-
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.AgeAndBirthDateDto;
@@ -24,6 +21,8 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.ShowDetailsListener;
 import de.symeda.sormas.ui.utils.UuidRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
 public class CaseGridDetailed extends AbstractCaseGrid<CaseIndexDetailedDto> {
 
@@ -109,7 +108,7 @@ public class CaseGridDetailed extends AbstractCaseGrid<CaseIndexDetailedDto> {
 				return null;
 			}
 		}).setCaption(I18nProperties.getPrefixCaption(CaseIndexDetailedDto.I18N_PREFIX, CaseIndexDetailedDto.LATEST_SAMPLE_DATE_TIME))
-			.setId(LATEST_SAMPLE_DATE_TIME_AND_SAMPLE_COUNT)
+			.setKey(LATEST_SAMPLE_DATE_TIME_AND_SAMPLE_COUNT)
 			.setSortable(false)
 			.setWidth(150);
 

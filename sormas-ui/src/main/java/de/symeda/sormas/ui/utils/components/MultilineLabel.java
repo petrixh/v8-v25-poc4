@@ -1,17 +1,21 @@
 package de.symeda.sormas.ui.utils.components;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
-public class MultilineLabel extends Label {
+import de.symeda.sormas.ui.utils.ContentMode;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+
+/**
+ * Was a full-width Vaadin 8 {@code Label}: a full-width {@link Span} whose text wraps.
+ */
+public class MultilineLabel extends Span {
 
 	public MultilineLabel(String text) {
-		super(text);
-		setWidth(100f, Unit.PERCENTAGE);
+		this(text, ContentMode.TEXT);
 	}
 
 	public MultilineLabel(String text, ContentMode contentMode) {
-		super(text, contentMode);
-		setWidth(100f, Unit.PERCENTAGE);
+		VaadinUiUtil.setLabelValue(this, text, contentMode);
+		setWidthFull();
 	}
 }

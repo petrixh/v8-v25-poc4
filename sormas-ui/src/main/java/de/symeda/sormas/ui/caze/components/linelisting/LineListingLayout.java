@@ -8,18 +8,17 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import com.vaadin.data.Binder;
-import com.vaadin.data.BinderValidationStatus;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.DateField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.BinderValidationStatus;
 
 import de.symeda.sormas.api.ConfigFacade;
 import de.symeda.sormas.api.CountryHelper;
@@ -72,10 +71,10 @@ public class LineListingLayout extends VerticalLayout {
 
 	private final List<CaseLineLayout> caseLines;
 
-	private final Window window;
+	private final Dialog window;
 	private Consumer<LinkedList<LineDto<CaseDataDto>>> saveCallback;
 
-	public LineListingLayout(Window window) {
+	public LineListingLayout(Dialog window) {
 
 		this.window = window;
 
@@ -84,37 +83,37 @@ public class LineListingLayout extends VerticalLayout {
 		LineListingSection sharedInformationComponent = new LineListingSection(Captions.lineListingSharedInformation);
 
 		HorizontalLayout sharedInformationBar = new HorizontalLayout();
-		sharedInformationBar.addStyleName(CssStyles.SPACING_SMALL);
+		sharedInformationBar.addClassName(CssStyles.SPACING_SMALL);
 		disease = new ComboBox<>(I18nProperties.getCaption(Captions.disease));
 		disease.setId("lineListingDisease");
 		disease.setItems(FacadeProvider.getDiseaseConfigurationFacade().getAllDiseases(true, true, true));
-		sharedInformationBar.addComponent(disease);
+		sharedInformationBar.add(disease);
 		diseaseDetails = new TextField(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.DISEASE_DETAILS));
 		diseaseDetails.setId("lineListingDiseaseDetails");
 		diseaseDetails.setVisible(false);
-		sharedInformationBar.addComponent(diseaseDetails);
+		sharedInformationBar.add(diseaseDetails);
 		disease.addValueChangeListener(event -> diseaseDetails.setVisible(Disease.OTHER.equals(disease.getValue())));
 
 		region = new ComboBox<>(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_REGION));
-		region.setItemCaptionGenerator(item -> item.buildCaption());
+		region.setItemLabelGenerator(item -> item.buildCaption());
 		region.setId("lineListingRegion");
-		sharedInformationBar.addComponent(region);
+		sharedInformationBar.add(region);
 
 		district = new ComboBox<>(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_DISTRICT));
-		district.setItemCaptionGenerator(item -> item.buildCaption());
+		district.setItemLabelGenerator(item -> item.buildCaption());
 		district.setId("lineListingDistrict");
-		sharedInformationBar.addComponent(district);
+		sharedInformationBar.add(district);
 
 		typeGroup = new ComboBox<>(I18nProperties.getCaption(Captions.Facility_typeGroup));
 		typeGroup.setId("typeGroup");
-		typeGroup.setWidth(200, Unit.PIXELS);
+		typeGroup.setWidth("200px");
 		typeGroup.setItems(FacilityTypeGroup.getAccomodationGroups());
-		sharedInformationBar.addComponent(typeGroup);
+		sharedInformationBar.add(typeGroup);
 
 		type = new ComboBox<>(I18nProperties.getPrefixCaption(FacilityDto.I18N_PREFIX, FacilityDto.TYPE));
 		type.setId("type");
-		type.setWidth(200, Unit.PIXELS);
-		sharedInformationBar.addComponent(type);
+		type.setWidth("200px");
+		sharedInformationBar.add(type);
 
 		region.addValueChangeListener(e -> {
 			RegionReferenceDto regionDto = e.getValue();
@@ -138,18 +137,18 @@ public class LineListingLayout extends VerticalLayout {
 			}
 		});
 
-		sharedInformationComponent.addComponent(sharedInformationBar);
+		sharedInformationComponent.add(sharedInformationBar);
 
-		addComponent(sharedInformationComponent);
+		add(sharedInformationComponent);
 
 		LineListingSection lineComponent = new LineListingSection(Captions.lineListingNewCasesList);
 
 		caseLines = new ArrayList<>();
 		CaseLineLayout line = buildNewLine(lineComponent);
 		caseLines.add(line);
-		lineComponent.addComponent(line);
+		lineComponent.add(line);
 		lineComponent.setSpacing(false);
-		addComponent(lineComponent);
+		add(lineComponent);
 
 		if (UiUtil.hasRegionJurisdictionLevel()) {
 			RegionReferenceDto userRegion = UiUtil.getUser().getRegion();
@@ -168,40 +167,39 @@ public class LineListingLayout extends VerticalLayout {
 		}
 
 		HorizontalLayout actionBar = new HorizontalLayout();
-		Button addLine = ButtonHelper.createIconButton(Captions.lineListingAddLine, VaadinIcons.PLUS, e -> {
+		Button addLine = ButtonHelper.createIconButton(Captions.lineListingAddLine, VaadinIcon.PLUS, e -> {
 			CaseLineLayout newLine = buildNewLine(lineComponent);
 			caseLines.add(newLine);
-			lineComponent.addComponent(newLine);
+			lineComponent.add(newLine);
 
 			if (caseLines.size() > 1) {
 				caseLines.get(0).getDelete().setEnabled(true);
 			}
-		}, ValoTheme.BUTTON_PRIMARY);
+		}, CssStyles.BUTTON_PRIMARY);
 
-		actionBar.addComponent(addLine);
-		actionBar.setComponentAlignment(addLine, Alignment.MIDDLE_LEFT);
+		actionBar.add(addLine);
+		actionBar.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, addLine);
 
-		addComponent(actionBar);
+		add(actionBar);
 
 		HorizontalLayout buttonsPanel = new HorizontalLayout();
-		buttonsPanel.setMargin(false);
+		buttonsPanel.setPadding(false);
 		buttonsPanel.setSpacing(true);
-		buttonsPanel.setWidth(100, Unit.PERCENTAGE);
+		buttonsPanel.setWidthFull();
 
 		Button cancelButton = ButtonHelper.createButton(Captions.actionDiscard, event -> closeWindow());
 
-		buttonsPanel.addComponent(cancelButton);
-		buttonsPanel.setComponentAlignment(cancelButton, Alignment.BOTTOM_RIGHT);
-		buttonsPanel.setExpandRatio(cancelButton, 1);
+		// was right-aligned in an expanded slot: both buttons sit on the right
+		buttonsPanel.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+		buttonsPanel.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.END);
+		buttonsPanel.add(cancelButton);
 
-		Button saveButton = ButtonHelper.createButton(Captions.actionSave, event -> saveCallback.accept(getCaseLineDtos()), ValoTheme.BUTTON_PRIMARY);
+		Button saveButton = ButtonHelper.createButton(Captions.actionSave, event -> saveCallback.accept(getCaseLineDtos()), CssStyles.BUTTON_PRIMARY);
 
-		buttonsPanel.addComponent(saveButton);
-		buttonsPanel.setComponentAlignment(saveButton, Alignment.BOTTOM_RIGHT);
-		buttonsPanel.setExpandRatio(saveButton, 0);
+		buttonsPanel.add(saveButton);
 
-		addComponent(buttonsPanel);
-		setComponentAlignment(buttonsPanel, Alignment.BOTTOM_RIGHT);
+		add(buttonsPanel);
+		setHorizontalComponentAlignment(FlexComponent.Alignment.END, buttonsPanel);
 	}
 
 	private void updateDistricts(RegionReferenceDto regionDto) {
@@ -388,8 +386,8 @@ public class LineListingLayout extends VerticalLayout {
 
 		newLine.setBean(newLineDto);
 		newLine.addDeleteLineListener(e -> {
-			CaseLineLayout selectedLine = (CaseLineLayout) e.getComponent();
-			lineComponent.removeComponent(selectedLine);
+			CaseLineLayout selectedLine = (CaseLineLayout) e.getSource();
+			lineComponent.remove(selectedLine);
 			caseLines.remove(selectedLine);
 			caseLines.get(0).formatAsFirstLine();
 			if (caseLines.size() > 1) {
@@ -406,20 +404,20 @@ public class LineListingLayout extends VerticalLayout {
 
 		private final Binder<CaseLineDto> binder = new Binder<>(CaseLineDto.class);
 
-		private final DateField dateOfReport;
+		private final DatePicker dateOfReport;
 		private final TextField epidNumber;
 		private final ComboBox<CommunityReferenceDto> community;
 		private ComboBox<FacilityReferenceDto> facility;
 		private TextField facilityDetails;
 		private final PersonField person;
-		private final DateField dateOfOnset;
+		private final DatePicker dateOfOnset;
 
 		private final Button delete;
 
 		public CaseLineLayout(int lineIndex) {
 
-			addStyleName(CssStyles.SPACING_SMALL);
-			setMargin(false);
+			addClassName(CssStyles.SPACING_SMALL);
+			setPadding(false);
 
 			binder.forField(disease).asRequired().bind(CaseLineDto.DISEASE);
 			binder.forField(diseaseDetails)
@@ -430,18 +428,18 @@ public class LineListingLayout extends VerticalLayout {
 			binder.forField(typeGroup).asRequired().bind(CaseLineDto.FACILITY_TYPE_GROUP);
 			binder.forField(type).asRequired().bind(CaseLineDto.FACILITY_TYPE);
 
-			dateOfReport = new DateField();
+			dateOfReport = new DatePicker();
 			dateOfReport.setId("lineListingDateOfReport_" + lineIndex);
-			dateOfReport.setWidth(100, Unit.PIXELS);
+			dateOfReport.setWidth("100px");
 			binder.forField(dateOfReport).asRequired().bind(CaseLineDto.DATE_OF_REPORT);
-			dateOfReport.setRangeEnd(LocalDate.now());
+			dateOfReport.setMax(LocalDate.now());
 			dateOfReport.addValueChangeListener(e -> setEpidNumberPrefix(this, dateOfReport.getValue()));
 			epidNumber = new TextField();
 			epidNumber.setId("lineListingEpidNumber_" + lineIndex);
-			epidNumber.setWidth(160, Unit.PIXELS);
+			epidNumber.setWidth("160px");
 			binder.forField(epidNumber).bind(CaseLineDto.EPID_NUMBER);
 			community = new ComboBox<>();
-			community.setItemCaptionGenerator(item -> item.buildCaption());
+			community.setItemLabelGenerator(item -> item.buildCaption());
 			community.setId("lineListingCommunity_" + lineIndex);
 			community.addValueChangeListener(e -> {
 				FieldHelper.removeItems(facility);
@@ -459,9 +457,9 @@ public class LineListingLayout extends VerticalLayout {
 			});
 			binder.forField(community).bind(CaseLineDto.COMMUNITY);
 			facility = new ComboBox<>();
-			facility.setItemCaptionGenerator(item -> item.buildCaption());
+			facility.setItemLabelGenerator(item -> item.buildCaption());
 			facility.setId("lineListingFacility_" + lineIndex);
-			facility.setWidth(364, Unit.PIXELS);
+			facility.setWidth("364px");
 			facility.addValueChangeListener(e -> updateFacilityFields(facility, facilityDetails));
 			binder.forField(facility).asRequired().bind(CaseLineDto.FACILITY);
 			facilityDetails = new TextField();
@@ -474,19 +472,19 @@ public class LineListingLayout extends VerticalLayout {
 			person.setId("lineListingPerson_" + lineIndex);
 			binder.forField(person).bind(CaseLineDto.PERSON);
 
-			dateOfOnset = new DateField();
+			dateOfOnset = new DatePicker();
 			dateOfOnset.setId("lineListingDateOfOnSet_" + lineIndex);
-			dateOfOnset.setWidth(100, Unit.PIXELS);
-			dateOfOnset.addStyleName(CssStyles.CAPTION_FIXED_WIDTH_100);
+			dateOfOnset.setWidth("100px");
+			dateOfOnset.addClassName(CssStyles.CAPTION_FIXED_WIDTH_100);
 			binder.forField(dateOfOnset).bind(CaseLineDto.DATE_OF_ONSET);
 			delete = ButtonHelper
-				.createIconButtonWithCaption("delete_" + lineIndex, null, VaadinIcons.TRASH, event -> fireEvent(new DeleteLineEvent(this)));
+				.createIconButtonWithCaption("delete_" + lineIndex, null, VaadinIcon.TRASH, event -> fireEvent(new DeleteLineEvent(this)));
 
-			addComponent(dateOfReport);
+			add(dateOfReport);
 			if (shouldShowEpidNumber()) {
-				addComponent(epidNumber);
+				add(epidNumber);
 			}
-			addComponents(community, facility, facilityDetails, person, dateOfOnset, delete);
+			add(community, facility, facilityDetails, person, dateOfOnset, delete);
 
 			if (lineIndex == 0) {
 				formatAsFirstLine();
@@ -518,18 +516,18 @@ public class LineListingLayout extends VerticalLayout {
 
 			formatAsOtherLine();
 
-			dateOfReport.setCaption(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.REPORT_DATE));
-			dateOfReport.removeStyleName(CssStyles.CAPTION_HIDDEN);
-			epidNumber.setCaption(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.EPID_NUMBER));
-			community.setCaption(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_COMMUNITY));
-			facility.setCaption(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.HEALTH_FACILITY));
-			facility.removeStyleName(CssStyles.CAPTION_HIDDEN);
+			dateOfReport.setLabel(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.REPORT_DATE));
+			dateOfReport.removeClassName(CssStyles.CAPTION_HIDDEN);
+			epidNumber.setLabel(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.EPID_NUMBER));
+			community.setLabel(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_COMMUNITY));
+			facility.setLabel(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.HEALTH_FACILITY));
+			facility.removeClassName(CssStyles.CAPTION_HIDDEN);
 			CssStyles.style(facilityDetails, CssStyles.FORCE_CAPTION);
 			person.showCaptions();
-			dateOfOnset.setCaption(I18nProperties.getPrefixCaption(SymptomsDto.I18N_PREFIX, SymptomsDto.ONSET_DATE));
-			dateOfOnset.setDescription(I18nProperties.getPrefixDescription(SymptomsDto.I18N_PREFIX, SymptomsDto.ONSET_DATE));
+			dateOfOnset.setLabel(I18nProperties.getPrefixCaption(SymptomsDto.I18N_PREFIX, SymptomsDto.ONSET_DATE));
+			dateOfOnset.setTooltipText(I18nProperties.getPrefixDescription(SymptomsDto.I18N_PREFIX, SymptomsDto.ONSET_DATE));
 			delete.setEnabled(false);
-			setComponentAlignment(delete, Alignment.MIDDLE_LEFT);
+			setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, delete);
 		}
 
 		private void formatAsOtherLine() {
@@ -557,16 +555,16 @@ public class LineListingLayout extends VerticalLayout {
 					tfFacilityDetails.setPlaceholder(I18nProperties.getCaption(Captions.CaseData_noneHealthFacilityDetails));
 				}
 				if (visibleEnabledAndRequired) {
-					cbFacility.setWidthUndefined();
+					cbFacility.setWidth(null);
 				} else {
 					tfFacilityDetails.clear();
-					cbFacility.setWidth(324, Unit.PIXELS);
+					cbFacility.setWidth("324px");
 				}
 			} else {
 				tfFacilityDetails.setVisible(false);
 				tfFacilityDetails.setEnabled(false);
 				tfFacilityDetails.clear();
-				cbFacility.setWidth(324, Unit.PIXELS);
+				cbFacility.setWidth("324px");
 			}
 		}
 

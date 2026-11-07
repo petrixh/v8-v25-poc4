@@ -17,7 +17,7 @@ package de.symeda.sormas.ui.adverseeventsfollowingimmunization.aefiinvestigation
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiInvestigationListEntryDto;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -37,32 +37,32 @@ public class AefiInvestigationListEntry extends SideComponentField {
 		this.listEntry = listEntry;
 
 		if (!StringUtils.isBlank(listEntry.getInvestigationCaseId())) {
-			Label labelCaseId = new Label(listEntry.getInvestigationCaseId());
+			Span labelCaseId = new Span(listEntry.getInvestigationCaseId());
 			CssStyles.style(labelCaseId, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
 			addComponentToField(labelCaseId);
 		}
 
-		Label labelInvestigationDate = new Label(
+		Span labelInvestigationDate = new Span(
 			I18nProperties.getPrefixCaption(AefiInvestigationListEntryDto.I18N_PREFIX, AefiInvestigationListEntryDto.INVESTIGATION_DATE)
 				+ SEPARATOR
 				+ DateFormatHelper.formatLocalDate(listEntry.getInvestigationDate()));
 		addComponentToField(labelInvestigationDate);
 
-		Label labelInvestigationStage = new Label(
+		Span labelInvestigationStage = new Span(
 			I18nProperties.getPrefixCaption(AefiInvestigationListEntryDto.I18N_PREFIX, AefiInvestigationListEntryDto.INVESTIGATION_STAGE)
 				+ SEPARATOR
 				+ listEntry.getInvestigationStage());
 		CssStyles.style(labelInvestigationStage, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
 		addComponentToField(labelInvestigationStage);
 
-		Label labelStatusOnInvestigation = new Label(
+		Span labelStatusOnInvestigation = new Span(
 			I18nProperties.getPrefixCaption(AefiInvestigationListEntryDto.I18N_PREFIX, AefiInvestigationListEntryDto.STATUS_ON_DATE_OF_INVESTIGATION)
 				+ SEPARATOR
 				+ listEntry.getStatusOnDateOfInvestigation());
 		CssStyles.style(labelStatusOnInvestigation, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
 		addComponentToField(labelStatusOnInvestigation);
 
-		Label labelAefiClassification = new Label(
+		Span labelAefiClassification = new Span(
 			I18nProperties.getPrefixCaption(AefiInvestigationListEntryDto.I18N_PREFIX, AefiInvestigationListEntryDto.AEFI_CLASSIFICATION)
 				+ SEPARATOR
 				+ ((listEntry.getAefiClassification() != null) ? listEntry.getAefiClassification() : ""));

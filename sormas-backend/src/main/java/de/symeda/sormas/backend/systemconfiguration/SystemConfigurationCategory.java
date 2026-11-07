@@ -15,8 +15,8 @@
 
 package de.symeda.sormas.backend.systemconfiguration;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 
 import de.symeda.sormas.backend.common.AbstractDomainObject;
 

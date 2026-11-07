@@ -17,7 +17,7 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.samples.components;
 
-import com.vaadin.ui.TextArea;
+import com.vaadin.flow.component.textfield.TextArea;
 
 import de.symeda.sormas.api.sample.PathogenTestDto;
 import de.symeda.sormas.ui.utils.FormComponent;
@@ -40,7 +40,7 @@ public class ResultTextComponent extends FormComponent<PathogenTestDto> {
 
 	private void buildLayout() {
 		resultText = createTextArea(PathogenTestDto.TEST_RESULT_TEXT, PathogenTestDto.I18N_PREFIX);
-		resultText.setRows(6);
+		resultText.setMinRows(6);
 		addFullWidthRow(resultText);
 	}
 

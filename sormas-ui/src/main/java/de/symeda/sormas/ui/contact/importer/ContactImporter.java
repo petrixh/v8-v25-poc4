@@ -28,9 +28,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.opencsv.exceptions.CsvValidationException;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.UI;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
@@ -69,6 +67,7 @@ import de.symeda.sormas.ui.importer.ImportLineResult;
 import de.symeda.sormas.ui.importer.ImportSimilarityResultOption;
 import de.symeda.sormas.ui.importer.ImporterPersonHelper;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 /**
@@ -95,7 +94,7 @@ public class ContactImporter extends DataImporter {
 	}
 
 	@Override
-	public void startImport(Consumer<StreamResource> addErrorReportToLayoutCallback, UI currentUI, boolean duplicatesPossible)
+	public void startImport(Consumer<StreamSourceDownloadHandler> addErrorReportToLayoutCallback, UI currentUI, boolean duplicatesPossible)
 		throws IOException, CsvValidationException {
 
 		this.currentUI = currentUI;
@@ -328,7 +327,7 @@ public class ContactImporter extends DataImporter {
 		currentUI.accessSynchronously(() -> {
 			ContactSelectionField contactSelection =
 				new ContactSelectionField(newContact, person, I18nProperties.getString(Strings.infoSelectOrCreateContactImport));
-			contactSelection.setWidth(1024, Unit.PIXELS);
+			contactSelection.setWidth("1024px");
 
 			if (contactSelection.hasMatches()) {
 				final CommitDiscardWrapperComponent<ContactSelectionField> component = new CommitDiscardWrapperComponent<>(contactSelection);

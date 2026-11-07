@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.api.epipulse;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface EpipulseDiseaseExportFacade {

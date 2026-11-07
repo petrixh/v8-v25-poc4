@@ -2,8 +2,7 @@ package de.symeda.sormas.ui.environment;
 
 import java.util.List;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.environment.EnvironmentCriteria;
@@ -22,7 +21,7 @@ import de.symeda.sormas.ui.utils.VaadinUiUtil;
 public class EnvironmentList extends PaginationList<EnvironmentIndexDto> {
 
 	private final EnvironmentCriteria criteria;
-	private final Label noEnvironmentLabel;
+	private final Span noEnvironmentLabel;
 	private final boolean isEditAllowed;
 	private final EventReferenceDto event;
 
@@ -33,7 +32,7 @@ public class EnvironmentList extends PaginationList<EnvironmentIndexDto> {
 		criteria = new EnvironmentCriteria();
 		criteria.event(event);
 		noEnvironmentLabel =
-			new Label(String.format(I18nProperties.getCaption(Captions.environmentNoEnvs), DataHelper.getShortUuid(event.getUuid())));
+			new Span(String.format(I18nProperties.getCaption(Captions.environmentNoEnvs), DataHelper.getShortUuid(event.getUuid())));
 	}
 
 	@Override
@@ -43,9 +42,9 @@ public class EnvironmentList extends PaginationList<EnvironmentIndexDto> {
 		if (!envs.isEmpty()) {
 			showPage(1);
 		} else {
-			listLayout.removeAllComponents();
+			listLayout.removeAll();
 			updatePaginationLayout();
-			listLayout.addComponent(noEnvironmentLabel);
+			listLayout.add(noEnvironmentLabel);
 		}
 	}
 
@@ -57,10 +56,10 @@ public class EnvironmentList extends PaginationList<EnvironmentIndexDto> {
 			EnvironmentListEntry listEntry = new EnvironmentListEntry(environmentIndex);
 
 			if (UiUtil.permitted(UserRight.ENVIRONMENT_CREATE)) {
-				listEntry.addUnlinkEnvironmentListener(i, (Button.ClickListener) clickEvent -> {
+				listEntry.addUnlinkEnvironmentListener(i, clickEvent -> {
 					VaadinUiUtil.showConfirmationPopup(
 						I18nProperties.getString(Strings.headingUnlinkEnvironmentFromEvent),
-						new Label(I18nProperties.getString(Strings.confirmationUnlinkEnvironmentFromEvent)),
+						new Span(I18nProperties.getString(Strings.confirmationUnlinkEnvironmentFromEvent)),
 						I18nProperties.getString(Strings.yes),
 						I18nProperties.getString(Strings.no),
 						480,
@@ -76,11 +75,11 @@ public class EnvironmentList extends PaginationList<EnvironmentIndexDto> {
 			if (UiUtil.permitted(UserRight.ENVIRONMENT_EDIT)) {
 				listEntry.addActionButton(
 					String.valueOf(i),
-					(Button.ClickListener) event -> ControllerProvider.getEnvironmentController().navigateToData(environmentIndex.getUuid(), false),
+					event -> ControllerProvider.getEnvironmentController().navigateToData(environmentIndex.getUuid(), false),
 					hasEditOrDeleteRights());
 			}
 			listEntry.setEnabled(isEditAllowed);
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 

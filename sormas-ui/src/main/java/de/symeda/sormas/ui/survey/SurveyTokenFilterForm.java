@@ -1,7 +1,7 @@
 package de.symeda.sormas.ui.survey;
 
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;

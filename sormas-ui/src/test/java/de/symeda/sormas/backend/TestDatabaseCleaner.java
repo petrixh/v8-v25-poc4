@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.Persistence;
+import jakarta.persistence.Persistence;
 
 import org.hibernate.cfg.AvailableSettings;
 import org.slf4j.Logger;

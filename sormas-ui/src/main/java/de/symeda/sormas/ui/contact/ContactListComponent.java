@@ -19,14 +19,13 @@ package de.symeda.sormas.ui.contact;
 
 import java.util.function.Consumer;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.event.EventParticipantReferenceDto;
@@ -48,23 +47,24 @@ public class ContactListComponent extends VerticalLayout {
 	public ContactListComponent(EventParticipantReferenceDto eventParticipantRef, Consumer<Runnable> actionCallback, boolean isEditAllowed) {
 
 		HorizontalLayout componentHeader = new HorizontalLayout();
-		componentHeader.setMargin(false);
+		componentHeader.setPadding(false);
 		componentHeader.setSpacing(false);
-		componentHeader.setWidth(100, Unit.PERCENTAGE);
-		addComponent(componentHeader);
+		componentHeader.setWidthFull();
+		add(componentHeader);
 
-		Label contactsHeader = new Label(I18nProperties.getString(Strings.entityContacts));
-		contactsHeader.addStyleName(CssStyles.H3);
-		componentHeader.addComponent(contactsHeader);
+		Span contactsHeader = new Span(I18nProperties.getString(Strings.entityContacts));
+		contactsHeader.addClassName(CssStyles.H3);
+		componentHeader.add(contactsHeader);
+		componentHeader.setFlexGrow(1, contactsHeader);
 
 		ContactList contactList = new ContactList(eventParticipantRef);
-		setWidth(100, Unit.PERCENTAGE);
-		setMargin(false);
+		setWidthFull();
+		setPadding(false);
 		setSpacing(false);
 
 		EventReferenceDto eventRef = FacadeProvider.getEventFacade().getReferenceByEventParticipant(eventParticipantRef.getUuid());
-		CheckBox contactOnlyWithSourceCaseInGivenEvent = new CheckBox(I18nProperties.getCaption(Captions.contactOnlyWithSourceCaseInGivenEvent));
-		contactOnlyWithSourceCaseInGivenEvent.addStyleNames(CssStyles.CHECKBOX_FILTER_INLINE, CssStyles.VSPACE_4);
+		Checkbox contactOnlyWithSourceCaseInGivenEvent = new Checkbox(I18nProperties.getCaption(Captions.contactOnlyWithSourceCaseInGivenEvent));
+		contactOnlyWithSourceCaseInGivenEvent.addClassNames(CssStyles.CHECKBOX_FILTER_INLINE, CssStyles.VSPACE_4);
 		contactOnlyWithSourceCaseInGivenEvent.addValueChangeListener(e -> {
 			if (e.getValue()) {
 				contactList.filterContactListBySourceCaseInGivenEvent(eventRef);
@@ -73,19 +73,19 @@ public class ContactListComponent extends VerticalLayout {
 			}
 			contactList.reload();
 		});
-		addComponent(contactOnlyWithSourceCaseInGivenEvent);
+		add(contactOnlyWithSourceCaseInGivenEvent);
 
 		list = contactList;
-		addComponent(list);
+		add(list);
 		list.reload();
 
 		if (UiUtil.permitted(isEditAllowed, UserRight.CONTACT_CREATE)) {
 			Button createButton = ButtonHelper.createButton(I18nProperties.getCaption(Captions.contactNewContact));
-			createButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
-			createButton.setIcon(VaadinIcons.PLUS_CIRCLE);
+			CssStyles.style(createButton, CssStyles.BUTTON_PRIMARY);
+			ButtonHelper.setIcon(createButton, VaadinIcon.PLUS_CIRCLE);
 			createButton.addClickListener(e -> actionCallback.accept(() -> ControllerProvider.getContactController().create(eventParticipantRef)));
-			componentHeader.addComponent(createButton);
-			componentHeader.setComponentAlignment(createButton, Alignment.MIDDLE_RIGHT);
+			componentHeader.add(createButton);
+			componentHeader.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, createButton);
 		}
 	}
 

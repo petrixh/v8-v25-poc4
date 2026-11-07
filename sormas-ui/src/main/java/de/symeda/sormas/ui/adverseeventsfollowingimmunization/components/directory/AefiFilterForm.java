@@ -25,12 +25,8 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiCriteria;
@@ -52,9 +48,13 @@ import de.symeda.sormas.api.utils.EpiWeek;
 import de.symeda.sormas.ui.UserProvider;
 import de.symeda.sormas.ui.utils.AbstractFilterForm;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.EpiWeekAndDateFilterComponent;
 import de.symeda.sormas.ui.utils.FieldConfiguration;
 import de.symeda.sormas.ui.utils.FieldHelper;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class AefiFilterForm extends AbstractFilterForm<AefiCriteria> {
 
@@ -129,7 +129,7 @@ public class AefiFilterForm extends AbstractFilterForm<AefiCriteria> {
 	}
 
 	@Override
-	protected void applyDependenciesOnFieldChange(String propertyId, Property.ValueChangeEvent event) {
+	protected void applyDependenciesOnFieldChange(String propertyId, HasValue.ValueChangeEvent<?> event) {
 
 		super.applyDependenciesOnFieldChange(propertyId, event);
 
@@ -145,7 +145,7 @@ public class AefiFilterForm extends AbstractFilterForm<AefiCriteria> {
 
 		switch (propertyId) {
 		case AefiCriteria.REGION: {
-			final RegionReferenceDto region = user.getRegion() != null ? user.getRegion() : (RegionReferenceDto) event.getProperty().getValue();
+			final RegionReferenceDto region = user.getRegion() != null ? user.getRegion() : (RegionReferenceDto) event.getValue();
 
 			if (!DataHelper.equal(region, criteria.getRegion())) {
 				if (region != null) {
@@ -160,7 +160,7 @@ public class AefiFilterForm extends AbstractFilterForm<AefiCriteria> {
 			break;
 		}
 		case AefiCriteria.DISTRICT: {
-			final DistrictReferenceDto newDistrict = (DistrictReferenceDto) event.getProperty().getValue();
+			final DistrictReferenceDto newDistrict = (DistrictReferenceDto) event.getValue();
 
 			if (!DataHelper.equal(newDistrict, criteria.getDistrict())) {
 				if (newDistrict != null) {
@@ -188,7 +188,7 @@ public class AefiFilterForm extends AbstractFilterForm<AefiCriteria> {
 			break;
 		}
 		case AefiCriteria.COMMUNITY: {
-			CommunityReferenceDto community = (CommunityReferenceDto) event.getProperty().getValue();
+			CommunityReferenceDto community = (CommunityReferenceDto) event.getValue();
 			if (!DataHelper.equal(community, criteria.getCommunity())) {
 				if (facilityField != null) {
 					facilityField.setValue(null);
@@ -213,7 +213,7 @@ public class AefiFilterForm extends AbstractFilterForm<AefiCriteria> {
 			break;
 		}
 		case AefiCriteria.FACILITY_TYPE_GROUP: {
-			FacilityTypeGroup typeGroup = (FacilityTypeGroup) event.getProperty().getValue();
+			FacilityTypeGroup typeGroup = (FacilityTypeGroup) event.getValue();
 			if (!DataHelper.equal(typeGroup, criteria.getFacilityTypeGroup())) {
 				if (typeGroup != null) {
 					enableFields(AefiCriteria.FACILITY_TYPE);
@@ -227,7 +227,7 @@ public class AefiFilterForm extends AbstractFilterForm<AefiCriteria> {
 			break;
 		}
 		case AefiCriteria.FACILITY_TYPE: {
-			FacilityType facilityType = (FacilityType) event.getProperty().getValue();
+			FacilityType facilityType = (FacilityType) event.getValue();
 			if (!DataHelper.equal(facilityType, criteria.getFacilityType())) {
 				if (facilityType == null) {
 					clearAndDisableFields(facilityField);
@@ -335,7 +335,7 @@ public class AefiFilterForm extends AbstractFilterForm<AefiCriteria> {
 		HorizontalLayout dateFilterLayout = (HorizontalLayout) getMoreFiltersContainer().getComponent(WEEK_AND_DATE_FILTER);
 		@SuppressWarnings("unchecked")
 		EpiWeekAndDateFilterComponent<AefiDateType> weekAndDateFilter =
-			(EpiWeekAndDateFilterComponent<AefiDateType>) dateFilterLayout.getComponent(0);
+			(EpiWeekAndDateFilterComponent<AefiDateType>) dateFilterLayout.getComponentAt(0);
 
 		AefiDateType aefiDateType = criteria.getAefiDateType();
 		weekAndDateFilter.getDateTypeSelector().setValue(aefiDateType);
@@ -356,7 +356,7 @@ public class AefiFilterForm extends AbstractFilterForm<AefiCriteria> {
 	protected Stream<Field> streamFieldsForEmptyCheck(CustomLayout layout) {
 		HorizontalLayout dateFilterLayout = (HorizontalLayout) getMoreFiltersContainer().getComponent(WEEK_AND_DATE_FILTER);
 		EpiWeekAndDateFilterComponent<AefiDateType> weekAndDateFilter =
-			(EpiWeekAndDateFilterComponent<AefiDateType>) dateFilterLayout.getComponent(0);
+			(EpiWeekAndDateFilterComponent<AefiDateType>) dateFilterLayout.getComponentAt(0);
 
 		return super.streamFieldsForEmptyCheck(layout).filter(f -> f != weekAndDateFilter.getDateFilterOptionFilter());
 	}
@@ -382,7 +382,7 @@ public class AefiFilterForm extends AbstractFilterForm<AefiCriteria> {
 		dateFilterRowLayout.setSpacing(true);
 		dateFilterRowLayout.setSizeUndefined();
 
-		dateFilterRowLayout.addComponent(weekAndDateFilter);
+		dateFilterRowLayout.add(weekAndDateFilter);
 
 		return dateFilterRowLayout;
 	}

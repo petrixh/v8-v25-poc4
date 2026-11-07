@@ -25,10 +25,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -50,13 +49,15 @@ import de.symeda.sormas.ui.dashboard.statistics.DashboardStatisticsDiseaseElemen
 import de.symeda.sormas.ui.dashboard.statistics.DashboardStatisticsGraphicalGrowthElement;
 import de.symeda.sormas.ui.dashboard.statistics.DashboardStatisticsPercentageElement;
 import de.symeda.sormas.ui.dashboard.statistics.DashboardStatisticsSubComponent;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 @SuppressWarnings("serial")
 public class ContactsDashboardStatisticsComponent extends AbstractDashboardStatisticsComponent {
 
 	// "All Contacts" elements
-	private CssLayout allContactsCountLayout;
+	private FlexLayout allContactsCountLayout;
 	private DashboardStatisticsCountElement contactClassificationUnconfirmed;
 	private DashboardStatisticsCountElement contactClassificationConfirmed;
 	private DashboardStatisticsCountElement contactClassificationNotAContact;
@@ -229,7 +230,7 @@ public class ContactsDashboardStatisticsComponent extends AbstractDashboardStati
 		// Content
 		secondComponent.addMainContent();
 
-		CssLayout visitStatusCountLayout = secondComponent.createCountLayout(true);
+		FlexLayout visitStatusCountLayout = secondComponent.createCountLayout(true);
 		cooperativeContacts =
 			new DashboardStatisticsCountElement(I18nProperties.getCaption(Captions.dashboardCooperative), CountElementStyle.POSITIVE);
 		secondComponent.addComponentToCountLayout(visitStatusCountLayout, cooperativeContacts);
@@ -243,16 +244,16 @@ public class ContactsDashboardStatisticsComponent extends AbstractDashboardStati
 			new DashboardStatisticsCountElement(I18nProperties.getCaption(Captions.dashboardNeverVisited), CountElementStyle.MINOR);
 		secondComponent.addComponentToCountLayout(visitStatusCountLayout, neverVisitedContacts);
 
-		Label infoLabel = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
+		Span infoLabel = new Span(VaadinIcon.INFO_CIRCLE.create());
 		infoLabel.setSizeUndefined();
-		infoLabel.setDescription(I18nProperties.getDescription(Descriptions.descDashboardFollowUpInfo));
+		infoLabel.setTitle(I18nProperties.getDescription(Descriptions.descDashboardFollowUpInfo));
 		CssStyles.style(infoLabel, CssStyles.LABEL_LARGE, CssStyles.LABEL_SECONDARY, "follow-up-status-info-button");
 		secondComponent.addComponentToCountLayout(visitStatusCountLayout, infoLabel);
 
 		secondComponent.addComponentToContent(visitStatusCountLayout);
 
 		// Number of missed visits
-		Label missedVisitsLabel = new Label(I18nProperties.getCaption(Captions.dashboardNotVisitedFor));
+		Span missedVisitsLabel = new Span(I18nProperties.getCaption(Captions.dashboardNotVisitedFor));
 		CssStyles.style(
 			missedVisitsLabel,
 			CssStyles.LABEL_BOLD,
@@ -262,7 +263,7 @@ public class ContactsDashboardStatisticsComponent extends AbstractDashboardStati
 			CssStyles.LABEL_ROUNDED_CORNERS_SLIM);
 		secondComponent.addComponentToContent(missedVisitsLabel);
 
-		CssLayout missedVisitsCountLayout = secondComponent.createCountLayout(false);
+		FlexLayout missedVisitsCountLayout = secondComponent.createCountLayout(false);
 		missedVisitsOneDay = new DashboardStatisticsCountElement(I18nProperties.getCaption(Captions.dashboardOneDay), CountElementStyle.PRIMARY);
 		secondComponent.addComponentToCountLayout(missedVisitsCountLayout, missedVisitsOneDay);
 		missedVisitsTwoDays = new DashboardStatisticsCountElement(I18nProperties.getCaption(Captions.dashboardTwoDays), CountElementStyle.PRIMARY);
@@ -346,16 +347,16 @@ public class ContactsDashboardStatisticsComponent extends AbstractDashboardStati
 
 		followUpCompleted =
 			new DashboardStatisticsPercentageElement(I18nProperties.getCaption(Captions.dashboardCompletedFollowUp), CssStyles.SVG_FILL_POSITIVE);
-		followUpCompleted.setDescription(FollowUpStatus.COMPLETED.getDescription());
+		followUpCompleted.getElement().setAttribute("title", FollowUpStatus.COMPLETED.getDescription());
 		followUpCanceled =
 			new DashboardStatisticsPercentageElement(I18nProperties.getCaption(Captions.dashboardCanceledFollowUp), CssStyles.SVG_FILL_IMPORTANT);
-		followUpCanceled.setDescription(FollowUpStatus.CANCELED.getDescription());
+		followUpCanceled.getElement().setAttribute("title", FollowUpStatus.CANCELED.getDescription());
 		lostToFollowUp =
 			new DashboardStatisticsPercentageElement(I18nProperties.getCaption(Captions.dashboardLostToFollowUp), CssStyles.SVG_FILL_CRITICAL);
-		lostToFollowUp.setDescription(FollowUpStatus.LOST.getDescription());
+		lostToFollowUp.getElement().setAttribute("title", FollowUpStatus.LOST.getDescription());
 		contactStatusConverted =
 			new DashboardStatisticsPercentageElement(I18nProperties.getCaption(Captions.dashboardConvertedToCase), CssStyles.SVG_FILL_NEUTRAL);
-		contactStatusConverted.setDescription(I18nProperties.getDescription(Descriptions.descDashboardConvertedToCase));
+		contactStatusConverted.getElement().setAttribute("title", I18nProperties.getDescription(Descriptions.descDashboardConvertedToCase));
 		thirdComponent.addComponentToContent(followUpCompleted);
 		thirdComponent.addComponentToContent(followUpCanceled);
 		thirdComponent.addComponentToContent(lostToFollowUp);
@@ -405,7 +406,7 @@ public class ContactsDashboardStatisticsComponent extends AbstractDashboardStati
 		cooperativeVisits =
 			new DashboardStatisticsGraphicalGrowthElement(I18nProperties.getCaption(Captions.dashboardCooperative), CssStyles.SVG_FILL_POSITIVE);
 		fourthComponent.addComponentToContent(cooperativeVisits);
-		Label separator = new Label("<hr/>", ContentMode.HTML);
+		Span separator = VaadinUiUtil.createLabel("<hr/>", ContentMode.HTML);
 		CssStyles.style(separator, CssStyles.VSPACE_TOP_3, CssStyles.VSPACE_3);
 		fourthComponent.addComponentToContent(separator);
 		missedVisits =

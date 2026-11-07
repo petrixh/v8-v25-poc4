@@ -2,29 +2,32 @@ package de.symeda.sormas.ui.contact;
 
 import java.util.List;
 
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.data.util.GeneratedPropertyContainer;
-import com.vaadin.v7.shared.ui.grid.HeightMode;
-import com.vaadin.v7.ui.Grid;
 
 import de.symeda.sormas.api.FacadeProvider;
+import de.symeda.sormas.api.caze.CaseReferenceDto;
 import de.symeda.sormas.api.contact.ContactDto;
 import de.symeda.sormas.api.contact.ContactIndexDto;
 import de.symeda.sormas.api.contact.ContactSimilarityCriteria;
 import de.symeda.sormas.api.contact.SimilarContactDto;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.ui.utils.V7UuidRenderer;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
+import de.symeda.sormas.ui.utils.grid.renderers.ConvertingHtmlRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
-public class ContactSelectionGrid extends Grid {
+public class ContactSelectionGrid extends Grid<SimilarContactDto> {
 
 	private static final long serialVersionUID = 1766319542062167849L;
 
 	public ContactSelectionGrid(ContactSimilarityCriteria criteria) {
+		super(SimilarContactDto.class);
 		buildGrid();
 		loadData(criteria);
 	}
 
 	public ContactSelectionGrid(List<SimilarContactDto> contacts) {
+		super(SimilarContactDto.class);
 		buildGrid();
 		setContainerData(contacts);
 	}
@@ -33,10 +36,6 @@ public class ContactSelectionGrid extends Grid {
 		setSizeFull();
 		setSelectionMode(SelectionMode.SINGLE);
 		setHeightMode(HeightMode.ROW);
-
-		BeanItemContainer<SimilarContactDto> container = new BeanItemContainer<>(SimilarContactDto.class);
-		GeneratedPropertyContainer generatedContainer = new GeneratedPropertyContainer(container);
-		setContainerDataSource(generatedContainer);
 
 		setColumns();
 	}
@@ -54,7 +53,7 @@ public class ContactSelectionGrid extends Grid {
 			SimilarContactDto.CONTACT_STATUS,
 			SimilarContactDto.FOLLOW_UP_STATUS);
 
-		for (Column column : getColumns()) {
+		for (Column<SimilarContactDto, ?> column : getAllColumns()) {
 			column.setHeaderCaption(
 				I18nProperties.findPrefixCaption(
 					column.getPropertyId().toString(),
@@ -64,8 +63,21 @@ public class ContactSelectionGrid extends Grid {
 		}
 
 		getColumn(SimilarContactDto.UUID).setRenderer(new V7UuidRenderer());
+		setV7ColumnRenderers();
 		getColumn(SimilarContactDto.FIRST_NAME).setMinimumWidth(150);
 		getColumn(SimilarContactDto.LAST_NAME).setMinimumWidth(150);
+	}
+
+	/**
+	 * The Vaadin 7 grid showed these property values through the session's default converters: the case as its caption,
+	 * the date in the medium date-time format of the UI locale (V7 {@code StringToDateConverter}).
+	 */
+	@SuppressWarnings("unchecked")
+	protected void setV7ColumnRenderers() {
+		((Column<SimilarContactDto, CaseReferenceDto>) getColumn(SimilarContactDto.CAZE))
+			.setRenderer(ConvertingHtmlRenderer::toPresentation, new TextRenderer());
+		((Column<SimilarContactDto, Object>) getColumn(SimilarContactDto.LAST_CONTACT_DATE))
+			.setRenderer(ConvertingHtmlRenderer::toPresentation, new TextRenderer());
 	}
 
 	private void loadData(ContactSimilarityCriteria criteria) {
@@ -74,14 +86,7 @@ public class ContactSelectionGrid extends Grid {
 	}
 
 	private void setContainerData(List<SimilarContactDto> similarContacts) {
-		getContainer().removeAllItems();
-		getContainer().addAll(similarContacts);
+		setItems(similarContacts);
 		setHeightByRows(similarContacts.size() > 0 ? (similarContacts.size() <= 10 ? similarContacts.size() : 10) : 1);
-	}
-
-	@SuppressWarnings("unchecked")
-	private BeanItemContainer<SimilarContactDto> getContainer() {
-		GeneratedPropertyContainer container = (GeneratedPropertyContainer) super.getContainerDataSource();
-		return (BeanItemContainer<SimilarContactDto>) container.getWrappedContainer();
 	}
 }

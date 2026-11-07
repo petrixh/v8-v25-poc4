@@ -23,7 +23,7 @@ package de.symeda.sormas.api.externalemail;
 import java.io.Serializable;
 import java.util.Set;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.audit.AuditedClass;
 import de.symeda.sormas.api.docgeneneration.DocumentTemplateReferenceDto;

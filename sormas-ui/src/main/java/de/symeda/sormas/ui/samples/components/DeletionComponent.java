@@ -17,8 +17,8 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.samples.components;
 
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.TextArea;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.textfield.TextArea;
 
 import de.symeda.sormas.api.common.DeletionReason;
 import de.symeda.sormas.api.sample.PathogenTestDto;
@@ -44,11 +44,11 @@ public class DeletionComponent extends FormComponent<PathogenTestDto> {
 	private void buildLayout() {
 		deletionReasonField = createComboBox(PathogenTestDto.DELETION_REASON, PathogenTestDto.I18N_PREFIX);
 		deletionReasonField.setItems(DeletionReason.values());
-		deletionReasonField.setItemCaptionGenerator(DeletionReason::toString);
+		deletionReasonField.setItemLabelGenerator(DeletionReason::toString);
 		addFullWidthRow(deletionReasonField);
 
 		otherReasonField = createTextArea(PathogenTestDto.OTHER_DELETION_REASON, PathogenTestDto.I18N_PREFIX);
-		otherReasonField.setRows(3);
+		otherReasonField.setMinRows(3);
 		addFullWidthRow(otherReasonField);
 
 		// Hidden by default

@@ -20,12 +20,12 @@
 		<!-- *** Payara modules *** -->
 
 		<dependency>
-			<groupId>javax</groupId>
-			<artifactId>javaee-web-api</artifactId>
+			<groupId>jakarta.platform</groupId>
+			<artifactId>jakarta.jakartaee-web-api</artifactId>
 		</dependency>
 	  	<dependency>
-			<groupId>javax.security.enterprise</groupId>
-			<artifactId>javax.security.enterprise-api</artifactId>
+			<groupId>jakarta.security.enterprise</groupId>
+			<artifactId>jakarta.security.enterprise-api</artifactId>
 		</dependency>
 
 		<dependency>
@@ -44,7 +44,7 @@
 
 		<dependency>
 			<groupId>org.glassfish.soteria</groupId>
-			<artifactId>javax.security.enterprise</artifactId>
+			<artifactId>soteria</artifactId>
 		</dependency>
 
 		<dependency>
@@ -71,11 +71,11 @@
 
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
-			<artifactId>swagger-jaxrs2</artifactId>
+			<artifactId>swagger-jaxrs2-jakarta</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
-			<artifactId>swagger-jaxrs2-servlet-initializer-v2</artifactId>
+			<artifactId>swagger-jaxrs2-servlet-initializer-v2-jakarta</artifactId>
 		</dependency>
 
 		<dependency>
@@ -89,7 +89,7 @@
 
 		<dependency>
 			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-servlet-filter-adapter</artifactId>
+			<artifactId>keycloak-jakarta-servlet-filter-adapter</artifactId>
 		</dependency>
 
 		<dependency>
@@ -153,7 +153,7 @@
 			<!-- Generate OpenAPI specification -->
 			<plugin>
 				<groupId>io.swagger.core.v3</groupId>
-				<artifactId>swagger-maven-plugin</artifactId>
+				<artifactId>swagger-maven-plugin-jakarta</artifactId>
 				<configuration>
 					<outputPath>${basedir}/target/</outputPath>
 					<outputFormat>JSONANDYAML</outputFormat>

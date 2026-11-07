@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.ui.utils;
 
-import com.vaadin.ui.Grid;
+import de.symeda.sormas.ui.utils.grid.Grid;
 
 public class GridHeightResizer implements DataSizeChangeListener {
 

@@ -20,8 +20,7 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 import com.opencsv.exceptions.CsvValidationException;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.UI;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Strings;
@@ -36,6 +35,7 @@ import de.symeda.sormas.ui.importer.DataImporter;
 import de.symeda.sormas.ui.importer.ImportLineResult;
 import de.symeda.sormas.ui.importer.ImportSimilarityResultOption;
 import de.symeda.sormas.ui.importer.PersonImportSimilarityResult;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
 
 public class TravelEntryImporter extends DataImporter {
 
@@ -50,7 +50,7 @@ public class TravelEntryImporter extends DataImporter {
 	}
 
 	@Override
-	public void startImport(Consumer<StreamResource> errorReportConsumer, UI currentUI, boolean duplicatesPossible)
+	public void startImport(Consumer<StreamSourceDownloadHandler> errorReportConsumer, UI currentUI, boolean duplicatesPossible)
 		throws IOException, CsvValidationException {
 
 		this.currentUI = currentUI;

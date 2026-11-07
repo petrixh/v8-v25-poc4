@@ -8,14 +8,13 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import com.vaadin.data.Binder;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.binder.Binder;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -54,10 +53,10 @@ public class LineListingLayout extends VerticalLayout {
 	private final List<ContactLineLayout> lines;
 	private final LineListingSection lineComponent;
 
-	private final Window window;
+	private final Dialog window;
 	private Consumer<LinkedList<LineDto<ContactDto>>> saveCallback;
 
-	private LineListingLayout(Window window, SharedInfoField sharedInfoField) {
+	private LineListingLayout(Dialog window, SharedInfoField sharedInfoField) {
 
 		this.window = window;
 
@@ -68,18 +67,18 @@ public class LineListingLayout extends VerticalLayout {
 		this.sharedInfoField = sharedInfoField;
 		this.sharedInfoField.setId("lineListingSharedInfoField");
 		this.sharedInfoField.addDiseaseChangeHandler(this::updateTypeOfContactValues);
-		sharedInformationComponent.addComponent(this.sharedInfoField);
+		sharedInformationComponent.add(this.sharedInfoField);
 
-		addComponent(sharedInformationComponent);
+		add(sharedInformationComponent);
 
 		lineComponent = new LineListingSection(Captions.lineListingNewContactsList);
 
 		lines = new ArrayList<>();
 
-		addComponent(lineComponent);
+		add(lineComponent);
 	}
 
-	public LineListingLayout(Window window, CaseDataDto caseDataDto) {
+	public LineListingLayout(Dialog window, CaseDataDto caseDataDto) {
 		this(window, new SharedInfoField(caseDataDto));
 
 		Disease disease = caseDataDto == null ? FacadeProvider.getDiseaseConfigurationFacade().getDefaultDisease() : caseDataDto.getDisease();
@@ -87,26 +86,26 @@ public class LineListingLayout extends VerticalLayout {
 		ContactLineLayout line = buildNewLine(lineComponent);
 		line.updateTypeOfContactValues(disease);
 		lines.add(line);
-		lineComponent.addComponent(line);
+		lineComponent.add(line);
 
 		HorizontalLayout actionBar = new HorizontalLayout();
-		Button addLine = ButtonHelper.createIconButton(Captions.lineListingAddLine, VaadinIcons.PLUS, e -> {
+		Button addLine = ButtonHelper.createIconButton(Captions.lineListingAddLine, VaadinIcon.PLUS, e -> {
 			ContactLineLayout newLine = buildNewLine(lineComponent);
 			newLine.updateTypeOfContactValues(sharedInfoField.getValue().getDisease());
 			lines.add(newLine);
-			lineComponent.addComponent(newLine);
+			lineComponent.add(newLine);
 			lines.get(0).enableDelete(true);
-		}, ValoTheme.BUTTON_PRIMARY);
+		}, CssStyles.BUTTON_PRIMARY);
 
-		actionBar.addComponent(addLine);
-		actionBar.setComponentAlignment(addLine, Alignment.MIDDLE_LEFT);
+		actionBar.add(addLine);
+		actionBar.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, addLine);
 
-		addComponent(actionBar);
+		add(actionBar);
 
 		addButtons();
 	}
 
-	public LineListingLayout(Window window, EventDto eventDto, Iterable<EventParticipantDto> eventParticipantDtos) {
+	public LineListingLayout(Dialog window, EventDto eventDto, Iterable<EventParticipantDto> eventParticipantDtos) {
 		this(window, new SharedInfoField(eventDto));
 
 		for (EventParticipantDto eventParticipantDto : eventParticipantDtos) {
@@ -134,7 +133,7 @@ public class LineListingLayout extends VerticalLayout {
 			}
 
 			lines.add(newLine);
-			lineComponent.addComponent(newLine);
+			lineComponent.add(newLine);
 		}
 
 		Disease disease = eventDto == null ? FacadeProvider.getDiseaseConfigurationFacade().getDefaultDisease() : eventDto.getDisease();
@@ -144,25 +143,24 @@ public class LineListingLayout extends VerticalLayout {
 
 	private void addButtons() {
 		HorizontalLayout buttonsPanel = new HorizontalLayout();
-		buttonsPanel.setMargin(false);
+		buttonsPanel.setPadding(false);
 		buttonsPanel.setSpacing(true);
-		buttonsPanel.setWidth(100, Unit.PERCENTAGE);
+		buttonsPanel.setWidthFull();
 
 		Button cancelButton = ButtonHelper.createButton(Captions.actionDiscard, event -> closeWindow());
 
-		buttonsPanel.addComponent(cancelButton);
-		buttonsPanel.setComponentAlignment(cancelButton, Alignment.BOTTOM_RIGHT);
-		buttonsPanel.setExpandRatio(cancelButton, 1);
+		// was right-aligned in an expanded slot: both buttons sit on the right
+		buttonsPanel.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+		buttonsPanel.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.END);
+		buttonsPanel.add(cancelButton);
 
 		Button saveButton =
-			ButtonHelper.createButton(Captions.actionSave, event -> saveCallback.accept(getContactLineDtos()), ValoTheme.BUTTON_PRIMARY);
+			ButtonHelper.createButton(Captions.actionSave, event -> saveCallback.accept(getContactLineDtos()), CssStyles.BUTTON_PRIMARY);
 
-		buttonsPanel.addComponent(saveButton);
-		buttonsPanel.setComponentAlignment(saveButton, Alignment.BOTTOM_RIGHT);
-		buttonsPanel.setExpandRatio(saveButton, 0);
+		buttonsPanel.add(saveButton);
 
-		addComponent(buttonsPanel);
-		setComponentAlignment(buttonsPanel, Alignment.BOTTOM_RIGHT);
+		add(buttonsPanel);
+		setHorizontalComponentAlignment(FlexComponent.Alignment.END, buttonsPanel);
 	}
 
 	public void closeWindow() {
@@ -247,8 +245,8 @@ public class LineListingLayout extends VerticalLayout {
 
 		newLine.setBean(newLineDto);
 		newLine.addDeleteLineListener(e -> {
-			ContactLineLayout selectedLine = (ContactLineLayout) e.getComponent();
-			lineComponent.removeComponent(selectedLine);
+			ContactLineLayout selectedLine = (ContactLineLayout) e.getSource();
+			lineComponent.remove(selectedLine);
 			lines.remove(selectedLine);
 			lines.get(0).enableDelete(lines.size() > 1);
 		});
@@ -268,21 +266,22 @@ public class LineListingLayout extends VerticalLayout {
 
 		public ContactLineLayout(int lineIndex) {
 
-			addStyleName(CssStyles.SPACING_SMALL);
-			setMargin(false);
+			addClassName(CssStyles.SPACING_SMALL);
+			setPadding(false);
 
 			contactLineField = new ContactLineField();
 			contactLineField.setId("lineListingContactLineField_" + lineIndex);
 			binder.forField(contactLineField).bind(ContactLineLayoutDto.LINE_FIELD);
 
 			delete = ButtonHelper
-				.createIconButtonWithCaption("delete_" + lineIndex, null, VaadinIcons.TRASH, event -> fireEvent(new DeleteLineEvent(this)));
-			delete.setStyleName(CssStyles.VSPACE_3);
+				.createIconButtonWithCaption("delete_" + lineIndex, null, VaadinIcon.TRASH, event -> fireEvent(new DeleteLineEvent(this)));
+			// was setStyleName: replaces the button's style names
+			delete.setClassName(CssStyles.VSPACE_3);
 
-			addComponents(contactLineField, delete);
+			add(contactLineField, delete);
 
-			setComponentAlignment(contactLineField, Alignment.BOTTOM_LEFT);
-			setComponentAlignment(delete, Alignment.BOTTOM_LEFT);
+			// was Alignment.BOTTOM_LEFT
+			setVerticalComponentAlignment(FlexComponent.Alignment.END, contactLineField, delete);
 
 			contactLineField.showCaptions();
 		}

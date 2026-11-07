@@ -17,7 +17,7 @@
  *******************************************************************************/
 package de.symeda.sormas.api.symptoms;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface SymptomsFacade {

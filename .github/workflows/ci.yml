@@ -48,12 +48,12 @@ jobs:
         if: steps.dedupe.outputs.skip != 'true'
         uses: actions/checkout@v7
 
-      - name: Set up JDK 11 (Temurin)
+      - name: Set up JDK 21 (Temurin)
         if: steps.dedupe.outputs.skip != 'true'
         uses: actions/setup-java@v6
         with:
           distribution: temurin
-          java-version: '11'
+          java-version: '21'
 
       # Dependency cache (actions cache, not artifact storage). The project's own artifacts,
       # installed by this build, are left out.
@@ -64,8 +64,8 @@ jobs:
           path: |
             ~/.m2/repository
             !~/.m2/repository/de/symeda
-          key: ${{ runner.os }}-jdk11-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-jdk11-m2-
+          key: ${{ runner.os }}-jdk21-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-jdk21-m2-
 
       # Testcontainers 1.18.3 (HistoryTablesTest) asks Docker for API 1.32 unless told otherwise;
       # Docker 29 refuses anything below 1.44 and the test is then skipped silently. 1.44 is
@@ -78,10 +78,14 @@ jobs:
           java -version 2>&1 | head -1
           mvn -v | head -1
 
-      - name: Build and test (mvn clean install, default profiles)
+      # CI builds with Vaadin's commercial-with-banner option (decision E002 C): the commercial
+      # Rich Text Editor is built in without a licence key and without Daily Active User licensing,
+      # and the app shows a commercial banner. A CI-built artefact is never shipped or deployed.
+      # Local and release builds use a real key (VAADIN_PRO_KEY). See CI.md.
+      - name: Build and test (mvn clean install, default profiles, commercial banner)
         if: steps.dedupe.outputs.skip != 'true'
         working-directory: sormas-base
-        run: mvn -B -ntp clean install
+        run: mvn -B -ntp clean install -Dvaadin.commercialWithBanner
 
       # Test counts per module in the job summary; fails when HistoryTablesTest did not run.
       - name: Test report
@@ -114,7 +118,8 @@ jobs:
           EOF
 
       # Smoke, in this job on the artefacts just built: start one app copy with env/, log in as each
-      # web test user, stop the copy. See CI.md and env/README.md ("Smoke check").
+      # web test user and open the routes in env/smoke-users.json by URL, stop the copy. A smoke
+      # failure fails the job. See CI.md and env/README.md ("Smoke check").
       #
       # env/up.sh --no-build reuses the image and env/.state/build/deploy only; it cannot take the
       # target/ directories of this build (without them it would build the app a second time). This
@@ -151,15 +156,17 @@ jobs:
           npm install -g --no-fund --no-audit playwright@1.63.0
           playwright install --with-deps chromium
 
-      # One copy with the env/ defaults (port 18080, project sormas-old-env): start, seed, snapshot.
+      # One copy with the env/ defaults (port 18080, project sormas-new-env): start, seed, snapshot.
       - name: 'Smoke: start the app (env/up.sh --no-build)'
         id: smoke_up
         if: steps.dedupe.outputs.skip != 'true'
         run: env/up.sh --no-build
 
-      # Each web test user logs in and the first view loads with no console error and no HTTP >= 400;
-      # PoeInf is refused. Passwords are read from DefaultEntityHelper.java, never printed or written.
-      - name: 'Smoke: log in as each web test user'
+      # Each web test user logs in, the first view and each route of env/smoke-users.json (opened by
+      # its own URL) load with no console error and no HTTP >= 400; PoeInf is refused. Passwords are
+      # read from DefaultEntityHelper.java, never printed or written.
+      - name: 'Smoke: log in as each web test user and open the routes'
+        id: smoke_login
         if: steps.dedupe.outputs.skip != 'true'
         run: node env/smoke.cjs env/.state/smoke
 

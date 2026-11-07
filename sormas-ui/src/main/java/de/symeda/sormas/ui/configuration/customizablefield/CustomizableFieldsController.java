@@ -15,9 +15,10 @@
 
 package de.symeda.sormas.ui.configuration.customizablefield;
 
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Unit;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.customizablefield.CustomizableFieldMetadataDto;
@@ -56,7 +57,7 @@ public class CustomizableFieldsController {
 
         cdw.addCommitListener(() -> {
             FacadeProvider.getCustomizableFieldMetadataFacade().save(form.getValue());
-            Notification.show(I18nProperties.getString(Strings.messageCustomizableFieldCreated), Notification.Type.ASSISTIVE_NOTIFICATION);
+            NotificationHelper.show(I18nProperties.getString(Strings.messageCustomizableFieldCreated), NotificationHelper.Type.ASSISTIVE_NOTIFICATION);
             SormasUI.get().getNavigator().navigateTo(CustomizableFieldsView.VIEW_NAME);
         });
 
@@ -84,7 +85,7 @@ public class CustomizableFieldsController {
 
         cdw.addCommitListener(() -> {
             FacadeProvider.getCustomizableFieldMetadataFacade().save(form.getValue());
-            Notification.show(I18nProperties.getString(Strings.messageCustomizableFieldSaved), Notification.Type.ASSISTIVE_NOTIFICATION);
+            NotificationHelper.show(I18nProperties.getString(Strings.messageCustomizableFieldSaved), NotificationHelper.Type.ASSISTIVE_NOTIFICATION);
             SormasUI.get().getNavigator().navigateTo(CustomizableFieldsView.VIEW_NAME);
         });
 
@@ -98,13 +99,13 @@ public class CustomizableFieldsController {
 
         TextField nameField =
             new TextField(I18nProperties.getPrefixCaption(CustomizableFieldMetadataDto.I18N_PREFIX, CustomizableFieldMetadataDto.NAME));
-        nameField.setWidth(100, com.vaadin.server.Sizeable.Unit.PERCENTAGE);
+        nameField.setWidth(100, Unit.PERCENTAGE);
         nameField.setRequiredIndicatorVisible(true);
 
         VerticalLayout content = new VerticalLayout();
-        content.setMargin(true);
+        content.setPadding(true);
         content.setSpacing(true);
-        content.addComponent(nameField);
+        content.add(nameField);
 
         VaadinUiUtil.showConfirmationPopup(
             I18nProperties.getString(Strings.headingCloneCustomizableField),
@@ -116,11 +117,11 @@ public class CustomizableFieldsController {
                 if (Boolean.TRUE.equals(result)) {
                     String newName = nameField.getValue();
                     if (newName == null || newName.trim().isEmpty()) {
-                        Notification.show(I18nProperties.getCaption(Captions.actionClone) + " - name required", Notification.Type.WARNING_MESSAGE);
+                        NotificationHelper.show(I18nProperties.getCaption(Captions.actionClone) + " - name required", NotificationHelper.Type.WARNING_MESSAGE);
                         return;
                     }
                     FacadeProvider.getCustomizableFieldMetadataFacade().cloneField(sourceDto.getUuid(), newName.trim());
-                    Notification.show(I18nProperties.getString(Strings.messageCustomizableFieldCloned), Notification.Type.ASSISTIVE_NOTIFICATION);
+                    NotificationHelper.show(I18nProperties.getString(Strings.messageCustomizableFieldCloned), NotificationHelper.Type.ASSISTIVE_NOTIFICATION);
                     SormasUI.get().getNavigator().navigateTo(CustomizableFieldsView.VIEW_NAME);
                 }
             });
@@ -142,7 +143,7 @@ public class CustomizableFieldsController {
 
         DeletableUtils.showDeleteWithReasonPopup(I18nProperties.getString(Strings.promptConfirmDeleteCustomizableField), deletionDetails -> {
             FacadeProvider.getCustomizableFieldMetadataFacade().delete(uuid, deletionDetails);
-            Notification.show(I18nProperties.getString(Strings.messageCustomizableFieldDeleted), Notification.Type.ASSISTIVE_NOTIFICATION);
+            NotificationHelper.show(I18nProperties.getString(Strings.messageCustomizableFieldDeleted), NotificationHelper.Type.ASSISTIVE_NOTIFICATION);
             grid.reload();
         });
     }

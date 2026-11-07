@@ -3,8 +3,8 @@ package de.symeda.sormas.api.patch.partial_retrieval;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Allows to retrieve field values and their respective field names.

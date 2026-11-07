@@ -19,9 +19,9 @@ package de.symeda.sormas.ui.utils;
 
 import java.util.function.Supplier;
 
-import com.vaadin.v7.data.validator.AbstractValidator;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.AbstractValidator;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.person.ApproximateAgeType;
 

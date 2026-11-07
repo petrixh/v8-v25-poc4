@@ -2,10 +2,8 @@ package de.symeda.sormas.ui.samples;
 
 import java.util.List;
 
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.dialog.Dialog;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -16,6 +14,8 @@ import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent.CommitListener;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 public class AdditionalTestController {
@@ -36,8 +36,8 @@ public class AdditionalTestController {
 		final CommitDiscardWrapperComponent<AdditionalTestForm> component =
 			new CommitDiscardWrapperComponent<>(form, UiUtil.permitted(UserRight.ADDITIONAL_TEST_CREATE), form.getFieldGroup());
 
-		Window window = VaadinUiUtil.showModalPopupWindow(component, I18nProperties.getString(Strings.headingCreateAdditionalTest));
-		window.setWidth(form.getWidth() + 90, Unit.PIXELS);
+		Dialog window = VaadinUiUtil.showModalPopupWindow(component, I18nProperties.getString(Strings.headingCreateAdditionalTest));
+		window.setWidth("calc(" + form.getWidth() + " + 90px)");
 		window.setHeight(80, Unit.PERCENTAGE);
 
 		component.addCommitListener(new CommitListener() {
@@ -46,7 +46,7 @@ public class AdditionalTestController {
 			public void onCommit() {
 				if (!form.getFieldGroup().isModified()) {
 					FacadeProvider.getAdditionalTestFacade().saveAdditionalTest(form.getValue());
-					Notification.show(I18nProperties.getString(Strings.messageAdditionalTestSaved), Type.TRAY_NOTIFICATION);
+					NotificationHelper.show(I18nProperties.getString(Strings.messageAdditionalTestSaved), Type.TRAY_NOTIFICATION);
 					if (callback != null) {
 						callback.run();
 					}
@@ -65,10 +65,10 @@ public class AdditionalTestController {
 		final CommitDiscardWrapperComponent<AdditionalTestForm> component =
 			new CommitDiscardWrapperComponent<>(form, isEditOrDeleteAllowed, form.getFieldGroup());
 
-		Window window = VaadinUiUtil.showModalPopupWindow(
+		Dialog window = VaadinUiUtil.showModalPopupWindow(
 			component,
 			I18nProperties.getString(isEditAllowed ? Strings.headingEditAdditionalTest : Strings.headingViewAdditionalTest));
-		window.setWidth(form.getWidth() + 90, Unit.PIXELS);
+		window.setWidth("calc(" + form.getWidth() + " + 90px)");
 		window.setHeight(80, Unit.PERCENTAGE);
 
 		if (isEditOrDeleteAllowed) {
@@ -78,7 +78,7 @@ public class AdditionalTestController {
 				public void onCommit() {
 					if (!form.getFieldGroup().isModified()) {
 						FacadeProvider.getAdditionalTestFacade().saveAdditionalTest(form.getValue());
-						Notification.show(I18nProperties.getString(Strings.messageAdditionalTestSaved), Type.TRAY_NOTIFICATION);
+						NotificationHelper.show(I18nProperties.getString(Strings.messageAdditionalTestSaved), Type.TRAY_NOTIFICATION);
 						if (callback != null) {
 							callback.run();
 						}
@@ -90,7 +90,7 @@ public class AdditionalTestController {
 				component.addDeleteListener(() -> {
 					FacadeProvider.getAdditionalTestFacade().deleteAdditionalTest(dto.getUuid());
 					window.close();
-					Notification.show(I18nProperties.getString(Strings.messageAdditionalTestDeleted), Type.TRAY_NOTIFICATION);
+					NotificationHelper.show(I18nProperties.getString(Strings.messageAdditionalTestDeleted), Type.TRAY_NOTIFICATION);
 					if (callback != null) {
 						callback.run();
 					}

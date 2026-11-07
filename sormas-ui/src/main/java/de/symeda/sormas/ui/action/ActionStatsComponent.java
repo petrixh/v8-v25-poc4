@@ -20,14 +20,13 @@ package de.symeda.sormas.ui.action;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.action.ActionContext;
@@ -53,74 +52,76 @@ public class ActionStatsComponent extends VerticalLayout {
 	private VerticalLayout listLayout;
 
 	public ActionStatsComponent(ActionContext context, EventReferenceDto entityRef) {
-		setWidth(100, Unit.PERCENTAGE);
-		setMargin(false);
+		setWidthFull();
+		setPadding(false);
 		setSpacing(false);
 
 		this.context = context;
 		this.actionCriteria = new ActionCriteria().event(entityRef);
 
 		HorizontalLayout componentHeader = new HorizontalLayout();
-		componentHeader.setMargin(false);
+		componentHeader.setPadding(false);
 		componentHeader.setSpacing(false);
-		componentHeader.setWidth(100, Unit.PERCENTAGE);
-		addComponent(componentHeader);
+		componentHeader.setWidthFull();
+		add(componentHeader);
 
 		listLayout = new VerticalLayout();
 		listLayout.setSpacing(true);
-		listLayout.setMargin(false);
-		addComponent(listLayout);
+		listLayout.setPadding(false);
+		add(listLayout);
 		reload();
 
-		Label actionsHeader = new Label(I18nProperties.getString(Strings.entityActions));
-		actionsHeader.addStyleName(CssStyles.H3);
-		componentHeader.addComponent(actionsHeader);
+		Span actionsHeader = new Span(I18nProperties.getString(Strings.entityActions));
+		actionsHeader.addClassName(CssStyles.H3);
+		componentHeader.add(actionsHeader);
 
 		if (UiUtil.permitted(UserRight.ACTION_CREATE)) {
 			createButton = ButtonHelper.createIconButton(
 				Captions.actionNewAction,
-				VaadinIcons.PLUS_CIRCLE,
+				VaadinIcon.PLUS_CIRCLE,
 				e -> ControllerProvider.getActionController().create(context, entityRef, this::reload),
-				ValoTheme.BUTTON_PRIMARY);
+				CssStyles.BUTTON_PRIMARY);
 
-			componentHeader.addComponent(createButton);
-			componentHeader.setComponentAlignment(createButton, Alignment.MIDDLE_RIGHT);
+			componentHeader.add(createButton);
+			// was Alignment.MIDDLE_RIGHT
+			componentHeader.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, createButton);
+			createButton.getStyle().set("margin-left", "auto");
 		}
 	}
 
 	private void reload() {
 		List<ActionStatEntry> stats = FacadeProvider.getActionFacade().getActionStats(actionCriteria);
-		listLayout.removeAllComponents();
+		listLayout.removeAll();
 		if (stats.isEmpty()) {
-			Label noActionsLabel = new Label(String.format(I18nProperties.getCaption(Captions.actionNoActions), context.toString()));
+			Span noActionsLabel = new Span(String.format(I18nProperties.getCaption(Captions.actionNoActions), context.toString()));
 			setSpacing(false);
-			listLayout.addComponent(noActionsLabel);
+			listLayout.add(noActionsLabel);
 		} else {
 			setSpacing(true);
-			listLayout.addComponents(stats.stream().map(this::toComponent).collect(Collectors.toList()).toArray(new Component[0]));
+			listLayout.add(stats.stream().map(this::toComponent).collect(Collectors.toList()).toArray(new Component[0]));
 		}
 	}
 
 	private Component toComponent(ActionStatEntry stat) {
 		HorizontalLayout res = new HorizontalLayout();
 		res.setSpacing(false);
-		res.setMargin(false);
-		res.setWidth(100, Unit.PERCENTAGE);
+		res.setPadding(false);
+		res.setWidthFull();
 
-		Label statusLabel = new Label(DataHelper.toStringNullable(stat.getActionStatus()));
-		res.addComponent(statusLabel);
-		res.setExpandRatio(statusLabel, 1);
+		Span statusLabel = new Span(DataHelper.toStringNullable(stat.getActionStatus()));
+		res.add(statusLabel);
+		res.setFlexGrow(1, statusLabel);
 		CssStyles.style(statusLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
-		Label countLabel = new Label();
+		Span countLabel = new Span();
 		if (stat.getCount() == null) {
-			countLabel.setValue("-");
+			countLabel.setText("-");
 		} else {
-			countLabel.setValue(String.valueOf(stat.getCount()));
-			countLabel.addStyleNames(CssStyles.BADGE, CssStyles.LABEL_LARGE);
+			countLabel.setText(String.valueOf(stat.getCount()));
+			countLabel.addClassNames(CssStyles.BADGE, CssStyles.LABEL_LARGE);
 		}
-		countLabel.addStyleName(CssStyles.ALIGN_RIGHT);
-		res.addComponent(countLabel);
-		res.setExpandRatio(countLabel, 0);
+		countLabel.addClassName(CssStyles.ALIGN_RIGHT);
+		res.add(countLabel);
+		res.setFlexGrow(0, countLabel);
 
 		return res;
 	}

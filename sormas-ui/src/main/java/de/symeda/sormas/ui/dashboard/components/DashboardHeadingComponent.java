@@ -17,19 +17,19 @@ package de.symeda.sormas.ui.dashboard.components;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.shared.Tooltip;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.ui.utils.CssStyles;
 
 public class DashboardHeadingComponent extends HorizontalLayout {
 
-	private Label totalLabel;
-	private Label titleLabel;
-	private Label infoIcon;
+	private Span totalLabel;
+	private Span titleLabel;
+	private Span infoIcon;
 
 	private String[] titleStyleNames = new String[] {
 		"heading-title-label",
@@ -47,35 +47,36 @@ public class DashboardHeadingComponent extends HorizontalLayout {
 		setSpacing(false);
 
 		// count
-		totalLabel = new Label();
-		totalLabel.addStyleNames(totalLabelStyleNames);
-		addComponent(totalLabel);
+		totalLabel = new Span();
+		CssStyles.style(totalLabel, totalLabelStyleNames);
+		add(totalLabel);
 		// title
-		titleLabel = new Label(I18nProperties.getCaption(titleCaption));
-		titleLabel.addStyleNames(titleStyleNames);
-		addComponent(titleLabel);
+		titleLabel = new Span(I18nProperties.getCaption(titleCaption));
+		CssStyles.style(titleLabel, titleStyleNames);
+		add(titleLabel);
 
 		if (StringUtils.isNotBlank(infoIconText)) {
-			infoIcon = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
+			infoIcon = new Span(VaadinIcon.INFO_CIRCLE.create());
 			CssStyles.style(infoIcon, CssStyles.LABEL_LARGE, CssStyles.LABEL_SECONDARY, "statistics-info-label", CssStyles.HSPACE_LEFT_4);
-			infoIcon.setDescription(infoIconText, ContentMode.HTML);
-			addComponent(infoIcon);
+			// was setDescription(infoIconText, ContentMode.HTML): the tooltip renders the HTML through Markdown
+			Tooltip.forComponent(infoIcon).setMarkdown(infoIconText);
+			add(infoIcon);
 		}
 	}
 
 	public void updateTotalLabel(String value) {
-		totalLabel.setValue(value);
+		totalLabel.setText(value);
 	}
 
 	public void setTotalLabelDescription(String description) {
-		totalLabel.setDescription(I18nProperties.getDescription(description));
+		totalLabel.setTitle(I18nProperties.getDescription(description));
 	}
 
-	public Label getTitleLabel() {
+	public Span getTitleLabel() {
 		return titleLabel;
 	}
 
-	public Label getTotalLabel() {
+	public Span getTotalLabel() {
 		return totalLabel;
 	}
 

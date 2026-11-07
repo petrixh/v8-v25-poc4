@@ -15,24 +15,24 @@
 
 package de.symeda.sormas.ui.configuration.system;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBoxGroup;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.util.ReflectTools;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.customfield.CustomField;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextField;
 
 import de.symeda.sormas.api.systemconfiguration.SystemConfigurationValueDataProvider;
 import de.symeda.sormas.api.systemconfiguration.SystemConfigurationValueDto;
@@ -59,8 +59,6 @@ public class SystemConfigurationValueDynamicInput extends CustomField<SystemConf
      */
     public interface ValueChangeListener {
 
-        Method VALUE_CHANGE_METHOD = ReflectTools.findMethod(ValueChangeListener.class, "valueChange", ValueChangeEvent.class);
-
         /**
          * Called when the value changes.
          *
@@ -72,7 +70,7 @@ public class SystemConfigurationValueDynamicInput extends CustomField<SystemConf
     /**
      * Event representing a change in value.
      */
-    public static class ValueChangeEvent extends Component.Event {
+    public static class ValueChangeEvent extends ComponentEvent<SystemConfigurationValueDynamicInput> {
 
         /**
          * Constructs a new ValueChangeEvent.
@@ -80,8 +78,8 @@ public class SystemConfigurationValueDynamicInput extends CustomField<SystemConf
          * @param source
          *            the source component
          */
-        public ValueChangeEvent(final Component source) {
-            super(source);
+        public ValueChangeEvent(final SystemConfigurationValueDynamicInput source) {
+            super(source, false);
         }
     }
 
@@ -97,16 +95,38 @@ public class SystemConfigurationValueDynamicInput extends CustomField<SystemConf
 
     private SystemConfigurationValueDto value;
 
+    private boolean contentInitialized;
+
     @Override
     public SystemConfigurationValueDto getValue() {
         return value;
     }
 
+    /**
+     * Was {@code doSetValue}: the value is the DTO itself, edited in place by the inputs.
+     */
     @Override
-    public void doSetValue(final SystemConfigurationValueDto newFieldValue) {
+    protected void setPresentationValue(final SystemConfigurationValueDto newFieldValue) {
 
         Objects.requireNonNull(newFieldValue);
         this.value = newFieldValue;
+    }
+
+    @Override
+    protected SystemConfigurationValueDto generateModelValue() {
+        return value;
+    }
+
+    /**
+     * Vaadin 8 built the content ({@link #initContent()}) when the field was first attached, after its value was set.
+     */
+    @Override
+    protected void onAttach(final AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        if (!contentInitialized) {
+            contentInitialized = true;
+            add(initContent());
+        }
     }
 
     /**
@@ -116,7 +136,7 @@ public class SystemConfigurationValueDynamicInput extends CustomField<SystemConf
      *            the listener to add
      */
     public void addValueChangeListener(final ValueChangeListener listener) {
-        addListener(ValueChangeEvent.class, listener, ValueChangeListener.VALUE_CHANGE_METHOD);
+        addListener(ValueChangeEvent.class, listener::valueChange);
     }
 
     /**
@@ -159,31 +179,30 @@ public class SystemConfigurationValueDynamicInput extends CustomField<SystemConf
         return super.hashCode();
     }
 
-    @Override
     protected Component initContent() {
 
-        addStyleName(STYLE_NAME_DYNAMIC_INPUT);
+        addClassName(STYLE_NAME_DYNAMIC_INPUT);
 
         final var mainLayout = new VerticalLayout();
 
         mainLayout.setSpacing(true);
-        mainLayout.setMargin(false);
+        mainLayout.setPadding(false);
         mainLayout.setSizeUndefined();
         mainLayout.setWidthFull();
 
         switch (getValueType()) {
         case DROPDOWN:
-            mainLayout.addComponent(createDropdown());
+            mainLayout.add(createDropdown());
             break;
         case CHECKBOX_GRID:
-            mainLayout.addComponent(createCheckboxGrid());
-            mainLayout.addStyleName(STYLE_NAME_DYNAMIC_INPUT_FIXED_SIZE);
+            mainLayout.add(createCheckboxGrid());
+            mainLayout.addClassName(STYLE_NAME_DYNAMIC_INPUT_FIXED_SIZE);
             break;
         case PASSWORD:
-            mainLayout.addComponent(createPasswordField());
+            mainLayout.add(createPasswordField());
             break;
         default:
-            mainLayout.addComponent(createTextField());
+            mainLayout.add(createTextField());
         }
 
         return mainLayout;
@@ -212,8 +231,10 @@ public class SystemConfigurationValueDynamicInput extends CustomField<SystemConf
 
         final var layout = new HorizontalLayout();
         layout.setWidthFull();
-        layout.addStyleName(STYLE_NAME_TOGGLE_PASSWORD);
+        layout.addClassName(STYLE_NAME_TOGGLE_PASSWORD);
         final var passwordField = new PasswordField();
+        // the own toggle button below shows the value, as in Vaadin 8; Flow's reveal button would be a second one
+        passwordField.setRevealButtonVisible(false);
         passwordField.setValue(getValue().getValue());
         passwordField.setWidthFull();
 
@@ -224,7 +245,7 @@ public class SystemConfigurationValueDynamicInput extends CustomField<SystemConf
         passwordField.setValue(getValue().getValue());
 
         final var toggleButton = new Button();
-        toggleButton.setIcon(VaadinIcons.EYE_SLASH);
+        toggleButton.setIcon(VaadinIcon.EYE_SLASH.create());
 
         passwordField.addValueChangeListener(event -> {
             textField.setValue(passwordField.getValue());
@@ -240,16 +261,16 @@ public class SystemConfigurationValueDynamicInput extends CustomField<SystemConf
                 passwordField.setVisible(false);
                 textField.setVisible(true);
                 textField.setValue(passwordField.getValue());
-                toggleButton.setIcon(VaadinIcons.EYE);
+                toggleButton.setIcon(VaadinIcon.EYE.create());
             } else {
                 passwordField.setVisible(true);
                 textField.setVisible(false);
                 passwordField.setValue(textField.getValue());
-                toggleButton.setIcon(VaadinIcons.EYE_SLASH);
+                toggleButton.setIcon(VaadinIcon.EYE_SLASH.create());
             }
         });
 
-        layout.addComponents(passwordField, textField, toggleButton);
+        layout.add(passwordField, textField, toggleButton);
         return layout;
     }
 
@@ -261,10 +282,16 @@ public class SystemConfigurationValueDynamicInput extends CustomField<SystemConf
     private ComboBox<String> createDropdown() {
 
         final var combo = new ComboBox<String>();
-        combo.setEmptySelectionAllowed(false);
         combo.setItems(getValue().getDataProvider().getOptions().values());
-        combo.setSelectedItem(getValue().getValue());
-        combo.addValueChangeListener(event -> fireValueChange(combo));
+        combo.setValue(getValue().getValue());
+        combo.addValueChangeListener(event -> {
+            // was setEmptySelectionAllowed(false): a value the user clears is restored
+            if (event.isFromClient() && event.getValue() == null && event.getOldValue() != null) {
+                combo.setValue(event.getOldValue());
+                return;
+            }
+            fireValueChange(combo);
+        });
         combo.setWidthFull();
         return combo;
     }
@@ -274,15 +301,15 @@ public class SystemConfigurationValueDynamicInput extends CustomField<SystemConf
      *
      * @return the checkbox grid
      */
-    private CheckBoxGroup<String> createCheckboxGrid() {
+    private CheckboxGroup<String> createCheckboxGrid() {
 
-        final var cbg = new CheckBoxGroup<String>();
+        final var cbg = new CheckboxGroup<String>();
         ArrayList<String> values = new ArrayList<>(getValue().getDataProvider().getOptions().values());
         values.sort(Comparator.naturalOrder());
         cbg.setItems(values);
         cbg.select(getValue().getDataProvider().getMappedValues(getValue()).values().toArray(new String[] {}));
         cbg.addValueChangeListener(event -> fireValueChange(cbg));
-        cbg.addStyleName(STYLE_NAME_WRAPPING_CHECKBOX_GROUP);
+        cbg.addClassName(STYLE_NAME_WRAPPING_CHECKBOX_GROUP);
         cbg.setWidthFull();
         return cbg;
     }
@@ -312,9 +339,9 @@ public class SystemConfigurationValueDynamicInput extends CustomField<SystemConf
             });
         }
 
-        if (source instanceof CheckBoxGroup) {
+        if (source instanceof CheckboxGroup) {
             final HashMap<String, String> selectedValues = new HashMap<>(getValue().getDataProvider().getKeys().size());
-            ((CheckBoxGroup<String>) source).getSelectedItems()
+            ((CheckboxGroup<String>) source).getSelectedItems()
                 .forEach(
                     v -> getValue().getDataProvider()
                         .getOptions()

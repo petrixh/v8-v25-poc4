@@ -20,14 +20,14 @@
 
 package de.symeda.sormas.ui.events.groups;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.event.EventGroupIndexDto;
 import de.symeda.sormas.api.i18n.Captions;
@@ -37,7 +37,9 @@ import de.symeda.sormas.api.utils.HtmlHelper;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.ClickableLabel;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.sidecomponent.SideComponentField;
 
 public class EventGroupListEntry extends SideComponentField {
@@ -51,96 +53,96 @@ public class EventGroupListEntry extends SideComponentField {
 		this.eventGroup = eventGroup;
 
 		HorizontalLayout topLayout = new HorizontalLayout();
-		topLayout.setWidth(100, Unit.PERCENTAGE);
-		topLayout.setMargin(false);
+		topLayout.setWidthFull();
+		topLayout.setPadding(false);
 		topLayout.setSpacing(false);
 		addComponentToField(topLayout);
 
 		VerticalLayout topLeftLayout = new VerticalLayout();
 		{
-			topLeftLayout.setMargin(false);
+			topLeftLayout.setPadding(false);
 			topLeftLayout.setSpacing(false);
 
-			Label eventTitleLabel = new Label(DataHelper.toStringNullable(eventGroup.getName()));
+			Span eventTitleLabel = new Span(DataHelper.toStringNullable(eventGroup.getName()));
 			CssStyles.style(eventTitleLabel, CssStyles.LABEL_BOLD, CssStyles.LABEL_UPPERCASE);
-			eventTitleLabel.setWidth(100, Unit.PERCENTAGE);
+			eventTitleLabel.setWidthFull();
 
-			topLeftLayout.addComponent(eventTitleLabel);
+			topLeftLayout.add(eventTitleLabel);
 
 			String hyperlinkedUuid = HtmlHelper.buildHyperlinkTitle(eventGroup.getUuid(), DataHelper.getShortUuid(eventGroup.getUuid()));
 			ClickableLabel uuidValue = new ClickableLabel(hyperlinkedUuid, ContentMode.HTML);
-			uuidValue.addLayoutClickListener(event -> {
+			uuidValue.addClickListener(event -> {
 				ControllerProvider.getEventGroupController().navigateToData(eventGroup.getUuid());
 			});
 
-			Label uuidLabel = new Label(I18nProperties.getCaption(Captions.EventGroup_uuid) + ":", ContentMode.HTML);
+			Span uuidLabel = VaadinUiUtil.createLabel(I18nProperties.getCaption(Captions.EventGroup_uuid) + ":", ContentMode.HTML);
 			CssStyles.style(uuidLabel, CssStyles.HSPACE_RIGHT_4);
 
 			HorizontalLayout labelLayout = new HorizontalLayout();
 			labelLayout.setSpacing(false);
-			labelLayout.addComponent(uuidLabel);
-			labelLayout.addComponent(uuidValue);
+			labelLayout.add(uuidLabel);
+			labelLayout.add(uuidValue);
 
-			Label eventCountLabel = new Label(I18nProperties.getCaption(Captions.EventGroup_eventCount) + ": " + eventGroup.getEventCount());
+			Span eventCountLabel = new Span(I18nProperties.getCaption(Captions.EventGroup_eventCount) + ": " + eventGroup.getEventCount());
 
-			topLeftLayout.addComponent(labelLayout);
-			topLeftLayout.addComponent(eventCountLabel);
+			topLeftLayout.add(labelLayout);
+			topLeftLayout.add(eventCountLabel);
 		}
-		topLayout.addComponent(topLeftLayout);
+		topLayout.add(topLeftLayout);
 	}
 
-	public void addEditListener(int rowIndex, Button.ClickListener editClickListener) {
+	public void addEditListener(int rowIndex, ComponentEventListener<ClickEvent<Button>> editClickListener) {
 		if (editButton == null) {
 			editButton = ButtonHelper.createIconButtonWithCaption(
 				"add-event-" + rowIndex,
 				null,
-				VaadinIcons.PENCIL,
+				VaadinIcon.PENCIL,
 				null,
-				ValoTheme.BUTTON_LINK,
+				CssStyles.BUTTON_LINK,
 				CssStyles.BUTTON_COMPACT);
-			editButton.setDescription(I18nProperties.getCaption(Captions.eventEditEventGroup));
+			editButton.setTooltipText(I18nProperties.getCaption(Captions.eventEditEventGroup));
 
-			addComponent(editButton);
-			setComponentAlignment(editButton, Alignment.MIDDLE_RIGHT);
-			setExpandRatio(editButton, 0);
+			add(editButton);
+			setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, editButton);
+			setFlexGrow(0, editButton);
 		}
 
 		editButton.addClickListener(editClickListener);
 	}
 
-	public void addUnlinkEventListener(int rowIndex, Button.ClickListener unlinkEventClickListener) {
+	public void addUnlinkEventListener(int rowIndex, ComponentEventListener<ClickEvent<Button>> unlinkEventClickListener) {
 		if (unlinkEventButton == null) {
 			unlinkEventButton = ButtonHelper.createIconButtonWithCaption(
 				"unlink-event-" + rowIndex,
 				null,
-				VaadinIcons.UNLINK,
+				VaadinIcon.UNLINK,
 				null,
-				ValoTheme.BUTTON_LINK,
+				CssStyles.BUTTON_LINK,
 				CssStyles.BUTTON_COMPACT);
-			unlinkEventButton.setDescription(I18nProperties.getCaption(Captions.eventUnlinkEventGroup));
+			unlinkEventButton.setTooltipText(I18nProperties.getCaption(Captions.eventUnlinkEventGroup));
 
-			addComponent(unlinkEventButton);
-			setComponentAlignment(unlinkEventButton, Alignment.MIDDLE_RIGHT);
-			setExpandRatio(unlinkEventButton, 0);
+			add(unlinkEventButton);
+			setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, unlinkEventButton);
+			setFlexGrow(0, unlinkEventButton);
 		}
 
 		unlinkEventButton.addClickListener(unlinkEventClickListener);
 	}
 
-	public void addListEventsListener(int rowIndex, Button.ClickListener listEventsClickListener) {
+	public void addListEventsListener(int rowIndex, ComponentEventListener<ClickEvent<Button>> listEventsClickListener) {
 		if (listEventsButton == null) {
 			listEventsButton = ButtonHelper.createIconButtonWithCaption(
 				"list-events-" + rowIndex,
 				null,
-				VaadinIcons.LIST_UL,
+				VaadinIcon.LIST_UL,
 				null,
-				ValoTheme.BUTTON_LINK,
+				CssStyles.BUTTON_LINK,
 				CssStyles.BUTTON_COMPACT);
-			listEventsButton.setDescription(I18nProperties.getCaption(Captions.eventGroupListEvents));
+			listEventsButton.setTooltipText(I18nProperties.getCaption(Captions.eventGroupListEvents));
 
-			addComponent(listEventsButton);
-			setComponentAlignment(listEventsButton, Alignment.MIDDLE_RIGHT);
-			setExpandRatio(listEventsButton, 0);
+			add(listEventsButton);
+			setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, listEventsButton);
+			setFlexGrow(0, listEventsButton);
 		}
 
 		listEventsButton.addClickListener(listEventsClickListener);

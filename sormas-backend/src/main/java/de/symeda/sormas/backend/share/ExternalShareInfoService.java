@@ -22,19 +22,19 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 
 import de.symeda.sormas.api.caze.CaseReferenceDto;
 import de.symeda.sormas.api.event.EventReferenceDto;
@@ -194,7 +194,7 @@ public class ExternalShareInfoService extends AdoServiceWithUserFilterAndJurisdi
 			Subquery<Long> survToolShareSubQuery = cq.subquery(Long.class);
 			Root<ExternalShareInfo> survToolShareRoot = survToolShareSubQuery.from(ExternalShareInfo.class);
 			survToolShareSubQuery.select(survToolShareRoot.get(ExternalShareInfo.ID));
-			survToolShareSubQuery.where(cb.equal(survToolShareRoot.join(associatedObjectName), from.get(AbstractDomainObject.ID)));
+			survToolShareSubQuery.where(cb.equal(survToolShareRoot.join(associatedObjectName).get(AbstractDomainObject.ID), from.get(AbstractDomainObject.ID)));
 
 			filter = CriteriaBuilderHelper.and(cb, filter, cb.not(cb.exists(survToolShareSubQuery)));
 		}
@@ -203,7 +203,7 @@ public class ExternalShareInfoService extends AdoServiceWithUserFilterAndJurisdi
 			Subquery<Long> survToolShareSubQuery = cq.subquery(Long.class);
 			Root<ExternalShareInfo> survToolShareRoot = survToolShareSubQuery.from(ExternalShareInfo.class);
 			survToolShareSubQuery.select(survToolShareRoot.get(ExternalShareInfo.ID));
-			survToolShareSubQuery.where(cb.equal(survToolShareRoot.join(associatedObjectName), from.get(AbstractDomainObject.ID)));
+			survToolShareSubQuery.where(cb.equal(survToolShareRoot.join(associatedObjectName).get(AbstractDomainObject.ID), from.get(AbstractDomainObject.ID)));
 
 			filter = CriteriaBuilderHelper.and(cb, filter, cb.exists(survToolShareSubQuery));
 		}
@@ -229,7 +229,11 @@ public class ExternalShareInfoService extends AdoServiceWithUserFilterAndJurisdi
 		String associatedObjectName,
 		Function<Expression<Date>, Predicate> shareDatePredicateBuilder) {
 
-		Subquery<Object> survToolShareSubQuery = cq.subquery(Object.class);
+		// The latest share date is a scalar subquery and the predicate is applied in the enclosing query. Hibernate 5 applied it in the
+		// subquery's HAVING (exists ... having <predicate>(max(creationDate))); Hibernate 7 renders the enclosing query's left joins
+		// that the predicate uses as inner joins inside such a subquery. Same rows: with no share, max(...) is null and the
+		// predicate is not true, as the exists was false.
+		Subquery<Date> survToolShareSubQuery = cq.subquery(Date.class);
 		Root<ExternalShareInfo> survToolShareRoot = survToolShareSubQuery.from(ExternalShareInfo.class);
 		Join<ExternalShareInfo, ?> associatedObject = survToolShareRoot.join(associatedObjectName, JoinType.LEFT);
 		@SuppressWarnings({
@@ -241,11 +245,9 @@ public class ExternalShareInfoService extends AdoServiceWithUserFilterAndJurisdi
 
 		Path<Object> associatedObjectId = associatedObject.get(AbstractDomainObject.ID);
 
-		survToolShareSubQuery.select(associatedObjectId);
-		survToolShareSubQuery.where(cb.equal(associatedObject, from.get(AbstractDomainObject.ID)));
-		survToolShareSubQuery.groupBy(associatedObjectId);
-		survToolShareSubQuery.having(shareDatePredicateBuilder.apply(latestShareDate));
+		survToolShareSubQuery.select(latestShareDate);
+		survToolShareSubQuery.where(cb.equal(associatedObjectId, from.get(AbstractDomainObject.ID)));
 
-		return cb.exists(survToolShareSubQuery);
+		return shareDatePredicateBuilder.apply(survToolShareSubQuery);
 	}
 }

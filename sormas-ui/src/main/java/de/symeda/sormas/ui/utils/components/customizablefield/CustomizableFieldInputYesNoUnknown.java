@@ -18,11 +18,11 @@ package de.symeda.sormas.ui.utils.components.customizablefield;
 import java.util.EnumMap;
 import java.util.Map;
 
-import com.vaadin.data.ValueProvider;
-import com.vaadin.server.Setter;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.data.binder.Setter;
+import com.vaadin.flow.function.ValueProvider;
 
 import de.symeda.sormas.api.customizablefield.CustomizableFieldMetadataDto;
 import de.symeda.sormas.api.customizablefield.CustomizableFieldValueDto;
@@ -50,7 +50,7 @@ public class CustomizableFieldInputYesNoUnknown extends CustomizableFieldInput<Y
 
 	private final Map<YesNoUnknown, Button> buttons = new EnumMap<>(YesNoUnknown.class);
 	/**
-	 * Holds a value that was pushed via {@link #doSetValue(YesNoUnknown)} before
+	 * Holds a value that was pushed via {@link #setPresentationValue(Object)} before
 	 * {@link #buildInputComponent()} had a chance to create the buttons.
 	 * Applied on first render.
 	 */
@@ -78,7 +78,7 @@ public class CustomizableFieldInputYesNoUnknown extends CustomizableFieldInput<Y
 	protected Component buildInputComponent() {
 		HorizontalLayout layout = new HorizontalLayout();
 		layout.setSpacing(false);
-		layout.setMargin(false);
+		layout.setPadding(false);
 		CssStyles.style(layout, CssStyles.YES_NO_UNKNOWN_GROUP);
 
 		for (YesNoUnknown option : YesNoUnknown.values()) {
@@ -88,7 +88,7 @@ public class CustomizableFieldInputYesNoUnknown extends CustomizableFieldInput<Y
 				setValue(option == current ? null : option);
 			});
 			buttons.put(option, btn);
-			layout.addComponent(btn);
+			layout.add(btn);
 		}
 
 		if (pendingValue != null) {
@@ -116,9 +116,9 @@ public class CustomizableFieldInputYesNoUnknown extends CustomizableFieldInput<Y
 	private void applyButtonStyles(YesNoUnknown selected) {
 		for (Map.Entry<YesNoUnknown, Button> entry : buttons.entrySet()) {
 			if (entry.getKey() == selected) {
-				entry.getValue().addStyleName(CssStyles.YES_NO_UNKNOWN_OPTION_SELECTED);
+				entry.getValue().addClassName(CssStyles.YES_NO_UNKNOWN_OPTION_SELECTED);
 			} else {
-				entry.getValue().removeStyleName(CssStyles.YES_NO_UNKNOWN_OPTION_SELECTED);
+				entry.getValue().removeClassName(CssStyles.YES_NO_UNKNOWN_OPTION_SELECTED);
 			}
 		}
 	}

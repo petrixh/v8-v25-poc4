@@ -20,14 +20,14 @@ package de.symeda.sormas.ui.user;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import com.vaadin.v7.data.Validator;
-
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.user.UserRoleDto;
 import de.symeda.sormas.api.user.UserRoleReferenceDto;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.Field.InvalidValueException;
 
 @SuppressWarnings("serial")
-public final class UserRolesValidator implements Validator {
+public final class UserRolesValidator implements Field.ValueValidator<Object> {
 
 	@SuppressWarnings("unchecked")
 	@Override

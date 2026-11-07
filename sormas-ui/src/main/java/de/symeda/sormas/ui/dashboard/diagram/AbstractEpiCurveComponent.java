@@ -22,19 +22,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Component;
-import org.vaadin.hene.popupbutton.PopupButton;
-
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.OptionGroup;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.dashboard.EpiCurveGrouping;
 import de.symeda.sormas.api.i18n.Captions;
@@ -45,6 +40,9 @@ import de.symeda.sormas.ui.dashboard.AbstractDashboardDataProvider;
 import de.symeda.sormas.ui.highcharts.HighChart;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.PopupButton;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 @SuppressWarnings("serial")
 public abstract class AbstractEpiCurveComponent<P extends AbstractDashboardDataProvider<?>> extends VerticalLayout {
@@ -52,8 +50,8 @@ public abstract class AbstractEpiCurveComponent<P extends AbstractDashboardDataP
 	// Components
 	protected final P dashboardDataProvider;
 	protected final HighChart epiCurveChart;
-	protected Label epiCurveLabel;
-	protected Label infoIcon;
+	protected Span epiCurveLabel;
+	protected Span infoIcon;
 
 	// Others
 	protected EpiCurveGrouping epiCurveGrouping;
@@ -68,7 +66,7 @@ public abstract class AbstractEpiCurveComponent<P extends AbstractDashboardDataP
 
 		setSpacing(false);
 		setSizeFull();
-		setMargin(true);
+		setPadding(true);
 
 		epiCurveChart = new HighChart();
 		epiCurveChart.setSizeFull();
@@ -76,10 +74,10 @@ public abstract class AbstractEpiCurveComponent<P extends AbstractDashboardDataP
 		epiCurveGrouping = EpiCurveGrouping.WEEK;
 		showMinimumEntries = true;
 
-		addComponent(createHeader());
-		addComponent(epiCurveChart);
-		addComponent(createFooter());
-		setExpandRatio(epiCurveChart, 1);
+		add(createHeader());
+		add(epiCurveChart);
+		add(createFooter());
+		setFlexGrow(1, epiCurveChart);
 
 		//clearAndFillEpiCurveChart();
 	}
@@ -87,24 +85,24 @@ public abstract class AbstractEpiCurveComponent<P extends AbstractDashboardDataP
 	public AbstractEpiCurveComponent(P dashboardDataProvider, String description) {
 		this(dashboardDataProvider);
 
-		infoIcon = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
+		infoIcon = new Span(VaadinIcon.INFO_CIRCLE.create());
 		CssStyles.style(infoIcon, CssStyles.H3, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_NONE, CssStyles.HSPACE_LEFT_4);
 
-		this.infoIcon.setDescription(I18nProperties.getDescription(description));
+		this.infoIcon.setTitle(I18nProperties.getDescription(description));
 		epiCurveLabel.setSizeUndefined();
 		CssStyles.style(epiCurveLabel, CssStyles.H2, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_NONE);
 		HorizontalLayout labelWithInfoLayout = new HorizontalLayout(epiCurveLabel, infoIcon);
-		labelWithInfoLayout.setMargin(false);
+		labelWithInfoLayout.setPadding(false);
 		labelWithInfoLayout.setSpacing(false);
 		// Replace the original epiCurveLabel with the new one that includes the info icon
 		// in the header layout
-		epiCurveHeaderLayout.removeComponent(epiCurveLabel);
-		epiCurveHeaderLayout.removeComponent(expandEpiCurveButton);
-		epiCurveHeaderLayout.addComponent(labelWithInfoLayout);
-		epiCurveHeaderLayout.setComponentAlignment(labelWithInfoLayout, Alignment.BOTTOM_LEFT);
-		epiCurveHeaderLayout.setExpandRatio(labelWithInfoLayout, 1f);
-		epiCurveHeaderLayout.addComponent(expandEpiCurveButton);
-		epiCurveHeaderLayout.setComponentAlignment(expandEpiCurveButton, Alignment.TOP_RIGHT);
+		epiCurveHeaderLayout.remove(epiCurveLabel);
+		epiCurveHeaderLayout.remove(expandEpiCurveButton);
+		epiCurveHeaderLayout.add(labelWithInfoLayout);
+		epiCurveHeaderLayout.setVerticalComponentAlignment(FlexComponent.Alignment.END, labelWithInfoLayout);
+		epiCurveHeaderLayout.setFlexGrow(1f, labelWithInfoLayout);
+		epiCurveHeaderLayout.add(expandEpiCurveButton);
+		epiCurveHeaderLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, expandEpiCurveButton);
 	}
 
 	public void setExpandListener(Consumer<Boolean> listener) {
@@ -118,36 +116,36 @@ public abstract class AbstractEpiCurveComponent<P extends AbstractDashboardDataP
 		epiCurveHeaderLayout.setSpacing(true);
 		CssStyles.style(epiCurveHeaderLayout, CssStyles.VSPACE_4);
 
-		epiCurveLabel = new Label(I18nProperties.getString(Strings.headingEpiCurve));
+		epiCurveLabel = new Span(I18nProperties.getString(Strings.headingEpiCurve));
 		epiCurveLabel.setSizeUndefined();
 		CssStyles.style(epiCurveLabel, CssStyles.H2, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_NONE);
 
-		epiCurveHeaderLayout.addComponent(epiCurveLabel);
-		epiCurveHeaderLayout.setComponentAlignment(epiCurveLabel, Alignment.BOTTOM_LEFT);
-		epiCurveHeaderLayout.setExpandRatio(epiCurveLabel, 1);
+		epiCurveHeaderLayout.add(epiCurveLabel);
+		epiCurveHeaderLayout.setVerticalComponentAlignment(FlexComponent.Alignment.END, epiCurveLabel);
+		epiCurveHeaderLayout.setFlexGrow(1, epiCurveLabel);
 
 		// "Expand" and "Collapse" buttons
 		expandEpiCurveButton =
-			ButtonHelper.createIconButtonWithCaption("expandEpiCurve", "", VaadinIcons.EXPAND, null, CssStyles.BUTTON_SUBTLE, CssStyles.VSPACE_NONE);
+			ButtonHelper.createIconButtonWithCaption("expandEpiCurve", "", VaadinIcon.EXPAND, null, CssStyles.BUTTON_SUBTLE, CssStyles.VSPACE_NONE);
 		Button collapseEpiCurveButton = ButtonHelper
-			.createIconButtonWithCaption("collapseEpiCurve", "", VaadinIcons.COMPRESS, null, CssStyles.BUTTON_SUBTLE, CssStyles.VSPACE_NONE);
+			.createIconButtonWithCaption("collapseEpiCurve", "", VaadinIcon.COMPRESS, null, CssStyles.BUTTON_SUBTLE, CssStyles.VSPACE_NONE);
 
 		expandEpiCurveButton.addClickListener(e -> {
 			externalExpandListener.accept(true);
-			epiCurveHeaderLayout.removeComponent(expandEpiCurveButton);
-			epiCurveHeaderLayout.addComponent(collapseEpiCurveButton);
-			epiCurveHeaderLayout.setComponentAlignment(collapseEpiCurveButton, Alignment.MIDDLE_RIGHT);
+			epiCurveHeaderLayout.remove(expandEpiCurveButton);
+			epiCurveHeaderLayout.add(collapseEpiCurveButton);
+			epiCurveHeaderLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, collapseEpiCurveButton);
 		});
 
 		collapseEpiCurveButton.addClickListener(e -> {
 			externalExpandListener.accept(false);
-			epiCurveHeaderLayout.removeComponent(collapseEpiCurveButton);
-			epiCurveHeaderLayout.addComponent(expandEpiCurveButton);
-			epiCurveHeaderLayout.setComponentAlignment(expandEpiCurveButton, Alignment.MIDDLE_RIGHT);
+			epiCurveHeaderLayout.remove(collapseEpiCurveButton);
+			epiCurveHeaderLayout.add(expandEpiCurveButton);
+			epiCurveHeaderLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, expandEpiCurveButton);
 		});
 
-		epiCurveHeaderLayout.addComponent(expandEpiCurveButton);
-		epiCurveHeaderLayout.setComponentAlignment(expandEpiCurveButton, Alignment.MIDDLE_RIGHT);
+		epiCurveHeaderLayout.add(expandEpiCurveButton);
+		epiCurveHeaderLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, expandEpiCurveButton);
 
 		return epiCurveHeaderLayout;
 	}
@@ -162,7 +160,7 @@ public abstract class AbstractEpiCurveComponent<P extends AbstractDashboardDataP
 		// Grouping
 		VerticalLayout groupingLayout = new VerticalLayout();
 		{
-			groupingLayout.setMargin(true);
+			groupingLayout.setPadding(true);
 			groupingLayout.setSizeUndefined();
 
 			// Grouping option group
@@ -171,40 +169,41 @@ public abstract class AbstractEpiCurveComponent<P extends AbstractDashboardDataP
 			groupingSelect.addItems((Object[]) EpiCurveGrouping.values());
 			groupingSelect.setValue(epiCurveGrouping);
 			groupingSelect.addValueChangeListener(e -> {
-				epiCurveGrouping = (EpiCurveGrouping) e.getProperty().getValue();
+				epiCurveGrouping = (EpiCurveGrouping) e.getValue();
 				clearAndFillEpiCurveChart();
 			});
-			groupingLayout.addComponent(groupingSelect);
+			groupingLayout.add(groupingSelect);
 
 			// "Always show at least 7 entries" checkbox
 			CheckBox minimumEntriesCheckbox = new CheckBox(I18nProperties.getCaption(Captions.dashboardShowMinimumEntries));
 			CssStyles.style(minimumEntriesCheckbox, CssStyles.VSPACE_NONE);
 			minimumEntriesCheckbox.setValue(showMinimumEntries);
 			minimumEntriesCheckbox.addValueChangeListener(e -> {
-				showMinimumEntries = (boolean) e.getProperty().getValue();
+				showMinimumEntries = (boolean) e.getValue();
 				clearAndFillEpiCurveChart();
 			});
-			groupingLayout.addComponent(minimumEntriesCheckbox);
+			groupingLayout.add(minimumEntriesCheckbox);
 		}
 
 		PopupButton groupingDropdown = ButtonHelper.createPopupButton(Captions.dashboardGrouping, groupingLayout, CssStyles.BUTTON_SUBTLE);
 
-		epiCurveFooterLayout.addComponent(groupingDropdown);
-		epiCurveFooterLayout.setComponentAlignment(groupingDropdown, Alignment.MIDDLE_RIGHT);
-		epiCurveFooterLayout.setExpandRatio(groupingDropdown, 1);
+		// was expand ratio 1 with MIDDLE_RIGHT alignment: the dropdown and the mode selector sit at the right end
+		epiCurveFooterLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+		epiCurveFooterLayout.add(groupingDropdown);
+		epiCurveFooterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, groupingDropdown);
 
 		// Epi curve mode
-		AbstractComponent epiCurveModeSelector = createEpiCurveModeSelector();
+		Component epiCurveModeSelector = createEpiCurveModeSelector();
 		if (epiCurveModeSelector != null) {
-			epiCurveFooterLayout.addComponent(epiCurveModeSelector);
-			epiCurveFooterLayout.setComponentAlignment(epiCurveModeSelector, Alignment.MIDDLE_RIGHT);
-			epiCurveFooterLayout.setExpandRatio(epiCurveModeSelector, 0);
+			epiCurveFooterLayout.add(epiCurveModeSelector);
+			epiCurveFooterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, epiCurveModeSelector);
+			epiCurveFooterLayout.setFlexGrow(0, epiCurveModeSelector);
 		}
 
 		return epiCurveFooterLayout;
 	}
 
-	protected abstract AbstractComponent createEpiCurveModeSelector();
+	protected abstract Component createEpiCurveModeSelector();
 
 	public abstract void clearAndFillEpiCurveChart();
 

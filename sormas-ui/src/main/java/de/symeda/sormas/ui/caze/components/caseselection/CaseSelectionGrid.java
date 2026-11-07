@@ -1,16 +1,12 @@
 package de.symeda.sormas.ui.caze.components.caseselection;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.data.util.GeneratedPropertyContainer;
-import com.vaadin.v7.shared.ui.grid.HeightMode;
-import com.vaadin.v7.ui.Grid;
-import com.vaadin.v7.ui.renderers.DateRenderer;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.FacadeProvider;
+import de.symeda.sormas.api.caze.AgeAndBirthDateDto;
 import de.symeda.sormas.api.caze.CaseSelectionDto;
 import de.symeda.sormas.api.feature.FeatureType;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -18,13 +14,19 @@ import de.symeda.sormas.api.utils.DateHelper;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.AgeAndBirthDateDtoConverterV7;
 import de.symeda.sormas.ui.utils.V7UuidRenderer;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
 @SuppressWarnings("serial")
-public class CaseSelectionGrid extends Grid {
+public class CaseSelectionGrid extends Grid<CaseSelectionDto> {
 
 	private List<CaseSelectionDto> cases;
 
 	public CaseSelectionGrid(List<CaseSelectionDto> cases) {
+
+		super(CaseSelectionDto.class);
 
 		if (cases != null) {
 			this.cases = cases;
@@ -35,15 +37,12 @@ public class CaseSelectionGrid extends Grid {
 		reload();
 	}
 
+	@SuppressWarnings("unchecked")
 	private void buildGrid() {
 
 		setSizeFull();
 		setSelectionMode(SelectionMode.SINGLE);
 		setHeightMode(HeightMode.ROW);
-
-		BeanItemContainer<CaseSelectionDto> container = new BeanItemContainer<>(CaseSelectionDto.class);
-		GeneratedPropertyContainer generatedContainer = new GeneratedPropertyContainer(container);
-		setContainerDataSource(generatedContainer);
 
 		setColumns(
 			CaseSelectionDto.UUID,
@@ -66,30 +65,25 @@ public class CaseSelectionGrid extends Grid {
 		}
 
 		getColumn(CaseSelectionDto.UUID).setRenderer(new V7UuidRenderer());
-		getColumn(CaseSelectionDto.AGE_AND_BIRTH_DATE).setConverter(new AgeAndBirthDateDtoConverterV7());
-		getColumn(CaseSelectionDto.REPORT_DATE).setRenderer(new DateRenderer(DateHelper.getLocalDateTimeFormat(I18nProperties.getUserLanguage())));
+		AgeAndBirthDateDtoConverterV7 ageAndBirthDateConverter = new AgeAndBirthDateDtoConverterV7();
+		((Column<CaseSelectionDto, AgeAndBirthDateDto>) getColumn(CaseSelectionDto.AGE_AND_BIRTH_DATE))
+			.setRenderer(value -> ageAndBirthDateConverter.convertToPresentation(value, null), new TextRenderer());
+		((Column<CaseSelectionDto, Date>) getColumn(CaseSelectionDto.REPORT_DATE))
+			.setRenderer(new DateRenderer(DateHelper.getLocalDateTimeFormat(I18nProperties.getUserLanguage())));
 
 		if (UiUtil.enabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {
 			getColumn(CaseSelectionDto.RESPONSIBLE_DISTRICT_NAME).setHidden(true);
 		}
 
-		for (Column column : getColumns()) {
+		for (Column<CaseSelectionDto, ?> column : getAllColumns()) {
 			column.setHeaderCaption(
 				I18nProperties.getPrefixCaption(CaseSelectionDto.I18N_PREFIX, column.getPropertyId().toString(), column.getHeaderCaption()));
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private BeanItemContainer<CaseSelectionDto> getContainer() {
-		GeneratedPropertyContainer container = (GeneratedPropertyContainer) super.getContainerDataSource();
-		return (BeanItemContainer<CaseSelectionDto>) container.getWrappedContainer();
-	}
-
 	public void reload() {
 
-		getContainer().removeAllItems();
-		getContainer().addAll(cases);
-		this.refreshAllRows();
+		setItems(cases);
 		setHeightByRows(cases.size() > 0 ? (cases.size() <= 10 ? cases.size() : 10) : 2);
 	}
 

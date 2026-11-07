@@ -1,60 +1,76 @@
 package de.symeda.sormas.ui.utils;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasEnabled;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.EditPermissionType;
 import de.symeda.sormas.ui.caze.CaseDataView;
 import de.symeda.sormas.ui.document.DocumentListComponent;
 import de.symeda.sormas.ui.utils.components.sidecomponent.SideComponentLayout;
 
-public class LayoutWithSidePanel extends CustomLayout {
+/**
+ * The edit component on the left (8 of 12 columns in the old HTML template), a side panel on the right (4 of 12) whose
+ * components are stacked in the order of their locations. Was a {@code CustomLayout} with that template; the slots are
+ * now plain Flow layouts, the responsive column widths are theme work.
+ */
+public class LayoutWithSidePanel extends HorizontalLayout {
 
 	private static final String CONTENT_COMPONENT = "contentComponent";
 	private static final String SIDE_PANEL = "sidePanel";
-	private static final String HTML_LAYOUT =
-		LayoutUtil.fluidRow(LayoutUtil.fluidColumnLoc(8, 0, 12, 0, CONTENT_COMPONENT), LayoutUtil.fluidColumnLoc(4, 0, 6, 0, SIDE_PANEL));
 
-	private final CustomLayout sidePanel;
+	private final VerticalLayout sidePanel;
+	private final Map<String, Div> sidePanelSlots = new HashMap<>();
 	private final CommitDiscardWrapperComponent<?> editComponent;
 	private Map<String, Component> sideComponents = new HashMap<>();
 
 	public LayoutWithSidePanel(CommitDiscardWrapperComponent editComponent, String... sideComponentLocs) {
 		this.editComponent = editComponent;
 
-		addStyleName(CssStyles.ROOT_COMPONENT);
-		setWidth(100, Unit.PERCENTAGE);
-		setHeightUndefined();
+		addClassName(CssStyles.ROOT_COMPONENT);
+		setWidthFull();
+		setHeight(null);
+		setPadding(false);
 
-		editComponent.setMargin(false);
-		editComponent.setWidth(100, Unit.PERCENTAGE);
-		editComponent.getWrappedComponent().setWidth(100, Unit.PERCENTAGE);
-		editComponent.addStyleName(CssStyles.MAIN_COMPONENT);
+		editComponent.setPadding(false);
+		editComponent.setWidthFull();
+		if (editComponent.getWrappedComponent() instanceof HasSize) {
+			((HasSize) editComponent.getWrappedComponent()).setWidthFull();
+		}
+		editComponent.addClassName(CssStyles.MAIN_COMPONENT);
 
-		setTemplateContents(HTML_LAYOUT);
-		addComponent(editComponent, CONTENT_COMPONENT);
+		// was an HTML template: fluid row, edit component in slot CONTENT_COMPONENT (8 columns), side panel in SIDE_PANEL (4)
+		add(editComponent);
+		setFlexGrow(8, editComponent);
 
-		sidePanel = new CustomLayout();
-
-		List<LayoutUtil.FluidColumn> sidePanelComponentsHtml =
-			Arrays.stream(sideComponentLocs).map(loc -> LayoutUtil.fluidColumnLoc(12, 0, loc)).collect(Collectors.toList());
-
-		sidePanel.setTemplateContents(LayoutUtil.fluidRow(sidePanelComponentsHtml.toArray(new LayoutUtil.FluidColumn[] {})));
-		addComponent(sidePanel, SIDE_PANEL);
+		sidePanel = new VerticalLayout();
+		sidePanel.setPadding(false);
+		for (String loc : sideComponentLocs) {
+			Div slot = new Div();
+			slot.setWidthFull();
+			sidePanelSlots.put(loc, slot);
+			sidePanel.add(slot);
+		}
+		add(sidePanel);
+		setFlexGrow(4, sidePanel);
 	}
 
 	public void addSidePanelComponent(Component component, String loc) {
-		sidePanel.addComponent(component, loc);
+		Div slot = sidePanelSlots.get(loc);
+		if (slot != null) {
+			slot.removeAll();
+			slot.add(component);
+		}
 		sideComponents.put(loc, component);
 	}
 
-	public CustomLayout getSidePanelComponent() {
+	public VerticalLayout getSidePanelComponent() {
 		return sidePanel;
 	}
 
@@ -74,7 +90,7 @@ public class LayoutWithSidePanel extends CustomLayout {
 		if (excludePresentDocuments) {
 			sideComponents.keySet().stream().forEach(loc -> {
 				if (!loc.equals(CaseDataView.DOCUMENTS_LOC)) {
-					sideComponents.get(loc).setEnabled(false);
+					setEnabled(sideComponents.get(loc), false);
 				} else {
 					((DocumentListComponent) ((SideComponentLayout) sideComponents.get(loc)).getComponent()).getMainButton().setEnabled(false);
 				}
@@ -102,6 +118,14 @@ public class LayoutWithSidePanel extends CustomLayout {
 		} else if (editAllowed.equals(EditPermissionType.WITHOUT_OWNERSHIP)) {
 			editComponent.addToActiveButtonsList(CommitDiscardWrapperComponent.DELETE_RESTORE);
 			disableWithViewAllow();
+		}
+	}
+
+	private static void setEnabled(Component component, boolean enabled) {
+		if (component instanceof HasEnabled) {
+			((HasEnabled) component).setEnabled(enabled);
+		} else {
+			component.getElement().setEnabled(enabled);
 		}
 	}
 }

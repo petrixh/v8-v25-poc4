@@ -23,7 +23,7 @@ package de.symeda.sormas.api.campaign.data;
 import java.util.Date;
 import java.util.List;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import de.symeda.sormas.api.EntityDto;
 import de.symeda.sormas.api.ImportIgnore;

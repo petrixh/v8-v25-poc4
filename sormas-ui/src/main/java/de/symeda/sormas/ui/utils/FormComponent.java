@@ -6,28 +6,29 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vaadin.data.Binder;
-import com.vaadin.data.BinderValidationStatus;
-import com.vaadin.data.BindingValidationStatus;
-import com.vaadin.data.HasValue;
-import com.vaadin.data.ValidationResult;
-import com.vaadin.server.UserError;
-import com.vaadin.shared.Registration;
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.AbstractOrderedLayout;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.DateField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.RadioButtonGroup;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.Validator.InvalidValueException;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.HasEnabled;
+import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.BinderValidationStatus;
+import com.vaadin.flow.data.binder.BindingValidationStatus;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.shared.Registration;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -38,10 +39,11 @@ import de.symeda.sormas.api.utils.ApplicableToPathogenTests;
 import de.symeda.sormas.api.utils.Diseases;
 import de.symeda.sormas.api.utils.fieldaccess.UiFieldAccessCheckers;
 import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
+import de.symeda.sormas.ui.utils.fields.KeepValueComboBox;
 
 /**
  * Base class for composable form components that participate in the parent form lifecycle.
- * Extends {@link VerticalLayout} so that Vaadin's {@link #detach()} is called automatically
+ * Extends {@link VerticalLayout} so that {@link #onDetach(DetachEvent)} is called automatically
  * when the parent form is removed — ensuring binder unbinding and listener cleanup.
  * <p>
  * Provides optional field factory methods ({@link #createComboBox}, {@link #createTextField}, etc.)
@@ -65,8 +67,9 @@ public abstract class FormComponent<T> extends VerticalLayout {
 
 	protected FormComponent(Class<T> dtoClass) {
 		binder = new Binder<>(dtoClass);
-		setWidth(100, Unit.PERCENTAGE);
-		setMargin(false);
+		setWidthFull();
+		// was setMargin(false): a Vaadin 8 margin is the padding of a Flow layout
+		setPadding(false);
 		setSpacing(true);
 	}
 
@@ -94,24 +97,33 @@ public abstract class FormComponent<T> extends VerticalLayout {
 		validationFields.add(field);
 	}
 
-	protected DateField createDateField(String propertyId, String i18nPrefix) {
-		DateField field = new DateField();
+	/**
+	 * Was a Vaadin 8 {@code DateField}: the value is a {@code LocalDate} as before.
+	 */
+	protected DatePicker createDateField(String propertyId, String i18nPrefix) {
+		DatePicker field = new DatePicker();
 		field.setId(propertyId);
-		field.setCaption(I18nProperties.getPrefixCaption(i18nPrefix, propertyId));
+		field.setLabel(I18nProperties.getPrefixCaption(i18nPrefix, propertyId));
 		CssStyles.style(field, CssStyles.CAPTION_ON_TOP);
-		field.setWidth(100, Unit.PERCENTAGE);
+		field.setWidthFull();
 		field.setLocale(I18nProperties.getUserLanguage().getLocale());
-		field.setDateFormat(DateFormatHelper.getDateFormatPattern());
+		DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+		i18n.setDateFormat(DateFormatHelper.getDateFormatPattern());
+		field.setI18n(i18n);
 		trackField(field);
 		return field;
 	}
 
+	/**
+	 * The combo box keeps its value when its items change and the value is still among them (Vaadin 8); see
+	 * {@link KeepValueComboBox}.
+	 */
 	protected <V> ComboBox<V> createComboBox(String propertyId, String i18nPrefix) {
-		ComboBox<V> field = new ComboBox<>();
+		ComboBox<V> field = new KeepValueComboBox<>();
 		field.setId(propertyId);
-		field.setCaption(I18nProperties.getPrefixCaption(i18nPrefix, propertyId));
+		field.setLabel(I18nProperties.getPrefixCaption(i18nPrefix, propertyId));
 		CssStyles.style(field, CssStyles.CAPTION_ON_TOP);
-		field.setWidth(100, Unit.PERCENTAGE);
+		field.setWidthFull();
 		trackField(field);
 		return field;
 	}
@@ -119,9 +131,9 @@ public abstract class FormComponent<T> extends VerticalLayout {
 	protected TextField createTextField(String propertyId, String i18nPrefix) {
 		TextField field = new TextField();
 		field.setId(propertyId);
-		field.setCaption(I18nProperties.getPrefixCaption(i18nPrefix, propertyId));
+		field.setLabel(I18nProperties.getPrefixCaption(i18nPrefix, propertyId));
 		CssStyles.style(field, CssStyles.CAPTION_ON_TOP);
-		field.setWidth(100, Unit.PERCENTAGE);
+		field.setWidthFull();
 		trackField(field);
 		return field;
 	}
@@ -135,19 +147,19 @@ public abstract class FormComponent<T> extends VerticalLayout {
 	protected TextArea createTextArea(String propertyId, String i18nPrefix) {
 		TextArea field = new TextArea();
 		field.setId(propertyId);
-		field.setCaption(I18nProperties.getPrefixCaption(i18nPrefix, propertyId));
+		field.setLabel(I18nProperties.getPrefixCaption(i18nPrefix, propertyId));
 		CssStyles.style(field, CssStyles.CAPTION_ON_TOP);
-		field.setWidth(100, Unit.PERCENTAGE);
+		field.setWidthFull();
 		trackField(field);
 		return field;
 	}
 
-	protected CheckBox createCheckBox(String propertyId, String i18nPrefix) {
-		CheckBox field = new CheckBox();
+	protected Checkbox createCheckBox(String propertyId, String i18nPrefix) {
+		Checkbox field = new Checkbox();
 		field.setId(propertyId);
-		field.setCaption(I18nProperties.getPrefixCaption(i18nPrefix, propertyId));
+		field.setLabel(I18nProperties.getPrefixCaption(i18nPrefix, propertyId));
 		CssStyles.style(field, CssStyles.CAPTION_ON_TOP);
-		field.setWidth(100, Unit.PERCENTAGE);
+		field.setWidthFull();
 		trackField(field);
 		return field;
 	}
@@ -155,10 +167,10 @@ public abstract class FormComponent<T> extends VerticalLayout {
 	protected RadioButtonGroup<Boolean> createBooleanRadioGroup(String propertyId, String i18nPrefix) {
 		RadioButtonGroup<Boolean> field = new RadioButtonGroup<>();
 		field.setId(propertyId);
-		field.setCaption(I18nProperties.getPrefixCaption(i18nPrefix, propertyId));
-		CssStyles.style(field, CssStyles.CAPTION_ON_TOP, ValoTheme.OPTIONGROUP_HORIZONTAL);
+		field.setLabel(I18nProperties.getPrefixCaption(i18nPrefix, propertyId));
+		CssStyles.style(field, CssStyles.CAPTION_ON_TOP, SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL);
 		field.setItems(Boolean.TRUE, Boolean.FALSE);
-		field.setItemCaptionGenerator(
+		field.setItemLabelGenerator(
 			b -> b
 				? I18nProperties.getEnumCaption(de.symeda.sormas.api.utils.YesNoUnknown.YES)
 				: I18nProperties.getEnumCaption(de.symeda.sormas.api.utils.YesNoUnknown.NO));
@@ -169,11 +181,11 @@ public abstract class FormComponent<T> extends VerticalLayout {
 	protected <E extends Enum<E>> RadioButtonGroup<E> createEnumRadioGroup(String propertyId, String i18nPrefix, Class<E> enumClass) {
 		RadioButtonGroup<E> field = new RadioButtonGroup<>();
 		field.setId(propertyId);
-		field.setCaption(I18nProperties.getPrefixCaption(i18nPrefix, propertyId));
-		CssStyles.style(field, CssStyles.CAPTION_ON_TOP, ValoTheme.OPTIONGROUP_HORIZONTAL);
+		field.setLabel(I18nProperties.getPrefixCaption(i18nPrefix, propertyId));
+		CssStyles.style(field, CssStyles.CAPTION_ON_TOP, SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL);
 		field.setItems(enumClass.getEnumConstants());
-		field.setItemCaptionGenerator(I18nProperties::getEnumCaption);
-		field.setWidth(100, Unit.PERCENTAGE);
+		field.setItemLabelGenerator(I18nProperties::getEnumCaption);
+		field.setWidthFull();
 		trackField(field);
 		return field;
 	}
@@ -184,21 +196,21 @@ public abstract class FormComponent<T> extends VerticalLayout {
 	 */
 	protected HorizontalLayout addRow(Component... fields) {
 		HorizontalLayout row = new HorizontalLayout();
-		row.setWidth(100, Unit.PERCENTAGE);
+		row.setWidthFull();
 		row.setSpacing(true);
 		for (Component field : fields) {
 			if (field != null) {
-				row.addComponent(field);
-				row.setExpandRatio(field, 1);
+				row.add(field);
+				row.setFlexGrow(1, field);
 			}
 		}
 		if (fields.length == 1 || (fields.length == 2 && fields[1] == null)) {
-			Label spacer = new Label();
-			spacer.setWidth(100, Unit.PERCENTAGE);
-			row.addComponent(spacer);
-			row.setExpandRatio(spacer, 1);
+			Span spacer = new Span();
+			spacer.setWidthFull();
+			row.add(spacer);
+			row.setFlexGrow(1, spacer);
 		}
-		addComponent(row);
+		add(row);
 		trackedRows.add(row);
 		return row;
 	}
@@ -206,31 +218,31 @@ public abstract class FormComponent<T> extends VerticalLayout {
 	/** Creates a row with custom expand ratios per field. */
 	protected HorizontalLayout addRow(float[] expandRatios, Component... fields) {
 		HorizontalLayout row = new HorizontalLayout();
-		row.setWidth(100, Unit.PERCENTAGE);
+		row.setWidthFull();
 		row.setSpacing(true);
 		for (int i = 0; i < fields.length; i++) {
 			if (fields[i] != null) {
-				row.addComponent(fields[i]);
-				row.setExpandRatio(fields[i], expandRatios[i]);
+				row.add(fields[i]);
+				row.setFlexGrow(expandRatios[i], fields[i]);
 			}
 		}
-		addComponent(row);
+		add(row);
 		trackedRows.add(row);
 		return row;
 	}
 
 	/** Creates a 3-component row for field + detail + spacer toggle pattern. */
-	protected HorizontalLayout addToggleRow(Component main, Component detail, Label spacer) {
+	protected HorizontalLayout addToggleRow(Component main, Component detail, Component spacer) {
 		HorizontalLayout row = new HorizontalLayout();
-		row.setWidth(100, Unit.PERCENTAGE);
+		row.setWidthFull();
 		row.setSpacing(true);
-		row.addComponent(main);
-		row.setExpandRatio(main, 1);
-		row.addComponent(detail);
-		row.setExpandRatio(detail, 1);
-		row.addComponent(spacer);
-		row.setExpandRatio(spacer, 1);
-		addComponent(row);
+		row.add(main);
+		row.setFlexGrow(1, main);
+		row.add(detail);
+		row.setFlexGrow(1, detail);
+		row.add(spacer);
+		row.setFlexGrow(1, spacer);
+		add(row);
 		trackedRows.add(row);
 		return row;
 	}
@@ -238,15 +250,15 @@ public abstract class FormComponent<T> extends VerticalLayout {
 	/** Creates a row with a leading spacer for right-alignment. */
 	protected HorizontalLayout addRowWithLeadingSpacer(Component field) {
 		HorizontalLayout row = new HorizontalLayout();
-		row.setWidth(100, Unit.PERCENTAGE);
+		row.setWidthFull();
 		row.setSpacing(true);
-		Label spacer = new Label();
-		spacer.setWidth(100, Unit.PERCENTAGE);
-		row.addComponent(spacer);
-		row.setExpandRatio(spacer, 1);
-		row.addComponent(field);
-		row.setExpandRatio(field, 1);
-		addComponent(row);
+		Span spacer = new Span();
+		spacer.setWidthFull();
+		row.add(spacer);
+		row.setFlexGrow(1, spacer);
+		row.add(field);
+		row.setFlexGrow(1, field);
+		add(row);
 		trackedRows.add(row);
 		return row;
 	}
@@ -254,33 +266,31 @@ public abstract class FormComponent<T> extends VerticalLayout {
 	/** Creates a single-field row without spacer (full width). */
 	protected HorizontalLayout addFullWidthRow(Component field) {
 		HorizontalLayout row = new HorizontalLayout();
-		row.setWidth(100, Unit.PERCENTAGE);
+		row.setWidthFull();
 		row.setSpacing(true);
-		row.addComponent(field);
-		row.setExpandRatio(field, 1);
-		addComponent(row);
+		row.add(field);
+		row.setFlexGrow(1, field);
+		add(row);
 		trackedRows.add(row);
 		return row;
 	}
 
 	/**
 	 * Updates a ComboBox's items to only those enum values visible for the given disease
-	 * (based on {@link Diseases} annotations). Preserves the current selection if still valid.
+	 * (based on {@link Diseases} annotations). Keeps the current selection if still valid, without a
+	 * value change ({@link KeepValueComboBox}, from {@link #createComboBox}); otherwise clears it.
 	 */
 	protected static <E extends Enum<E>> void updateComboBoxByDisease(ComboBox<E> comboBox, Class<E> enumClass, Disease disease) {
-		E currentValue = comboBox.getValue();
 		List<E> filtered = Diseases.DiseasesConfiguration.getVisibleValues(enumClass, disease);
 		filtered.sort(Comparator.comparing(Object::toString));
 		comboBox.setItems(filtered);
-		if (currentValue != null && filtered.contains(currentValue)) {
-			comboBox.setValue(currentValue);
-		}
 	}
 
 	/**
 	 * Updates a ComboBox's items to only those enum values visible for the given disease
 	 * AND applicable to the given pathogen test type (based on {@link Diseases} and
-	 * {@link ApplicableToPathogenTests} annotations). Preserves the current selection if still valid.
+	 * {@link ApplicableToPathogenTests} annotations). Keeps the current selection if still valid, without a
+	 * value change ({@link KeepValueComboBox}, from {@link #createComboBox}); otherwise clears it.
 	 */
 	protected static <E extends Enum<E>> void updateComboBoxByDiseaseAndTestType(
 		ComboBox<E> comboBox,
@@ -288,7 +298,6 @@ public abstract class FormComponent<T> extends VerticalLayout {
 		Disease disease,
 		PathogenTestType testType) {
 
-		E currentValue = comboBox.getValue();
 		List<E> filtered = Diseases.DiseasesConfiguration.getVisibleValues(enumClass, disease).stream().filter(value -> {
 			if (testType == null) {
 				return true;
@@ -302,9 +311,6 @@ public abstract class FormComponent<T> extends VerticalLayout {
 			}
 		}).sorted(Comparator.comparing(Object::toString)).collect(Collectors.toList());
 		comboBox.setItems(filtered);
-		if (currentValue != null && filtered.contains(currentValue)) {
-			comboBox.setValue(currentValue);
-		}
 	}
 
 	/**
@@ -391,9 +397,12 @@ public abstract class FormComponent<T> extends VerticalLayout {
 		return categories;
 	}
 
-	protected Label createSpacer() {
-		Label spacer = new Label();
-		spacer.setWidth(100, Unit.PERCENTAGE);
+	/**
+	 * Was a Vaadin 8 {@code Label}; {@link #updateRowVisibility} ignores spacers.
+	 */
+	protected Span createSpacer() {
+		Span spacer = new Span();
+		spacer.setWidthFull();
 		return spacer;
 	}
 
@@ -461,7 +470,7 @@ public abstract class FormComponent<T> extends VerticalLayout {
 		}
 	}
 
-	protected void updateRequiredValidation(HasValue<?> field) {
+	protected void updateRequiredValidation(HasValue<?, ?> field) {
 		Component component = (Component) field;
 		if (!component.isVisible() || !field.isEmpty()) {
 			clearValidationError(component);
@@ -470,7 +479,7 @@ public abstract class FormComponent<T> extends VerticalLayout {
 		applyValidationError(component, requiredErrorMessage(component));
 	}
 
-	protected void validateRequiredVisible(HasValue<?> field) {
+	protected void validateRequiredVisible(HasValue<?, ?> field) {
 		Component component = (Component) field;
 		if (!component.isVisible()) {
 			clearValidationError(component);
@@ -500,7 +509,14 @@ public abstract class FormComponent<T> extends VerticalLayout {
 	}
 
 	private String requiredErrorMessage(Component field) {
-		return I18nProperties.getValidationError(Validations.required, field.getCaption());
+		return I18nProperties.getValidationError(Validations.required, getCaption(field));
+	}
+
+	/**
+	 * Was {@code Component.getCaption()}: the label of a Flow field.
+	 */
+	protected static String getCaption(Component field) {
+		return field instanceof HasLabel ? ((HasLabel) field).getLabel() : null;
 	}
 
 	private void applyValidationError(Component field, String errorMessage) {
@@ -508,14 +524,17 @@ public abstract class FormComponent<T> extends VerticalLayout {
 			clearValidationError(field);
 			return;
 		}
-		if (field instanceof AbstractComponent) {
-			((AbstractComponent) field).setComponentError(new UserError(errorMessage));
+		// was setComponentError(new UserError(errorMessage))
+		if (field instanceof HasValidation) {
+			((HasValidation) field).setErrorMessage(errorMessage);
+			((HasValidation) field).setInvalid(true);
 		}
 	}
 
 	protected void clearValidationError(Component field) {
-		if (field instanceof AbstractComponent) {
-			((AbstractComponent) field).setComponentError(null);
+		if (field instanceof HasValidation) {
+			((HasValidation) field).setErrorMessage(null);
+			((HasValidation) field).setInvalid(false);
 		}
 	}
 
@@ -525,7 +544,7 @@ public abstract class FormComponent<T> extends VerticalLayout {
 	 */
 	public void applyVisibility(FieldVisibilityCheckers checkers, Class<?> dtoClass) {
 		for (Component field : trackedFields) {
-			String id = field.getId();
+			String id = field.getId().orElse(null);
 			if (id != null && !checkers.isVisible(dtoClass, id)) {
 				field.setVisible(false);
 			}
@@ -539,10 +558,14 @@ public abstract class FormComponent<T> extends VerticalLayout {
 	 */
 	public void applyAccess(UiFieldAccessCheckers checkers, Class<?> dtoClass) {
 		for (Component field : trackedFields) {
-			String id = field.getId();
+			String id = field.getId().orElse(null);
 			if (id != null && !checkers.isAccessible(dtoClass, id)) {
-				field.setEnabled(false);
-				field.addStyleName(CssStyles.INACCESSIBLE_FIELD);
+				if (field instanceof HasEnabled) {
+					((HasEnabled) field).setEnabled(false);
+				}
+				if (field instanceof HasStyle) {
+					CssStyles.style((HasStyle) field, CssStyles.INACCESSIBLE_FIELD);
+				}
 			}
 		}
 	}
@@ -552,14 +575,14 @@ public abstract class FormComponent<T> extends VerticalLayout {
 	}
 
 	@Override
-	public void detach() {
+	protected void onDetach(DetachEvent detachEvent) {
 		for (Registration reg : registrations) {
 			reg.remove();
 		}
 		registrations.clear();
 		binder.removeBean();
 		onCleanup();
-		super.detach();
+		super.onDetach(detachEvent);
 	}
 
 	/**
@@ -601,7 +624,7 @@ public abstract class FormComponent<T> extends VerticalLayout {
 			for (BindingValidationStatus<?> fieldStatus : status.getFieldValidationErrors()) {
 				String caption = null;
 				if (fieldStatus.getField() instanceof Component) {
-					caption = ((Component) fieldStatus.getField()).getCaption();
+					caption = getCaption((Component) fieldStatus.getField());
 				}
 				String errorMsg = fieldStatus.getMessage().orElse(caption != null ? caption : "");
 				fieldCauses.add(new InvalidValueException(caption != null ? caption : errorMsg));
@@ -622,17 +645,17 @@ public abstract class FormComponent<T> extends VerticalLayout {
 	}
 
 	/**
-	 * Hides a layout row if none of its actual field children are visible (ignores spacer Labels).
+	 * Hides a layout row if none of its actual field children are visible (ignores spacers: {@link Span}s, which were
+	 * Vaadin 8 Labels).
 	 */
-	public static void updateRowVisibility(AbstractOrderedLayout row) {
+	public static void updateRowVisibility(Component row) {
 		boolean anyChildVisible = false;
-		for (int i = 0; i < row.getComponentCount(); i++) {
-			Component child = row.getComponent(i);
-			if (child instanceof Label) {
+		for (Component child : (Iterable<Component>) row.getChildren()::iterator) {
+			if (child instanceof Span) {
 				continue;
 			}
-			if (child instanceof AbstractOrderedLayout) {
-				updateRowVisibility((AbstractOrderedLayout) child);
+			if (child instanceof FlexComponent) {
+				updateRowVisibility(child);
 			}
 			if (child.isVisible()) {
 				anyChildVisible = true;

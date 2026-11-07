@@ -2,8 +2,8 @@ package de.symeda.sormas.api.campaign.diagram;
 
 import java.util.List;
 
-import javax.ejb.Remote;
-import javax.validation.Valid;
+import jakarta.ejb.Remote;
+import jakarta.validation.Valid;
 
 @Remote
 public interface CampaignDiagramDefinitionFacade {

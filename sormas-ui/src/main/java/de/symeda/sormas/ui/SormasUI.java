@@ -17,65 +17,137 @@
  *******************************************************************************/
 package de.symeda.sormas.ui;
 
-import com.vaadin.annotations.Theme;
-import com.vaadin.annotations.VaadinServletConfiguration;
-import com.vaadin.annotations.Viewport;
-import com.vaadin.annotations.Widgetset;
-import com.vaadin.server.Responsive;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinServlet;
-import com.vaadin.server.VaadinSession;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.themes.ValoTheme;
+import java.io.Serializable;
+import java.util.concurrent.Future;
+
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.page.Page;
+import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinServlet;
+import com.vaadin.flow.server.VaadinSession;
+
 import de.symeda.sormas.api.FacadeProvider;
-import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.ui.UserProvider.HasUserProvider;
 import de.symeda.sormas.ui.ViewModelProviders.HasViewModelProviders;
-import de.symeda.sormas.ui.utils.SormasDefaultConverterFactory;
+import de.symeda.sormas.ui.navigation.Navigator;
 
-import javax.servlet.annotation.HttpConstraint;
-import javax.servlet.annotation.ServletSecurity;
-import javax.servlet.annotation.WebServlet;
+import jakarta.servlet.annotation.WebServlet;
 
 /**
- * Main UI class of the application that shows either the login screen or the
- * main view of the application depending on whether a user is signed in.
- *
- * The @Viewport annotation configures the viewport meta tags appropriately on
- * mobile devices. Instead of device based scaling (default), using responsive
- * layouts.
+ * Per-UI state of the main application (user provider, view model providers, navigator, main screen), attached to the
+ * Flow {@link UI}.
+ * <p>
+ * In Vaadin 8 this class was the UI subclass. Flow creates a plain {@link UI} for every browser tab and ignores the
+ * {@code UI} servlet init parameter, so this class is a holder now: {@link SormasUIInitListener} creates one for each
+ * new UI of {@link SormasUIServlet} and runs {@link #init(UI, VaadinRequest)} (what {@code UI.init} did) before the
+ * UI's first navigation. {@link #get()} returns the holder of the current UI; the UI methods that callers used on it
+ * ({@link #getPage()}, {@link #setPollInterval(int)}, {@link #access(Command)}, {@link #getCurrent()}) delegate to
+ * the UI.
+ * <p>
+ * The viewport meta tags (formerly the @Viewport annotation here) are set by {@link SormasAppShell}.
  */
 @SuppressWarnings("serial")
-@Viewport("user-scalable=no,initial-scale=1.0")
-@Theme("sormas")
-@Widgetset("de.symeda.sormas.SormasWidgetset")
-public class SormasUI extends UI implements HasUserProvider, HasViewModelProviders {
+public class SormasUI implements HasUserProvider, HasViewModelProviders, Serializable {
 
+	private final UI ui;
 	private final UserProvider userProvider = new UserProvider();
 	private final ViewModelProviders viewModelProviders = new ViewModelProviders();
 
-	@Override
-	public void init(VaadinRequest vaadinRequest) {
+	private Navigator navigator;
+	private MainScreen mainScreen;
+	private String pageTitle;
 
-		setErrorHandler(SormasErrorHandler.get());
-		setLocale(vaadinRequest.getLocale());
-
-		Responsive.makeResponsive(this);
-
-		VaadinSession.getCurrent().setConverterFactory(new SormasDefaultConverterFactory());
-
-		getPage().setTitle(FacadeProvider.getConfigFacade().getSormasInstanceName());
-
-		initMainScreen();
+	/**
+	 * Creates a holder for the UI without attaching or initialising it ({@link #init(UI, VaadinRequest)} does both).
+	 */
+	public SormasUI(UI ui) {
+		this.ui = ui;
 	}
 
+	/**
+	 * Attaches a new holder to the UI and initialises it, as {@code UI.init} did in Vaadin 8. Called once per UI, before
+	 * its first navigation, so that the routes of the session are registered when the router resolves the location.
+	 */
+	static SormasUI init(UI ui, VaadinRequest vaadinRequest) {
+
+		SormasUI sormasUI = new SormasUI(ui);
+		ComponentUtil.setData(ui, SormasUI.class, sormasUI);
+
+		VaadinSession.getCurrent().setErrorHandler(SormasErrorHandler.get());
+		if (vaadinRequest != null) {
+			ui.setLocale(vaadinRequest.getLocale());
+		}
+
+		sormasUI.pageTitle = FacadeProvider.getConfigFacade().getSormasInstanceName();
+		ui.getPage().setTitle(sormasUI.pageTitle);
+
+		sormasUI.initMainScreen();
+		return sormasUI;
+	}
+
+	/**
+	 * Builds the main screen (menu and view registration) when the UI is created, as before: the routes of this
+	 * session are registered before the first navigation. {@link de.symeda.sormas.ui.navigation.MainLayout} shows it.
+	 */
 	protected void initMainScreen() {
-		addStyleName(ValoTheme.UI_WITH_MENU);
-		setContent(new MainScreen(SormasUI.this));
+		mainScreen = new MainScreen(SormasUI.this);
 	}
 
+	/**
+	 * @return the holder of the current UI, or {@code null} when there is no current UI or it is not a UI of the main
+	 *         application
+	 */
 	public static SormasUI get() {
-		return (SormasUI) UI.getCurrent();
+		UI currentUI = UI.getCurrent();
+		return currentUI != null ? ComponentUtil.getData(currentUI, SormasUI.class) : null;
+	}
+
+	/**
+	 * @return the current Flow UI ({@link UI#getCurrent()}); kept because callers used the inherited static method
+	 */
+	public static UI getCurrent() {
+		return UI.getCurrent();
+	}
+
+	/**
+	 * @return the Flow UI this holder belongs to
+	 */
+	public UI getUI() {
+		return ui;
+	}
+
+	public Page getPage() {
+		return ui.getPage();
+	}
+
+	public void setPollInterval(int intervalInMillis) {
+		ui.setPollInterval(intervalInMillis);
+	}
+
+	public Future<Void> access(Command command) {
+		return ui.access(command);
+	}
+
+	/**
+	 * @return the page title set when the UI was created (the instance name). Flow sets the title again after every
+	 *         navigation, so {@link de.symeda.sormas.ui.navigation.MainLayout} returns it as its dynamic title.
+	 */
+	public String getPageTitle() {
+		return pageTitle;
+	}
+
+	public Navigator getNavigator() {
+		return navigator;
+	}
+
+	public void setNavigator(Navigator navigator) {
+		this.navigator = navigator;
+	}
+
+	public MainScreen getMainScreen() {
+		return mainScreen;
 	}
 
 	@Override
@@ -88,10 +160,14 @@ public class SormasUI extends UI implements HasUserProvider, HasViewModelProvide
 		return viewModelProviders;
 	}
 
+	/**
+	 * The one Vaadin servlet of the web UI. No {@code @ServletSecurity}: in Vaadin 8 the container refused this servlet
+	 * to users without the {@code SORMAS_UI} right; on Payara 7 that refuses the servlet root to everyone, so
+	 * {@link de.symeda.sormas.ui.login.LoginUI} checks the login before every navigation instead (E001). The {@code UI}
+	 * init parameter is gone: Flow ignores it ({@link SormasUIInitListener}).
+	 */
 	@WebServlet(urlPatterns = {
 		"/*" }, name = "SormasUIServlet", asyncSupported = true)
-	@VaadinServletConfiguration(ui = SormasUI.class, productionMode = false)
-	@ServletSecurity(@HttpConstraint(rolesAllowed = UserRight._SORMAS_UI))
 	public static class SormasUIServlet extends VaadinServlet {
 
 	}

@@ -15,9 +15,9 @@
 
 package de.symeda.sormas.ui.sormastosormas;
 
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.sormastosormas.share.ShareRequestCriteria;
 
@@ -36,20 +36,20 @@ public class ShareRequestGridComponent extends VerticalLayout {
 		this.criteria = criteria;
 
 		setSizeFull();
-		setMargin(false);
+		setPadding(false);
 
 		grid = new ShareRequestGrid(viewConfiguration.isInEagerMode(), criteria, viewConfiguration.getViewType());
 		grid.setSizeFull();
 
 		VerticalLayout gridLayout = new VerticalLayout();
-		gridLayout.addComponent(createFilterBar(viewConfiguration.getViewType(), filterChangeHandler, filterResetHandler));
+		gridLayout.add(createFilterBar(viewConfiguration.getViewType(), filterChangeHandler, filterResetHandler));
 
-		gridLayout.addComponent(grid);
+		gridLayout.add(grid);
 
-		gridLayout.setMargin(true);
+		gridLayout.setPadding(true);
 		styleGridLayout(gridLayout);
 
-		addComponent(gridLayout);
+		add(gridLayout);
 	}
 
 	public void reload(ViewChangeListener.ViewChangeEvent event) {
@@ -64,7 +64,7 @@ public class ShareRequestGridComponent extends VerticalLayout {
 
 	public HorizontalLayout createFilterBar(ShareRequestViewType viewType, Runnable filterChangeHandler, Runnable filterResetHandler) {
 		HorizontalLayout filterLayout = new HorizontalLayout();
-		filterLayout.setMargin(false);
+		filterLayout.setPadding(false);
 		filterLayout.setSpacing(true);
 		filterLayout.setSizeUndefined();
 
@@ -72,7 +72,7 @@ public class ShareRequestGridComponent extends VerticalLayout {
 		filterForm.addResetHandler((e) -> filterResetHandler.run());
 		filterForm.addApplyHandler(e -> filterChangeHandler.run());
 
-		filterLayout.addComponent(filterForm);
+		filterLayout.add(filterForm);
 
 		return filterLayout;
 	}
@@ -80,8 +80,8 @@ public class ShareRequestGridComponent extends VerticalLayout {
 	private void styleGridLayout(VerticalLayout gridLayout) {
 		gridLayout.setSpacing(false);
 		gridLayout.setSizeFull();
-		gridLayout.setExpandRatio(grid, 1);
-		gridLayout.setStyleName("crud-main-layout");
+		gridLayout.setFlexGrow(1, grid);
+		gridLayout.setClassName("crud-main-layout");
 	}
 
 	public void updateFilterComponents() {

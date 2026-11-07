@@ -20,7 +20,7 @@ package de.symeda.sormas.ui.utils;
 
 import java.util.Date;
 
-import com.vaadin.v7.data.validator.AbstractValidator;
+import de.symeda.sormas.ui.utils.fields.AbstractValidator;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Validations;

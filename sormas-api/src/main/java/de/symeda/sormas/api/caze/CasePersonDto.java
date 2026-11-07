@@ -17,7 +17,7 @@ package de.symeda.sormas.api.caze;
 
 import java.io.Serializable;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import de.symeda.sormas.api.audit.AuditIncludeProperty;
 import de.symeda.sormas.api.audit.AuditedClass;

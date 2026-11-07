@@ -20,13 +20,12 @@
 
 package de.symeda.sormas.ui.events.groups;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.event.EventGroupReferenceDto;
 import de.symeda.sormas.api.i18n.Captions;
@@ -53,31 +52,33 @@ public class EventGroupMemberListComponent extends VerticalLayout {
 	}
 
 	private void createEventListComponent(EventGroupMemberList eventList, String heading) {
-		setWidth(100, Unit.PERCENTAGE);
-		setMargin(false);
+		setWidthFull();
+		setPadding(false);
 		setSpacing(false);
 
 		HorizontalLayout componentHeader = new HorizontalLayout();
-		componentHeader.setMargin(false);
+		componentHeader.setPadding(false);
 		componentHeader.setSpacing(false);
-		componentHeader.setWidth(100, Unit.PERCENTAGE);
-		addComponent(componentHeader);
+		componentHeader.setWidthFull();
+		add(componentHeader);
 
 		list = eventList;
-		addComponent(list);
+		add(list);
 		list.reload();
 
-		Label eventLabel = new Label(heading);
-		eventLabel.addStyleName(CssStyles.H3);
-		componentHeader.addComponent(eventLabel);
+		Span eventLabel = new Span(heading);
+		eventLabel.addClassName(CssStyles.H3);
+		componentHeader.add(eventLabel);
+		// Vaadin 8: the heading's slot took the free space, the button sat right in its own slot
+		componentHeader.setFlexGrow(1, eventLabel);
 
 		if (UiUtil.permitted(UserRight.EVENTGROUP_LINK)) {
 			createButton = ButtonHelper.createButton(I18nProperties.getCaption(Captions.linkEvent));
-			createButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
-			createButton.setIcon(VaadinIcons.PLUS_CIRCLE);
+			CssStyles.style(createButton, CssStyles.BUTTON_PRIMARY);
+			ButtonHelper.setIcon(createButton, VaadinIcon.PLUS_CIRCLE);
 			createButton.addClickListener(event -> ControllerProvider.getEventController().selectEvent(eventGroupReference));
-			componentHeader.addComponent(createButton);
-			componentHeader.setComponentAlignment(createButton, Alignment.MIDDLE_RIGHT);
+			componentHeader.add(createButton);
+			componentHeader.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, createButton);
 		}
 	}
 }

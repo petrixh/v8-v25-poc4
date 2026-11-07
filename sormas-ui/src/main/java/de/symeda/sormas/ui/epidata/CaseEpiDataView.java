@@ -17,10 +17,9 @@ package de.symeda.sormas.ui.epidata;
 
 import java.util.function.Consumer;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.FacadeProvider;
@@ -36,10 +35,13 @@ import de.symeda.sormas.ui.caze.AbstractCaseView;
 import de.symeda.sormas.ui.contact.SourceContactListComponent;
 import de.symeda.sormas.ui.travelentry.travelentrylink.TravelEntryListComponent;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DetailSubComponentWrapper;
 import de.symeda.sormas.ui.utils.LayoutWithSidePanel;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.sidecomponent.SideComponentLayout;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class CaseEpiDataView extends AbstractCaseView {
 
@@ -60,11 +62,11 @@ public class CaseEpiDataView extends AbstractCaseView {
 	@Override
 	protected void initView(String params) {
 
-		setHeightUndefined();
+		setHeight(null);
 
 		DetailSubComponentWrapper container = new DetailSubComponentWrapper(() -> epiDataComponent);
-		container.setWidth(100, Unit.PERCENTAGE);
-		container.setMargin(true);
+		container.setWidth("100%");
+		container.setPadding(true);
 		setSubComponent(container);
 
 		boolean sourceContactsVisible = UiUtil.permitted(UserRight.CONTACT_VIEW);
@@ -76,25 +78,26 @@ public class CaseEpiDataView extends AbstractCaseView {
 			.getEpiDataComponent(getCaseRef().getUuid(), sourceContactsToggleCallback, UiUtil.permitted(isEditAllowed(), UserRight.CASE_EDIT));
 
 		LayoutWithSidePanel layout = new LayoutWithSidePanel(epiDataComponent, LOC_SOURCE_CONTACTS, TRAVEL_ENTRIES_LOC);
-		container.addComponent(layout);
+		container.add(layout);
 
 		if (sourceContactsVisible) {
-			sourceContactsLayout.setMargin(false);
+			sourceContactsLayout.setPadding(false);
 			sourceContactsLayout.setSpacing(false);
 
 			final SourceContactListComponent sourceContactList =
 				new SourceContactListComponent(getCaseRef(), this, UiUtil.permitted(isEditAllowed(), UserRight.CASE_EDIT));
-			sourceContactList.addStyleName(CssStyles.SIDE_COMPONENT);
-			sourceContactsLayout.addComponent(sourceContactList);
+			sourceContactList.addClassName(CssStyles.SIDE_COMPONENT);
+			sourceContactsLayout.add(sourceContactList);
 
 			if (UiUtil.permitted(UserRight.CONTACT_CREATE, UserRight.CASE_EDIT)) {
-				sourceContactList.addStyleName(CssStyles.VSPACE_NONE);
-				Label contactCreationDisclaimer = new Label(
-					VaadinIcons.INFO_CIRCLE.getHtml() + " " + I18nProperties.getString(Strings.infoCreateNewContactDiscardsChanges),
+				sourceContactList.addClassName(CssStyles.VSPACE_NONE);
+				Span contactCreationDisclaimer = VaadinUiUtil.createLabel(
+					HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE) + " "
+						+ I18nProperties.getString(Strings.infoCreateNewContactDiscardsChanges),
 					ContentMode.HTML);
-				contactCreationDisclaimer.addStyleName(CssStyles.VSPACE_TOP_4);
+				contactCreationDisclaimer.addClassName(CssStyles.VSPACE_TOP_4);
 
-				sourceContactsLayout.addComponent(contactCreationDisclaimer);
+				sourceContactsLayout.add(contactCreationDisclaimer);
 			}
 
 			epiDataComponent.getWrappedComponent().setGetSourceContactsCallback(sourceContactList::getEntries);

@@ -19,7 +19,7 @@ package de.symeda.sormas.ui.utils;
 
 import java.util.Collection;
 
-import com.vaadin.data.ValueProvider;
+import com.vaadin.flow.function.ValueProvider;
 
 import de.symeda.sormas.api.utils.HtmlHelper;
 

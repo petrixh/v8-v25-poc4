@@ -17,7 +17,7 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.samples;
 
-import static com.vaadin.ui.Notification.Type.TRAY_NOTIFICATION;
+import static de.symeda.sormas.ui.utils.NotificationHelper.Type.TRAY_NOTIFICATION;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,10 +31,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -70,6 +68,7 @@ import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 public class PathogenTestController {
@@ -199,22 +198,22 @@ public class PathogenTestController {
 		final CommitDiscardWrapperComponent<PathogenTestForm> editView =
 			getPathogenTestEditComponent(pathogenTestUuid, doneCallback, isEditAllowed, isDeleteAllowed);
 
-		Window popupWindow = VaadinUiUtil.createPopupWindow();
+		Dialog popupWindow = VaadinUiUtil.createPopupWindow();
 
 		if (isDeleteAllowed) {
 			editView.addDeleteWithReasonOrRestoreListener((deleteDetails) -> {
 				FacadeProvider.getPathogenTestFacade().deletePathogenTest(pathogenTestUuid, deleteDetails);
-				UI.getCurrent().removeWindow(popupWindow);
+				popupWindow.close();
 				doneCallback.run();
 			}, I18nProperties.getCaption(PathogenTestDto.I18N_PREFIX));
 		}
 		editView.addCommitListener(popupWindow::close);
 		editView.addDiscardListener(popupWindow::close);
 
-		popupWindow.setContent(editView);
+		popupWindow.add(editView);
 		popupWindow
-			.setCaption(I18nProperties.getString(!isEditAllowed ? Strings.headingViewPathogenTestResult : Strings.headingEditPathogenTestResult));
-		UI.getCurrent().addWindow(popupWindow);
+			.setHeaderTitle(I18nProperties.getString(!isEditAllowed ? Strings.headingViewPathogenTestResult : Strings.headingEditPathogenTestResult));
+		popupWindow.open();
 	}
 
 	public CommitDiscardWrapperComponent<PathogenTestForm> getPathogenTestEditComponent(
@@ -294,7 +293,7 @@ public class PathogenTestController {
 
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getString(Strings.headingUpdateCaseWithNewDiseaseVariant),
-			new Label(
+			new Span(
 				String.format(
 					I18nProperties.getString(Strings.messageUpdateCaseWithNewDiseaseVariant),
 					existingCaseDto.getDiseaseVariant() == null
@@ -314,7 +313,7 @@ public class PathogenTestController {
 				if (callback != null) {
 					callback.accept(yes);
 				}
-			}).bringToFront();
+			}); // V8 bringToFront(): the newest Flow dialog is on top already
 	}
 
 	public void savePathogenTestForSample(PathogenTestDto dto, boolean suppressNavigateToCase) {
@@ -330,7 +329,7 @@ public class PathogenTestController {
 			p.setEnvironmentSample(sampleRef);
 			facade.savePathogenTest(p);
 		});
-		Notification.show(I18nProperties.getString(Strings.messagePathogenTestsSavedShort), TRAY_NOTIFICATION);
+		NotificationHelper.show(I18nProperties.getString(Strings.messagePathogenTestsSavedShort), TRAY_NOTIFICATION);
 	}
 
 	public void savePathogenTests(List<PathogenTestDto> pathogenTests, SampleReferenceDto sampleRef, boolean suppressNavigateToCase) {
@@ -360,7 +359,7 @@ public class PathogenTestController {
 			handleAssociatedCase(pathogenTests, associatedCase, suppressNavigateToCase);
 		}
 
-		Notification.show(
+		NotificationHelper.show(
 			I18nProperties.getString(pathogenTests.size() == 1 ? Strings.messagePathogenTestSavedShort : Strings.messagePathogenTestsSavedShort),
 			TRAY_NOTIFICATION);
 	}
@@ -682,11 +681,11 @@ public class PathogenTestController {
 		final EventDto event = FacadeProvider.getEventFacade().getEventByUuid(eventParticipant.getEvent().getUuid(), false);
 		final boolean differentDiseases = testedDisease != event.getDisease();
 		final boolean noEventDisease = event.getDisease() == null;
-		Label dialogContent = noEventDisease
-			? new Label(I18nProperties.getString(Strings.messageConvertEventParticipantToCaseNoDisease))
+		Span dialogContent = noEventDisease
+			? new Span(I18nProperties.getString(Strings.messageConvertEventParticipantToCaseNoDisease))
 			: differentDiseases
-				? new Label(I18nProperties.getString(Strings.messageConvertEventParticipantToCaseDifferentDiseases))
-				: new Label(I18nProperties.getString(Strings.messageConvertEventParticipantToCase));
+				? new Span(I18nProperties.getString(Strings.messageConvertEventParticipantToCaseDifferentDiseases))
+				: new Span(I18nProperties.getString(Strings.messageConvertEventParticipantToCase));
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getCaption(Captions.convertEventParticipantToCase),
 			dialogContent,
@@ -708,7 +707,7 @@ public class PathogenTestController {
 	public void showConvertContactToCaseDialog(ContactDto contact, Consumer<Boolean> callback) {
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getCaption(Captions.convertContactToCase),
-			new Label(I18nProperties.getString(Strings.messageConvertContactToCase)),
+			new Span(I18nProperties.getString(Strings.messageConvertContactToCase)),
 			I18nProperties.getString(Strings.yes),
 			I18nProperties.getString(Strings.no),
 			800,
@@ -723,7 +722,7 @@ public class PathogenTestController {
 	public void showCreateContactCaseDialog(ContactDto contact, Disease disease) {
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getCaption(Captions.contactCreateContactCase),
-			new Label(I18nProperties.getString(Strings.messageConvertContactToCaseDifferentDiseases)),
+			new Span(I18nProperties.getString(Strings.messageConvertContactToCaseDifferentDiseases)),
 			I18nProperties.getString(Strings.yes),
 			I18nProperties.getString(Strings.no),
 			800,
@@ -743,7 +742,7 @@ public class PathogenTestController {
 
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getCaption(Captions.caseCloneCaseWithNewDisease) + " " + I18nProperties.getEnumCaption(disease) + "?",
-			new Label(I18nProperties.getString(Strings.messageCloneCaseWithNewDisease)),
+			new Span(I18nProperties.getString(Strings.messageCloneCaseWithNewDisease)),
 			I18nProperties.getString(Strings.yes),
 			I18nProperties.getString(Strings.no),
 			800,
@@ -775,7 +774,7 @@ public class PathogenTestController {
 
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getCaption(Captions.caseConfirmCase),
-			new Label(I18nProperties.getString(Strings.messageConfirmCaseAfterPathogenTest)),
+			new Span(I18nProperties.getString(Strings.messageConfirmCaseAfterPathogenTest)),
 			I18nProperties.getString(Strings.yes),
 			I18nProperties.getString(Strings.no),
 			800,
@@ -806,7 +805,7 @@ public class PathogenTestController {
 
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getCaption(Captions.caseNegativeCase),
-			new Label(I18nProperties.getString(Strings.messageNegativeCaseAfterPathogenTest)),
+			new Span(I18nProperties.getString(Strings.messageNegativeCaseAfterPathogenTest)),
 			I18nProperties.getString(Strings.yes),
 			I18nProperties.getString(Strings.no),
 			800,

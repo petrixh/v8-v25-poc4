@@ -30,14 +30,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.navigator.Navigator;
-import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.DiseaseHelper;
@@ -97,6 +91,7 @@ import de.symeda.sormas.ui.caze.components.caseselection.CaseSelectionField;
 import de.symeda.sormas.ui.contact.components.linelisting.layout.LineListingLayout;
 import de.symeda.sormas.ui.epidata.ContactEpiDataView;
 import de.symeda.sormas.ui.epidata.EpiDataForm;
+import de.symeda.sormas.ui.navigation.Navigator;
 import de.symeda.sormas.ui.person.PersonSelectionGrid;
 import de.symeda.sormas.ui.utils.AbstractView;
 import de.symeda.sormas.ui.utils.ArchiveHandlers;
@@ -105,6 +100,8 @@ import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DeletableUtils;
 import de.symeda.sormas.ui.utils.DeleteRestoreHandlers;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.ViewMode;
 import de.symeda.sormas.ui.utils.components.automaticdeletion.DeletionLabel;
@@ -138,27 +135,28 @@ public class ContactController {
 	}
 
 	public void openLineListingWindow(CaseDataDto caseDataDto) {
-		Window window = new Window(I18nProperties.getString(Strings.headingLineListing));
+		Dialog window = VaadinUiUtil.createPopupWindow();
+		window.setHeaderTitle(I18nProperties.getString(Strings.headingLineListing));
 
 		LineListingLayout lineListingForm = new LineListingLayout(window, caseDataDto);
 		lineListingForm.setSaveCallback(contacts -> saveContactsFromLineListing(lineListingForm, contacts));
 
-		lineListingForm.setWidth(LineListingLayout.DEFAULT_WIDTH, Unit.PIXELS);
+		lineListingForm.setWidth(LineListingLayout.DEFAULT_WIDTH + "px");
 
-		window.setContent(lineListingForm);
+		window.add(lineListingForm);
 		window.setModal(true);
-		window.setPositionX((int) Math.max(0, (Page.getCurrent().getBrowserWindowWidth() - lineListingForm.getWidth())) / 2);
-		window.setPositionY(70);
+		// was centred horizontally by the browser width (the dialog's default) and 70 px from the top
+		window.setTop("70px");
 		window.setResizable(false);
 
-		UI.getCurrent().addWindow(window);
+		window.open();
 	}
 
 	private void saveContactsFromLineListing(LineListingLayout lineListingForm, LinkedList<LineDto<ContactDto>> contacts) {
 		try {
 			lineListingForm.validate();
 		} catch (ValidationRuntimeException e) {
-			Notification.show(I18nProperties.getString(Strings.errorFieldValidationFailed), "", Type.ERROR_MESSAGE);
+			NotificationHelper.show(I18nProperties.getString(Strings.errorFieldValidationFailed), "", Type.ERROR_MESSAGE);
 			return;
 		}
 
@@ -178,7 +176,7 @@ public class ContactController {
 						selectOrCreateContact(newContact, FacadeProvider.getPersonFacade().getByUuid(selectedPerson.getUuid()), uuid -> {
 							if (uuid == null) {
 								FacadeProvider.getContactFacade().save(newContact);
-								Notification.show(I18nProperties.getString(Strings.messageContactCreated), Type.ASSISTIVE_NOTIFICATION);
+								NotificationHelper.show(I18nProperties.getString(Strings.messageContactCreated), Type.ASSISTIVE_NOTIFICATION);
 							}
 						});
 
@@ -199,14 +197,15 @@ public class ContactController {
 
 	public void openLineListingWindow(EventDto eventDto, Set<EventParticipantIndexDto> eventParticipantIndexDtos) {
 		if (eventParticipantIndexDtos.isEmpty()) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingNoEventParticipantsSelected),
 				I18nProperties.getString(Strings.messageNoEventParticipantsSelected),
 				Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				false);
 		} else {
 
-			Window window = new Window(I18nProperties.getString(Strings.headingLineListing));
+			Dialog window = VaadinUiUtil.createPopupWindow();
+			window.setHeaderTitle(I18nProperties.getString(Strings.headingLineListing));
 
 			List<String> uuids = eventParticipantIndexDtos.stream().map(EventParticipantIndexDto::getUuid).collect(Collectors.toList());
 			List<EventParticipantDto> eventParticipantDtos = FacadeProvider.getEventParticipantFacade().getByUuids(uuids);
@@ -214,15 +213,15 @@ public class ContactController {
 			LineListingLayout lineListingForm = new LineListingLayout(window, eventDto, eventParticipantDtos);
 			lineListingForm.setSaveCallback(contacts -> saveContactsFromEventParticipantsLineListing(lineListingForm, contacts));
 
-			lineListingForm.setWidth(LineListingLayout.DEFAULT_WIDTH, Unit.PIXELS);
+			lineListingForm.setWidth(LineListingLayout.DEFAULT_WIDTH + "px");
 
-			window.setContent(lineListingForm);
+			window.add(lineListingForm);
 			window.setModal(true);
-			window.setPositionX((int) Math.max(0, (Page.getCurrent().getBrowserWindowWidth() - lineListingForm.getWidth())) / 2);
-			window.setPositionY(70);
+			// was centred horizontally by the browser width (the dialog's default) and 70 px from the top
+			window.setTop("70px");
 			window.setResizable(false);
 
-			UI.getCurrent().addWindow(window);
+			window.open();
 		}
 	}
 
@@ -230,7 +229,7 @@ public class ContactController {
 		try {
 			lineListingForm.validate();
 		} catch (ValidationRuntimeException e) {
-			Notification.show(I18nProperties.getString(Strings.errorFieldValidationFailed), "", Type.ERROR_MESSAGE);
+			NotificationHelper.show(I18nProperties.getString(Strings.errorFieldValidationFailed), "", Type.ERROR_MESSAGE);
 			return;
 		}
 
@@ -246,7 +245,7 @@ public class ContactController {
 			selectOrCreateContact(newContact, contactLineDto.getPerson(), uuid -> {
 				if (uuid == null) {
 					FacadeProvider.getContactFacade().save(newContact);
-					Notification.show(I18nProperties.getString(Strings.messageContactCreated), Type.ASSISTIVE_NOTIFICATION);
+					NotificationHelper.show(I18nProperties.getString(Strings.messageContactCreated), Type.ASSISTIVE_NOTIFICATION);
 				}
 			});
 
@@ -286,11 +285,11 @@ public class ContactController {
 		EventDto event = FacadeProvider.getEventFacade().getEventByUuid(eventParticipant.getEvent().getUuid(), false);
 
 		if (event.getDisease() == null) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingCreateNewContactIssue),
 				I18nProperties.getString(Strings.messageEventParticipantToContactWithoutEventDisease),
-				Notification.Type.ERROR_MESSAGE,
-				false).show(Page.getCurrent());
+				Type.ERROR_MESSAGE,
+				false);
 			return;
 		}
 
@@ -317,7 +316,7 @@ public class ContactController {
 	public void navigateToView(String viewName, String contactUuid, boolean openTab) {
 		String navigationState = viewName + "/" + contactUuid;
 		if (openTab) {
-			SormasUI.get().getPage().open(SormasUI.get().getPage().getLocation().getRawPath() + "#!" + navigationState, "_blank", false);
+			SormasUI.get().getPage().open(Navigator.getUrl(navigationState), "_blank");
 		} else {
 			SormasUI.get().getNavigator().navigateTo(navigationState);
 		}
@@ -381,8 +380,7 @@ public class ContactController {
 			fragmentParameter = contactUuid;
 		}
 
-		Page page = SormasUI.get().getPage();
-		page.setUriFragment("!" + ContactsView.VIEW_NAME + "/" + fragmentParameter, false);
+		SormasUI.get().getNavigator().updateUrl(ContactsView.VIEW_NAME + "/" + fragmentParameter);
 	}
 
 	private ContactDto createNewContact(CaseDataDto caze, boolean asSourceContact) {
@@ -513,12 +511,16 @@ public class ContactController {
 						final PersonDto person = PersonDto.build();
 
 						if (createForm.getWarningSimilarPersons() != null) {
+							// was Window.getContent(): the wrapper is the dialog's content component
 							CommitDiscardWrapperComponent<PersonSelectionGrid> warningPopUpDuplicatePerson =
 								(CommitDiscardWrapperComponent<PersonSelectionGrid>) createComponent.getWrappedComponent()
 									.getWarningSimilarPersons()
-									.getContent();
+									.getChildren()
+									.filter(CommitDiscardWrapperComponent.class::isInstance)
+									.findFirst()
+									.orElseThrow(() -> new IllegalStateException("Similar persons dialog has no CommitDiscardWrapperComponent"));
 							warningPopUpDuplicatePerson.getDiscardButton().setVisible(true);
-							warningPopUpDuplicatePerson.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionContinue));
+							warningPopUpDuplicatePerson.getCommitButton().setText(I18nProperties.getCaption(Captions.actionContinue));
 							warningPopUpDuplicatePerson.addDoneListener(() -> {
 								if (!contactSaveTriggered) {
 									VaadinUiUtil.showModalPopupWindow(createComponent, I18nProperties.getString(Strings.headingCreateNewContact));
@@ -665,7 +667,7 @@ public class ContactController {
 	public void selectOrCreateContact(final ContactDto contact, final PersonReferenceDto personReferenceDto, Consumer<String> resultConsumer) {
 		ContactSelectionField contactSelect =
 			new ContactSelectionField(contact, personReferenceDto, I18nProperties.getString(Strings.infoSelectOrCreateContact));
-		contactSelect.setWidth(1024, Unit.PIXELS);
+		contactSelect.setWidth("1024px");
 
 		if (contactSelect.hasMatches()) {
 			// TODO add user right parameter
@@ -692,7 +694,7 @@ public class ContactController {
 
 	private void createNewContact(ContactDto contact, Consumer<String> resultConsumer) {
 		final ContactDto savedContact = FacadeProvider.getContactFacade().save(contact);
-		Notification.show(I18nProperties.getString(Strings.messageContactCreated), Type.WARNING_MESSAGE);
+		NotificationHelper.show(I18nProperties.getString(Strings.messageContactCreated), Type.WARNING_MESSAGE);
 		resultConsumer.accept(savedContact.getUuid());
 	}
 
@@ -727,7 +729,7 @@ public class ContactController {
 
 				FacadeProvider.getContactFacade().save(dto);
 
-				Notification.show(I18nProperties.getString(Strings.messageContactSaved), Type.WARNING_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageContactSaved), Type.WARNING_MESSAGE);
 				SormasUI.refreshView();
 			}
 		});
@@ -776,11 +778,11 @@ public class ContactController {
 		String caseUuid,
 		AbstractContactGrid<?> contactGrid) {
 		if (selectedContacts.isEmpty()) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingNoContactsSelected),
 				I18nProperties.getString(Strings.messageNoContactsSelected),
 				Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				false);
 			return;
 		}
 
@@ -804,7 +806,7 @@ public class ContactController {
 		form.setValue(bulkEditData);
 		final CommitDiscardWrapperComponent<BulkContactDataForm> editView = new CommitDiscardWrapperComponent<>(form, form.getFieldGroup());
 
-		Window popupWindow = VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getString(Strings.headingEditContacts));
+		Dialog popupWindow = VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getString(Strings.headingEditContacts));
 
 		editView.addCommitListener(() -> {
 			ContactBulkEditData updatedBulkEditData = form.getValue();
@@ -832,7 +834,7 @@ public class ContactController {
 	private <T extends ContactIndexDto> Consumer<List<T>> bulkOperationCallback(
 		String caseUuid,
 		AbstractContactGrid<?> contactGrid,
-		Window popupWindow) {
+		Dialog popupWindow) {
 		return remainingContacts -> {
 			if (popupWindow != null) {
 				popupWindow.close();
@@ -840,9 +842,9 @@ public class ContactController {
 			contactGrid.reload();
 			if (CollectionUtils.isNotEmpty(remainingContacts)) {
 				if (contactGrid instanceof ContactGrid) {
-					((ContactGrid) contactGrid).asMultiSelect().selectItems(remainingContacts.toArray(new ContactIndexDto[0]));
+					((ContactGrid) contactGrid).asMultiSelect().select(remainingContacts.toArray(new ContactIndexDto[0]));
 				} else if (contactGrid instanceof ContactGridDetailed) {
-					((ContactGridDetailed) contactGrid).asMultiSelect().selectItems(remainingContacts.toArray(new ContactIndexDetailedDto[0]));
+					((ContactGridDetailed) contactGrid).asMultiSelect().select(remainingContacts.toArray(new ContactIndexDetailedDto[0]));
 				}
 			} else {
 				if (caseUuid == null) {
@@ -856,11 +858,11 @@ public class ContactController {
 
 	public void sendEmailsToAllSelectedItems(Collection<? extends ContactIndexDto> selectedRows, AbstractContactGrid<?> contactGrid) {
 		if (selectedRows.isEmpty()) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingNoContactsSelected),
 				I18nProperties.getString(Strings.messageNoContactsSelected),
 				Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				false);
 		} else {
 			ControllerProvider.getExternalEmailController()
 				.sendBulkEmail(
@@ -892,15 +894,15 @@ public class ContactController {
 		AbstractContactGrid<?> contactGrid) {
 
 		if (selectedRows.isEmpty()) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingNoContactsSelected),
 				I18nProperties.getString(Strings.messageNoContactsSelected),
 				Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				false);
 		} else {
 			VaadinUiUtil.showConfirmationPopup(
 				String.format(I18nProperties.getString(Strings.headingContactsCancelFollowUp)),
-				new Label(String.format(I18nProperties.getString(Strings.confirmationCancelFollowUp), selectedRows.size())),
+				new Span(String.format(I18nProperties.getString(Strings.confirmationCancelFollowUp), selectedRows.size())),
 				I18nProperties.getString(Strings.yes),
 				I18nProperties.getString(Strings.no),
 				640,
@@ -942,15 +944,15 @@ public class ContactController {
 		String caseUuid,
 		AbstractContactGrid<?> contactGrid) {
 		if (selectedRows.isEmpty()) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingNoContactsSelected),
 				I18nProperties.getString(Strings.messageNoContactsSelected),
 				Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				false);
 		} else {
 			VaadinUiUtil.showConfirmationPopup(
 				String.format(I18nProperties.getString(Strings.headingContactsLostToFollowUp)),
-				new Label(String.format(I18nProperties.getString(Strings.confirmationLostToFollowUp), selectedRows.size())),
+				new Span(String.format(I18nProperties.getString(Strings.confirmationLostToFollowUp), selectedRows.size())),
 				I18nProperties.getString(Strings.yes),
 				I18nProperties.getString(Strings.no),
 				640,
@@ -1009,10 +1011,10 @@ public class ContactController {
 	public void openSelectCaseForContactWindow(Disease disease, Consumer<CaseSelectionDto> selectedCaseCallback) {
 
 		CaseSelectionField selectionField = new CaseSelectionField(disease);
-		selectionField.setWidth(1280, Unit.PIXELS);
+		selectionField.setWidth("1280px");
 
 		final CommitDiscardWrapperComponent<CaseSelectionField> component = new CommitDiscardWrapperComponent<>(selectionField);
-		component.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionConfirm));
+		component.getCommitButton().setText(I18nProperties.getCaption(Captions.actionConfirm));
 		component.getCommitButton().setEnabled(false);
 		component.addCommitListener(() -> selectedCaseCallback.accept(selectionField.getValue()));
 
@@ -1058,7 +1060,7 @@ public class ContactController {
 				.forEach(
 					(exposureUuid, fields) -> FacadeProvider.getCustomizableFieldValueFacade()
 						.saveEntityCustomFields(exposureUuid, CustomizableFieldContext.EXPOSURE, fields));
-			Notification.show(I18nProperties.getString(Strings.messageContactSaved), Type.WARNING_MESSAGE);
+			NotificationHelper.show(I18nProperties.getString(Strings.messageContactSaved), Type.WARNING_MESSAGE);
 			SormasUI.refreshView();
 		});
 
@@ -1123,17 +1125,16 @@ public class ContactController {
 
 	public void linkSelectedContactsToEvent(Collection<? extends ContactIndexDto> selectedRows, AbstractContactGrid<?> contactGrid) {
 		if (selectedRows.isEmpty()) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingNoContactsSelected),
 				I18nProperties.getString(Strings.messageNoContactsSelected),
-				Notification.Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				Type.WARNING_MESSAGE,
+				false);
 			return;
 		}
 
 		if (!selectedRows.stream().allMatch(contact -> contact.getDisease().equals(selectedRows.stream().findAny().get().getDisease()))) {
-			new Notification(I18nProperties.getString(Strings.messageBulkContactsWithDifferentDiseasesSelected), Notification.Type.WARNING_MESSAGE)
-				.show(Page.getCurrent());
+			NotificationHelper.show(I18nProperties.getString(Strings.messageBulkContactsWithDifferentDiseasesSelected), Type.WARNING_MESSAGE);
 			return;
 		}
 

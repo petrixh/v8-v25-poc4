@@ -40,7 +40,7 @@ public class TaskListComponent extends SideComponent {
 		super(I18nProperties.getString(Strings.entityTasks), actionCallback);
 
 		list = new TaskList(context, entityRef, isEditAllowed);
-		addComponent(list);
+		add(list);
 		list.reload();
 
 		if (UiUtil.permitted(isEditAllowed, UserRight.TASK_CREATE)) {

@@ -17,16 +17,13 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.utils;
 
-import com.vaadin.ui.renderers.TextRenderer;
-
 import de.symeda.sormas.api.utils.HasCaption;
-import elemental.json.JsonValue;
-
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 @SuppressWarnings("serial")
 public class CaptionRenderer extends TextRenderer {
 
 	@Override
-	public JsonValue encode(Object value) {
+	public String encode(Object value) {
 
 		if (value == null) {
 			return null;

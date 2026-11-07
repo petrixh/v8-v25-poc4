@@ -2,7 +2,7 @@ package de.symeda.sormas.api.utils;
 
 import java.util.Set;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Can be used to define ordered mappers (same order by default) that supports specific type and that perform whatever action on this type.

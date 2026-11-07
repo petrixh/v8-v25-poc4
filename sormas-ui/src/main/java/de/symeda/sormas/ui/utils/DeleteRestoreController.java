@@ -6,13 +6,10 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import com.vaadin.server.Page;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.common.DeletionDetails;
@@ -21,6 +18,7 @@ import de.symeda.sormas.api.common.progress.ProcessedEntity;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.uuid.HasUuid;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 
 public class DeleteRestoreController {
 
@@ -34,8 +32,8 @@ public class DeleteRestoreController {
 			return;
 		}
 
-		Label restoreConfirmationMessage = new Label();
-		restoreConfirmationMessage.setValue(
+		Span restoreConfirmationMessage = new Span();
+		restoreConfirmationMessage.setText(
 			String.format(
 				I18nProperties.getString(Strings.confirmationRestoreEntities),
 				entities.size(),
@@ -78,10 +76,10 @@ public class DeleteRestoreController {
 		VerticalLayout verticalLayout = new VerticalLayout();
 		verticalLayout.setMargin(false);
 
-		Label contentLabel = new Label(deleteWithReasonConfirmationMessage, ContentMode.HTML);
-		contentLabel.addStyleName(CssStyles.LABEL_WHITE_SPACE_NORMAL);
+		Span contentLabel = VaadinUiUtil.createLabel(deleteWithReasonConfirmationMessage, ContentMode.HTML);
+		contentLabel.addClassName(CssStyles.LABEL_WHITE_SPACE_NORMAL);
 		contentLabel.setWidthFull();
-		verticalLayout.addComponent(contentLabel);
+		verticalLayout.add(contentLabel);
 
 		deleteHandler.addAdditionalDeleteReasonField(verticalLayout);
 
@@ -132,19 +130,19 @@ public class DeleteRestoreController {
 	}
 
 	private void displayNothingSelectedToBeDeleted(DeleteRestoreMessages messages) {
-		new Notification(
+		NotificationHelper.show(
 			I18nProperties.getString(messages.getHeadingNoSelection()),
 			I18nProperties.getString(messages.getMessageNoSelection()),
-			Notification.Type.WARNING_MESSAGE,
-			false).show(Page.getCurrent());
+			Type.WARNING_MESSAGE,
+			false);
 	}
 
 	private void displayNothingSelectedToBeRestored(DeleteRestoreMessages messages) {
-		new Notification(
+		NotificationHelper.show(
 			I18nProperties.getString(messages.getHeadingNoSelection()),
 			I18nProperties.getString(messages.getMessageNoSelection()),
-			Notification.Type.WARNING_MESSAGE,
-			false).show(Page.getCurrent());
+			Type.WARNING_MESSAGE,
+			false);
 	}
 
 	public <T extends HasUuid> String getDeleteConfirmationDetails(String entity, Collection<T> entities) {

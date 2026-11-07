@@ -21,10 +21,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.ui.CheckBox;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiType;
@@ -124,7 +124,7 @@ public class AefiDashboardMapComponent extends BaseDashboardMapComponent<AefiDas
 			refreshMap(true);
 		});
 
-		layersLayout.addComponent(showSeriousAefiCheckBox);
+		layersLayout.add(showSeriousAefiCheckBox);
 
 		showNonSeriousAefiCheckBox = new CheckBox();
 		showNonSeriousAefiCheckBox.setId(Captions.aefiDashboardShowNonSeriousAefi);
@@ -134,7 +134,7 @@ public class AefiDashboardMapComponent extends BaseDashboardMapComponent<AefiDas
 			refreshMap(true);
 		});
 
-		layersLayout.addComponent(showNonSeriousAefiCheckBox);
+		layersLayout.add(showNonSeriousAefiCheckBox);
 	}
 
 	@Override
@@ -142,17 +142,17 @@ public class AefiDashboardMapComponent extends BaseDashboardMapComponent<AefiDas
 
 		HorizontalLayout samplesLegendLayout = new HorizontalLayout();
 		samplesLegendLayout.setSpacing(false);
-		samplesLegendLayout.setMargin(false);
+		samplesLegendLayout.setPadding(false);
 
 		HorizontalLayout seriousLegendEntry =
 			buildMarkerLegendEntry(MarkerIcon.AEFI_SERIOUS, I18nProperties.getCaption(Captions.aefiDashboardSeriousAefi));
 		CssStyles.style(seriousLegendEntry, CssStyles.HSPACE_RIGHT_3);
-		samplesLegendLayout.addComponent(seriousLegendEntry);
+		samplesLegendLayout.add(seriousLegendEntry);
 
 		HorizontalLayout nonSeriousLegendEntry =
 			buildMarkerLegendEntry(MarkerIcon.AEFI_NON_SERIOUS, I18nProperties.getCaption(Captions.aefiDashboardNonSeriousAefi));
 		CssStyles.style(nonSeriousLegendEntry, CssStyles.HSPACE_RIGHT_3);
-		samplesLegendLayout.addComponent(nonSeriousLegendEntry);
+		samplesLegendLayout.add(nonSeriousLegendEntry);
 
 		return Collections.singletonList(samplesLegendLayout);
 	}

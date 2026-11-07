@@ -45,7 +45,7 @@ public class TravelEntryListComponent extends SideComponent {
 
 		TravelEntryList travelEntryList = new TravelEntryList(travelEntryListCriteria, isEditAllowed);
 		travelEntryList.setActiveUuid(activeUuid);
-		addComponent(travelEntryList);
+		add(travelEntryList);
 		travelEntryList.reload();
 	}
 }

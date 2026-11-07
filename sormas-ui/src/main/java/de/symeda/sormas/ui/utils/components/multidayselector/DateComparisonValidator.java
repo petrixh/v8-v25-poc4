@@ -2,18 +2,18 @@ package de.symeda.sormas.ui.utils.components.multidayselector;
 
 import java.time.LocalDate;
 
-import com.vaadin.data.ValidationResult;
-import com.vaadin.data.Validator;
-import com.vaadin.data.ValueContext;
-import com.vaadin.ui.DateField;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.data.binder.ValueContext;
 
 public class DateComparisonValidator implements Validator<LocalDate> {
 
-	private final DateField referenceField;
+	private final DatePicker referenceField;
 	private final boolean earlierOrSame;
 	private final String errorMessage;
 
-	public DateComparisonValidator(DateField referenceField, boolean earlierOrSame, String errorMessage) {
+	public DateComparisonValidator(DatePicker referenceField, boolean earlierOrSame, String errorMessage) {
 
 		this.referenceField = referenceField;
 		this.earlierOrSame = earlierOrSame;

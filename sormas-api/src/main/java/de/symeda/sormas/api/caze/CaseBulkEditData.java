@@ -20,7 +20,7 @@
 
 package de.symeda.sormas.api.caze;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.EntityDto;

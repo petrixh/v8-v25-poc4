@@ -17,10 +17,8 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.dashboard.contacts;
 
-import org.vaadin.hene.popupbutton.PopupButton;
-
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.ui.OptionGroup;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -30,6 +28,8 @@ import de.symeda.sormas.ui.dashboard.contacts.epicurve.ContactsEpiCurveBuilders;
 import de.symeda.sormas.ui.dashboard.diagram.AbstractEpiCurveComponent;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.PopupButton;
+import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
 public class ContactsEpiCurveComponent extends AbstractEpiCurveComponent<DashboardDataProvider> {
 
@@ -45,11 +45,11 @@ public class ContactsEpiCurveComponent extends AbstractEpiCurveComponent<Dashboa
 	protected PopupButton createEpiCurveModeSelector() {
 		if (epiCurveContactsMode == null) {
 			epiCurveContactsMode = ContactsEpiCurveMode.FOLLOW_UP_STATUS;
-			epiCurveLabel.setValue(I18nProperties.getCaption(Captions.dashboardFollowUpStatusChart));
+			epiCurveLabel.setText(I18nProperties.getCaption(Captions.dashboardFollowUpStatusChart));
 		}
 
 		VerticalLayout groupingLayout = new VerticalLayout();
-		groupingLayout.setMargin(true);
+		groupingLayout.setPadding(true);
 		groupingLayout.setSizeUndefined();
 
 		PopupButton dataDropdown = ButtonHelper.createPopupButton(Captions.dashboardData, groupingLayout, CssStyles.BUTTON_SUBTLE);
@@ -60,21 +60,21 @@ public class ContactsEpiCurveComponent extends AbstractEpiCurveComponent<Dashboa
 		dataSelect.setValue(epiCurveContactsMode);
 		dataSelect.select(epiCurveContactsMode);
 		dataSelect.addValueChangeListener(e -> {
-			epiCurveContactsMode = (ContactsEpiCurveMode) e.getProperty().getValue();
+			epiCurveContactsMode = (ContactsEpiCurveMode) e.getValue();
 			switch (epiCurveContactsMode) {
 			case FOLLOW_UP_STATUS:
-				epiCurveLabel.setValue(I18nProperties.getCaption(Captions.dashboardFollowUpStatusChart));
+				epiCurveLabel.setText(I18nProperties.getCaption(Captions.dashboardFollowUpStatusChart));
 				break;
 			case CONTACT_CLASSIFICATION:
-				epiCurveLabel.setValue(I18nProperties.getCaption(Captions.dashboardContactClassificationChart));
+				epiCurveLabel.setText(I18nProperties.getCaption(Captions.dashboardContactClassificationChart));
 				break;
 			case FOLLOW_UP_UNTIL:
-				epiCurveLabel.setValue(I18nProperties.getCaption(Captions.dashboardFollowUpUntilChart));
+				epiCurveLabel.setText(I18nProperties.getCaption(Captions.dashboardFollowUpUntilChart));
 				break;
 			}
 			clearAndFillEpiCurveChart();
 		});
-		groupingLayout.addComponent(dataSelect);
+		groupingLayout.add(dataSelect);
 
 		return dataDropdown;
 	}

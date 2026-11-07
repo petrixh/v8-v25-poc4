@@ -30,17 +30,14 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Window;
-import com.vaadin.v7.data.validator.EmailValidator;
-import com.vaadin.v7.ui.AbstractSelect;
-import com.vaadin.v7.ui.AbstractSelect.ItemCaptionMode;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.data.binder.Binder;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -67,6 +64,12 @@ import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.PhoneNumberValidator;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.SormasTextField;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.SelectField;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class PersonCreateForm extends AbstractEditForm<PersonDto> {
 
@@ -89,7 +92,7 @@ public class PersonCreateForm extends AbstractEditForm<PersonDto> {
 	private final boolean showSymptomsOnsetDate;
 	private final boolean showPersonSearchButton;
 	private SormasTextField nationalHealthIdField;
-	private Window warningSimilarPersons;
+	private Dialog warningSimilarPersons;
 
 	private static final String HTML_LAYOUT =
 		"%s" + fluidRow(fluidRowLocs(PersonDto.BIRTH_DATE_YYYY, PersonDto.BIRTH_DATE_MM, PersonDto.BIRTH_DATE_DD), fluidRowLocs(PersonDto.SEX))
@@ -159,7 +162,7 @@ public class PersonCreateForm extends AbstractEditForm<PersonDto> {
 		// @TODO: Done for nullselection Bug, fixed in Vaadin 7.7.3
 		birthDateYear.setNullSelectionAllowed(true);
 		birthDateYear.addItems(DateHelper.getYearsToNow());
-		birthDateYear.setItemCaptionMode(ItemCaptionMode.ID_TOSTRING);
+		// was setItemCaptionMode(ID_TOSTRING): the shim shows toString() of items without an explicit caption
 		birthDateYear.setInputPrompt(I18nProperties.getString(Strings.year));
 		birthDateDay.addValidator(
 			e -> ControllerProvider.getPersonController()
@@ -173,18 +176,15 @@ public class PersonCreateForm extends AbstractEditForm<PersonDto> {
 
 		// Update the list of days according to the selected month and year
 		birthDateYear.addValueChangeListener(e -> {
-			updateListOfDays((Integer) e.getProperty().getValue(), (Integer) birthDateMonth.getValue());
-			birthDateMonth.markAsDirty();
-			birthDateDay.markAsDirty();
+			updateListOfDays((Integer) e.getValue(), (Integer) birthDateMonth.getValue());
+			validateBirthDateFields(birthDateMonth, birthDateDay);
 		});
 		birthDateMonth.addValueChangeListener(e -> {
-			updateListOfDays((Integer) birthDateYear.getValue(), (Integer) e.getProperty().getValue());
-			birthDateYear.markAsDirty();
-			birthDateDay.markAsDirty();
+			updateListOfDays((Integer) birthDateYear.getValue(), (Integer) e.getValue());
+			validateBirthDateFields(birthDateYear, birthDateDay);
 		});
 		birthDateDay.addValueChangeListener(e -> {
-			birthDateYear.markAsDirty();
-			birthDateMonth.markAsDirty();
+			validateBirthDateFields(birthDateYear, birthDateMonth);
 		});
 
 		ComboBox sex = addField(PersonDto.SEX, ComboBox.class);
@@ -211,7 +211,7 @@ public class PersonCreateForm extends AbstractEditForm<PersonDto> {
 		email.setCaption(I18nProperties.getCaption(Captions.Person_emailAddress));
 
 		phone.addValidator(new PhoneNumberValidator(I18nProperties.getValidationError(Validations.validPhoneNumber, phone.getCaption())));
-		email.addValidator(new EmailValidator(I18nProperties.getValidationError(Validations.validEmailAddress, email.getCaption())));
+		email.addValidator(PersonFormHelper.createEmailValidator(I18nProperties.getValidationError(Validations.validEmailAddress, email.getCaption())));
 
 		if (showHomeAddressForm) {
 			addHomeAddressForm();
@@ -223,7 +223,7 @@ public class PersonCreateForm extends AbstractEditForm<PersonDto> {
 		setRequired(true, PersonDto.FIRST_NAME, PersonDto.LAST_NAME, PersonDto.SEX);
 	}
 
-	private void setItemCaptionsForMonths(AbstractSelect months) {
+	private void setItemCaptionsForMonths(SelectField months) {
 
 		months.setItemCaption(1, I18nProperties.getEnumCaption(Month.JANUARY));
 		months.setItemCaption(2, I18nProperties.getEnumCaption(Month.FEBRUARY));
@@ -237,6 +237,20 @@ public class PersonCreateForm extends AbstractEditForm<PersonDto> {
 		months.setItemCaption(10, I18nProperties.getEnumCaption(Month.OCTOBER));
 		months.setItemCaption(11, I18nProperties.getEnumCaption(Month.NOVEMBER));
 		months.setItemCaption(12, I18nProperties.getEnumCaption(Month.DECEMBER));
+	}
+
+	/**
+	 * Was V8 {@code markAsDirty()} on the sibling birth date fields: Vaadin 7 repainted them, so their validators' result
+	 * showed at once. Flow shows a field's error when its binding validates, so the siblings' bindings are validated here;
+	 * the form's status handler still honours {@code isValidationVisible()}, as the V7 repaint did.
+	 */
+	private void validateBirthDateFields(Field<?>... fields) {
+		for (Field<?> field : fields) {
+			Binder.Binding<PersonDto, ?> binding = getFieldGroup().getBinding(field);
+			if (binding != null) {
+				binding.validate();
+			}
+		}
 	}
 
 	private void updateListOfDays(Integer selectedYear, Integer selectedMonth) {
@@ -255,8 +269,8 @@ public class PersonCreateForm extends AbstractEditForm<PersonDto> {
 		enterHomeAddressNow.addStyleName(VSPACE_3);
 		getContent().addComponent(enterHomeAddressNow, ENTER_HOME_ADDRESS_NOW);
 
-		Label addressHeader = new Label(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.ADDRESS));
-		addressHeader.addStyleName(H3);
+		Span addressHeader = new Span(I18nProperties.getPrefixCaption(PersonDto.I18N_PREFIX, PersonDto.ADDRESS));
+		addressHeader.addClassName(H3);
 		getContent().addComponent(addressHeader, HOME_ADDRESS_HEADER);
 		addressHeader.setVisible(false);
 
@@ -272,7 +286,7 @@ public class PersonCreateForm extends AbstractEditForm<PersonDto> {
 		homeAddressForm.setVisible(false);
 
 		enterHomeAddressNow.addValueChangeListener(e -> {
-			boolean isChecked = (boolean) e.getProperty().getValue();
+			boolean isChecked = (boolean) e.getValue();
 			addressHeader.setVisible(isChecked);
 			homeAddressForm.setVisible(isChecked);
 			homeAddressForm.setFacilityFieldsVisible(isChecked, true);
@@ -284,14 +298,14 @@ public class PersonCreateForm extends AbstractEditForm<PersonDto> {
 
 	protected Button createPersonSearchButton(String personSearchLoc) {
 
-		return ButtonHelper.createIconButtonWithCaption(personSearchLoc, StringUtils.EMPTY, VaadinIcons.SEARCH, clickEvent -> {
-			VaadinIcons icon = (VaadinIcons) clickEvent.getButton().getIcon();
-			if (icon == VaadinIcons.SEARCH) {
+		return ButtonHelper.createIconButtonWithCaption(personSearchLoc, StringUtils.EMPTY, VaadinIcon.SEARCH, clickEvent -> {
+			Button button = clickEvent.getSource();
+			if (isIcon(button, VaadinIcon.SEARCH)) {
 				PersonSearchField personSearchField = new PersonSearchField(null, I18nProperties.getString(Strings.infoSearchPerson));
 				personSearchField.setWidth(1280, Unit.PIXELS);
 
 				final CommitDiscardWrapperComponent<PersonSearchField> component = new CommitDiscardWrapperComponent<>(personSearchField);
-				component.getCommitButton().setCaption(I18nProperties.getCaption(Captions.actionConfirm));
+				component.getCommitButton().setText(I18nProperties.getCaption(Captions.actionConfirm));
 				component.getCommitButton().setEnabled(false);
 				component.addCommitListener(() -> {
 					SimilarPersonDto pickedPerson = personSearchField.getValue();
@@ -300,7 +314,7 @@ public class PersonCreateForm extends AbstractEditForm<PersonDto> {
 						person = FacadeProvider.getPersonFacade().getByUuid(pickedPerson.getUuid());
 						setPerson(person);
 						enablePersonFields(false, true);
-						clickEvent.getButton().setIcon(VaadinIcons.CLOSE);
+						button.setIcon(VaadinIcon.CLOSE.create());
 					}
 				});
 
@@ -313,9 +327,17 @@ public class PersonCreateForm extends AbstractEditForm<PersonDto> {
 				person = null;
 				setPerson(person);
 				enablePersonFields(true);
-				clickEvent.getButton().setIcon(VaadinIcons.SEARCH);
+				button.setIcon(VaadinIcon.SEARCH.create());
 			}
 		}, CssStyles.FORCE_CAPTION);
+	}
+
+	/**
+	 * Was the comparison of the Vaadin 8 button icon with {@code VaadinIcons.SEARCH}.
+	 */
+	private static boolean isIcon(Button button, VaadinIcon vaadinIcon) {
+		Component icon = button.getIcon();
+		return icon instanceof Icon && vaadinIcon.create().getElement().getAttribute("icon").equals(icon.getElement().getAttribute("icon"));
 	}
 
 	public void setPerson(PersonDto person) {
@@ -505,7 +527,7 @@ public class PersonCreateForm extends AbstractEditForm<PersonDto> {
 		this.person = searchedPerson;
 	}
 
-	public Window getWarningSimilarPersons() {
+	public Dialog getWarningSimilarPersons() {
 		return warningSimilarPersons;
 	}
 

@@ -7,17 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.ExternalResource;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Link;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.CustomField;
-import com.vaadin.v7.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -25,6 +21,7 @@ import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.user.UserDto;
 import de.symeda.sormas.api.user.UserReferenceDto;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 
 public class UserField extends CustomField<UserReferenceDto> {
 
@@ -52,21 +49,17 @@ public class UserField extends CustomField<UserReferenceDto> {
 		userCombo.setValue(getValue());
 		userCombo.setEnabled(enabled);
 		userCombo.setReadOnly(readOnly);
-		userLayout.addComponent(userCombo);
+		userLayout.add(userCombo);
 		final Button userContactButton = createUserContactButton();
-		userLayout.addComponent(userContactButton);
+		userLayout.add(userContactButton);
 		userLayout.setWidthFull();
-		userLayout.setExpandRatio(userCombo, 1);
+		userLayout.setFlexGrow(1, userCombo);
 		userLayout.setSpacing(false);
 
 		userCombo.setWidthFull();
 
 		userCombo.addValueChangeListener(valueChangeEvent -> {
-			super.setValue((UserReferenceDto) userCombo.getValue());
-		});
-
-		addValueChangeListener(c -> {
-			userCombo.setValue(c.getProperty().getValue());
+			setModelValue((UserReferenceDto) userCombo.getValue(), valueChangeEvent.isFromClient());
 		});
 
 		return userLayout;
@@ -89,12 +82,12 @@ public class UserField extends CustomField<UserReferenceDto> {
 
 	protected Button createUserContactButton() {
 		boolean isReadOnly = userCombo.isReadOnly();
-		Button userContactButton = ButtonHelper.createIconButtonWithCaption("userContact", "", VaadinIcons.EYE, e -> {
+		Button userContactButton = new Button("", VaadinIcon.EYE.create(), e -> {
 			triggerUserContactPopUpWindow();
-		},
-			ValoTheme.BUTTON_ICON_ONLY,
-			ValoTheme.BUTTON_BORDERLESS,
-			ValoTheme.BUTTON_LARGE,
+		});
+		userContactButton.setId("userContact");
+		// V8 Valo styles icon-only, borderless, large are not carried over (no CSS in stage 1a)
+		userContactButton.addClassNames(
 			isReadOnly ? CssStyles.HSPACE_LEFT_6 : CssStyles.HSPACE_LEFT_NONE,
 			isReadOnly ? CssStyles.VSPACE_TOP_6 : CssStyles.VSPACE_NONE);
 		return userContactButton;
@@ -117,8 +110,7 @@ public class UserField extends CustomField<UserReferenceDto> {
 	}
 
 	@Override
-	public void setValue(UserReferenceDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
-		super.setValue(newFieldValue);
+	protected void setPresentationValue(UserReferenceDto newFieldValue) {
 		if (userCombo != null) {
 			userCombo.setValue(newFieldValue);
 		}
@@ -131,37 +123,37 @@ public class UserField extends CustomField<UserReferenceDto> {
 		}
 
 		VerticalLayout verticalLayout = new VerticalLayout();
-		verticalLayout.setMargin(false);
+		verticalLayout.setPadding(false);
 		if (userCombo.isReadOnly()) {
 			if (userDto == null) {
-				verticalLayout.addComponent(createFieldLayout(I18nProperties.getCaption(Captions.User_userName), null, null, true));
-				verticalLayout.addComponent(createFieldLayout(I18nProperties.getCaption(Captions.User_phone), null, LinkType.PHONE, true));
-				verticalLayout.addComponent(createFieldLayout(I18nProperties.getCaption(Captions.User_userEmail), null, LinkType.EMAIL, true));
+				verticalLayout.add(createFieldLayout(I18nProperties.getCaption(Captions.User_userName), null, null, true));
+				verticalLayout.add(createFieldLayout(I18nProperties.getCaption(Captions.User_phone), null, LinkType.PHONE, true));
+				verticalLayout.add(createFieldLayout(I18nProperties.getCaption(Captions.User_userEmail), null, LinkType.EMAIL, true));
 			} else {
-				verticalLayout.addComponent(createFieldLayout(I18nProperties.getCaption(Captions.User_userName), userDto.getUserName(), null, false));
+				verticalLayout.add(createFieldLayout(I18nProperties.getCaption(Captions.User_userName), userDto.getUserName(), null, false));
 				verticalLayout
-					.addComponent(createFieldLayout(I18nProperties.getCaption(Captions.User_phone), userDto.getPhone(), LinkType.PHONE, false));
-				verticalLayout.addComponent(
+					.add(createFieldLayout(I18nProperties.getCaption(Captions.User_phone), userDto.getPhone(), LinkType.PHONE, false));
+				verticalLayout.add(
 					createFieldLayout(I18nProperties.getCaption(Captions.User_userEmail), userDto.getUserEmail(), LinkType.EMAIL, false));
 			}
 		} else {
 			boolean parentPseudonymizedFlag = parentPseudonymizedSupplier.get();
 			if (userDto == null && !parentPseudonymizedFlag) {
 				HorizontalLayout labelLayout = new HorizontalLayout();
-				Label noUserMessageLabel = new Label();
+				Span noUserMessageLabel = new Span();
 				final String noUserMessage;
 				noUserMessage = I18nProperties.getString(Strings.messageNoUserSelected);
-				noUserMessageLabel.setValue(noUserMessage);
-				labelLayout.addComponent(noUserMessageLabel);
-				verticalLayout.addComponent(labelLayout);
+				noUserMessageLabel.setText(noUserMessage);
+				labelLayout.add(noUserMessageLabel);
+				verticalLayout.add(labelLayout);
 			} else {
-				verticalLayout.addComponent(
+				verticalLayout.add(
 					createFieldLayout(
 						I18nProperties.getCaption(Captions.User_phone),
 						userDto != null ? userDto.getPhone() : null,
 						LinkType.PHONE,
 						parentPseudonymizedFlag));
-				verticalLayout.addComponent(
+				verticalLayout.add(
 					createFieldLayout(
 						I18nProperties.getCaption(Captions.User_userEmail),
 						userDto != null ? userDto.getUserEmail() : null,
@@ -183,25 +175,25 @@ public class UserField extends CustomField<UserReferenceDto> {
 
 	private static HorizontalLayout createFieldLayout(String fieldLabelCaption, String fieldValue, LinkType linkType, boolean inaccessible) {
 		HorizontalLayout fieldLayout = new HorizontalLayout();
-		Label fieldLabel = new Label(fieldLabelCaption + ":");
-		fieldLabel.addStyleName(LABEL_BOLD);
-		fieldLayout.addComponent(fieldLabel);
+		Span fieldLabel = new Span(fieldLabelCaption + ":");
+		fieldLabel.addClassName(LABEL_BOLD);
+		fieldLayout.add(fieldLabel);
 
 		if (inaccessible) {
-			Label fieldValueLabel = new Label(fieldValue != null ? fieldValue : I18nProperties.getCaption(Captions.inaccessibleValue));
-			fieldValueLabel.addStyleName(INACCESSIBLE_LABEL);
-			fieldLayout.addComponent(fieldValueLabel);
+			Span fieldValueLabel = new Span(fieldValue != null ? fieldValue : I18nProperties.getCaption(Captions.inaccessibleValue));
+			fieldValueLabel.addClassName(INACCESSIBLE_LABEL);
+			fieldLayout.add(fieldValueLabel);
 		} else {
 			if (fieldValue == null || fieldValue.isEmpty()) {
-				Label valueLabel = new Label(I18nProperties.getString(Strings.notSpecified));
-				fieldLayout.addComponent(valueLabel);
+				Span valueLabel = new Span(I18nProperties.getString(Strings.notSpecified));
+				fieldLayout.add(valueLabel);
 			} else {
 				if (linkType != null) {
-					Link fieldLink = new Link(fieldValue, new ExternalResource(linkType.getLinkType() + fieldValue));
-					fieldLayout.addComponent(fieldLink);
+					Anchor fieldLink = new Anchor(linkType.getLinkType() + fieldValue, fieldValue);
+					fieldLayout.add(fieldLink);
 				} else {
-					Label valueLabel = new Label(fieldValue);
-					fieldLayout.addComponent(valueLabel);
+					Span valueLabel = new Span(fieldValue);
+					fieldLayout.add(valueLabel);
 				}
 			}
 		}

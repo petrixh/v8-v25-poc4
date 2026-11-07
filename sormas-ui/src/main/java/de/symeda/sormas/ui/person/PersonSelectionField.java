@@ -19,12 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.RadioButtonGroup;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.feature.FeatureType;
@@ -39,6 +39,7 @@ import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 
 @SuppressWarnings("serial")
 public class PersonSelectionField extends CustomField<SimilarPersonDto> {
@@ -91,7 +92,7 @@ public class PersonSelectionField extends CustomField<SimilarPersonDto> {
 	}
 
 	protected void addInfoComponent() {
-		mainLayout.addComponent(VaadinUiUtil.createInfoComponent(infoText));
+		mainLayout.add(VaadinUiUtil.createInfoComponent(infoText));
 	}
 
 	private void addPersonDetailsComponent() {
@@ -102,16 +103,15 @@ public class PersonSelectionField extends CustomField<SimilarPersonDto> {
 		addLabelIfVisible(personDetailsLayout1, referencePerson.getLastName(), PersonDto.I18N_PREFIX, PersonDto.LAST_NAME, PersonDto.class);
 		addLabelIfVisible(personDetailsLayout1, referencePerson.getNickname(), PersonDto.I18N_PREFIX, PersonDto.NICKNAME, PersonDto.class);
 
-		Label lblBirthDateAndAge = new Label(
+		Component lblBirthDateAndAge = createCaptionedLabel(
 			PersonHelper.getAgeAndBirthdateString(
 				referencePerson.getApproximateAge(),
 				referencePerson.getApproximateAgeType(),
 				referencePerson.getBirthdateDD(),
 				referencePerson.getBirthdateMM(),
-				referencePerson.getBirthdateYYYY()));
-		lblBirthDateAndAge.setWidthUndefined();
-		lblBirthDateAndAge.setCaption(I18nProperties.getCaption(Captions.personAgeAndBirthdate));
-		personDetailsLayout1.addComponent(lblBirthDateAndAge);
+				referencePerson.getBirthdateYYYY()),
+			I18nProperties.getCaption(Captions.personAgeAndBirthdate));
+		personDetailsLayout1.add(lblBirthDateAndAge);
 
 		addLabelIfVisible(
 			personDetailsLayout1,
@@ -129,7 +129,7 @@ public class PersonSelectionField extends CustomField<SimilarPersonDto> {
 
 		addLabelIfVisible(personDetailsLayout1, referencePerson.getPhone(), PersonDto.I18N_PREFIX, PersonDto.PHONE, PersonDto.class);
 
-		mainLayout.addComponent(personDetailsLayout1);
+		mainLayout.add(personDetailsLayout1);
 
 		HorizontalLayout personDetailsLayout2 = new HorizontalLayout();
 		personDetailsLayout2.setSpacing(true);
@@ -172,7 +172,7 @@ public class PersonSelectionField extends CustomField<SimilarPersonDto> {
 			LocationDto.HOUSE_NUMBER,
 			LocationDto.class);
 
-		mainLayout.addComponent(personDetailsLayout2);
+		mainLayout.add(personDetailsLayout2);
 
 		HorizontalLayout personDetailsLayout3 = new HorizontalLayout();
 		personDetailsLayout3.setSpacing(true);
@@ -190,16 +190,25 @@ public class PersonSelectionField extends CustomField<SimilarPersonDto> {
 			PersonDto.PASSPORT_NUMBER,
 			PersonDto.class);
 
-		mainLayout.addComponent(personDetailsLayout3);
+		mainLayout.add(personDetailsLayout3);
 	}
 
 	private void addLabelIfVisible(HorizontalLayout layout, String text, String i18nPrefix, String captionKey, Class<?> clazz) {
 		if (fieldVisibilityCheckers.isVisible(clazz, captionKey)) {
-			Label label = new Label(text);
-			label.setCaption(I18nProperties.getPrefixCaption(i18nPrefix, captionKey));
-			label.setWidthUndefined();
-			layout.addComponent(label);
+			layout.add(createCaptionedLabel(text, I18nProperties.getPrefixCaption(i18nPrefix, captionKey)));
 		}
+	}
+
+	/**
+	 * Was a Vaadin 8 {@code Label} with a caption (rendered above it by the layout); Flow layouts render no captions, so
+	 * the caption is a span above the text.
+	 */
+	private static Component createCaptionedLabel(String text, String caption) {
+		VerticalLayout captionedLabel = new VerticalLayout(new Span(caption), new Span(text != null ? text : ""));
+		captionedLabel.setPadding(false);
+		captionedLabel.setSpacing(false);
+		captionedLabel.setWidth(null);
+		return captionedLabel;
 	}
 
 	private void addSelectPersonRadioGroup() {
@@ -213,7 +222,7 @@ public class PersonSelectionField extends CustomField<SimilarPersonDto> {
 
 		rbSelectPerson = new RadioButtonGroup<>();
 		rbSelectPerson.setItems(selectPersonOption);
-		rbSelectPerson.setItemCaptionGenerator(I18nProperties::getCaption);
+		rbSelectPerson.setItemLabelGenerator(I18nProperties::getCaption);
 		CssStyles.style(rbSelectPerson, CssStyles.VSPACE_NONE);
 
 		rbSelectPerson.addValueChangeListener(e -> {
@@ -222,7 +231,7 @@ public class PersonSelectionField extends CustomField<SimilarPersonDto> {
 				rbCreatePerson.setValue(null);
 				personGrid.setEnabled(true);
 				if (selectionChangeCallback != null) {
-					selectionChangeCallback.accept(personGrid.getSelectedRow() != null);
+					selectionChangeCallback.accept(!personGrid.getSelectedItems().isEmpty());
 				}
 
 				if (SELECT_PERSON.equals(value)) {
@@ -241,7 +250,7 @@ public class PersonSelectionField extends CustomField<SimilarPersonDto> {
 			}
 		});
 
-		mainLayout.addComponent(rbSelectPerson);
+		mainLayout.add(rbSelectPerson);
 	}
 
 	protected void addFilterForm() {
@@ -262,7 +271,7 @@ public class PersonSelectionField extends CustomField<SimilarPersonDto> {
 			filterForm.clearValidation();
 		});
 
-		mainLayout.addComponent(filterForm);
+		mainLayout.add(filterForm);
 	}
 
 	/**
@@ -273,12 +282,15 @@ public class PersonSelectionField extends CustomField<SimilarPersonDto> {
 		personGrid = new PersonSelectionGrid();
 
 		personGrid.addSelectionListener(e -> {
-			if (e.getSelected().size() > 0) {
+			// the field value is the grid selection (Vaadin 8: getValue() read the grid)
+			updateValue();
+
+			if (e.getAllSelectedItems().size() > 0) {
 				rbCreatePerson.setValue(null);
 			}
 
 			if (selectionChangeCallback != null) {
-				selectionChangeCallback.accept(!e.getSelected().isEmpty());
+				selectionChangeCallback.accept(!e.getAllSelectedItems().isEmpty());
 			}
 		});
 	}
@@ -286,7 +298,7 @@ public class PersonSelectionField extends CustomField<SimilarPersonDto> {
 	private void addCreatePersonRadioGroup() {
 		rbCreatePerson = new RadioButtonGroup<>();
 		rbCreatePerson.setItems(CREATE_PERSON);
-		rbCreatePerson.setItemCaptionGenerator((item) -> I18nProperties.getCaption(Captions.personCreateNew));
+		rbCreatePerson.setItemLabelGenerator((item) -> I18nProperties.getCaption(Captions.personCreateNew));
 		rbCreatePerson.addValueChangeListener(e -> {
 			if (e.getValue() != null) {
 				rbSelectPerson.setValue(null);
@@ -302,7 +314,7 @@ public class PersonSelectionField extends CustomField<SimilarPersonDto> {
 			filterForm.setVisible(!CREATE_PERSON.equals(e.getValue()));
 		});
 
-		mainLayout.addComponent(rbCreatePerson);
+		mainLayout.add(rbCreatePerson);
 	}
 
 	@Override
@@ -310,7 +322,7 @@ public class PersonSelectionField extends CustomField<SimilarPersonDto> {
 		// Main layout
 		mainLayout = new VerticalLayout();
 		mainLayout.setSpacing(true);
-		mainLayout.setMargin(false);
+		mainLayout.setPadding(false);
 		mainLayout.setSizeUndefined();
 		mainLayout.setWidth(100, Unit.PERCENTAGE);
 
@@ -318,7 +330,7 @@ public class PersonSelectionField extends CustomField<SimilarPersonDto> {
 		addPersonDetailsComponent();
 		addSelectPersonRadioGroup();
 		addFilterForm();
-		mainLayout.addComponent(personGrid);
+		mainLayout.add(personGrid);
 		addCreatePersonRadioGroup();
 
 		if (hasMatches) {
@@ -331,29 +343,49 @@ public class PersonSelectionField extends CustomField<SimilarPersonDto> {
 	}
 
 	public void selectBestMatch() {
-		if (personGrid.getContainerDataSource().size() == 1) {
-			setValue((SimilarPersonDto) personGrid.getContainerDataSource().firstItemId());
+		// Vaadin 8 built the content when the window was added; a Flow dialog attaches its content only before the
+		// response, after the callers' selectBestMatch(), so build it here
+		getContent();
+		if (personGrid.getListDataView().getItemCount() == 1) {
+			setValue(personGrid.getListDataView().getItem(0));
 		} else {
 			setValue(null);
 		}
 	}
 
+	/**
+	 * Was the Vaadin 8 {@code getValue()} override: the value is the person selected in the grid.
+	 */
 	@Override
-	public SimilarPersonDto getValue() {
+	protected SimilarPersonDto generateModelValue() {
 		if (personGrid != null) {
-			return (SimilarPersonDto) personGrid.getSelectedRow();
+			return personGrid.getSelectedItems().stream().findFirst().orElse(null);
 		}
 
 		return null;
 	}
 
+	/**
+	 * Was {@code doSetValue}: selects the person in the grid.
+	 */
 	@Override
-	protected void doSetValue(SimilarPersonDto newValue) {
+	protected void setPresentationValue(SimilarPersonDto newValue) {
 		if (rbSelectPerson.getValue() == null) {
 			rbSelectPerson.setValue(SELECT_PERSON);
 		}
 
-		personGrid.select(newValue);
+		selectInGrid(personGrid, newValue);
+	}
+
+	/**
+	 * Vaadin 7 {@code Grid.select(null)} cleared the single selection; Flow needs {@code deselectAll()} for that.
+	 */
+	static void selectInGrid(PersonSelectionGrid grid, SimilarPersonDto person) {
+		if (person == null) {
+			grid.deselectAll();
+		} else {
+			grid.select(person);
+		}
 	}
 
 	public boolean hasMatches() {

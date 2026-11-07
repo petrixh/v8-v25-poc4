@@ -3,7 +3,7 @@ package de.symeda.sormas.backend.patch;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.slf4j.Logger;

@@ -1,6 +1,6 @@
 package de.symeda.sormas.ui.immunization.components.fields.popup;
 
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
@@ -15,19 +15,19 @@ public class SimilarImmunizationPopup extends VerticalLayout {
 
 		setSpacing(true);
 		setSizeUndefined();
-		setWidth(100, Unit.PERCENTAGE);
+		setWidthFull();
 
 		String infoText = String.format(I18nProperties.getString(Strings.infoSimilarImmunization), immunization.getDisease().toString());
 		InfoLayout infoLayout = new InfoLayout(infoText);
-		addComponent(infoLayout);
+		add(infoLayout);
 		CssStyles.style(infoLayout, CssStyles.VSPACE_3);
 
 		ImmunizationInfo immunizationInfo = new ImmunizationInfo(I18nProperties.getString(Strings.infoImmunizationPeriod));
-		immunizationInfo.addComponent(new ImmunizationInfoLayout(immunization));
-		addComponent(immunizationInfo);
+		immunizationInfo.add(new ImmunizationInfoLayout(immunization));
+		add(immunizationInfo);
 
 		ImmunizationInfo existingImmunization = new ImmunizationInfo(I18nProperties.getString(Strings.infoExistingImmunizationPeriod));
-		existingImmunization.addComponent(new ImmunizationInfoLayout(similarImmunization));
-		addComponent(existingImmunization);
+		existingImmunization.add(new ImmunizationInfoLayout(similarImmunization));
+		add(existingImmunization);
 	}
 }

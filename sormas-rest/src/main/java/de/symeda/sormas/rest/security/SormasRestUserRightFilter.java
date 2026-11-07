@@ -15,28 +15,40 @@
 
 package de.symeda.sormas.rest.security;
 
-import static javax.ws.rs.Priorities.AUTHORIZATION;
+import static jakarta.ws.rs.Priorities.AUTHORIZATION;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import javax.annotation.Priority;
-import javax.enterprise.inject.spi.CDI;
-import javax.security.enterprise.AuthenticationStatus;
-import javax.security.enterprise.SecurityContext;
-import javax.security.enterprise.authentication.mechanism.http.AuthenticationParameters;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.core.Response;
+import jakarta.annotation.Priority;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.security.enterprise.AuthenticationStatus;
+import jakarta.security.enterprise.SecurityContext;
+import jakarta.security.enterprise.authentication.mechanism.http.AuthenticationParameters;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.core.Response;
 
+import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.user.UserRight;
 
 /**
  * Filter to ensure authenticated user has SORMAS_REST user right,
  * return status 403 when missing
+ * <p>
+ * Also checks the rights of the resource's {@code @RolesAllowed} (resolved by {@link SormasDynamicFeature}), which
+ * Payara's own JAX-RS filter checked before the migration (switched off in {@code glassfish-web.xml}).
+ * <p>
+ * The caller's rights are read through the backend (the rights of the user's roles: the set the login gives the caller
+ * as groups, mapped 1:1 to roles in {@code glassfish-web.xml}), not with {@code isUserInRole} or the Jakarta Security
+ * {@code SecurityContext}: on Payara 7 those container checks fail with an exception after any call to a remote EJB,
+ * such as the backend facades, because the call clears the request's authorization context (migration ticket 1a-30e).
  */
 
 @Priority(AUTHORIZATION)
@@ -47,11 +59,21 @@ public class SormasRestUserRightFilter implements ContainerRequestFilter {
 	private final HttpServletRequest request;
 	private final HttpServletResponse response;
 
+	/**
+	 * Rights of the resource's {@code @RolesAllowed}, one of which the caller needs; {@code null} when it has none.
+	 */
+	private final String[] rolesAllowed;
+
 	public SormasRestUserRightFilter(HttpServletRequest request, HttpServletResponse response) {
+		this(request, response, null);
+	}
+
+	public SormasRestUserRightFilter(HttpServletRequest request, HttpServletResponse response, String[] rolesAllowed) {
 		securityContext = CDI.current().select(SecurityContext.class).get();
 
 		this.request = request;
 		this.response = response;
+		this.rolesAllowed = rolesAllowed;
 	}
 
 	@Override
@@ -75,14 +97,25 @@ public class SormasRestUserRightFilter implements ContainerRequestFilter {
 
 		}
 
-		boolean hasRestRole = requestContext.getSecurityContext().isUserInRole(UserRight.SORMAS_REST.name());
+		Set<String> callerRights = getCallerRights();
+
+		boolean hasRestRole = callerRights.contains(UserRight.SORMAS_REST.name());
 
 		if (!hasRestRole) {
+			throw new ForbiddenException("Caller not in requested role");
+		}
+
+		if (rolesAllowed != null && Arrays.stream(rolesAllowed).noneMatch(callerRights::contains)) {
+			// same answer as Payara's JAX-RS @RolesAllowed filter
 			throw new ForbiddenException("Caller not in requested role");
 		}
 	}
 
 	private boolean isAuthenticated() {
-		return securityContext.getCallerPrincipal() != null;
+		return request.getUserPrincipal() != null;
+	}
+
+	private static Set<String> getCallerRights() {
+		return FacadeProvider.getUserFacade().getUserRights(null).stream().map(Enum::name).collect(Collectors.toSet());
 	}
 }

@@ -18,10 +18,10 @@
 
 package de.symeda.junit.cdi.jee.jpa;
 
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 
 import org.hibernate.internal.SessionImpl;
 

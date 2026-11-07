@@ -2,17 +2,19 @@ package de.symeda.sormas.ui.utils.components.automaticdeletion;
 
 import java.util.Date;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.shared.Tooltip;
 
 import de.symeda.sormas.api.deletionconfiguration.DeletionInfoDto;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.utils.DateHelper;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 public class DeletionLabel extends HorizontalLayout {
 
@@ -39,7 +41,7 @@ public class DeletionLabel extends HorizontalLayout {
 	}
 
 	private void setDeleteLabel(DeletionInfoDto deletionInfoDto, String classPrefix) {
-		setMargin(false);
+		setPadding(false);
 		setSpacing(false);
 
 		String infoIconDesciption = String.format(
@@ -48,23 +50,24 @@ public class DeletionLabel extends HorizontalLayout {
 			I18nProperties.getPrefixCaption(classPrefix, deletionInfoDto.getDeletionReferenceField()),
 			DateFormatHelper.formatDate(deletionInfoDto.getReferenceDate()),
 			formatDeletionPeriod(deletionInfoDto.getDeletionPeriod()));
-		Label infoIcon = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
-		infoIcon.setDescription(infoIconDesciption, ContentMode.HTML);
-		infoIcon.addStyleNames(CssStyles.VSPACE_TOP_4, CssStyles.HSPACE_RIGHT_4);
-		addComponent(infoIcon);
+		Span infoIcon = new Span(VaadinIcon.INFO_CIRCLE.create());
+		// was setDescription(infoIconDesciption, ContentMode.HTML): the tooltip renders the HTML through Markdown
+		Tooltip.forComponent(infoIcon).setMarkdown(infoIconDesciption);
+		infoIcon.addClassNames(CssStyles.VSPACE_TOP_4, CssStyles.HSPACE_RIGHT_4);
+		add(infoIcon);
 
 		String infoText =
 			String.format(I18nProperties.getString(Strings.infoAutomaticDeletion), DateFormatHelper.formatDate(deletionInfoDto.getDeletionDate()));
-		Label infoTextLabel = new Label(infoText, ContentMode.HTML);
-		infoTextLabel.addStyleName(CssStyles.VSPACE_TOP_4);
-		addComponent(infoTextLabel);
+		Span infoTextLabel = VaadinUiUtil.createLabel(infoText, ContentMode.HTML);
+		infoTextLabel.addClassName(CssStyles.VSPACE_TOP_4);
+		add(infoTextLabel);
 
 		if (DateHelper.getDaysBetween(new Date(), deletionInfoDto.getDeletionDate()) < 181) {
-			infoIcon.addStyleName(CssStyles.LABEL_CRITICAL);
-			infoTextLabel.addStyleName(CssStyles.LABEL_CRITICAL);
+			infoIcon.addClassName(CssStyles.LABEL_CRITICAL);
+			infoTextLabel.addClassName(CssStyles.LABEL_CRITICAL);
 		} else {
-			infoIcon.addStyleName(CssStyles.LABEL_MINOR);
-			infoTextLabel.addStyleName(CssStyles.LABEL_MINOR);
+			infoIcon.addClassName(CssStyles.LABEL_MINOR);
+			infoTextLabel.addClassName(CssStyles.LABEL_MINOR);
 		}
 	}
 

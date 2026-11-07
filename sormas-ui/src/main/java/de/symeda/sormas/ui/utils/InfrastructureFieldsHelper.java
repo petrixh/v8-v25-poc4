@@ -20,8 +20,8 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextField;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.infrastructure.community.CommunityReferenceDto;
@@ -49,13 +49,13 @@ public class InfrastructureFieldsHelper {
 		@Nullable TextField facilityDetailsField,
 		@Nullable Supplier<String> facilityDetailsSupplier) {
 		regionCombo.addValueChangeListener(e -> {
-			RegionReferenceDto regionDto = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto regionDto = (RegionReferenceDto) e.getValue();
 			FieldHelper
 				.updateItems(districtCombo, regionDto != null ? FacadeProvider.getDistrictFacade().getAllActiveByRegion(regionDto.getUuid()) : null);
 		});
 
 		districtCombo.addValueChangeListener(e -> {
-			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getProperty().getValue();
+			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getValue();
 
 			if (communityCombo != null) {
 				FieldHelper.updateItems(
@@ -77,7 +77,7 @@ public class InfrastructureFieldsHelper {
 
 		if (communityCombo != null && facilityCombo != null) {
 			communityCombo.addValueChangeListener(e -> {
-				CommunityReferenceDto communityDto = (CommunityReferenceDto) e.getProperty().getValue();
+				CommunityReferenceDto communityDto = (CommunityReferenceDto) e.getValue();
 				FacilityType facilityType = facilityTypeCombo != null ? (FacilityType) facilityTypeCombo.getValue() : null;
 
 				if (facilityType != null) {
@@ -188,7 +188,7 @@ public class InfrastructureFieldsHelper {
 	public static void initPointOfEntry(ComboBox districtCombo, ComboBox pointOfEntryCombo) {
 		if (districtCombo != null) {
 			districtCombo.addValueChangeListener(e -> {
-				DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getProperty().getValue();
+				DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getValue();
 
 				if (pointOfEntryCombo != null) {
 					FieldHelper.updateItems(

@@ -2,11 +2,13 @@ package de.symeda.sormas.ui.user;
 
 import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
-import com.vaadin.v7.data.validator.EmailValidator;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.validator.RegexpValidator;
+
+import de.symeda.sormas.ui.utils.ContentMode;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.AuthProvider;
 import de.symeda.sormas.api.FacadeProvider;
@@ -18,12 +20,15 @@ import de.symeda.sormas.api.user.UserDto;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 public class UserSettingsForm extends AbstractEditForm<UserDto> {
 
 	private static final long serialVersionUID = -928337100277917699L;
 
 	private static final String CROWDIN_INFO_LOC = "crowdinInfoLoc";
+	/** The pattern of the Vaadin 7 {@code EmailValidator} (as 1a-45, {@code EventDataForm}). */
+	private static final String V7_EMAIL_PATTERN = "^([a-zA-Z0-9_\\.\\-+])+@[a-zA-Z0-9-.]+\\.[a-zA-Z0-9-]{2,}$";
 
 	private static final String HTML_LAYOUT =
 		loc(UserDto.LANGUAGE) + loc(UserDto.USER_EMAIL) + loc(UserDto.UUID) + loc(CROWDIN_INFO_LOC);
@@ -46,15 +51,23 @@ public class UserSettingsForm extends AbstractEditForm<UserDto> {
 		if (AuthProvider.KEYCLOAK.equals(authenticationProvider)) {
 			emailTf = addField(UserDto.USER_EMAIL, TextField.class);
 			emailTf.setCaption(I18nProperties.getCaption(Captions.User_userEmail));
-			emailTf.addValidator(new EmailValidator(I18nProperties.getValidationError(Validations.validEmailAddress, emailTf.getCaption())));
+			// was the Vaadin 7 EmailValidator: same pattern, and an empty value is valid as in Vaadin 7
+			emailTf.addValidator(
+				new RegexpValidator(I18nProperties.getValidationError(Validations.validEmailAddress, emailTf.getCaption()), V7_EMAIL_PATTERN) {
+
+					@Override
+					protected boolean isValid(String value) {
+						return value == null || value.isEmpty() || super.isValid(value);
+					}
+				});
 		}
 
 		TextField tfUuid = addField(UserDto.UUID, TextField.class);
 		tfUuid.setReadOnly(true);
 		tfUuid.setCaption(I18nProperties.getCaption(Captions.userMyUserId));
 
-		Label crowdinInfoLabel = new Label(I18nProperties.getString(Strings.infoCrowdinLocalization), ContentMode.HTML);
-		crowdinInfoLabel.setWidth(100, Unit.PERCENTAGE);
+		Span crowdinInfoLabel = VaadinUiUtil.createLabel(I18nProperties.getString(Strings.infoCrowdinLocalization), ContentMode.HTML);
+		crowdinInfoLabel.setWidthFull();
 		CssStyles.style(crowdinInfoLabel, CssStyles.VSPACE_TOP_3, CssStyles.VSPACE_3);
 		getContent().addComponent(crowdinInfoLabel, CROWDIN_INFO_LOC);
 	}

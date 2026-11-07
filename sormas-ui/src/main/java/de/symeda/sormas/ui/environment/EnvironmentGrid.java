@@ -19,8 +19,6 @@ import java.util.Date;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import com.vaadin.ui.renderers.DateRenderer;
-
 import de.symeda.sormas.api.EntityRelevanceStatus;
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.environment.EnvironmentCriteria;
@@ -38,6 +36,7 @@ import de.symeda.sormas.ui.utils.FilteredGrid;
 import de.symeda.sormas.ui.utils.ShowDetailsListener;
 import de.symeda.sormas.ui.utils.UuidRenderer;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
 
 public class EnvironmentGrid extends FilteredGrid<EnvironmentIndexDto, EnvironmentCriteria> {
 
@@ -88,11 +87,11 @@ public class EnvironmentGrid extends FilteredGrid<EnvironmentIndexDto, Environme
 			removeColumn(DELETE_REASON_COLUMN);
 		}
 
-		for (Column<EnvironmentIndexDto, ?> column : getColumns()) {
+		for (Column<EnvironmentIndexDto, ?> column : getAllColumns()) {
 			column.setCaption(
 				I18nProperties
-					.findPrefixCaptionWithDefault(column.getId(), column.getCaption(), EnvironmentIndexDto.I18N_PREFIX, LocationDto.I18N_PREFIX));
-			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(EnvironmentIndexDto.class, column.getId()));
+					.findPrefixCaptionWithDefault(column.getKey(), column.getCaption(), EnvironmentIndexDto.I18N_PREFIX, LocationDto.I18N_PREFIX));
+			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(EnvironmentIndexDto.class, column.getKey()));
 		}
 
 		if (UiUtil.enabled(FeatureType.HIDE_JURISDICTION_FIELDS)) {

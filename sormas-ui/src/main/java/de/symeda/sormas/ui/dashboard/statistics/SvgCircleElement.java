@@ -17,17 +17,19 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.dashboard.statistics;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
+
+import de.symeda.sormas.ui.utils.ContentMode;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 @SuppressWarnings("serial")
-public class SvgCircleElement extends Label {
+// was a Vaadin 8 Label in HTML mode
+public class SvgCircleElement extends Span {
 
 	private final boolean showPercentage;
 	private int percentage;
 
 	public SvgCircleElement(boolean showPercentage) {
-		setContentMode(ContentMode.HTML);
 		this.showPercentage = showPercentage;
 		updateSvg();
 	}
@@ -63,7 +65,7 @@ public class SvgCircleElement extends Label {
 			sb.append("</svg>");
 		}
 
-		setValue(sb.toString());
+		VaadinUiUtil.setLabelValue(this, sb.toString(), ContentMode.HTML);
 	}
 
 	public class SvgCircleElementPart {

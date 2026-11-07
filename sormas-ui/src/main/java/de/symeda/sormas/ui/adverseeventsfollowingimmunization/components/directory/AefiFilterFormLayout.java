@@ -15,8 +15,11 @@
 
 package de.symeda.sormas.ui.adverseeventsfollowingimmunization.components.directory;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiCriteria;
 
@@ -28,11 +31,11 @@ public class AefiFilterFormLayout extends VerticalLayout {
 
 	public AefiFilterFormLayout() {
 		setSpacing(false);
-		setMargin(false);
+		setPadding(false);
 		setWidth(PERCENTAGE_WIDTH, Unit.PERCENTAGE);
 
 		filterForm = new AefiFilterForm();
-		addComponent(filterForm);
+		add(filterForm);
 	}
 
 	public AefiCriteria getValue() {
@@ -43,11 +46,11 @@ public class AefiFilterFormLayout extends VerticalLayout {
 		filterForm.setValue(criteria);
 	}
 
-	public void addResetHandler(Button.ClickListener listener) {
+	public void addResetHandler(ComponentEventListener<ClickEvent<Button>> listener) {
 		filterForm.addResetHandler(listener);
 	}
 
-	public void addApplyHandler(Button.ClickListener listener) {
+	public void addApplyHandler(ComponentEventListener<ClickEvent<Button>> listener) {
 		filterForm.addApplyHandler(listener);
 	}
 }

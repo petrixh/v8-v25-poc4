@@ -22,20 +22,22 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.data.Binder;
-import com.vaadin.data.ValueProvider;
-import com.vaadin.server.Setter;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.BinderValidationStatus;
+import com.vaadin.flow.data.binder.Setter;
+import com.vaadin.flow.function.ValueProvider;
 
 import de.symeda.sormas.api.Language;
 import de.symeda.sormas.api.customizablefield.CustomizableFieldMetadataDto;
 import de.symeda.sormas.api.customizablefield.CustomizableFieldValueDto;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Strings;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 
 /**
- * Abstract base for editable customizable field input components (Vaadin v8).
+ * Abstract base for editable customizable field input components (Flow; was Vaadin 8). The content is built on first
+ * attach, as in Vaadin 8 ({@link CustomField}).
  * <p>
  * Each concrete subclass is responsible for a specific {@link de.symeda.sormas.api.customizablefield.CustomizableFieldType}.
  * The base class handles metadata-driven configuration (caption, mandatory indicator, read-only state)
@@ -43,7 +45,7 @@ import de.symeda.sormas.api.i18n.Strings;
  * with the widget in both directions:
  * <ul>
  * <li><b>DTO → widget:</b> {@link #setFieldValue(CustomizableFieldValueDto)} calls {@link Binder#setBean},
- * which reads the DTO and pushes the value into this {@code CustomField} via {@link #doSetValue}.</li>
+ * which reads the DTO and pushes the value into this {@code CustomField} via {@link #setPresentationValue}.</li>
  * <li><b>widget → DTO:</b> subclasses must call {@link #setValue(Object)} whenever the inner widget
  * changes (typically via a value-change listener); the binder immediately writes the new value
  * into the bean so {@link #getFieldValue()} never needs a manual flush.</li>
@@ -54,9 +56,9 @@ import de.symeda.sormas.api.i18n.Strings;
  * <li>{@link #buildInputComponent()} – called once by {@link #initContent()}; return the inner editable widget
  * and wire a value-change listener that calls {@link #setValue(Object)}.</li>
  * <li>{@link #applyValueToWidget(Object)} – propagates the value down to the inner widget;
- * called by the final {@link #doSetValue(Object)} after storing the new value internally.</li>
+ * called by the final {@link #setPresentationValue(Object)} after storing the new value internally.</li>
  * <li>{@link #configureBinding(Binder.BindingBuilder)} – optional; override to attach
- * {@link com.vaadin.data.Validator}s to the binding before it is finalised.</li>
+ * {@link com.vaadin.flow.data.binder.Validator}s to the binding before it is finalised.</li>
  * </ul>
  */
 @SuppressWarnings("java:S2160") // sonar missing equals, ok for Vaadin UI components
@@ -70,12 +72,9 @@ public abstract class CustomizableFieldInput<T> extends CustomField<T> {
 	 * Stores the current logical value of this field.
 	 * <p>
 	 * {@link #getValue()} reads from here instead of from the inner widget.
-	 * This ensures that {@link com.vaadin.ui.AbstractField#setValue(Object)} can
-	 * correctly detect value changes: when the inner widget fires a change event
-	 * and the listener calls {@link #setValue(Object)}, the old logical value is
-	 * still present here, so the equality check succeeds and a
-	 * {@link com.vaadin.data.HasValue.ValueChangeEvent} is fired to notify the binder.
-	 * The field is updated inside {@link #doSetValue(Object)}, which is invoked by
+	 * Flow's {@link com.vaadin.flow.component.AbstractField#setValue(Object)} compares with its own stored value
+	 * and then calls {@link #setPresentationValue(Object)}, which updates this store and the widget.
+	 * The field is updated inside {@link #setPresentationValue(Object)}, which is invoked by
 	 * Vaadin only after the equality check has already passed.
 	 */
 	private transient T currentValue;
@@ -103,7 +102,7 @@ public abstract class CustomizableFieldInput<T> extends CustomField<T> {
 
 	/**
 	 * Optional hook called during construction, just before the binder binding is finalised.
-	 * Subclasses can override this to attach additional {@link com.vaadin.data.Validator}s
+	 * Subclasses can override this to attach additional {@link com.vaadin.flow.data.binder.Validator}s
 	 * (e.g. pattern validators for numeric types).
 	 * <p>
 	 * <b>Note:</b> this method is called from the superclass constructor. Overrides must
@@ -137,11 +136,7 @@ public abstract class CustomizableFieldInput<T> extends CustomField<T> {
 	/**
 	 * Returns the current logical value of this field.
 	 * <p>
-	 * Reads from the internal {@link #currentValue} store rather than from the inner widget,
-	 * so that {@link com.vaadin.ui.AbstractField#setValue(Object)} can detect changes correctly:
-	 * when the inner widget fires a change and the listener calls {@link #setValue(Object)},
-	 * the old value is still present here, allowing the equality check to pass and a
-	 * {@link com.vaadin.data.HasValue.ValueChangeEvent} to be fired to the binder.
+	 * Reads from the internal {@link #currentValue} store rather than from the inner widget.
 	 */
 	@Override
 	public T getValue() {
@@ -149,21 +144,22 @@ public abstract class CustomizableFieldInput<T> extends CustomField<T> {
 	}
 
 	/**
-	 * Called by Vaadin when a new value is set on this field (via {@link #setValue(Object)}).
+	 * Called by Flow when a new value is set on this field (via {@link #setValue(Object)}; was Vaadin 8
+	 * {@code doSetValue}).
 	 * Stores the new value in {@link #currentValue}, then delegates widget propagation to
 	 * {@link #applyValueToWidget(Object)}.
 	 * <p>
 	 * Made {@code final} so that subclasses cannot accidentally bypass the value-storage step.
 	 */
 	@Override
-	protected final void doSetValue(T value) {
+	protected final void setPresentationValue(T value) {
 		this.currentValue = value;
 		applyValueToWidget(value);
 	}
 
 	/**
 	 * Propagates {@code value} down to the inner UI widget.
-	 * Called by {@link #doSetValue(Object)} after the new value has been stored.
+	 * Called by {@link #setPresentationValue(Object)} after the new value has been stored.
 	 * <p>
 	 * If the inner widget has not been created yet (component not yet rendered),
 	 * implementations should stash the value as a pending value and apply it in
@@ -217,7 +213,7 @@ public abstract class CustomizableFieldInput<T> extends CustomField<T> {
 	 */
 	public List<String> validateAndGetErrors() {
 		List<String> errors = new ArrayList<>();
-		com.vaadin.data.BinderValidationStatus<CustomizableFieldValueDto> status = binder.validate();
+		BinderValidationStatus<CustomizableFieldValueDto> status = binder.validate();
 		status.getFieldValidationErrors().forEach(error -> error.getMessage().ifPresent(errors::add));
 		if (errors.isEmpty() && !status.isOk()) {
 			errors.add(I18nProperties.getString(Strings.errorInvalidValue));

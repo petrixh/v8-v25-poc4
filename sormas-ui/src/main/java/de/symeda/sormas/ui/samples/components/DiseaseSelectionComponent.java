@@ -19,10 +19,10 @@ package de.symeda.sormas.ui.samples.components;
 
 import java.util.List;
 
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -49,10 +49,10 @@ public class DiseaseSelectionComponent extends FormComponent<PathogenTestDto> {
 
 	private ComboBox<Disease> diseaseField;
 	private TextField diseaseDetailsField;
-	private Label diseaseDetailsSpacer;
+	private Span diseaseDetailsSpacer;
 	private ComboBox<Pathogen> testedPathogenField;
 	private TextField testedPathogenDetailsField;
-	private Label pathogenDetailsSpacer;
+	private Span pathogenDetailsSpacer;
 
 	public DiseaseSelectionComponent(FormEventBus eventBus, Disease initialDisease, boolean create, boolean isEnvironmentSample) {
 		super(PathogenTestDto.class);
@@ -68,14 +68,14 @@ public class DiseaseSelectionComponent extends FormComponent<PathogenTestDto> {
 	private void buildLayout() {
 		// Disease
 		diseaseField = createComboBox(PathogenTestDto.TESTED_DISEASE, PathogenTestDto.I18N_PREFIX);
-		diseaseField.setItemCaptionGenerator(Disease::toString);
+		diseaseField.setItemLabelGenerator(Disease::toString);
 
 		List<Disease> activeDiseases = FacadeProvider.getDiseaseConfigurationFacade().getAllDiseases(true, true, true);
 		List<Disease> nonPrimary = FacadeProvider.getDiseaseConfigurationFacade().getAllDiseases(true, false, true);
 		activeDiseases.addAll(nonPrimary);
 		diseaseField.setItems(activeDiseases);
 
-		diseaseDetailsField = createTextField(PathogenTestDto.TESTED_DISEASE_DETAILS, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
+		diseaseDetailsField = createTextField(PathogenTestDto.TESTED_DISEASE_DETAILS, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
 		diseaseDetailsField.setVisible(false);
 
 		diseaseDetailsSpacer = createSpacer();
@@ -83,10 +83,10 @@ public class DiseaseSelectionComponent extends FormComponent<PathogenTestDto> {
 
 		// Pathogen
 		testedPathogenField = createComboBox(PathogenTestDto.TESTED_PATHOGEN, PathogenTestDto.I18N_PREFIX);
-		testedPathogenField.setItemCaptionGenerator(Pathogen::getCaption);
+		testedPathogenField.setItemLabelGenerator(Pathogen::getCaption);
 		testedPathogenField.setItems(FacadeProvider.getCustomizableEnumFacade().getEnumValues(CustomizableEnumType.PATHOGEN, initialDisease));
 
-		testedPathogenDetailsField = createTextField(PathogenTestDto.TESTED_PATHOGEN_DETAILS, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
+		testedPathogenDetailsField = createTextField(PathogenTestDto.TESTED_PATHOGEN_DETAILS, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
 		testedPathogenDetailsField.setVisible(false);
 
 		pathogenDetailsSpacer = createSpacer();

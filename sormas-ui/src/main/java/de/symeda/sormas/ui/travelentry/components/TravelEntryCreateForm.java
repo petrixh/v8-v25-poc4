@@ -15,13 +15,9 @@ import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Window;
-import com.vaadin.v7.data.util.converter.Converter;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -49,6 +45,10 @@ import de.symeda.sormas.ui.travelentry.DEAFormBuilder;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.InfrastructureFieldsHelper;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DateField;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class TravelEntryCreateForm extends AbstractEditForm<TravelEntryDto> {
 
@@ -87,7 +87,7 @@ public class TravelEntryCreateForm extends AbstractEditForm<TravelEntryDto> {
 	private PersonCreateForm personCreateForm;
 
 	private final PersonReferenceDto personDto;
-	private Window warningSimilarPersons;
+	private Dialog warningSimilarPersons;
 
 	public TravelEntryCreateForm() {
 		this(null);
@@ -125,8 +125,8 @@ public class TravelEntryCreateForm extends AbstractEditForm<TravelEntryDto> {
 
 		addField(TravelEntryDto.DATE_OF_ARRIVAL).setRequired(true);
 
-		Label jurisdictionHeadingLabel = new Label(I18nProperties.getString(Strings.headingResponsibleJurisdiction));
-		jurisdictionHeadingLabel.addStyleName(H3);
+		Span jurisdictionHeadingLabel = new Span(I18nProperties.getString(Strings.headingResponsibleJurisdiction));
+		jurisdictionHeadingLabel.addClassName(H3);
 		getContent().addComponent(jurisdictionHeadingLabel, RESPONSIBLE_JURISDICTION_HEADING_LOC);
 
 		responsibleRegion = addInfrastructureField(TravelEntryDto.RESPONSIBLE_REGION);
@@ -139,10 +139,10 @@ public class TravelEntryCreateForm extends AbstractEditForm<TravelEntryDto> {
 		InfrastructureFieldsHelper.initInfrastructureFields(responsibleRegion, responsibleDistrict, responsibleCommunity);
 
 		CheckBox differentPointOfEntryJurisdiction = addCustomField(DIFFERENT_POINT_OF_ENTRY_JURISDICTION, Boolean.class, CheckBox.class);
-		differentPointOfEntryJurisdiction.addStyleName(VSPACE_3);
+		differentPointOfEntryJurisdiction.addClassName(VSPACE_3);
 
-		Label placeOfStayHeadingLabel = new Label(I18nProperties.getCaption(Captions.travelEntryPointOfEntry));
-		placeOfStayHeadingLabel.addStyleName(H3);
+		Span placeOfStayHeadingLabel = new Span(I18nProperties.getCaption(Captions.travelEntryPointOfEntry));
+		placeOfStayHeadingLabel.addClassName(H3);
 		getContent().addComponent(placeOfStayHeadingLabel, POINT_OF_ENTRY_HEADING_LOC);
 
 		ComboBox regionCombo = addInfrastructureField(TravelEntryDto.REGION);
@@ -164,13 +164,13 @@ public class TravelEntryCreateForm extends AbstractEditForm<TravelEntryDto> {
 
 		regionCombo.addItems(FacadeProvider.getRegionFacade().getAllActiveByServerCountry());
 		regionCombo.addValueChangeListener(e -> {
-			RegionReferenceDto regionDto = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto regionDto = (RegionReferenceDto) e.getValue();
 			FieldHelper
 				.updateItems(districtCombo, regionDto != null ? FacadeProvider.getDistrictFacade().getAllActiveByRegion(regionDto.getUuid()) : null);
 		});
 		districtCombo.addValueChangeListener(e -> {
 			if (differentPointOfEntryJurisdiction.getValue()) {
-				DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getProperty().getValue();
+				DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getValue();
 				getPointsOfEntryForDistrict(districtDto);
 			}
 		});
@@ -216,12 +216,12 @@ public class TravelEntryCreateForm extends AbstractEditForm<TravelEntryDto> {
 			null);
 
 		responsibleDistrict.addValueChangeListener(e -> {
-			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getProperty().getValue();
+			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getValue();
 			getPointsOfEntryForDistrict(districtDto);
 		});
 
-		diseaseField.addValueChangeListener((ValueChangeListener) valueChangeEvent -> {
-			Disease disease = (Disease) valueChangeEvent.getProperty().getValue();
+		diseaseField.addValueChangeListener(valueChangeEvent -> {
+			Disease disease = (Disease) valueChangeEvent.getValue();
 			List<DiseaseVariant> diseaseVariants =
 				FacadeProvider.getCustomizableEnumFacade().getEnumValues(CustomizableEnumType.DISEASE_VARIANT, disease);
 			FieldHelper.updateItems(diseaseVariantField, diseaseVariants);
@@ -230,7 +230,7 @@ public class TravelEntryCreateForm extends AbstractEditForm<TravelEntryDto> {
 			personCreateForm.updatePresentConditionEnum(disease);
 		});
 		diseaseVariantField.addValueChangeListener(e -> {
-			DiseaseVariant diseaseVariant = (DiseaseVariant) e.getProperty().getValue();
+			DiseaseVariant diseaseVariant = (DiseaseVariant) e.getValue();
 			diseaseVariantDetailsField.setVisible(diseaseVariant != null && diseaseVariant.matchPropertyValue(DiseaseVariant.HAS_DETAILS, true));
 		});
 
@@ -303,7 +303,7 @@ public class TravelEntryCreateForm extends AbstractEditForm<TravelEntryDto> {
 	}
 
 	@Override
-	public void setValue(TravelEntryDto newFieldValue) throws ReadOnlyException, Converter.ConversionException {
+	public void setValue(TravelEntryDto newFieldValue) {
 		super.setValue(newFieldValue);
 		buildDeaContent(newFieldValue);
 
@@ -321,7 +321,7 @@ public class TravelEntryCreateForm extends AbstractEditForm<TravelEntryDto> {
 		}
 	}
 
-	public Window getWarningSimilarPersons() {
+	public Dialog getWarningSimilarPersons() {
 		return warningSimilarPersons;
 	}
 }

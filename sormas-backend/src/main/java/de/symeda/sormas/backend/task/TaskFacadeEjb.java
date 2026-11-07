@@ -28,25 +28,25 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Tuple;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Selection;
-import javax.validation.Valid;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Selection;
+import jakarta.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1183,8 +1183,9 @@ public class TaskFacadeEjb implements TaskFacade {
 	 * The url is bound to the Sormas UI made with Vaadin.
 	 * This function will need to be modified if the UI will have URL modifications
 	 * or in case the UI app is replaced by another one.
+	 * The UI's routes are the old view names as paths: {@code <ui.url>/cases/data/<uuid>} (was {@code <ui.url>/#!cases/data/<uuid>}).
 	 */
-	private String getUiUrl(TaskContext taskContext, String uuid) {
+	String getUiUrl(TaskContext taskContext, String uuid) {
 		if (taskContext.getUrlPattern() == null || uuid == null) {
 			return null;
 		}
@@ -1198,7 +1199,7 @@ public class TaskFacadeEjb implements TaskFacade {
 		if (!uiUrl.endsWith("/")) {
 			uiUrlBuilder.append("/");
 		}
-		return uiUrlBuilder.append("#!").append(taskContext.getUrlPattern()).append("/data/").append(uuid).toString();
+		return uiUrlBuilder.append(taskContext.getUrlPattern()).append("/data/").append(uuid).toString();
 	}
 
 	@Override

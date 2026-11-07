@@ -40,8 +40,8 @@ public class AggregateReportsGrid extends FilteredGrid<AggregateCaseCountDto, Ag
 			AggregateCaseCountDto.LAB_CONFIRMATIONS,
 			AggregateCaseCountDto.DEATHS);
 
-		for (Column<?, ?> column : getColumns()) {
-			column.setCaption(I18nProperties.getPrefixCaption(AggregateCaseCountDto.I18N_PREFIX, column.getId(), column.getCaption()));
+		for (Column<?, ?> column : getAllColumns()) {
+			column.setCaption(I18nProperties.getPrefixCaption(AggregateCaseCountDto.I18N_PREFIX, column.getKey(), column.getCaption()));
 		}
 	}
 

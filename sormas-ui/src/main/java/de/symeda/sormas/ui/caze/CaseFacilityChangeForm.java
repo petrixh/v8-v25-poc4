@@ -22,10 +22,7 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 
 import java.util.List;
 
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.AbstractSelect;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Unit;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -47,6 +44,9 @@ import de.symeda.sormas.ui.utils.ComboBoxHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class CaseFacilityChangeForm extends AbstractEditForm<CaseDataDto> {
 
@@ -89,10 +89,10 @@ public class CaseFacilityChangeForm extends AbstractEditForm<CaseDataDto> {
 			facilityOrHome.addItem(place);
 			facilityOrHome.setItemCaption(place, I18nProperties.getEnumCaption(place));
 		}
-		facilityOrHome.setItemCaptionMode(AbstractSelect.ItemCaptionMode.EXPLICIT);
+		// was setItemCaptionMode(EXPLICIT): every item has an explicit caption
 		facilityOrHome.setId("facilityOrHome");
 		facilityOrHome.setWidth(100, Unit.PERCENTAGE);
-		CssStyles.style(facilityOrHome, ValoTheme.OPTIONGROUP_HORIZONTAL);
+		CssStyles.style(facilityOrHome, SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL);
 		getContent().addComponent(facilityOrHome, FACILITY_OR_HOME_LOC);
 		typeGroup = ComboBoxHelper.createComboBoxV7();
 		typeGroup.setId("typeGroup");
@@ -114,14 +114,14 @@ public class CaseFacilityChangeForm extends AbstractEditForm<CaseDataDto> {
 		facilityDetails.setVisible(false);
 
 		region.addValueChangeListener(e -> {
-			RegionReferenceDto regionDto = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto regionDto = (RegionReferenceDto) e.getValue();
 			FieldHelper
 				.updateItems(district, regionDto != null ? FacadeProvider.getDistrictFacade().getAllActiveByRegion(regionDto.getUuid()) : null);
 		});
 		district.addValueChangeListener(e -> {
 			FieldHelper.removeItems(facility);
 			FieldHelper.removeItems(community);
-			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getProperty().getValue();
+			DistrictReferenceDto districtDto = (DistrictReferenceDto) e.getValue();
 			FieldHelper.updateItems(
 				community,
 				districtDto != null ? FacadeProvider.getCommunityFacade().getAllActiveByDistrict(districtDto.getUuid()) : null);
@@ -143,7 +143,7 @@ public class CaseFacilityChangeForm extends AbstractEditForm<CaseDataDto> {
 		});
 		community.addValueChangeListener(e -> {
 			FieldHelper.removeItems(facility);
-			CommunityReferenceDto communityDto = (CommunityReferenceDto) e.getProperty().getValue();
+			CommunityReferenceDto communityDto = (CommunityReferenceDto) e.getValue();
 			if (type.getValue() != null) {
 				FieldHelper.updateItems(
 					facility,

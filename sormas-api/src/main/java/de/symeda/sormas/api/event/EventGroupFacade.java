@@ -20,9 +20,9 @@ package de.symeda.sormas.api.event;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.Remote;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import jakarta.ejb.Remote;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.EditPermissionType;
 import de.symeda.sormas.api.common.Page;

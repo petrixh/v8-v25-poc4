@@ -15,7 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 
 import com.tngtech.archunit.core.domain.JavaClass;

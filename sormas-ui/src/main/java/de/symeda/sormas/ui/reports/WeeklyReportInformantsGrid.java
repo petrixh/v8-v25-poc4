@@ -21,9 +21,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.ui.Grid;
-import com.vaadin.v7.ui.renderers.HtmlRenderer;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -36,36 +33,27 @@ import de.symeda.sormas.api.user.UserReferenceDto;
 import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.api.utils.EpiWeek;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import de.symeda.sormas.ui.utils.grid.renderers.ConvertingHtmlRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
+/**
+ * Was a Vaadin 7 container grid; the items are now set with {@link #setItems}.
+ */
 @SuppressWarnings("serial")
-public class WeeklyReportInformantsGrid extends Grid {
+public class WeeklyReportInformantsGrid extends Grid<WeeklyReportInformantsGrid.WeeklyReportInformantSummary> {
 
 	private final UserReferenceDto officerRef;
 	private final EpiWeek epiWeek;
 
-	private final class WeeklyReportGridCellStyleGenerator implements CellStyleGenerator {
-
-		@Override
-		public String getStyle(CellReference cell) {
-			if (WeeklyReportInformantSummary.INFORMANT_REPORT_DATE.equals(cell.getPropertyId())) {
-				if (cell.getValue() == null) {
-					return CssStyles.GRID_CELL_PRIORITY_HIGH;
-				}
-			}
-			return null;
-		}
-	}
-
 	public WeeklyReportInformantsGrid(UserReferenceDto officerRef, EpiWeek epiWeek) {
+		super(WeeklyReportInformantSummary.class);
 		this.officerRef = officerRef;
 		this.epiWeek = epiWeek;
 		setSizeFull();
 
 		setSelectionMode(SelectionMode.NONE);
-
-		BeanItemContainer<WeeklyReportInformantSummary> container =
-			new BeanItemContainer<WeeklyReportInformantSummary>(WeeklyReportInformantSummary.class);
-		setContainerDataSource(container);
 
 		setColumns(
 			WeeklyReportInformantSummary.INFORMANT,
@@ -74,27 +62,42 @@ public class WeeklyReportInformantsGrid extends Grid {
 			WeeklyReportInformantSummary.INFORMANT_REPORT_DATE,
 			WeeklyReportInformantSummary.TOTAL_CASE_COUNT);
 
-		for (Column column : getColumns()) {
+		for (Column<WeeklyReportInformantSummary, ?> column : getAllColumns()) {
 			column.setHeaderCaption(
 				I18nProperties
 					.getPrefixCaption(WeeklyReportInformantSummary.I18N_PREFIX, column.getPropertyId().toString(), column.getHeaderCaption()));
 		}
 
-		getColumn(WeeklyReportInformantSummary.INFORMANT_REPORT_DATE)
-			.setRenderer(new HtmlRenderer(I18nProperties.getCaption(Captions.weeklyReportNoReport)));
+		setV7ColumnRenderers();
 
-		setCellStyleGenerator(new WeeklyReportGridCellStyleGenerator());
+		// was the V7 cell style generator
+		getColumn(WeeklyReportInformantSummary.INFORMANT_REPORT_DATE)
+			.setStyleGenerator(summary -> summary.getInformantReportDate() == null ? CssStyles.GRID_CELL_PRIORITY_HIGH : null);
 
 		reload();
 	}
 
+	/**
+	 * The Vaadin 7 grid showed the property values through the session's default converters: references as their
+	 * caption, numbers in the UI locale, the report date in the medium date-time format of the UI locale (V7
+	 * {@code StringToDateConverter}) inside the HTML renderer.
+	 */
 	@SuppressWarnings("unchecked")
-	private BeanItemContainer<WeeklyReportInformantSummary> getContainer() {
-		return (BeanItemContainer<WeeklyReportInformantSummary>) super.getContainerDataSource();
+	private void setV7ColumnRenderers() {
+		for (String columnId : new String[] {
+			WeeklyReportInformantSummary.INFORMANT,
+			WeeklyReportInformantSummary.COMMUNITY,
+			WeeklyReportInformantSummary.FACILITY,
+			WeeklyReportInformantSummary.TOTAL_CASE_COUNT }) {
+			((Column<WeeklyReportInformantSummary, Object>) getColumn(columnId)).setRenderer(ConvertingHtmlRenderer::toPresentation, new TextRenderer());
+		}
+
+		((Column<WeeklyReportInformantSummary, Object>) getColumn(WeeklyReportInformantSummary.INFORMANT_REPORT_DATE)).setRenderer(
+			ConvertingHtmlRenderer::toPresentation,
+			new HtmlRenderer(I18nProperties.getCaption(Captions.weeklyReportNoReport)));
 	}
 
 	public void reload() {
-		getContainer().removeAllItems();
 
 		List<WeeklyReportInformantSummary> reportDetailDtos = new ArrayList<>();
 		List<UserDto> informants = FacadeProvider.getUserFacade().getUsersByAssociatedOfficer(officerRef, UserRight.WEEKLYREPORT_CREATE);
@@ -136,7 +139,7 @@ public class WeeklyReportInformantsGrid extends Grid {
 			reportDetailDtos.add(reportDetails);
 		}
 
-		getContainer().addAll(reportDetailDtos);
+		setItems(reportDetailDtos);
 		this.setHeightByRows(reportDetailDtos.size());
 	}
 

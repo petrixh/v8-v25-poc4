@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.ReferenceDto;
@@ -188,15 +188,15 @@ public class ExternalEmailSideComponent extends SideComponent {
 				createButton.setEnabled(false);
 			}
 
-			Label noRecipientLabel = new Label(I18nProperties.getString(noRecipientStringKey));
-			noRecipientLabel.addStyleName(CssStyles.LABEL_WHITE_SPACE_NORMAL);
+			Span noRecipientLabel = new Span(I18nProperties.getString(noRecipientStringKey));
+			noRecipientLabel.addClassName(CssStyles.LABEL_WHITE_SPACE_NORMAL);
 
-			addComponent(noRecipientLabel);
+			add(noRecipientLabel);
 		}
 
 		emailList = new ExternalEmailList(baseCriteria.withTemplate(true).messageType(MessageType.EMAIL), noEmailsStringKey);
 
-		addComponent(emailList);
+		add(emailList);
 		emailList.reload();
 	}
 }

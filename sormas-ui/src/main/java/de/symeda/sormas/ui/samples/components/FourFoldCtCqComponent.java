@@ -17,7 +17,7 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.samples.components;
 
-import com.vaadin.ui.CheckBox;
+import com.vaadin.flow.component.checkbox.Checkbox;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.i18n.Captions;
@@ -46,7 +46,7 @@ public class FourFoldCtCqComponent extends FormComponent<PathogenTestDto> {
 	private final int caseSampleCount;
 	private final CtCqValueComponent ctCqValueComponent;
 
-	private CheckBox fourFoldIncrease;
+	private Checkbox fourFoldIncrease;
 
 	private Disease currentDisease;
 	private PathogenTestType currentTestType;
@@ -68,9 +68,9 @@ public class FourFoldCtCqComponent extends FormComponent<PathogenTestDto> {
 		CssStyles.style(fourFoldIncrease, CssStyles.VSPACE_3, CssStyles.VSPACE_TOP_4);
 		fourFoldIncrease.setVisible(false);
 		fourFoldIncrease.setEnabled(false);
-		addComponent(fourFoldIncrease);
+		add(fourFoldIncrease);
 
-		addComponent(ctCqValueComponent);
+		add(ctCqValueComponent);
 	}
 
 	private void bindFields() {
@@ -130,7 +130,7 @@ public class FourFoldCtCqComponent extends FormComponent<PathogenTestDto> {
 			fourFoldIncrease.setEnabled(false);
 			fourFoldIncrease.clear();
 		}
-		fourFoldIncrease.setCaption(
+		fourFoldIncrease.setLabel(
 			currentDisease == Disease.DENGUE
 				? I18nProperties.getCaption(Captions.PathogenTest_fourFoldIncreaseAntibodyTiter_DENGUE)
 				: I18nProperties.getPrefixCaption(PathogenTestDto.I18N_PREFIX, PathogenTestDto.FOUR_FOLD_INCREASE_ANTIBODY_TITER));

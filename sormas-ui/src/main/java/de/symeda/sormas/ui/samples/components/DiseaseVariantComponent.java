@@ -24,11 +24,11 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.DiseaseHelper;
@@ -70,7 +70,7 @@ public class DiseaseVariantComponent extends FormComponent<PathogenTestDto> {
 
 	private ComboBox<DiseaseVariant> diseaseVariantField;
 	private TextField diseaseVariantDetailsField;
-	private Label variantDetailsSpacer;
+	private Span variantDetailsSpacer;
 	private HorizontalLayout variantRow;
 
 	public DiseaseVariantComponent(FormEventBus eventBus, Disease initialDisease) {
@@ -84,12 +84,12 @@ public class DiseaseVariantComponent extends FormComponent<PathogenTestDto> {
 
 	private void buildLayout() {
 		diseaseVariantField = createComboBox(PathogenTestDto.TESTED_DISEASE_VARIANT, PathogenTestDto.I18N_PREFIX);
-		diseaseVariantField.setItemCaptionGenerator(DiseaseVariant::getCaption);
-		diseaseVariantField.setEmptySelectionAllowed(true);
+		diseaseVariantField.setItemLabelGenerator(DiseaseVariant::getCaption);
+		diseaseVariantField.setClearButtonVisible(true);
 		diseaseVariantField.setVisible(false);
 
 		diseaseVariantDetailsField =
-			createTextField(PathogenTestDto.TESTED_DISEASE_VARIANT_DETAILS, PathogenTestDto.I18N_PREFIX, ValueChangeMode.BLUR);
+			createTextField(PathogenTestDto.TESTED_DISEASE_VARIANT_DETAILS, PathogenTestDto.I18N_PREFIX, ValueChangeMode.ON_BLUR);
 		diseaseVariantDetailsField.setVisible(false);
 
 		updateCaptions(currentDisease);
@@ -161,8 +161,8 @@ public class DiseaseVariantComponent extends FormComponent<PathogenTestDto> {
 
 	private void updateCaptions(Disease disease) {
 		if (DiseaseHelper.SUBTYPE_ALLOWED_DISEASES.contains(disease)) {
-			diseaseVariantField.setCaption(I18nProperties.getCaption(Captions.PathogenTest_rsv_testedDiseaseVariant));
-			diseaseVariantDetailsField.setCaption(I18nProperties.getCaption(Captions.PathogenTest_rsv_testedDiseaseVariantDetails));
+			diseaseVariantField.setLabel(I18nProperties.getCaption(Captions.PathogenTest_rsv_testedDiseaseVariant));
+			diseaseVariantDetailsField.setLabel(I18nProperties.getCaption(Captions.PathogenTest_rsv_testedDiseaseVariantDetails));
 		}
 	}
 

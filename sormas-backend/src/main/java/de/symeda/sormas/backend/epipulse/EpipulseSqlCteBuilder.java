@@ -17,8 +17,8 @@ package de.symeda.sormas.backend.epipulse;
 
 import java.util.StringJoiner;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
 
 /**
  * Service for building SQL Common Table Expressions (CTEs) for Epipulse disease exports.

@@ -15,7 +15,7 @@
 
 package de.symeda.sormas.backend.sormastosormas.data.processed;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import de.symeda.sormas.api.sormastosormas.DuplicateResult;
 import de.symeda.sormas.api.sormastosormas.SormasToSormasOriginInfoDto;

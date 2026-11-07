@@ -15,8 +15,8 @@
 
 package de.symeda.sormas.api.externalmessage.labmessage;
 
-import javax.ejb.Remote;
-import javax.validation.Valid;
+import jakarta.ejb.Remote;
+import jakarta.validation.Valid;
 
 @Remote
 public interface SampleReportFacade {

@@ -19,9 +19,7 @@ import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.navigator.Navigator;
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Notification;
+import com.vaadin.flow.component.Unit;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiDto;
@@ -41,9 +39,11 @@ import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.UserProvider;
 import de.symeda.sormas.ui.adverseeventsfollowingimmunization.components.fields.vaccines.AefiPrimarySuspectVaccinationSelectionField;
 import de.symeda.sormas.ui.adverseeventsfollowingimmunization.components.form.AefiDataForm;
+import de.symeda.sormas.ui.navigation.Navigator;
 import de.symeda.sormas.ui.utils.ArchiveHandlers;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.automaticdeletion.DeletionLabel;
 import de.symeda.sormas.ui.utils.components.page.title.RowLayout;
@@ -63,7 +63,7 @@ public class AefiController {
 
 		AefiPrimarySuspectVaccinationSelectionField selectionField =
 			new AefiPrimarySuspectVaccinationSelectionField(aefiDto.getVaccinations(), aefiDto.getPrimarySuspectVaccine());
-		selectionField.setWidth(1024, Sizeable.Unit.PIXELS);
+		selectionField.setWidth(1024, Unit.PIXELS);
 
 		final CommitDiscardWrapperComponent<AefiPrimarySuspectVaccinationSelectionField> component =
 			new CommitDiscardWrapperComponent<>(selectionField);
@@ -123,7 +123,7 @@ public class AefiController {
 				AefiDto aefiDataFormValue = aefiDataForm.getValue();
 
 				AefiDto savedAefiDto = FacadeProvider.getAefiFacade().save(aefiDataFormValue);
-				Notification.show(I18nProperties.getString(Strings.messageAdverseEventSaved), Notification.Type.WARNING_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageAdverseEventSaved), NotificationHelper.Type.WARNING_MESSAGE);
 
 				if (isCreateAction) {
 					navigateToAefi(savedAefiDto.getUuid());

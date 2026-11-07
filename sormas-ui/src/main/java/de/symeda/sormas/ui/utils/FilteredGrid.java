@@ -1,28 +1,24 @@
 package de.symeda.sormas.ui.utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.data.provider.CallbackDataProvider;
-import com.vaadin.data.provider.CallbackDataProvider.CountCallback;
-import com.vaadin.data.provider.CallbackDataProvider.FetchCallback;
-import com.vaadin.data.provider.ConfigurableFilterDataProvider;
-import com.vaadin.data.provider.DataProvider;
-import com.vaadin.data.provider.ListDataProvider;
-import com.vaadin.data.provider.Query;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.SerializableSupplier;
-import com.vaadin.shared.Registration;
-import com.vaadin.shared.data.sort.SortDirection;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.renderers.HtmlRenderer;
-import com.vaadin.ui.renderers.TextRenderer;
+import com.vaadin.flow.component.grid.dataview.GridListDataView;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
+import com.vaadin.flow.data.provider.CallbackDataProvider.CountCallback;
+import com.vaadin.flow.data.provider.CallbackDataProvider.FetchCallback;
+import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.SortDirection;
+import com.vaadin.flow.shared.Registration;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -32,6 +28,9 @@ import de.symeda.sormas.api.utils.SortProperty;
 import de.symeda.sormas.api.utils.criteria.BaseCriteria;
 import de.symeda.sormas.api.utils.pseudonymization.PseudonymizableIndexDto;
 import de.symeda.sormas.ui.UiUtil;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
 public class FilteredGrid<T, C extends BaseCriteria> extends Grid<T> {
 
@@ -51,7 +50,7 @@ public class FilteredGrid<T, C extends BaseCriteria> extends Grid<T> {
 
 	public FilteredGrid(Class<T> beanType) {
 		super(beanType);
-		getDataCommunicator().setMinPushSize(LAZY_BATCH_SIZE);
+		setPageSize(LAZY_BATCH_SIZE);
 	}
 
 	public C getCriteria() {
@@ -99,7 +98,7 @@ public class FilteredGrid<T, C extends BaseCriteria> extends Grid<T> {
 	 * get fired when {@link #getDataSize()} is updated.
 	 */
 	public Registration addDataSizeChangeListener(DataSizeChangeListener listener) {
-		return addListener(DataSizeChangeEvent.class, listener, DataSizeChangeListener.class.getMethods()[0]);
+		return addListener(DataSizeChangeEvent.class, listener);
 	}
 
 	/**
@@ -202,27 +201,31 @@ public class FilteredGrid<T, C extends BaseCriteria> extends Grid<T> {
 	}
 
 	/**
-	 * @deprecated Use one of the other methods to create and set a {@link DataProvider}.
+	 * Flow's {@code setItems(Collection)} ends here. Returns {@code null} when the items were wrapped for the criteria
+	 * filter (not in eager mode), because Flow's list data view needs the unwrapped list provider. Vaadin 8
+	 * {@code setItems} returned nothing.
 	 */
 	@Override
-	@Deprecated
-	public void setDataProvider(FetchItemsCallback<T> fetchItems, SerializableSupplier<Integer> sizeCallback) {
-		throw new UnsupportedOperationException();
+	public GridListDataView<T> setItems(ListDataProvider<T> dataProvider) {
+		setDataProvider(dataProvider);
+		return getDataProvider() instanceof ListDataProvider ? getListDataView() : null;
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void setColumns(String... columnIds) {
 		super.setColumns(columnIds);
-		getColumns().forEach(tColumn -> tColumn.setMaximumWidth(300));
+		getAllColumns().forEach(tColumn -> tColumn.setMaximumWidth(300));
 
-		Arrays.asList(columnIds).forEach(columnId -> {
+		for (String columnId : columnIds) {
 			if (!columnId.equals(ACTION_BTN_ID)) {
-				Column<?, ?> column = getColumn(columnId);
-				if (column.getRenderer() == null || TextRenderer.class.isAssignableFrom(column.getRenderer().getClass())) {
-					column.setRenderer(new CaptionRenderer());
+				Column<T, ?> column = getColumn(columnId);
+				if (column.getValueProvider() != null
+					&& (column.getValueRenderer() == null || TextRenderer.class.isAssignableFrom(column.getValueRenderer().getClass()))) {
+					((Column<T, Object>) column).setRenderer(new CaptionRenderer());
 				}
 			}
-		});
+		}
 	}
 
 	/**
@@ -234,7 +237,7 @@ public class FilteredGrid<T, C extends BaseCriteria> extends Grid<T> {
 
 			VaadinUiUtil.showConfirmationPopup(
 				I18nProperties.getCaption(Captions.bulkActions),
-				new Label(I18nProperties.getString(Strings.pseudonymizedEntitiesSelectedWarning)),
+				new Span(I18nProperties.getString(Strings.pseudonymizedEntitiesSelectedWarning)),
 				I18nProperties.getCaption(Captions.actionDeselectAndContinue),
 				I18nProperties.getCaption(Captions.actionCancel),
 				640,
@@ -275,9 +278,11 @@ public class FilteredGrid<T, C extends BaseCriteria> extends Grid<T> {
 	}
 
 	private void addActionColumnConfiguration(Consumer<T> handler, boolean isEditAction) {
-		List<Column<T, ?>> columnsList = new ArrayList<>(getColumns());
+		List<Column<T, ?>> columnsList = new ArrayList<>(getAllColumns());
 
-		Column<T, String> editColumn = addColumn(entry -> isEditAction ? VaadinIcons.EDIT.getHtml() : VaadinIcons.EYE.getHtml(), new HtmlRenderer());
+		Column<T, String> editColumn = addColumn(
+			entry -> isEditAction ? HtmlRenderer.iconHtml(VaadinIcon.EDIT) : HtmlRenderer.iconHtml(VaadinIcon.EYE),
+			new HtmlRenderer());
 		editColumn.setId(ACTION_BTN_ID);
 		editColumn.setCaption(isEditAction ? I18nProperties.getCaption(Captions.edit) : I18nProperties.getCaption(Captions.view));
 		editColumn.setSortable(false);
@@ -285,7 +290,7 @@ public class FilteredGrid<T, C extends BaseCriteria> extends Grid<T> {
 
 		// the edit column should always be on the left for consistency and to prevent sidescrolling
 		columnsList.add(0, editColumn);
-		setColumnOrder(columnsList.toArray(new Column[columnsList.size()]));
+		setColumnOrder(new ArrayList<>(columnsList));
 
 		addItemClickListener(new ShowDetailsListener<>(ACTION_BTN_ID, e -> handler.accept(e)));
 	}

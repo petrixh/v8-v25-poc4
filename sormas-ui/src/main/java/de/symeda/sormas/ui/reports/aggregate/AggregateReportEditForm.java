@@ -3,9 +3,8 @@ package de.symeda.sormas.ui.reports.aggregate;
 import de.symeda.sormas.api.i18n.Strings;
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.v7.ui.Label;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.i18n.Captions;
@@ -16,7 +15,9 @@ import de.symeda.sormas.api.utils.AgeGroupUtils;
 import de.symeda.sormas.api.utils.DataHelper;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.LayoutUtil;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 /**
  * @author Christopher Riedel
@@ -93,7 +94,7 @@ public class AggregateReportEditForm extends AbstractEditForm<AggregateReportDto
 			if (firstGroup) {
 				addDiseaseLabel();
 			}
-			Label ageGroupLabel = new Label(AgeGroupUtils.createCaption(ageGroup));
+			Span ageGroupLabel = new Span(AgeGroupUtils.createCaption(ageGroup));
 			getContent().addComponent(ageGroupLabel, AGE_GROUP_LOC);
 			CssStyles.style(CssStyles.CAPTION_HIDDEN, ageGroupLabel);
 		}
@@ -110,15 +111,15 @@ public class AggregateReportEditForm extends AbstractEditForm<AggregateReportDto
 		CssStyles.style(CssStyles.CAPTION_HIDDEN, caseField, labField, deathField);
 
 		if (isExpiredAgeGroup()) {
-			Label expiredAgeGroupLabel = new Label(I18nProperties.getCaption(Captions.aggregateReportExpiredAgeGroups));
-			expiredAgeGroupLabel.addStyleName(CssStyles.LABEL_BOLD);
+			Span expiredAgeGroupLabel = new Span(I18nProperties.getCaption(Captions.aggregateReportExpiredAgeGroups));
+			expiredAgeGroupLabel.addClassName(CssStyles.LABEL_BOLD);
 			getContent().addComponent(expiredAgeGroupLabel, AggregateReportDto.EXPIRED_AGE_GROUP);
 		}
 	}
 
 	private void addDiseaseLabel() {
-		Label diseaseLabel = new Label(disease.toString());
-		diseaseLabel.addStyleName(CssStyles.LABEL_BOLD);
+		Span diseaseLabel = new Span(disease.toString());
+		diseaseLabel.addClassName(CssStyles.LABEL_BOLD);
 		getContent().addComponent(diseaseLabel, DISEASE_LOC);
 		CssStyles.style(CssStyles.CAPTION_HIDDEN, diseaseLabel);
 	}
@@ -159,7 +160,7 @@ public class AggregateReportEditForm extends AbstractEditForm<AggregateReportDto
 	}
 
 	@Override
-	protected CustomLayout getContent() {
+	public CustomLayout getContent() {
 		return (CustomLayout) super.getContent();
 	}
 }

@@ -39,12 +39,7 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.locs;
 
 import java.util.Arrays;
 
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextArea;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AdverseEventState;
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AdverseEventsDto;
@@ -55,8 +50,13 @@ import de.symeda.sormas.api.utils.fieldaccess.UiFieldAccessCheckers;
 import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.utils.AbstractEditForm;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
+import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextArea;
 
 @SuppressWarnings("deprecation")
 public class AdverseEventsForm extends AbstractEditForm<AdverseEventsDto> {
@@ -97,8 +97,8 @@ public class AdverseEventsForm extends AbstractEditForm<AdverseEventsDto> {
 
 	@Override
 	protected void addFields() {
-		Label adverseEventsHeadingLabel = new Label(I18nProperties.getString(Strings.headingAefiAdverseEvents));
-		adverseEventsHeadingLabel.addStyleName(H3);
+		Span adverseEventsHeadingLabel = new Span(I18nProperties.getString(Strings.headingAefiAdverseEvents));
+		adverseEventsHeadingLabel.addClassName(H3);
 		getContent().addComponent(adverseEventsHeadingLabel, ADVERSE_EVENTS_HEADINGS_LOC);
 
 		addFields(
@@ -115,12 +115,12 @@ public class AdverseEventsForm extends AbstractEditForm<AdverseEventsDto> {
 		addField(SEVERE_LOCAL_REACTION_MORE_THAN_THREE_DAYS, CheckBox.class);
 		addField(SEVERE_LOCAL_REACTION_BEYOND_NEAREST_JOINT, CheckBox.class);
 
-		Label emptyLabel = new Label("");
-		emptyLabel.addStyleName(H3);
+		Span emptyLabel = new Span("");
+		emptyLabel.addClassName(H3);
 		getContent().addComponent(emptyLabel, EMPTY_LABEL_LOC);
 
 		NullableOptionGroup seizureType = addField(SEIZURE_TYPE, NullableOptionGroup.class);
-		CssStyles.style(seizureType, ValoTheme.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_CAPTION_INLINE);
+		CssStyles.style(seizureType, SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL, CssStyles.OPTIONGROUP_CAPTION_INLINE);
 
 		TextArea otherAdverseEvents = addField(OTHER_ADVERSE_EVENT_DETAILS, TextArea.class);
 		otherAdverseEvents.setRows(6);

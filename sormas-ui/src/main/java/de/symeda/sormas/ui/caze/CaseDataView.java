@@ -20,8 +20,8 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.EditPermissionType;
@@ -116,13 +116,13 @@ public class CaseDataView extends AbstractCaseView implements HasName {
 	@Override
 	protected void initView(String params) {
 
-		setHeightUndefined();
+		setHeight(null);
 
 		CaseDataDto caze = FacadeProvider.getCaseFacade().getCaseDataByUuid(getCaseRef().getUuid());
 
 		DetailSubComponentWrapper container = new DetailSubComponentWrapper(() -> editComponent);
-		container.setWidth(100, Unit.PERCENTAGE);
-		container.setMargin(true);
+		container.setWidth("100%");
+		container.setPadding(true);
 		setSubComponent(container);
 		container.setEnabled(true);
 
@@ -147,7 +147,7 @@ public class CaseDataView extends AbstractCaseView implements HasName {
 			SELF_REPORT_LOC,
 			SURVEYS_LOC);
 
-		container.addComponent(layout);
+		container.add(layout);
 
 		final String uuid = caze.getUuid();
 		final EditPermissionType caseEditAllowed = FacadeProvider.getCaseFacade().getEditPermissionType(uuid);
@@ -155,21 +155,21 @@ public class CaseDataView extends AbstractCaseView implements HasName {
 
 		if (UiUtil.enabled(FeatureType.SURVEILLANCE_REPORTS)) {
 			CaseNotifierSideViewComponent notifierSideViewComponent = new CaseNotifierSideViewComponent(getCaseRef(), this::showUnsavedChangesPopup);
-			notifierSideViewComponent.addStyleNames(CssStyles.SIDE_COMPONENT);
+			notifierSideViewComponent.addClassNames(CssStyles.SIDE_COMPONENT);
 			layout.addSidePanelComponent(notifierSideViewComponent, CASE_NOTIFIER_LOC);
 		}
 
 		if (UiUtil.permitted(FeatureType.TASK_MANAGEMENT, UserRight.TASK_VIEW)) {
 			TaskListComponent taskList =
 				new TaskListComponent(TaskContext.CASE, getCaseRef(), caze.getDisease(), this::showUnsavedChangesPopup, isEditAllowed);
-			taskList.addStyleName(CssStyles.SIDE_COMPONENT);
+			taskList.addClassName(CssStyles.SIDE_COMPONENT);
 			layout.addSidePanelComponent(taskList, TASKS_LOC);
 		}
 
 		final boolean isSmsServiceSetUp = FacadeProvider.getConfigFacade().isSmsServiceSetUp();
 		if (isSmsServiceSetUp && UiUtil.permitted(FeatureType.MANUAL_EXTERNAL_MESSAGES, UserRight.SEND_MANUAL_EXTERNAL_MESSAGES)) {
 			SmsListComponent smsList = new SmsListComponent(getCaseRef(), caze.getPerson(), isEditAllowed);
-			smsList.addStyleName(CssStyles.SIDE_COMPONENT);
+			smsList.addClassName(CssStyles.SIDE_COMPONENT);
 			layout.addSidePanelComponent(smsList, SMS_LOC);
 		}
 
@@ -185,12 +185,12 @@ public class CaseDataView extends AbstractCaseView implements HasName {
 
 		if (UiUtil.permitted(FeatureType.EVENT_SURVEILLANCE, UserRight.EVENT_VIEW)) {
 			VerticalLayout eventLayout = new VerticalLayout();
-			eventLayout.setMargin(false);
+			eventLayout.setPadding(false);
 			eventLayout.setSpacing(false);
 
 			EventListComponent eventList = new EventListComponent(getCaseRef(), this::showUnsavedChangesPopup, isEditAllowed);
-			eventList.addStyleName(CssStyles.SIDE_COMPONENT);
-			eventLayout.addComponent(eventList);
+			eventList.addClassName(CssStyles.SIDE_COMPONENT);
+			eventLayout.add(eventList);
 			layout.addSidePanelComponent(eventLayout, EVENTS_LOC);
 		}
 
@@ -224,12 +224,12 @@ public class CaseDataView extends AbstractCaseView implements HasName {
 		boolean sormasToSormasEnabled = FacadeProvider.getSormasToSormasFacade().isAnyFeatureConfigured(FeatureType.SORMAS_TO_SORMAS_SHARE_CASES);
 		if (sormasToSormasEnabled || caze.getSormasToSormasOriginInfo() != null || caze.isOwnershipHandedOver()) {
 			VerticalLayout sormasToSormasLocLayout = new VerticalLayout();
-			sormasToSormasLocLayout.setMargin(false);
+			sormasToSormasLocLayout.setPadding(false);
 			sormasToSormasLocLayout.setSpacing(false);
 
 			SormasToSormasListComponent sormasToSormasListComponent = new SormasToSormasListComponent(caze, isEditAllowed);
-			sormasToSormasListComponent.addStyleNames(CssStyles.SIDE_COMPONENT);
-			sormasToSormasLocLayout.addComponent(sormasToSormasListComponent);
+			sormasToSormasListComponent.addClassNames(CssStyles.SIDE_COMPONENT);
+			sormasToSormasLocLayout.add(sormasToSormasListComponent);
 
 			layout.addSidePanelComponent(sormasToSormasLocLayout, SORMAS_TO_SORMAS_LOC);
 		}
@@ -239,11 +239,11 @@ public class CaseDataView extends AbstractCaseView implements HasName {
 		if (UiUtil.enabled(FeatureType.SURVEILLANCE_REPORTS)) {
 			SurveillanceReportListComponent surveillanceReportList =
 				new SurveillanceReportListComponent(caze.toReference(), this::showUnsavedChangesPopup, UserRight.CASE_EDIT, isEditAllowed);
-			surveillanceReportList.addStyleNames(CssStyles.SIDE_COMPONENT);
+			surveillanceReportList.addClassNames(CssStyles.SIDE_COMPONENT);
 			VerticalLayout surveillanceReportListLocLayout = new VerticalLayout();
-			surveillanceReportListLocLayout.setMargin(false);
+			surveillanceReportListLocLayout.setPadding(false);
 			surveillanceReportListLocLayout.setSpacing(false);
-			surveillanceReportListLocLayout.addComponent(surveillanceReportList);
+			surveillanceReportListLocLayout.add(surveillanceReportList);
 
 			layout.addSidePanelComponent(surveillanceReportListLocLayout, SURVEILLANCE_REPORTS_LOC);
 		}
@@ -304,7 +304,7 @@ public class CaseDataView extends AbstractCaseView implements HasName {
 	private void showVaccinationStatusUpdateDialog(CaseDataDto caze) {
 		VaadinUiUtil.showConfirmationPopup(
 			I18nProperties.getCaption(Captions.CaseData_vaccinationStatusUpdate),
-			new Label(I18nProperties.getString(Strings.confirmationVaccinationStatusSync)),
+			new Span(I18nProperties.getString(Strings.confirmationVaccinationStatusSync)),
 			I18nProperties.getString(Strings.yes),
 			I18nProperties.getString(Strings.no),
 			600,

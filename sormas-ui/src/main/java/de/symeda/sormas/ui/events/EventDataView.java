@@ -14,9 +14,9 @@
  */
 package de.symeda.sormas.ui.events;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.symeda.sormas.api.EditPermissionType;
 import de.symeda.sormas.api.FacadeProvider;
@@ -83,11 +83,11 @@ public class EventDataView extends AbstractEventView {
 
 		EventDto event = FacadeProvider.getEventFacade().getEventByUuid(getEventRef().getUuid(), false);
 
-		setHeightUndefined();
+		setHeight(null);
 
 		DetailSubComponentWrapper container = new DetailSubComponentWrapper(() -> editComponent);
 		container.setWidth(100, Unit.PERCENTAGE);
-		container.setMargin(true);
+		container.setPadding(true);
 		setSubComponent(container);
 		container.setEnabled(true);
 
@@ -108,7 +108,7 @@ public class EventDataView extends AbstractEventView {
 			ExternalSurveillanceServiceGateway.EXTERANEL_SURVEILLANCE_TOOL_GATEWAY_LOC,
 			SHORTCUT_LINKS_LOC);
 
-		container.addComponent(layout);
+		container.add(layout);
 
 		final String uuid = event.getUuid();
 		final EditPermissionType eventEditAllowed = FacadeProvider.getEventFacade().getEditPermissionType(uuid);
@@ -120,19 +120,19 @@ public class EventDataView extends AbstractEventView {
 		if (UiUtil.permitted(FeatureType.TASK_MANAGEMENT, UserRight.TASK_VIEW)) {
 			TaskListComponent taskList =
 				new TaskListComponent(TaskContext.EVENT, getEventRef(), event.getDisease(), this::showUnsavedChangesPopup, isEditAllowed);
-			taskList.addStyleName(CssStyles.SIDE_COMPONENT);
+			taskList.addClassName(CssStyles.SIDE_COMPONENT);
 			layout.addSidePanelComponent(taskList, TASKS_LOC);
 		}
 
 		if (UiUtil.permitted(FeatureType.ENVIRONMENT_MANAGEMENT, UserRight.ENVIRONMENT_VIEW)) {
 			EnvironmentListComponent environmentList =
 				new EnvironmentListComponent(event.toReference(), isEditAllowed, this::showUnsavedChangesPopup);
-			environmentList.addStyleName(CssStyles.SIDE_COMPONENT);
+			environmentList.addClassName(CssStyles.SIDE_COMPONENT);
 			layout.addSidePanelComponent(environmentList, ENVIRONMENT_LOC);
 		}
 
 		ActionStatsComponent actionList = new ActionStatsComponent(ActionContext.EVENT, getEventRef());
-		actionList.addStyleName(CssStyles.SIDE_COMPONENT);
+		actionList.addClassName(CssStyles.SIDE_COMPONENT);
 		layout.addSidePanelComponent(actionList, ACTIONS_LOC);
 
 		DocumentListComponent documentList = null;
@@ -151,17 +151,17 @@ public class EventDataView extends AbstractEventView {
 		}
 
 		EventDocumentsComponent eventDocuments = new EventDocumentsComponent(event, documentList);
-		eventDocuments.addStyleName(CssStyles.SIDE_COMPONENT);
+		eventDocuments.addClassName(CssStyles.SIDE_COMPONENT);
 		layout.addSidePanelComponent(eventDocuments, EventDocumentsComponent.DOCGENERATION_LOC);
 
 		boolean eventHierarchiesFeatureEnabled = UiUtil.enabled(FeatureType.EVENT_HIERARCHIES);
 		if (eventHierarchiesFeatureEnabled) {
 			SuperordinateEventComponent superordinateEventComponent = new SuperordinateEventComponent(event, this::showUnsavedChangesPopup);
-			superordinateEventComponent.addStyleName(CssStyles.SIDE_COMPONENT);
+			superordinateEventComponent.addClassName(CssStyles.SIDE_COMPONENT);
 			layout.addSidePanelComponent(superordinateEventComponent, SUPERORDINATE_EVENT_LOC);
 
 			EventListComponent subordinateEventList = new EventListComponent(event.toReference(), this::showUnsavedChangesPopup, isEditAllowed);
-			subordinateEventList.addStyleName(CssStyles.SIDE_COMPONENT);
+			subordinateEventList.addClassName(CssStyles.SIDE_COMPONENT);
 			layout.addSidePanelComponent(subordinateEventList, SUBORDINATE_EVENTS_LOC);
 		}
 
@@ -175,18 +175,18 @@ public class EventDataView extends AbstractEventView {
 		boolean sormasToSormasEnabled = FacadeProvider.getSormasToSormasFacade().isAnyFeatureConfigured(FeatureType.SORMAS_TO_SORMAS_SHARE_EVENTS);
 		if (sormasToSormasEnabled || event.getSormasToSormasOriginInfo() != null || event.isOwnershipHandedOver()) {
 			VerticalLayout sormasToSormasLocLayout = new VerticalLayout();
-			sormasToSormasLocLayout.setMargin(false);
+			sormasToSormasLocLayout.setPadding(false);
 			sormasToSormasLocLayout.setSpacing(false);
 
 			SormasToSormasListComponent sormasToSormasListComponent = new SormasToSormasListComponent(event);
-			sormasToSormasListComponent.addStyleNames(CssStyles.SIDE_COMPONENT);
-			sormasToSormasLocLayout.addComponent(sormasToSormasListComponent);
+			sormasToSormasListComponent.addClassNames(CssStyles.SIDE_COMPONENT);
+			sormasToSormasLocLayout.add(sormasToSormasListComponent);
 
 			layout.addSidePanelComponent(sormasToSormasLocLayout, SORMAS_TO_SORMAS_LOC);
 		}
 
 		VerticalLayout shortcutLinksLayout = new VerticalLayout();
-		shortcutLinksLayout.setMargin(false);
+		shortcutLinksLayout.setPadding(false);
 		shortcutLinksLayout.setSpacing(true);
 
 		if (UiUtil.permitted(UserRight.CASE_VIEW)) {
@@ -194,8 +194,8 @@ public class EventDataView extends AbstractEventView {
 				"eventLinkToCases",
 				I18nProperties.getCaption(Captions.eventLinkToCases),
 				thisEvent -> ControllerProvider.getCaseController().navigateTo(new CaseCriteria().eventLike(getEventRef().getUuid())),
-				ValoTheme.BUTTON_PRIMARY);
-			shortcutLinksLayout.addComponent(seeEventCasesBtn);
+				CssStyles.BUTTON_PRIMARY);
+			shortcutLinksLayout.add(seeEventCasesBtn);
 		}
 
 		if (UiUtil.permitted(UserRight.CONTACT_VIEW)) {
@@ -203,8 +203,8 @@ public class EventDataView extends AbstractEventView {
 				"eventLinkToContacts",
 				I18nProperties.getCaption(Captions.eventLinkToContacts),
 				thisEvent -> ControllerProvider.getContactController().navigateTo(new ContactCriteria().eventUuid(getEventRef().getUuid())),
-				ValoTheme.BUTTON_PRIMARY);
-			shortcutLinksLayout.addComponent(seeEventContactsBtn);
+				CssStyles.BUTTON_PRIMARY);
+			shortcutLinksLayout.add(seeEventContactsBtn);
 		}
 
 		LocationDto eventLocationDto = ((EventDataForm) editComponent.getWrappedComponent()).getValue().getEventLocation();
@@ -220,8 +220,8 @@ public class EventDataView extends AbstractEventView {
 							.typeOfPlace(TypeOfPlace.FACILITY)
 							.facilityType(eventLocationDto.getFacilityType())
 							.facility(eventLocationDto.getFacility())),
-				ValoTheme.BUTTON_PRIMARY);
-			shortcutLinksLayout.addComponent(seeEventsWithinTheSameFacility);
+				CssStyles.BUTTON_PRIMARY);
+			shortcutLinksLayout.add(seeEventsWithinTheSameFacility);
 		}
 
 		layout.addSidePanelComponent(shortcutLinksLayout, SHORTCUT_LINKS_LOC);

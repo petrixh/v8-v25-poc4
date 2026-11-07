@@ -17,9 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Test;
@@ -53,12 +53,12 @@ public class HistoryTablesTest {
 		start(container);
 
 		Map<String, String> properties = new HashMap<>();
-		properties.put("javax.persistence.jdbc.url", container.getJdbcUrl());
-		properties.put("javax.persistence.jdbc.user", container.getUsername());
-		properties.put("javax.persistence.jdbc.password", container.getPassword());
-		properties.put("javax.persistence.jdbc.driver", container.getDriverClassName());
-		properties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQL94Dialect");
-		properties.put("hibernate.transaction.jta.platform", "org.hibernate.service.jta.platform.internal.SunOneJtaPlatform");
+		properties.put("jakarta.persistence.jdbc.url", container.getJdbcUrl());
+		properties.put("jakarta.persistence.jdbc.user", container.getUsername());
+		properties.put("jakarta.persistence.jdbc.password", container.getPassword());
+		properties.put("jakarta.persistence.jdbc.driver", container.getDriverClassName());
+		properties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+		properties.put("hibernate.transaction.jta.platform", "org.hibernate.engine.transaction.jta.platform.internal.GlassFishJtaPlatform");
 		properties.put("hibernate.jdbc.batch_size", "100");
 		properties.put("hibernate.order_inserts", "true");
 		properties.put("hibernate.order_updates", "true");

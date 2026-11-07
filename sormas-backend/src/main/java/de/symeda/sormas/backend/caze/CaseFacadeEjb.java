@@ -47,32 +47,32 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
-import javax.annotation.Resource;
-import javax.annotation.security.PermitAll;
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.concurrent.ManagedScheduledExecutorService;
-import javax.inject.Inject;
-import javax.persistence.Tuple;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.ParameterExpression;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import jakarta.annotation.Resource;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.concurrent.ManagedScheduledExecutorService;
+import jakarta.inject.Inject;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.ParameterExpression;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -3769,7 +3769,7 @@ public class CaseFacadeEjb extends AbstractCoreFacadeEjb<Case, CaseDataDto, Case
 				regexPattern,
 				regexReplacement,
 				regexFlags);
-			filter = cb.and(filter, cb.equal(cb.concat("0", epidNumberSuffixClean).as(Integer.class), suffixNumber));
+			filter = cb.and(filter, cb.equal(cb.concat("0", epidNumberSuffixClean).cast(Integer.class), suffixNumber));
 		} else {
 			filter = cb.and(filter, cb.equal(caze.get(Case.EPID_NUMBER), prefixString));
 		}
@@ -4536,7 +4536,7 @@ public class CaseFacadeEjb extends AbstractCoreFacadeEjb<Case, CaseDataDto, Case
 				// threshold is zero: we want to get exact matches
 				reportDatePredicate = cb.equal(
 					cb.function(ExtendedPostgreSQL94Dialect.DATE, Date.class, caseRoot.get(Case.REPORT_DATE)),
-					cb.function(ExtendedPostgreSQL94Dialect.DATE, Date.class, cb.literal(searchCaze.getReportDate())));
+					cb.function(ExtendedPostgreSQL94Dialect.DATE, Date.class, CriteriaBuilderHelper.value(cb, searchCaze.getReportDate())));
 			} else {
 				// threshold is nonzero: apply time range of threshold to the reportDate
 				Date reportDate = casePerson.getCaze().getReportDate();
@@ -4544,8 +4544,8 @@ public class CaseFacadeEjb extends AbstractCoreFacadeEjb<Case, CaseDataDto, Case
 				Date dateAfter = DateHelper.addDays(reportDate, reportDateThreshold);
 				reportDatePredicate = cb.between(
 					cb.function(ExtendedPostgreSQL94Dialect.DATE, Date.class, caseRoot.get(Case.REPORT_DATE)),
-					cb.function(ExtendedPostgreSQL94Dialect.DATE, Date.class, cb.literal(dateBefore)),
-					cb.function(ExtendedPostgreSQL94Dialect.DATE, Date.class, cb.literal(dateAfter)));
+					cb.function(ExtendedPostgreSQL94Dialect.DATE, Date.class, CriteriaBuilderHelper.value(cb, dateBefore)),
+					cb.function(ExtendedPostgreSQL94Dialect.DATE, Date.class, CriteriaBuilderHelper.value(cb, dateAfter)));
 			}
 
 			Predicate districtPredicate = CriteriaBuilderHelper.or(

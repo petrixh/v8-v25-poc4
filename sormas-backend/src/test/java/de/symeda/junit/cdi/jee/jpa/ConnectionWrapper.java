@@ -18,7 +18,7 @@
 
 package de.symeda.junit.cdi.jee.jpa;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 /**
  * Interface for classes providing wrapped connections.

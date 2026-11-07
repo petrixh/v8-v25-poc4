@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.v7.data.validator.AbstractValidator;
+import de.symeda.sormas.ui.utils.fields.AbstractValidator;
 
 public class NumberNumericValueValidator extends AbstractValidator<String> {
 
@@ -102,8 +102,4 @@ public class NumberNumericValueValidator extends AbstractValidator<String> {
 		return true;
 	}
 
-	@Override
-	protected boolean isValidType(Object value) {
-		return super.isValidType(value) || Number.class.isAssignableFrom(value.getClass());
-	}
 }

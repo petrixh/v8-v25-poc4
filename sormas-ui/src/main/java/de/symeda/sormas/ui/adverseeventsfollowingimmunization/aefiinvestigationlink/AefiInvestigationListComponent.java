@@ -17,6 +17,8 @@ package de.symeda.sormas.ui.adverseeventsfollowingimmunization.aefiinvestigation
 
 import java.util.function.Consumer;
 
+import com.vaadin.flow.component.Unit;
+
 import de.symeda.sormas.api.adverseeventsfollowingimmunization.AefiInvestigationListCriteria;
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -35,7 +37,7 @@ public class AefiInvestigationListComponent extends SideComponent {
 		boolean isCreateAction) {
 		super(I18nProperties.getString(Strings.headingAefiReportInvestigations), actionCallback);
 
-		setMargin(false);
+		setPadding(false);
 		setWidth(100, Unit.PERCENTAGE);
 
 		if (isEditAllowed) {
@@ -51,7 +53,7 @@ public class AefiInvestigationListComponent extends SideComponent {
 		}
 
 		AefiInvestigationList aefiInvestigationList = new AefiInvestigationList(listCriteria, actionCallback, isEditAllowed);
-		addComponent(aefiInvestigationList);
+		add(aefiInvestigationList);
 		aefiInvestigationList.reload();
 	}
 }

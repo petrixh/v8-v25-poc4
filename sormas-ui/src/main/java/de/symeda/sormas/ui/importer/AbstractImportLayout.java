@@ -3,25 +3,18 @@ package de.symeda.sormas.ui.importer;
 import java.io.IOException;
 import java.util.function.Function;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.ClassResource;
-import com.vaadin.server.Extension;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.Page;
-import com.vaadin.server.Resource;
-import com.vaadin.server.StreamResource;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.themes.ValoTheme;
-import com.vaadin.v7.ui.Upload;
-import com.vaadin.v7.ui.VerticalLayout;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.AttachmentType;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -33,68 +26,72 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DownloadUtil;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
 
 @SuppressWarnings("serial")
 public class AbstractImportLayout extends VerticalLayout {
 
 	protected Button downloadErrorReportButton;
+	/**
+	 * The download link around {@link #downloadErrorReportButton} (was the button's {@code FileDownloader} extension);
+	 * created with the first error report.
+	 */
+	private Anchor downloadErrorReportLink;
 	protected Upload upload;
 	protected final UserDto currentUser;
 	protected final UI currentUI;
 	protected ImportReceiver generatedReceiver;
-	protected ComboBox separator;
+	protected ComboBox<ValueSeparator> separator;
 
 	public AbstractImportLayout() {
 		currentUser = UiUtil.getUser();
 		currentUI = UI.getCurrent();
 		setSpacing(false);
-		setMargin(true);
+		setPadding(true);
 		createSeparatorComboBox();
 	}
 
-	protected void addDownloadResourcesComponent(int step, ClassResource importGuideResource) {
+	protected void addDownloadResourcesComponent(int step, DownloadHandler importGuideResource) {
 		String headline = I18nProperties.getString(Strings.headingDownloadImportGuide);
 		String infoText = I18nProperties.getString(Strings.infoDownloadImportGuide);
-		Resource buttonIcon = VaadinIcons.FILE_PRESENTATION;
+		VaadinIcon buttonIcon = VaadinIcon.FILE_PRESENTATION;
 		String buttonCaption = I18nProperties.getCaption(Captions.importDownloadImportGuide);
 		ImportLayoutComponent importGuideComponent = new ImportLayoutComponent(step, headline, infoText, buttonIcon, buttonCaption);
-		FileDownloader importGuideDownloader = new FileDownloader(importGuideResource);
-		importGuideDownloader.extend(importGuideComponent.getButton());
-		addComponent(importGuideComponent);
+		DownloadUtil.attachDownloader(importGuideComponent.getButton(), importGuideResource);
+		add(importGuideComponent);
 
 		Button dataDictionaryButton = ButtonHelper.createIconButton(
 			Captions.importDownloadDataDictionary,
-			VaadinIcons.FILE_TABLE,
+			VaadinIcon.FILE_TABLE,
 			null,
-			ValoTheme.BUTTON_PRIMARY,
+			CssStyles.BUTTON_PRIMARY,
 			CssStyles.VSPACE_TOP_3,
 			CssStyles.VSPACE_2);
-		DownloadUtil.attachDataDictionaryDownloader(dataDictionaryButton);
-		addComponent(dataDictionaryButton);
+		add(DownloadUtil.attachDataDictionaryDownloader(dataDictionaryButton));
 	}
 
 	protected void addDownloadImportTemplateComponent(int step, String templateFilePath, String templateFileName) {
 		String headline = I18nProperties.getString(Strings.headingDownloadImportTemplate);
 		String infoText = I18nProperties.getString(Strings.infoDownloadImportTemplate);
-		Resource buttonIcon = VaadinIcons.DOWNLOAD;
+		VaadinIcon buttonIcon = VaadinIcon.DOWNLOAD;
 		String buttonCaption = I18nProperties.getCaption(Captions.importDownloadImportTemplate);
 		ImportLayoutComponent importTemplateComponent = new ImportLayoutComponent(step, headline, infoText, buttonIcon, buttonCaption);
 
 		try {
 			String content = FacadeProvider.getImportFacade().getImportTemplateContent(templateFilePath);
-			StreamResource templateResource = DownloadUtil.createStringStreamResource(content, templateFileName, "text/csv");
+			StreamSourceDownloadHandler templateResource = DownloadUtil.createStringStreamResource(content, templateFileName, "text/csv");
 
-			FileDownloader templateFileDownloader = new FileDownloader(templateResource);
-			templateFileDownloader.extend(importTemplateComponent.getButton());
+			DownloadUtil.attachDownloader(importTemplateComponent.getButton(), templateResource);
 
 			CssStyles.style(importTemplateComponent, CssStyles.VSPACE_2);
-			addComponent(importTemplateComponent);
+			add(importTemplateComponent);
 		} catch (IOException e) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingTemplateNotAvailable),
 				I18nProperties.getString(Strings.messageTemplateNotAvailable),
-				Notification.Type.ERROR_MESSAGE,
-				false).show(Page.getCurrent());
+				NotificationHelper.Type.ERROR_MESSAGE,
+				false);
 		}
 	}
 
@@ -103,23 +100,39 @@ public class AbstractImportLayout extends VerticalLayout {
 		String infoText = I18nProperties.getString(Strings.infoImportCsvFile);
 		ImportLayoutComponent importCsvComponent = new ImportLayoutComponent(step, headline, infoText, null, null);
 		CssStyles.style(importCsvComponent, CssStyles.VSPACE_3);
-		addComponent(importCsvComponent);
-		addComponent(separator);
-		upload = new Upload("", receiver);
-		upload.setButtonCaption(I18nProperties.getCaption(Captions.importImportData));
+		add(importCsvComponent);
+		add(separator);
+		upload = createUpload(receiver);
 		CssStyles.style(upload, CssStyles.VSPACE_2);
-		upload.addStartedListener(receiver);
-		upload.addSucceededListener(receiver);
-		addComponent(upload);
+		add(upload);
 	}
 
-	private ComboBox createSeparatorComboBox() {
-		ComboBox comboBox = new ComboBox();
-		comboBox.setCaption(I18nProperties.getCaption(Captions.importValueSeparator));
+	/**
+	 * Was the V7 {@code Upload} with a button caption: one file at a time, uploaded as soon as it is chosen, no drop
+	 * zone. Flow keeps an uploaded file in the upload's list and, with one file allowed, would block the next upload until
+	 * the user removes it; the list is cleared after each upload so the button can be used again, as before.
+	 */
+	private Upload createUpload(ImportReceiver receiver) {
+		Upload newUpload = new Upload(receiver);
+		newUpload.setUploadButton(new Button(I18nProperties.getCaption(Captions.importImportData)));
+		newUpload.setMaxFiles(1);
+		newUpload.setDropAllowed(false);
+		newUpload.addAllFinishedListener(e -> newUpload.clearFileList());
+		return newUpload;
+	}
+
+	private ComboBox<ValueSeparator> createSeparatorComboBox() {
+		ComboBox<ValueSeparator> comboBox = new ComboBox<>();
+		comboBox.setLabel(I18nProperties.getCaption(Captions.importValueSeparator));
 		comboBox.setItems(ValueSeparator.values());
 		comboBox.setValue(ValueSeparator.DEFAULT);
-		comboBox.setEmptySelectionAllowed(false);
-		comboBox.setItemCaptionGenerator(item -> ((ValueSeparator) item).getCaption(FacadeProvider.getConfigFacade().getCsvSeparator()));
+		// was setEmptySelectionAllowed(false): a value the user clears is restored
+		comboBox.addValueChangeListener(e -> {
+			if (e.isFromClient() && e.getValue() == null) {
+				comboBox.setValue(e.getOldValue());
+			}
+		});
+		comboBox.setItemLabelGenerator(item -> item.getCaption(FacadeProvider.getConfigFacade().getCsvSeparator()));
 		separator = comboBox;
 		return comboBox;
 	}
@@ -128,59 +141,56 @@ public class AbstractImportLayout extends VerticalLayout {
 		String headline = I18nProperties.getString(Strings.headingImportCsvFile);
 		String infoText = I18nProperties.getString(Strings.infoImportCsvFile);
 		ImportLayoutComponent importCsvComponent = new ImportLayoutComponent(step, headline, infoText, null, null);
-		addComponent(importCsvComponent);
+		add(importCsvComponent);
 		generatedReceiver = receiverGenerator.apply(false);
-		upload = new Upload("", generatedReceiver);
-		upload.setButtonCaption(I18nProperties.getCaption(Captions.importImportData));
+		upload = createUpload(generatedReceiver);
 		CssStyles.style(upload, CssStyles.VSPACE_2);
-		upload.addStartedListener(generatedReceiver);
-		upload.addSucceededListener(generatedReceiver);
 
 		HorizontalLayout checkboxBar = new HorizontalLayout();
-		checkboxBar.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
-		checkboxBar.setDescription(I18nProperties.getString(Strings.infoImportInfrastructureAllowOverwrite));
+		checkboxBar.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
+		// was setDescription: the tooltip of the bar
+		checkboxBar.getElement().setAttribute("title", I18nProperties.getString(Strings.infoImportInfrastructureAllowOverwrite));
 		CssStyles.style(checkboxBar, CssStyles.VSPACE_TOP_3);
-		CheckBox allowOverwrite = new CheckBox(I18nProperties.getCaption(Captions.infrastructureImportAllowOverwrite));
+		Checkbox allowOverwrite = new Checkbox(I18nProperties.getCaption(Captions.infrastructureImportAllowOverwrite));
 		allowOverwrite.setValue(false);
-		checkboxBar.addComponent(allowOverwrite);
-		Label labelInfo = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
-		checkboxBar.addComponent(labelInfo);
+		checkboxBar.add(allowOverwrite);
+		checkboxBar.add(VaadinIcon.INFO_CIRCLE.create());
 		CssStyles.style(checkboxBar, CssStyles.VSPACE_3);
-		addComponent(checkboxBar);
-		addComponent(separator);
-		addComponent(upload);
+		add(checkboxBar);
+		add(separator);
+		add(upload);
 
 		allowOverwrite.addValueChangeListener(e -> {
-			upload.removeSucceededListener(generatedReceiver);
 			generatedReceiver = receiverGenerator.apply(e.getValue());
-			upload.setReceiver(generatedReceiver);
-			upload.addStartedListener(generatedReceiver);
-			upload.addSucceededListener(generatedReceiver);
+			upload.setUploadHandler(generatedReceiver);
 		});
 	}
 
 	protected void addDownloadErrorReportComponent(int step) {
 		String headline = I18nProperties.getString(Strings.headingDownloadErrorReport);
 		String infoText = I18nProperties.getString(Strings.infoDownloadErrorReport);
-		Resource buttonIcon = VaadinIcons.DOWNLOAD;
+		VaadinIcon buttonIcon = VaadinIcon.DOWNLOAD;
 		String buttonCaption = I18nProperties.getCaption(Captions.importDownloadErrorReport);
 		ImportLayoutComponent errorReportComponent = new ImportLayoutComponent(step, headline, infoText, buttonIcon, buttonCaption);
 		downloadErrorReportButton = errorReportComponent.getButton();
 		errorReportComponent.getButton().setEnabled(false);
-		addComponent(errorReportComponent);
+		add(errorReportComponent);
 	}
 
 	protected void resetDownloadErrorReportButton() {
 		downloadErrorReportButton.setEnabled(false);
-		for (int i = 0; i < downloadErrorReportButton.getExtensions().size(); i++) {
-			Extension ext = downloadErrorReportButton.getExtensions().iterator().next();
-			downloadErrorReportButton.removeExtension(ext);
+		// was: remove the button's FileDownloader extensions
+		if (downloadErrorReportLink != null) {
+			downloadErrorReportLink.removeHref();
 		}
 	}
 
-	protected void extendDownloadErrorReportButton(StreamResource streamResource) {
-		FileDownloader fileDownloader = new FileDownloader(streamResource);
-		fileDownloader.extend(downloadErrorReportButton);
+	protected void extendDownloadErrorReportButton(StreamSourceDownloadHandler streamResource) {
+		if (downloadErrorReportLink == null) {
+			downloadErrorReportLink = DownloadUtil.attachDownloader(downloadErrorReportButton, streamResource);
+		} else {
+			downloadErrorReportLink.setHref(streamResource, AttachmentType.DOWNLOAD);
+		}
 		downloadErrorReportButton.setEnabled(true);
 	}
 }

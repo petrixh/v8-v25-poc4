@@ -17,46 +17,32 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.highcharts;
 
-import com.vaadin.annotations.JavaScript;
-import com.vaadin.ui.AbstractJavaScriptComponent;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ClientCallable;
+import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.function.SerializableRunnable;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * <p>
- * Abstract Highcharts chart.
+ * A chart drawn by Vaadin Charts from Highcharts options written as JavaScript.
  * </p>
  * <p>
- * Download jquery and highcharts.js (if not already loaded in your webapp) and save them in the resource directory org/vaadin/highcharts.
- * Create a new class in the package org.vaadin.highcharts (e.g. "HighChart") and inherit it from AbstractHighChart.
- * Then add a proper JavaScript annotation to the newly created class in order to load all necessary JavaScript
- * libraries that you need (e.g. jquery.js, highcharts.js, highcharts-more.js, ...).
- * Make sure your project complies with the licenses of those libraries.
- * At the end of this list add "highcharts-connector.js".
+ * Until Vaadin 8 this was a JavaScript component around Highcharts 8 (based on https://github.com/xylo/highcharts-vaadin7,
+ * Apache 2.0 license, by Stefan Endrullis). It is now the Vaadin Charts component, so the chart users keep building their options
+ * as before: {@link #setHcjs(String)} takes JavaScript code that binds the Highcharts options to a variable called
+ * <code>options</code>, e.g. <code>chart.setHcjs("var options = { chart: { type: 'column' }, series: [...] };")</code>. The code
+ * may use functions (formatters, menu item handlers) and read <code>Highcharts</code> (e.g. <code>Highcharts.theme</code>).
+ * The options replace the whole chart configuration in the browser (<code>highchart-connector.js</code>); the Java configuration
+ * model of {@link Chart} is not used.
  * </p>
- * <p>
- * Example of how to extend <code>AbstractHighChart</code>:
- * </p>
- * 
- * <pre>
- * package org.vaadin.highcharts;
- *
- *{@literal @}JavaScript({"jquery-min.js", "highcharts.js", "highcharts-connector.js"})
- * public class HighChart extends AbstractHighChart {
- * 	private static final long serialVersionUID = -7326315426217377753L;
- * }
- * </pre>
- *
- * @author Stefan Endrullis
- * 
- *         Based on https://github.com/xylo/highcharts-vaadin7 (Apache 2.0 license)
  */
-@JavaScript({
-	"jquery.slim.min.js",
-	"highcharts.js",
-	"highcharts-connector.js",
-	"highcharts-exporting.js",
-	"highcharts-export-data.js",
-	"highcharts-no-data.js" })
-public class HighChart extends AbstractJavaScriptComponent {
+@JsModule("./charts/highchart-connector.js")
+public class HighChart extends Chart {
 
 	private static final long serialVersionUID = 7738496276049495017L;
 
@@ -68,23 +54,17 @@ public class HighChart extends AbstractJavaScriptComponent {
 
 	protected int chartId = nextChartId();
 
+	private String hcjs = "";
+
+	private final Map<String, SerializableRunnable> jsFunctions = new LinkedHashMap<>();
+
+	private Registration pendingUpdate;
+
 	/**
 	 * Creates the chart object.
 	 */
 	public HighChart() {
 		setId(getDomId());
-		getState().setDomId(getDomId());
-		getState().setHcjs("");
-	}
-
-	/**
-	 * Returns the state of the chart that is shared with the web browser.
-	 *
-	 * @return the state of the chart that is shared with the web browser
-	 */
-	@Override
-	protected HighChartState getState() {
-		return (HighChartState) super.getState();
 	}
 
 	/**
@@ -113,6 +93,48 @@ public class HighChart extends AbstractJavaScriptComponent {
 	 *            Highcharts JavaScript code describing the chart
 	 */
 	public void setHcjs(String hcjs) {
-		getState().setHcjs(hcjs);
+		this.hcjs = hcjs != null ? hcjs : "";
+		scheduleUpdate();
+	}
+
+	/**
+	 * Defines the browser function <code>window.&lt;name&gt;()</code>, which runs <code>action</code> on the server. Chart options
+	 * call it from their JavaScript, e.g. a context menu item
+	 * <code>{ onclick: function() { window.&lt;name&gt;(); } }</code>. Replaces the Vaadin 8
+	 * <code>JavaScript.getCurrent().addFunction(name, ...)</code>; the name should be unique in the page.
+	 */
+	public void addJsFunction(String name, SerializableRunnable action) {
+		jsFunctions.put(name, action);
+		scheduleUpdate();
+	}
+
+	@ClientCallable
+	private void runJsFunction(String name) {
+		SerializableRunnable action = jsFunctions.get(name);
+		if (action != null) {
+			action.run();
+		}
+	}
+
+	@Override
+	protected void onAttach(AttachEvent attachEvent) {
+		// Chart draws its own (empty) configuration before the client response; the update registered after it replaces it
+		super.onAttach(attachEvent);
+		scheduleUpdate();
+	}
+
+	private void scheduleUpdate() {
+		getUI().ifPresent(ui -> {
+			if (pendingUpdate != null) {
+				pendingUpdate.remove();
+			}
+			pendingUpdate = ui.beforeClientResponse(this, context -> {
+				pendingUpdate = null;
+				getElement().executeJs(
+					"window.Vaadin.sormasHighChart.update(this, $0, $1)",
+					hcjs,
+					String.join(",", jsFunctions.keySet()));
+			});
+		});
 	}
 }

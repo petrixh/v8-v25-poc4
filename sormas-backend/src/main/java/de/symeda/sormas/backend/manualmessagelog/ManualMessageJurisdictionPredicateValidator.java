@@ -17,9 +17,9 @@ package de.symeda.sormas.backend.manualmessagelog;
 
 import java.util.Set;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
 
 import de.symeda.sormas.api.person.PersonAssociation;
 import de.symeda.sormas.backend.person.PersonJoins;

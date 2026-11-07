@@ -20,8 +20,8 @@ package de.symeda.sormas.api.sample;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Remote;
-import javax.validation.Valid;
+import jakarta.ejb.Remote;
+import jakarta.validation.Valid;
 
 import de.symeda.sormas.api.common.DeletionDetails;
 import de.symeda.sormas.api.common.Page;

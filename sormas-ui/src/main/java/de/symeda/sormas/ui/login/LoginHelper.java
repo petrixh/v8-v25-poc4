@@ -15,25 +15,28 @@
 
 package de.symeda.sormas.ui.login;
 
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.CDI;
-import javax.security.enterprise.AuthenticationStatus;
-import javax.security.enterprise.SecurityContext;
-import javax.security.enterprise.authentication.mechanism.http.AuthenticationParameters;
-import javax.security.enterprise.credential.UsernamePasswordCredential;
-import javax.servlet.ServletException;
+import jakarta.enterprise.context.spi.CreationalContext;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.security.enterprise.AuthenticationStatus;
+import jakarta.security.enterprise.SecurityContext;
+import jakarta.security.enterprise.authentication.mechanism.http.AuthenticationParameters;
+import jakarta.security.enterprise.credential.UsernamePasswordCredential;
+import jakarta.servlet.ServletException;
 
-import com.vaadin.server.Page;
-import com.vaadin.server.VaadinServletService;
-import com.vaadin.server.VaadinSession;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.flow.server.VaadinServletResponse;
+import com.vaadin.flow.server.VaadinSession;
 
 import de.symeda.sormas.api.AuthProvider;
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
 import de.symeda.sormas.api.i18n.I18nProperties;
+import de.symeda.sormas.api.user.UserDto;
 import de.symeda.sormas.api.user.UserRight;
+import de.symeda.sormas.api.user.UserRoleDto;
 
 public final class LoginHelper {
 
@@ -58,8 +61,8 @@ public final class LoginHelper {
 		authentication.newAuthentication(true);
 		authentication.setRememberMe(true);
 		AuthenticationStatus status = securityContext.authenticate(
-			VaadinServletService.getCurrentServletRequest(),
-			VaadinServletService.getCurrentResponse().getHttpServletResponse(),
+			VaadinServletRequest.getCurrent().getHttpServletRequest(),
+			VaadinServletResponse.getCurrent().getHttpServletResponse(),
 			authentication);
 
 		if (status == AuthenticationStatus.SUCCESS) {
@@ -73,9 +76,9 @@ public final class LoginHelper {
 	}
 
 	public static boolean hasApplicationRight() {
-		if (!VaadinServletService.getCurrentServletRequest().isUserInRole(UserRight.SORMAS_UI.name())) {
+		if (!isLoggedInToWebUi()) {
 			try {
-				VaadinServletService.getCurrentServletRequest().logout();
+				VaadinServletRequest.getCurrent().getHttpServletRequest().logout();
 			} catch (ServletException e) {
 				// just do not crash
 			}
@@ -85,22 +88,43 @@ public final class LoginHelper {
 	}
 
 	/**
+	 * @return whether the caller of the current request is logged in and has the right to use the web UI
+	 *         ({@link UserRight#SORMAS_UI}). Before the migration the container checked this for every request of the
+	 *         main UI ({@code @ServletSecurity} on its servlet); now {@link LoginUI} checks it before every navigation.
+	 */
+	public static boolean isLoggedInToWebUi() {
+		VaadinServletRequest request = VaadinServletRequest.getCurrent();
+		return request != null && request.getUserPrincipal() != null && currentUserHasWebUiRight();
+	}
+
+	/**
+	 * Whether the logged-in caller has the right {@link UserRight#SORMAS_UI}: the user rights of the user's roles, the same
+	 * set the login gives the caller as groups (and so as roles). Not {@code isUserInRole}: on Payara 7 the web role check
+	 * fails with an exception when the request's authorization context is not set, which is the case for this app
+	 * (migration ticket 1a-91).
+	 */
+	public static boolean currentUserHasWebUiRight() {
+		UserDto user = FacadeProvider.getUserFacade().getCurrentUser();
+		return user != null && UserRoleDto.getUserRights(FacadeProvider.getUserFacade().getUserRoles(user)).contains(UserRight.SORMAS_UI);
+	}
+
+	/**
 	 * Trigger logout event for Authentication Mechanism or other components to react.
 	 */
 	public static boolean logout() {
 
 		if (!AuthProvider.getProvider(FacadeProvider.getConfigFacade()).isDefaultProvider()) {
-			Page.getCurrent().setLocation("logout");
+			UI.getCurrent().getPage().setLocation("logout");
 		} else {
 			try {
-				VaadinServletService.getCurrentServletRequest().logout();
+				VaadinServletRequest.getCurrent().getHttpServletRequest().logout();
 			} catch (ServletException e) {
 				return false;
 			}
 
 			VaadinSession.getCurrent().getSession().invalidate();
 
-			Page.getCurrent().reload();
+			UI.getCurrent().getPage().reload();
 		}
 
 		return true;

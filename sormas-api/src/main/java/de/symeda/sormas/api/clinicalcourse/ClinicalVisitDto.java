@@ -2,8 +2,8 @@ package de.symeda.sormas.api.clinicalcourse;
 
 import java.util.Date;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Size;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.feature.FeatureType;

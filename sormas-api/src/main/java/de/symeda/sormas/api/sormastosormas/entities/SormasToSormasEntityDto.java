@@ -19,7 +19,7 @@ import de.symeda.sormas.api.sormastosormas.SormasToSormasShareableDto;
 
 import java.io.Serializable;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 public abstract class SormasToSormasEntityDto<T extends SormasToSormasShareableDto> implements Serializable {
 

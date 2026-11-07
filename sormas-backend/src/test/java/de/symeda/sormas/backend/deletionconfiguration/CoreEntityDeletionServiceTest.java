@@ -13,8 +13,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Query;
-import javax.validation.ConstraintViolationException;
+import jakarta.persistence.Query;
+import jakarta.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -561,7 +561,7 @@ public class CoreEntityDeletionServiceTest extends SormasToSormasTest {
 
 		final Date ninetyDaysPlusAgo = DateUtils.addDays(new Date(), (-1) * deletionConfig.deletionPeriod - 1);
 		executeInTransaction(em -> {
-			Query query = em.createQuery("update immunization i set changedate=:date where i.uuid=:uuid");
+			Query query = em.createQuery("update immunization i set i.changeDate=:date where i.uuid=:uuid");
 			query.setParameter("date", new Timestamp(ninetyDaysPlusAgo.getTime()));
 			query.setParameter("uuid", immunization.getUuid());
 			query.executeUpdate();

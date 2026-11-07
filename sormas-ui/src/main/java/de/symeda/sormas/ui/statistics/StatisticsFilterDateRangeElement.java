@@ -20,7 +20,7 @@ package de.symeda.sormas.ui.statistics;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.v7.ui.DateField;
+import de.symeda.sormas.ui.utils.fields.DateField;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -40,8 +40,8 @@ public class StatisticsFilterDateRangeElement extends StatisticsFilterElement {
 		dateToField = new DateField(I18nProperties.getCaption(Captions.to));
 		dateToField.setId("dateTo-" + rowIndex);
 
-		addComponent(dateFromField);
-		addComponent(dateToField);
+		add(dateFromField);
+		add(dateToField);
 	}
 
 	@Override

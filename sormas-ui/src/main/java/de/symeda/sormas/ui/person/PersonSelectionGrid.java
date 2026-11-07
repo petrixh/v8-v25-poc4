@@ -20,9 +20,6 @@ package de.symeda.sormas.ui.person;
 import java.util.Arrays;
 import java.util.List;
 
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.data.util.GeneratedPropertyContainer;
-import com.vaadin.v7.shared.ui.grid.HeightMode;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.feature.FeatureType;
@@ -31,14 +28,16 @@ import de.symeda.sormas.api.person.PersonSimilarityCriteria;
 import de.symeda.sormas.api.person.SimilarPersonDto;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.CustomizableGrid;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
 
 @SuppressWarnings("serial")
-public class PersonSelectionGrid extends CustomizableGrid {
+public class PersonSelectionGrid extends CustomizableGrid<SimilarPersonDto> {
 
 	/**
 	 * Create a grid of persons listing all persons similar to the given criteria.
 	 */
 	public PersonSelectionGrid() {
+		super(SimilarPersonDto.class);
 		buildGrid();
 	}
 
@@ -46,10 +45,6 @@ public class PersonSelectionGrid extends CustomizableGrid {
 		setSizeFull();
 		setSelectionMode(SelectionMode.SINGLE);
 		setHeightMode(HeightMode.ROW);
-
-		BeanItemContainer<SimilarPersonDto> container = new BeanItemContainer<>(SimilarPersonDto.class);
-		GeneratedPropertyContainer generatedContainer = new GeneratedPropertyContainer(container);
-		setContainerDataSource(generatedContainer);
 
 		setColumns(
 			SimilarPersonDto.class,
@@ -70,7 +65,7 @@ public class PersonSelectionGrid extends CustomizableGrid {
 				SimilarPersonDto.NATIONAL_HEALTH_ID,
 				SimilarPersonDto.PASSPORT_NUMBER));
 
-		for (Column column : getColumns()) {
+		for (Column<SimilarPersonDto, ?> column : getAllColumns()) {
 			String propertyId = column.getPropertyId().toString();
 			String i18nPrefix = SimilarPersonDto.getI18nPrefix(propertyId);
 			column.setHeaderCaption(I18nProperties.getPrefixCaption(i18nPrefix, propertyId, column.getHeaderCaption()));
@@ -85,12 +80,6 @@ public class PersonSelectionGrid extends CustomizableGrid {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private BeanItemContainer<SimilarPersonDto> getContainer() {
-		GeneratedPropertyContainer container = (GeneratedPropertyContainer) super.getContainerDataSource();
-		return (BeanItemContainer<SimilarPersonDto>) container.getWrappedContainer();
-	}
-
 	/**
 	 * Load similar persons for the given criteria.
 	 * 
@@ -100,14 +89,12 @@ public class PersonSelectionGrid extends CustomizableGrid {
 	public void loadData(PersonSimilarityCriteria criteria) {
 		List<SimilarPersonDto> similarPersons = FacadeProvider.getPersonFacade().getSimilarPersonDtos(criteria);
 
-		getContainer().removeAllItems();
-		getContainer().addAll(similarPersons);
+		setItems(similarPersons);
 		setHeightByRows(similarPersons.size() > 0 ? (Math.min(similarPersons.size(), 10)) : 1);
 	}
 
 	public void loadData(List<SimilarPersonDto> similarPersons) {
-		getContainer().removeAllItems();
-		getContainer().addAll(similarPersons);
+		setItems(similarPersons);
 		setHeightByRows(similarPersons.size() > 0 ? (Math.min(similarPersons.size(), 10)) : 1);
 	}
 

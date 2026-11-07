@@ -1,8 +1,8 @@
 package de.symeda.sormas.ui.survey;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.ui.Button;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import de.symeda.sormas.ui.navigation.ViewChangeListener;
+import com.vaadin.flow.component.button.Button;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.survey.SurveyCriteria;
@@ -38,7 +38,7 @@ public class SurveysView extends AbstractView {
 
 		if (UiUtil.permitted(UserRight.SURVEY_CREATE)) {
 			final Button btnNewSurvey = ButtonHelper
-				.createIconButton(Captions.surveyNewSurvey, VaadinIcons.PLUS_CIRCLE, e -> ControllerProvider.getSurveyController().create());
+				.createIconButton(Captions.surveyNewSurvey, VaadinIcon.PLUS_CIRCLE, e -> ControllerProvider.getSurveyController().create());
 			addHeaderComponent(btnNewSurvey);
 		}
 	}

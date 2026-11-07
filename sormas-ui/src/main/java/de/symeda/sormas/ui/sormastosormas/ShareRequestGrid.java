@@ -20,15 +20,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.vaadin.data.provider.GridSortOrder;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.data.sort.SortDirection;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.DescriptionGenerator;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.renderers.DateRenderer;
-import com.vaadin.ui.renderers.HtmlRenderer;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.grid.GridSortOrder;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.data.provider.SortDirection;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.externalmessage.ExternalMessageIndexDto;
@@ -46,9 +42,12 @@ import de.symeda.sormas.ui.SormasUI;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.BooleanRenderer;
 import de.symeda.sormas.ui.utils.ButtonHelper;
+import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FilteredGrid;
 import de.symeda.sormas.ui.utils.ShowDetailsListener;
 import de.symeda.sormas.ui.utils.UuidRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class ShareRequestGrid extends FilteredGrid<ShareRequestIndexDto, ShareRequestCriteria> {
 
@@ -79,7 +78,7 @@ public class ShareRequestGrid extends FilteredGrid<ShareRequestIndexDto, ShareRe
 		addShowColumn((request) -> {
 			ControllerProvider.getSormasToSormasController().showRequestDetails(request, viewType);
 		});
-		addComponentColumn(this::createActionButtons).setId(COLUMN_ACTIONS).setSortable(false).setMinimumWidth(260);
+		addComponentColumn(this::createActionButtons).setKey(COLUMN_ACTIONS).setSortable(false).setMinimumWidth(260);
 
 		setColumns(
 			SHOW_MESSAGE,
@@ -101,36 +100,36 @@ public class ShareRequestGrid extends FilteredGrid<ShareRequestIndexDto, ShareRe
 		getColumn(COLUMN_ACTIONS).setWidth(250);
 
 		Column<ShareRequestIndexDto, ?> commentColumn = getColumn(ShareRequestIndexDto.COMMENT);
-		commentColumn.setDescriptionGenerator((DescriptionGenerator<ShareRequestIndexDto>) ShareRequestIndexDto::getComment);
+		commentColumn.setDescriptionGenerator(ShareRequestIndexDto::getComment);
 		commentColumn.setWidth(300);
 
-		for (Column<?, ?> column : getColumns()) {
+		for (Column<?, ?> column : getAllColumns()) {
 			column.setCaption(
-				column.getId().equals(COLUMN_ACTIONS) || column.getId().equals(SHOW_MESSAGE)
+				column.getKey().equals(COLUMN_ACTIONS) || column.getKey().equals(SHOW_MESSAGE)
 					? ""
-					: I18nProperties.findPrefixCaption(column.getId(), ShareRequestIndexDto.I18N_PREFIX, SormasToSormasShareRequestDto.I18N_PREFIX));
+					: I18nProperties.findPrefixCaption(column.getKey(), ShareRequestIndexDto.I18N_PREFIX, SormasToSormasShareRequestDto.I18N_PREFIX));
 		}
 
-		setSortOrder(Collections.singletonList(new GridSortOrder<>(getColumn(ShareRequestIndexDto.CREATION_DATE), SortDirection.DESCENDING)));
+		sort(Collections.singletonList(new GridSortOrder<>(getColumn(ShareRequestIndexDto.CREATION_DATE), SortDirection.DESCENDING)));
 	}
 
 	private Component createActionButtons(ShareRequestIndexDto indexDto) {
 		HorizontalLayout layout = new HorizontalLayout();
-		layout.setMargin(false);
+		layout.setPadding(false);
 		layout.setSpacing(true);
 
 		if (indexDto.getStatus() == ShareRequestStatus.PENDING) {
 			if (viewType == ShareRequestViewType.INCOMING) {
-				layout.addComponent(ButtonHelper.createButton(Captions.actionAccept, (e) -> {
+				layout.add(ButtonHelper.createButton(Captions.actionAccept, (e) -> {
 					ControllerProvider.getSormasToSormasController().acceptShareRequest(indexDto, SormasUI::refreshView);
-				}, ValoTheme.BUTTON_SMALL));
-				layout.addComponent(ButtonHelper.createButton(Captions.actionReject, (e) -> {
+				}, CssStyles.BUTTON_SMALL));
+				layout.add(ButtonHelper.createButton(Captions.actionReject, (e) -> {
 					ControllerProvider.getSormasToSormasController().rejectShareRequest(indexDto, SormasUI::refreshView);
-				}, ValoTheme.BUTTON_SMALL));
+				}, CssStyles.BUTTON_SMALL));
 			} else if (UiUtil.permitted(UserRight.SORMAS_TO_SORMAS_SHARE)) {
-				layout.addComponent(ButtonHelper.createButton(Captions.sormasToSormasRevokeShare, (e) -> {
+				layout.add(ButtonHelper.createButton(Captions.sormasToSormasRevokeShare, (e) -> {
 					ControllerProvider.getSormasToSormasController().revokeShareRequest(indexDto.getUuid(), SormasUI::refreshView);
-				}, ValoTheme.BUTTON_SMALL));
+				}, CssStyles.BUTTON_SMALL));
 			}
 		}
 
@@ -139,7 +138,7 @@ public class ShareRequestGrid extends FilteredGrid<ShareRequestIndexDto, ShareRe
 
 	protected void addShowColumn(Consumer<ShareRequestIndexDto> handler) {
 
-		Column<ShareRequestIndexDto, String> showColumn = addColumn(entry -> VaadinIcons.EYE.getHtml(), new HtmlRenderer());
+		Column<ShareRequestIndexDto, String> showColumn = addColumn(entry -> HtmlRenderer.iconHtml(VaadinIcon.EYE), new HtmlRenderer());
 		showColumn.setId(SHOW_MESSAGE);
 		showColumn.setCaption("");
 		showColumn.setSortable(false);
@@ -149,7 +148,7 @@ public class ShareRequestGrid extends FilteredGrid<ShareRequestIndexDto, ShareRe
 	}
 
 	public void reload() {
-		if (getSelectionModel().isUserSelectionAllowed()) {
+		if (isUserSelectionAllowed()) {
 			deselectAll();
 		}
 

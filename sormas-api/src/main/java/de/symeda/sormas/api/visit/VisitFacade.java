@@ -19,8 +19,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Remote;
-import javax.validation.Valid;
+import jakarta.ejb.Remote;
+import jakarta.validation.Valid;
 
 import de.symeda.sormas.api.BaseFacade;
 import de.symeda.sormas.api.PermanentlyDeletableFacade;

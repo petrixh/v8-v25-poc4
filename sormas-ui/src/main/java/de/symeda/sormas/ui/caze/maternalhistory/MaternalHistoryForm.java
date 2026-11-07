@@ -6,9 +6,7 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.loc;
 
 import java.util.Arrays;
 
-import com.vaadin.ui.Label;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.caze.maternalhistory.MaternalHistoryDto;
@@ -24,6 +22,8 @@ import de.symeda.sormas.ui.utils.FieldAccessHelper;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.NullableOptionGroup;
 import de.symeda.sormas.ui.utils.ViewMode;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 public class MaternalHistoryForm extends AbstractEditForm<MaternalHistoryDto> {
 
@@ -61,8 +61,8 @@ public class MaternalHistoryForm extends AbstractEditForm<MaternalHistoryDto> {
 	@Override
 	protected void addFields() {
 
-		Label maternalHistoryHeadingLabel = new Label(I18nProperties.getString(Strings.headingMaternalHistory));
-		maternalHistoryHeadingLabel.addStyleName(H3);
+		Span maternalHistoryHeadingLabel = new Span(I18nProperties.getString(Strings.headingMaternalHistory));
+		maternalHistoryHeadingLabel.addClassName(H3);
 		getContent().addComponent(maternalHistoryHeadingLabel, MATERNAL_HISTORY_HEADING_LOC);
 
 		TextField tfChildrenNumber = addField(MaternalHistoryDto.CHILDREN_NUMBER, TextField.class);
@@ -113,14 +113,14 @@ public class MaternalHistoryForm extends AbstractEditForm<MaternalHistoryDto> {
 		initializeAccessAndAllowedAccesses();
 
 		cbRashExposureRegion.addValueChangeListener(e -> {
-			RegionReferenceDto region = (RegionReferenceDto) e.getProperty().getValue();
+			RegionReferenceDto region = (RegionReferenceDto) e.getValue();
 			FieldHelper.updateItems(
 				cbRashExposureDistrict,
 				region != null ? FacadeProvider.getDistrictFacade().getAllActiveByRegion(region.getUuid()) : null);
 		});
 		cbRashExposureDistrict.addValueChangeListener(e -> {
 			FieldHelper.removeItems(cbRashExposureCommunity);
-			DistrictReferenceDto district = (DistrictReferenceDto) e.getProperty().getValue();
+			DistrictReferenceDto district = (DistrictReferenceDto) e.getValue();
 			FieldHelper.updateItems(
 				cbRashExposureCommunity,
 				district != null ? FacadeProvider.getCommunityFacade().getAllActiveByDistrict(district.getUuid()) : null);

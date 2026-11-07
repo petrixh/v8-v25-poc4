@@ -17,8 +17,7 @@ package de.symeda.sormas.ui.travelentry.travelentrylink;
 
 import java.util.List;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
@@ -56,8 +55,8 @@ public class TravelEntryList extends PaginationList<TravelEntryListEntryDto> {
 			showPage(1);
 		} else {
 			updatePaginationLayout();
-			Label noTravelEntriesLabel = new Label(I18nProperties.getCaption(Captions.travelEntriesNoTravelEntriesForPerson));
-			listLayout.addComponent(noTravelEntriesLabel);
+			Span noTravelEntriesLabel = new Span(I18nProperties.getCaption(Captions.travelEntriesNoTravelEntriesForPerson));
+			listLayout.add(noTravelEntriesLabel);
 		}
 	}
 
@@ -72,14 +71,14 @@ public class TravelEntryList extends PaginationList<TravelEntryListEntryDto> {
 			if (!isActiveTravelEntry) {
 				addActionButton(listEntry);
 			}
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 
 	private void addActionButton(TravelEntryListEntry listEntry) {
 		listEntry.addActionButton(
 			listEntry.getTravelEntry().getUuid(),
-			(Button.ClickListener) event -> ControllerProvider.getTravelEntryController().navigateToTravelEntry(listEntry.getTravelEntry().getUuid()),
+			event -> ControllerProvider.getTravelEntryController().navigateToTravelEntry(listEntry.getTravelEntry().getUuid()),
 			UiUtil.permitted(isEditAllowed, UserRight.TRAVEL_ENTRY_EDIT));
 		listEntry.setEnabled(isEditAllowed);
 	}

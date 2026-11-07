@@ -20,12 +20,13 @@ package de.symeda.sormas.ui.samples.diseasesection;
 
 import java.util.Locale;
 
-import com.vaadin.data.ValueProvider;
-import com.vaadin.server.Setter;
-import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.RadioButtonGroup;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Setter;
+import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.function.ValueProvider;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -83,20 +84,20 @@ public class TuberculosisSectionComponent extends AbstractDiseaseSectionComponen
 		// Test scale
 		testScale = createComboBox(PathogenTestDto.TEST_SCALE);
 		testScale.setItems(PathogenTestScale.values());
-		testScale.setItemCaptionGenerator(PathogenTestScale::toString);
+		testScale.setItemLabelGenerator(PathogenTestScale::toString);
 		testScale.setVisible(false);
 		addRow(testScale);
 
 		// Strain call status
 		strainCallStatus = createComboBox(PathogenTestDto.STRAIN_CALL_STATUS);
-		strainCallStatus.setItemCaptionGenerator(PathogenStrainCallStatus::toString);
+		strainCallStatus.setItemLabelGenerator(PathogenStrainCallStatus::toString);
 		strainCallStatus.setVisible(false);
 		updateStrainCallStatusItems(disease);
 		addRow(strainCallStatus);
 
 		// Specie
 		specie = createComboBox(PathogenTestDto.SPECIE);
-		specie.setItemCaptionGenerator(PathogenSpecie::toString);
+		specie.setItemLabelGenerator(PathogenSpecie::toString);
 		specie.setVisible(false);
 		updateComboBoxByDiseaseAndTestType(specie, PathogenSpecie.class, disease, currentTestType);
 		addRow(specie);
@@ -356,16 +357,18 @@ public class TuberculosisSectionComponent extends AbstractDiseaseSectionComponen
 		ValueProvider<PathogenTestDto, Boolean> gt10Getter,
 		Setter<PathogenTestDto, Boolean> gt10Setter) {
 
-		binder.forField(tubeField).withConverter(new StringToFloatNullableConverter(tubeField.getCaption())).bind(tubeGetter, tubeSetter);
+		binder.forField(tubeField).withConverter(new StringToFloatNullableConverter(tubeField.getLabel())).bind(tubeGetter, tubeSetter);
 		binder.forField(gt10Field).bind(gt10Getter, gt10Setter);
 
 		track(tubeField.addValueChangeListener(e -> {
-			Locale locale = tubeField.getLocale() != null ? tubeField.getLocale() : Locale.getDefault();
+			// was Component.getLocale(): the UI locale, as the binding converter's ValueContext uses
+			Locale locale = tubeField.getUI().map(UI::getLocale).orElse(Locale.getDefault());
 			StringToFloatNullableConverter.parseLocaleAware(e.getValue(), locale).ifPresent(f -> gt10Field.setValue(f > 10));
 		}));
 
 		track(gt10Field.addValueChangeListener(e -> {
-			Locale locale = tubeField.getLocale() != null ? tubeField.getLocale() : Locale.getDefault();
+			// was Component.getLocale(): the UI locale, as the binding converter's ValueContext uses
+			Locale locale = tubeField.getUI().map(UI::getLocale).orElse(Locale.getDefault());
 			if (Boolean.TRUE.equals(e.getValue())) {
 				StringToFloatNullableConverter.parseLocaleAware(tubeField.getValue(), locale).filter(f -> f <= 10).ifPresent(f -> tubeField.clear());
 			} else if (Boolean.FALSE.equals(e.getValue())) {

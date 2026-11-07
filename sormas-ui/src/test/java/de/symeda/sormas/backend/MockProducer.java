@@ -30,19 +30,19 @@ import java.security.Principal;
 import java.util.Hashtable;
 import java.util.Properties;
 
-import javax.ejb.SessionContext;
-import javax.ejb.TimerService;
-import javax.enterprise.concurrent.ManagedScheduledExecutorService;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.Specializes;
-import javax.jms.ConnectionFactory;
-import javax.jms.Topic;
-import javax.mail.Session;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.TimerService;
+import jakarta.enterprise.concurrent.ManagedScheduledExecutorService;
+import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.Specializes;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Topic;
+import jakarta.mail.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.naming.spi.InitialContextFactory;
-import javax.transaction.UserTransaction;
+import jakarta.transaction.UserTransaction;
 
 import de.symeda.sormas.api.RequestContextHolder;
 import de.symeda.sormas.api.RequestContextTO;

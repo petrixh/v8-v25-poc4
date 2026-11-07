@@ -1,9 +1,10 @@
 package de.symeda.sormas.ui.utils.components.datetypeselector;
 
-import com.vaadin.v7.shared.ui.combobox.FilteringMode;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.flow.component.Unit;
 
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.FilteringMode;
 
 public class DateTypeSelectorComponent extends ComboBox {
 
@@ -61,7 +62,7 @@ public class DateTypeSelectorComponent extends ComboBox {
 			setInputPrompt(builder.dateTypePrompt);
 		}
 		if (builder.defaultDateType != null) {
-			select(builder.defaultDateType);
+			setValue(builder.defaultDateType);
 		}
 		if (builder.showCaption) {
 			CssStyles.style(this, CssStyles.FORCE_CAPTION);

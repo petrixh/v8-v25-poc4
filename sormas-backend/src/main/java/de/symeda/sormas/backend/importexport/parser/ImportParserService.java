@@ -21,8 +21,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
 
 import de.symeda.sormas.api.customizableenum.CustomizableEnum;
 import de.symeda.sormas.api.i18n.I18nProperties;

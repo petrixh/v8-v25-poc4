@@ -4,7 +4,7 @@ import static de.symeda.sormas.backend.patch.customizablefield.CustomizableField
 
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import de.symeda.sormas.api.externalmessage.survey.PatchField;
 import de.symeda.sormas.backend.patch.PatchFieldHelper;

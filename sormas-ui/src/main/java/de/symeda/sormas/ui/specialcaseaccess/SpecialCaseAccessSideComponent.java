@@ -17,10 +17,10 @@ package de.symeda.sormas.ui.specialcaseaccess;
 
 import java.util.List;
 
-import javax.validation.constraints.Null;
+import jakarta.validation.constraints.Null;
 
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
@@ -43,12 +43,12 @@ public class SpecialCaseAccessSideComponent extends SideComponent {
 	public SpecialCaseAccessSideComponent(CaseReferenceDto caze) {
 		super(I18nProperties.getString(Strings.headingSpecailCaseAccess));
 
-		setWidth(100, Unit.PERCENTAGE);
-		setMargin(false);
+		setWidthFull();
+		setPadding(false);
 		setSpacing(false);
 
 		SpecialCaseAccessList list = new SpecialCaseAccessList(caze);
-		addComponent(list);
+		add(list);
 		list.reload();
 
 		addCreateButton(
@@ -73,15 +73,15 @@ public class SpecialCaseAccessSideComponent extends SideComponent {
 			if (!specialAccesses.isEmpty()) {
 				showPage(1);
 			} else {
-				listLayout.removeAllComponents();
+				listLayout.removeAll();
 				updatePaginationLayout();
-				listLayout.addComponent(new Label(I18nProperties.getCaption(Captions.specailCaseAccessNoAccessGranted)));
+				listLayout.add(new Span(I18nProperties.getCaption(Captions.specailCaseAccessNoAccessGranted)));
 			}
 		}
 
 		@Override
 		protected void drawDisplayedEntries() {
-			listLayout.removeAllComponents();
+			listLayout.removeAll();
 			for (SpecialCaseAccessDto specialCaseAccess : getDisplayedEntries()) {
 				SpecialCaseAccessEntry entry = new SpecialCaseAccessEntry(specialCaseAccess);
 
@@ -89,7 +89,7 @@ public class SpecialCaseAccessSideComponent extends SideComponent {
 					specialCaseAccess.getUuid(),
 					event -> ControllerProvider.getSpecialCaseAccessController().edit(specialCaseAccess, this::reload),
 					true);
-				listLayout.addComponent(entry);
+				listLayout.add(entry);
 			}
 		}
 	}
@@ -98,8 +98,8 @@ public class SpecialCaseAccessSideComponent extends SideComponent {
 
 		public SpecialCaseAccessEntry(SpecialCaseAccessDto specialCaseAccess) {
 //			VerticalLayout mainLayout = new VerticalLayout();
-//			mainLayout.setWidth(100, Unit.PERCENTAGE);
-//			mainLayout.setMargin(false);
+//			mainLayout.setWidthFull();
+//			mainLayout.setPadding(false);
 //			mainLayout.setSpacing(false);
 //			addComponentToField(mainLayout);
 			Language userLanguage = UiUtil.getUser().getLanguage();
@@ -121,20 +121,20 @@ public class SpecialCaseAccessSideComponent extends SideComponent {
 
 		private HorizontalLayout createRow(@Null String label, Object value) {
 			HorizontalLayout row = new HorizontalLayout();
-			row.setMargin(false);
+			row.setPadding(false);
 			row.setSpacing(false);
 
 			if (label != null) {
-				Label rowLabel = new Label(DataHelper.toStringNullable(label) + ":");
+				Span rowLabel = new Span(DataHelper.toStringNullable(label) + ":");
 				CssStyles.style(rowLabel, CssStyles.HSPACE_RIGHT_4);
-				row.addComponent(rowLabel);
+				row.add(rowLabel);
 			}
 
-			Label rowValue = new Label(DataHelper.toStringNullable(value));
+			Span rowValue = new Span(DataHelper.toStringNullable(value));
 			if (label == null) {
-				rowValue.addStyleName(CssStyles.LABEL_BOLD);
+				rowValue.addClassName(CssStyles.LABEL_BOLD);
 			}
-			row.addComponent(rowValue);
+			row.add(rowValue);
 
 			return row;
 		}

@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import javax.persistence.Query;
+import jakarta.persistence.Query;
 
 import org.h2.tools.TriggerAdapter;
 

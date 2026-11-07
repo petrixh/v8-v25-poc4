@@ -2,9 +2,9 @@ package de.symeda.sormas.ui.utils;
 
 import java.util.Date;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.VisitOrigin;
 import de.symeda.sormas.api.utils.DataHelper;
@@ -22,47 +22,47 @@ public class FollowUpUtils {
     legendLayout.setSpacing(false);
     CssStyles.style(legendLayout, CssStyles.VSPACE_TOP_4);
 
-    Label notSymptomaticColor = new Label("");
+    Span notSymptomaticColor = new Span();
     styleLegendEntry(notSymptomaticColor, CssStyles.LABEL_BACKGROUND_FOLLOW_UP_NOT_SYMPTOMATIC, true);
-    legendLayout.addComponent(notSymptomaticColor);
+    legendLayout.add(notSymptomaticColor);
 
-    Label notSymptomaticLabel = new Label(VisitResult.NOT_SYMPTOMATIC.toString());
-    legendLayout.addComponent(notSymptomaticLabel);
+    Span notSymptomaticLabel = new Span(VisitResult.NOT_SYMPTOMATIC.toString());
+    legendLayout.add(notSymptomaticLabel);
 
-    Label symptomaticColor = new Label("");
+    Span symptomaticColor = new Span();
     styleLegendEntry(symptomaticColor, CssStyles.LABEL_BACKGROUND_FOLLOW_UP_SYMPTOMATIC, false);
-    legendLayout.addComponent(symptomaticColor);
+    legendLayout.add(symptomaticColor);
 
-    Label symptomaticLabel = new Label(VisitResult.SYMPTOMATIC.toString());
-    legendLayout.addComponent(symptomaticLabel);
+    Span symptomaticLabel = new Span(VisitResult.SYMPTOMATIC.toString());
+    legendLayout.add(symptomaticLabel);
 
-    Label unavailableColor = new Label("");
+    Span unavailableColor = new Span();
     styleLegendEntry(unavailableColor, CssStyles.LABEL_BACKGROUND_FOLLOW_UP_UNAVAILABLE, false);
-    legendLayout.addComponent(unavailableColor);
+    legendLayout.add(unavailableColor);
 
-    Label unavailableLabel = new Label(VisitResult.UNAVAILABLE.toString());
-    legendLayout.addComponent(unavailableLabel);
+    Span unavailableLabel = new Span(VisitResult.UNAVAILABLE.toString());
+    legendLayout.add(unavailableLabel);
 
-    Label uncooperativeColor = new Label("");
+    Span uncooperativeColor = new Span();
     styleLegendEntry(uncooperativeColor, CssStyles.LABEL_BACKGROUND_FOLLOW_UP_UNCOOPERATIVE, false);
-    legendLayout.addComponent(uncooperativeColor);
+    legendLayout.add(uncooperativeColor);
 
-    Label uncooperativeLabel = new Label(VisitResult.UNCOOPERATIVE.toString());
-    legendLayout.addComponent(uncooperativeLabel);
+    Span uncooperativeLabel = new Span(VisitResult.UNCOOPERATIVE.toString());
+    legendLayout.add(uncooperativeLabel);
 
-    Label notPerformedColor = new Label("");
+    Span notPerformedColor = new Span();
     styleLegendEntry(notPerformedColor, CssStyles.LABEL_BACKGROUND_FOLLOW_UP_NOT_PERFORMED, false);
-    legendLayout.addComponent(notPerformedColor);
+    legendLayout.add(notPerformedColor);
 
-    Label notPerformedLabel = new Label(VisitResult.NOT_PERFORMED.toString());
-    legendLayout.addComponent(notPerformedLabel);
+    Span notPerformedLabel = new Span(VisitResult.NOT_PERFORMED.toString());
+    legendLayout.add(notPerformedLabel);
 
     return legendLayout;
   }
 
-  private static void styleLegendEntry(Label label, String style, boolean first) {
-    label.setHeight(18, Sizeable.Unit.PIXELS);
-    label.setWidth(12, Sizeable.Unit.PIXELS);
+  private static void styleLegendEntry(Span label, String style, boolean first) {
+    label.setHeight(18, Unit.PIXELS);
+    label.setWidth(12, Unit.PIXELS);
     CssStyles.style(label, style, CssStyles.HSPACE_RIGHT_4);
 
     if (!first) {

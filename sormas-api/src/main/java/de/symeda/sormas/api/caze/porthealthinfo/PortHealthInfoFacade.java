@@ -1,6 +1,6 @@
 package de.symeda.sormas.api.caze.porthealthinfo;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface PortHealthInfoFacade {

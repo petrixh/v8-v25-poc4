@@ -1,19 +1,14 @@
 package de.symeda.sormas.ui.therapy;
 
+import java.util.Date;
 import java.util.List;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.v7.data.Item;
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.data.util.GeneratedPropertyContainer;
-import com.vaadin.v7.data.util.PropertyValueGenerator;
-import com.vaadin.v7.ui.Grid;
-import com.vaadin.v7.ui.Grid.SelectionModel.HasUserSelectionAllowed;
-import com.vaadin.v7.ui.renderers.DateRenderer;
+import com.vaadin.flow.component.icon.VaadinIcon;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
+import de.symeda.sormas.api.therapy.PeriodDto;
 import de.symeda.sormas.api.therapy.PrescriptionCriteria;
 import de.symeda.sormas.api.therapy.PrescriptionDto;
 import de.symeda.sormas.api.therapy.PrescriptionIndexDto;
@@ -28,9 +23,12 @@ import de.symeda.sormas.ui.utils.GridButtonRenderer;
 import de.symeda.sormas.ui.utils.PeriodDtoConverter;
 import de.symeda.sormas.ui.utils.V7AbstractGrid;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
 @SuppressWarnings("serial")
-public class PrescriptionGrid extends Grid implements V7AbstractGrid<PrescriptionCriteria> {
+public class PrescriptionGrid extends Grid<PrescriptionIndexDto> implements V7AbstractGrid<PrescriptionCriteria> {
 
 	private static final String ACTION_BTN_ID = "edit";
 	private static final String DOCUMENT_TREATMENT_BTN_ID = "documentTreatment";
@@ -39,8 +37,10 @@ public class PrescriptionGrid extends Grid implements V7AbstractGrid<Prescriptio
 
 	private PrescriptionCriteria prescriptionCriteria = new PrescriptionCriteria();
 
+	@SuppressWarnings("unchecked")
 	public PrescriptionGrid(TherapyForm parentView, boolean isPseudonymized, boolean isEditAllowed, boolean isDeleteAllowed) {
 
+		super(PrescriptionIndexDto.class);
 		setSizeFull();
 
 		if (UiUtil.permitted(isEditAllowed, UserRight.PERFORM_BULK_OPERATIONS)) {
@@ -49,25 +49,11 @@ public class PrescriptionGrid extends Grid implements V7AbstractGrid<Prescriptio
 			setSelectionMode(SelectionMode.NONE);
 		}
 
-		BeanItemContainer<PrescriptionIndexDto> container = new BeanItemContainer<>(PrescriptionIndexDto.class);
-		GeneratedPropertyContainer generatedContainer = new GeneratedPropertyContainer(container);
+		VaadinUiUtil.addIconColumn(this, ACTION_BTN_ID, isEditAllowed ? VaadinIcon.EDIT : VaadinIcon.EYE);
 
-		VaadinUiUtil.addIconColumn(generatedContainer, ACTION_BTN_ID, isEditAllowed ? VaadinIcons.EDIT : VaadinIcons.EYE);
-
-		setContainerDataSource(generatedContainer);
-
-		generatedContainer.addGeneratedProperty(DOCUMENT_TREATMENT_BTN_ID, new PropertyValueGenerator<String>() {
-
-			@Override
-			public String getValue(Item item, Object itemId, Object propertyId) {
-				return I18nProperties.getPrefixCaption(TherapyDto.I18N_PREFIX, I18nProperties.getCaption(Captions.treatmentCreateTreatment));
-			}
-
-			@Override
-			public Class<String> getType() {
-				return String.class;
-			}
-		});
+		// was a generated container property
+		addColumn(prescription -> I18nProperties.getPrefixCaption(TherapyDto.I18N_PREFIX, I18nProperties.getCaption(Captions.treatmentCreateTreatment)))
+			.setKey(DOCUMENT_TREATMENT_BTN_ID);
 
 		setColumns(
 			ACTION_BTN_ID,
@@ -86,16 +72,18 @@ public class PrescriptionGrid extends Grid implements V7AbstractGrid<Prescriptio
 			getColumn(DOCUMENT_TREATMENT_BTN_ID).setRenderer(new GridButtonRenderer()).setMinimumWidth(180);
 			getColumn(DOCUMENT_TREATMENT_BTN_ID).setHeaderCaption("");
 		}
-
 		getColumn(DOCUMENT_TREATMENT_BTN_ID).setHidden(isPseudonymized || !isEditAllowed || !UiUtil.permitted(UserRight.TREATMENT_CREATE));
 
-		getColumn(PrescriptionIndexDto.PRESCRIPTION_DATE).setRenderer(new DateRenderer(DateFormatHelper.getDateFormat()));
-		getColumn(PrescriptionIndexDto.PRESCRIPTION_PERIOD).setConverter(new PeriodDtoConverter());
+		((Column<PrescriptionIndexDto, Date>) getColumn(PrescriptionIndexDto.PRESCRIPTION_DATE))
+			.setRenderer(new DateRenderer(DateFormatHelper.getDateFormat()));
+		// was setConverter(new PeriodDtoConverter()): the period shows as the converter's text
+		PeriodDtoConverter periodDtoConverter = new PeriodDtoConverter();
+		((Column<PrescriptionIndexDto, PeriodDto>) getColumn(PrescriptionIndexDto.PRESCRIPTION_PERIOD))
+			.setRenderer(period -> periodDtoConverter.convertToPresentation(period, null), new TextRenderer());
 
-		for (Column column : getColumns()) {
+		for (Column<PrescriptionIndexDto, ?> column : getAllColumns()) {
 			column.setHeaderCaption(
 				I18nProperties.getPrefixCaption(PrescriptionIndexDto.I18N_PREFIX, column.getPropertyId().toString(), column.getHeaderCaption()));
-
 			setCellStyleGenerator(
 				FieldAccessCellStyleGenerator.withFieldAccessCheckers(
 					PrescriptionIndexDto.class,
@@ -103,39 +91,37 @@ public class PrescriptionGrid extends Grid implements V7AbstractGrid<Prescriptio
 		}
 
 		addItemClickListener(e -> {
-			if (e.getPropertyId() == null) {
+			if (e.getColumn() == null) {
 				return;
 			}
 
-			if (DOCUMENT_TREATMENT_BTN_ID.equals(e.getPropertyId())) {
-				PrescriptionDto prescription =
-					FacadeProvider.getPrescriptionFacade().getPrescriptionByUuid(((PrescriptionIndexDto) e.getItemId()).getUuid());
+			if (DOCUMENT_TREATMENT_BTN_ID.equals(e.getColumn().getKey())) {
+				PrescriptionDto prescription = FacadeProvider.getPrescriptionFacade().getPrescriptionByUuid(e.getItem().getUuid());
 				ControllerProvider.getTherapyController().openTreatmentCreateForm(prescription, (Runnable) () -> parentView.reloadTreatmentGrid());
-			} else if (ACTION_BTN_ID.equals(e.getPropertyId()) || e.isDoubleClick()) {
-				ControllerProvider.getTherapyController()
-					.openPrescriptionEditForm((PrescriptionIndexDto) e.getItemId(), this::reload, isEditAllowed, isDeleteAllowed);
+			} else if (ACTION_BTN_ID.equals(e.getColumn().getKey()) || e.getClickCount() > 1) {
+				ControllerProvider.getTherapyController().openPrescriptionEditForm(e.getItem(), this::reload, isEditAllowed, isDeleteAllowed);
 			}
 		});
 
 		// without this, the first time new elements are added they will not be correctly displayed as the row is not high enough.
-		setStyleName(MIN_ROW_HEIGHT_STYLE_NAME);
-	}
-
-	@SuppressWarnings("unchecked")
-	public BeanItemContainer<PrescriptionIndexDto> getContainer() {
-		GeneratedPropertyContainer container = (GeneratedPropertyContainer) super.getContainerDataSource();
-		return (BeanItemContainer<PrescriptionIndexDto>) container.getWrappedContainer();
+		addClassName(MIN_ROW_HEIGHT_STYLE_NAME);
 	}
 
 	public void reload() {
-		if (getSelectionModel() instanceof HasUserSelectionAllowed) {
+
+		if (isUserSelectionAllowed()) {
 			deselectAll();
 		}
 
 		List<PrescriptionIndexDto> entries = FacadeProvider.getPrescriptionFacade().getIndexList(prescriptionCriteria);
+		setItems(entries);
+	}
 
-		getContainer().removeAllItems();
-		getContainer().addAll(entries);
+	/**
+	 * @return the number of rows (was {@code getContainer().size()})
+	 */
+	public int getItemCount() {
+		return getListDataView().getItemCount();
 	}
 
 	@Override

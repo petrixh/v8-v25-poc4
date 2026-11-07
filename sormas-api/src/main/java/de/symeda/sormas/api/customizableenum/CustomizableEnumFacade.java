@@ -18,7 +18,7 @@ package de.symeda.sormas.api.customizableenum;
 import java.util.Date;
 import java.util.List;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 import de.symeda.sormas.api.BaseFacade;
 import de.symeda.sormas.api.Disease;

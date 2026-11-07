@@ -1,11 +1,11 @@
 package de.symeda.sormas.backend.deletionconfiguration;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 import de.symeda.sormas.api.common.DeletableEntityType;
 import de.symeda.sormas.api.deletionconfiguration.DeletionReference;

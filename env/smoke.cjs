@@ -1,11 +1,14 @@
 // Login smoke for one app copy started with env/up.sh: each web user from env/smoke-users.json logs in and the first
-// view loads with no console or page errors, no HTTP response >= 400 and no collapsed layout; users marked
+// view loads with no console or page errors, no HTTP response >= 400 and no collapsed layout, then each route in
+// "routes" (top-level, or the user's own) opens by its own URL with the same checks; users marked
 // expectWebLoginRefused must be refused by the web login (no menu, the "no access to the web application" message).
 // Usage: node env/smoke.cjs [outDir]
 //   Base URL: APP_ENV_SMOKE_URL, else http://localhost:$APP_ENV_PORT/sormas-ui (APP_ENV_PORT default 18080, as env/).
-//   outDir default: $APP_ENV_STATE_DIR/smoke/$APP_ENV_PROJECT (env/.state/smoke/sormas-old-env). Writes one screenshot
-//   per user and smoke.json (results, no passwords). Exit 0 all pass, 1 a check failed, 2 setup error.
-// Passwords are read at run time from DefaultEntityHelper.java and never printed or written.
+//   Users with "configs" are checked only on a copy of one of those configurations (APP_ENV_CONFIG, default C1, as env/).
+//   outDir default: $APP_ENV_STATE_DIR/smoke/$APP_ENV_PROJECT (env/.state/smoke/sormas-new-env). Writes one screenshot
+//   per user (and <user>-route-<route>.png per route) and smoke.json (results, no passwords). Exit 0 all pass, 1 a check failed, 2 setup error.
+// Passwords are read at run time from DefaultEntityHelper.java and never printed or written. A seed user that is not a
+// default user names the default user whose password it has ("passwordOf"; env/seed/extend.sh sets it so).
 // Needs Playwright for Node (1.63) with Chromium: a local or global npm install, or PW=<path to the module>.
 'use strict';
 const fs = require('fs');
@@ -26,14 +29,17 @@ function loadPlaywright() {
   const cfg = JSON.parse(fs.readFileSync(path.join(ENV_DIR, 'smoke-users.json'), 'utf8'));
   const base = (process.env.APP_ENV_SMOKE_URL || `http://localhost:${process.env.APP_ENV_PORT || 18080}/sormas-ui`).replace(/\/+$/, '');
   const out = path.resolve(process.argv[2] || path.join(process.env.APP_ENV_STATE_DIR || path.join(ENV_DIR, '.state'),
-    'smoke', process.env.APP_ENV_PROJECT || 'sormas-old-env'));
+    'smoke', process.env.APP_ENV_PROJECT || 'sormas-new-env'));
   fs.mkdirSync(out, { recursive: true });
+  const config = process.env.APP_ENV_CONFIG || 'C1';
+  const users = cfg.users.filter(u => !u.configs || u.configs.includes(config));
 
   // Passwords: in memory only, passed to the password field and nowhere else. Messages are cut to their first line,
   // which never holds a typed value (Playwright puts call details on later lines).
   const pw = {};
   for (const m of fs.readFileSync(HELPER, 'utf8').matchAll(/Pair<>\(\s*"([^"]+)"\s*,\s*"([^"]*)"\s*\)/g)) pw[m[1]] = m[2];
-  const missing = cfg.users.filter(u => !(u.username in pw)).map(u => u.username);
+  const pwOf = u => pw[u.passwordOf || u.username];
+  const missing = users.filter(u => pwOf(u) === undefined).map(u => u.username);
   if (missing.length) { console.error('SMOKE ERROR no default password in DefaultEntityHelper.java for ' + missing.join(', ')); process.exit(2); }
 
   const { chromium } = loadPlaywright();
@@ -46,10 +52,10 @@ function loadPlaywright() {
   const slug = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'x';
   const firstLine = e => String(e && e.message || e).split('\n')[0];
   const results = [];
-  console.log(`smoke: ${base} (${cfg.users.length} users, Chromium ${browser.version()}, out: ${out})`);
+  console.log(`smoke: ${base} (${config}, ${users.length} users, Chromium ${browser.version()}, out: ${out})`);
 
   try {
-    for (const user of cfg.users) {
+    for (const user of users) {
       const refusedExpected = !!user.expectWebLoginRefused;
       // Fresh context per user: a shared one keeps the previous user's session cookie.
       const context = await browser.newContext({ viewport, userAgent });
@@ -62,7 +68,7 @@ function loadPlaywright() {
       try {
         await page.goto(base + (cfg.loginPath || '/'));
         await page.fill(cfg.login.user, user.username);
-        await page.fill(cfg.login.password, pw[user.username]);
+        await page.fill(cfg.login.password, pwOf(user));
         await page.click(cfg.login.submit);
         if (refusedExpected) {
           await page.getByText(cfg.refusedText).first().waitFor({ state: 'visible', timeout: 30000 });
@@ -83,6 +89,24 @@ function loadPlaywright() {
           await page.waitForTimeout(1000);
           await page.screenshot({ path: r.screenshot, fullPage: true });
           r.pass = errors.length === 0 && badResponses.length === 0 && r.maxScrollHeight <= (cfg.maxScrollFactor || 4) * viewport.height;
+          // Routes opened by their own URL (the user's "routes", else the top-level list): an app whose router has no
+          // routes fails here even when the first view loads. A route passes when the menu shows, the address stays on
+          // the route (no redirect to the login page or the start view) and nothing new is logged or answered >= 400.
+          r.routes = [];
+          for (const route of user.routes || cfg.routes || []) {
+            const before = errors.length + badResponses.length;
+            const rr = { route, screenshot: path.join(out, slug(user.username) + '-route-' + slug(route) + '.png') };
+            r.routes.push(rr);
+            await page.setViewportSize(viewport);
+            const response = await page.goto(base + route);
+            rr.status = response ? response.status() : null;
+            await page.waitForSelector(cfg.loggedInSelector, { state: 'visible', timeout: 60000 });
+            await page.waitForTimeout(cfg.settleMs || 3000);
+            rr.path = new URL(page.url()).pathname;
+            await page.screenshot({ path: rr.screenshot, fullPage: true });
+            rr.pass = errors.length + badResponses.length === before && new URL(base + route).pathname === rr.path;
+            r.pass = r.pass && rr.pass;
+          }
         }
       } catch (e) {
         r.exception = firstLine(e);
@@ -94,7 +118,7 @@ function loadPlaywright() {
       results.push(r);
       console.log(`${r.pass ? 'PASS' : 'FAIL'} ${user.username}: ${refusedExpected
         ? `web login refused=${!!r.refusedMessage} menu=${r.menu === undefined ? '?' : r.menu}`
-        : `first view ${r.view || '?'} scroll=${r.maxScrollHeight || '?'}`} errors=${errors.length} http>=400=${badResponses.length}${r.exception ? ' exception: ' + r.exception : ''}`);
+        : `first view ${r.view || '?'} scroll=${r.maxScrollHeight || '?'}${(r.routes || []).map(x => ` route ${x.route}=${x.pass ? 'ok' : 'FAIL'}`).join('')}`} errors=${errors.length} http>=400=${badResponses.length}${r.exception ? ' exception: ' + r.exception : ''}`);
       for (const x of errors.concat(badResponses)) console.log('    ' + x);
       await context.close();
     }

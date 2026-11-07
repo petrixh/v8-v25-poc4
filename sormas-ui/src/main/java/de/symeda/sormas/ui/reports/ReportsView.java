@@ -20,18 +20,14 @@ package de.symeda.sormas.ui.reports;
 import java.util.Date;
 import java.util.List;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.v7.shared.ui.grid.HeightMode;
-import com.vaadin.v7.ui.AbstractSelect;
-import com.vaadin.v7.ui.AbstractSelect.ItemCaptionMode;
-import com.vaadin.v7.ui.Grid;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.shared.Tooltip;
 
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
@@ -40,10 +36,17 @@ import de.symeda.sormas.api.user.JurisdictionLevel;
 import de.symeda.sormas.api.utils.DateHelper;
 import de.symeda.sormas.api.utils.EpiWeek;
 import de.symeda.sormas.ui.UiUtil;
+import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
 import de.symeda.sormas.ui.utils.AbstractView;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.ComboBoxHelper;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.grid.Grid;
+import de.symeda.sormas.ui.utils.grid.HeightMode;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class ReportsView extends AbstractView {
 
@@ -51,10 +54,10 @@ public class ReportsView extends AbstractView {
 
 	public static final String VIEW_NAME = "reports";
 
-	private Grid grid;
+	private Grid<?> grid;
 	private VerticalLayout gridLayout;
-	private AbstractSelect yearFilter;
-	private AbstractSelect epiWeekFilter;
+	private ComboBox yearFilter;
+	private ComboBox epiWeekFilter;
 
 	public ReportsView() {
 		super(VIEW_NAME);
@@ -69,22 +72,22 @@ public class ReportsView extends AbstractView {
 		grid.setHeightMode(HeightMode.UNDEFINED);
 
 		gridLayout = new VerticalLayout();
-		gridLayout.addComponent(createFilterBar());
-		gridLayout.addComponent(grid);
-		gridLayout.setMargin(true);
+		gridLayout.add(createFilterBar());
+		gridLayout.add(grid);
+		gridLayout.setPadding(true);
 		gridLayout.setSpacing(false);
 		gridLayout.setSizeFull();
-		gridLayout.setExpandRatio(grid, 1);
+		gridLayout.setFlexGrow(1, grid);
 
 		addComponent(gridLayout);
 	}
 
 	public HorizontalLayout createFilterBar() {
 		HorizontalLayout filterLayout = new HorizontalLayout();
-		filterLayout.setMargin(false);
+		filterLayout.setPadding(false);
 		filterLayout.setSpacing(true);
-		filterLayout.addStyleName(CssStyles.VSPACE_3);
-		filterLayout.setWidth(100, Unit.PERCENTAGE);
+		filterLayout.addClassName(CssStyles.VSPACE_3);
+		filterLayout.setWidthFull();
 
 		EpiWeek prevEpiWeek = DateHelper.getPreviousEpiWeek(new Date());
 		int year = prevEpiWeek.getYear();
@@ -95,14 +98,14 @@ public class ReportsView extends AbstractView {
 		yearFilter.setWidth(200, Unit.PIXELS);
 		yearFilter.setNullSelectionAllowed(false);
 		yearFilter.addItems(DateHelper.getYearsToNow());
-		yearFilter.select(year);
+		yearFilter.setValue(year);
 		yearFilter.setCaption(I18nProperties.getString(Strings.year));
-		yearFilter.setItemCaptionMode(ItemCaptionMode.ID_TOSTRING);
+		// was setItemCaptionMode(ID_TOSTRING): items without an explicit caption show toString()
 		yearFilter.addValueChangeListener(e -> {
-			updateEpiWeeks((int) e.getProperty().getValue(), (int) epiWeekFilter.getValue());
+			updateEpiWeeks((int) e.getValue(), (int) epiWeekFilter.getValue());
 			reloadGrid();
 		});
-		filterLayout.addComponent(yearFilter);
+		filterLayout.add(yearFilter);
 
 		epiWeekFilter = ComboBoxHelper.createComboBoxV7();
 		epiWeekFilter.setId(Strings.epiWeek);
@@ -113,27 +116,29 @@ public class ReportsView extends AbstractView {
 		epiWeekFilter.addValueChangeListener(e -> {
 			reloadGrid();
 		});
-		filterLayout.addComponent(epiWeekFilter);
+		filterLayout.add(epiWeekFilter);
 
 		Button lastWeekButton = ButtonHelper.createButton(
 			Captions.dashboardLastWeek,
 			String.format(I18nProperties.getCaption(Captions.dashboardLastWeek), DateHelper.getPreviousEpiWeek(new Date()).toString()),
 			e -> {
 				EpiWeek epiWeek = DateHelper.getPreviousEpiWeek(new Date());
-				yearFilter.select(epiWeek.getYear());
-				epiWeekFilter.select(epiWeek.getWeek());
+				yearFilter.setValue(epiWeek.getYear());
+				epiWeekFilter.setValue(epiWeek.getWeek());
 			},
 			CssStyles.FORCE_CAPTION);
 
-		filterLayout.addComponent(lastWeekButton);
+		filterLayout.add(lastWeekButton);
 
-		Label infoLabel = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
-		infoLabel.setDescription(I18nProperties.getString(Strings.infoWeeklyReportsView), ContentMode.HTML);
+		Span infoLabel = VaadinUiUtil.createLabel(HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE), ContentMode.HTML);
+		// was setDescription(info, ContentMode.HTML): the tooltip renders the HTML through Markdown
+		Tooltip.forComponent(infoLabel).setMarkdown(I18nProperties.getString(Strings.infoWeeklyReportsView));
 		infoLabel.setSizeUndefined();
 		CssStyles.style(infoLabel, CssStyles.LABEL_XLARGE, CssStyles.LABEL_SECONDARY);
-		filterLayout.addComponent(infoLabel);
-		filterLayout.setComponentAlignment(infoLabel, Alignment.MIDDLE_RIGHT);
-		filterLayout.setExpandRatio(infoLabel, 1);
+		filterLayout.add(infoLabel);
+		// was Alignment.MIDDLE_RIGHT in an expanding slot: the icon sits at the right end (the tooltip stays on the icon)
+		filterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, infoLabel);
+		infoLabel.getStyle().set("margin-left", "auto");
 
 		return filterLayout;
 	}
@@ -144,7 +149,7 @@ public class ReportsView extends AbstractView {
 			epiWeekFilter.addItem(epiWeek.getWeek());
 			epiWeekFilter.setItemCaption(epiWeek.getWeek(), epiWeek.toString());
 		}
-		epiWeekFilter.select(week);
+		epiWeekFilter.setValue(week);
 	}
 
 	@Override

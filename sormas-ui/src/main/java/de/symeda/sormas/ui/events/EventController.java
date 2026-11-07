@@ -35,17 +35,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Functions;
-import com.vaadin.navigator.Navigator;
-import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.Notification.Type;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.EntityDto;
@@ -89,13 +82,17 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.events.eventLink.EventSelectionField;
 import de.symeda.sormas.ui.externalsurveillanceservice.ExternalSurveillanceServiceGateway;
+import de.symeda.sormas.ui.navigation.Navigator;
 import de.symeda.sormas.ui.utils.AbstractView;
 import de.symeda.sormas.ui.utils.ArchiveHandlers;
 import de.symeda.sormas.ui.utils.BulkOperationHandler;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.DeleteRestoreHandlers;
+import de.symeda.sormas.ui.utils.NotificationHelper;
+import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.automaticdeletion.DeletionLabel;
 import de.symeda.sormas.ui.utils.components.page.title.TitleLayout;
@@ -175,7 +172,7 @@ public class EventController {
 
 		EventSelectionField eventSelect =
 			new EventSelectionField(caseDataDto.getDisease(), I18nProperties.getString(Strings.infoPickOrCreateEventForCase), null);
-		eventSelect.setWidth(1100, Sizeable.Unit.PIXELS);
+		eventSelect.setWidth("1100px");
 
 		final CommitDiscardWrapperComponent<EventSelectionField> component = new CommitDiscardWrapperComponent<>(eventSelect);
 		component.addCommitListener(() -> {
@@ -193,10 +190,10 @@ public class EventController {
 					SormasUI.refreshView();
 				} else {
 					SormasUI.refreshView();
-					Notification notification =
-						new Notification(I18nProperties.getString(Strings.messagePersonAlreadyCaseInEvent), "", Type.HUMANIZED_MESSAGE);
-					notification.setDelayMsec(10000);
-					notification.show(Page.getCurrent());
+					NotificationHelper.showNotification(
+						I18nProperties.getString(Strings.messagePersonAlreadyCaseInEvent),
+						Type.HUMANIZED_MESSAGE,
+						10000);
 				}
 			} else {
 				create(caseRef);
@@ -224,7 +221,7 @@ public class EventController {
 			caseDataDtos.stream().findFirst().get().getDisease(),
 			I18nProperties.getString(Strings.infoPickOrCreateEventForCases),
 			null);
-		eventSelect.setWidth(1100, Sizeable.Unit.PIXELS);
+		eventSelect.setWidth("1100px");
 
 		final CommitDiscardWrapperComponent<EventSelectionField> component = new CommitDiscardWrapperComponent<>(eventSelect);
 		component.addCommitListener(() -> {
@@ -259,7 +256,7 @@ public class EventController {
 			contactDtos.stream().findFirst().get().getDisease(),
 			I18nProperties.getString(Strings.infoPickOrCreateEventForContact),
 			null);
-		eventSelect.setWidth(1100, Sizeable.Unit.PIXELS);
+		eventSelect.setWidth("1100px");
 
 		final CommitDiscardWrapperComponent<EventSelectionField> component = new CommitDiscardWrapperComponent<>(eventSelect);
 		component.addCommitListener(() -> {
@@ -434,7 +431,7 @@ public class EventController {
 		Set<String> relatedEventUuids = FacadeProvider.getEventFacade().getAllEventUuidsByEventGroupUuid(eventGroupReference.getUuid());
 
 		EventSelectionField eventSelect = new EventSelectionField(relatedEventUuids);
-		eventSelect.setWidth(1024, Sizeable.Unit.PIXELS);
+		eventSelect.setWidth("1024px");
 
 		final CommitDiscardWrapperComponent<EventSelectionField> component = new CommitDiscardWrapperComponent<>(eventSelect);
 		component.addCommitListener(() -> {
@@ -443,7 +440,7 @@ public class EventController {
 				EventReferenceDto eventReference = selectedEvent.toReference();
 				FacadeProvider.getEventGroupFacade().linkEventToGroup(eventReference, eventGroupReference);
 				FacadeProvider.getEventGroupFacade().notifyEventAddedToEventGroup(eventGroupReference, Collections.singletonList(eventReference));
-				Notification.show(I18nProperties.getString(Strings.messageEventLinkedToGroup), Type.TRAY_NOTIFICATION);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageEventLinkedToGroup), Type.TRAY_NOTIFICATION);
 				SormasUI.refreshView();
 			}
 		});
@@ -458,7 +455,7 @@ public class EventController {
 	public void selectOrCreateEvent(EnvironmentDto environment) {
 
 		EventSelectionField eventSelect = new EventSelectionField(null, I18nProperties.getString(Strings.infoPickOrCreateEventForContact), null);
-		eventSelect.setWidth(1100, Sizeable.Unit.PIXELS);
+		eventSelect.setWidth("1100px");
 
 		final CommitDiscardWrapperComponent<EventSelectionField> component = new CommitDiscardWrapperComponent<>(eventSelect);
 		component.addCommitListener(() -> {
@@ -476,10 +473,10 @@ public class EventController {
 					environmentDto.addEventReference(eventReferenceDto);
 					FacadeProvider.getEnvironmentFacade().save(environmentDto);
 				} else {
-					Notification notification =
-						new Notification(I18nProperties.getString(Strings.messageThisEventAlreadyLinkedToEnvironment), "", Type.HUMANIZED_MESSAGE);
-					notification.setDelayMsec(10000);
-					notification.show(Page.getCurrent());
+					NotificationHelper.showNotification(
+						I18nProperties.getString(Strings.messageThisEventAlreadyLinkedToEnvironment),
+						Type.HUMANIZED_MESSAGE,
+						10000);
 				}
 			} else {
 				create(environment);
@@ -498,7 +495,7 @@ public class EventController {
 
 		EventSelectionField eventSelect =
 			new EventSelectionField(contact.getDisease(), I18nProperties.getString(Strings.infoPickOrCreateEventForContact), null);
-		eventSelect.setWidth(1100, Sizeable.Unit.PIXELS);
+		eventSelect.setWidth("1100px");
 
 		final CommitDiscardWrapperComponent<EventSelectionField> component = new CommitDiscardWrapperComponent<>(eventSelect);
 		component.addCommitListener(() -> {
@@ -514,10 +511,10 @@ public class EventController {
 				if (!personEvents.contains(selectedEvent)) {
 					createEventParticipantWithContact(eventReferenceDto, contact);
 				} else {
-					Notification notification =
-						new Notification(I18nProperties.getString(Strings.messageThisPersonAlreadyEventParticipant), "", Type.HUMANIZED_MESSAGE);
-					notification.setDelayMsec(10000);
-					notification.show(Page.getCurrent());
+					NotificationHelper.showNotification(
+						I18nProperties.getString(Strings.messageThisPersonAlreadyEventParticipant),
+						Type.HUMANIZED_MESSAGE,
+						10000);
 				}
 			} else {
 				create(contact);
@@ -535,7 +532,7 @@ public class EventController {
 	public void selectOrCreateEvent(PersonReferenceDto personReference) {
 
 		EventSelectionField eventSelect = new EventSelectionField(null, I18nProperties.getString(Strings.infoPickOrCreateEventForContact), null);
-		eventSelect.setWidth(1100, Sizeable.Unit.PIXELS);
+		eventSelect.setWidth("1100px");
 
 		final CommitDiscardWrapperComponent<EventSelectionField> component = new CommitDiscardWrapperComponent<>(eventSelect);
 		component.addCommitListener(() -> {
@@ -552,10 +549,10 @@ public class EventController {
 					createEventParticipantWithPerson(eventReferenceDto, personReference);
 				} else {
 					SormasUI.refreshView();
-					Notification notification =
-						new Notification(I18nProperties.getString(Strings.messageThisPersonAlreadyEventParticipant), "", Type.HUMANIZED_MESSAGE);
-					notification.setDelayMsec(10000);
-					notification.show(Page.getCurrent());
+					NotificationHelper.showNotification(
+						I18nProperties.getString(Strings.messageThisPersonAlreadyEventParticipant),
+						Type.HUMANIZED_MESSAGE,
+						10000);
 				}
 			} else {
 				create(personReference);
@@ -578,7 +575,7 @@ public class EventController {
 
 		EventDto superordinateEvent = FacadeProvider.getEventFacade().getEventByUuid(superordinateEventRef.getUuid(), false);
 		EventSelectionField selectionField = EventSelectionField.forSubordinateEvent(superordinateEvent, excludedUuids);
-		selectionField.setWidth(1100, Sizeable.Unit.PIXELS);
+		selectionField.setWidth("1100px");
 
 		final CommitDiscardWrapperComponent<EventSelectionField> component = new CommitDiscardWrapperComponent<>(selectionField);
 		component.addCommitListener(() -> {
@@ -589,7 +586,7 @@ public class EventController {
 				FacadeProvider.getEventFacade().save(selectedEvent);
 
 				navigateToData(superordinateEventRef.getUuid());
-				Notification.show(I18nProperties.getString(Strings.messageEventLinkedAsSubordinate), Type.TRAY_NOTIFICATION);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageEventLinkedAsSubordinate), Type.TRAY_NOTIFICATION);
 			} else {
 				createSubordinateEvent(superordinateEventRef);
 			}
@@ -607,7 +604,7 @@ public class EventController {
 
 		EventDto subordinateEvent = FacadeProvider.getEventFacade().getEventByUuid(subordinateEventRef.getUuid(), false);
 		EventSelectionField selectionField = EventSelectionField.forSuperordinateEvent(subordinateEvent, excludedUuids);
-		selectionField.setWidth(1100, Sizeable.Unit.PIXELS);
+		selectionField.setWidth("1100px");
 
 		final CommitDiscardWrapperComponent<EventSelectionField> component = new CommitDiscardWrapperComponent<>(selectionField);
 		component.addCommitListener(() -> {
@@ -617,7 +614,7 @@ public class EventController {
 				FacadeProvider.getEventFacade().save(subordinateEvent);
 
 				navigateToData(subordinateEventRef.getUuid());
-				Notification.show(I18nProperties.getString(Strings.messageEventLinkedAsSuperordinate), Type.TRAY_NOTIFICATION);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageEventLinkedAsSuperordinate), Type.TRAY_NOTIFICATION);
 			} else {
 				createSuperordinateEvent(subordinateEventRef);
 			}
@@ -635,12 +632,12 @@ public class EventController {
 		eventParticipantDto.setResultingCase(null);
 		FacadeProvider.getEventParticipantFacade().save(eventParticipantDto);
 
-		Notification.show(notificationMessage, Type.TRAY_NOTIFICATION);
+		NotificationHelper.show(notificationMessage, Type.TRAY_NOTIFICATION);
 	}
 
 	public void removeLinkEnvironmentEvent(EventDto event, EnvironmentReferenceDto environmentReference, String notificationMessage) {
 		FacadeProvider.getEventFacade().unlinkEnvironment(environmentReference, event);
-		Notification.show(notificationMessage, Type.TRAY_NOTIFICATION);
+		NotificationHelper.show(notificationMessage, Type.TRAY_NOTIFICATION);
 	}
 
 	public void removeSuperordinateEvent(EventDto subordinateEvent, boolean reloadPage, String notificationMessage) {
@@ -650,7 +647,7 @@ public class EventController {
 		if (reloadPage) {
 			navigateToData(subordinateEvent.getUuid());
 		}
-		Notification.show(notificationMessage, Type.TRAY_NOTIFICATION);
+		NotificationHelper.show(notificationMessage, Type.TRAY_NOTIFICATION);
 	}
 
 	/**
@@ -665,10 +662,10 @@ public class EventController {
 				FacadeProvider.getEventParticipantFacade().getEventParticipantByUuid(eventParticipantRef.getUuid());
 			eventParticipant.setResultingCase(caseRef);
 			FacadeProvider.getEventParticipantFacade().save(eventParticipant);
-			Notification notification =
-				new Notification(I18nProperties.getString(Strings.messagePersonAlreadyEventParticipant), "", Type.HUMANIZED_MESSAGE);
-			notification.setDelayMsec(10000);
-			notification.show(Page.getCurrent());
+			NotificationHelper.showNotification(
+				I18nProperties.getString(Strings.messagePersonAlreadyEventParticipant),
+				Type.HUMANIZED_MESSAGE,
+				10000);
 			return true;
 		}
 
@@ -710,7 +707,7 @@ public class EventController {
 
 		String navigationState = EventDataView.VIEW_NAME + "/" + eventUuid;
 		if (openTab) {
-			SormasUI.get().getPage().open(SormasUI.get().getPage().getLocation().getRawPath() + "#!" + navigationState, "_blank", false);
+			SormasUI.get().getPage().open(Navigator.getUrl(navigationState), "_blank");
 		} else {
 			SormasUI.get().getNavigator().navigateTo(navigationState);
 		}
@@ -743,8 +740,7 @@ public class EventController {
 			fragmentParameter = eventUuid;
 		}
 
-		Page page = SormasUI.get().getPage();
-		page.setUriFragment("!" + EventsView.VIEW_NAME + "/" + fragmentParameter, false);
+		SormasUI.get().getNavigator().updateUrl(EventsView.VIEW_NAME + "/" + fragmentParameter);
 	}
 
 	private EventDto findEvent(String uuid) {
@@ -776,7 +772,7 @@ public class EventController {
 			if (!eventCreateForm.getFieldGroup().isModified()) {
 				EventDto dto = eventCreateForm.getValue();
 				FacadeProvider.getEventFacade().save(dto);
-				Notification.show(I18nProperties.getString(Strings.messageEventCreated), Type.WARNING_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageEventCreated), Type.WARNING_MESSAGE);
 
 				if (caseRef != null) {
 					EventReferenceDto createdEvent = new EventReferenceDto(dto.getUuid());
@@ -812,7 +808,7 @@ public class EventController {
 			if (!eventCreateForm.getFieldGroup().isModified()) {
 				EventDto dto = eventCreateForm.getValue();
 				FacadeProvider.getEventFacade().save(dto);
-				Notification.show(I18nProperties.getString(Strings.messageEventCreated), Type.WARNING_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageEventCreated), Type.WARNING_MESSAGE);
 
 				linkCasesToEvent(
 					new EventReferenceDto(dto.getUuid()),
@@ -843,7 +839,7 @@ public class EventController {
 			if (!eventCreateForm.getFieldGroup().isModified()) {
 				EventDto dto = eventCreateForm.getValue();
 				FacadeProvider.getEventFacade().save(dto);
-				Notification.show(I18nProperties.getString(Strings.messageEventCreated), Type.WARNING_MESSAGE);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageEventCreated), Type.WARNING_MESSAGE);
 
 				linkContactsToEvent(
 					new EventReferenceDto(dto.getUuid()),
@@ -867,7 +863,7 @@ public class EventController {
 			if (!eventCreateForm.getFieldGroup().isModified()) {
 				EventDto dto = eventCreateForm.getValue();
 				FacadeProvider.getEventFacade().save(dto);
-				Notification.show(I18nProperties.getString(Strings.messageEventCreated), Type.TRAY_NOTIFICATION);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageEventCreated), Type.TRAY_NOTIFICATION);
 
 				EventReferenceDto createdEvent = new EventReferenceDto(dto.getUuid());
 
@@ -892,7 +888,7 @@ public class EventController {
 			if (!eventCreateForm.getFieldGroup().isModified()) {
 				EventDto dto = eventCreateForm.getValue();
 				FacadeProvider.getEventFacade().save(dto);
-				Notification.show(I18nProperties.getString(Strings.messageEventCreated), Type.TRAY_NOTIFICATION);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageEventCreated), Type.TRAY_NOTIFICATION);
 
 				EventReferenceDto createdEvent = new EventReferenceDto(dto.getUuid());
 
@@ -919,7 +915,7 @@ public class EventController {
 				EnvironmentReferenceDto referenceDto = new EnvironmentReferenceDto(environment.getUuid());
 				eventDto.getEnvironmentReferenceDtos().add(referenceDto);
 				FacadeProvider.getEventFacade().save(eventDto);
-				Notification.show(I18nProperties.getString(Strings.messageEventCreated), Type.TRAY_NOTIFICATION);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageEventCreated), Type.TRAY_NOTIFICATION);
 				// maintining the relation in both sides for event and environment
 				EnvironmentDto environmentDto = FacadeProvider.getEnvironmentFacade().getByUuid(environment.getUuid());
 				EventReferenceDto createdEvent = new EventReferenceDto(eventDto.getUuid());
@@ -962,7 +958,7 @@ public class EventController {
 				}
 
 				navigateToData(superOrSubordinateEvent.getUuid());
-				Notification.show(I18nProperties.getString(Strings.messageEventCreated), Type.TRAY_NOTIFICATION);
+				NotificationHelper.show(I18nProperties.getString(Strings.messageEventCreated), Type.TRAY_NOTIFICATION);
 			}
 		});
 
@@ -1005,7 +1001,7 @@ public class EventController {
 				if (eventOutsideJurisdiction) {
 					VaadinUiUtil.showConfirmationPopup(
 						I18nProperties.getString(Strings.headingEventJurisdictionUpdated),
-						new Label(I18nProperties.getString(Strings.messageEventJurisdictionUpdated)),
+						new Span(I18nProperties.getString(Strings.messageEventJurisdictionUpdated)),
 						I18nProperties.getString(Strings.yes),
 						I18nProperties.getString(Strings.no),
 						500,
@@ -1029,7 +1025,7 @@ public class EventController {
 						try {
 							FacadeProvider.getEventFacade().delete(uuid, deleteDetails);
 						} catch (ExternalSurveillanceToolRuntimeException e) {
-							Notification.show(
+							NotificationHelper.show(
 								String.format(
 									I18nProperties.getString(Strings.ExternalSurveillanceToolGateway_notificationEntryNotDeleted),
 									DataHelper.getShortUuid(uuid)),
@@ -1041,10 +1037,10 @@ public class EventController {
 							I18nProperties.getString(Strings.headingEventNotDeleted),
 							I18nProperties.getString(Strings.messageEventsNotDeletedLinkedEntitiesReason));
 					}
-					UI.getCurrent().getNavigator().navigateTo(EventsView.VIEW_NAME);
+					SormasUI.get().getNavigator().navigateTo(EventsView.VIEW_NAME);
 				}, getDeleteConfirmationDetails(Collections.singletonList(eventUuid)), (deleteDetails) -> {
 					FacadeProvider.getEventFacade().restore(uuid);
-					UI.getCurrent().getNavigator().navigateTo(EventsView.VIEW_NAME);
+					SormasUI.get().getNavigator().navigateTo(EventsView.VIEW_NAME);
 				}, I18nProperties.getString(Strings.entityEvent), uuid, FacadeProvider.getEventFacade());
 			}
 
@@ -1078,7 +1074,7 @@ public class EventController {
 
 	private void saveEvent(Consumer<EventStatus> saveCallback, EventDto eventDto) {
 		eventDto = FacadeProvider.getEventFacade().save(eventDto);
-		Notification.show(I18nProperties.getString(Strings.messageEventSaved), Type.WARNING_MESSAGE);
+		NotificationHelper.show(I18nProperties.getString(Strings.messageEventSaved), Type.WARNING_MESSAGE);
 		SormasUI.refreshView();
 
 		if (saveCallback != null) {
@@ -1089,11 +1085,11 @@ public class EventController {
 	public void showBulkEventDataEditComponent(Collection<EventIndexDto> selectedEvents, EventGrid eventGrid) {
 
 		if (selectedEvents.isEmpty()) {
-			new Notification(
+			NotificationHelper.show(
 				I18nProperties.getString(Strings.headingNoEventsSelected),
 				I18nProperties.getString(Strings.messageNoEventsSelected),
 				Type.WARNING_MESSAGE,
-				false).show(Page.getCurrent());
+				false);
 			return;
 		}
 
@@ -1103,7 +1099,7 @@ public class EventController {
 		form.setValue(tempEvent);
 		final CommitDiscardWrapperComponent<BulkEventDataForm> editView = new CommitDiscardWrapperComponent<>(form, form.getFieldGroup());
 
-		Window popupWindow = VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getString(Strings.headingEditEvents));
+		Dialog popupWindow = VaadinUiUtil.showModalPopupWindow(editView, I18nProperties.getString(Strings.headingEditEvents));
 
 		editView.addCommitListener(() -> {
 			EventDto updatedTempEvent = form.getValue();
@@ -1129,7 +1125,7 @@ public class EventController {
 		editView.addDiscardListener(popupWindow::close);
 	}
 
-	private Consumer<List<EventIndexDto>> bulkOperationCallback(EventGrid eventGrid, Window popupWindow) {
+	private Consumer<List<EventIndexDto>> bulkOperationCallback(EventGrid eventGrid, Dialog popupWindow) {
 		return remainingEvents -> {
 			if (popupWindow != null) {
 				popupWindow.close();
@@ -1137,7 +1133,7 @@ public class EventController {
 
 			eventGrid.reload();
 			if (CollectionUtils.isNotEmpty(remainingEvents)) {
-				eventGrid.asMultiSelect().selectItems(remainingEvents.toArray(new EventIndexDto[0]));
+				eventGrid.asMultiSelect().select(remainingEvents.toArray(new EventIndexDto[0]));
 			} else {
 				navigateToIndex();
 			}
@@ -1205,7 +1201,7 @@ public class EventController {
 		// Show an error when at least one selected event is not a CLUSTER event
 		Optional<? extends EventIndexDto> nonClusterEvent = selectedRows.stream().filter(e -> e.getEventStatus() != EventStatus.CLUSTER).findFirst();
 		if (nonClusterEvent.isPresent()) {
-			Notification.show(
+			NotificationHelper.show(
 				String.format(
 					I18nProperties.getString(Strings.errorExternalSurveillanceToolNonClusterEvent),
 					DataHelper.getShortUuid(nonClusterEvent.get().getUuid()),
@@ -1222,13 +1218,14 @@ public class EventController {
 			List<EventIndexDto> withoutNotSharable =
 				selectedRows.stream().filter(e -> !ownershipHandedOverUuids.contains(e.getUuid())).collect(Collectors.toList());
 
-			TextArea notShareableListComponent = new TextArea("", new ArrayList<>(ownershipHandedOverUuids).toString());
+			TextArea notShareableListComponent = new TextArea();
+			notShareableListComponent.setValue(new ArrayList<>(ownershipHandedOverUuids).toString());
 			notShareableListComponent.setWidthFull();
 			notShareableListComponent.setEnabled(false);
-			Label notSharableLabel = new Label(
+			Span notSharableLabel = VaadinUiUtil.createLabel(
 				String.format(I18nProperties.getString(Strings.errorExternalSurveillanceToolEventNotOwned), ownershipHandedOverUuids.size()),
 				ContentMode.HTML);
-			notSharableLabel.addStyleName(CssStyles.LABEL_WHITE_SPACE_NORMAL);
+			notSharableLabel.addClassName(CssStyles.LABEL_WHITE_SPACE_NORMAL);
 			VaadinUiUtil.showConfirmationPopup(
 				I18nProperties.getCaption(Captions.ExternalSurveillanceToolGateway_send),
 				new VerticalLayout(notSharableLabel, notShareableListComponent),

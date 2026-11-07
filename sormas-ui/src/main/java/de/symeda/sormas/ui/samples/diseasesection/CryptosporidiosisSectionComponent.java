@@ -17,9 +17,9 @@
  *******************************************************************************/
 package de.symeda.sormas.ui.samples.diseasesection;
 
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.TextField;
 
 import de.symeda.sormas.api.sample.GenoType;
 import de.symeda.sormas.api.sample.PathogenTestDto;
@@ -33,7 +33,7 @@ public class CryptosporidiosisSectionComponent extends AbstractDiseaseSectionCom
 
 	private ComboBox<GenoType> genoTypeField;
 	private TextField genoTypeTextField;
-	private Label genoTypeTextFieldSpacer;
+	private Span genoTypeTextFieldSpacer;
 
 	private PathogenTestType currentTestType;
 	private PathogenTestResultType currentResult;
@@ -41,7 +41,7 @@ public class CryptosporidiosisSectionComponent extends AbstractDiseaseSectionCom
 	@Override
 	protected void buildLayout() {
 		genoTypeField = createComboBox(PathogenTestDto.GENOTYPE);
-		genoTypeField.setItemCaptionGenerator(GenoType::toString);
+		genoTypeField.setItemLabelGenerator(GenoType::toString);
 		genoTypeField.setVisible(false);
 		updateGenoTypeItems();
 

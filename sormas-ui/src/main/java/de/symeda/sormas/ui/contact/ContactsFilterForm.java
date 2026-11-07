@@ -11,16 +11,10 @@ import java.util.stream.Stream;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Field;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -50,10 +44,18 @@ import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.AbstractFilterForm;
 import de.symeda.sormas.ui.utils.BirthdateRangeFilterComponent;
+import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.CustomLayout;
 import de.symeda.sormas.ui.utils.EpiWeekAndDateFilterComponent;
 import de.symeda.sormas.ui.utils.FieldConfiguration;
 import de.symeda.sormas.ui.utils.FieldHelper;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.CheckBox;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.TextField;
+import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 public class ContactsFilterForm extends AbstractFilterForm<ContactCriteria> {
 
@@ -194,9 +196,10 @@ public class ContactsFilterForm extends AbstractFilterForm<ContactCriteria> {
 				I18nProperties.getPrefixCaption(ContactIndexDto.I18N_PREFIX, ContactIndexDto.COMMUNITY_UUID),
 				240));
 
-		Label infoLabel = new Label(VaadinIcons.INFO_CIRCLE.getHtml(), ContentMode.HTML);
+		Span infoLabel = VaadinUiUtil.createLabel(HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE), ContentMode.HTML);
 		infoLabel.setSizeUndefined();
-		infoLabel.setDescription(I18nProperties.getString(Strings.infoContactsViewRegionDistrictFilter), ContentMode.HTML);
+		// was an HTML description: Flow tooltips are text (the string has no markup)
+		infoLabel.setTitle(I18nProperties.getString(Strings.infoContactsViewRegionDistrictFilter));
 		CssStyles.style(infoLabel, CssStyles.LABEL_XLARGE, CssStyles.LABEL_SECONDARY, AbstractFilterForm.FILTER_ITEM_STYLE);
 		moreFiltersContainer.addComponent(infoLabel, DISTRICT_INFO_LABEL_ID);
 
@@ -353,10 +356,10 @@ public class ContactsFilterForm extends AbstractFilterForm<ContactCriteria> {
 	}
 
 	@Override
-	protected void applyDependenciesOnFieldChange(String propertyId, Property.ValueChangeEvent event) {
+	protected void applyDependenciesOnFieldChange(String propertyId, HasValue.ValueChangeEvent<?> event) {
 		switch (propertyId) {
 		case ContactCriteria.REGION: {
-			RegionReferenceDto region = (RegionReferenceDto) event.getProperty().getValue();
+			RegionReferenceDto region = (RegionReferenceDto) event.getValue();
 			if (region != null) {
 				applyRegionFilterDependency(region, ContactCriteria.DISTRICT);
 				clearAndDisableFields(ContactCriteria.COMMUNITY);
@@ -367,7 +370,7 @@ public class ContactsFilterForm extends AbstractFilterForm<ContactCriteria> {
 			break;
 		}
 		case ContactCriteria.DISTRICT: {
-			DistrictReferenceDto district = (DistrictReferenceDto) event.getProperty().getValue();
+			DistrictReferenceDto district = (DistrictReferenceDto) event.getValue();
 			if (district != null) {
 				applyDistrictDependency(district, ContactCriteria.COMMUNITY);
 			} else {
@@ -377,7 +380,7 @@ public class ContactsFilterForm extends AbstractFilterForm<ContactCriteria> {
 			break;
 		}
 		case ContactIndexDto.DISEASE: {
-			Disease disease = (Disease) event.getProperty().getValue();
+			Disease disease = (Disease) event.getValue();
 			ComboBox diseaseVariantField = getField(ContactCriteria.DISEASE_VARIANT);
 			if (disease != null) {
 				List<DiseaseVariant> diseaseVariants =
@@ -390,11 +393,11 @@ public class ContactsFilterForm extends AbstractFilterForm<ContactCriteria> {
 			}
 		}
 		case ContactCriteria.FOLLOW_UP_UNTIL_TO: {
-			getValue().followUpUntilToPrecise(event.getProperty().getValue() != null);
+			getValue().followUpUntilToPrecise(event.getValue() != null);
 			break;
 		}
 		case ContactCriteria.EVENT_LIKE: {
-			String eventLike = (String) event.getProperty().getValue();
+			String eventLike = (String) event.getValue();
 			if (StringUtils.isBlank(eventLike)) {
 				clearAndDisableFields(ContactCriteria.ONLY_CONTACTS_SHARING_EVENT_WITH_SOURCE_CASE);
 			} else {
@@ -403,7 +406,7 @@ public class ContactsFilterForm extends AbstractFilterForm<ContactCriteria> {
 			break;
 		}
 		case ContactCriteria.BIRTHDATE_MM: {
-			Integer birthMM = (Integer) event.getProperty().getValue();
+			Integer birthMM = (Integer) event.getValue();
 
 			ComboBox birthDayDD = getField(ContactCriteria.BIRTHDATE_DD);
 			birthDayDD.setEnabled(birthMM != null);
@@ -453,7 +456,7 @@ public class ContactsFilterForm extends AbstractFilterForm<ContactCriteria> {
 		HorizontalLayout dateFilterLayout = (HorizontalLayout) getMoreFiltersContainer().getComponent(WEEK_AND_DATE_FILTER);
 		@SuppressWarnings("unchecked")
 		EpiWeekAndDateFilterComponent<NewCaseDateType> weekAndDateFilter =
-			(EpiWeekAndDateFilterComponent<NewCaseDateType>) dateFilterLayout.getComponent(0);
+			(EpiWeekAndDateFilterComponent<NewCaseDateType>) dateFilterLayout.getComponentAt(0);
 
 		ContactDateType contactDateType = newValue.getReportDateFrom() != null
 			? ContactDateType.REPORT_DATE
@@ -477,7 +480,7 @@ public class ContactsFilterForm extends AbstractFilterForm<ContactCriteria> {
 
 		//Birthdate Filter
 		HorizontalLayout birthdateFilterForm = (HorizontalLayout) getMoreFiltersContainer().getComponent(BIRTHDATE_RANGE_FILTER);
-		BirthdateRangeFilterComponent birtdateFilter = (BirthdateRangeFilterComponent) birthdateFilterForm.getComponent(0);
+		BirthdateRangeFilterComponent birtdateFilter = (BirthdateRangeFilterComponent) birthdateFilterForm.getComponentAt(0);
 		birtdateFilter.getDateFromFilter().setValue(newValue.getBirthdateFrom());
 		birtdateFilter.getDateToFilter().setValue(newValue.getBirthdateTo());
 		birtdateFilter.getIncludePartialMatch().setValue(newValue.isIncludePartialMatch());
@@ -492,7 +495,7 @@ public class ContactsFilterForm extends AbstractFilterForm<ContactCriteria> {
 		ComboBox diseaseVariantField = getField(ContactCriteria.DISEASE_VARIANT);
 		Disease disease = (Disease) diseaseField.getValue();
 		if (disease == null) {
-			FieldHelper.updateItems(diseaseVariantField, Collections.emptyList());
+			FieldHelper.updateItems(diseaseVariantField, Collections.<DiseaseVariant> emptyList());
 			FieldHelper.setEnabled(false, diseaseVariantField);
 		} else {
 			List<DiseaseVariant> diseaseVariants =
@@ -508,7 +511,7 @@ public class ContactsFilterForm extends AbstractFilterForm<ContactCriteria> {
 		HorizontalLayout dateFilterLayout = (HorizontalLayout) getMoreFiltersContainer().getComponent(WEEK_AND_DATE_FILTER);
 		@SuppressWarnings("unchecked")
 		EpiWeekAndDateFilterComponent<NewCaseDateType> weekAndDateFilter =
-			(EpiWeekAndDateFilterComponent<NewCaseDateType>) dateFilterLayout.getComponent(0);
+			(EpiWeekAndDateFilterComponent<NewCaseDateType>) dateFilterLayout.getComponentAt(0);
 
 		return super.streamFieldsForEmptyCheck(layout).filter(f -> f != weekAndDateFilter.getDateFilterOptionFilter());
 	}
@@ -534,7 +537,7 @@ public class ContactsFilterForm extends AbstractFilterForm<ContactCriteria> {
 		dateFilterRowLayout.setSpacing(true);
 		dateFilterRowLayout.setSizeUndefined();
 
-		dateFilterRowLayout.addComponent(weekAndDateFilter);
+		dateFilterRowLayout.add(weekAndDateFilter);
 
 		return dateFilterRowLayout;
 	}
@@ -547,7 +550,7 @@ public class ContactsFilterForm extends AbstractFilterForm<ContactCriteria> {
 		dateFilterRowLayout.setSpacing(true);
 		dateFilterRowLayout.setSizeUndefined();
 
-		dateFilterRowLayout.addComponent(birthdateRangeFilterComponent);
+		dateFilterRowLayout.add(birthdateRangeFilterComponent);
 
 		return dateFilterRowLayout;
 	}

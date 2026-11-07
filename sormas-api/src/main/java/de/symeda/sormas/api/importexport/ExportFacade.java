@@ -20,8 +20,8 @@ package de.symeda.sormas.api.importexport;
 import java.io.IOException;
 import java.util.List;
 
-import javax.ejb.Remote;
-import javax.validation.Valid;
+import jakarta.ejb.Remote;
+import jakarta.validation.Valid;
 
 import de.symeda.sormas.api.utils.ExportErrorException;
 

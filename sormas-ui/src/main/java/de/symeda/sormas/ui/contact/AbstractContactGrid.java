@@ -24,9 +24,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.navigator.View;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.renderers.DateRenderer;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.CountryHelper;
 import de.symeda.sormas.api.Disease;
@@ -47,14 +45,18 @@ import de.symeda.sormas.api.utils.SortProperty;
 import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.ViewModelProviders;
+import de.symeda.sormas.ui.navigation.View;
 import de.symeda.sormas.ui.utils.BooleanRenderer;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.FieldAccessColumnStyleGenerator;
 import de.symeda.sormas.ui.utils.FilteredGrid;
+import de.symeda.sormas.ui.utils.GridExportStreamResource;
 import de.symeda.sormas.ui.utils.ShowDetailsListener;
 import de.symeda.sormas.ui.utils.UuidRenderer;
 import de.symeda.sormas.ui.utils.ViewConfiguration;
+import de.symeda.sormas.ui.utils.grid.renderers.DateRenderer;
+import de.symeda.sormas.ui.utils.grid.renderers.TextRenderer;
 
 @SuppressWarnings("serial")
 public abstract class AbstractContactGrid<IndexDto extends ContactIndexDto> extends FilteredGrid<IndexDto, ContactCriteria> {
@@ -134,9 +136,8 @@ public abstract class AbstractContactGrid<IndexDto extends ContactIndexDto> exte
 		deleteColumn.setSortable(false);
 		deleteColumn.setCaption(I18nProperties.getCaption(Captions.deletionReason));
 
-		addComponentColumn(indexDto -> {
-			Label label =
-				new Label(indexDto.getCompleteness() != null ? new DecimalFormat("#").format(indexDto.getCompleteness() * 100) + " %" : "-");
+		Column<IndexDto, Span> completenessColumn = addComponentColumn(indexDto -> {
+			Span label = new Span(formatCompleteness(indexDto));
 			if (indexDto.getCompleteness() != null) {
 				if (indexDto.getCompleteness() < 0.25f) {
 					CssStyles.style(label, CssStyles.LABEL_CRITICAL);
@@ -149,7 +150,10 @@ public abstract class AbstractContactGrid<IndexDto extends ContactIndexDto> exte
 				}
 			}
 			return label;
-		}).setId(COLUMN_COMPLETENESS);
+		});
+		completenessColumn.setId(COLUMN_COMPLETENESS);
+		// Vaadin 8 exported the label's text
+		GridExportStreamResource.setExportValueProvider(completenessColumn, this::formatCompleteness);
 
 		getColumn(COLUMN_COMPLETENESS).setCaption(I18nProperties.getPrefixCaption(ContactIndexDto.I18N_PREFIX, ContactIndexDto.COMPLETENESS));
 		getColumn(COLUMN_COMPLETENESS).setSortable(false);
@@ -180,7 +184,7 @@ public abstract class AbstractContactGrid<IndexDto extends ContactIndexDto> exte
 				return "";
 			}
 			return proximities.stream().map(I18nProperties::getEnumCaption).collect(Collectors.joining(", "));
-		}, new com.vaadin.ui.renderers.TextRenderer());
+		}, new TextRenderer());
 		contactProximityColumn.setSortable(false);
 		((Column<ContactIndexDto, String>) getColumn(ContactIndexDto.UUID)).setRenderer(new UuidRenderer());
 		((Column<ContactIndexDto, String>) getColumn(ContactIndexDto.PERSON_UUID)).setRenderer(new UuidRenderer());
@@ -199,17 +203,21 @@ public abstract class AbstractContactGrid<IndexDto extends ContactIndexDto> exte
 			removeColumn(ContactIndexDto.CASE_REFERENCE_NUMBER);
 		}
 
-		for (Column<IndexDto, ?> column : getColumns()) {
+		for (Column<IndexDto, ?> column : getAllColumns()) {
 			column.setCaption(
 				I18nProperties.findPrefixCaptionWithDefault(
-					column.getId(),
+					column.getKey(),
 					column.getCaption(),
 					ContactIndexDto.I18N_PREFIX,
 					PersonDto.I18N_PREFIX,
 					LocationDto.I18N_PREFIX));
 
-			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getId()));
+			column.setStyleGenerator(FieldAccessColumnStyleGenerator.getDefault(getBeanType(), column.getKey()));
 		}
+	}
+
+	private String formatCompleteness(IndexDto indexDto) {
+		return indexDto.getCompleteness() != null ? new DecimalFormat("#").format(indexDto.getCompleteness() * 100) + " %" : "-";
 	}
 
 	protected Stream<String> getColumnList() {
@@ -257,7 +265,7 @@ public abstract class AbstractContactGrid<IndexDto extends ContactIndexDto> exte
 
 	public void reload() {
 
-		if (getSelectionModel().isUserSelectionAllowed()) {
+		if (isUserSelectionAllowed()) {
 			deselectAll();
 		}
 

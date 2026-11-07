@@ -17,9 +17,10 @@ package de.symeda.sormas.ui.configuration.customizableenum;
 
 import static de.symeda.sormas.ui.utils.LayoutUtil.fluidRowLocs;
 
-import com.vaadin.v7.data.Validator;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.flow.component.Unit;
+import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.TextField;
 
 import de.symeda.sormas.api.customizableenum.CustomizableEnumHelper;
 import de.symeda.sormas.api.customizableenum.CustomizableEnumValueDto;
@@ -60,7 +61,7 @@ public class CustomizableEnumValueCreateForm extends AbstractEditForm<Customizab
 
 		tfValue.addValidator(value -> {
 			if (!CustomizableEnumHelper.isValidEnumValue((String) value)) {
-				throw new Validator.InvalidValueException(I18nProperties.getValidationError(Validations.customizableEnumValueAllowedCharacters));
+				throw new Field.InvalidValueException(I18nProperties.getValidationError(Validations.customizableEnumValueAllowedCharacters));
 			}
 		});
 	}

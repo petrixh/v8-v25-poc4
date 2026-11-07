@@ -2,13 +2,12 @@ package de.symeda.sormas.ui.contact.components.linelisting.sharedinfo;
 
 import java.util.function.Consumer;
 
-import com.vaadin.data.Binder;
-import com.vaadin.data.BinderValidationStatus;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.BinderValidationStatus;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.FacadeProvider;
@@ -24,6 +23,7 @@ import de.symeda.sormas.api.infrastructure.region.RegionReferenceDto;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.contact.components.linelisting.CaseSelector;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.fields.CustomField;
 import de.symeda.sormas.ui.utils.FieldHelper;
 
 public class SharedInfoField extends CustomField<SharedInfoFieldDto> {
@@ -46,8 +46,8 @@ public class SharedInfoField extends CustomField<SharedInfoFieldDto> {
 		disease = new ComboBox<>(I18nProperties.getCaption(Captions.lineListingDiseaseOfSourceCase));
 		region = new ComboBox<>(I18nProperties.getCaption(Captions.Region));
 		district = new ComboBox<>(I18nProperties.getCaption(Captions.District));
-		region.setItemCaptionGenerator(item -> item.buildCaption());
-		district.setItemCaptionGenerator(item -> item.buildCaption());
+		region.setItemLabelGenerator(item -> item.buildCaption());
+		district.setItemLabelGenerator(item -> item.buildCaption());
 
 		this.initialDiseaseValue = initialDiseaseValue;
 	}
@@ -62,30 +62,33 @@ public class SharedInfoField extends CustomField<SharedInfoFieldDto> {
 		this(null, eventDto == null ? FacadeProvider.getDiseaseConfigurationFacade().getDefaultDisease() : eventDto.getDisease());
 	}
 
+	/**
+	 * Built on first attach, as in Vaadin 8 ({@link CustomField}).
+	 */
 	@Override
 	protected Component initContent() {
 		setValue(new SharedInfoFieldDto());
 
 		VerticalLayout layout = new VerticalLayout();
 
-		layout.setMargin(false);
+		layout.setPadding(false);
 		layout.setSpacing(false);
 
 		caseSelector.setId("caseSelector");
-		layout.addComponent(caseSelector);
+		layout.add(caseSelector);
 
 		HorizontalLayout sharedInformationBar = new HorizontalLayout();
-		sharedInformationBar.addStyleName(CssStyles.SPACING_SMALL);
+		sharedInformationBar.addClassName(CssStyles.SPACING_SMALL);
 
 		disease.setId("disease");
 		disease.setItems(FacadeProvider.getDiseaseConfigurationFacade().getAllDiseases(true, true, true));
-		sharedInformationBar.addComponent(disease);
+		sharedInformationBar.add(disease);
 
 		region.setId("region");
-		sharedInformationBar.addComponent(region);
+		sharedInformationBar.add(region);
 
 		district.setId("district");
-		sharedInformationBar.addComponent(district);
+		sharedInformationBar.add(district);
 
 		binder.forField(caseSelector).bind(SharedInfoFieldDto.CAZE);
 		binder.forField(disease).asRequired().bind(SharedInfoFieldDto.DISEASE);
@@ -96,9 +99,9 @@ public class SharedInfoField extends CustomField<SharedInfoFieldDto> {
 			CaseReferenceDto caseReferenceDto = e.getValue();
 			if (caseReferenceDto != null) {
 				CaseDataDto selectedCase = FacadeProvider.getCaseFacade().getCaseDataByUuid(e.getValue().getUuid());
-				disease.setSelectedItem(selectedCase.getDisease());
+				disease.setValue(selectedCase.getDisease());
 			} else {
-				disease.setSelectedItem(null);
+				disease.setValue(null);
 			}
 			disease.setEnabled(caseReferenceDto == null);
 
@@ -108,7 +111,7 @@ public class SharedInfoField extends CustomField<SharedInfoFieldDto> {
 		});
 
 		if (initialDiseaseValue != null) {
-			disease.setSelectedItem(initialDiseaseValue);
+			disease.setValue(initialDiseaseValue);
 			disease.setEnabled(false);
 		}
 
@@ -117,7 +120,7 @@ public class SharedInfoField extends CustomField<SharedInfoFieldDto> {
 			updateDistricts(regionDto);
 		});
 
-		layout.addComponent(sharedInformationBar);
+		layout.add(sharedInformationBar);
 
 		if (UiUtil.hasRegionJurisdictionLevel()) {
 			RegionReferenceDto userRegion = UiUtil.getUser().getRegion();
@@ -139,8 +142,13 @@ public class SharedInfoField extends CustomField<SharedInfoFieldDto> {
 	}
 
 	@Override
-	protected void doSetValue(SharedInfoFieldDto sharedInfoFieldDto) {
+	protected void setPresentationValue(SharedInfoFieldDto sharedInfoFieldDto) {
 		binder.setBean(sharedInfoFieldDto);
+	}
+
+	@Override
+	protected SharedInfoFieldDto generateModelValue() {
+		return binder.getBean();
 	}
 
 	@Override

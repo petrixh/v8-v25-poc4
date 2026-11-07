@@ -19,9 +19,9 @@ import static de.symeda.sormas.ui.utils.LayoutUtil.locCss;
 
 import java.util.List;
 
-import com.vaadin.ui.CustomLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import de.symeda.sormas.ui.utils.CustomLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.Language;
@@ -39,7 +39,7 @@ import de.symeda.sormas.ui.utils.PaginationList;
 public class ExternalShareInfoList extends PaginationList<ExternalShareInfoDto> {
 
 	private final ExternalShareInfoCriteria criteria;
-	private final Label placeholderLabel;
+	private final Span placeholderLabel;
 	private final Language userLanguage;
 
 	public ExternalShareInfoList(ExternalShareInfoCriteria criteria, boolean showPlaceholder, String placeholderCaptionTag) {
@@ -47,7 +47,7 @@ public class ExternalShareInfoList extends PaginationList<ExternalShareInfoDto> 
 
 		this.criteria = criteria;
 
-		this.placeholderLabel = new Label(placeholderCaptionTag != null ? I18nProperties.getCaption(placeholderCaptionTag) : null);
+		this.placeholderLabel = new Span(placeholderCaptionTag != null ? I18nProperties.getCaption(placeholderCaptionTag) : null);
 		this.placeholderLabel.setVisible(showPlaceholder);
 
 		userLanguage = I18nProperties.getUserLanguage();
@@ -60,9 +60,9 @@ public class ExternalShareInfoList extends PaginationList<ExternalShareInfoDto> 
 		setEntries(shareInfos);
 		if (shareInfos.isEmpty()) {
 			updatePaginationLayout();
-			listLayout.addComponent(placeholderLabel);
+			listLayout.add(placeholderLabel);
 		} else {
-			listLayout.removeComponent(placeholderLabel);
+			listLayout.remove(placeholderLabel);
 			showPage(1);
 		}
 	}
@@ -73,7 +73,7 @@ public class ExternalShareInfoList extends PaginationList<ExternalShareInfoDto> 
 
 		for (ExternalShareInfoDto shareInfo : displayedEntries) {
 			ExternalShareInfoListEntry listEntry = new ExternalShareInfoListEntry(shareInfo, userLanguage);
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 
@@ -85,33 +85,33 @@ public class ExternalShareInfoList extends PaginationList<ExternalShareInfoDto> 
 		private static final String TIMESTAMP_LOC = "timestamp";
 
 		public ExternalShareInfoListEntry(ExternalShareInfoDto shareInfo, Language userLanguage) {
-			setMargin(false);
+			setPadding(false);
 			setSpacing(true);
-			setWidth(100, Unit.PERCENTAGE);
-			addStyleName(CssStyles.SORMAS_LIST_ENTRY);
+			setWidthFull();
+			addClassName(CssStyles.SORMAS_LIST_ENTRY);
 
 			CustomLayout infoLayout = new CustomLayout();
 			infoLayout.setTemplateContents(buildLayout(shareInfo.getStatus()));
-			infoLayout.setWidth(100, Unit.PERCENTAGE);
+			infoLayout.setWidthFull();
 
 			UserReferenceDto sender = shareInfo.getSender();
-			Label senderLabel = new Label(
+			Span senderLabel = new Span(
 				shareInfo.isPseudonymized()
 					? I18nProperties.getCaption(Captions.inaccessibleValue)
 					: sender != null ? sender.getShortCaption() : I18nProperties.getCaption(Captions.system));
-			senderLabel.addStyleName(CssStyles.LABEL_BOLD);
+			senderLabel.addClassName(CssStyles.LABEL_BOLD);
 			if (shareInfo.isPseudonymized()) {
-				senderLabel.addStyleName(CssStyles.INACCESSIBLE_LABEL);
+				senderLabel.addClassName(CssStyles.INACCESSIBLE_LABEL);
 			}
 
 			infoLayout.addComponent(senderLabel, SENDER_LOC);
 
-			Label timestampLabel = new Label(DateHelper.formatLocalDateTime(shareInfo.getCreationDate(), userLanguage));
-			timestampLabel.addStyleName(CssStyles.LABEL_BOLD);
+			Span timestampLabel = new Span(DateHelper.formatLocalDateTime(shareInfo.getCreationDate(), userLanguage));
+			timestampLabel.addClassName(CssStyles.LABEL_BOLD);
 			infoLayout.addComponent(timestampLabel, TIMESTAMP_LOC);
 
-			addComponent(infoLayout);
-			setExpandRatio(infoLayout, 1);
+			add(infoLayout);
+			setFlexGrow(1, infoLayout);
 		}
 
 		private String buildLayout(ExternalShareStatus status) {

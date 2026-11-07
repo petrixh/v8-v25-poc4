@@ -20,7 +20,7 @@
 
 package de.symeda.sormas.api.document;
 
-import javax.ejb.Remote;
+import jakarta.ejb.Remote;
 
 @Remote
 public interface DocumentRelatedEntityFacade {

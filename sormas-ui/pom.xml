@@ -16,17 +16,38 @@
 		<m2e.jpa.activation>false</m2e.jpa.activation>
 	</properties>
 
+	<dependencyManagement>
+		<dependencies>
+			<!-- Payara module (Payara 7.2026.10 ships jackson-annotations 2.22.0). Flow's Jackson 3.1.8 needs annotations 2.21 or newer;
+				the sormas-base pin (2.13.4, Payara 5) breaks the vaadin-maven-plugin (missing JsonSerializeAs). Aligning sormas-base is ticket 1a-21 -->
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+				<version>2.22</version>
+				<scope>provided</scope>
+			</dependency>
+			<!-- Vaadin Flow (vaadin-core, vaadin-cdi). Imported here, not in sormas-base, so that it manages no versions of the other modules -->
+			<dependency>
+				<groupId>com.vaadin</groupId>
+				<artifactId>vaadin-bom</artifactId>
+				<version>${vaadin.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
 
 		<!-- *** Payara modules *** -->
 
 		<dependency>
-			<groupId>javax</groupId>
-			<artifactId>javaee-web-api</artifactId>
+			<groupId>jakarta.platform</groupId>
+			<artifactId>jakarta.jakartaee-web-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 		</dependency>
 
 		<dependency>
@@ -44,7 +65,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.soteria</groupId>
-			<artifactId>javax.security.enterprise</artifactId>
+			<artifactId>soteria</artifactId>
 		</dependency>
 
 		<!-- *** Payara modules END *** -->
@@ -102,34 +123,37 @@
 			<artifactId>sormas-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>sormas-widgetset</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 
+		<!-- Vaadin Flow free components; vaadin-dev (development mode tools) is not packaged in the war -->
 		<dependency>
 			<groupId>com.vaadin</groupId>
-			<artifactId>vaadin-compatibility-server</artifactId>
+			<artifactId>vaadin-core</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.vaadin</groupId>
+					<artifactId>vaadin-dev</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- Vaadin commercial component (M0 D10): Rich Text Editor for the rich-text fields (utils/fields/SormasRichTextArea).
+			Needs a Vaadin subscription: the production build checks the licence (pro key locally, VAADIN_OFFLINE_KEY in CI; see CI.md) -->
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin-rich-text-editor-flow</artifactId>
+		</dependency>
+		<!-- Vaadin commercial components (M0 D8, D10), same licence check as above: Charts for the Highcharts diagrams (highcharts/HighChart),
+			Map for the maps (map/LeafletMap) -->
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin-charts-flow</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.vaadin</groupId>
-			<artifactId>vaadin-themes</artifactId>
+			<artifactId>vaadin-map-flow</artifactId>
 		</dependency>
-
 		<dependency>
-			<groupId>org.vaadin.addons</groupId>
-			<artifactId>popupbutton</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.vaadin.addons</groupId>
-			<artifactId>extended-token-field</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.wcs.wcslib</groupId>
-			<artifactId>wcslib-vaadin-widget-multifileupload</artifactId>
+			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin-cdi</artifactId>
 		</dependency>
 
 		<!-- *** Compile dependencies END *** -->
@@ -139,8 +163,8 @@
 		<!-- Many dependencies needed for cdi-test with sormas-backend -->
 
 		<dependency>
-			<groupId>javax</groupId>
-			<artifactId>javaee-api</artifactId>
+			<groupId>jakarta.platform</groupId>
+			<artifactId>jakarta.jakartaee-api</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -157,6 +181,27 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- CDI tests (cdi-test): the server's implementations, which are Payara modules at run time -->
+		<dependency>
+			<groupId>com.nimbusds</groupId>
+			<artifactId>nimbus-jose-jwt</artifactId>
+			<version>10.4.2</version>
+			<scope>test</scope>
+			<!-- Needed by Soteria's CDI extension (the version Soteria 4.0.2 declares; Payara module on the server) -->
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+			<scope>test</scope>
+			<!-- Jakarta XML Binding runtime for Hibernate in tests (Payara module jaxb-osgi on the server), as sormas-backend -->
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.angus</groupId>
+			<artifactId>angus-mail</artifactId>
+			<scope>test</scope>
+			<!-- Jakarta Mail implementation for tests that create a mail Session (Payara module angus-mail on the server), as sormas-backend -->
+		</dependency>
+
 		<dependency>
 			<groupId>de.hilling.junit.cdi</groupId>
 			<artifactId>cdi-test-core</artifactId>
@@ -170,13 +215,19 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.hibernate</groupId>
+			<groupId>org.hibernate.orm</groupId>
 			<artifactId>hibernate-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-ehcache</artifactId>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-jcache</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ehcache</groupId>
+			<artifactId>ehcache</artifactId>
+			<classifier>jakarta</classifier>
 			<scope>test</scope>
 		</dependency>
 
@@ -187,14 +238,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.vladmihalcea</groupId>
-			<artifactId>hibernate-types-55</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>javax.el</artifactId>
+			<groupId>org.glassfish.expressly</groupId>
+			<artifactId>expressly</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -252,8 +297,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.geronimo.config</groupId>
-			<artifactId>geronimo-config-impl</artifactId>
+			<groupId>io.smallrye.config</groupId>
+			<artifactId>smallrye-config</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -308,35 +353,20 @@
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
 					<!-- By attaching the classes to a separate JAR, we can import them
-						directly in the production overlay project, making it easier to compile a
-						separate widgetset for production mode. -->
+						directly in the production overlay project. -->
 					<attachClasses>true</attachClasses>
-					<!-- Exclude some unnecessary files generated by the GWT compiler. -->
-					<packagingExcludes>WEB-INF/classes/VAADIN/gwt-unitCache/**,
-						WEB-INF/classes/VAADIN/widgetsets/WEB-INF/**
-					</packagingExcludes>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>com.vaadin</groupId>
 				<artifactId>vaadin-maven-plugin</artifactId>
-				<configuration>
-					<extraJvmArgs>-Xmx512M -Xss1024k</extraJvmArgs>
-					<webappDirectory>${basedir}/target/classes/VAADIN/widgetsets</webappDirectory>
-					<draftCompile>false</draftCompile>
-					<compileReport>false</compileReport>
-					<style>OBF</style>
-					<strict>true</strict>
-				</configuration>
 				<executions>
 					<execution>
-						<configuration>
-							<!-- if you don't specify any modules, the plugin will find them -->
-						</configuration>
 						<goals>
-							<goal>update-theme</goal>
-							<!-- Comment out compile-theme goal to use on-the-fly theme compilation -->
-							<goal>compile-theme</goal>
+							<!-- Production mode. The Rich Text Editor is not in Vaadin's prebuilt bundle, so build-frontend builds the bundle
+								(downloads Node to ~/.vaadin and the npm packages) and checks the commercial licence: it fails without a key -->
+							<goal>prepare-frontend</goal>
+							<goal>build-frontend</goal>
 						</goals>
 					</execution>
 				</executions>

@@ -8,12 +8,12 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.security.PermitAll;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import jakarta.annotation.security.PermitAll;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 import de.symeda.sormas.api.InfrastructureDataReferenceDto;
 import de.symeda.sormas.api.audit.AuditIgnore;

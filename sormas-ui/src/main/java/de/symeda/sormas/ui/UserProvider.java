@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.UI;
 
 import de.symeda.sormas.api.EditPermissionType;
 import de.symeda.sormas.api.FacadeProvider;
@@ -187,9 +187,9 @@ public class UserProvider {
 	 */
 	public static UserProvider getCurrent() {
 
-		UI currentUI = UI.getCurrent();
-		if (currentUI instanceof HasUserProvider) {
-			return ((HasUserProvider) currentUI).getUserProvider();
+		SormasUI currentUI = SormasUI.get();
+		if (currentUI != null) {
+			return currentUI.getUserProvider();
 		}
 		return null;
 	}

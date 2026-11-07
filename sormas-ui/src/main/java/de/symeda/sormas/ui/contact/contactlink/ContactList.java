@@ -2,8 +2,7 @@ package de.symeda.sormas.ui.contact.contactlink;
 
 import java.util.List;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.html.Span;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.contact.ContactListEntryDto;
@@ -20,12 +19,12 @@ public class ContactList extends PaginationList<ContactListEntryDto> {
 	private static final int MAX_DISPLAYED_ENTRIES = 5;
 
 	private final String personUuid;
-	private final Label noContactLabel;
+	private final Span noContactLabel;
 
 	public ContactList(PersonReferenceDto personReferenceDto) {
 		super(MAX_DISPLAYED_ENTRIES);
 		this.personUuid = personReferenceDto != null ? personReferenceDto.getUuid() : null;
-		noContactLabel = new Label(I18nProperties.getCaption(Captions.personNoContactLinkedToPerson));
+		noContactLabel = new Span(I18nProperties.getCaption(Captions.personNoContactLinkedToPerson));
 	}
 
 	@Override
@@ -36,9 +35,9 @@ public class ContactList extends PaginationList<ContactListEntryDto> {
 		if (!contactIndexDtoList.isEmpty()) {
 			showPage(1);
 		} else {
-			listLayout.removeAllComponents();
+			listLayout.removeAll();
 			updatePaginationLayout();
-			listLayout.addComponent(noContactLabel);
+			listLayout.add(noContactLabel);
 		}
 	}
 
@@ -55,11 +54,11 @@ public class ContactList extends PaginationList<ContactListEntryDto> {
 			if (UiUtil.permitted(UserRight.CONTACT_EDIT) && !isActiveContact) {
 				listEntry.addEditButton(
 					"edit-contact-" + i,
-					(Button.ClickListener) event -> ControllerProvider.getContactController()
+					event -> ControllerProvider.getContactController()
 						.navigateToData(listEntry.getContactListEntryDto().getUuid()));
 			}
 
-			listLayout.addComponent(listEntry);
+			listLayout.add(listEntry);
 		}
 	}
 }

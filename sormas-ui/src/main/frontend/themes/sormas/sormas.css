@@ -1246,6 +1246,14 @@ vaadin-custom-field.caption-inline::part(label) {
   text-align: left;
 }
 
+/* Vaadin 8 drew the caption outside the field, across its layout slot, and CssStyles.FLOAT_RIGHT put the field at the
+   slot's right end (campaign form Yes/No fields: 33% wide; drug susceptibility results). The Flow field holds its own
+   caption: it spans the slot, so the caption starts at the left and the options end at the right, as before. */
+vaadin-custom-field.caption-inline.float-right {
+  float: none;
+  width: 100% !important;
+}
+
 /* CssStyles.OPTIONGROUP_GRID_LAYOUT (optiongroup.scss): two options per row, each half the width */
 :is(vaadin-radio-group.grid-layout, vaadin-checkbox-group.grid-layout,
     vaadin-custom-field.grid-layout > :is(vaadin-radio-group, vaadin-checkbox-group)) > :is(vaadin-radio-button, vaadin-checkbox) {

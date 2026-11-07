@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.GridMultiSelectionModel;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
@@ -94,12 +95,13 @@ public class CaseVisitsView extends AbstractCaseView {
 
 			if (UiUtil.permitted(UserRight.VISIT_EXPORT)) {
 				Button exportButton = ButtonHelper.createIconButton(Captions.export, VaadinIcon.DOWNLOAD, null, CssStyles.BUTTON_PRIMARY);
+				final boolean exportFirst;
 				{
 					topLayout.add(exportButton);
 					topLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, exportButton);
-					if (topLayout.getComponentCount() == 1) {
-						topLayout.setFlexGrow(1, exportButton);
-					}
+					// was expand ratio 1 and Alignment.MIDDLE_RIGHT when it is the first component: its slot took the free width, the
+					// button kept its own width at the slot's right end (set on the download link below, which takes the button's place)
+					exportFirst = topLayout.getComponentCount() == 1;
 				}
 
 				DownloadHandler exportStreamResource = DownloadUtil.createCsvExportStreamResource(
@@ -130,7 +132,10 @@ public class CaseVisitsView extends AbstractCaseView {
 					ExportEntityName.CASE_VISITS,
 					null);
 
-				DownloadUtil.attachDownloader(exportButton, exportStreamResource);
+				Anchor exportLink = DownloadUtil.attachDownloader(exportButton, exportStreamResource);
+				if (exportFirst) {
+					exportLink.getElement().getStyle().set("margin-left", "auto");
+				}
 			}
 
 			if (UiUtil.permitted(UserRight.VISIT_CREATE, UserRight.CASE_EDIT)) {

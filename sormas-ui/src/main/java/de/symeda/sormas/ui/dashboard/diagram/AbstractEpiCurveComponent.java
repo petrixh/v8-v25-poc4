@@ -92,13 +92,14 @@ public abstract class AbstractEpiCurveComponent<P extends AbstractDashboardDataP
 		VaadinUiUtil.setDescription(this.infoIcon, I18nProperties.getDescription(description));
 		epiCurveLabel.setSizeUndefined();
 		CssStyles.style(epiCurveLabel, CssStyles.H2, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_NONE);
+		// Replace the original epiCurveLabel with the new one that includes the info icon
+		// in the header layout. Removed first: adding the label to the new layout moves it, and Flow's remove throws
+		// for a component that is no longer a child (Vaadin 8 removeComponent ignored it)
+		epiCurveHeaderLayout.remove(epiCurveLabel);
+		epiCurveHeaderLayout.remove(expandEpiCurveButton);
 		HorizontalLayout labelWithInfoLayout = new HorizontalLayout(epiCurveLabel, infoIcon);
 		labelWithInfoLayout.setPadding(false);
 		labelWithInfoLayout.setSpacing(false);
-		// Replace the original epiCurveLabel with the new one that includes the info icon
-		// in the header layout
-		epiCurveHeaderLayout.remove(epiCurveLabel);
-		epiCurveHeaderLayout.remove(expandEpiCurveButton);
 		epiCurveHeaderLayout.add(labelWithInfoLayout);
 		epiCurveHeaderLayout.setVerticalComponentAlignment(FlexComponent.Alignment.END, labelWithInfoLayout);
 		epiCurveHeaderLayout.setFlexGrow(1f, labelWithInfoLayout);

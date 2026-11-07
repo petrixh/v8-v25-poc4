@@ -15,6 +15,7 @@
 package de.symeda.sormas.ui.utils.fields;
 
 import java.time.LocalDate;
+import java.util.Calendar;
 import java.util.Date;
 
 import com.vaadin.flow.component.Component;
@@ -24,8 +25,9 @@ import de.symeda.sormas.api.utils.UtilDate;
 
 /**
  * Date field with a {@link java.util.Date} value on a Flow {@link DatePicker} (replaces {@code com.vaadin.v7.ui.DateField}
- * and, through {@link PopupDateField}, {@code PopupDateField}). The value is the start of the selected day in the server
- * time zone, like a V7 date field with day resolution.
+ * and, through {@link PopupDateField}, {@code PopupDateField}), with the V7 day-resolution semantics: a day picked or
+ * typed by the user replaces only the year, month and day of the current value and keeps its time of day; with no
+ * current value it is the start of the selected day. Server (JVM) time zone. See {@link #generateModelValue()}.
  */
 public class DateField extends CustomField<Date> {
 
@@ -59,10 +61,29 @@ public class DateField extends CustomField<Date> {
 		return datePicker;
 	}
 
+	/**
+	 * As Vaadin 7 ({@code com.vaadin.v7.ui.DateField.changeVariables} with {@code Resolution.DAY}, 8.14.3): the new value
+	 * is a calendar in the JVM time zone set to the current value, with only year, month and day replaced by the user's
+	 * day. The time of day of the current value (hours to milliseconds) is kept, e.g. a stored report date
+	 * {@code 2026-10-26 11:00:17.25} edited to the 24th becomes {@code 2026-10-24 11:00:17.25}. With no current value it
+	 * is the start of the day; an emptied picker gives {@code null}. Called only for user changes (see the constructor).
+	 */
 	@Override
 	protected Date generateModelValue() {
 		LocalDate date = datePicker.getValue();
-		return date != null ? UtilDate.from(date) : null;
+		if (date == null) {
+			return null;
+		}
+		Date current = getValue();
+		if (current == null) {
+			return UtilDate.from(date);
+		}
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(current);
+		calendar.set(Calendar.YEAR, date.getYear());
+		calendar.set(Calendar.MONTH, date.getMonthValue() - 1);
+		calendar.set(Calendar.DAY_OF_MONTH, date.getDayOfMonth());
+		return calendar.getTime();
 	}
 
 	@Override

@@ -67,6 +67,12 @@ public class GridColumnSizingTest {
 		a.setWidthUndefined();
 		assertTrue(a.isAutoWidth());
 		assertEquals(1, a.getFlexGrow());
+
+		// Flow API, as VaadinUiUtil.setupActionColumn uses it
+		a.setWidth("20px");
+		assertFalse(a.isAutoWidth());
+		assertEquals(0, a.getFlexGrow());
+		assertEquals(-1, a.getFixedWidth());
 	}
 
 	@Test
@@ -91,5 +97,16 @@ public class GridColumnSizingTest {
 		a.setHeaderPartName("odd");
 		assertEquals("odd", a.getHeaderPartName());
 		assertEquals("odd sormas-col-min-150 sormas-col-max-300", a.getElement().getProperty("headerPartName"));
+	}
+
+	@Test
+	public void testUndefinedHeightModeDropsTheHeight() {
+		Grid<String> grid = new Grid<>();
+		grid.setSizeFull();
+		grid.setHeightMode(HeightMode.UNDEFINED);
+
+		assertNull(grid.getHeight());
+		assertTrue(grid.isAllRowsVisible());
+		assertEquals("100%", grid.getWidth());
 	}
 }

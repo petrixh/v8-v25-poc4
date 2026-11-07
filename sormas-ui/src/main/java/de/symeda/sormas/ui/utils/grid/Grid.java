@@ -199,6 +199,8 @@ public class Grid<T> extends com.vaadin.flow.component.grid.Grid<T> {
 		this.heightMode = heightMode;
 		switch (heightMode) {
 		case UNDEFINED:
+			// Vaadin 8: the rows define the height, a height set before (setSizeFull) no longer counts
+			setHeight(null);
 			setAllRowsVisible(true);
 			break;
 		case ROW:
@@ -257,6 +259,8 @@ public class Grid<T> extends com.vaadin.flow.component.grid.Grid<T> {
 		private boolean flowSortUpdate;
 		/** Vaadin 8 {@code getWidth()}: a fixed width in pixels, -1 when the width comes from the content. */
 		private double fixedWidth = -1;
+		/** A fixed width is set ({@link #setWidth(double)} or a CSS width with {@link #setWidth(String)}). */
+		private boolean widthFixed;
 		/** Vaadin 8 {@code getExpandRatio()}: -1 until set. */
 		private int expandRatio = -1;
 		private double minimumWidth = -1;
@@ -485,15 +489,31 @@ public class Grid<T> extends com.vaadin.flow.component.grid.Grid<T> {
 		 * Vaadin 8 fixed width in pixels: the column does not grow and its content does not change its width.
 		 */
 		public Column<T, V> setWidth(double pixels) {
-			this.fixedWidth = pixels;
-			setAutoWidth(false);
 			setWidth(GridSupport.pixels(pixels));
+			this.fixedWidth = pixels;
+			return this;
+		}
+
+		/**
+		 * A fixed CSS width, as {@link #setWidth(double)}: the column's content no longer sizes it and it does not grow;
+		 * {@code null} goes back to the width from the content.
+		 */
+		@Override
+		public Column<T, V> setWidth(String width) {
+			if (width == null) {
+				return setWidthUndefined();
+			}
+			super.setWidth(width);
+			this.fixedWidth = -1;
+			this.widthFixed = true;
+			setAutoWidth(false);
 			GridSupport.updateFlexGrow(getGrid());
 			return this;
 		}
 
 		/**
-		 * Vaadin 8 {@code getWidth()}: the fixed width in pixels, -1 when the width comes from the content.
+		 * Vaadin 8 {@code getWidth()}: the fixed width in pixels, -1 when the width comes from the content (or is a CSS
+		 * width set with {@link #setWidth(String)}).
 		 */
 		public double getFixedWidth() {
 			return fixedWidth;
@@ -504,6 +524,7 @@ public class Grid<T> extends com.vaadin.flow.component.grid.Grid<T> {
 		 */
 		public Column<T, V> setWidthUndefined() {
 			this.fixedWidth = -1;
+			this.widthFixed = false;
 			setAutoWidth(true);
 			GridSupport.updateFlexGrow(getGrid());
 			return this;
@@ -533,7 +554,7 @@ public class Grid<T> extends com.vaadin.flow.component.grid.Grid<T> {
 		 */
 		void applyFlexGrow(boolean gridHasExpandRatio) {
 			int flexGrow;
-			if (fixedWidth >= 0) {
+			if (widthFixed) {
 				flexGrow = 0;
 			} else if (gridHasExpandRatio) {
 				flexGrow = Math.max(expandRatio, 0);

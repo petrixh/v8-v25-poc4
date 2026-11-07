@@ -152,7 +152,7 @@ public class MergeCasesFilterComponent extends VerticalLayout {
 		tfReportingUser.setPlaceholder(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.REPORTING_USER));
 		criteriaBinder.bind(tfReportingUser, CaseCriteria.REPORTING_USER_LIKE);
 		firstRowLayout.add(tfReportingUser);
-		firstRowLayout.setFlexGrow(1, tfReportingUser);
+		// was setExpandRatio(tfReportingUser, 1): the slot grew, the 200 px field kept its width
 
 		add(firstRowLayout);
 	}
@@ -327,6 +327,8 @@ public class MergeCasesFilterComponent extends VerticalLayout {
 		thirdRowLayout.add(relevanceStatusFilterLayout);
 		thirdRowLayout.setVerticalComponentAlignment(FlexComponent.Alignment.END, relevanceStatusFilterLayout);
 		thirdRowLayout.setFlexGrow(1, relevanceStatusFilterLayout);
+		// was Alignment.BOTTOM_RIGHT in an expanding slot: the layout grows, its content goes right
+		relevanceStatusFilterLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
 		add(thirdRowLayout);
 	}

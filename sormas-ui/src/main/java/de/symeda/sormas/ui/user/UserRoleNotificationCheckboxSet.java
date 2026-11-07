@@ -149,6 +149,9 @@ public class UserRoleNotificationCheckboxSet extends CustomField<UserRoleDto.Not
 
 		headerLayout.setFlexGrow(0.5, groupLabel);
 		headerLayout.setFlexGrow(0.5, buttonsLayout);
+		// Vaadin 8 expand ratios share out the whole width, not what the content leaves: halves, as before
+		groupLabel.getStyle().set("flex-basis", "0");
+		buttonsLayout.getStyle().set("flex-basis", "0");
 		headerLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, buttonsLayout);
 
 		return headerLayout;
@@ -241,6 +244,9 @@ public class UserRoleNotificationCheckboxSet extends CustomField<UserRoleDto.Not
 
 			add(rightComponent);
 			setFlexGrow(0.54, rightComponent);
+
+			// Vaadin 8 expand ratios share out the whole width (45% / 1% / 54%), not what the content leaves
+			getChildren().forEach(c -> c.getElement().getStyle().set("flex-basis", "0"));
 		}
 
 		public void checkAll() {

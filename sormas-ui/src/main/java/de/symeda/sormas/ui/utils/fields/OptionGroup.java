@@ -17,6 +17,7 @@ package de.symeda.sormas.ui.utils.fields;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import com.vaadin.flow.component.Component;
@@ -32,13 +33,15 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 
 	private static final long serialVersionUID = 1L;
 
-	private final SelectItems selectItems = new SelectItems(this::itemsChanged);
+	private final SelectItems selectItems = new SelectItems(this, this::itemsChanged);
 	private boolean multiSelect;
 	private RadioButtonGroup<Object> radioGroup;
 	private CheckboxGroup<Object> checkboxGroup;
 
 	public OptionGroup() {
 		super();
+		// the inner Flow group clears its selection when its items are refreshed; show the value again
+		selectItems.setOnRefresh(() -> setPresentationValue(getValue()));
 		createGroup();
 	}
 
@@ -154,6 +157,10 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 		return radioGroup.getValue();
 	}
 
+	/**
+	 * Shows the value in the inner group. An unchanged selection is not set again: Flow's {@code CheckboxGroup.setValue}
+	 * updates every check box (one client call each) even when the selection is equal.
+	 */
 	@Override
 	protected void setPresentationValue(Object value) {
 		if (multiSelect) {
@@ -164,10 +171,15 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 				selected.add(value);
 			}
 			selected.retainAll(selectItems.getItemIds());
-			checkboxGroup.setValue(selected);
+			if (!selected.equals(checkboxGroup.getValue())) {
+				checkboxGroup.setValue(selected);
+			}
 		} else if (radioGroup != null) {
 			Object single = value instanceof Collection ? ((Collection<?>) value).stream().findFirst().orElse(null) : value;
-			radioGroup.setValue(single != null && selectItems.contains(single) ? single : null);
+			Object shown = single != null && selectItems.contains(single) ? single : null;
+			if (!Objects.equals(shown, radioGroup.getValue())) {
+				radioGroup.setValue(shown);
+			}
 		}
 	}
 

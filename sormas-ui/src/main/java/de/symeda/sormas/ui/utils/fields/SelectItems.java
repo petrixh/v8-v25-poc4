@@ -20,18 +20,23 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.provider.ListDataProvider;
 
 import de.symeda.sormas.api.utils.HasCaption;
 
 /**
  * Item ids, captions and enabled state of a {@link SelectField}, backed by one {@link ListDataProvider}. After each
- * change the owner refreshes its component and keeps its value if the value is still an item (V7 behaviour).
+ * change the owner keeps its value if the value is still an item (V7 behaviour). The data provider refresh, which makes
+ * Flow reset the client side of the component, is done once per round trip ({@link UI#beforeClientResponse}) however
+ * many items were added, removed or re-captioned (V7 sent the container once per response too).
  */
 public class SelectItems implements Serializable {
 
@@ -41,11 +46,26 @@ public class SelectItems implements Serializable {
 	private final Map<Object, String> captions = new HashMap<>();
 	private final Set<Object> disabled = new HashSet<>();
 	private final ListDataProvider<Object> dataProvider = new ListDataProvider<>(itemIds);
+	private final Component owner;
 	private final Runnable onChange;
 	private boolean nullSelectionAllowed = true;
 	private Runnable onNullSelectionAllowedChange;
+	private Runnable onRefresh;
+	private boolean refreshAllPending;
+	private final Set<Object> refreshItemsPending = new LinkedHashSet<>();
+	private boolean refreshScheduled;
 
 	public SelectItems(Runnable onChange) {
+		this(null, onChange);
+	}
+
+	/**
+	 * @param owner
+	 *            the component showing the items; its data provider refreshes are coalesced once per round trip. Without
+	 *            an owner every change refreshes at once.
+	 */
+	public SelectItems(Component owner, Runnable onChange) {
+		this.owner = owner;
 		this.onChange = onChange;
 	}
 
@@ -114,7 +134,7 @@ public class SelectItems implements Serializable {
 	 */
 	public void sort(java.util.Comparator<Object> comparator) {
 		itemIds.sort(comparator);
-		dataProvider.refreshAll();
+		refreshAll();
 	}
 
 	public Collection<?> getItemIds() {
@@ -132,7 +152,7 @@ public class SelectItems implements Serializable {
 			captions.put(itemId, caption);
 		}
 		if (itemIds.contains(itemId)) {
-			dataProvider.refreshItem(itemId);
+			refreshItem(itemId);
 		}
 	}
 
@@ -162,7 +182,7 @@ public class SelectItems implements Serializable {
 			disabled.add(itemId);
 		}
 		if (itemIds.contains(itemId)) {
-			dataProvider.refreshItem(itemId);
+			refreshItem(itemId);
 		}
 	}
 
@@ -185,10 +205,67 @@ public class SelectItems implements Serializable {
 		this.onNullSelectionAllowedChange = onNullSelectionAllowedChange;
 	}
 
+	/**
+	 * Run after each full data provider refresh (Flow's radio button and check box groups clear their selection on it).
+	 */
+	public void setOnRefresh(Runnable onRefresh) {
+		this.onRefresh = onRefresh;
+	}
+
 	private void changed() {
-		dataProvider.refreshAll();
+		refreshAll();
 		if (onChange != null) {
 			onChange.run();
+		}
+	}
+
+	private void refreshAll() {
+		refreshAllPending = true;
+		refreshItemsPending.clear();
+		scheduleRefresh();
+	}
+
+	private void refreshItem(Object itemId) {
+		if (!refreshAllPending) {
+			refreshItemsPending.add(itemId);
+			scheduleRefresh();
+		}
+	}
+
+	/**
+	 * Runs the pending refresh before the next response. Flow keeps the task until the owner is attached, so a form
+	 * built while detached refreshes once when it is shown. Without an owner or a UI (e.g. unit tests outside a
+	 * request) it refreshes at once.
+	 */
+	private void scheduleRefresh() {
+		if (refreshScheduled) {
+			return;
+		}
+		UI ui = owner == null ? null : owner.getUI().orElseGet(UI::getCurrent);
+		if (ui == null) {
+			flushRefresh();
+			return;
+		}
+		refreshScheduled = true;
+		ui.beforeClientResponse(owner, context -> flushRefresh());
+	}
+
+	/**
+	 * Refreshes the data provider now if a change is pending (also called by the owner before it relies on the
+	 * component's item state).
+	 */
+	public void flushRefresh() {
+		refreshScheduled = false;
+		if (refreshAllPending) {
+			refreshAllPending = false;
+			dataProvider.refreshAll();
+			if (onRefresh != null) {
+				onRefresh.run();
+			}
+		} else if (!refreshItemsPending.isEmpty()) {
+			List<Object> items = new ArrayList<>(refreshItemsPending);
+			refreshItemsPending.clear();
+			items.forEach(dataProvider::refreshItem);
 		}
 	}
 }

@@ -81,8 +81,8 @@ These scripts follow the replay runner's env-script contract (`up.sh [--no-build
    - unless `APP_ENV_DEPLOY=0`: `mvn clean install -Dmaven.test.skip=true` (the tests are neither compiled nor run;
      CI does both) with Maven 3.9 on JDK 21 in a container (`maven:3.9-eclipse-temurin-21`), default profiles, and
      collects the ear and the two wars. The production frontend build of `sormas-ui` checks the Vaadin commercial
-     licence (Rich Text Editor): `build.sh` passes `VAADIN_PRO_KEY` or `VAADIN_OFFLINE_KEY` to the container by name
-     when set, else mounts `~/.vaadin/proKey` read-only. Without a key the build fails.
+     licence (Rich Text Editor): `build.sh` passes `VAADIN_PRO_KEY` to the container by name
+     when set, else mounts `~/.vaadin/proKey` read-only. Without a key the build fails. This is the local and release build: a real key, no banner. CI builds with `-Dvaadin.commercialWithBanner` instead (see `CI.md`); a banner-built artefact must never be shipped or deployed outside CI.
    - A lock makes a second build wait for the first. Log: `env/.state/build/build.log`.
 3. Generates a throwaway database password for this copy (`env/.state/copies/<project>/db.env`, mode 600; never in an
    image or a tracked file) and writes the copy's `sormas.properties` (`env/.state/copies/<project>/sormas.properties`,

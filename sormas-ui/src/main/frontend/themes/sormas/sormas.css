@@ -966,10 +966,15 @@ vaadin-custom-field:is(.horizontal, .checkboxes-horizontal) > :is(vaadin-radio-g
 /* CssStyles.OPTIONGROUP_CAPTION_INLINE (optiongroup.scss .v-caption-caption-inline; set on every Yes/No/Unknown and symptom
    field by SormasFieldGroupFieldFactory): the caption on the left in the options' row, not upper case, 12px; the options at
    the right end of the field. Vaadin 8 floated the caption; here the options come first and the caption is moved up into
-   their row (35px: the Lumo group's height), so a caption that wraps makes the field taller as the float did. The caption
-   keeps clear of the options (Vaadin 8: 160px for the narrower Valo buttons; three Lumo options take up to about 205px). */
+   their row (35px: the Lumo group's height) and is at least that high, so the field is as high as the options or, when
+   the caption wraps, as the caption, as with the float. The caption keeps clear of the options (Vaadin 8: 160px for the
+   narrower Valo buttons; three Lumo options take up to about 205px). No caption row above the field. */
 vaadin-custom-field.caption-inline {
   padding-top: 0;
+}
+
+vaadin-custom-field.caption-inline::before {
+  margin-top: 0;
 }
 
 vaadin-custom-field.caption-inline::part(input-fields) {
@@ -979,6 +984,8 @@ vaadin-custom-field.caption-inline::part(input-fields) {
 }
 
 vaadin-custom-field.caption-inline::part(label) {
+  box-sizing: border-box;
+  min-height: 35px;
   margin: -35px 210px 0 0;
   padding: 8px 0 0 0;
   font-size: 12px;

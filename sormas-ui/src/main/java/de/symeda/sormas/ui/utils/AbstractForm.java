@@ -891,7 +891,10 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 				return;
 			}
 			HasValidation hasValidation = (HasValidation) field;
-			boolean show = status.isError() && field.isValidationVisible() && !(field.isRequired() && field.isEmpty());
+			// an empty required field is not marked, but unparsable input (which empties the value) is, as in Vaadin 7
+			boolean show = status.isError()
+				&& field.isValidationVisible()
+				&& (field.getUnparsableInputError() != null || !(field.isRequired() && field.isEmpty()));
 			hasValidation.setErrorMessage(show ? status.getMessage().orElse(null) : null);
 			hasValidation.setInvalid(show);
 		}

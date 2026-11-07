@@ -32,6 +32,8 @@ import com.vaadin.flow.router.Location;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
+import com.vaadin.flow.server.ErrorEvent;
+import com.vaadin.flow.server.ErrorHandler;
 import com.vaadin.flow.server.VaadinSession;
 /**
  * Session-scope route shim with the API of the Vaadin 8 {@code com.vaadin.navigator.Navigator} that SORMAS uses.
@@ -331,7 +333,19 @@ public class Navigator implements Serializable {
 
 		ViewChangeListener.ViewChangeEvent changeEvent =
 			new ViewChangeListener.ViewChangeEvent(this, oldView, newView, viewNameAndParameters[0], viewNameAndParameters[1]);
-		newView.enter(changeEvent);
+		try {
+			newView.enter(changeEvent);
+		} catch (RuntimeException e) {
+			// Vaadin 8: an exception in enter() reached the session error handler (log, generic error notification);
+			// the view stayed shown as far as it was built and the after-view-change listeners did not run. Flow
+			// would instead replace the page with its default error view showing the exception text.
+			ErrorHandler errorHandler = VaadinSession.getCurrent() != null ? VaadinSession.getCurrent().getErrorHandler() : null;
+			if (errorHandler == null) {
+				throw e;
+			}
+			errorHandler.error(new ErrorEvent(e));
+			return;
+		}
 		for (ViewChangeListener listener : new ArrayList<>(listeners)) {
 			listener.afterViewChange(changeEvent);
 		}

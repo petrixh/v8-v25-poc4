@@ -1390,3 +1390,14 @@ vaadin-grid-cell-content div.v-button.v-button-warning {
   background-color: #F4F4F4;
   color: #BBBBBB;
 }
+
+/* Geographical analysis dashboard: the filter and the legend rows (section 12) lie over the map, the filter row's left
+   padding over the zoom buttons. Only the rows' own buttons take the pointer, so the zoom buttons and the map under the
+   rows stay usable, as the Leaflet controls lay above these rows in Vaadin 8 */
+:is(.gis-dashboard-map-header, .gis-dashboard-map-footer) {
+  pointer-events: none;
+}
+
+:is(.gis-dashboard-map-header, .gis-dashboard-map-footer) > * {
+  pointer-events: auto;
+}

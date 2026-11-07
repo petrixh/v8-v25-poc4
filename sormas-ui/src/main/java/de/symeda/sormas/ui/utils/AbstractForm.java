@@ -1,7 +1,11 @@
 package de.symeda.sormas.ui.utils;
 
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -738,16 +742,12 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 		 * @return the type of the bean property (primitive types as their wrapper type)
 		 */
 		public Class<?> getPropertyType(Object propertyId) {
-			return wrapperType(getDeclaredPropertyType(propertyId));
-		}
-
-		private Class<?> getDeclaredPropertyType(Object propertyId) {
 			if (propertyId == null) {
 				throw new IllegalArgumentException("Property id must not be null");
 			}
 			PropertyDefinition<T, ?> property = propertySet.getProperty(propertyId.toString())
 				.orElseThrow(() -> new IllegalArgumentException("Property " + propertyId + " not found in " + beanType.getName()));
-			return property.getType();
+			return wrapperType(property.getType());
 		}
 
 		/**
@@ -756,7 +756,38 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 		 * factory makes a check box for a primitive {@code boolean} and a Yes/No option group for a {@code Boolean}.
 		 */
 		private Class<?> getFieldFactoryType(Object propertyId) {
-			return bean != null ? getPropertyType(propertyId) : getDeclaredPropertyType(propertyId);
+			Class<?> propertyType = getPropertyType(propertyId);
+			if (bean != null || !isWrapperType(propertyType)) {
+				return propertyType;
+			}
+			// the Flow property set reports primitives as wrapper types: read the declared type from the bean class
+			try {
+				Class<?> declaredType = beanType;
+				for (String name : propertyId.toString().split("\\.")) {
+					PropertyDescriptor descriptor = Arrays.stream(Introspector.getBeanInfo(declaredType).getPropertyDescriptors())
+						.filter(d -> d.getName().equals(name))
+						.findFirst()
+						.orElse(null);
+					if (descriptor == null || descriptor.getPropertyType() == null) {
+						return propertyType;
+					}
+					declaredType = descriptor.getPropertyType();
+				}
+				return declaredType;
+			} catch (IntrospectionException e) {
+				return propertyType;
+			}
+		}
+
+		private static boolean isWrapperType(Class<?> type) {
+			return type == Boolean.class
+				|| type == Integer.class
+				|| type == Long.class
+				|| type == Double.class
+				|| type == Float.class
+				|| type == Short.class
+				|| type == Byte.class
+				|| type == Character.class;
 		}
 
 		private static Class<?> wrapperType(Class<?> type) {

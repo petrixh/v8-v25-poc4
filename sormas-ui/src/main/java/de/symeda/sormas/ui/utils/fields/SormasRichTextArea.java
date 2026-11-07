@@ -31,8 +31,9 @@ import com.vaadin.flow.component.richtexteditor.RichTextEditor;
  * <p>
  * The editor is wrapped in a {@link CustomField} because the Flow editor has no label, required indicator or error
  * message: the custom field shows the caption, the required indicator and validation errors like the other SORMAS
- * fields. The value is the editor's HTML value ({@link RichTextEditor#asHtml()}); an empty field has the value
- * {@code ""}.
+ * fields. The value is the editor's HTML value ({@link RichTextEditor#asHtml()}); a new field has the value {@code ""}.
+ * As in V7, the value can be {@code null} (shown empty): an untouched field read from a {@code null} property stays
+ * {@code null}, see {@link Field#getNullRepresentation()}.
  * <p>
  * Sanitising: the editor cleans the HTML it shows and the HTML the user's edits produce (Vaadin's safelist: basic
  * formatting, lists, links, images, headings h1-h3, inline styles; scripts and event attributes are removed). A value set
@@ -50,7 +51,8 @@ public class SormasRichTextArea extends CustomField<String> {
 		editor.setWidthFull();
 		editor.addValueChangeListener(event -> {
 			if (event.isFromClient()) {
-				updateValue();
+				// V7 RichTextArea.changeVariables: an empty edit keeps a null value null
+				setModelValue(AbstractTextField.valueFromClient(this, generateModelValue(), getValue() == null), true);
 			}
 		});
 	}

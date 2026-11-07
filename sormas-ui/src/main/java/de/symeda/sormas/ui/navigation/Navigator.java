@@ -27,6 +27,7 @@ import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.BeforeLeaveEvent;
 import com.vaadin.flow.router.Location;
 import com.vaadin.flow.router.QueryParameters;
@@ -54,6 +55,9 @@ import com.vaadin.flow.server.VaadinSession;
  * {@link ViewChangeListener#afterViewChange(ViewChangeListener.ViewChangeEvent)}. Every navigation gets a new view
  * instance, also to the current view class or the current state ({@code SormasUI.refreshView()}), as with Vaadin 8's
  * class-based view registration. {@link MainLayout} forwards the Flow navigation events here.
+ * <p>
+ * <b>Errors</b> go to the session error handler, as in Vaadin 8: from {@code enter()} and the after-view-change
+ * listeners directly (the view stays shown), from all earlier stages through {@link NavigationExceptionView}.
  */
 public class Navigator implements Serializable {
 
@@ -257,7 +261,7 @@ public class Navigator implements Serializable {
 
 	void beforeLeave(BeforeLeaveEvent event) {
 
-		if (currentView == null || internalRefresh) {
+		if (currentView == null || internalRefresh || isExceptionNavigation(event)) {
 			return;
 		}
 		LeaveAction leaveAction = new LeaveAction(event);
@@ -267,7 +271,7 @@ public class Navigator implements Serializable {
 
 	void beforeEnter(BeforeEnterEvent event) {
 
-		if (internalRefresh) {
+		if (internalRefresh || isExceptionNavigation(event)) {
 			return;
 		}
 
@@ -310,6 +314,15 @@ public class Navigator implements Serializable {
 		}
 		View newView = (View) target;
 
+		if (newView instanceof NavigationExceptionView) {
+			// the navigation failed (NavigationExceptionView has reported it); as in Vaadin 8, no enter() and no
+			// after-view-change listeners. The error view is now what the user sees, so it is the current view.
+			internalRefresh = false;
+			currentView = newView;
+			state = toState(toViewNameAndParameters(event.getLocation(), event.getRouteParameters()));
+			return;
+		}
+
 		if (internalRefresh) {
 			internalRefresh = false;
 		} else if (newView == currentView) {
@@ -329,26 +342,51 @@ public class Navigator implements Serializable {
 		String[] viewNameAndParameters = toViewNameAndParameters(event.getLocation(), event.getRouteParameters());
 		View oldView = currentView;
 		currentView = newView;
-		state = viewNameAndParameters[1].isEmpty() ? viewNameAndParameters[0] : viewNameAndParameters[0] + "/" + viewNameAndParameters[1];
+		state = toState(viewNameAndParameters);
 
 		ViewChangeListener.ViewChangeEvent changeEvent =
 			new ViewChangeListener.ViewChangeEvent(this, oldView, newView, viewNameAndParameters[0], viewNameAndParameters[1]);
 		try {
 			newView.enter(changeEvent);
-		} catch (RuntimeException e) {
-			// Vaadin 8: an exception in enter() reached the session error handler (log, generic error notification);
-			// the view stayed shown as far as it was built and the after-view-change listeners did not run. Flow
-			// would instead replace the page with its default error view showing the exception text.
-			ErrorHandler errorHandler = VaadinSession.getCurrent() != null ? VaadinSession.getCurrent().getErrorHandler() : null;
-			if (errorHandler == null) {
+			for (ViewChangeListener listener : new ArrayList<>(listeners)) {
+				listener.afterViewChange(changeEvent);
+			}
+		} catch (Throwable e) {
+			// Vaadin 8: anything thrown by enter() or an after-view-change listener reached the session error handler
+			// (log, generic error notification); the view stayed shown as far as it was built and the remaining
+			// listeners did not run. Flow would instead replace the view with an error view (NavigationExceptionView).
+			if (!toSessionErrorHandler(e)) {
 				throw e;
 			}
-			errorHandler.error(new ErrorEvent(e));
-			return;
 		}
-		for (ViewChangeListener listener : new ArrayList<>(listeners)) {
-			listener.afterViewChange(changeEvent);
+	}
+
+	private static String toState(String[] viewNameAndParameters) {
+		return viewNameAndParameters[1].isEmpty() ? viewNameAndParameters[0] : viewNameAndParameters[0] + "/" + viewNameAndParameters[1];
+	}
+
+	/**
+	 * @return whether this is Flow's navigation to {@link NavigationExceptionView} after an exception in the navigation
+	 *         (view constructor, before-leave or before-view-change): the views and listeners are not asked again
+	 */
+	private static boolean isExceptionNavigation(BeforeEvent event) {
+		return NavigationExceptionView.class.equals(event.getNavigationTarget());
+	}
+
+	/**
+	 * Hands an error to the session error handler ({@code SormasErrorHandler}: log, generic error notification), where
+	 * Vaadin 8 sent every exception of a request.
+	 *
+	 * @return {@code false} when there is no session or handler
+	 */
+	static boolean toSessionErrorHandler(Throwable throwable) {
+		VaadinSession session = VaadinSession.getCurrent();
+		ErrorHandler errorHandler = session != null ? session.getErrorHandler() : null;
+		if (errorHandler == null) {
+			return false;
 		}
+		errorHandler.error(new ErrorEvent(throwable));
+		return true;
 	}
 
 	/**

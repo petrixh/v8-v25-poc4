@@ -76,4 +76,10 @@ public class CasePersonView extends AbstractCaseView implements PersonSideCompon
 	protected boolean isEditAllowed() {
 		return FacadeProvider.getPersonFacade().isEditAllowed(person.getUuid());
 	}
+
+	@Override
+	public boolean isScrollPositionKeptOnRefresh() {
+		// as in Vaadin 8: after Save the person form is shown again from the top
+		return false;
+	}
 }

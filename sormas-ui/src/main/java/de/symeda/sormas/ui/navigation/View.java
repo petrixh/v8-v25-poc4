@@ -44,6 +44,15 @@ public interface View extends Serializable {
 		event.navigate();
 	}
 
+	/**
+	 * Whether the view container keeps its scroll position when this view is shown again for the current state
+	 * ({@code SormasUI.refreshView()}, e.g. after Save), as it did in Vaadin 8. {@code false}: the view is shown from the
+	 * top, as Vaadin 8 did for the person forms.
+	 */
+	default boolean isScrollPositionKeptOnRefresh() {
+		return true;
+	}
+
 	default Component getViewComponent() {
 		return (Component) this;
 	}

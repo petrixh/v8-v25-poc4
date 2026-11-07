@@ -82,6 +82,8 @@ public class Navigator implements Serializable {
 	private boolean inBeforeEnter;
 	private String forwardState;
 	private boolean internalRefresh;
+	// the location of a refresh of the current state (navigateTo(getState())) that is under way
+	private Location refreshLocation;
 
 	/**
 	 * @param ui
@@ -92,6 +94,13 @@ public class Navigator implements Serializable {
 	public Navigator(UI ui, Component display) {
 		this.ui = ui;
 		this.display = display;
+
+		// Vaadin 8 kept the scroll position of the view container when the current view was shown again (refreshView()
+		// after Save): the container stayed and the browser kept its scroll offset. Flow empties the container before it
+		// adds the new view, which scrolls it to the top. The container remembers its offset here, and a refresh of the
+		// current state puts it back (afterNavigation).
+		display.getElement()
+			.executeJs("this.addEventListener('scroll', () => { this.$sormasScrollTop = this.scrollTop; }, { passive: true });");
 
 		// Vaadin 8 had one Navigator per UI, filled when the UI was created. Session-scope routes outlive a UI, so a new UI
 		// of the session starts from an empty registration and registers again with the user's current rights.
@@ -155,6 +164,7 @@ public class Navigator implements Serializable {
 
 		Location location = toLocation(target);
 		if (currentView != null && location.getPathWithQueryParameters().equals(toLocation(state).getPathWithQueryParameters())) {
+			refreshLocation = location;
 			ui.refreshCurrentRoute(false);
 		} else {
 			ui.navigate(location.getPath(), location.getQueryParameters());
@@ -309,6 +319,9 @@ public class Navigator implements Serializable {
 
 		List<HasElement> chain = event.getActiveChain();
 		HasElement target = chain.isEmpty() ? null : chain.get(0);
+		boolean keepScrollPosition = refreshLocation != null
+			&& refreshLocation.getPathWithQueryParameters().equals(event.getLocation().getPathWithQueryParameters());
+		refreshLocation = null;
 		if (!(target instanceof View)) {
 			return;
 		}
@@ -339,6 +352,10 @@ public class Navigator implements Serializable {
 			return;
 		}
 
+		if (keepScrollPosition) {
+			restoreScrollPosition(newView.isScrollPositionKeptOnRefresh());
+		}
+
 		String[] viewNameAndParameters = toViewNameAndParameters(event.getLocation(), event.getRouteParameters());
 		View oldView = currentView;
 		currentView = newView;
@@ -359,6 +376,22 @@ public class Navigator implements Serializable {
 				throw e;
 			}
 		}
+	}
+
+	/**
+	 * After the current view was shown again: puts the view container back to the scroll offset it had before, once
+	 * the new view is in the page and once more in the next frame (for parts of the view that get their height a little
+	 * later); or shows the view from the top when the view asks for that.
+	 */
+	private void restoreScrollPosition(boolean keep) {
+		if (!keep) {
+			display.getElement().executeJs("this.scrollTop = 0;");
+			return;
+		}
+		display.getElement()
+			.executeJs(
+				"const top = this.$sormasScrollTop; if (!top) { return; } this.scrollTop = top;"
+					+ " requestAnimationFrame(() => { if (this.scrollTop < top) { this.scrollTop = top; } });");
 	}
 
 	private static String toState(String[] viewNameAndParameters) {

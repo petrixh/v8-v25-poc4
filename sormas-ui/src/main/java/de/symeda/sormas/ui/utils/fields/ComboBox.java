@@ -38,7 +38,7 @@ public class ComboBox extends com.vaadin.flow.component.combobox.ComboBox<Object
 		void addNewItem(String newItemCaption);
 	}
 
-	private final SelectItems selectItems = new SelectItems(this, this::itemsChanged);
+	private final SelectItems selectItems = new SelectItems(this, this::itemsRemoved);
 	private FilteringMode filteringMode = FilteringMode.STARTSWITH;
 	private NewItemHandler newItemHandler;
 
@@ -62,6 +62,13 @@ public class ComboBox extends com.vaadin.flow.component.combobox.ComboBox<Object
 		setItemLabelGenerator(selectItems::getCaption);
 		setClearButtonVisible(selectItems.isNullSelectionAllowed());
 		selectItems.setOnNullSelectionAllowedChange(() -> setClearButtonVisible(selectItems.isNullSelectionAllowed()));
+		// V7 showed the value with its current item caption; Flow sends the caption only when the value is set, so a
+		// caption set afterwards (or an item added after the value) would not show
+		selectItems.setOnRefresh(() -> {
+			if (getValue() != null) {
+				refreshValue();
+			}
+		});
 		addCustomValueSetListener(e -> {
 			if (!isNewItemsAllowed()) {
 				return;
@@ -116,11 +123,12 @@ public class ComboBox extends com.vaadin.flow.component.combobox.ComboBox<Object
 	}
 
 	/**
-	 * V7: removing the selected item clears the value.
+	 * V7: removing the selected item, or all items, clears the value. Adding items or removing other items keeps it, also
+	 * when it is not an item (yet).
 	 */
-	protected void itemsChanged() {
+	protected void itemsRemoved(java.util.function.Predicate<Object> wasRemoved) {
 		Object value = getValue();
-		if (value != null && !selectItems.contains(value)) {
+		if (value != null && wasRemoved.test(value)) {
 			clear();
 		}
 	}

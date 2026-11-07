@@ -24,6 +24,7 @@ import com.vaadin.flow.component.shared.Tooltip;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 public class DashboardHeadingComponent extends HorizontalLayout {
 
@@ -69,7 +70,7 @@ public class DashboardHeadingComponent extends HorizontalLayout {
 	}
 
 	public void setTotalLabelDescription(String description) {
-		totalLabel.setTitle(I18nProperties.getDescription(description));
+		VaadinUiUtil.setDescription(totalLabel, I18nProperties.getDescription(description));
 	}
 
 	public Span getTitleLabel() {

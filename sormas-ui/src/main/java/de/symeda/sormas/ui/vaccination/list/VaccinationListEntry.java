@@ -87,7 +87,7 @@ public class VaccinationListEntry extends SideComponentField {
 
 		if (!vaccination.isRelevant()) {
 			Span vaccinationNotRelevantInfo = VaadinUiUtil.createLabel(HtmlRenderer.iconHtml(VaadinIcon.INFO_CIRCLE), ContentMode.HTML);
-			vaccinationNotRelevantInfo.setTitle(vaccination.getNonRelevantMessage());
+			VaadinUiUtil.setDescription(vaccinationNotRelevantInfo, vaccination.getNonRelevantMessage());
 			vaccineNameAndInfoLayout.add(vaccinationNotRelevantInfo);
 			vaccineNameAndInfoLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, vaccinationNotRelevantInfo);
 		}

@@ -56,13 +56,19 @@ public class NullableOptionGroup extends OptionGroup {
 		setup();
 	}
 
+	/**
+	 * The converter is switched before the select mode: switching the mode converts the value (set ↔ single item) and
+	 * a bound field converts every new value at once (Flow {@code Binder}; V7 did so only on commit), so the converter
+	 * must already fit the new value type.
+	 */
 	private void setup() {
-		super.setMultiSelect(!isRequired());
 		if (isRequired()) {
 			setConverter(null);
 		} else {
-			setConverter(new NullableOptionGroupConverter(getValue() instanceof Set ? getFirstValue((Set) getValue()) : null));
+			Object value = getValue();
+			setConverter(new NullableOptionGroupConverter(value instanceof Set ? getFirstValue((Set) value) : value));
 		}
+		super.setMultiSelect(!isRequired());
 		addStyleName("multiline");
 	}
 

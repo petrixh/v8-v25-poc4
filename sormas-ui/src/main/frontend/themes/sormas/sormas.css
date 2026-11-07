@@ -1009,4 +1009,179 @@ vaadin-dialog::part(header-content) {
 
 vaadin-dialog::part(backdrop) {
   background-color: rgba(34, 34, 34, 0.8);
+
+ * 11. Dashboards, login, statistics (views/dashboard.scss, components/countelement.scss, components/svg.scss,
+ *     views/login.scss, views/statistics.scss). Class names as the Flow code sets them (DashboardCssStyles, CssStyles).
+ * ------------------------------------------------------------------------------------------------------------- */
+
+/* Dashboards: section backgrounds (dashboard.scss) */
+.curve-and-map-layout { background-color: var(--sormas-focus-color); }
+.highlighted-statistics-component { background-color: var(--sormas-focus-light-color); padding-top: 16px; }
+.statistics-sublayout { background-color: var(--sormas-focus-light-color); }
+.background-highlight { background-color: #EDF2FD; }
+.background-critical { background-color: #DE5555; }
+.dashboard-screen { overflow-x: hidden; }
+.dashboard-screen .heading-title-label { margin-top: 12px; }
+.cfr-info-button { margin-top: -3px; }
+.follow-up-status-info-button { margin-top: 10px; }
+.statistics-info-label { margin-top: 10px; }
+hr { margin-top: 0; margin-bottom: 0; }
+
+.dashboard-key {
+  text-align: center;
+  padding: 7px;
+  color: #191919;
+  font-weight: 500;
+  border-radius: 4px;
+  border: 1px solid #c5c5c5;
+  border-bottom-color: #bcbcbc;
+  background-color: #fafafa;
+}
+
+/* Dashboards: Vaadin 8 labels and layouts of undefined width did not wrap (Valo .v-label-undef-w and
+   .v-horizontallayout: white-space nowrap); the Flow spans of the dashboard rows and counters keep that */
+.dashboard-screen vaadin-horizontal-layout > span,
+.dashboard-screen .count-element > span {
+  white-space: nowrap;
+}
+
+/* Info icons next to dashboard headings: the size of the heading's text, as the Vaadin 8 icon font */
+.dashboard-screen span > vaadin-icon { width: 1em; height: 1em; }
+/* an info icon next to a heading moved up with vspace-top-5 sits on the heading's line (Vaadin 8 slot alignment) */
+.dashboard-screen span.vspace-top-5 + span.h3:has(> vaadin-icon) { margin-top: 2px; }
+
+/* Count elements: the count over a 4px line in the element's colour (countelement.scss) */
+.count-element > :first-child { border-bottom: 4px solid; align-self: stretch !important; text-align: center; }
+.count-element.important > * { border-color: var(--sormas-important-color); }
+.count-element.critical > * { border-color: var(--sormas-critical-color); }
+.count-element.critical-transparent > * { border-color: var(--sormas-critical-transparent-color); }
+.count-element.critical-more-transparent > * { border-color: rgba(200, 0, 0, 0.5); }
+.count-element.relevant > * { border-color: var(--sormas-relevant-color); }
+.count-element.neutral > * { border-color: var(--sormas-neutral-color); }
+.count-element.positive > * { border-color: var(--sormas-positive-color); }
+.count-element.minor > * { border-color: var(--sormas-minor-color); }
+.count-element.primary > * { border-color: var(--sormas-primary-color); }
+
+/* SVG bars and circles of the statistics elements (svg.scss). SvgBarElement is a span set 4px high around an inline svg:
+   the svg overflowed it onto the next row (labels looked struck through). As the Vaadin 8 label in its slot, the span
+   takes one text line and the bar sits on its baseline, 10px below the row above */
+span:has(> svg > rect.svg-bar) { height: auto !important; }
+.svg-circle { fill: none; stroke-width: 3; }
+.svg-fill-primary { fill: var(--sormas-primary-color); }
+.svg-fill-critical { fill: var(--sormas-critical-color); }
+.svg-fill-important { fill: var(--sormas-important-color); }
+.svg-fill-positive { fill: var(--sormas-positive-color); }
+.svg-fill-minor { fill: var(--sormas-minor-color); }
+.svg-fill-neutral { fill: var(--sormas-neutral-color); }
+.svg-fill-background { fill: #E6E6E6; }
+.svg-stroke-primary { stroke: var(--sormas-primary-color); }
+.svg-stroke-critical { stroke: var(--sormas-critical-color); }
+.svg-stroke-important { stroke: var(--sormas-important-color); }
+.svg-stroke-positive { stroke: var(--sormas-positive-color); }
+.svg-stroke-minor { stroke: var(--sormas-minor-color); }
+.svg-stroke-background { stroke: #E6E6E6; }
+
+/* Samples dashboard tiles (dashboard.scss) */
+.background-external-lab-samples { background-color: #3E489B; fill: #3E489B; }
+.background-internal-lab-samples { background-color: #7565B8; fill: #7565B8; }
+.background-specimen-condition-adequate { background-color: #5a95f4; fill: #5a95f4; }
+.background-specimen-condition-adequate.background-darker { background-color: #3b7fed; fill: #3b7fed; }
+.background-specimen-condition-inadequate { background-color: #FEBA01; fill: #FEBA01; }
+.background-specimen-condition-inadequate.background-darker { background-color: #E5A701; fill: #E5A701; }
+.background-specimen-condition-not-specified { background-color: #8C45AD; fill: #8C45AD; }
+.background-specimen-condition-not-specified.background-darker { background-color: #7E3E9C; fill: #7E3E9C; }
+.background-shipment-status-shipped { background-color: #44BEC7; fill: #44BEC7; }
+.background-shipment-status-shipped.background-darker { background-color: #3DABB3; fill: #3DABB3; }
+.background-shipment-status-not-shipped { background-color: #ef5a6c; fill: #ef5a6c; }
+.background-shipment-status-not-shipped.background-darker { background-color: #e04a5b; fill: #e04a5b; }
+.background-shipment-status-received { background-color: #E2D320; fill: #E2D320; }
+.background-shipment-status-received.background-darker { background-color: #CBBE1D; fill: #CBBE1D; }
+
+/* Map overlay (dashboard.scss) */
+.map-container { position: relative; }
+.map-component { z-index: 1; }
+.map-overlay, .map-overlay-background { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.map-overlay-background { background-color: #222; opacity: 0.6; z-index: 2; }
+.map-overlay { z-index: 3; }
+
+/* Statistics: captioned frames, the caption on the frame's top line (statistics.scss .title, .title-box) */
+span.title {
+  margin-left: 10px;
+  position: relative;
+  background: var(--sormas-background-color);
+  padding-left: 10px;
+  padding-right: 10px;
+  color: var(--sormas-secondary-color);
+  font-weight: 600;
+  font-size: 1.25em;
+  text-align: center;
+}
+.title-box {
+  padding: 12px;
+  border: 1px solid var(--sormas-primary-color);
+  margin-top: -28px;
+  box-sizing: border-box;
+}
+
+/* Login (login.scss): world map under a blue curtain, the login box centred, the side bar at the right */
+.login-screen-back {
+  background: #FFFFFF url(img/world.png) center / cover;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 460px;
+}
+.login-screen {
+  background-color: rgba(27, 84, 154, 0.9);
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+}
+.login-screen .login-form-container {
+  height: 100%;
+  width: auto;
+  display: flex;
+  flex: 1 1 auto;
+  overflow: visible;
+  text-align: center;
+  position: relative;
+}
+.login-screen .login-form {
+  width: auto !important;
+  background: #FFFFFF;
+  border-radius: 4px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.05);
+  text-align: left;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: 0;
+  transform: translate(-50%, -50%);
+}
+.login-screen .login-sidebar {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  background: #FFFFFF;
+  height: 100%;
+  overflow: auto;
+  padding: var(--sormas-layout-margin);
+  padding-right: 0;
+  box-sizing: border-box;
+}
+.login-screen .login-sidebar .headline-label {
+  background-color: rgba(0, 90, 156, 0.7);
+  color: #FFF;
+  padding: 10px;
+}
+.login-screen .login-sidebar .login-sidebar-custom-header { flex-grow: 1; min-width: 350px; }
+
+/* narrow windows: the parts one below the other (login.scss, width range 0-960px) */
+@media (max-width: 960px) {
+  .login-screen-back, .login-screen { height: auto; }
+  .login-screen { display: block; }
+  .login-screen .login-sidebar { display: block; width: 100%; height: auto; text-align: center; padding-right: var(--sormas-layout-margin); }
+  .login-screen .login-form-container { display: block; width: 100%; height: auto; padding: 30px 0; }
+  .login-screen .login-form { position: static; transform: none; max-width: 100%; display: inline-block; }
 }

@@ -315,7 +315,9 @@ public class CaseContactsView extends AbstractCaseView {
 				statusFilterLayout.add(importButton);
 				statusFilterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, importButton);
 				if (!UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS)) {
-					statusFilterLayout.setFlexGrow(1, importButton);
+					// was expand ratio 1 and Alignment.MIDDLE_RIGHT: its slot took a share of the free width, the button kept its
+					// own width at the slot's right end
+					importButton.getElement().getStyle().set("margin-left", "auto");
 				}
 			}
 
@@ -331,7 +333,9 @@ public class CaseContactsView extends AbstractCaseView {
 				statusFilterLayout.add(exportButton);
 				statusFilterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, exportButton);
 				if (!UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS)) {
-					statusFilterLayout.setFlexGrow(1, exportButton);
+					// was expand ratio 1 and Alignment.MIDDLE_RIGHT: its slot took a share of the free width, the button kept its
+					// own width at the slot's right end
+					exportButton.getElement().getStyle().set("margin-left", "auto");
 				}
 				DownloadHandler streamResource = GridExportStreamResource.createStreamResourceWithSelectedItems(
 					grid,

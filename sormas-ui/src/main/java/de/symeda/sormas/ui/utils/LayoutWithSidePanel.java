@@ -51,6 +51,9 @@ public class LayoutWithSidePanel extends HorizontalLayout {
 
 		sidePanel = new VerticalLayout();
 		sidePanel.setPadding(false);
+		// was a bootstrap row of full-width columns, one per location: no gap between them, so an empty location takes no
+		// room and the side components are spaced only by their own bottom margin (.side-component)
+		sidePanel.setSpacing(false);
 		for (String loc : sideComponentLocs) {
 			Div slot = new Div();
 			slot.setWidthFull();

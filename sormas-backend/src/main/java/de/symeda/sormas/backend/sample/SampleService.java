@@ -944,15 +944,20 @@ public class SampleService extends AbstractDeletableAdoService<Sample>
 			}
 		}
 
-		filter = addCaseContactEventParticipantSamplePredicate(criteria, cb, sample, filter);
+		filter = addCaseContactEventParticipantSamplePredicate(criteria, cb, joins, filter);
 
 		return filter;
 	}
 
+	/**
+	 * Uses the query's left joins of the associated case, contact and event participant. A path like
+	 * {@code sample.get(ASSOCIATED_CONTACT).get(UUID)} is an implicit inner join in Hibernate 7 (Hibernate 5 reused the left
+	 * join), which drops every sample without a contact (or event participant) from the "or" below.
+	 */
 	private Predicate addCaseContactEventParticipantSamplePredicate(
 		SampleCriteria criteria,
 		CriteriaBuilder cb,
-		From<?, ?> sample,
+		SampleJoins joins,
 		Predicate filter) {
 
 		Predicate filterCaseUuids = null;
@@ -960,15 +965,15 @@ public class SampleService extends AbstractDeletableAdoService<Sample>
 		Predicate filterEvPartUuids = null;
 
 		if (criteria.getCaseUuids() != null) {
-			filterCaseUuids = sample.get(Sample.ASSOCIATED_CASE).get(Case.UUID).in(criteria.getCaseUuids());
+			filterCaseUuids = joins.getCaze().get(Case.UUID).in(criteria.getCaseUuids());
 		}
 
 		if (criteria.getContactUuids() != null) {
-			filterContactUuids = sample.get(Sample.ASSOCIATED_CONTACT).get(Contact.UUID).in(criteria.getContactUuids());
+			filterContactUuids = joins.getContact().get(Contact.UUID).in(criteria.getContactUuids());
 		}
 
 		if (criteria.getEventParticipantUuids() != null) {
-			filterEvPartUuids = sample.get(Sample.ASSOCIATED_EVENT_PARTICIPANT).get(EventParticipant.UUID).in(criteria.getEventParticipantUuids());
+			filterEvPartUuids = joins.getEventParticipant().get(EventParticipant.UUID).in(criteria.getEventParticipantUuids());
 		}
 
 		filter = CriteriaBuilderHelper.and(cb, filter, CriteriaBuilderHelper.or(cb, filterCaseUuids, filterContactUuids, filterEvPartUuids));
@@ -997,7 +1002,7 @@ public class SampleService extends AbstractDeletableAdoService<Sample>
 				.and(cb, filter, cb.equal(joins.getEventParticipant().get(EventParticipant.UUID), criteria.getEventParticipant().getUuid()));
 		}
 
-		filter = addCaseContactEventParticipantSamplePredicate(criteria, cb, sample, filter);
+		filter = addCaseContactEventParticipantSamplePredicate(criteria, cb, joins, filter);
 
 		return filter;
 	}

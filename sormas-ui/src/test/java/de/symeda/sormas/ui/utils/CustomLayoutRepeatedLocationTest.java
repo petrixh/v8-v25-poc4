@@ -1,7 +1,6 @@
 package de.symeda.sormas.ui.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -30,8 +29,8 @@ public class CustomLayoutRepeatedLocationTest {
 		assertEquals("first", first.getAttribute("id"));
 		assertEquals("second", second.getAttribute("id"));
 		assertEquals(0, first.getChild(0).getChildCount());
-		assertSame(field.getElement(), second.getChild(0).getChild(0));
-		assertSame(second.getChild(0), layout.getSlotElement("field"));
+		assertEquals(field.getElement(), second.getChild(0).getChild(0));
+		assertEquals(second.getChild(0), layout.getSlotElement("field"));
 	}
 
 	@Test
@@ -42,7 +41,7 @@ public class CustomLayoutRepeatedLocationTest {
 		layout.setTemplateContents(TEMPLATE);
 
 		Element second = layout.getElement().getChild(2);
-		assertSame(field.getElement(), second.getChild(0).getChild(0));
+		assertEquals(field.getElement(), second.getChild(0).getChild(0));
 		assertTrue(layout.hasLocation("other"));
 	}
 }

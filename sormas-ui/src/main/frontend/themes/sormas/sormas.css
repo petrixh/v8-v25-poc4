@@ -778,3 +778,76 @@ vaadin-text-area.resizable::part(input-field) { resize: vertical; overflow: auto
 .background-disease-salmonellosis.background-darker { background-color: #a04000; fill: #a04000; }
 .background-disease-shigellosis { background-color: #bd1307; fill: #bd1307; }
 .background-disease-shigellosis.background-darker { background-color: #DAAA69; fill: #DAAA69; }
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 10. Forms, filter bars, buttons, dialogs
+ * ------------------------------------------------------------------------------------------------------------- */
+
+/* Detail views with a side panel (LayoutWithSidePanel): Vaadin 8 placed the form and the side panel in bootstrap
+   columns col-lg-8 and col-lg-4 of the root component, so they split its width 8:4. The Flow HorizontalLayout grows
+   them 8:4 from their content widths instead: start both from zero so the split is the old one again. */
+vaadin-horizontal-layout.root-component > * {
+  flex-basis: 0;
+}
+
+/* CssStyles.LAYOUT_COL_HIDE_INVSIBLE (bootstrap-grid.scss): a column whose component is hidden takes no room. Vaadin 8
+   left such a slot empty; Flow keeps the hidden component in it, so ":empty" (section 6) no longer matches. */
+.row div[location].hide-invisble:not(:has(> :not([hidden]))) {
+  display: none;
+}
+
+/* Fields without a width of their own: Valo's default field width ($v-default-field-width, 5 x 32px); Lumo's is 12em */
+html {
+  --vaadin-field-default-width: 160px;
+}
+
+/* Captions in the bootstrap-grid forms (CustomLayout slots): Vaadin 8 never cut them off; a caption longer than its field
+   runs on past the field's end. CssStyles.CAPTION_OVERFLOW (global.scss .v-caption-caption-overflow: the date of birth
+   caption over the year, month and day fields) does the same wherever it is set. */
+[location] > :is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field,
+    vaadin-integer-field, vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box,
+    vaadin-select, vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker, vaadin-radio-group,
+    vaadin-checkbox-group, vaadin-custom-field)::part(label),
+.caption-overflow::part(label) {
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+/* Delete buttons: CssStyles.BUTTON_DANGER maps to Lumo's "error" variant; Valo's danger button (button.scss) is filled
+   in the critical colour with a darker border. Link-style (tertiary) error buttons stay unfilled. */
+vaadin-button[theme~="error"]:not([theme~="tertiary"]):not([theme~="tertiary-inline"]) {
+  --vaadin-button-background: var(--sormas-critical-color);
+  --vaadin-button-text-color: #FFFFFF;
+  --vaadin-button-border: 1px solid rgb(72, 0, 0);
+  color: #FFFFFF;
+}
+
+/* Dialogs (window.scss): a white title bar with the caption in 24px semi-bold primary colour and a 3px line below it,
+   the close button in the top right corner, and Valo's dark modality curtain */
+vaadin-dialog::part(header) {
+  padding: 16px 32px 8px 32px;
+  background-color: #FFFFFF;
+  border-bottom: 3px solid var(--sormas-focus-color);
+}
+
+/* the dialog sets font: inherit !important on its slotted title: the font goes on the title part */
+vaadin-dialog::part(title) {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 31px;
+}
+
+vaadin-dialog > h2[slot="title"] {
+  margin: 0;
+  color: var(--sormas-primary-color);
+}
+
+vaadin-dialog::part(header-content) {
+  align-self: flex-start;
+  margin: -16px -32px 0 0;
+}
+
+vaadin-dialog::part(backdrop) {
+  background-color: rgba(34, 34, 34, 0.8);
+}

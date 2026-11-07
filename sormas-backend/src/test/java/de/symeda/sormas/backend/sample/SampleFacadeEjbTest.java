@@ -84,6 +84,7 @@ import de.symeda.sormas.api.sample.SampleAssociationType;
 import de.symeda.sormas.api.sample.SampleCriteria;
 import de.symeda.sormas.api.sample.SampleDto;
 import de.symeda.sormas.api.sample.SampleIndexDto;
+import de.symeda.sormas.api.sample.SampleListEntryDto;
 import de.symeda.sormas.api.sample.SampleMaterial;
 import de.symeda.sormas.api.sample.SamplePurpose;
 import de.symeda.sormas.api.sample.SampleSimilarityCriteria;
@@ -613,6 +614,37 @@ public class SampleFacadeEjbTest extends AbstractBeanTest {
 
 		assertThat(samples, hasSize(3));
 		assertThat(samples, contains(sample, sample2, sample3));
+	}
+
+	/**
+	 * The person's sample list: case uuids, and empty contact and event participant uuid lists (a person without contacts
+	 * or event participations). Samples without a contact or event participant must not be dropped (implicit inner joins
+	 * in Hibernate 7).
+	 */
+	@Test
+	public void testGetEntriesListAndIndexListByPersonUuidLists() {
+
+		RDCF rdcf = creator.createRDCF("Region", "District", "Community", "Facility");
+		UserDto user = creator.createSurveillanceSupervisor(rdcf);
+		PersonDto person = creator.createPerson();
+		CaseDataDto caze = creator.createCase(user.toReference(), person.toReference(), rdcf);
+		CaseDataDto otherCase = creator.createCase(user.toReference(), creator.createPerson().toReference(), rdcf);
+		SampleDto sample = creator.createSample(caze.toReference(), user.toReference(), rdcf.facility);
+		creator.createSample(otherCase.toReference(), user.toReference(), rdcf.facility);
+
+		SampleCriteria criteria = new SampleCriteria().caseUuids(Collections.singletonList(caze.getUuid()))
+			.contactUuids(Collections.emptyList())
+			.eventParticipantUuids(Collections.emptyList())
+			.sampleAssociationType(SampleAssociationType.PERSON);
+
+		List<SampleListEntryDto> entries = getSampleFacade().getEntriesList(criteria, 0, 100);
+		assertThat(entries, hasSize(1));
+		assertEquals(sample.getUuid(), entries.get(0).getUuid());
+
+		List<SampleIndexDto> index = getSampleFacade().getIndexList(criteria, 0, 100, null);
+		assertThat(index, hasSize(1));
+		assertEquals(sample.getUuid(), index.get(0).getUuid());
+		assertEquals(1, getSampleFacade().count(criteria));
 	}
 
 	@Test

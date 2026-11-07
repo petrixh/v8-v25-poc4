@@ -439,10 +439,23 @@ public final class CssStyles {
 	private static boolean applyButtonVariant(Button button, String style) {
 		ButtonVariant variant = getButtonVariant(style);
 		if (variant != null) {
+			// Valo: "borderless" and "link" override the colours of "primary" (transparent, text colour kept). Lumo's
+			// "tertiary primary" is white text on a transparent background, i.e. invisible: the tertiary variant wins.
+			if (variant == ButtonVariant.LUMO_PRIMARY && isTertiary(button)) {
+				return true;
+			}
+			if (variant == ButtonVariant.LUMO_TERTIARY || variant == ButtonVariant.LUMO_TERTIARY_INLINE) {
+				button.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+			}
 			button.addThemeVariants(variant);
 			return true;
 		}
 		return false;
+	}
+
+	private static boolean isTertiary(Button button) {
+		return button.getThemeNames().contains(ButtonVariant.LUMO_TERTIARY.getVariantName())
+			|| button.getThemeNames().contains(ButtonVariant.LUMO_TERTIARY_INLINE.getVariantName());
 	}
 
 	private static boolean removeButtonVariant(Button button, String style) {

@@ -69,10 +69,15 @@ public class CustomLayout extends Component implements HasSize, HasStyle {
 	 */
 	private final Map<String, Component> slots = new LinkedHashMap<>();
 
+	/**
+	 * As in Vaadin 8, the layout is 100% wide by default; {@code setWidth(..)} and {@link #setWidthUndefined()} change it.
+	 */
 	public CustomLayout() {
+		setWidthFull();
 	}
 
 	public CustomLayout(String templateContents) {
+		this();
 		setTemplateContents(templateContents);
 	}
 

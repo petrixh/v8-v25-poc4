@@ -40,8 +40,9 @@ public class DashboardStatisticsSubComponent extends VerticalLayout {
 	private Span totalCountLabel;
 
 	public DashboardStatisticsSubComponent() {
-		// was a left and right margin only (MarginInfo); spacing details belong to the theme work
+		// was a left and right margin only (MarginInfo(false, true, false, true)): the layout margin at the sides
 		this.setPadding(false);
+		this.getStyle().set("padding-left", "var(--lumo-space-l)").set("padding-right", "var(--lumo-space-l)");
 		this.setSpacing(false);
 	}
 

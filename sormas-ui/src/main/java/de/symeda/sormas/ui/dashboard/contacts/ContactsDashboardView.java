@@ -159,8 +159,9 @@ public class ContactsDashboardView extends AbstractDashboardView {
 
 	private HorizontalLayout createContactsPerCaseLayout() {
 		HorizontalLayout layout = new HorizontalLayout();
-		// was a left and right margin only (MarginInfo); spacing details belong to the theme work
+		// was a left and right margin only (MarginInfo(false, true, false, true)): the layout margin at the sides
 		layout.setPadding(false);
+		layout.getStyle().set("padding-left", "var(--lumo-space-l)").set("padding-right", "var(--lumo-space-l)");
 		layout.setSpacing(false);
 
 		Span caption = new Span(I18nProperties.getString(Strings.headingContactsPerCase));
@@ -181,8 +182,9 @@ public class ContactsDashboardView extends AbstractDashboardView {
 
 	private HorizontalLayout createSourceCasesLayout() {
 		HorizontalLayout layout = new HorizontalLayout();
-		// was a left and right margin only (MarginInfo); spacing details belong to the theme work
+		// was a left and right margin only (MarginInfo(false, true, false, true)): the layout margin at the sides
 		layout.setPadding(false);
+		layout.getStyle().set("padding-left", "var(--lumo-space-l)").set("padding-right", "var(--lumo-space-l)");
 		layout.setSpacing(false);
 
 		Span caption = new Span(I18nProperties.getString(Strings.headingNewSourceCases));
@@ -219,8 +221,9 @@ public class ContactsDashboardView extends AbstractDashboardView {
 	private HorizontalLayout createContactsInQuarantineLayout() {
 
 		HorizontalLayout layout = new HorizontalLayout();
-		// was a left and right margin only (MarginInfo); spacing details belong to the theme work
+		// was a left and right margin only (MarginInfo(false, true, false, true)): the layout margin at the sides
 		layout.setPadding(false);
+		layout.getStyle().set("padding-left", "var(--lumo-space-l)").set("padding-right", "var(--lumo-space-l)");
 		layout.setSpacing(false);
 
 		Span captionInQuarantine = new Span(I18nProperties.getString(Strings.headingContactsInQuarantine));
@@ -242,8 +245,9 @@ public class ContactsDashboardView extends AbstractDashboardView {
 	private HorizontalLayout createContactsPlacedInQuarantineLayout() {
 
 		HorizontalLayout layout = new HorizontalLayout();
-		// was a left and right margin only (MarginInfo); spacing details belong to the theme work
+		// was a left and right margin only (MarginInfo(false, true, false, true)): the layout margin at the sides
 		layout.setPadding(false);
+		layout.getStyle().set("padding-left", "var(--lumo-space-l)").set("padding-right", "var(--lumo-space-l)");
 		layout.setSpacing(false);
 
 		Span captionPlacedInQuarantine = new Span(I18nProperties.getString(Strings.headingContactsPlacedInQuarantine));

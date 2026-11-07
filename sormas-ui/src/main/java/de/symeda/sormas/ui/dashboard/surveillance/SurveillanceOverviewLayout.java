@@ -82,8 +82,9 @@ public class SurveillanceOverviewLayout extends CustomLayout {
 		HorizontalLayout buttonsLayout = new HorizontalLayout();
 		buttonsLayout.setHeight(null);
 		buttonsLayout.setWidth(100, Unit.PERCENTAGE);
-		// was a left and right margin only (MarginInfo); spacing details belong to the theme work
+		// was a left and right margin only (MarginInfo(false, true, false, true)): the layout margin at the sides
 		buttonsLayout.setPadding(false);
+		buttonsLayout.getStyle().set("padding-left", "var(--lumo-space-l)").set("padding-right", "var(--lumo-space-l)");
 
 		showMoreButton = ButtonHelper.createIconButton(
 			Captions.dashboardShowAllDiseases,

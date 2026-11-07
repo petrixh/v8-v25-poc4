@@ -28,17 +28,43 @@ import de.symeda.sormas.api.utils.UtilDate;
  * and, through {@link PopupDateField}, {@code PopupDateField}), with the V7 day-resolution semantics: a day picked or
  * typed by the user replaces only the year, month and day of the current value and keeps its time of day; with no
  * current value it is the start of the selected day. Server (JVM) time zone. See {@link #generateModelValue()}.
+ * <p>
+ * Typed text the date picker cannot parse empties the value and makes the field invalid with the
+ * {@link #getParseErrorMessage() parse error message} until the text is corrected or a value is set, as in V7 (see
+ * {@link #getUnparsableInputError()}): a form commit then fails and writes nothing.
  */
 public class DateField extends CustomField<Date> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final DatePicker datePicker = new DatePicker();
+	/**
+	 * The V7 default ({@code com.vaadin.v7.ui.DateField}, 8.14.3); not localised there either, and SORMAS never changed
+	 * it.
+	 */
+	public static final String DEFAULT_PARSE_ERROR_MESSAGE = "Date format not recognized";
+
+	private final Picker datePicker = new Picker();
 	private String dateFormat;
+	private String parseErrorMessage = DEFAULT_PARSE_ERROR_MESSAGE;
+
+	/**
+	 * The date picker with its unparsable-input state readable by the field.
+	 */
+	private static class Picker extends DatePicker {
+
+		private static final long serialVersionUID = 1L;
+
+		boolean hasUnparsableInput() {
+			return isInputUnparsable();
+		}
+	}
 
 	public DateField() {
 		super();
 		datePicker.setWidthFull();
+		// V7 PopupDateField opened its calendar only from its button, not on typing or clicking into the text. An overlay
+		// opened by typing would also take the next click outside (e.g. on Save) only to close itself.
+		datePicker.setAutoOpen(false);
 		datePicker.addValueChangeListener(e -> {
 			if (e.isFromClient()) {
 				updateValue();
@@ -94,6 +120,27 @@ public class DateField extends CustomField<Date> {
 	@Override
 	public Class<? extends Date> getType() {
 		return Date.class;
+	}
+
+	/**
+	 * As V7 ({@code DateField.changeVariables} and {@code validate()}): while the picker holds typed text it cannot parse,
+	 * the value is empty and the field is not valid, with the {@link #getParseErrorMessage() parse error message}. A
+	 * value set by code (e.g. a form's discard or read) replaces the text and ends this state.
+	 */
+	@Override
+	public String getUnparsableInputError() {
+		return datePicker.hasUnparsableInput() ? parseErrorMessage : null;
+	}
+
+	/**
+	 * V7 {@code getParseErrorMessage()}. Default {@value #DEFAULT_PARSE_ERROR_MESSAGE}.
+	 */
+	public String getParseErrorMessage() {
+		return parseErrorMessage;
+	}
+
+	public void setParseErrorMessage(String parseErrorMessage) {
+		this.parseErrorMessage = parseErrorMessage;
 	}
 
 	public String getDateFormat() {

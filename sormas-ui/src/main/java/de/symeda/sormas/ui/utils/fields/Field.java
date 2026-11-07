@@ -398,13 +398,17 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 	}
 
 	/**
-	 * V7 {@code validate()}: required check, conversion and all validators. Named differently because Flow fields have
-	 * a protected {@code validate()}.
+	 * V7 {@code validate()}: unparsable input ({@link #getUnparsableInputError()}), required check, conversion and all
+	 * validators. Named differently because Flow fields have a protected {@code validate()}.
 	 *
 	 * @throws InvalidValueException
 	 *             with the first error message
 	 */
 	default void validateValue() {
+		String unparsableInputError = getUnparsableInputError();
+		if (unparsableInputError != null) {
+			throw new InvalidValueException(unparsableInputError);
+		}
 		if (isRequired() && isEmpty()) {
 			throw new InvalidValueException(getRequiredError() != null ? getRequiredError() : "");
 		}
@@ -413,6 +417,17 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 		if (result.isError()) {
 			throw new InvalidValueException(result.getErrorMessage());
 		}
+	}
+
+	/**
+	 * The error of input the field could not parse, or {@code null}. As in V7 ({@code DateField.validate()}, which threw
+	 * {@code UnparsableDateString} before any other check), such input makes {@link #validateValue()} and the form's
+	 * binding validator ({@link #asBindingValidator()}) fail first, also when the field's value is empty, so a form
+	 * commit fails and writes nothing. Default: {@code null} (the field has no input of its own to parse; text fields
+	 * with a converter fail in the conversion instead). Overridden by {@link DateField}.
+	 */
+	default String getUnparsableInputError() {
+		return null;
 	}
 
 	/**
@@ -451,10 +466,15 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 	}
 
 	/**
-	 * Validator for the form's binding: required check plus the field's validators, looked up on every call.
+	 * Validator for the form's binding: unparsable input ({@link #getUnparsableInputError()}), required check, then the
+	 * field's validators, looked up on every call.
 	 */
 	default Validator<Object> asBindingValidator() {
 		return (value, context) -> {
+			String unparsableInputError = getUnparsableInputError();
+			if (unparsableInputError != null) {
+				return ValidationResult.error(unparsableInputError);
+			}
 			if (isRequired() && isEmpty()) {
 				return ValidationResult.error(getRequiredError() != null ? getRequiredError() : "");
 			}

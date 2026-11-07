@@ -33,6 +33,15 @@ public class CheckBox extends com.vaadin.flow.component.checkbox.Checkbox implem
 		super(caption, initialValue);
 	}
 
+	/**
+	 * V7 {@code CheckBox.setValue(null)} was allowed and showed the box unchecked; Flow throws on {@code null}. Here
+	 * {@code null} sets the empty value {@code false} (a bound {@code null} property already shows as {@code false}).
+	 */
+	@Override
+	public void setValue(Boolean value) {
+		super.setValue(value == null ? Boolean.FALSE : value);
+	}
+
 	// Flow implements these as interface defaults; declared here because Field declares them too
 
 	@Override

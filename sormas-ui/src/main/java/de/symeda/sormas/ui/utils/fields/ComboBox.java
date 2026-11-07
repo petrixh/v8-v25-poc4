@@ -38,7 +38,7 @@ public class ComboBox extends com.vaadin.flow.component.combobox.ComboBox<Object
 		void addNewItem(String newItemCaption);
 	}
 
-	private final SelectItems selectItems = new SelectItems(this::itemsChanged);
+	private final SelectItems selectItems = new SelectItems(this, this::itemsChanged);
 	private FilteringMode filteringMode = FilteringMode.STARTSWITH;
 	private NewItemHandler newItemHandler;
 
@@ -63,12 +63,18 @@ public class ComboBox extends com.vaadin.flow.component.combobox.ComboBox<Object
 		setClearButtonVisible(selectItems.isNullSelectionAllowed());
 		selectItems.setOnNullSelectionAllowedChange(() -> setClearButtonVisible(selectItems.isNullSelectionAllowed()));
 		addCustomValueSetListener(e -> {
+			if (!isNewItemsAllowed()) {
+				return;
+			}
 			if (newItemHandler != null) {
 				newItemHandler.addNewItem(e.getDetail());
 			} else {
 				addNewItemDefault(e.getDetail());
 			}
 		});
+		// V7 default: no new items. Flow's addCustomValueSetListener turns custom values on; without this, typed text
+		// that is no item plus Enter became the value (a String where the binding expects the item type).
+		setAllowCustomValue(false);
 	}
 
 	/**

@@ -1084,10 +1084,11 @@ vaadin-custom-field.caption-inline::part(label) {
   overflow-y: auto;
 }
 
-/* Outbreak overview (OutbreakOverviewGrid): the cells are HTML "div.v-button" (CssStyles.buildVaadinStyle), which Valo drew
+/* Outbreak overview (OutbreakOverviewGrid): the cells are HTML "div.v-button" (CssStyles.buildVaadinStyle, in the span of the
+   grid shim's HtmlRenderer), which Valo drew
    as a button (button.scss, measured on the old app: 32px high, 14px side padding, 2px primary border, 4px radius,
    12px upper case); critical and warning are filled in the status colour with a 25% darker border */
-vaadin-grid-cell-content > div.v-button {
+vaadin-grid-cell-content div.v-button {
   display: inline-block;
   box-sizing: border-box;
   height: 32px;
@@ -1105,14 +1106,44 @@ vaadin-grid-cell-content > div.v-button {
   cursor: pointer;
 }
 
-vaadin-grid-cell-content > div.v-button.v-button-critical {
+vaadin-grid-cell-content div.v-button.v-button-critical {
   border-color: rgb(72, 0, 0);
   background-color: var(--sormas-critical-color);
   color: #FFFFFF;
 }
 
-vaadin-grid-cell-content > div.v-button.v-button-warning {
+vaadin-grid-cell-content div.v-button.v-button-warning {
   border-color: rgb(63, 35, 0);
   background-color: var(--sormas-warning-color);
   color: #FFFFFF;
+}
+
+/* Geographical analysis dashboard (GisDashboardView, global.scss): the filter button row lies over the top left of the map
+   and the legend and layers buttons over its bottom right, so the map fills the view below the header without scrolling;
+   the buttons are white and rounded to stand out on the map */
+.gis-dashboard-map-header {
+  position: relative;
+  z-index: 5;
+  margin: 12px 0 -80px 0 !important;
+  padding-left: 70px;
+}
+
+.gis-dashboard-map-footer {
+  position: relative;
+  z-index: 5;
+  float: right;
+  clear: both;
+  margin: -60px 0 0 0;
+  padding-right: 10px;
+}
+
+:is(.gis-dashboard-map-header, .gis-dashboard-map-footer) vaadin-button {
+  --vaadin-button-background: #FFFFFF;
+  --vaadin-button-text-color: #000000;
+  --vaadin-button-font-weight: 600;
+  --vaadin-button-border-radius: 24px;
+  border-radius: 24px;
+  background-color: #FFFFFF;
+  color: #000000;
+  font-weight: 600;
 }

@@ -32,9 +32,11 @@ if [ ! -s "$COPY_DIR/db.env" ]; then
   (umask 077; pw=$(head -c 18 /dev/urandom | base64 | tr -dc A-Za-z0-9); printf 'SORMAS_DB_PW=%s\nPOSTGRES_PASSWORD=%s\n' "$pw" "$pw" > "$COPY_DIR/db.env")
 fi
 # This copy's sormas.properties (mounted over the shared one, compose.yml): stock file, env overlay, configuration overlay,
-# and the default-password check when asked for. Later lines win.
+# this copy's UI URL, and the default-password check when asked for. Later lines win.
 {
   cat "$APP_ENV_DEPLOY_DIR/setup/sormas.properties" "$ENV_DIR/sormas.properties.env" "$ENV_DIR/config/$APP_ENV_CONFIG.properties"
+  # Link target of notification mails (task mails): this copy's UI. The app accepts only https here (validateConfigUrls)
+  printf '%s\n' '# --- env/up.sh: this copy ---' "ui.url=$APP_ENV_UI_URL"
   if [ "$APP_ENV_PWCHECK" = on ]; then
     printf '%s\n' '# --- env/up.sh: APP_ENV_PWCHECK=on ---' 'skipDefaultPasswordCheck=false'
   fi

@@ -19,7 +19,8 @@ APP_ENV_DEPLOY=0 env/up.sh       # the domain only (no app build, no deploy): ht
 
 Log in with a default user (`admin`, `SurvSup`, `NatUser`, ...; passwords in
 `sormas-api/src/main/java/de/symeda/sormas/api/utils/DefaultEntityHelper.java`). Test environment only: the default
-users and their default passwords exist on purpose.
+users and their default passwords exist on purpose. C2 also has the seed user `CfgUser`, who logs in with `NatUser`'s
+default password ("Seed additions").
 
 ## Requirements
 
@@ -44,14 +45,16 @@ Each script reads these variables; the defaults start one copy.
 | `APP_ENV_M2_REPO` | `~/.m2/repository` | Maven repository used by the build container |
 | `APP_ENV_WAIT_S` | `900` | How long `up.sh` waits for the app |
 | `APP_ENV_CONFIG` | `C1` | Test configuration, `C1` or `C2` (see "Configurations") |
+| `APP_ENV_UI_URL` | `https://localhost:<APP_ENV_PORT>/sormas-ui/` | `ui.url` of the copy: the link target in notification mails (see "Integrations") |
 | `APP_ENV_PWCHECK` | `off` | `on`: the "Security Alert: default password" dialog after a default-user login (`skipDefaultPasswordCheck=false`) |
 | `APP_ENV_SEED` | `snapshot` | `up.sh` data: `snapshot` (the committed `env/seed/snapshot-<C>.pgdump`) or `rest` (only the small REST seed; `env/seed/generate.sh` uses it) |
 | `APP_ENV_DEPLOY` | `1` | `0`: the domain only. `build.sh` does not build the app, the container does not deploy it, `up.sh` waits for `GET /` (Payara's default page) instead of the login page and takes the reset point right after loading the snapshot. Needs `APP_ENV_SEED=snapshot`. Was used in migration stage 1a while the app did not deploy on Payara 7 (until ticket 1a-91) |
 
 Use the same variables for `up.sh`, `reset.sh` and `down.sh` of one copy. `APP_ENV_CONFIG`, `APP_ENV_PWCHECK`,
-`APP_ENV_SEED` and `APP_ENV_DEPLOY` matter to `up.sh` only: the copy keeps them until `down.sh` (`up.sh` records
-`APP_ENV_DEPLOY` in the copy's state directory for `reset.sh`; it counts only while the copy's app container exists, so
-a record left by an interrupted `up.sh` does not change the next `up.sh`). Two copies:
+`APP_ENV_UI_URL`, `APP_ENV_SEED` and `APP_ENV_DEPLOY` matter to `up.sh` only: the copy keeps them until `down.sh`
+(`APP_ENV_CONFIG` also tells the smoke check which users the copy has; `up.sh` records `APP_ENV_DEPLOY` in the copy's
+state directory for `reset.sh`; it counts only while the copy's app container exists, so a record left by an
+interrupted `up.sh` does not change the next `up.sh`). Two copies:
 
 ```sh
 APP_ENV_PORT=18081 APP_ENV_PROJECT=sormas-new-1 env/up.sh
@@ -84,7 +87,8 @@ These scripts follow the replay runner's env-script contract (`up.sh [--no-build
 3. Generates a throwaway database password for this copy (`env/.state/copies/<project>/db.env`, mode 600; never in an
    image or a tracked file) and writes the copy's `sormas.properties` (`env/.state/copies/<project>/sormas.properties`,
    mounted over the shared one): the stock `sormas-base/setup/sormas.properties`, then `env/sormas.properties.env`, then
-   `env/config/<C>.properties`, then `skipDefaultPasswordCheck=false` if `APP_ENV_PWCHECK=on`. Later lines win.
+   `env/config/<C>.properties`, then `ui.url=$APP_ENV_UI_URL`, then `skipDefaultPasswordCheck=false` if
+   `APP_ENV_PWCHECK=on`. Later lines win.
 4. Starts the compose project (`env/compose.yml`): `db` (postgres:14, fresh volume), `mail` (SMTP sink) and `app`
    (Payara; deploys the ear and the wars at container start, unless `APP_ENV_DEPLOY=0`). With `APP_ENV_SEED=snapshot` it starts `db` first and
    loads `env/seed/snapshot-<C>.pgdump` into it (`pg_restore`, objects owned by the app's database user), so that the
@@ -97,9 +101,9 @@ These scripts follow the replay runner's env-script contract (`up.sh [--no-build
    database to the template database `sormas_seed` (the reset point), starts the domain again and waits for 200. The
    copy is now in exactly the state `reset.sh` restores.
 
-`reset.sh` restores the database from `sormas_seed`, empties the mail sink and removes uploaded document templates
-(`/opt/sormas/custom/docgeneration` in the app container: their database rows go with the restore, the files would
-stay). Modes (`APP_ENV_RESET_MODE`):
+`reset.sh` restores the database from `sormas_seed`, empties the mail sink and removes uploaded document templates and
+documents (`/opt/sormas/custom/docgeneration` and `/opt/sormas/documents` in the app container: their database rows go
+with the restore, the files would stay). Modes (`APP_ENV_RESET_MODE`):
 - `restart` (default): stops the Payara domain, restores, starts it. Nothing in memory survives: no sessions, no cached
   users, roles or infrastructure (Hibernate second-level cache).
 - `db`: restores the database while the app runs. Logged-in sessions and the cache survive; use it only when tests
@@ -149,14 +153,17 @@ Payara 7 with the app, `APP_ENV_DEPLOY=1` (same host, 2026-11-06, ticket 1a-91, 
 | | C1 (default) | C2 Germany |
 |---|---|---|
 | `sormas.properties` | stock (`country.locale=en`); `env/config/C1.properties` adds nothing | `country.locale=de-DE` (`env/config/C2.properties`): German texts and date formats for users without a language of their own, and the DE-specific UI (`isConfiguredCountry("de")`) |
-| Features (`featureconfiguration` table) | stock | `env/config/C2.sql` switches on campaigns, AEFI, environments, surveys, self reports, the GDPR consent popup at login and travel entries; external messages and SORMAS-to-SORMAS stay off |
+| Features (`featureconfiguration` table) | stock | `env/config/C2.sql` switches on campaigns, AEFI, environments, surveys, self reports, the GDPR consent popup at login, travel entries, case follow-up (the case's visits tab), the area infrastructure type, external e-mails (e-mail templates) and documents; external messages and SORMAS-to-SORMAS stay off |
 | Default infrastructure names | "Default Region", "Default Facility", ... | German: "Voreingestelltes Bundesland", "Voreingestellte Einrichtung", ... (made by the app in `country.locale`) |
 
 The feature switches are set in the database because that is where SORMAS keeps them (`docs/SERVER_CUSTOMIZATION.md`;
 the admin UI's Features page offers only two other switches). `up.sh` runs `env/config/<C>.sql` with the app stopped,
 before the reset point, so the app reads them at start. In C2 the GDPR popup opens at every login of a user who has not
 consented; closing it consents to nothing. In C2, `NatUser` has every switched-on menu (Umgebungen, Adverse Events,
-Einreisen, Kampagnen, Self Reports, Surveys); `SurvSup` has all but environments and AEFI (role rights).
+Einreisen, Kampagnen, Self Reports, Surveys); `SurvSup` has all but environments and AEFI (role rights). The seed user
+`CfgUser` (C2) has `NatUser`'s rights plus those of the disease configuration, the e-mail templates and the Epipulse
+export (`statistics/epipulse-export`; the statistics view shows its tab only with the `EPIPULSE_EXPORT` feature, which
+stays off, so the view is opened by its address).
 `APP_ENV_PWCHECK=on` works with either configuration.
 
 ## Seed data
@@ -164,13 +171,14 @@ Einreisen, Kampagnen, Self Reports, Surveys); `SurvSup` has all but environments
 `up.sh` loads the configuration's committed snapshot, `env/seed/snapshot-<C>.pgdump` (`pg_dump` custom format of
 `sormas_db`), with its metadata in `env/seed/snapshot-<C>.json`: snapshot date, app commit, generator settings, row
 counts and the dump's sha256. Each snapshot holds the small REST seed, on top of it data from SORMAS's own dev-mode
-generator, and on top of that the seed additions (one record for each detail view the other two leave empty). The new
+generator, and on top of that the seed additions (one record for each detail view the other two leave empty, and in
+C2 a campaign form, an area and a test user for the views no default user reaches). The new
 app restores the same files (its schema must match the old app's).
 
 | Snapshot | Snapshot date | Size | Cases (investigation pending) | Contacts | Events (participants) | Samples (at the lab, result pending) | Tasks (SurvOff / SurvSup) | Persons |
 |---|---|---|---|---|---|---|---|---|
 | C1 | 2026-11-05 | 0.97 MB | 84 (57) | 151 | 13 (85) | 41 (40) | 60 (6 / 54) | 232 |
-| C2 | 2026-11-05 | 0.97 MB | 84 (50) | 131 | 13 (76) | 41 (40) | 53 (6 / 47) | 224 |
+| C2 | 2026-11-05 | 0.98 MB | 84 (50) | 131 | 13 (76) | 41 (40) | 53 (6 / 47) | 224 |
 
 All records are in the default region and district (the only ones). `SurvSup` and `NatUser` see all of them, `SurvOff`
 those of the district, `LabOff` the samples at the default laboratory.
@@ -223,9 +231,16 @@ its UI as a user would (`env/seed/extend.cjs`; the app sets the UUIDs). Dates ar
 | Campaign | "Seed campaign: vaccination drive", 30 days before to 30 days after the snapshot date, no form | C2 |
 | Survey | "Seed survey: symptom follow-up" (COVID-19) with one imported token `SEEDTOKEN01` | C2 |
 | Self report | Juliett `Seedperson`, case, COVID-19, imported from CSV | C2 |
+| Campaign form | SCFM01 "Seed form: vaccination round" (`env/seed/campaign-form.sql`: section, label, two numbers, yes/no, a text shown on "no"; German captions for the German UI), linked to the seed campaign | C2 (part 2) |
+| Campaign form data | SCFD01 of that form and campaign, in the default community, 2 days before the snapshot date, as NatUser | C2 (part 2) |
+| Area | "Seed area", holding the default region: with the area infrastructure type on, the campaign form data form needs an area and offers only the regions of the chosen one. The region's area is the one change to an existing row | C2 (part 2) |
+| User role and user | role "Seed role: configuration and Epipulse" (from NatUser's role as template, plus `DISEASE_MANAGEMENT`, `EMAIL_TEMPLATE_MANAGEMENT` and the four `EPIPULSE_EXPORT_*` rights); user `CfgUser` (Config Seeduser) with that role and `NatUser`'s password | C2 (part 2) |
 
-The features of the C2-only records are off in C1. The campaign form data view (`campaign/campaigndata/dataform`) still
-has no record: it needs a campaign form definition, which SORMAS does not ship.
+The features of the C2-only records are off in C1. Part 2 is the C2 configuration's second set of additions (made
+later, on top of part 1). SORMAS has no UI or REST endpoint that creates campaign form definitions, so `extend.sh`
+loads the form into its table with the app stopped, as deployments do. The app only generates passwords for new users
+(it shows them once); `extend.sh` does not read it and copies `NatUser`'s password hash and seed to `CfgUser`, so no
+password is in any file.
 
 **Make a new snapshot** (for example after a schema change, or to move the dates), per configuration:
 
@@ -245,13 +260,14 @@ for the run `generate.sh` gives SurvSup's role the `DEV_MODE` right and removes 
 history table `userroles_userrights_history` keeps one row of it). It needs Node and Playwright as the smoke check does. The copy stays up in the new
 snapshot's state; remove it with `down.sh`.
 
-`extend.sh` adds the seed additions to a copy that holds the committed snapshot (started with `up.sh`, unchanged; it
-refuses a copy that already has an event group), stops the app and writes the dump and the metadata again: the snapshot
-date stays, `extendedAt` records when. To add them to the current snapshot without regenerating it, start a copy with
+`extend.sh` adds the seed additions to a copy that holds the committed snapshot (started with `up.sh`, unchanged): the
+parts the copy lacks (part 1 when it has no event group, part 2 in C2 when it has no `CfgUser`; it refuses a copy that
+has both). It stops the app and writes the dump and the metadata again: the snapshot date stays, `extendedAt` (part 1)
+and `extendedPart2At` (part 2) record when. To add them to the current snapshot without regenerating it, start a copy with
 `up.sh --no-build` and run `extend.sh` on it (about 1 min for C1, 2 min for C2). It needs Node and Playwright as the
 smoke check does. Running `extend.sh` again does not reproduce the UUIDs or the creation and change times of the records
-made through the UI (campaign, survey and token, self report, adverse event and investigation): the committed snapshot
-is the fixed seed, not the script run.
+made through the UI (campaign, survey and token, self report, adverse event and investigation, area, user role, user):
+the committed snapshot is the fixed seed, not the script run.
 
 Set by the app, not by the seed: creation and change dates, epid numbers and the UUIDs of the default users and of the
 default facility, laboratory and point of entry. They are in the snapshot, so every copy started from the same
@@ -260,7 +276,10 @@ snapshot has the same row counts and UUIDs (checked for two C1 copies), and `res
 ## Integrations
 
 - Mail: the app's mail session (`mail/MailSession`) sends to the copy's own SMTP sink (Mailpit, service `mail`, SMTP
-  port 1025). Nothing leaves the host. Read the mails in the sink's web UI (URL printed by `up.sh`, or
+  port 1025). Nothing leaves the host. Task mails link to the task's case, contact or event under `ui.url`
+  (`APP_ENV_UI_URL`). The app refuses to start with an `ui.url` that is not https (`ConfigFacadeEjb.validateConfigUrls`),
+  so the default names the copy's own port with https although the copy serves http: the link shows the right view
+  path; to open it, change the scheme to http. Read the mails in the sink's web UI (URL printed by `up.sh`, or
   `docker compose -p <project> -f env/compose.yml port mail 8025`) or its API (`/api/v1/messages`).
 - Everything else stays at the stock values of `sormas-base/setup/sormas.properties`, which leave all external
   systems off (SORMAS-to-SORMAS, SurvNet, geocoding, SMS, patient diary, external messages).
@@ -270,7 +289,7 @@ snapshot has the same row counts and UUIDs (checked for two C1 copies), and `res
 ## Smoke check
 
 `env/smoke.cjs` checks a running copy: each web test user in `env/smoke-users.json` (`admin`, `SurvSup`, `NatUser`,
-`SurvOff`, `LabOff`, `HospInf`, `PoeSup`, `NatClin`) logs in, and the first view must load with no console or page error, no HTTP
+`SurvOff`, `LabOff`, `HospInf`, `PoeSup`, `NatClin`; on a C2 copy, with `APP_ENV_CONFIG=C2`, also `CfgUser`) logs in, and the first view must load with no console or page error, no HTTP
 response of 400 or more and no collapsed layout (a scroll height over 4 window heights). `PoeInf` must be refused by the
 web login ("Your user account does not have access to the web application"): its role has no web UI right. CI runs it
 after every build (`CI.md`).

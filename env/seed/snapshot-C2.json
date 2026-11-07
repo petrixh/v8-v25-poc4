@@ -6,8 +6,8 @@
   "appCommit": "688ce2975fd5ddfc43bc49611e1e7717af50820a",
   "pgDump": "pg_dump (PostgreSQL) 14.24 (Debian 14.24-1.pgdg13+2)",
   "file": "snapshot-C2.pgdump",
-  "bytes": 994772,
-  "sha256": "149405469f91d2c298d917b4926fc902e13590ca4a3da3bbd0db39188eb53395",
+  "bytes": 997839,
+  "sha256": "5ea70c86418a5f609f17af5b68f0717cce70e92ce9d18b1298f9da88616a3840",
   "restSeed": "env/seed/seed.py",
   "devModeGenerator": {
     "user": "SurvSup",
@@ -48,11 +48,17 @@
     "continents": 6,
     "subcontinents": 27,
     "countries": 201,
+    "campaignforms": 1,
+    "campaignformdata": 1,
+    "areas": 1,
+    "userroles": 28,
+    "users": 14,
     "tasksForSurvOff": 6,
     "tasksForSurvSup": 47
   },
   "extendedAt": "2026-11-06T08:10:59Z",
-  "extendNote": "Seed additions (env/seed/extend.sh) made on the snapshot of createdAt: dates relative to snapshotDate as the REST seed's; creation and change dates of the added records are those of extendedAt.",
+  "extendNote": "Seed additions (env/seed/extend.sh) made on the snapshot of createdAt: dates relative to snapshotDate as the REST seed's; creation and change dates of the added records are those of extendedAt (part 1) and extendedPart2At (part 2, C2).",
   "extendAppCommit": "5da5bfc06e11b66645cd95c5ae6dfd39754f8081",
-  "seedAdditions": "env/seed/extend.py, env/seed/extend.cjs"
+  "seedAdditions": "env/seed/extend.py, env/seed/extend.cjs, env/seed/campaign-form.sql",
+  "extendedPart2At": "2026-11-06T15:56:11Z"
 }

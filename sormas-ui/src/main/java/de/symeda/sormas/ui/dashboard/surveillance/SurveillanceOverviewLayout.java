@@ -51,9 +51,6 @@ public class SurveillanceOverviewLayout extends CustomLayout {
 	private Boolean isShowingAllDiseases;
 
 	public SurveillanceOverviewLayout(DashboardDataProvider dashboardDataProvider) {
-		// a Vaadin 8 CustomLayout was 100% wide by default; the Flow CustomLayout is as wide as its content
-		setWidthFull();
-
 		setTemplateContents(
 			LayoutUtil.fluidRow(LayoutUtil.fluidColumnLoc(6, 0, 12, 0, BURDEN_LOC), LayoutUtil.fluidColumnLoc(6, 0, 12, 0, DIFFERENCE_LOC))
 				+ LayoutUtil.loc(EXTEND_BUTTONS_LOC));

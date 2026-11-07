@@ -1401,3 +1401,59 @@ vaadin-grid-cell-content div.v-button.v-button-warning {
 :is(.gis-dashboard-map-header, .gis-dashboard-map-footer) > * {
   pointer-events: auto;
 }
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 14. Residuals (sweep 2a-002)
+ * ------------------------------------------------------------------------------------------------------------- */
+
+/* Filter buttons (button.scss .v-button-filter): the status, assignee and shipment filters above the lists. Grey pills
+   in the focus colour with bold dark text; the unselected ones ("filter-light") lighter, so the selected filter shows
+   as the darker pill. The Flow buttons are borderless, i.e. Lumo tertiary, whose background, colour, weight and
+   padding are set through its custom properties (the variant sets its background with !important). Padding as the
+   Valo button ($v-unit-size / 2.4). */
+vaadin-button.filter {
+  --vaadin-button-tertiary-background: var(--sormas-focus-color);
+  --vaadin-button-tertiary-text-color: var(--sormas-font-color);
+  --vaadin-button-tertiary-font-weight: bold;
+  --vaadin-button-tertiary-padding: 0 calc(var(--lumo-size-m) / 2.4);
+  text-decoration: none;
+}
+
+vaadin-button.filter.filter-light {
+  --vaadin-button-tertiary-background: var(--sormas-focus-light-color);
+}
+
+vaadin-button.filter.filter-light:hover {
+  --vaadin-button-tertiary-background: var(--sormas-focus-color);
+}
+
+vaadin-button.filter.filter-light[disabled] {
+  --vaadin-button-tertiary-background: var(--sormas-focus-light-color);
+}
+
+vaadin-button.filter.filter-dark {
+  --vaadin-button-tertiary-background: var(--sormas-primary-color);
+  --vaadin-button-tertiary-text-color: #FFFFFF;
+}
+
+vaadin-button.filter.filter-enabled {
+  --vaadin-button-tertiary-background: #2EB82E;
+  --vaadin-button-tertiary-text-color: #FFFFFF;
+}
+
+vaadin-button.filter.filter-enabled:hover {
+  --vaadin-button-tertiary-background: #248F24;
+}
+
+vaadin-button.filter.filter-disabled {
+  --vaadin-button-tertiary-background: #C8C8C8;
+}
+
+vaadin-button.filter.filter-disabled:hover {
+  --vaadin-button-tertiary-background: #B8B8B8;
+}
+
+vaadin-button.filter.filter-small {
+  --vaadin-button-tertiary-padding: 0 7px;
+  height: 26px;
+}

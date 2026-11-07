@@ -318,6 +318,12 @@ APP_ENV_PORT=18091 APP_ENV_PROJECT=sormas-new-smoke env/down.sh
   (e.g. `@Lock is only permitted for singleton session beans`, annotation processing of `sormas-backend`) that do not
   stop the app. Payara 7 logs the same ones (checked in ticket 1a-91), plus a deprecation warning for each
   `glassfish-web.xml` and, when the domain stops, a `SEVERE` about a ThreadLocal of Payara's ORB left in `/sormas-ui`.
+- A view stays blank, the browser reports an empty response (`ERR_EMPTY_RESPONSE`) for a UI request and the server
+  logs `IOException: Connection is closed`: the response was larger than Grizzly's write queue hard limit (16 x the
+  transport's `socket-write-buffer-size`, see "Payara 7 domain"). Check the setting with `asadmin get
+  configs.config.server-config.network-config.transports.transport.tcp.socket-write-buffer-size` in the app container.
+  Logging `org.glassfish.grizzly.nio.AbstractNIOAsyncQueueWriter` at `FINEST` shows the size and the limit
+  (`Asynchronous write queue hard limit exceeded ... size=..., hardLimit=...`).
 - `server.log` in a fresh container starts with the image build's own domain start (`WARNING` lines "cannot take effect
   without server restart" for the JVM options set then); they are from the build, not from this start.
 
@@ -337,6 +343,7 @@ and password from the container env at run time (`${ENV=SORMAS_DB_HOST}`, `${ENV
 | JVM | `-Xmx4096m`, `-XX:+IgnoreUnrecognizedVMOptions`, logback configuration `config/logback.xml`, `-DlogbackDisableServletContainerInitializer=true`; time zone Europe/Berlin from the container's `TZ` (the JVM reports `user.timezone = Europe/Berlin`) |
 | Class loading | system property `fish.payara.classloading.delegate=false` |
 | Pools | EJB `max-pool-size` 128, HTTP thread pool max 50 |
+| Transport | TCP transport `socket-write-buffer-size` 1048576 (1 MiB), as `server-setup.sh`. Payara 7's Grizzly closes the connection when a write would leave more than 16 x this size pending on it; unset (-1), the size is the kernel's socket send buffer (the limit was 696,320 bytes on the test host) and a larger UI response is never sent. With 1 MiB the limit is 16 MiB (see "Logs and troubleshooting") |
 | Domain lib | the server libraries (`sormas-serverlibs`, collected by `build.sh`) copied to `domains/sormas/lib/` at container start; also holds the PostgreSQL driver the JDBC pool needs |
 | Login | none in the domain: SORMAS authenticates in the app (Jakarta Security: `SormasIdentityStore` and `MultiAuthenticationMechanism` in the two wars) and maps its user rights to roles through `glassfish-ejb-jar.xml` / `glassfish-web.xml`; the setup scripts create no realm, as before. No Keycloak |
 | Directories | `/opt/sormas/{custom,documents,temp,generated}`; login pages from `sormas-base/setup` into `custom` at start |
@@ -352,6 +359,8 @@ Differences to the Payara 5 environment of the old app (`sormas-old-env-payara:5
 - The domain lib holds today's server library list (`sormas-serverlibs/pom.xml` at HEAD). Migration ticket 1a-02
   changes that list to Jakarta EE 11 artefacts; `build.sh` collects whatever the pom says, so nothing changes here.
   Ticket 1a-91 deployed the app with it: no missing class at deploy or on the screens it opened.
+- Transport write buffer (new): `socket-write-buffer-size` is 1 MiB. Payara 5's Grizzly (2.4.4) had no hard limit on
+  a connection's write queue, so the old environment left it unset.
 - `APP_ENV_DEPLOY=0` (new): the domain without the app.
 - Payara 7's own defaults differ from Payara 5's (e.g. its default JVM options with `--add-opens` for JDK 21); the
   setup does not change them.

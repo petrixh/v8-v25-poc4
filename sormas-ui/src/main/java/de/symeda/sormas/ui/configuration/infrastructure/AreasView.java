@@ -183,7 +183,8 @@ public class AreasView extends AbstractConfigurationView {
 			if (UiUtil.permitted(UserRight.INFRASTRUCTURE_VIEW)) {
 				filterRelevanceStatus = new ComboBox<>();
 				filterRelevanceStatus.setId("relevanceStatus");
-				filterRelevanceStatus.setWidth(220, Unit.PERCENTAGE);
+				// was 220%: Vaadin 8 ignored a relative width in this undefined-width layout and showed the default width
+				filterRelevanceStatus.setWidth(160, Unit.PIXELS);
 				filterRelevanceStatus.setItems(EntityRelevanceStatus.getAllExceptDeleted());
 				filterRelevanceStatus.setItemLabelGenerator(status -> {
 					switch (status) {

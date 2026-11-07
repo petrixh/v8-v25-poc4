@@ -16,6 +16,7 @@ package de.symeda.sormas.ui.utils.grid;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -163,10 +164,11 @@ public class Grid<T> extends com.vaadin.flow.component.grid.Grid<T> {
 	}
 
 	/**
-	 * Vaadin 8 row style generator: the class names become part names of the row.
+	 * Vaadin 8 row style generator: the class names become part names of the row's cells, prefixed with {@code row-}
+	 * ({@link GridSupport#rowPartNames}), so that a row style does not match a cell style of the same name.
 	 */
 	public void setStyleGenerator(SerializableFunction<T, String> styleGenerator) {
-		setPartNameGenerator(styleGenerator);
+		setPartNameGenerator(item -> GridSupport.rowPartNames(styleGenerator.apply(item)));
 	}
 
 	/**
@@ -198,6 +200,8 @@ public class Grid<T> extends com.vaadin.flow.component.grid.Grid<T> {
 		this.heightMode = heightMode;
 		switch (heightMode) {
 		case UNDEFINED:
+			// Vaadin 8: the rows define the height, a height set before (setSizeFull) no longer counts
+			setHeight(null);
 			setAllRowsVisible(true);
 			break;
 		case ROW:
@@ -254,10 +258,29 @@ public class Grid<T> extends com.vaadin.flow.component.grid.Grid<T> {
 		private boolean sortPropertySet;
 		/** Set while Flow's own sort setters run: they call {@link #setSortable(boolean)}, which is the user's switch here. */
 		private boolean flowSortUpdate;
+		/** Vaadin 8 {@code getWidth()}: a fixed width in pixels, -1 when the width comes from the content. */
+		private double fixedWidth = -1;
+		/** A fixed width is set ({@link #setWidth(double)} or a CSS width with {@link #setWidth(String)}). */
+		private boolean widthFixed;
+		/** Vaadin 8 {@code getExpandRatio()}: -1 until set. */
+		private int expandRatio = -1;
+		private double minimumWidth = -1;
 		private double maximumWidth = -1;
+		/** The cell part names set by the caller ({@link #setStyleGenerator}), without the width limit part names. */
+		private SerializableFunction<T, String> cellPartNameGenerator;
+		/** The header and footer part names set by the caller (Vaadin 8 header cell style names). */
+		private String headerPartName;
+		private String footerPartName;
 
+		/**
+		 * Vaadin 8 column sizing: the width comes from the content (header and the rendered rows) and the column takes an
+		 * equal share of the free width, unless another column of the grid has an expand ratio
+		 * ({@link GridSupport#updateFlexGrow}).
+		 */
 		public Column(com.vaadin.flow.component.grid.Grid<T> grid, String columnId, Renderer<T> renderer) {
 			super(grid, columnId, renderer);
+			setAutoWidth(true);
+			super.setFlexGrow(GridSupport.hasExpandRatio(grid) ? 0 : 1);
 		}
 
 		@SuppressWarnings("unchecked")
@@ -445,6 +468,17 @@ public class Grid<T> extends com.vaadin.flow.component.grid.Grid<T> {
 		}
 
 		/**
+		 * The cells' part names: those of the generator plus the column's width limit part names
+		 * ({@link #setMinimumWidth(double)}, {@link #setMaximumWidth(double)}).
+		 */
+		@Override
+		public Column<T, V> setPartNameGenerator(SerializableFunction<T, String> partNameGenerator) {
+			this.cellPartNameGenerator = Objects.requireNonNull(partNameGenerator, "Part name generator can not be null");
+			updatePartNames();
+			return this;
+		}
+
+		/**
 		 * Vaadin 8 cell description generator: shown as the cells' tooltip.
 		 */
 		public Column<T, V> setDescriptionGenerator(SerializableFunction<T, String> descriptionGenerator) {
@@ -453,48 +487,168 @@ public class Grid<T> extends com.vaadin.flow.component.grid.Grid<T> {
 		}
 
 		/**
-		 * Vaadin 8 fixed width in pixels: the column does not grow.
+		 * Vaadin 8 fixed width in pixels: the column does not grow and its content does not change its width.
 		 */
 		public Column<T, V> setWidth(double pixels) {
 			setWidth(GridSupport.pixels(pixels));
-			setFlexGrow(0);
+			this.fixedWidth = pixels;
 			return this;
 		}
 
 		/**
-		 * Vaadin 8: width from the content.
+		 * A fixed CSS width, as {@link #setWidth(double)}: the column's content no longer sizes it and it does not grow;
+		 * {@code null} goes back to the width from the content.
+		 */
+		@Override
+		public Column<T, V> setWidth(String width) {
+			if (width == null) {
+				return setWidthUndefined();
+			}
+			super.setWidth(width);
+			this.fixedWidth = -1;
+			this.widthFixed = true;
+			setAutoWidth(false);
+			GridSupport.updateFlexGrow(getGrid());
+			return this;
+		}
+
+		/**
+		 * Vaadin 8 {@code getWidth()}: the fixed width in pixels, -1 when the width comes from the content (or is a CSS
+		 * width set with {@link #setWidth(String)}).
+		 */
+		public double getFixedWidth() {
+			return fixedWidth;
+		}
+
+		/**
+		 * Vaadin 8: width from the content (the default).
 		 */
 		public Column<T, V> setWidthUndefined() {
+			this.fixedWidth = -1;
+			this.widthFixed = false;
 			setAutoWidth(true);
+			GridSupport.updateFlexGrow(getGrid());
 			return this;
 		}
 
 		/**
-		 * Vaadin 8 expand ratio: the flex grow of the column.
+		 * Vaadin 8 expand ratio: the column's share of the free width (flex grow). Once a column of the grid has an expand
+		 * ratio, the columns without one do not grow (Vaadin 8: the implicit ratio 1 of all columns is dropped). A fixed
+		 * width overrides it.
 		 */
 		public Column<T, V> setExpandRatio(int expandRatio) {
-			setFlexGrow(expandRatio);
+			this.expandRatio = expandRatio;
+			GridSupport.updateFlexGrow(getGrid());
 			return this;
 		}
 
 		/**
-		 * Vaadin 8 minimum width: the column's base width; it still grows with its flex grow.
+		 * Vaadin 8 {@code getExpandRatio()}: -1 when not set.
+		 */
+		public int getExpandRatio() {
+			return expandRatio;
+		}
+
+		/**
+		 * Flex grow from the Vaadin 8 sizing: 0 for a fixed width, the expand ratio, or 1 for every column when no column
+		 * of the grid has one.
+		 */
+		void applyFlexGrow(boolean gridHasExpandRatio) {
+			int flexGrow;
+			if (widthFixed) {
+				flexGrow = 0;
+			} else if (gridHasExpandRatio) {
+				flexGrow = Math.max(expandRatio, 0);
+			} else {
+				flexGrow = 1;
+			}
+			if (getFlexGrow() != flexGrow) {
+				super.setFlexGrow(flexGrow);
+			}
+		}
+
+		/**
+		 * Vaadin 8 minimum width: the column is at least this wide, whatever its content. Applied as the CSS
+		 * {@code min-width} of its cells (part name {@code sormas-col-min-<pixels>}); the theme
+		 * ({@code sormas.css} "Grids") has a rule for the widths the app uses.
 		 */
 		public Column<T, V> setMinimumWidth(double pixels) {
-			setWidth(GridSupport.pixels(pixels));
+			this.minimumWidth = pixels;
+			updatePartNames();
 			return this;
 		}
 
+		public double getMinimumWidth() {
+			return minimumWidth;
+		}
+
 		/**
-		 * Vaadin 8 maximum width. Flow grid columns have no maximum width: the value is only kept.
+		 * Vaadin 8 maximum width: the column neither sizes to its content nor grows beyond this width; longer text is cut
+		 * with an ellipsis. Applied as the CSS {@code max-width} of its cells (part name {@code sormas-col-max-<pixels>});
+		 * the theme ({@code sormas.css} "Grids") has a rule for the widths the app uses.
 		 */
 		public Column<T, V> setMaximumWidth(double pixels) {
 			this.maximumWidth = pixels;
+			updatePartNames();
 			return this;
 		}
 
 		public double getMaximumWidth() {
 			return maximumWidth;
+		}
+
+		/**
+		 * Puts the width limit part names on the header, footer and body cells, so that all cells of the column have the
+		 * same limits.
+		 */
+		private void updatePartNames() {
+			String limits = GridSupport.widthLimitPartNames(minimumWidth, maximumWidth);
+			super.setHeaderPartName(GridSupport.joinPartNames(headerPartName, limits));
+			super.setFooterPartName(GridSupport.joinPartNames(footerPartName, limits));
+			SerializableFunction<T, String> generator = cellPartNameGenerator;
+			if (limits == null) {
+				super.setPartNameGenerator(generator != null ? generator : item -> null);
+			} else if (generator == null) {
+				super.setPartNameGenerator(item -> limits);
+			} else {
+				super.setPartNameGenerator(item -> GridSupport.joinPartNames(generator.apply(item), limits));
+			}
+		}
+
+		/**
+		 * The header cell's part names (Vaadin 8 header cell style name), plus the column's width limit part names.
+		 */
+		@Override
+		public com.vaadin.flow.component.grid.Grid.Column<T> setHeaderPartName(String partName) {
+			this.headerPartName = partName;
+			updatePartNames();
+			return this;
+		}
+
+		/**
+		 * @return the header part names set with {@link #setHeaderPartName(String)}, without the width limits
+		 */
+		@Override
+		public String getHeaderPartName() {
+			return headerPartName;
+		}
+
+		/**
+		 * The footer cell's part names, plus the column's width limit part names.
+		 */
+		@Override
+		public com.vaadin.flow.component.grid.Grid.Column<T> setFooterPartName(String partName) {
+			this.footerPartName = partName;
+			updatePartNames();
+			return this;
+		}
+
+		/**
+		 * @return the footer part names set with {@link #setFooterPartName(String)}, without the width limits
+		 */
+		@Override
+		public String getFooterPartName() {
+			return footerPartName;
 		}
 
 		@Override

@@ -51,6 +51,8 @@ public class SurveillanceOverviewLayout extends CustomLayout {
 	private Boolean isShowingAllDiseases;
 
 	public SurveillanceOverviewLayout(DashboardDataProvider dashboardDataProvider) {
+		// a Vaadin 8 CustomLayout was 100% wide by default; the Flow CustomLayout is as wide as its content
+		setWidthFull();
 
 		setTemplateContents(
 			LayoutUtil.fluidRow(LayoutUtil.fluidColumnLoc(6, 0, 12, 0, BURDEN_LOC), LayoutUtil.fluidColumnLoc(6, 0, 12, 0, DIFFERENCE_LOC))
@@ -141,6 +143,8 @@ public class SurveillanceOverviewLayout extends CustomLayout {
 		buttonsLayout.add(hideOverview);
 		buttonsLayout.setVerticalComponentAlignment(FlexComponent.Alignment.END, hideOverview);
 		buttonsLayout.setFlexGrow(0, hideOverview);
+		// was BOTTOM_RIGHT: the check box stays at the right end also when both buttons are hidden
+		buttonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
 		addComponent(buttonsLayout, EXTEND_BUTTONS_LOC);
 

@@ -98,6 +98,8 @@ public class AefiDashboardView extends AbstractDashboardView {
 		dashboardLayout.setFlexGrow(0, filterLayout);
 
 		aefiCountsLayout = new CustomLayout();
+		// a Vaadin 8 CustomLayout was 100% wide by default; the Flow CustomLayout is as wide as its content
+		aefiCountsLayout.setWidthFull();
 		//@formatter:off
 		aefiCountsLayout.setTemplateContents(
 			fluidRowCss(

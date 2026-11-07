@@ -805,6 +805,12 @@ vaadin-grid::part(body-cell) {
   min-height: var(--sormas-grid-row-height);
 }
 
+/* Vaadin 8 HeightMode.UNDEFINED (Grid.setHeightMode, setAllRowsVisible): the rows give the height, also when the grid
+   sits in an expanded layout slot (Vaadin 8 expanded the slot, not the grid) */
+vaadin-grid[all-rows-visible] {
+  flex-grow: 0 !important;
+}
+
 /* Header: small, semi-bold, upper case captions over a 2px line */
 vaadin-grid::part(header-cell) {
   min-height: var(--sormas-grid-row-height);

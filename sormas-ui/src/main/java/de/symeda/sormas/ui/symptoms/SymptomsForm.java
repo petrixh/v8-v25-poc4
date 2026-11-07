@@ -318,8 +318,9 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 
 		ComboBox temperature = addField(TEMPERATURE, ComboBox.class);
 		temperature.setImmediate(true);
+		// Flow: add the items in one call; each addItem refreshes the combo box and schedules a client reset
+		temperature.addItems(SymptomsHelper.getTemperatureValues());
 		for (Float temperatureValue : SymptomsHelper.getTemperatureValues()) {
-			temperature.addItem(temperatureValue);
 			temperature.setItemCaption(temperatureValue, SymptomsHelper.getTemperatureString(temperatureValue));
 		}
 		if (symptomsContext == SymptomsContext.CASE) {
@@ -336,15 +337,15 @@ public class SymptomsForm extends AbstractEditForm<SymptomsDto> {
 		ComboBox respiratoryRate = addField(RESPIRATORY_RATE, ComboBox.class);
 		respiratoryRate.addItems(SymptomsHelper.getRespiratoryRateValues());
 		ComboBox weight = addField(WEIGHT, ComboBox.class);
+		weight.addItems(SymptomsHelper.getWeightValues());
 		for (Integer weightValue : SymptomsHelper.getWeightValues()) {
-			weight.addItem(weightValue);
 			weight.setItemCaption(weightValue, SymptomsHelper.getDecimalString(weightValue));
 		}
 		ComboBox height = addField(HEIGHT, ComboBox.class);
 		height.addItems(SymptomsHelper.getHeightValues());
 		ComboBox midUpperArmCircumference = addField(MID_UPPER_ARM_CIRCUMFERENCE, ComboBox.class);
+		midUpperArmCircumference.addItems(SymptomsHelper.getMidUpperArmCircumferenceValues());
 		for (Integer circumferenceValue : SymptomsHelper.getMidUpperArmCircumferenceValues()) {
-			midUpperArmCircumference.addItem(circumferenceValue);
 			midUpperArmCircumference.setItemCaption(circumferenceValue, SymptomsHelper.getDecimalString(circumferenceValue));
 		}
 		ComboBox glasgowComaScale = addField(GLASGOW_COMA_SCALE, ComboBox.class);

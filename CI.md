@@ -17,9 +17,9 @@ On every push to any branch (there is no pull request trigger: a pushed commit's
 
 `sormas-ui` uses a Vaadin commercial component, the Rich Text Editor (see the notice at the top of [`README.md`](README.md)). Vaadin's prebuilt frontend bundle does not contain it, so the production build of `sormas-ui` (`vaadin-maven-plugin` goal `build-frontend`) builds the bundle itself (it downloads Node to `~/.vaadin` and the npm packages) and checks the commercial licence. Without a valid key it stops with `Commercial features require a subscription` and the build fails.
 
-- **CI:** the build step gets the key from the repository secret `VAADIN_PRODMODE_CI_SERVER_KEY` as the environment variable `VAADIN_OFFLINE_KEY`. It is a Vaadin CI server key, valid for production-mode builds only. The workflow never prints it; when the secret is missing (for example in a fork) the step logs a warning and the build then fails at the licence check.
-- **Locally:** the build reads your Vaadin pro key from `~/.vaadin/proKey` or the environment variable `VAADIN_PRO_KEY`. When Maven runs in a container, pass the variable by name only (`docker run -e VAADIN_PRO_KEY ...`) or mount the key file read-only; never write the key into an image, a file in the repository or a log.
-- Vaadin also offers a watermarked build without a key (`-Dvaadin.commercialWithBanner`); this project does not use it: the banner it shows can get in the way of clicks.
+- **CI:** the build runs `mvn -B -ntp clean install -Dvaadin.commercialWithBanner` (no key, no `VAADIN_OFFLINE_KEY`). Vaadin builds the commercial components with a commercial banner and without Daily Active User licensing, so the CI-built app starts. The repository secret `VAADIN_PRODMODE_CI_SERVER_KEY` stays in the settings, unused: the CI server key turns on DAU licensing, which needs `license-checker` at runtime (`ClassNotFoundException: com.vaadin.pro.licensechecker.dau.DauIntegration` at the smoke start). Decision E002 (C).
+- **A banner-built artefact must never be shipped or deployed outside CI.** CI keeps no artefacts (only failure diagnostics); do not build releases or deployable images from a CI run.
+- **Locally and for releases:** the build reads your Vaadin pro key from `~/.vaadin/proKey` or the environment variable `VAADIN_PRO_KEY`. When Maven runs in a container, pass the variable by name only (`docker run -e VAADIN_PRO_KEY ...`) or mount the key file read-only; never write the key into an image, a file in the repository or a log.
 
 ## Smoke
 

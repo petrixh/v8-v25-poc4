@@ -35,6 +35,7 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import org.hamcrest.MatcherAssert;
@@ -719,5 +720,50 @@ public class EventFacadeEjbTest extends AbstractBeanTest {
 		eventCriteria.setFreeTextEventParticipants(null);
 		List<EventIndexDto> eventIndexDtosAll = getEventFacade().getIndexList(eventCriteria, 0, 100, null);
 		assertEquals(3, eventIndexDtosAll.size());
+	}
+
+	/**
+	 * A jurisdiction user's filter joins the event participants: a page must still hold distinct events (1b-10).
+	 */
+	@Test
+	public void testGetIndexListPagesOverDistinctEventsForJurisdictionUser() {
+
+		RDCF rdcf = creator.createRDCF();
+		UserDto user = creator.createSurveillanceSupervisor(rdcf);
+		loginWith(user);
+
+		for (String title : Arrays.asList("TitleEv1", "TitleEv2", "TitleEv3")) {
+			EventDto event = creator.createEvent(
+				EventStatus.EVENT,
+				EventInvestigationStatus.PENDING,
+				title,
+				"Description",
+				"First",
+				"Name",
+				"12345",
+				TypeOfPlace.PUBLIC_PLACE,
+				DateHelper.subtractDays(new Date(), 1),
+				new Date(),
+				user.toReference(),
+				user.toReference(),
+				Disease.EVD,
+				rdcf);
+			for (int i = 0; i < 3; i++) {
+				creator.createEventParticipant(event.toReference(), creator.createPerson(), user.toReference());
+			}
+		}
+
+		EventCriteria eventCriteria = new EventCriteria();
+		assertEquals(3, getEventFacade().count(eventCriteria));
+
+		List<EventIndexDto> firstPage = getEventFacade().getIndexList(eventCriteria, 0, 2, null);
+		List<EventIndexDto> secondPage = getEventFacade().getIndexList(eventCriteria, 2, 2, null);
+		assertEquals(2, firstPage.size());
+		assertEquals(1, secondPage.size());
+
+		HashSet<String> uuids = new HashSet<>();
+		firstPage.forEach(e -> uuids.add(e.getUuid()));
+		secondPage.forEach(e -> uuids.add(e.getUuid()));
+		assertEquals(3, uuids.size());
 	}
 }

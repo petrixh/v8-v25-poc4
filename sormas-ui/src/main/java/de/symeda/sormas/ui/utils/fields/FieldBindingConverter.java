@@ -71,7 +71,7 @@ public class FieldBindingConverter<T> implements Converter<T, Object> {
 	public T convertToPresentation(Object value, ValueContext context) {
 		Converter<T, Object> converter = getEffectiveConverter();
 		T presentation = converter != null ? converter.convertToPresentation(value, context) : (T) value;
-		// Flow text fields do not accept null
-		return presentation == null ? field.getEmptyValue() : presentation;
+		// Flow text fields do not accept null; the CheckBox keeps a null property as null (V7), shown unchecked
+		return presentation == null && !(field instanceof CheckBox) ? field.getEmptyValue() : presentation;
 	}
 }

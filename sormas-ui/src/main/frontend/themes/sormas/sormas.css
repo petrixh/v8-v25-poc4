@@ -991,10 +991,10 @@ hr { margin-top: 0; margin-bottom: 0; }
 .count-element.minor > * { border-color: var(--sormas-minor-color); }
 .count-element.primary > * { border-color: var(--sormas-primary-color); }
 
-/* SVG bars and circles of the statistics elements (svg.scss). SvgBarElement is a 4px high span around the svg: the svg is
-   a block in it, so it does not sit on a text line and run over the next row */
-span:has(> svg > rect.svg-bar) { display: block; line-height: 0; }
-span:has(> svg > rect.svg-bar) > svg { display: block; }
+/* SVG bars and circles of the statistics elements (svg.scss). SvgBarElement is a span set 4px high around an inline svg:
+   the svg overflowed it onto the next row (labels looked struck through). As the Vaadin 8 label in its slot, the span
+   takes one text line and the bar sits on its baseline, 10px below the row above */
+span:has(> svg > rect.svg-bar) { height: auto !important; }
 .svg-circle { fill: none; stroke-width: 3; }
 .svg-fill-primary { fill: var(--sormas-primary-color); }
 .svg-fill-critical { fill: var(--sormas-critical-color); }

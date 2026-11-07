@@ -738,12 +738,25 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 		 * @return the type of the bean property (primitive types as their wrapper type)
 		 */
 		public Class<?> getPropertyType(Object propertyId) {
+			return wrapperType(getDeclaredPropertyType(propertyId));
+		}
+
+		private Class<?> getDeclaredPropertyType(Object propertyId) {
 			if (propertyId == null) {
 				throw new IllegalArgumentException("Property id must not be null");
 			}
 			PropertyDefinition<T, ?> property = propertySet.getProperty(propertyId.toString())
 				.orElseThrow(() -> new IllegalArgumentException("Property " + propertyId + " not found in " + beanType.getName()));
-			return wrapperType(property.getType());
+			return property.getType();
+		}
+
+		/**
+		 * The property type the field factory gets, as in Vaadin 7: {@code BeanFieldGroup.getPropertyType} returned the
+		 * declared type (a primitive stays primitive) while no bean was set, and the wrapper type once a bean was set. The
+		 * factory makes a check box for a primitive {@code boolean} and a Yes/No option group for a {@code Boolean}.
+		 */
+		private Class<?> getFieldFactoryType(Object propertyId) {
+			return bean != null ? getPropertyType(propertyId) : getDeclaredPropertyType(propertyId);
 		}
 
 		private static Class<?> wrapperType(Class<?> type) {
@@ -775,7 +788,7 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 		 */
 		@SuppressWarnings("rawtypes")
 		public <F extends Field> F buildAndBind(String caption, Object propertyId, Class<F> fieldType) {
-			Class<?> propertyType = getPropertyType(propertyId);
+			Class<?> propertyType = getFieldFactoryType(propertyId);
 			F field = fieldFactory.createField(propertyType, fieldType);
 			if (field == null) {
 				throw new IllegalStateException("Unable to build a field of type " + fieldType.getName() + " for editing " + propertyType.getName());

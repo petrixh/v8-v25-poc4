@@ -112,8 +112,9 @@ public abstract class DashboardFilterLayout<P extends AbstractDashboardDataProvi
 
 		setSpacing(true);
 		setSizeUndefined();
-		// was a margin on all sides but the bottom (MarginInfo); spacing details belong to the theme work
+		// was a margin on all sides but the bottom (MarginInfo)
 		setPadding(true);
+		getStyle().set("padding-bottom", "0");
 
 		String[] templateLocs = new String[] {
 			DATE_FILTER,

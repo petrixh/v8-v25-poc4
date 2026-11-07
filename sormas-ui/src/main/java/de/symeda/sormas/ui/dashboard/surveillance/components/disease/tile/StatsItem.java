@@ -62,5 +62,10 @@ public class StatsItem extends HorizontalLayout {
 			builder.isSingleColumn ? CssStyles.HSPACE_LEFT_5 : CssStyles.ALIGN_CENTER);
 		add(valueLabel);
 		setFlexGrow(builder.isSingleColumn ? 1f : 0.65f, valueLabel);
+		// Vaadin 8 expand ratios share out the whole width, not what the content leaves: start the growing labels from zero
+		valueLabel.getStyle().set("flex-basis", "0");
+		if (!builder.isSingleColumn) {
+			nameLabel.getStyle().set("flex-basis", "0");
+		}
 	}
 }

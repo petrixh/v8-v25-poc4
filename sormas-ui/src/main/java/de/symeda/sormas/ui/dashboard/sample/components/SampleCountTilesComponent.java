@@ -58,8 +58,9 @@ public class SampleCountTilesComponent<T extends Enum<?>> extends VerticalLayout
 		this.groupType = groupType;
 		this.tileBackgroundFactory = tileBackgroundFactory;
 
-		// was a left and right margin only (MarginInfo); spacing details belong to the theme work
+		// was a left and right margin only (MarginInfo(false, true)): the layout margin at the sides
 		setPadding(false);
+		getStyle().set("padding-left", "var(--lumo-space-l)").set("padding-right", "var(--lumo-space-l)");
 		setSpacing(false);
 		setWidthFull();
 

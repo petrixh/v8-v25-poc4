@@ -90,6 +90,8 @@ public class SampleDashboardView extends AbstractDashboardView {
 		dashboardLayout.add(heading);
 
 		sampleCountsLayout = new CustomLayout();
+		// a Vaadin 8 CustomLayout was 100% wide by default; the Flow CustomLayout is as wide as its content
+		sampleCountsLayout.setWidthFull();
 		sampleCountsLayout.setTemplateContents(
 			LayoutUtil.fluidRow(
 				LayoutUtil.fluidColumnLoc(4, 0, 5, 0, LAB_RESULTS),

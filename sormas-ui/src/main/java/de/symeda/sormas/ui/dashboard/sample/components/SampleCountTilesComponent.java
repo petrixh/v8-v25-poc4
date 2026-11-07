@@ -34,6 +34,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import de.symeda.sormas.api.i18n.Captions;
 import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 public class SampleCountTilesComponent<T extends Enum<?>> extends VerticalLayout {
 
@@ -74,7 +75,7 @@ public class SampleCountTilesComponent<T extends Enum<?>> extends VerticalLayout
 
 		if (StringUtils.isNotBlank(descriptionTag)) {
 			infoIcon = new Span(VaadinIcon.INFO_CIRCLE.create());
-			infoIcon.setTitle(I18nProperties.getDescription(descriptionTag));
+			VaadinUiUtil.setDescription(infoIcon, I18nProperties.getDescription(descriptionTag));
 			infoIcon.addClassName(CssStyles.HSPACE_LEFT_4);
 			infoIcon.addClassNames(titleStyleNames);
 

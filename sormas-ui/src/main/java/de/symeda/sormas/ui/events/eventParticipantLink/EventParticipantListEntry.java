@@ -19,6 +19,7 @@ import de.symeda.sormas.api.utils.DataHelper;
 import de.symeda.sormas.api.utils.DateHelper;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 public class EventParticipantListEntry extends HorizontalLayout {
 
@@ -83,7 +84,7 @@ public class EventParticipantListEntry extends HorizontalLayout {
 		mainLayout.add(diseaseStatusLayout);
 
 		Span titleLabel = new Span(eventParticipantListEntryDto.getEventTitle());
-		titleLabel.setTitle(eventParticipantListEntryDto.getEventTitle());
+		VaadinUiUtil.setDescription(titleLabel, eventParticipantListEntryDto.getEventTitle());
 		mainLayout.add(titleLabel);
 
 		if (eventParticipantListEntryDto.getEventStartDate() != null) {

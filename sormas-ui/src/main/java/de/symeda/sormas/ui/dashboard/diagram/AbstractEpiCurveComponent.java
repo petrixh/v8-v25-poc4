@@ -41,6 +41,7 @@ import de.symeda.sormas.ui.highcharts.HighChart;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.PopupButton;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.fields.CheckBox;
 import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
@@ -88,7 +89,7 @@ public abstract class AbstractEpiCurveComponent<P extends AbstractDashboardDataP
 		infoIcon = new Span(VaadinIcon.INFO_CIRCLE.create());
 		CssStyles.style(infoIcon, CssStyles.H3, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_NONE, CssStyles.HSPACE_LEFT_4);
 
-		this.infoIcon.setTitle(I18nProperties.getDescription(description));
+		VaadinUiUtil.setDescription(this.infoIcon, I18nProperties.getDescription(description));
 		epiCurveLabel.setSizeUndefined();
 		CssStyles.style(epiCurveLabel, CssStyles.H2, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_NONE);
 		HorizontalLayout labelWithInfoLayout = new HorizontalLayout(epiCurveLabel, infoIcon);

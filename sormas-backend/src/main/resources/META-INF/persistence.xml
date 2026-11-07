@@ -118,6 +118,11 @@
 			<property name="hibernate.query.native.prefer_jdbc_datetime_types" value="true"/>
 			<property name="hibernate.transaction.jta.platform"
 					  value="org.hibernate.engine.transaction.jta.platform.internal.GlassFishJtaPlatform"/>
+			<!-- No runtime bytecode enhancement, as with Hibernate 5 (and the tests, which have no container class transformer).
+			     Hibernate 7 defaults both to true and enhances the entities through Payara's class transformer: field access
+			     instead of the setters, and access optimizer bridge classes that fail for TravelEntry (IllegalAccessError) -->
+			<property name="hibernate.enhancer.enableDirtyTracking" value="false"/>
+			<property name="hibernate.enhancer.enableLazyInitialization" value="false"/>
 			<property name="hibernate.show_sql" value="false"/>
 			<property name="hibernate.format_sql" value="false"/>
 

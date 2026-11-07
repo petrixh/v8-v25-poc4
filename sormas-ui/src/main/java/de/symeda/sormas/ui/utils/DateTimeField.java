@@ -82,8 +82,8 @@ public class DateTimeField extends CustomField<Date> {
 		// value can't be set on readOnly fields
 		dateField.setReadOnly(false);
 		timeField.setReadOnly(false);
-		// set field values based on internal value
-		setPresentationValue(getValue());
+		// set field values based on the stored value (V7: super.getInternalValue())
+		setPresentationValue(super.getValue());
 		dateField.setReadOnly(isReadOnly());
 		timeField.setReadOnly(isReadOnly());
 
@@ -122,6 +122,23 @@ public class DateTimeField extends CustomField<Date> {
 		}
 	}
 
+	/**
+	 * As Vaadin 7 ({@code getInternalValue()}): once the content exists, the value is built from the date and time parts
+	 * on every read, also when the field is untouched: a new {@link Date} at the start of the day of the date part plus
+	 * the selected hour and minute, seconds and milliseconds 0, in the JVM time zone (no time selected: the date part's
+	 * start of the day; no date: {@code null}). It is never the stored object (often a {@code java.sql.Timestamp}), so
+	 * backend change checks see the same as in the old app: e.g. {@code EventFacadeEjb.hasVaccinationReferenceChanged}
+	 * sees a change on every event save and refreshes the event participants. Before the content exists, the stored
+	 * value.
+	 */
+	@Override
+	public Date getValue() {
+		if (dateField != null && timeField != null) {
+			return generateModelValue();
+		}
+		return super.getValue();
+	}
+
 	@Override
 	protected Date generateModelValue() {
 		if (dateField != null && timeField != null) {
@@ -137,7 +154,7 @@ public class DateTimeField extends CustomField<Date> {
 			}
 			return null;
 		}
-		return getValue();
+		return super.getValue();
 	}
 
 	@Override

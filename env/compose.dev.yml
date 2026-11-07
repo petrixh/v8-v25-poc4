@@ -1,0 +1,15 @@
+# Vaadin development mode overlay for the app service (APP_ENV_MODE=dev, env/README.md "Development mode"); lib.sh adds it
+# to compose.yml. The war is built with sormas-ui's -Pdev profile.
+services:
+  app:
+    environment:
+      # Flow dev mode checks the commercial components' licence at run time: the key is passed by name, never by value
+      VAADIN_PRO_KEY:
+      # Payara's JVM inherits it (asadmin start-domain). The browser reaches the app through Docker's port mapping, so
+      # Flow sees the Docker gateway, not a loopback address, and refuses the dev-tools websocket without a host rule.
+      # The port is published on 127.0.0.1 only (compose.yml)
+      JAVA_TOOL_OPTIONS: "-Dvaadin.devmode.hostsAllowed=*"
+    volumes:
+      # Flow dev mode needs the project folder that flow-build-info.json names (the build clone): it runs npm install and
+      # builds its development bundle there at deploy time, and serves /VAADIN/themes/sormas/ from its frontend folder
+      - ${APP_ENV_SRC_DIR:?}:${APP_ENV_SRC_DIR:?}

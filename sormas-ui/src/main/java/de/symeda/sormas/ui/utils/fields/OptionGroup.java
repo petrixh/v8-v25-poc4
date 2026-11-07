@@ -46,6 +46,13 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 	 * Set by the form binding right before it sets the {@code null} it read ({@link #readNull()}).
 	 */
 	private boolean readingNull;
+	/**
+	 * Multi select: V7's internal value is {@code null} while {@link #getValue()} shows an empty set. V7 had it after
+	 * reading a {@code null} property, and, with a converter ({@link NullableOptionGroup}), after any change to an
+	 * empty value (the {@code setValue} round trip through the converter gives {@code null}). Reading {@code null}
+	 * fired a value change event only when the internal value was not {@code null} yet.
+	 */
+	private boolean internalNull;
 
 	public OptionGroup() {
 		super();
@@ -89,6 +96,8 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 			} else {
 				setValue(value instanceof Collection ? ((Collection<?>) value).stream().findFirst().orElse(null) : value);
 			}
+			// V7 converted the value before the converter was set: a multi select starts with an empty set
+			internalNull = false;
 		}
 	}
 
@@ -140,19 +149,44 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 			}
 		}
 		nullRead = false;
+		internalNull = multiSelect && isEmptyValue(clientValue) && getConverter() != null;
 		updateValue();
 	}
 
 	/**
 	 * V7 {@code AbstractSelect.setValue}: in multi select, {@code null} is stored as an empty set, so the value of a
 	 * multi select is never {@code null}. A {@code null} the form binding read is the exception ({@link #readNull()}).
+	 * <p>
+	 * Reading {@code null} into a multi select whose value is already an empty set fires a value change event, as V7
+	 * {@code AbstractField.setPropertyDataSource} did when its internal value was not {@code null} yet (a new field
+	 * holds an empty set): form listeners on the field (e.g. hiding dependent fields unless the value is Yes) run when
+	 * the form reads an empty property. Reading {@code null} again fires nothing, as in V7.
 	 */
 	@Override
 	public void setValue(Object value) {
 		boolean fromRead = readingNull && value == null;
 		readingNull = false;
-		super.setValue(multiSelect && value == null ? new LinkedHashSet<>() : value);
+		Object newValue = multiSelect && value == null ? new LinkedHashSet<>() : value;
+		Object oldValue = getValue();
+		boolean fireRead = fromRead && multiSelect && !internalNull && isEmptyValue(oldValue);
 		nullRead = fromRead && multiSelect;
+		if (!multiSelect) {
+			internalNull = false;
+		} else if (fromRead) {
+			internalNull = true;
+		} else if (internalNull || !Objects.equals(newValue, oldValue)) {
+			// V7 AbstractField.setValue: a value equal to the internal value changes nothing; otherwise the value goes
+			// through the converter and back, which makes an empty value null with a converter
+			internalNull = isEmptyValue(newValue) && getConverter() != null;
+		}
+		super.setValue(newValue);
+		if (fireRead) {
+			fireEvent(new ComponentValueChangeEvent<>(this, this, oldValue, false));
+		}
+	}
+
+	private static boolean isEmptyValue(Object value) {
+		return value == null || (value instanceof Collection && ((Collection<?>) value).isEmpty());
 	}
 
 	/**

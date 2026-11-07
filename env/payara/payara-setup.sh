@@ -16,6 +16,11 @@ $A create-system-properties --target server-config fish.payara.classloading.dele
 $A get configs.config.server-config.ejb-container.max-pool-size
 $A set configs.config.server-config.ejb-container.max-pool-size=128
 $A set configs.config.server-config.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=50
+# Grizzly 5 (Payara 7) closes the connection instead of writing a response chunk when the connection's pending bytes
+# would exceed 16 x the transport's socket write buffer size ("Asynchronous write queue hard limit exceeded"). Unset (-1),
+# that size is the kernel's socket send buffer at accept time (43,520 here: limit 696,320 bytes), and a larger Vaadin
+# UIDL response is never sent. 1 MiB raises the hard limit to 16 MiB (back-pressure from 4 MiB). As server-setup.sh.
+$A set configs.config.server-config.network-config.transports.transport.tcp.socket-write-buffer-size=1048576
 $A create-jdbc-connection-pool --restype javax.sql.ConnectionPoolDataSource --datasourceclassname org.postgresql.ds.PGConnectionPoolDataSource --isconnectvalidatereq true --validationmethod custom-validation --validationclassname org.glassfish.api.jdbc.validation.PostgresConnectionValidation --maxpoolsize 128 --property 'portNumber=5432:databaseName=sormas_db:serverName=${ENV=SORMAS_DB_HOST}:user=sormas_user:password=${ENV=SORMAS_DB_PW}' sormasDataPool
 $A create-jdbc-resource --connectionpoolid sormasDataPool jdbc/sormasDataPool
 # Mail: the copy's SMTP sink (compose service "mail", port 1025), never an outside mail host

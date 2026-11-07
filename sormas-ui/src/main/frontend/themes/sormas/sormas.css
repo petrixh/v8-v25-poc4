@@ -1,0 +1,780 @@
+/*
+ * SORMAS global theme settings on Lumo (Vaadin 25). Loaded by SormasAppShell (@StyleSheet), after
+ * bootstrap-grid.min.css and lumo/lumo.css. Served at VAADIN/themes/sormas/sormas.css in both Vaadin modes
+ * (this folder is copied to the war, see sormas-ui/pom.xml; dev mode reads it here).
+ *
+ * Carries the global look of the Vaadin 8 Valo theme "sormas" (webapp/VAADIN/themes/sormas/sormas.scss, global.scss,
+ * components/label.scss, components/menu.scss, views/view.scss): palette, font, sizes, density, the menu bar and the
+ * SORMAS style class names of CssStyles that set layout or the global look. Structural parity, not pixel parity:
+ * component-level styles of the old theme (grid, window, tabsheet, option group, dashboard, login, ...) are not here.
+ */
+
+/* Open Sans, as Valo loaded it for $v-font-family. Files from vaadin-themes 8.14.3 (VAADIN/themes/valo/fonts/open-sans),
+   Open Sans by Steve Matteson, Apache License 2.0. */
+@font-face {
+  font-family: 'Open Sans';
+  src: url('fonts/OpenSans-Regular-webfont.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Open Sans';
+  src: url('fonts/OpenSans-Italic-webfont.woff') format('woff');
+  font-weight: 400;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'Open Sans';
+  src: url('fonts/OpenSans-Semibold-webfont.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Open Sans';
+  src: url('fonts/OpenSans-Bold-webfont.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 1. Settings: the Valo variables of sormas.scss as custom properties, and Lumo set from them
+ * ------------------------------------------------------------------------------------------------------------- */
+html {
+  /* SORMAS palette (sormas.scss $s-*) */
+  --sormas-default-color: #6691C4;          /* $s-default-color: menu background */
+  --sormas-primary-color: #005A9C;          /* $s-primary-color, $v-selection-color */
+  --sormas-secondary-color: #6591C4;        /* $s-secondary-color: h2-h4 */
+  --sormas-critical-color: rgb(200, 0, 0);
+  --sormas-critical-transparent-color: rgba(200, 0, 0, 0.7);
+  --sormas-critical-most-transparent-color: rgba(200, 0, 0, 0.1);
+  --sormas-important-color: rgb(190, 105, 0);
+  --sormas-important-transparent-color: rgba(190, 105, 0, 0.7);
+  --sormas-warning-color: rgb(190, 105, 0);
+  --sormas-relevant-color: rgb(200, 170, 0);
+  --sormas-relevant-transparent-color: rgba(200, 170, 0, 0.7);
+  --sormas-neutral-color: #00BFFF;
+  --sormas-positive-color: #32CD32;
+  --sormas-minor-color: #808080;
+  --sormas-steady-color: #FF8C00;
+  --sormas-highlight-subtle-color: rgba(244, 244, 244, 0.8);
+  --sormas-highlight-slightly-subtle-color: rgba(244, 244, 244, 0.7);
+  --sormas-highlight-color: #C9C9C9;
+  --sormas-background-color: #FEFEFE;       /* $v-background-color */
+  --sormas-font-color: #394C5B;             /* $v-font-color */
+  --sormas-focus-color: #CDD8EC;            /* $v-focus-color: borders, selected rows */
+  --sormas-focus-light-color: #EDF2FD;      /* $v-focus-light-color */
+  --sormas-link-color: #1565A2;             /* $v-link-font-color */
+  --sormas-font-family: "Open Sans", sans-serif, "Source Sans Pro";
+  --sormas-font-size: 12px;                 /* $v-font-size */
+  --sormas-unit-size: 32px;                 /* $v-unit-size: field and button height */
+  --sormas-layout-margin: 21px;             /* $v-layout-margin: round(32 / 1.5) */
+  --sormas-layout-spacing: 18px;            /* $v-layout-spacing: round(32 / 1.8) */
+
+  /* Lumo colours */
+  --lumo-base-color: var(--sormas-background-color);
+  --lumo-primary-color: var(--sormas-primary-color);
+  --lumo-primary-color-50pct: rgba(0, 90, 156, 0.5);
+  --lumo-primary-color-10pct: rgba(0, 90, 156, 0.1);
+  --lumo-primary-text-color: var(--sormas-primary-color);
+  --lumo-primary-contrast-color: #FFFFFF;
+  --lumo-error-color: var(--sormas-critical-color);
+  --lumo-error-color-50pct: var(--sormas-critical-more-transparent-color, rgba(200, 0, 0, 0.5));
+  --lumo-error-color-10pct: var(--sormas-critical-most-transparent-color);
+  --lumo-error-text-color: var(--sormas-critical-color);
+  --lumo-warning-color: var(--sormas-warning-color);
+  --lumo-warning-text-color: var(--sormas-warning-color);
+  --lumo-body-text-color: var(--sormas-font-color);
+  --lumo-header-text-color: var(--sormas-font-color);
+
+  /* Lumo typography: Valo's 12px base; h3 16px, h2 1.6em, h1 2.4em as in Valo */
+  --lumo-font-family: var(--sormas-font-family);
+  --lumo-font-size-xxs: 9px;
+  --lumo-font-size-xs: 10px;
+  --lumo-font-size-s: 11px;                 /* $v-font-size--small */
+  --lumo-font-size-m: 12px;                 /* $v-font-size */
+  --lumo-font-size-l: 14px;
+  --lumo-font-size-xl: 16px;                /* $v-font-size--h3 */
+  --lumo-font-size-xxl: 19px;               /* h2 */
+  --lumo-font-size-xxxl: 29px;              /* h1 */
+  --lumo-line-height-m: 1.55;               /* $v-line-height */
+
+  /* Lumo density: Valo's 32px unit */
+  --lumo-size-xl: 48px;
+  --lumo-size-l: 40px;
+  --lumo-size-m: 32px;                      /* $v-unit-size */
+  --lumo-size-s: 27px;                      /* $v-unit-size--small */
+  --lumo-size-xs: 24px;
+  --lumo-space-xl: 32px;
+  --lumo-space-l: 21px;                     /* layout margin */
+  --lumo-space-m: 12px;
+  --lumo-space-s: 8px;
+  --lumo-space-xs: 4px;
+  --lumo-border-radius-m: 4px;              /* $v-border-radius */
+  --vaadin-vertical-layout-padding: var(--sormas-layout-margin);
+  --vaadin-horizontal-layout-padding: var(--sormas-layout-margin);
+  --vaadin-vertical-layout-gap: var(--sormas-layout-spacing);
+  --vaadin-horizontal-layout-gap: var(--sormas-layout-spacing);
+
+  /* Fields: white with a 2px focus-colour border, uppercase semi-bold caption (global.scss .v-caption, $v-border) */
+  --vaadin-input-field-background: #FFFFFF;
+  --vaadin-input-field-border-width: 2px;
+  --vaadin-input-field-border-color: var(--sormas-focus-color);
+  --vaadin-input-field-label-font-size: 11px;
+  --vaadin-input-field-label-font-weight: 600;
+  --vaadin-input-field-label-color: var(--sormas-font-color);
+  --vaadin-input-field-focused-label-color: var(--sormas-font-color);
+  --vaadin-input-field-hovered-label-color: var(--sormas-font-color);
+  --vaadin-input-field-required-indicator: "*";            /* Valo: red asterisk after the caption */
+  --vaadin-input-field-required-indicator-color: var(--sormas-critical-color);
+
+  /* Buttons: outlined in the selection colour, primary filled (button.scss, $v-border-primary) */
+  --vaadin-button-background: #FFFFFF;
+  --vaadin-button-text-color: var(--sormas-font-color);
+  --vaadin-button-border: 1px solid var(--sormas-primary-color);
+  --vaadin-button-primary-background: var(--sormas-primary-color);
+  --vaadin-button-primary-text-color: #FFFFFF;
+  --vaadin-button-primary-border: 1px solid var(--sormas-primary-color);
+  --vaadin-button-tertiary-border: none;
+  --vaadin-button-tertiary-text-color: var(--sormas-link-color);
+
+  /* bootstrap-grid.min.css sets html { font-size: 10px }; Lumo sizes are in rem: back to the browser default */
+  font-size: 16px;
+}
+
+body {
+  /* bootstrap-grid.min.css (normalize) styles body directly; Lumo's own body rule has no specificity */
+  font-family: var(--lumo-font-family);
+  font-size: var(--lumo-font-size-m);
+  line-height: var(--lumo-line-height-m);
+  color: var(--lumo-body-text-color);
+  background-color: var(--lumo-base-color);
+}
+
+a,
+a:not(:any-link) {
+  /* Vaadin 8 links without an address (grid id links) were link-coloured; Lumo greys them out */
+  color: var(--sormas-link-color);
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 2. Captions and buttons (global.scss .v-caption, button.scss .v-button)
+ * ------------------------------------------------------------------------------------------------------------- */
+vaadin-text-field::part(label),
+vaadin-text-area::part(label),
+vaadin-password-field::part(label),
+vaadin-email-field::part(label),
+vaadin-integer-field::part(label),
+vaadin-number-field::part(label),
+vaadin-big-decimal-field::part(label),
+vaadin-combo-box::part(label),
+vaadin-multi-select-combo-box::part(label),
+vaadin-select::part(label),
+vaadin-date-picker::part(label),
+vaadin-date-time-picker::part(label),
+vaadin-time-picker::part(label),
+vaadin-radio-group::part(label),
+vaadin-checkbox-group::part(label),
+vaadin-custom-field::part(label),
+vaadin-list-box::part(label),
+.v-caption {
+  text-transform: uppercase;
+}
+
+.v-caption {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* required fields: border in the selection colour (textfield.scss .v-required) */
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker)[required] {
+  --vaadin-input-field-border-color: var(--sormas-primary-color);
+}
+
+.no-uppercase::part(label),
+.v-caption.no-uppercase {
+  text-transform: none;
+}
+
+vaadin-button {
+  text-transform: uppercase;
+}
+
+vaadin-button[theme~="tertiary-inline"],
+vaadin-button.filter {
+  /* Valo .v-button-link and the SORMAS filter buttons (button.scss) keep their case */
+  text-transform: none;
+}
+
+vaadin-button[theme~="tertiary-inline"] {
+  /* Valo .v-button-link: link-coloured text, no frame */
+  --vaadin-button-border: none;
+  --vaadin-button-text-color: var(--sormas-link-color);
+}
+
+/* read-only fields show their value as text, without a frame (textfield.scss .v-readonly) */
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker)[readonly] {
+  --vaadin-input-field-readonly-border: none;
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 3. Headings (global.scss h1-h4 colours on the Valo label sizes)
+ * ------------------------------------------------------------------------------------------------------------- */
+h1, .h1,
+h2, .h2,
+h3, .h3,
+h4, .h4 {
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+h1, .h1 {
+  color: var(--sormas-primary-color);
+  font-size: 2.4em;
+  letter-spacing: -0.03em;
+  margin-top: 1.4em;
+  margin-bottom: 1em;
+}
+
+h2, .h2 {
+  color: var(--sormas-secondary-color);
+  font-size: 1.6em;
+  letter-spacing: -0.02em;
+  margin-top: 1.6em;
+  margin-bottom: 0.77em;
+}
+
+h3, .h3 {
+  color: var(--sormas-secondary-color);
+  font-size: 16px;
+  margin-top: 1.8em;
+  margin-bottom: 0.77em;
+}
+
+h4, .h4 {
+  color: var(--sormas-secondary-color);
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-top: 2.4em;
+  margin-bottom: 0.8em;
+}
+
+vaadin-vertical-layout > :first-child:is(h1, .h1, h2, .h2, h3, .h3, h4, .h4) {
+  margin-top: var(--sormas-font-size);
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 4. Application shell: menu as a vertical left bar, view area, view header (menu.scss, view.scss)
+ * ------------------------------------------------------------------------------------------------------------- */
+.sormas-content {
+  overflow: auto;
+}
+
+.valo-menu {
+  flex: none;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: var(--sormas-default-color);
+  border-right: 1px solid var(--sormas-focus-color);
+  color: #FFFFFF;
+  font-size: 16px;
+  padding-bottom: var(--sormas-unit-size);
+}
+
+.valo-menu .valo-menu-title {
+  padding: 36px 12px;
+  background: var(--sormas-background-color);
+  color: var(--sormas-default-color);
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 32px;
+  line-height: 32px;
+  letter-spacing: -1px;
+  border-bottom: 3px solid var(--sormas-critical-color);
+}
+
+.valo-menu .valo-menu-logo {
+  display: inline-block;
+  height: auto;
+  max-height: 64px;
+  width: auto;
+}
+
+/* "Menu" toggle: Valo shows it on narrow screens only */
+.valo-menu .valo-menu-toggle {
+  display: none;
+}
+
+.valo-menu .valo-menuitems {
+  display: flex;
+  flex-direction: column;
+}
+
+.valo-menu vaadin-button.valo-menu-item {
+  --vaadin-button-background: transparent;
+  --vaadin-button-border: none;
+  --vaadin-button-text-color: #FFFFFF;
+  justify-content: flex-start;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 8px 16px;
+  border-radius: 0;
+  font-size: 16px;
+  line-height: 36px;
+  text-transform: none;
+  font-weight: 400;
+  position: relative;
+}
+
+.valo-menu vaadin-button.valo-menu-item vaadin-icon {
+  width: 28px;
+  height: 28px;
+  min-width: 36px;
+  margin-right: 8px;
+}
+
+.valo-menu vaadin-button.valo-menu-item.selected {
+  --vaadin-button-background: var(--sormas-background-color);
+  --vaadin-button-text-color: var(--sormas-primary-color);
+}
+
+.valo-menu vaadin-button.valo-menu-item.selected::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 4px;
+  height: 100%;
+  background-color: var(--sormas-primary-color);
+  content: "";
+}
+
+/* Settings and logout: Valo's user menu, below the items */
+.valo-menu .user-menu {
+  margin: 8px 0;
+  --vaadin-button-background: transparent;
+  --vaadin-button-border: none;
+  --vaadin-button-text-color: #FFFFFF;
+}
+
+.valo-menu .user-menu vaadin-menu-bar-button,
+.valo-menu .user-menu vaadin-menu-bar-item {
+  text-transform: none;
+  font-size: 16px;
+}
+
+.valo-menu .settings-menu {
+  margin-top: 42px;
+}
+
+.top-menu-container {
+  max-height: 115px;
+}
+
+.menu-subtitle {
+  font-size: 24px;
+}
+
+.view-header {
+  padding-left: var(--sormas-layout-margin);
+  padding-right: var(--sormas-layout-margin);
+  border-bottom: 3px solid var(--sormas-focus-color);
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 5. Label styles (components/label.scss): colours, sizes, font styles. Scoped to plain elements: the same class
+ *    names (primary, small, warning, ...) are button variants or other components' names in CssStyles.
+ * ------------------------------------------------------------------------------------------------------------- */
+:is(span, div, label, p, a, li, td, b, strong, i, em).primary { color: var(--sormas-primary-color); font-weight: 600; }
+:is(span, div, label, p, a, li, td, b, strong, i, em).secondary { color: var(--sormas-secondary-color); }
+:is(span, div, label, p, a, li, td, b, strong, i, em).critical { color: var(--sormas-critical-color); font-weight: 600; }
+:is(span, div, label, p, a, li, td, b, strong, i, em).important { color: var(--sormas-important-color); font-weight: 600; }
+:is(span, div, label, p, a, li, td, b, strong, i, em).warning { color: var(--sormas-warning-color); font-weight: 600; }
+:is(span, div, label, p, a, li, td, b, strong, i, em).relevant { color: var(--sormas-relevant-color); }
+:is(span, div, label, p, a, li, td, b, strong, i, em).neutral { color: var(--sormas-neutral-color); }
+:is(span, div, label, p, a, li, td, b, strong, i, em).positive { color: var(--sormas-positive-color); }
+:is(span, div, label, p, a, li, td, b, strong, i, em).minor { color: var(--sormas-minor-color); }
+:is(span, div, label, p, a, li, td, b, strong, i, em).discarded { text-decoration: line-through; color: #888; }
+:is(span, div, label, p, a, li, td, b, strong, i, em).done { color: #888; }
+:is(span, div, label, p, a, li, td, b, strong, i, em).not { color: #C44; }
+:is(span, div, label, p, a, li, td, b, strong, i, em).white { color: #FFF; }
+
+.bg-follow-up-symptomatic { background: var(--sormas-critical-color); line-height: 2em; }
+.bg-follow-up-not-symptomatic { background: var(--sormas-positive-color); line-height: 2em; }
+.bg-follow-up-unavailable { background: #6277cc; line-height: 2em; }
+.bg-follow-up-uncooperative { background: #ff19ff; line-height: 2em; }
+.bg-follow-up-not-performed { background: var(--sormas-minor-color); line-height: 2em; }
+
+.rounded-corners { border-radius: 8px; padding: 8px; }
+.rounded-corners-slim { border-radius: 4px; padding: 4px; }
+.background-focus-light { background: var(--sormas-focus-light-color); }
+.vertical-align-super { vertical-align: super; }
+
+:is(span, div, label, p, a, li, td).small { font-size: 0.75em; }
+:is(span, div, label, p, a, li, td).medium { font-size: 1em; }
+:is(span, div, label, p, a, li, td).large { font-size: 1.25em; }
+.large-alt { font-size: 1.25em; line-height: 1.1; }
+.xlarge { font-size: 1.5em; }
+.xxlarge { font-size: 2em; }
+.xxxlarge { font-size: 2.5em; }
+.really-large { font-size: 5em; line-height: 1em; }
+
+.bold { font-weight: bold; }
+.italic { font-style: italic; }
+.uppercase { text-transform: uppercase; }
+.bottom-line { border-bottom: 1px solid var(--sormas-focus-color); }
+.white-space-normal { white-space: normal !important; }
+.text-align-right { text-align: right; }
+.caption-truncated {
+  width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  display: block;
+}
+.side-component :is(span, div, label) {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 6. Layout and global style classes (global.scss "CUSTOM STYLES", orderedlayout.scss)
+ * ------------------------------------------------------------------------------------------------------------- */
+.v-caption-multiline { white-space: normal; }
+.force-caption { margin-top: 1.5em; margin-bottom: 16px; }
+.force-caption-checkbox { margin-top: 2.2em; margin-bottom: 16px; }
+
+/* like bootstrap grid with free columns */
+.inline-container { margin-left: -15px; margin-right: -15px; }
+.inline-container > div { padding-left: 15px; padding-right: 15px; display: inline-block; vertical-align: top; }
+
+/* filter bars: filters side by side, wrapping */
+.filters-container { margin-left: -8px; margin-right: -8px; white-space: normal; font-size: 0; }
+.filters-container > * { display: inline-block; vertical-align: top; font-size: var(--sormas-font-size); }
+.filters-container > * .filter-item { margin-left: 8px; margin-right: 8px; }
+
+.fieldextrainfo { font-size: 0.9em; }
+vaadin-text-area.resizable::part(input-field) { resize: vertical; overflow: auto; }
+
+.badge {
+  padding: 2px 9px 2px;
+  margin-left: 5px;
+  font-weight: bold;
+  white-space: nowrap;
+  color: #ffffff;
+  background-color: var(--sormas-primary-color);
+  border-radius: 9px;
+}
+
+.vspace-0 { margin-bottom: 64px; }
+.vspace-1 { margin-bottom: 36px; }
+.vspace-2 { margin-bottom: 24px; }
+.vspace-3 { margin-bottom: 16px; }
+.vspace-4 { margin-bottom: 6px; }
+.vspace-5 { margin-bottom: 2px; }
+.vspace-none { margin-bottom: 0 !important; }
+
+.vspace-top-0 { margin-top: 64px; }
+.vspace-top-1 { margin-top: 36px; }
+.vspace-top-2 { margin-top: 24px; }
+.vspace-top-3 { margin-top: 16px; }
+.vspace-top-4 { margin-top: 6px; }
+.vspace-top-5 { margin-top: 2px; }
+.vspace-top-6 { margin-top: -8px; }
+.vspace-top-none { margin-top: 0 !important; }
+
+.hspace-left-0 { margin-left: 64px; }
+.hspace-left-1 { margin-left: 36px; }
+.hspace-left-2 { margin-left: 20px; }
+.hspace-left-3 { margin-left: 10px; }
+.hspace-left-4 { margin-left: 6px; }
+.hspace-left-5 { margin-left: 2px; }
+.hspace-left-6 { margin-left: -50px; }
+.hspace-left-none { margin-left: 0 !important; }
+
+.hspace-right-0 { margin-right: 64px; }
+.hspace-right-1 { margin-right: 36px; }
+.hspace-right-2 { margin-right: 20px; }
+.hspace-right-3 { margin-right: 10px; }
+.hspace-right-4 { margin-right: 6px; }
+.hspace-right-5 { margin-right: 2px; }
+.hspace-right-none { margin-right: 0 !important; }
+
+.indent-left-1 { margin-left: 15px; }
+.indent-left-2 { margin-left: 30px; }
+.indent-left-3 { margin-left: 45px; }
+
+.margin-x-4 { margin-left: 4px; margin-right: 4px; }
+.margin-top-4 { margin-top: 4px; }
+.padding-none { padding: 0 !important; }
+.padding-x-8 { padding: 0 8px !important; }
+.padding-x-20 { padding: 0 20px !important; }
+
+.vertical-rule { border-right: 1px solid var(--sormas-focus-color); }
+
+.rich-text-content-container {
+  box-shadow: inset 0 0 4px var(--sormas-focus-color);
+  border-radius: 4px;
+  padding: 10px;
+  background-color: #F7F8F8;
+  margin-top: 10px;
+}
+.rich-text-content-container .reply {
+  border-top: 2px dashed var(--sormas-focus-color);
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.text-bold { font-weight: bold; }
+.align-right { text-align: right; }
+.align-center { text-align: center; }
+
+/* classification criteria */
+.background-criteria { background: var(--sormas-highlight-subtle-color); }
+.background-sub-criteria { background: var(--sormas-highlight-slightly-subtle-color); }
+.background-suspect-criteria { background: var(--sormas-relevant-transparent-color); }
+.background-probable-criteria { background: var(--sormas-important-transparent-color); }
+.background-confirmed-criteria { background: var(--sormas-critical-transparent-color); }
+.background-not-a-case-criteria { background: var(--sormas-highlight-color); }
+.background-duplicate-aggregate-report { background: var(--sormas-critical-most-transparent-color); }
+.background-rounded-corners { border-radius: 8px; padding: 8px; }
+
+.geocode-button-highlight { color: var(--sormas-critical-color) !important; }
+
+.root-component { min-width: 640px; max-width: 1280px; }
+.main-component { min-width: 640px; margin-bottom: 24px; }
+.side-component {
+  min-width: 420px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 12px 20px;
+  margin-bottom: 24px;
+}
+.active-side-component-element {
+  background-color: var(--sormas-focus-color);
+  border-radius: 6px;
+  padding: 6px;
+}
+
+.grid-row-gap-1 > div:first-child { padding-right: 0 !important; }
+
+.view-section,
+.view-section-width-auto {
+  padding: 5px 8px;
+  margin-left: 4px;
+  background-color: #ffffff;
+  border: 0 solid #ffffff;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.14);
+}
+.view-section { width: 99% !important; border-radius: 8px; }
+.view-section-width-auto { width: auto !important; border-radius: 4px; }
+
+.page-title { font-size: 24px !important; }
+
+.rounded-border { border-radius: 8px; }
+.rounded-border-top { border-top-left-radius: 8px; border-top-right-radius: 8px; }
+.rounded-border-bottom { border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
+.rounded-border-sm { border-radius: 4px; }
+.rounded-border-sm-top { border-top-left-radius: 4px; border-top-right-radius: 4px; }
+.rounded-border-sm-bottom { border-bottom-left-radius: 4px; border-bottom-right-radius: 4px; }
+
+.form-section-accordion-panel-title-button {
+  font-size: 16px !important;
+  font-weight: 600;
+  color: var(--sormas-secondary-color);
+  text-decoration: none !important;
+  padding-left: 0;
+}
+
+.spacing-small {
+  --vaadin-vertical-layout-gap: 4px;
+  --vaadin-horizontal-layout-gap: 4px;
+}
+.minimal {
+  --vaadin-vertical-layout-padding: 4px;
+  --vaadin-horizontal-layout-padding: 4px;
+  --vaadin-vertical-layout-gap: 8px;
+  --vaadin-horizontal-layout-gap: 8px;
+}
+.spacious {
+  --vaadin-vertical-layout-padding: 36px;
+  --vaadin-horizontal-layout-padding: 36px;
+  --vaadin-vertical-layout-gap: 36px;
+  --vaadin-horizontal-layout-gap: 36px;
+}
+.wrap { white-space: normal !important; }
+
+.no-border { border: none; }
+.float-right { float: right; }
+.inaccessible-field { font-style: italic; }
+.inaccessible-column,
+.inaccessible-label { font-style: italic; opacity: 0.5; }
+
+.case-notifier-side-view { border-top: 1px solid var(--sormas-focus-color); padding: 9px 0; }
+
+.underline { text-decoration: underline; }
+.front-element { z-index: 99999 !important; }
+.min-row-height { min-height: 79px; }
+
+/* bootstrap-grid.scss: empty hidden slots take no room */
+.row div[location].hide-invisble:empty { display: none; }
+
+/* deprecated.scss */
+.callout {
+  text-align: center;
+  padding: 0 14px;
+  color: #191919;
+  font-weight: 500;
+  border-radius: 4px;
+  border: 1px solid #c5c5c5;
+  border-left: 7px solid #60a0ea;
+  border-bottom-color: #bcbcbc;
+  background-color: #fafafa;
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 7. Disease colours (views/disease.scss; CssStyles.getDiseaseColor): one class per disease and a darker variant.
+ *    Generated by migration/prs/evidence/fix-2a-01-global-theme/disease-scss-to-css.py, values unchanged.
+ * ------------------------------------------------------------------------------------------------------------- */
+.background-disease-afp { background-color: #00E0A1; fill: #00E0A1; }
+.background-disease-afp.background-darker { background-color: #00B582; fill: #00B582; }
+.background-disease-cholera { background-color: #FEBA01; fill: #FEBA01; }
+.background-disease-cholera.background-darker { background-color: #E5A701; fill: #E5A701; }
+.background-disease-csm { background-color: #59BDEF; fill: #59BDEF; }
+.background-disease-csm.background-darker { background-color: #50AAD7; fill: #50AAD7; }
+.background-disease-dengue { background-color: #44BEC7; fill: #44BEC7; }
+.background-disease-dengue.background-darker { background-color: #3DABB3; fill: #3DABB3; }
+.background-disease-evd { background-color: #8C45AD; fill: #8C45AD; }
+.background-disease-evd.background-darker { background-color: #7E3E9C; fill: #7E3E9C; }
+.background-disease-guinea-worm { background-color: #3FD100; fill: #3FD100; }
+.background-disease-guinea-worm.background-darker { background-color: #38BA00; fill: #38BA00; }
+.background-disease-lassa { background-color: #EA579B; fill: #EA579B; }
+.background-disease-lassa.background-darker { background-color: #D34E8B; fill: #D34E8B; }
+.background-disease-measles { background-color: #66AD45; fill: #66AD45; }
+.background-disease-measles.background-darker { background-color: #5C9C3E; fill: #5C9C3E; }
+.background-disease-monkeypox { background-color: #FF9299; fill: #FF9299; }
+.background-disease-monkeypox.background-darker { background-color: #E5838A; fill: #E5838A; }
+.background-disease-new-flu { background-color: #4550AC; fill: #4550AC; }
+.background-disease-new-flu.background-darker { background-color: #3E489B; fill: #3E489B; }
+.background-disease-plague { background-color: #8270CC; fill: #8270CC; }
+.background-disease-plague.background-darker { background-color: #7565B8; fill: #7565B8; }
+.background-disease-polio { background-color: #A6E300; fill: #A6E300; }
+.background-disease-polio.background-darker { background-color: #96CC00; fill: #96CC00; }
+.background-disease-unspecified-vhf { background-color: #448282; fill: #448282; }
+.background-disease-unspecified-vhf.background-darker { background-color: #2F4F4F; fill: #2F4F4F; }
+.background-disease-west-nile-fever { background-color: #87CEFA; fill: #87CEFA; }
+.background-disease-west-nile-fever.background-darker { background-color: #5b94b7; fill: #5b94b7; }
+.background-disease-yellow-fever { background-color: #E2D320; fill: #E2D320; }
+.background-disease-yellow-fever.background-darker { background-color: #CBBE1D; fill: #CBBE1D; }
+.background-disease-congenital-rubella { background-color: #d4d4f7; fill: #d4d4f7; }
+.background-disease-congenital-rubella.background-darker { background-color: #aaaaee; fill: #aaaaee; }
+.background-disease-other { background-color: #888; fill: #888; }
+.background-disease-other.background-darker { background-color: #6D6D6D; fill: #6D6D6D; }
+.background-disease-undefined { background-color: #cccccc; fill: #cccccc; }
+.background-disease-undefined.background-darker { background-color: #d9d9d9; fill: #d9d9d9; }
+.background-disease-rabies { background-color: #ef5a6c; fill: #ef5a6c; }
+.background-disease-rabies.background-darker { background-color: #e04a5b; fill: #e04a5b; }
+.background-disease-anthrax { background-color: #5a95f4; fill: #5a95f4; }
+.background-disease-anthrax.background-darker { background-color: #3b7fed; fill: #3b7fed; }
+.background-disease-coronavirus { background-color: #bf8678; fill: #bf8678; }
+.background-disease-coronavirus.background-darker { background-color: #b0796b; fill: #b0796b; }
+.background-disease-pneumonia { background-color: #b0c4de; fill: #b0c4de; }
+.background-disease-pneumonia.background-darker { background-color: #7b8fa3; fill: #7b8fa3; }
+.background-disease-malaria { background-color: #7ed957; fill: #7ed957; }
+.background-disease-malaria.background-darker { background-color: #5fa23f; fill: #5fa23f; }
+.background-disease-typhoid-fever { background-color: #f7b267; fill: #f7b267; }
+.background-disease-typhoid-fever.background-darker { background-color: #d9983a; fill: #d9983a; }
+.background-disease-acute-viral-hepatitis { background-color: #f9e79f; fill: #f9e79f; }
+.background-disease-acute-viral-hepatitis.background-darker { background-color: #f7ca18; fill: #f7ca18; }
+.background-disease-non-neonatal-tetanus { background-color: #b2bec3; fill: #b2bec3; }
+.background-disease-non-neonatal-tetanus.background-darker { background-color: #636e72; fill: #636e72; }
+.background-disease-hiv { background-color: #e17055; fill: #e17055; }
+.background-disease-hiv.background-darker { background-color: #b03a2e; fill: #b03a2e; }
+.background-disease-schistosomiasis { background-color: #00b894; fill: #00b894; }
+.background-disease-schistosomiasis.background-darker { background-color: #00897b; fill: #00897b; }
+.background-disease-soil-transmitted-helminths { background-color: #a0522d; fill: #a0522d; }
+.background-disease-soil-transmitted-helminths.background-darker { background-color: #6e2c00; fill: #6e2c00; }
+.background-disease-trypanosomiasis { background-color: #6c3483; fill: #6c3483; }
+.background-disease-trypanosomiasis.background-darker { background-color: #512e5f; fill: #512e5f; }
+.background-disease-diarrhea-dehydration { background-color: #85c1e9; fill: #85c1e9; }
+.background-disease-diarrhea-dehydration.background-darker { background-color: #2874a6; fill: #2874a6; }
+.background-disease-diarrhea-blood { background-color: #c0392b; fill: #c0392b; }
+.background-disease-diarrhea-blood.background-darker { background-color: #922b21; fill: #922b21; }
+.background-disease-snake-bite { background-color: #a3a847; fill: #a3a847; }
+.background-disease-snake-bite.background-darker { background-color: #7d8334; fill: #7d8334; }
+.background-disease-rubella { background-color: #f1948a; fill: #f1948a; }
+.background-disease-rubella.background-darker { background-color: #c0392b; fill: #c0392b; }
+.background-disease-tuberculosis { background-color: #b9770e; fill: #b9770e; }
+.background-disease-tuberculosis.background-darker { background-color: #7e5109; fill: #7e5109; }
+.background-disease-leprosy { background-color: #f5cba7; fill: #f5cba7; }
+.background-disease-leprosy.background-darker { background-color: #ca6f1e; fill: #ca6f1e; }
+.background-disease-lymphatic-filariasis { background-color: #48c9b0; fill: #48c9b0; }
+.background-disease-lymphatic-filariasis.background-darker { background-color: #148f77; fill: #148f77; }
+.background-disease-buruli-ulcer { background-color: #f7cac9; fill: #f7cac9; }
+.background-disease-buruli-ulcer.background-darker { background-color: #e9967a; fill: #e9967a; }
+.background-disease-pertussis { background-color: #f8c471; fill: #f8c471; }
+.background-disease-pertussis.background-darker { background-color: #b9770e; fill: #b9770e; }
+.background-disease-neonatal-tetanus { background-color: #f9e79f; fill: #f9e79f; }
+.background-disease-neonatal-tetanus.background-darker { background-color: #f7ca18; fill: #f7ca18; }
+.background-disease-onchocerciasis { background-color: #34495e; fill: #34495e; }
+.background-disease-onchocerciasis.background-darker { background-color: #212f3c; fill: #212f3c; }
+.background-disease-diphteria { background-color: #e67e22; fill: #e67e22; }
+.background-disease-diphteria.background-darker { background-color: #ca6f1e; fill: #ca6f1e; }
+.background-disease-trachoma { background-color: #aed6f1; fill: #aed6f1; }
+.background-disease-trachoma.background-darker { background-color: #5499c7; fill: #5499c7; }
+.background-disease-yaws-endemic-syphilis { background-color: #f5b7b1; fill: #f5b7b1; }
+.background-disease-yaws-endemic-syphilis.background-darker { background-color: #c0392b; fill: #c0392b; }
+.background-disease-maternal-deaths { background-color: #f1948a; fill: #f1948a; }
+.background-disease-maternal-deaths.background-darker { background-color: #922b21; fill: #922b21; }
+.background-disease-perinatal-deaths { background-color: #f7dc6f; fill: #f7dc6f; }
+.background-disease-perinatal-deaths.background-darker { background-color: #b7950b; fill: #b7950b; }
+.background-disease-influenza { background-color: #5dade2; fill: #5dade2; }
+.background-disease-influenza.background-darker { background-color: #21618c; fill: #21618c; }
+.background-disease-influenza-a { background-color: #2874a6; fill: #2874a6; }
+.background-disease-influenza-a.background-darker { background-color: #154360; fill: #154360; }
+.background-disease-influenza-b { background-color: #85c1e9; fill: #85c1e9; }
+.background-disease-influenza-b.background-darker { background-color: #2874a6; fill: #2874a6; }
+.background-disease-h-metapneumovirus { background-color: #a569bd; fill: #a569bd; }
+.background-disease-h-metapneumovirus.background-darker { background-color: #76448a; fill: #76448a; }
+.background-disease-respiratory-syncytial-virus { background-color: #48c9b0; fill: #48c9b0; }
+.background-disease-respiratory-syncytial-virus.background-darker { background-color: #148f77; fill: #148f77; }
+.background-disease-parainfluenza-1-4 { background-color: #f7ca18; fill: #f7ca18; }
+.background-disease-parainfluenza-1-4.background-darker { background-color: #b7950b; fill: #b7950b; }
+.background-disease-adenovirus { background-color: #f5b041; fill: #f5b041; }
+.background-disease-adenovirus.background-darker { background-color: #b9770e; fill: #b9770e; }
+.background-disease-rhinovirus { background-color: #76d7c4; fill: #76d7c4; }
+.background-disease-rhinovirus.background-darker { background-color: #117864; fill: #117864; }
+.background-disease-enterovirus { background-color: #f1948a; fill: #f1948a; }
+.background-disease-enterovirus.background-darker { background-color: #922b21; fill: #922b21; }
+.background-disease-m-pneumoniae { background-color: #f7cac9; fill: #f7cac9; }
+.background-disease-m-pneumoniae.background-darker { background-color: #e9967a; fill: #e9967a; }
+.background-disease-c-pneumoniae { background-color: #f9e79f; fill: #f9e79f; }
+.background-disease-c-pneumoniae.background-darker { background-color: #f7ca18; fill: #f7ca18; }
+.background-disease-ari { background-color: #aed6f1; fill: #aed6f1; }
+.background-disease-ari.background-darker { background-color: #5499c7; fill: #5499c7; }
+.background-disease-chikungunya { background-color: #e67e22; fill: #e67e22; }
+.background-disease-chikungunya.background-darker { background-color: #ca6f1e; fill: #ca6f1e; }
+.background-disease-post-immunization-adverse-events-mild { background-color: #f7cac9; fill: #f7cac9; }
+.background-disease-post-immunization-adverse-events-mild.background-darker { background-color: #e9967a; fill: #e9967a; }
+.background-disease-post-immunization-adverse-events-severe { background-color: #c0392b; fill: #c0392b; }
+.background-disease-post-immunization-adverse-events-severe.background-darker { background-color: #922b21; fill: #922b21; }
+.background-disease-fha { background-color: #f5b7b1; fill: #f5b7b1; }
+.background-disease-fha.background-darker { background-color: #c0392b; fill: #c0392b; }
+.background-disease-invasive-meningococcal-infection { background-color: #00E0A1; fill: #00E0A1; }
+.background-disease-invasive-meningococcal-infection.background-darker { background-color: #00B582; fill: #00B582; }
+.background-disease-invasive-pneumococcal-infection { background-color: #e67e22; fill: #e67e22; }
+.background-disease-invasive-pneumococcal-infection.background-darker { background-color: #ca6f1e; fill: #ca6f1e; }
+.background-disease-giardiasis { background-color: #22b8e6; fill: #22b8e6; }
+.background-disease-giardiasis.background-darker { background-color: #064c63; fill: #064c63; }
+.background-disease-cryptosporidiosis { background-color: #9938ca; fill: #9938ca; }
+.background-disease-cryptosporidiosis.background-darker { background-color: #4b066a; fill: #4b066a; }
+.background-disease-salmonellosis { background-color: #d35400; fill: #d35400; }
+.background-disease-salmonellosis.background-darker { background-color: #a04000; fill: #a04000; }
+.background-disease-shigellosis { background-color: #bd1307; fill: #bd1307; }
+.background-disease-shigellosis.background-darker { background-color: #DAAA69; fill: #DAAA69; }

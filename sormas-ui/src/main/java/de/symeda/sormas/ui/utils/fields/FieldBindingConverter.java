@@ -54,6 +54,10 @@ public class FieldBindingConverter<T> implements Converter<T, Object> {
 
 	@Override
 	public Result<Object> convertToModel(T value, ValueContext context) {
+		if (field instanceof OptionGroup && ((OptionGroup) field).isNullRead()) {
+			// V7: an untouched multi select read from a null property wrote null back
+			return Result.ok(null);
+		}
 		Converter<T, Object> converter = getEffectiveConverter();
 		if (converter == null) {
 			return Result.ok(value);
@@ -70,8 +74,17 @@ public class FieldBindingConverter<T> implements Converter<T, Object> {
 	@Override
 	public T convertToPresentation(Object value, ValueContext context) {
 		Converter<T, Object> converter = getEffectiveConverter();
+		if (value == null && field instanceof OptionGroup) {
+			((OptionGroup) field).readNull();
+		}
 		T presentation = converter != null ? converter.convertToPresentation(value, context) : (T) value;
-		// Flow text fields do not accept null; the CheckBox keeps a null property as null (V7), shown unchecked
-		return presentation == null && !(field instanceof CheckBox) ? field.getEmptyValue() : presentation;
+		// V7 kept a null property as null in the field, and so wrote null back on commit: the SORMAS text fields (shown
+		// as the null representation) and the CheckBox (shown unchecked) hold null themselves. Other fields get their
+		// empty value.
+		return presentation == null && !holdsNull(field) ? field.getEmptyValue() : presentation;
+	}
+
+	private static boolean holdsNull(Field<?> field) {
+		return field instanceof CheckBox || field instanceof AbstractTextField || field instanceof SormasRichTextArea;
 	}
 }

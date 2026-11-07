@@ -37,6 +37,15 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 	private boolean multiSelect;
 	private RadioButtonGroup<Object> radioGroup;
 	private CheckboxGroup<Object> checkboxGroup;
+	/**
+	 * Multi select read from a {@code null} property and not changed since: V7 kept {@code null} as the field's
+	 * internal value and wrote it back on commit, while {@link #getValue()} showed an empty set.
+	 */
+	private boolean nullRead;
+	/**
+	 * Set by the form binding right before it sets the {@code null} it read ({@link #readNull()}).
+	 */
+	private boolean readingNull;
 
 	public OptionGroup() {
 		super();
@@ -130,16 +139,37 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 				return;
 			}
 		}
+		nullRead = false;
 		updateValue();
 	}
 
 	/**
 	 * V7 {@code AbstractSelect.setValue}: in multi select, {@code null} is stored as an empty set, so the value of a
-	 * multi select is never {@code null}.
+	 * multi select is never {@code null}. A {@code null} the form binding read is the exception ({@link #readNull()}).
 	 */
 	@Override
 	public void setValue(Object value) {
+		boolean fromRead = readingNull && value == null;
+		readingNull = false;
 		super.setValue(multiSelect && value == null ? new LinkedHashSet<>() : value);
+		nullRead = fromRead && multiSelect;
+	}
+
+	/**
+	 * The form binding is about to set the {@code null} it read from the property (V7
+	 * {@code AbstractField.setPropertyDataSource}): a multi select then shows an empty set but writes {@code null} back
+	 * until the value changes ({@link #isNullRead()}).
+	 */
+	void readNull() {
+		readingNull = true;
+	}
+
+	/**
+	 * Whether the form binding writes {@code null} back: a multi select read from a {@code null} property and not
+	 * changed since (V7 {@code AbstractField.commit} wrote the internal value, {@code null}).
+	 */
+	boolean isNullRead() {
+		return nullRead;
 	}
 
 	/**

@@ -14,12 +14,20 @@
  */
 package de.symeda.sormas.ui.utils.fields;
 
+import java.util.Objects;
+
 /**
  * Flow password field as a SORMAS {@link Field} (replaces {@code com.vaadin.v7.ui.PasswordField}).
  */
 public class PasswordField extends com.vaadin.flow.component.textfield.PasswordField implements AbstractTextField {
 
 	private static final long serialVersionUID = 1L;
+
+	/**
+	 * The value is {@code null}; the Flow value underneath is the null representation (Flow text fields do not take
+	 * {@code null}). No initializer: Flow's constructors call {@link #setValue(String)} before field initializers run.
+	 */
+	private boolean nullValue;
 
 	public PasswordField() {
 		super();
@@ -30,12 +38,49 @@ public class PasswordField extends com.vaadin.flow.component.textfield.PasswordF
 	}
 
 	/**
-	 * V7 behaviour: {@code null} shows the {@link #getNullRepresentation() null representation} (Flow rejects
-	 * {@code null}).
+	 * V7 {@code setValue(null)}: the value is {@code null} and the field shows the
+	 * {@link #getNullRepresentation() null representation} (Flow rejects {@code null}). A change between {@code null}
+	 * and the null representation fires a value change event, as in V7, though the field looks the same.
 	 */
 	@Override
 	public void setValue(String value) {
-		super.setValue(value != null ? value : getNullRepresentation());
+		String oldValue = getValue();
+		boolean wasNull = nullValue;
+		nullValue = value == null;
+		String shown = value != null ? value : getNullRepresentation();
+		if (!Objects.equals(super.getValue(), shown)) {
+			super.setValue(shown);
+		} else if (wasNull != nullValue) {
+			fireEvent(new ComponentValueChangeEvent<>(this, this, oldValue, false));
+		}
+	}
+
+	/**
+	 * {@code null} while the value is {@code null} (V7), else the text.
+	 */
+	@Override
+	public String getValue() {
+		return nullValue ? null : super.getValue();
+	}
+
+	/**
+	 * Text from the browser, as V7 took it ({@link AbstractTextField#valueFromClient}).
+	 */
+	@Override
+	protected void setModelValue(String newModelValue, boolean fromClient) {
+		if (fromClient) {
+			nullValue = AbstractTextField.valueFromClient(this, newModelValue, nullValue) == null;
+		}
+		super.setModelValue(newModelValue, fromClient);
+	}
+
+	/**
+	 * V7: {@code null} and {@code ""} are empty.
+	 */
+	@Override
+	public boolean isEmpty() {
+		String value = getValue();
+		return value == null || value.isEmpty();
 	}
 
 	// Flow implements these as interface defaults; declared here because Field declares them too

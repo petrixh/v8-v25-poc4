@@ -18,6 +18,7 @@ import static de.symeda.sormas.ui.contact.ContactsView.buildDetailedExportConfig
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -487,7 +488,7 @@ public class CaseContactsView extends AbstractCaseView {
 			}
 		});
 		field.addBlurListener(e -> {
-			if (!field.getValue().equals(lastValue[0])) {
+			if (!Objects.equals(field.getValue(), lastValue[0])) {
 				lastValue[0] = field.getValue();
 				updateApplyResetButtons();
 			}

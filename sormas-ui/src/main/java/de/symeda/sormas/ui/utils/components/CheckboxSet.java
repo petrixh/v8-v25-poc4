@@ -168,6 +168,9 @@ public class CheckboxSet<T> extends CustomField<Set<T>> {
 
 		headerLayout.setFlexGrow(0.5, groupLabel);
 		headerLayout.setFlexGrow(0.5, buttonsLayout);
+		// Vaadin 8 expand ratios share out the whole width, not what the content leaves: halves, as before
+		groupLabel.getStyle().set("flex-basis", "0");
+		buttonsLayout.getStyle().set("flex-basis", "0");
 		headerLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, buttonsLayout);
 
 		return headerLayout;
@@ -294,6 +297,10 @@ public class CheckboxSet<T> extends CustomField<Set<T>> {
 				// add empty columns to fill the row
 				add(new HorizontalLayout());
 			}
+
+			// Vaadin 8: a full-width layout without expand ratios gives every slot an equal share, so the check boxes
+			// line up in columns
+			getChildren().forEach(c -> c.getElement().getStyle().set("flex", "1 1 0"));
 		}
 
 		public void setValueForAll(boolean checked) {

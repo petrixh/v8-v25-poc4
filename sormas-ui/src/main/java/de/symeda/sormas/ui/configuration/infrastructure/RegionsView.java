@@ -224,7 +224,8 @@ public class RegionsView extends AbstractConfigurationView {
 			if (UiUtil.permitted(UserRight.INFRASTRUCTURE_VIEW)) {
 				relevanceStatusFilter = ComboBoxHelper.createComboBoxV7();
 				relevanceStatusFilter.setId("relevanceStatus");
-				relevanceStatusFilter.setWidth(220, Unit.PERCENTAGE);
+				// was 220%: Vaadin 8 ignored a relative width in this undefined-width layout and showed the default width
+				relevanceStatusFilter.setWidth(160, Unit.PIXELS);
 				relevanceStatusFilter.setNullSelectionAllowed(false);
 				relevanceStatusFilter.addItems(EntityRelevanceStatus.getAllExceptDeleted());
 				relevanceStatusFilter.setItemCaption(EntityRelevanceStatus.ACTIVE, I18nProperties.getCaption(Captions.regionActiveRegions));

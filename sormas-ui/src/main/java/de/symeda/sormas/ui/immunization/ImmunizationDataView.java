@@ -95,4 +95,10 @@ public class ImmunizationDataView extends AbstractImmunizationView {
 		final boolean deleted = FacadeProvider.getImmunizationFacade().isDeleted(uuid);
 		layout.disableIfNecessary(deleted, immunizationEditAllowed);
 	}
+
+	@Override
+	public boolean isScrollPositionKeptOnRefresh() {
+		// as in Vaadin 8: after Save the immunization form is shown again from the top
+		return false;
+	}
 }

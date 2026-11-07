@@ -71,4 +71,10 @@ public class ContactPersonView extends AbstractContactView implements PersonSide
 			isEditAllowed());
 		setEditPermission(editComponent, UiUtil.permitted(UserRight.PERSON_EDIT), PersonDto.ADDRESSES, PersonDto.PERSON_CONTACT_DETAILS);
 	}
+
+	@Override
+	public boolean isScrollPositionKeptOnRefresh() {
+		// as in Vaadin 8: after Save the person form is shown again from the top
+		return false;
+	}
 }

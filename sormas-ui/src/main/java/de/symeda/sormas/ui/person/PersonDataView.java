@@ -82,4 +82,10 @@ public class PersonDataView extends AbstractEditAllowedDetailView<PersonReferenc
 	protected EditPermissionFacade getEditPermissionFacade() {
 		return FacadeProvider.getPersonFacade();
 	}
+
+	@Override
+	public boolean isScrollPositionKeptOnRefresh() {
+		// as in Vaadin 8: after Save the person form is shown again from the top
+		return false;
+	}
 }

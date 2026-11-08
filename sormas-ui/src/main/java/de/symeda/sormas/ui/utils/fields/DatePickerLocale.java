@@ -19,8 +19,6 @@ import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 
@@ -68,31 +66,27 @@ public final class DatePickerLocale {
 	}
 
 	/**
-	 * On every attach, applies the calendar language of the picker's locale (its own, else its UI's) to the picker's
-	 * current i18n, so a format set before (e.g. {@link DefaultDateFormat}, {@code setDateFormat}) stays.
+	 * On every attach, applies the calendar language of the locale of the UI the picker is attached to (the browser's) to
+	 * the picker's current i18n, so a format set before (e.g. {@link DefaultDateFormat}, {@code setDateFormat}) stays.
+	 * For pickers without a locale of their own, as all but two in SORMAS; see {@link #applyOwnLocaleOnAttach}.
 	 */
 	public static void applyOnAttach(DatePicker picker) {
-		picker.addAttachListener(e -> picker.setI18n(apply(orNew(picker.getI18n()), localeOf(picker.getLocale(), e))));
+		picker.addAttachListener(e -> picker.setI18n(apply(orNew(picker.getI18n()), e.getUI().getLocale())));
 	}
 
 	/**
 	 * {@link #applyOnAttach(DatePicker)} for the date part of a date-time picker.
 	 */
 	public static void applyOnAttach(DateTimePicker picker) {
-		picker.addAttachListener(e -> picker.setDatePickerI18n(apply(orNew(picker.getDatePickerI18n()), localeOf(picker.getLocale(), e))));
+		picker.addAttachListener(e -> picker.setDatePickerI18n(apply(orNew(picker.getDatePickerI18n()), e.getUI().getLocale())));
 	}
 
 	/**
-	 * The picker's locale ({@code getLocale()}: its own, else the current UI's). At attach the current UI is the UI the
-	 * picker is attached to; where another UI is current (only in tests, e.g. a static mock of {@code UI.getCurrent()}),
-	 * a locale that is just the current UI's is replaced by the attached UI's, as {@link DefaultDateFormat} does.
+	 * As {@link #applyOnAttach(DatePicker)}, with the picker's own locale ({@code setLocale}, e.g. the user's language in
+	 * {@code FormComponent.createDateField}, as Vaadin 8's {@code setLocale} on the field).
 	 */
-	static Locale localeOf(Locale resolved, AttachEvent event) {
-		UI current = UI.getCurrent();
-		if (current != null && current != event.getUI() && resolved != null && resolved.equals(current.getLocale())) {
-			return event.getUI().getLocale();
-		}
-		return resolved;
+	public static void applyOwnLocaleOnAttach(DatePicker picker) {
+		picker.addAttachListener(e -> picker.setI18n(apply(orNew(picker.getI18n()), picker.getLocale())));
 	}
 
 	private static DatePicker.DatePickerI18n orNew(DatePicker.DatePickerI18n i18n) {

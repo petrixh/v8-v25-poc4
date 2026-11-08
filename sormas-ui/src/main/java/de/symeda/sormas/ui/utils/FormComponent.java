@@ -111,7 +111,7 @@ public abstract class FormComponent<T> extends VerticalLayout {
 		DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
 		i18n.setDateFormat(DateFormatHelper.getDateFormatPattern());
 		field.setI18n(i18n);
-		DatePickerLocale.applyOnAttach(field);
+		DatePickerLocale.applyOwnLocaleOnAttach(field);
 		trackField(field);
 		return field;
 	}

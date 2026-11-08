@@ -227,7 +227,7 @@ public class QuickImmunizationCreationForm extends AbstractEditForm<Immunization
 			DatePicker.DatePickerI18n dateOfMostRecentDoseI18n = new DatePicker.DatePickerI18n();
 			dateOfMostRecentDoseI18n.setDateFormat(DateFormatHelper.getDateFormatPattern());
 			dateOfMostRecentDose.setI18n(dateOfMostRecentDoseI18n);
-			DatePickerLocale.applyOnAttach(dateOfMostRecentDose);
+			DatePickerLocale.applyOwnLocaleOnAttach(dateOfMostRecentDose);
 
 			vaccinationInfoSource = new ComboBox<>();
 			vaccinationInfoSource.setId("vaccinationInfoSource");

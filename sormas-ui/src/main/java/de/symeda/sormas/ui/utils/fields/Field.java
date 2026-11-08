@@ -581,4 +581,17 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 			super(message);
 		}
 	}
+
+	/**
+	 * V7 {@code Property.ReadOnlyException}: a read-only field refused a programmatic write of a different value (see
+	 * {@link ReadOnlyWrites}). Like in V7 it is not caught; the error handler shows the "unexpected error" notification.
+	 */
+	class ReadOnlyException extends RuntimeException {
+
+		private static final long serialVersionUID = 1L;
+
+		public ReadOnlyException() {
+			super();
+		}
+	}
 }

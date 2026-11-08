@@ -51,6 +51,7 @@ import de.symeda.sormas.ui.utils.components.NotBlankTextValidator;
 import de.symeda.sormas.ui.utils.fields.AbstractTextField;
 import de.symeda.sormas.ui.utils.fields.ComboBox;
 import de.symeda.sormas.ui.utils.fields.Field;
+import de.symeda.sormas.ui.utils.fields.ReadOnlyWrites;
 import de.symeda.sormas.ui.utils.fields.TextField;
 
 public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements AbstractForm.BeanFieldGroup.CommitHandler {// implements DtoEditForm<DTO> {
@@ -471,7 +472,7 @@ public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements
 			}
 			Binder.Binding binding = getFieldGroup().getBinding(field);
 			if (binding != null && getFieldGroup().getBean() != null) {
-				binding.read(getFieldGroup().getBean());
+				ReadOnlyWrites.readFromDataSource(Collections.singleton(field), () -> binding.read(getFieldGroup().getBean()));
 			}
 			getFieldGroup().clearModified(field);
 		}

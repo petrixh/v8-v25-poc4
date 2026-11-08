@@ -144,6 +144,14 @@ public abstract class CustomizableFieldInput<T> extends CustomField<T> {
 	}
 
 	/**
+	 * Was a Vaadin 8 {@code CustomField}: read-only blocks only the user; the binder and code still write the value.
+	 */
+	@Override
+	protected boolean isReadOnlyWriteRefused() {
+		return false;
+	}
+
+	/**
 	 * Called by Flow when a new value is set on this field (via {@link #setValue(Object)}; was Vaadin 8
 	 * {@code doSetValue}).
 	 * Stores the new value in {@link #currentValue}, then delegates widget propagation to

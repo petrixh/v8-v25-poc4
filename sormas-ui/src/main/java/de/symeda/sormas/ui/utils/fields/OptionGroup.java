@@ -165,6 +165,9 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 	 * Also V7 {@code AbstractSelect.setValue}: a multi select stores a collection as a {@code LinkedHashSet} and
 	 * ignores a value that is not a collection (no change, no event), e.g. {@code setValue(TypeOfPlace.FACILITY)} on a
 	 * not required {@link de.symeda.sormas.ui.utils.NullableOptionGroup}.
+	 * <p>
+	 * A read-only group refuses a different value, as in V7 ({@link ReadOnlyWrites}); a multi select compares the value
+	 * as a set.
 	 */
 	@Override
 	public void setValue(Object value) {
@@ -172,6 +175,11 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 			readingNull = false;
 			return;
 		}
+		Object checkedValue = multiSelect ? (value == null ? new LinkedHashSet<>() : new LinkedHashSet<>((Collection<?>) value)) : value;
+		ReadOnlyWrites.write(this, checkedValue, () -> setValueUnchecked(value));
+	}
+
+	private void setValueUnchecked(Object value) {
 		boolean fromRead = readingNull && value == null;
 		readingNull = false;
 		Object newValue = multiSelect ? (value == null ? new LinkedHashSet<>() : new LinkedHashSet<>((Collection<?>) value)) : value;

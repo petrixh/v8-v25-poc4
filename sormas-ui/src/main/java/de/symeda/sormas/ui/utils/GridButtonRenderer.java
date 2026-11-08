@@ -29,8 +29,11 @@ public class GridButtonRenderer extends ConvertingHtmlRenderer {
 	protected String encodeString(String value) {
 
 		if (!StringUtils.isEmpty(value)) {
-			// Vaadin 8 drew a primary button with its own markup; the Flow button web component replaces it
-			value = "<vaadin-button theme='primary'>" + HtmlHelper.cleanHtml(value) + "</vaadin-button>";
+			// Vaadin 8 drew a primary button with its own markup; the Flow button web component replaces it. The button is
+			// drawn only: as in Vaadin 8, a click on it is the grid's item click on its column, which does the action. A Flow
+			// grid fires no item click for a click on a focusable element in a cell, so the button takes no pointer events
+			// and the click lands on the cell.
+			value = "<vaadin-button theme='primary' style='pointer-events: none'>" + HtmlHelper.cleanHtml(value) + "</vaadin-button>";
 
 			return value;
 		} else {

@@ -48,6 +48,8 @@ public class SelectItems implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private final List<Object> itemIds = new ArrayList<>();
+	/** Each item id mapped to itself, to find the stored instance of an equal id ({@link #getStoredId}). */
+	private final Map<Object, Object> storedIds = new HashMap<>();
 	private final Map<Object, String> captions = new HashMap<>();
 	private final Set<Object> disabled = new HashSet<>();
 	private final ListDataProvider<Object> dataProvider = new ListDataProvider<>(itemIds);
@@ -88,6 +90,7 @@ public class SelectItems implements Serializable {
 			return false;
 		}
 		itemIds.add(itemId);
+		storedIds.put(itemId, itemId);
 		refreshAll();
 		return true;
 	}
@@ -98,6 +101,7 @@ public class SelectItems implements Serializable {
 			for (Object id : ids) {
 				if (id != null && !itemIds.contains(id)) {
 					itemIds.add(id);
+					storedIds.put(id, id);
 					added = true;
 				}
 			}
@@ -109,6 +113,7 @@ public class SelectItems implements Serializable {
 
 	public boolean remove(Object itemId) {
 		boolean removed = itemIds.remove(itemId);
+		storedIds.remove(itemId);
 		captions.remove(itemId);
 		disabled.remove(itemId);
 		if (removed) {
@@ -120,6 +125,7 @@ public class SelectItems implements Serializable {
 	public boolean removeAll() {
 		boolean hadItems = !itemIds.isEmpty();
 		itemIds.clear();
+		storedIds.clear();
 		captions.clear();
 		disabled.clear();
 		removed(id -> true);
@@ -133,6 +139,7 @@ public class SelectItems implements Serializable {
 		Set<Object> removedIds = new HashSet<>(itemIds);
 		boolean changed = itemIds.retainAll(ids);
 		removedIds.removeAll(itemIds);
+		storedIds.keySet().retainAll(ids);
 		captions.keySet().retainAll(ids);
 		disabled.retainAll(ids);
 		if (changed) {
@@ -155,6 +162,27 @@ public class SelectItems implements Serializable {
 
 	public boolean contains(Object itemId) {
 		return itemIds.contains(itemId);
+	}
+
+	/**
+	 * The item id as stored here when an equal id was added, else the given id. Item ids may be equal without being the
+	 * same: a form adds a copy of its value with another caption, e.g. "Default Facility (Inactive)" for an inactive
+	 * facility ({@code AbstractEditForm.addInfrastructureField}).
+	 */
+	public Object getStoredId(Object itemId) {
+		if (itemId == null) {
+			return null;
+		}
+		Object stored = storedIds.get(itemId);
+		return stored != null ? stored : itemId;
+	}
+
+	/**
+	 * Caption of a selected value as V7 showed it: the caption of the equal item id stored here (V7 painted the selected
+	 * option from the container's item ids), or of the value itself when it is no item.
+	 */
+	public String getValueCaption(Object value) {
+		return getCaption(getStoredId(value));
 	}
 
 	public void setCaption(Object itemId, String caption) {

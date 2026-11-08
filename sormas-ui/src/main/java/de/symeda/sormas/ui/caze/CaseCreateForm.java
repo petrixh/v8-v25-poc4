@@ -565,14 +565,22 @@ public class CaseCreateForm extends AbstractEditForm<CaseDataDto> {
 			.setVisible(newDisease != null && isVisibleAllowed(CaseDataDto.DISEASE_VARIANT) && CollectionUtils.isNotEmpty(diseaseVariants));
 
 		NullableOptionGroup classificationField = getField(CaseDataDto.CASE_CLASSIFICATION);
+		// Health facility users: the place of stay is preset to their facility and read-only. Vaadin 7 refused the
+		// change below (ReadOnlyException, the "unexpected error" of baseline B046) and kept the place of stay; the
+		// Flow shim would take it and clear the place of stay, so the case could not be saved
+		boolean placeOfStayEditable = !facilityOrHome.isReadOnly();
 		if (newDisease == Disease.INFLUENZA) {
-			facilityOrHome.setValue(Sets.newHashSet(TypeOfPlace.HOME));
-			facilityOrHome.select(TypeOfPlace.HOME);
+			if (placeOfStayEditable) {
+				facilityOrHome.setValue(Sets.newHashSet(TypeOfPlace.HOME));
+				facilityOrHome.select(TypeOfPlace.HOME);
+			}
 			classificationField.setValue(Sets.newHashSet(CaseClassification.CONFIRMED));
 			classificationField.select(CaseClassification.CONFIRMED);
 		} else {
-			facilityOrHome.setValue(null);
-			facilityOrHome.unselect(TypeOfPlace.HOME);
+			if (placeOfStayEditable) {
+				facilityOrHome.setValue(null);
+				facilityOrHome.unselect(TypeOfPlace.HOME);
+			}
 			classificationField.setValue(Sets.newHashSet(getValue().getCaseClassification()));
 			classificationField.select(getValue().getCaseClassification());
 		}

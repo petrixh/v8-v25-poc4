@@ -161,12 +161,20 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 	 * {@code AbstractField.setPropertyDataSource} did when its internal value was not {@code null} yet (a new field
 	 * holds an empty set): form listeners on the field (e.g. hiding dependent fields unless the value is Yes) run when
 	 * the form reads an empty property. Reading {@code null} again fires nothing, as in V7.
+	 * <p>
+	 * Also V7 {@code AbstractSelect.setValue}: a multi select stores a collection as a {@code LinkedHashSet} and
+	 * ignores a value that is not a collection (no change, no event), e.g. {@code setValue(TypeOfPlace.FACILITY)} on a
+	 * not required {@link de.symeda.sormas.ui.utils.NullableOptionGroup}.
 	 */
 	@Override
 	public void setValue(Object value) {
+		if (multiSelect && value != null && !(value instanceof Collection)) {
+			readingNull = false;
+			return;
+		}
 		boolean fromRead = readingNull && value == null;
 		readingNull = false;
-		Object newValue = multiSelect && value == null ? new LinkedHashSet<>() : value;
+		Object newValue = multiSelect ? (value == null ? new LinkedHashSet<>() : new LinkedHashSet<>((Collection<?>) value)) : value;
 		Object oldValue = getValue();
 		boolean fireRead = fromRead && multiSelect && !internalNull && isEmptyValue(oldValue);
 		nullRead = fromRead && multiSelect;

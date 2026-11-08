@@ -228,8 +228,9 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> impl
 		table.setColumnWidth(ACTION_COLUMN_ID, 20);
 		table.setColumnHeader(ACTION_COLUMN_ID, "");
 
-		// The edit/view button in the action column has no listener of its own: a Flow grid reports a click on it (also by
-		// Enter or Space) as an item click on the action column, which opens the entry once, as in Vaadin 7.
+		// As in Vaadin 7: a double click on a row, or a click in the action column next to the button, opens the entry. A
+		// Flow grid does not report a click on a focusable element in a cell (the button) as an item click, so the button
+		// opens the entry through its own listener (see generateEditCell), once.
 		table.addItemClickListener(event -> {
 			if (event.getClickCount() > 1 || (event.getColumn() != null && ACTION_COLUMN_ID.equals(event.getColumn().getKey()))) {
 				@SuppressWarnings("unchecked")
@@ -241,14 +242,12 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> impl
 		});
 	}
 
-	/**
-	 * The button opens the entry through the table's item click on the action column (see
-	 * {@link #createActionColumn(Table)}); with its own listener the entry would open twice.
-	 */
+	@SuppressWarnings("unchecked")
 	protected Object generateEditCell(Object itemId) {
 
-		return ButtonHelper
-			.createIconButtonWithCaption(itemId + "-edit", null, isEditAllowed ? VaadinIcon.EDIT : VaadinIcon.EYE, null, CssStyles.BUTTON_BORDERLESS);
+		return ButtonHelper.createIconButtonWithCaption(itemId + "-edit", null, isEditAllowed ? VaadinIcon.EDIT : VaadinIcon.EYE, e -> {
+			editEntry((E) itemId, false, this::onEntryChanged);
+		}, CssStyles.BUTTON_BORDERLESS);
 	}
 
 	protected Button createAddButton() {

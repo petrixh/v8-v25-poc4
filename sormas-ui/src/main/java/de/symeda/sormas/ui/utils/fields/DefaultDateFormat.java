@@ -83,8 +83,8 @@ public final class DefaultDateFormat {
 	}
 
 	/**
-	 * When the picker is attached and has no date format of its own, gives it the default format of its locale (see the
-	 * class comment). A format set later replaces it.
+	 * When the picker is attached and has no date format of its own, gives it the default format of the locale of the UI
+	 * it is attached to (see the class comment; no caller sets a locale on these pickers). A format set later replaces it.
 	 */
 	public static void applyOnAttach(DatePicker picker) {
 		picker.addAttachListener(e -> {
@@ -92,7 +92,7 @@ public final class DefaultDateFormat {
 			List<String> formats = current != null ? current.getDateFormats() : null;
 			if (formats == null || formats.isEmpty()) {
 				picker.setI18n(
-					configure(current != null ? current : new DatePicker.DatePickerI18n(), picker.getLocale(), LocalDate.now()));
+					configure(current != null ? current : new DatePicker.DatePickerI18n(), e.getUI().getLocale(), LocalDate.now()));
 			}
 		});
 	}

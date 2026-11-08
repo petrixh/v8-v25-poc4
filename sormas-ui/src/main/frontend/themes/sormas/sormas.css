@@ -1457,3 +1457,78 @@ vaadin-button.filter.filter-small {
   --vaadin-button-tertiary-padding: 0 7px;
   height: 26px;
 }
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 15. Disabled fields. Valo ($v-disabled-opacity 0.5) dimmed a disabled field to half opacity and kept its look: white
+ *     field, its border, the value in the font colour; the caption stayed dark at full opacity. Option groups stayed
+ *     at full opacity and only their options were dimmed; a check box was dimmed with its label. Lumo instead greys
+ *     the caption, fills the field grey and greys the value. Here the field keeps its enabled look and is dimmed to
+ *     0.5, the caption keeps the caption colour. Read-only fields (section 2: no frame) are not dimmed unless they are
+ *     disabled too, as in Valo.
+ * ------------------------------------------------------------------------------------------------------------- */
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker)[disabled] {
+  --vaadin-input-field-disabled-background: var(--vaadin-input-field-background);
+  --vaadin-input-field-disabled-value-color: var(--sormas-font-color);
+}
+
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker)[disabled]:not([required]) {
+  /* Lumo sets a lighter border on disabled fields; required ones keep theirs (section 2), as in Valo */
+  --vaadin-input-field-border-color: var(--sormas-focus-color);
+}
+
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker)[disabled][readonly] {
+  /* disabled and read-only: the read-only look (no frame, no fill), dimmed (Valo .v-readonly.v-disabled) */
+  --vaadin-input-field-disabled-background: transparent;
+  --vaadin-input-field-border-color: transparent;
+}
+
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-time-picker)[disabled]::part(input-field) {
+  opacity: 0.5;
+}
+
+:is(vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select, vaadin-date-picker, vaadin-time-picker)[disabled]::part(toggle-button) {
+  /* the arrow and calendar icons in their enabled colour (Lumo: nearly invisible), dimmed with the field */
+  color: var(--lumo-contrast-60pct);
+}
+
+/* Captions of disabled fields, groups and the shim's option groups (vaadin-custom-field) stay in the caption colour */
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker, vaadin-radio-group, vaadin-checkbox-group,
+    vaadin-custom-field)[disabled]::part(label) {
+  color: var(--vaadin-input-field-label-color);
+  -webkit-text-fill-color: var(--vaadin-input-field-label-color);
+}
+
+/* Check boxes and radio buttons (alone or as the options of a group): the enabled look, label in the font colour,
+   dimmed to 0.5 with their label. The group around them and its caption stay at full opacity. A read-only radio group
+   disables its unselected options: those keep Lumo's read-only look (not dimmed, as the read-only Valo option group) */
+:is(vaadin-checkbox, vaadin-radio-button)[disabled]:not([readonly]:not([disabled]) > *) {
+  opacity: 0.5;
+  color: var(--sormas-font-color);
+  --vaadin-checkbox-disabled-background: var(--vaadin-checkbox-background, var(--lumo-contrast-20pct));
+  --vaadin-checkbox-disabled-checkmark-color: var(--lumo-primary-contrast-color);
+  --vaadin-radio-button-disabled-background: var(--vaadin-radio-button-background, var(--lumo-contrast-20pct));
+  --vaadin-radio-button-disabled-dot-color: var(--lumo-primary-contrast-color);
+}
+
+vaadin-checkbox[disabled]:not([readonly]:not([disabled]) > *):is([checked], [indeterminate]) {
+  --vaadin-checkbox-disabled-background: var(--lumo-primary-color);
+}
+
+vaadin-radio-button[disabled][checked]:not([readonly]:not([disabled]) > *) {
+  --vaadin-radio-button-disabled-background: var(--lumo-primary-color);
+}
+
+:is(vaadin-checkbox, vaadin-radio-button)[disabled]:not([readonly]:not([disabled]) > *)::part(label) {
+  color: var(--sormas-font-color);
+  -webkit-text-fill-color: var(--sormas-font-color);
+}

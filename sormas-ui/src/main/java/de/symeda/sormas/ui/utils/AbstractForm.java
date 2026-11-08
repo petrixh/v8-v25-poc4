@@ -7,6 +7,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -47,6 +48,7 @@ import de.symeda.sormas.ui.utils.fields.DateField;
 import de.symeda.sormas.ui.utils.fields.Field;
 import de.symeda.sormas.ui.utils.fields.FieldGroup;
 import de.symeda.sormas.ui.utils.fields.FilteringMode;
+import de.symeda.sormas.ui.utils.fields.ReadOnlyWrites;
 import de.symeda.sormas.ui.utils.fields.TextArea;
 import de.symeda.sormas.ui.utils.fields.TextField;
 
@@ -722,6 +724,14 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 			setFieldModified(field, false);
 		}
 
+		/**
+		 * Vaadin 7 data source read: the bean's values are written into the bound fields also when a field is
+		 * read-only ({@link ReadOnlyWrites#readFromDataSource}).
+		 */
+		private void readFromBean(Runnable read) {
+			ReadOnlyWrites.readFromDataSource(bindings.keySet(), read);
+		}
+
 		public Binder<T> getBinder() {
 			return binder;
 		}
@@ -871,7 +881,7 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 			if (bean != null) {
 				// reading a field is not a change
 				boolean wasModified = modified;
-				binding.read(bean);
+				ReadOnlyWrites.readFromDataSource(Collections.singleton(field), () -> binding.read(bean));
 				modified = wasModified;
 			}
 		}
@@ -945,11 +955,13 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 		 */
 		public void setItemDataSource(T bean) {
 			this.bean = bean;
-			if (buffered) {
-				binder.readBean(bean);
-			} else {
-				binder.setBean(bean);
-			}
+			readFromBean(() -> {
+				if (buffered) {
+					binder.readBean(bean);
+				} else {
+					binder.setBean(bean);
+				}
+			});
 			clearModified();
 		}
 
@@ -1084,7 +1096,7 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 				}
 			}
 			if (buffered && bean != null) {
-				binder.readBean(bean);
+				readFromBean(() -> binder.readBean(bean));
 			}
 			clearModified();
 		}
@@ -1136,12 +1148,14 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 					modifiedFields.add(f);
 				}
 			});
-			if (buffered) {
-				binder.removeBean();
-				binder.readBean(bean);
-			} else {
-				binder.setBean(bean);
-			}
+			readFromBean(() -> {
+				if (buffered) {
+					binder.removeBean();
+					binder.readBean(bean);
+				} else {
+					binder.setBean(bean);
+				}
+			});
 			modified = wasModified;
 			bindings.keySet().forEach(f -> setFieldModified(f, modifiedFields.contains(f)));
 		}

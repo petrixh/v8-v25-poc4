@@ -36,10 +36,19 @@ public abstract class CustomField<T> extends com.vaadin.flow.component.customfie
 
 	protected CustomField() {
 		super();
+		addPresentedListener();
 	}
 
 	protected CustomField(T defaultValue) {
 		super(defaultValue);
+		addPresentedListener();
+	}
+
+	/**
+	 * The first value change listener: the new value is shown in the inner fields, see {@link ReadOnlyWrites}.
+	 */
+	private void addPresentedListener() {
+		super.addValueChangeListener(e -> ReadOnlyWrites.presented(this));
 	}
 
 	/**
@@ -71,6 +80,28 @@ public abstract class CustomField<T> extends com.vaadin.flow.component.customfie
 	@Override
 	protected void setPresentationValue(T newPresentationValue) {
 		// value is kept in the field
+	}
+
+	/**
+	 * A read-only field refuses a different value, as in V7 ({@link ReadOnlyWrites}), unless
+	 * {@link #isReadOnlyWriteRefused()} is {@code false}.
+	 */
+	@Override
+	public void setValue(T value) {
+		if (isReadOnlyWriteRefused()) {
+			ReadOnlyWrites.write(this, value, () -> super.setValue(value));
+		} else {
+			super.setValue(value);
+		}
+	}
+
+	/**
+	 * Whether a programmatic write of a different value to the read-only field throws a {@link Field.ReadOnlyException}
+	 * (V7 {@code com.vaadin.v7.ui.CustomField}, default). A field that replaces a Vaadin 8 {@code com.vaadin.ui.CustomField}
+	 * returns {@code false}: Vaadin 8 read-only blocks only the user.
+	 */
+	protected boolean isReadOnlyWriteRefused() {
+		return true;
 	}
 
 	/**

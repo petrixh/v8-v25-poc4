@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.action.ActionContext;
 import de.symeda.sormas.api.action.ActionDto;
+import de.symeda.sormas.api.event.EventActionExportDto;
 import de.symeda.sormas.api.event.EventActionIndexDto;
 import de.symeda.sormas.api.event.EventCriteria;
 import de.symeda.sormas.api.event.EventDto;
@@ -122,5 +123,21 @@ public class ActionFacadeEjbTest extends AbstractBeanTest {
 		sortProperties.add(new SortProperty(EventActionIndexDto.ACTION_LAST_MODIFIED_BY));
 
 		assertEquals(2, getActionFacade().getEventActionList(new EventCriteria(), null, null, sortProperties).size());
+	}
+
+	@Test
+	public void testGetEventActionExportList() {
+
+		TestDataCreator.RDCF rdcf = creator.createRDCF("Region", "District", "Community", "Facility");
+		UserDto user = creator.createSurveillanceSupervisor(rdcf);
+
+		EventDto eventDto = creator.createEvent(user.toReference());
+		creator.createAction(eventDto.toReference());
+		creator.createAction(eventDto.toReference());
+
+		List<EventActionExportDto> exportList = getActionFacade().getEventActionExportList(new EventCriteria(), null, null);
+		assertEquals(2, exportList.size());
+		assertEquals(eventDto.getUuid(), exportList.get(0).getEventUuid());
+		assertEquals(eventDto.getEventStatus(), exportList.get(0).getEventStatus());
 	}
 }

@@ -457,13 +457,14 @@ public class EventParticipantsView extends AbstractEventView implements HasName 
 						FacadeProvider.getFeatureConfigurationFacade().getActiveServerFeatureConfigurations()),
 					customExportWindow::close);
 				customExportsLayout.setExportCallback((exportConfig) -> {
-					// was Page.open(resource, null, true): the download opens in the current window (as CasesView)
+					// was Page.open(resource, null, true): the download opens in the current window (as CasesView). Owned by
+					// the window's layout: the UI is inert while the modal window is open, and Flow refuses (403) an inert owner
 					StreamRegistration exportRegistration = VaadinSession.getCurrent()
 						.getResourceRegistry()
 						.registerResource(
 							EventParticipantDownloadUtil
 								.createExtendedEventParticipantExportResource(grid.getCriteria(), this::getSelectedRows, exportConfig),
-							UI.getCurrent().getElement());
+							customExportsLayout.getElement());
 					UI.getCurrent().getPage().open(exportRegistration.getResourceUri().toString(), "_self");
 				});
 				customExportWindow.setWidth(1024, Unit.PIXELS);

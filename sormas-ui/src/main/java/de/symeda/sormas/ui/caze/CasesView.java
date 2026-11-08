@@ -397,12 +397,13 @@ public class CasesView extends AbstractView implements HasName {
 							FacadeProvider.getFeatureConfigurationFacade().getActiveServerFeatureConfigurations()),
 						customExportWindow::close);
 					customExportsLayout.setExportCallback((exportConfig) -> {
-						// was Page.open(resource, null, true): the download opens in the current window
+						// was Page.open(resource, null, true): the download opens in the current window. Owned by the
+						// window's layout: the UI is inert while the modal window is open, and Flow refuses (403) an inert owner
 						StreamRegistration exportRegistration = VaadinSession.getCurrent()
 							.getResourceRegistry()
 							.registerResource(
 								CaseDownloadUtil.createCaseExportResource(grid.getCriteria(), this::getSelectedRows, null, exportConfig),
-								UI.getCurrent().getElement());
+								customExportsLayout.getElement());
 						UI.getCurrent().getPage().open(exportRegistration.getResourceUri().toString(), "_self");
 					});
 					customExportWindow.setWidth(1024, Unit.PIXELS);

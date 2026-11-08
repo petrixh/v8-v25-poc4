@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Unit;
 import de.symeda.sormas.ui.utils.NotificationHelper;
 import com.vaadin.flow.component.UI;
@@ -55,7 +56,9 @@ public class CustomExportController {
 				FacadeProvider.getFeatureConfigurationFacade().getActiveServerFeatureConfigurations()),
 			customExportWindow::close);
 		customExportsLayout.setExportCallback(
-			exportConfig -> openDownload(ContactDownloadUtil.createContactExportResource(contactCriteria, selectedRows, exportConfig)));
+			exportConfig -> openDownload(
+				ContactDownloadUtil.createContactExportResource(contactCriteria, selectedRows, exportConfig),
+				customExportsLayout));
 		customExportWindow.setWidth(1024, Unit.PIXELS);
 		customExportWindow.setHeaderTitle(I18nProperties.getCaption(Captions.exportCustom));
 		customExportWindow.add(customExportsLayout);
@@ -72,7 +75,7 @@ public class CustomExportController {
 				FacadeProvider.getFeatureConfigurationFacade().getActiveServerFeatureConfigurations()),
 			customExportWindow::close);
 		customExportsLayout.setExportCallback(
-			exportConfig -> openDownload(TaskDownloadUtil.createTaskExportResource(taskCriteria, selectedRows, exportConfig)));
+			exportConfig -> openDownload(TaskDownloadUtil.createTaskExportResource(taskCriteria, selectedRows, exportConfig), customExportsLayout));
 		customExportWindow.setWidth(1024, Unit.PIXELS);
 		customExportWindow.setHeaderTitle(I18nProperties.getCaption(Captions.exportCustom));
 		customExportWindow.add(customExportsLayout);
@@ -89,7 +92,7 @@ public class CustomExportController {
 				FacadeProvider.getFeatureConfigurationFacade().getActiveServerFeatureConfigurations()),
 			customExportWindow::close);
 		customExportsLayout.setExportCallback(
-			exportConfig -> openDownload(PersonDownloadUtil.createPersonExportResource(personCriteria, exportConfig)));
+			exportConfig -> openDownload(PersonDownloadUtil.createPersonExportResource(personCriteria, exportConfig), customExportsLayout));
 		customExportWindow.setWidth(1024, Unit.PIXELS);
 		customExportWindow.setHeaderTitle(I18nProperties.getCaption(Captions.exportCustom));
 		customExportWindow.add(customExportsLayout);
@@ -120,11 +123,12 @@ public class CustomExportController {
 
 	/**
 	 * Was {@code Page.getCurrent().open(resource, null, true)}: the download opens in the current window (as in
-	 * {@code CasesView}).
+	 * {@code CasesView}). The resource is owned by the export window's layout: Flow refuses (HTTP 403) a download whose
+	 * owner is inert, and the UI is inert while this modal window is open.
 	 */
-	private static void openDownload(DownloadHandler resource) {
+	private static void openDownload(DownloadHandler resource, Component owner) {
 		StreamRegistration exportRegistration =
-			VaadinSession.getCurrent().getResourceRegistry().registerResource(resource, UI.getCurrent().getElement());
+			VaadinSession.getCurrent().getResourceRegistry().registerResource(resource, owner.getElement());
 		UI.getCurrent().getPage().open(exportRegistration.getResourceUri().toString(), "_self");
 	}
 }

@@ -355,9 +355,11 @@
 					<!-- By attaching the classes to a separate JAR, we can import them
 						directly in the production overlay project. -->
 					<attachClasses>true</attachClasses>
-					<!-- Theme images and favicon (Java code uses /VAADIN/themes/sormas/img/...). They live in src/main/frontend/themes/sormas/,
-						where Flow dev mode looks them up for /VAADIN/themes/<name>/ requests; the war gets them at the same URL path for
-						production mode. No theme is activated (no @Theme, no theme.json); the style files stay in webapp until stage 2a -->
+					<!-- Theme files: sormas.css, bootstrap-grid.min.css, the fonts, the images and the favicon (Java code uses
+						/VAADIN/themes/sormas/img/...). They live in src/main/frontend/themes/sormas/, where Flow dev mode looks them up for
+						/VAADIN/themes/<name>/ requests; the war gets them at the same URL path for production mode. No theme is activated
+						(no @Theme, no theme.json): SormasAppShell loads the two style sheets with @StyleSheet. The Valo .scss files in
+						src/main/webapp/VAADIN/themes/sormas/ are not loaded; they are kept as a reference and still end up in the war -->
 					<webResources>
 						<resource>
 							<directory>src/main/frontend/themes/sormas</directory>

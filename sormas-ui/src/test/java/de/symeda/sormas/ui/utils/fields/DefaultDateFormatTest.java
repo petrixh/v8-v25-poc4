@@ -97,6 +97,17 @@ public class DefaultDateFormatTest {
 	}
 
 	@Test
+	public void testLocaleOfTheUiTheFieldIsAttachedTo() {
+		ui.setLocale(Locale.GERMANY);
+		UI other = new UI();
+		other.setLocale(Locale.US);
+		UI.setCurrent(other);
+		PopupDateField field = new PopupDateField();
+		ui.add(field);
+		assertEquals(Arrays.asList("dd.MM.yy", "dd.MM.yyyy"), formats(field.getDatePicker()));
+	}
+
+	@Test
 	public void testFieldWithOwnFormatKeepsIt() {
 		DateField factoryField = new SormasFieldGroupFieldFactory(new FieldVisibilityCheckers(), UiFieldAccessCheckers.getNoop())
 			.createField(Date.class, DateField.class);

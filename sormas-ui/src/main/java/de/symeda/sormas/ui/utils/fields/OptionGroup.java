@@ -166,12 +166,21 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 	 * ignores a value that is not a collection (no change, no event), e.g. {@code setValue(TypeOfPlace.FACILITY)} on a
 	 * not required {@link de.symeda.sormas.ui.utils.NullableOptionGroup}.
 	 * <p>
+	 * V7 {@code AbstractSelect.setValue}: a single select ignores a value that is not an item (no change, no event, also
+	 * when read-only), unless the data source writes it ({@link ReadOnlyWrites#isDataSourceWrite}, the form's field group
+	 * reading its bean); an item added later does not select it. A multi select takes any collection, items or not, as
+	 * V7 did.
+	 * <p>
 	 * A read-only group refuses a different value, as in V7 ({@link ReadOnlyWrites}); a multi select compares the value
 	 * as a set.
 	 */
 	@Override
 	public void setValue(Object value) {
 		if (multiSelect && value != null && !(value instanceof Collection)) {
+			readingNull = false;
+			return;
+		}
+		if (!multiSelect && value != null && !containsId(value) && !ReadOnlyWrites.isDataSourceWrite(this)) {
 			readingNull = false;
 			return;
 		}
@@ -302,10 +311,14 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 	}
 
 	/**
-	 * Selects the item (V7 {@code select}); in multi select it is added to the selection.
+	 * Selects the item (V7 {@code select}); in multi select it is added to the selection. An item id that is not an item
+	 * is ignored, as in V7 (single select: see {@link #setValue}).
 	 */
 	public void select(Object itemId) {
 		if (multiSelect) {
+			if (!containsId(itemId)) {
+				return;
+			}
 			Set<Object> selected = getValue() instanceof Collection ? new LinkedHashSet<>((Collection<?>) getValue()) : new LinkedHashSet<>();
 			selected.add(itemId);
 			setValue(selected);

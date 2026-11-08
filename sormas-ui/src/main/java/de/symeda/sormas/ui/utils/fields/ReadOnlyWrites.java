@@ -51,6 +51,8 @@ public final class ReadOnlyWrites {
 		private Field<?> writing;
 		/** The innermost write is still showing its value (before its value change listeners run). */
 		private boolean presenting;
+		/** The innermost write comes from the data source ({@link #readFromDataSource}). */
+		private boolean fromDataSource;
 		private final Deque<Scope> scopes = new ArrayDeque<>();
 	}
 
@@ -111,16 +113,19 @@ public final class ReadOnlyWrites {
 			return;
 		}
 		try {
+			boolean fromDataSource = isDataSourceWrite(state, field);
 			if (field.isReadOnly()
 				&& !Objects.equals(newValue, field.getValue())
-				&& !isDataSourceWrite(state, field)
+				&& !fromDataSource
 				&& !isInsideWritingField(state, field)) {
 				throw new Field.ReadOnlyException();
 			}
 			Field<?> outer = state.writing;
 			boolean outerPresenting = state.presenting;
+			boolean outerFromDataSource = state.fromDataSource;
 			state.writing = field;
 			state.presenting = true;
+			state.fromDataSource = fromDataSource;
 			state.depth++;
 			try {
 				write.run();
@@ -128,10 +133,29 @@ public final class ReadOnlyWrites {
 				state.depth--;
 				state.writing = outer;
 				state.presenting = outerPresenting;
+				state.fromDataSource = outerFromDataSource;
 			}
 		} finally {
 			release(state);
 		}
+	}
+
+	/**
+	 * Whether a write of {@code field} made now comes from the data source ({@link #readFromDataSource}): the form's field
+	 * group reading its bean into the field, not code calling {@code setValue} (also not a value change listener during
+	 * such a read). The V7 select rule uses it ({@link ComboBox#setValue}, {@link OptionGroup#setValue}): V7 took a data
+	 * source's value whatever the items were, but ignored a {@code setValue} of a value that is not an item.
+	 */
+	public static boolean isDataSourceWrite(Field<?> field) {
+		State state = STATE.get();
+		if (state == null) {
+			return false;
+		}
+		if (state.writing == field) {
+			// the same write, passed on by a subclass's setValue to its superclass's
+			return state.fromDataSource;
+		}
+		return isDataSourceWrite(state, field);
 	}
 
 	/**

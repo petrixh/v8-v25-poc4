@@ -95,7 +95,7 @@ public final class DefaultDateFormat {
 			if (formats == null || formats.isEmpty()) {
 				configure(i18n, e.getUI().getLocale(), LocalDate.now());
 			}
-			picker.setI18n(DatePickerLocale.apply(i18n, picker.getLocale()));
+			picker.setI18n(DatePickerLocale.apply(i18n, DatePickerLocale.localeOf(picker.getLocale(), e)));
 		});
 	}
 }

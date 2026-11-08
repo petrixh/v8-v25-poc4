@@ -172,4 +172,21 @@ public class DatePickerLocaleTest {
 		assertEquals(Arrays.asList("dd.MM.yyyy"), picker.getDatePickerI18n().getDateFormats());
 		assertGerman(picker.getDatePickerI18n());
 	}
+
+	@Test
+	public void testLocaleOfTheUiThePickerIsAttachedTo() {
+		UI other = new UI();
+		other.setLocale(Locale.US);
+		UI.setCurrent(other);
+
+		DateField field = new DateField();
+		ui.add(field);
+		assertGerman(field.getDatePicker().getI18n());
+
+		DatePicker own = new DatePicker();
+		own.setLocale(Locale.ENGLISH);
+		DatePickerLocale.applyOnAttach(own);
+		ui.add(own);
+		assertEquals("January", own.getI18n().getMonthNames().get(0));
+	}
 }

@@ -1509,9 +1509,9 @@ vaadin-button.filter.filter-small {
 }
 
 /* Check boxes and radio buttons (alone or as the options of a group): the enabled look, label in the font colour,
-   dimmed to 0.5 with their label. The group around them and its caption stay at full opacity */
-vaadin-checkbox[disabled],
-vaadin-radio-button[disabled] {
+   dimmed to 0.5 with their label. The group around them and its caption stay at full opacity. A read-only radio group
+   disables its unselected options: those keep Lumo's read-only look (not dimmed, as the read-only Valo option group) */
+:is(vaadin-checkbox, vaadin-radio-button)[disabled]:not([readonly]:not([disabled]) > *) {
   opacity: 0.5;
   color: var(--sormas-font-color);
   --vaadin-checkbox-disabled-background: var(--vaadin-checkbox-background, var(--lumo-contrast-20pct));
@@ -1520,15 +1520,15 @@ vaadin-radio-button[disabled] {
   --vaadin-radio-button-disabled-dot-color: var(--lumo-primary-contrast-color);
 }
 
-vaadin-checkbox[disabled]:is([checked], [indeterminate]) {
+vaadin-checkbox[disabled]:not([readonly]:not([disabled]) > *):is([checked], [indeterminate]) {
   --vaadin-checkbox-disabled-background: var(--lumo-primary-color);
 }
 
-vaadin-radio-button[disabled][checked] {
+vaadin-radio-button[disabled][checked]:not([readonly]:not([disabled]) > *) {
   --vaadin-radio-button-disabled-background: var(--lumo-primary-color);
 }
 
-:is(vaadin-checkbox, vaadin-radio-button)[disabled]::part(label) {
+:is(vaadin-checkbox, vaadin-radio-button)[disabled]:not([readonly]:not([disabled]) > *)::part(label) {
   color: var(--sormas-font-color);
   -webkit-text-fill-color: var(--sormas-font-color);
 }

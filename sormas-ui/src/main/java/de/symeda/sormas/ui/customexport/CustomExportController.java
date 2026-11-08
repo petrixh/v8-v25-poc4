@@ -22,10 +22,7 @@ import java.util.function.Supplier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Unit;
 import de.symeda.sormas.ui.utils.NotificationHelper;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.server.StreamRegistration;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.FacadeProvider;
@@ -40,6 +37,7 @@ import de.symeda.sormas.api.importexport.ImportExportUtils;
 import de.symeda.sormas.api.person.PersonCriteria;
 import de.symeda.sormas.api.task.TaskCriteria;
 import de.symeda.sormas.ui.utils.ContactDownloadUtil;
+import de.symeda.sormas.ui.utils.DownloadUtil;
 import de.symeda.sormas.ui.utils.PersonDownloadUtil;
 import de.symeda.sormas.ui.utils.TaskDownloadUtil;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
@@ -122,13 +120,9 @@ public class CustomExportController {
 	}
 
 	/**
-	 * Was {@code Page.getCurrent().open(resource, null, true)}: the download opens in the current window (as in
-	 * {@code CasesView}). The resource is owned by the export window's layout: Flow refuses (HTTP 403) a download whose
-	 * owner is inert, and the UI is inert while this modal window is open.
+	 * Was {@code Page.getCurrent().open(resource, null, true)}; owned by the export window's layout, which is not inert.
 	 */
 	private static void openDownload(DownloadHandler resource, Component owner) {
-		StreamRegistration exportRegistration =
-			VaadinSession.getCurrent().getResourceRegistry().registerResource(resource, owner.getElement());
-		UI.getCurrent().getPage().open(exportRegistration.getResourceUri().toString(), "_self");
+		DownloadUtil.startDownload(resource, owner);
 	}
 }

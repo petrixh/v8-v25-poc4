@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -42,8 +41,6 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.server.StreamRegistration;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.CountryHelper;
@@ -397,14 +394,10 @@ public class CasesView extends AbstractView implements HasName {
 							FacadeProvider.getFeatureConfigurationFacade().getActiveServerFeatureConfigurations()),
 						customExportWindow::close);
 					customExportsLayout.setExportCallback((exportConfig) -> {
-						// was Page.open(resource, null, true): the download opens in the current window. Owned by the
-						// window's layout: the UI is inert while the modal window is open, and Flow refuses (403) an inert owner
-						StreamRegistration exportRegistration = VaadinSession.getCurrent()
-							.getResourceRegistry()
-							.registerResource(
-								CaseDownloadUtil.createCaseExportResource(grid.getCriteria(), this::getSelectedRows, null, exportConfig),
-								customExportsLayout.getElement());
-						UI.getCurrent().getPage().open(exportRegistration.getResourceUri().toString(), "_self");
+						// was Page.open(resource, null, true); owned by the export window, which is not inert
+						DownloadUtil.startDownload(
+							CaseDownloadUtil.createCaseExportResource(grid.getCriteria(), this::getSelectedRows, null, exportConfig),
+							customExportsLayout);
 					});
 					customExportWindow.setWidth(1024, Unit.PIXELS);
 					customExportWindow.setHeaderTitle(I18nProperties.getCaption(Captions.exportCaseCustom));

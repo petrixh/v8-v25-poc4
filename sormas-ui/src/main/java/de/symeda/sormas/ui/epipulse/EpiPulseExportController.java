@@ -24,8 +24,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.server.StreamRegistration;
-import com.vaadin.flow.server.VaadinSession;
 
 import de.symeda.sormas.api.FacadeProvider;
 import de.symeda.sormas.api.epipulse.EpipulseExportDto;
@@ -42,6 +40,7 @@ import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CommitDiscardWrapperComponent;
 import de.symeda.sormas.ui.utils.ConfirmationComponent;
 import de.symeda.sormas.ui.utils.CssStyles;
+import de.symeda.sormas.ui.utils.DownloadUtil;
 import de.symeda.sormas.ui.utils.NotificationHelper;
 import de.symeda.sormas.ui.utils.NotificationHelper.Type;
 import de.symeda.sormas.ui.utils.StreamSourceDownloadHandler;
@@ -248,9 +247,7 @@ public class EpiPulseExportController {
 			}
 		}, exportIndexDto.getExportFileName(), "text/csv");
 
-		// was Page.open(resource, null, false): the download opens in the current window
-		StreamRegistration exportRegistration =
-			VaadinSession.getCurrent().getResourceRegistry().registerResource(streamResource, UI.getCurrent().getElement());
-		UI.getCurrent().getPage().open(exportRegistration.getResourceUri().toString(), "_self");
+		// was Page.open(resource, null, false); called from the export grid of the view, so the UI owns it
+		DownloadUtil.startDownload(streamResource, UI.getCurrent());
 	}
 }

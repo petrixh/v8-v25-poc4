@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinServletRequest;
@@ -66,10 +67,12 @@ import fish.payara.security.openid.api.OpenIdContext;
 public final class LoginUI {
 
 	/**
-	 * Session attribute: the address a user asked for before logging in (old app: the {@code #!} fragment kept by the
-	 * browser across the redirect to the login page).
+	 * Query parameter of the login route: the address a user asked for before logging in. Old app: the {@code #!}
+	 * fragment, which the browser kept across the redirect to the login page. Like the fragment it lives in the address
+	 * of the login page only, not in the session: opening the login page by its own address logs in to the start view,
+	 * also after a logout (migration ticket 2b-05).
 	 */
-	private static final String LOGIN_TARGET = LoginUI.class.getName() + ".target";
+	static final String TARGET_PARAMETER = "target";
 
 	private LoginUI() {
 		// Hide Utility Class Constructor
@@ -114,27 +117,26 @@ public final class LoginUI {
 		}
 
 		String target = event.getLocation().getPathWithQueryParameters();
-		VaadinSession session = VaadinSession.getCurrent();
-		if (session != null) {
-			session.setAttribute(LOGIN_TARGET, target.isEmpty() ? null : target);
-		}
-		event.forwardTo(LoginView.class);
+		event.forwardTo(LoginView.class, target.isEmpty() ? QueryParameters.empty() : QueryParameters.of(TARGET_PARAMETER, target));
 	}
 
 	/**
+	 * @param target
+	 *            the address asked for before the login (the {@value #TARGET_PARAMETER} parameter of the login page), or
+	 *            {@code null}
 	 * @return the address to open after a successful login: the one asked for before the login, or the start page
 	 */
-	static String getTargetUrl() {
+	static String getTargetUrl(String target) {
+		return VaadinServletRequest.getCurrent().getContextPath() + "/" + toApplicationPath(target);
+	}
 
-		String target = null;
-		VaadinSession session = VaadinSession.getCurrent();
-		if (session != null) {
-			target = (String) session.getAttribute(LOGIN_TARGET);
-			session.setAttribute(LOGIN_TARGET, null);
-		}
-		// a path inside this application only
-		String path = target != null ? target.replaceFirst("^/+", "") : "";
-		return VaadinServletRequest.getCurrent().getContextPath() + "/" + path;
+	/**
+	 * @return the target as a path inside this application, without leading slashes: the parameter comes from the
+	 *         address, so it must not lead to another site ({@code //host}, {@code /\host}; browsers drop tabs and line
+	 *         breaks in addresses)
+	 */
+	static String toApplicationPath(String target) {
+		return target != null ? target.replaceAll("[\\p{Cntrl}\\s]", "").replaceFirst("^[/\\\\]+", "") : "";
 	}
 
 	public static class OidcLogoutServlet extends HttpServlet {

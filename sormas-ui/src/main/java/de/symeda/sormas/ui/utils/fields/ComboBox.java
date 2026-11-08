@@ -59,7 +59,9 @@ public class ComboBox extends com.vaadin.flow.component.combobox.ComboBox<Object
 
 	private void init() {
 		setItems(this::matchesFilter, selectItems.getDataProvider());
-		setItemLabelGenerator(selectItems::getCaption);
+		// V7 showed the selected value with the caption of the equal item in the container, which may differ from the
+		// value's own (an inactive facility shows "(Inactive)": AbstractEditForm.addInfrastructureField)
+		setItemLabelGenerator(selectItems::getValueCaption);
 		setClearButtonVisible(selectItems.isNullSelectionAllowed());
 		selectItems.setOnNullSelectionAllowedChange(() -> setClearButtonVisible(selectItems.isNullSelectionAllowed()));
 		// V7 showed the value with its current item caption; Flow sends the caption only when the value is set, so a

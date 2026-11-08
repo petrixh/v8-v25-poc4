@@ -24,12 +24,15 @@ import java.util.Map;
 import java.util.Set;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.BeforeLeaveEvent;
 import com.vaadin.flow.router.Location;
+import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
@@ -55,6 +58,9 @@ import com.vaadin.flow.server.VaadinSession;
  * {@link ViewChangeListener#afterViewChange(ViewChangeListener.ViewChangeEvent)}. Every navigation gets a new view
  * instance, also to the current view class or the current state ({@code SormasUI.refreshView()}), as with Vaadin 8's
  * class-based view registration. {@link MainLayout} forwards the Flow navigation events here.
+ * <p>
+ * <b>Open dialogs stay open</b> when the current view is shown again ({@link #keepDialogsOpen(UI, Runnable)}): Vaadin 8
+ * sub-windows belonged to the UI, and its Navigator never touched them.
  * <p>
  * <b>Errors</b> go to the session error handler, as in Vaadin 8: from {@code enter()} and the after-view-change
  * listeners directly (the view stays shown), from all earlier stages through {@link NavigationExceptionView}.
@@ -155,7 +161,7 @@ public class Navigator implements Serializable {
 
 		Location location = toLocation(target);
 		if (currentView != null && location.getPathWithQueryParameters().equals(toLocation(state).getPathWithQueryParameters())) {
-			ui.refreshCurrentRoute(false);
+			keepDialogsOpen(ui, () -> ui.refreshCurrentRoute(false));
 		} else {
 			ui.navigate(location.getPath(), location.getQueryParameters());
 		}
@@ -331,7 +337,7 @@ public class Navigator implements Serializable {
 			internalRefresh = true;
 			ui.beforeClientResponse(ui, context -> {
 				try {
-					ui.refreshCurrentRoute(false);
+					keepDialogsOpen(ui, () -> ui.refreshCurrentRoute(false));
 				} finally {
 					internalRefresh = false;
 				}
@@ -359,6 +365,50 @@ public class Navigator implements Serializable {
 				throw e;
 			}
 		}
+	}
+
+	/**
+	 * Runs a refresh of the current route ({@link UI#refreshCurrentRoute(boolean)}) and keeps the open dialogs open,
+	 * with their content and state, as Vaadin 8 kept its sub-windows when the Navigator showed a new view instance.
+	 * <p>
+	 * Flow's route refresh removes every component with modality from the UI (open dialogs: modal and, by default,
+	 * visually modal), and while there is one it re-creates the whole route chain instead of only the route target. So
+	 * the open dialogs leave the modality tracking for the refresh (they stay attached and open) and get their modality
+	 * back after it, oldest first, which restores the order. A dialog that the refreshed view closed or removed in the
+	 * meantime is left as it is.
+	 */
+	static void keepDialogsOpen(UI ui, Runnable refresh) {
+
+		List<Dialog> dialogs = new ArrayList<>();
+		collectOpenDialogs(ui, dialogs);
+		dialogs.forEach(dialog -> ui.setChildComponentModal(dialog, ModalityMode.MODELESS));
+		try {
+			refresh.run();
+		} finally {
+			for (Dialog dialog : dialogs) {
+				if (dialog.getUI().orElse(null) == ui && dialog.isOpened() && dialog.isVisible()) {
+					ui.setChildComponentModal(dialog, dialog.getModality());
+				}
+			}
+		}
+	}
+
+	/**
+	 * Collects the open dialogs with modality: the ones attached to the UI and, after each, the ones opened from it
+	 * (Flow adds a dialog opened while another one is shown to that one). A dialog tracks its modality only while it is
+	 * open and visible (Flow's {@code Dialog}).
+	 */
+	private static void collectOpenDialogs(Component parent, List<Dialog> dialogs) {
+
+		parent.getChildren().forEach(child -> {
+			if (child instanceof Dialog) {
+				Dialog dialog = (Dialog) child;
+				if (dialog.isOpened() && dialog.isVisible() && dialog.getModality() != ModalityMode.MODELESS) {
+					dialogs.add(dialog);
+				}
+				collectOpenDialogs(dialog, dialogs);
+			}
+		});
 	}
 
 	private static String toState(String[] viewNameAndParameters) {
@@ -409,7 +459,12 @@ public class Navigator implements Serializable {
 			if (inHandler) {
 				proceeded = true;
 			} else if (postponed != null) {
-				postponed.proceed();
+				if (event.getTrigger() == NavigationTrigger.REFRESH_ROUTE) {
+					// a refresh of the current view, confirmed later (unsaved changes): the open dialogs stay open
+					keepDialogsOpen(event.getUI(), postponed::proceed);
+				} else {
+					postponed.proceed();
+				}
 			}
 		}
 

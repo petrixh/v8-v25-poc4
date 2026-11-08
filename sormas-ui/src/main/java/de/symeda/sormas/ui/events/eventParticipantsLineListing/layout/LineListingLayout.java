@@ -40,6 +40,7 @@ import de.symeda.sormas.ui.utils.components.linelisting.model.LineDto;
 import de.symeda.sormas.ui.utils.components.linelisting.person.PersonField;
 import de.symeda.sormas.ui.utils.components.linelisting.person.PersonFieldDto;
 import de.symeda.sormas.ui.utils.components.linelisting.section.LineListingSection;
+import de.symeda.sormas.ui.utils.fields.KeepValueComboBox;
 
 public class LineListingLayout extends VerticalLayout {
 
@@ -64,7 +65,7 @@ public class LineListingLayout extends VerticalLayout {
 		HorizontalLayout sharedInformationBar = new HorizontalLayout();
 		sharedInformationBar.addClassName(CssStyles.SPACING_SMALL);
 
-		region = new ComboBox<>(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_REGION));
+		region = new KeepValueComboBox<>(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_REGION));
 		region.setItemLabelGenerator(item -> item.buildCaption());
 		region.setId("lineListingRegion");
 		sharedInformationBar.add(region);
@@ -73,7 +74,7 @@ public class LineListingLayout extends VerticalLayout {
 			updateDistricts(e.getValue());
 		});
 
-		district = new ComboBox<>(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_DISTRICT));
+		district = new KeepValueComboBox<>(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_DISTRICT));
 		district.setItemLabelGenerator(item -> item.buildCaption());
 		district.setId("lineListingDistrict");
 		sharedInformationBar.add(district);

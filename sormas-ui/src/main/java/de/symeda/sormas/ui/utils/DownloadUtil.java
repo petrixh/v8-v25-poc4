@@ -64,6 +64,8 @@ import com.vaadin.flow.component.html.AttachmentType;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.server.StreamRegistration;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.AgeGroup;
@@ -648,6 +650,23 @@ public final class DownloadUtil {
 		dialog.setHeaderTitle(caption);
 
 		VaadinUiUtil.addCloseListener(dialog, closeListener);
+	}
+
+	/**
+	 * Was {@code Page.getCurrent().open(resource, ...)} for a download: the browser downloads the resource and the page
+	 * stays in use, as in Vaadin 8. {@code Page.open(url, "_self")} would stop the Flow client (Flow stops the
+	 * application before a "_self" navigation), so the UI would no longer answer after the download; a download link
+	 * that is clicked once does not navigate. The resource is owned by {@code owner}: Flow refuses (HTTP 403) a request
+	 * for a resource whose owner is inert, as everything outside an open modal window is (the UI too).
+	 */
+	public static void startDownload(DownloadHandler downloadHandler, Component owner) {
+		StreamRegistration registration = VaadinSession.getCurrent().getResourceRegistry().registerResource(downloadHandler, owner.getElement());
+		UI.getCurrent()
+			.getPage()
+			.executeJs(
+				"const a = document.createElement('a'); a.href = $0; a.download = ''; a.style.display = 'none';"
+					+ " document.body.appendChild(a); a.click(); a.remove();",
+				registration.getResourceUri().toString());
 	}
 
 	/**

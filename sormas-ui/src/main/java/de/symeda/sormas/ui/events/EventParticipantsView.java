@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -36,8 +35,6 @@ import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.server.StreamRegistration;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
 import de.symeda.sormas.api.EntityRelevanceStatus;
@@ -69,6 +66,7 @@ import de.symeda.sormas.ui.utils.ComboBoxHelper;
 import de.symeda.sormas.ui.utils.ContentMode;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DetailSubComponentWrapper;
+import de.symeda.sormas.ui.utils.DownloadUtil;
 import de.symeda.sormas.ui.utils.EventParticipantDownloadUtil;
 import de.symeda.sormas.ui.utils.ExportEntityName;
 import de.symeda.sormas.ui.utils.GridExportStreamResource;
@@ -457,14 +455,11 @@ public class EventParticipantsView extends AbstractEventView implements HasName 
 						FacadeProvider.getFeatureConfigurationFacade().getActiveServerFeatureConfigurations()),
 					customExportWindow::close);
 				customExportsLayout.setExportCallback((exportConfig) -> {
-					// was Page.open(resource, null, true): the download opens in the current window (as CasesView)
-					StreamRegistration exportRegistration = VaadinSession.getCurrent()
-						.getResourceRegistry()
-						.registerResource(
-							EventParticipantDownloadUtil
-								.createExtendedEventParticipantExportResource(grid.getCriteria(), this::getSelectedRows, exportConfig),
-							UI.getCurrent().getElement());
-					UI.getCurrent().getPage().open(exportRegistration.getResourceUri().toString(), "_self");
+					// was Page.open(resource, null, true); owned by the export window, which is not inert
+					DownloadUtil.startDownload(
+						EventParticipantDownloadUtil
+							.createExtendedEventParticipantExportResource(grid.getCriteria(), this::getSelectedRows, exportConfig),
+						customExportsLayout);
 				});
 				customExportWindow.setWidth(1024, Unit.PIXELS);
 				customExportWindow.setHeaderTitle(I18nProperties.getCaption(Captions.exportCustom));

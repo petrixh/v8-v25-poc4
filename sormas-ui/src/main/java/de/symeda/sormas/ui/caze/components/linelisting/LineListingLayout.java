@@ -54,6 +54,7 @@ import de.symeda.sormas.ui.utils.components.linelisting.person.PersonField;
 import de.symeda.sormas.ui.utils.components.linelisting.person.PersonFieldDto;
 import de.symeda.sormas.ui.utils.components.linelisting.section.LineListingSection;
 import de.symeda.sormas.ui.utils.fields.DefaultDateFormat;
+import de.symeda.sormas.ui.utils.fields.KeepValueComboBox;
 
 public class LineListingLayout extends VerticalLayout {
 
@@ -95,12 +96,12 @@ public class LineListingLayout extends VerticalLayout {
 		sharedInformationBar.add(diseaseDetails);
 		disease.addValueChangeListener(event -> diseaseDetails.setVisible(Disease.OTHER.equals(disease.getValue())));
 
-		region = new ComboBox<>(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_REGION));
+		region = new KeepValueComboBox<>(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_REGION));
 		region.setItemLabelGenerator(item -> item.buildCaption());
 		region.setId("lineListingRegion");
 		sharedInformationBar.add(region);
 
-		district = new ComboBox<>(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_DISTRICT));
+		district = new KeepValueComboBox<>(I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.RESPONSIBLE_DISTRICT));
 		district.setItemLabelGenerator(item -> item.buildCaption());
 		district.setId("lineListingDistrict");
 		sharedInformationBar.add(district);
@@ -440,7 +441,7 @@ public class LineListingLayout extends VerticalLayout {
 			epidNumber.setId("lineListingEpidNumber_" + lineIndex);
 			epidNumber.setWidth("160px");
 			binder.forField(epidNumber).bind(CaseLineDto.EPID_NUMBER);
-			community = new ComboBox<>();
+			community = new KeepValueComboBox<>();
 			community.setItemLabelGenerator(item -> item.buildCaption());
 			community.setId("lineListingCommunity_" + lineIndex);
 			community.addValueChangeListener(e -> {

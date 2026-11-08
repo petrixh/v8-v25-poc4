@@ -85,15 +85,17 @@ public final class DefaultDateFormat {
 	/**
 	 * When the picker is attached and has no date format of its own, gives it the default format of the locale of the UI
 	 * it is attached to (see the class comment; no caller sets a locale on these pickers). A format set later replaces it.
+	 * Also gives it the calendar language of its locale ({@link DatePickerLocale}), with or without a format of its own.
 	 */
 	public static void applyOnAttach(DatePicker picker) {
 		picker.addAttachListener(e -> {
 			DatePicker.DatePickerI18n current = picker.getI18n();
-			List<String> formats = current != null ? current.getDateFormats() : null;
+			DatePicker.DatePickerI18n i18n = current != null ? current : new DatePicker.DatePickerI18n();
+			List<String> formats = i18n.getDateFormats();
 			if (formats == null || formats.isEmpty()) {
-				picker.setI18n(
-					configure(current != null ? current : new DatePicker.DatePickerI18n(), e.getUI().getLocale(), LocalDate.now()));
+				configure(i18n, e.getUI().getLocale(), LocalDate.now());
 			}
+			picker.setI18n(DatePickerLocale.apply(i18n, picker.getLocale()));
 		});
 	}
 }

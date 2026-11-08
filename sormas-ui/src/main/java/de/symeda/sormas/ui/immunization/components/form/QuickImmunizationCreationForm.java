@@ -57,6 +57,7 @@ import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.FieldHelper;
 import de.symeda.sormas.ui.utils.FormComponent;
+import de.symeda.sormas.ui.utils.fields.DatePickerLocale;
 
 /**
  * Simplified "Quick Immunization Entry" form showing the core fields for quick creation (BR0070).
@@ -226,6 +227,7 @@ public class QuickImmunizationCreationForm extends AbstractEditForm<Immunization
 			DatePicker.DatePickerI18n dateOfMostRecentDoseI18n = new DatePicker.DatePickerI18n();
 			dateOfMostRecentDoseI18n.setDateFormat(DateFormatHelper.getDateFormatPattern());
 			dateOfMostRecentDose.setI18n(dateOfMostRecentDoseI18n);
+			DatePickerLocale.applyOnAttach(dateOfMostRecentDose);
 
 			vaccinationInfoSource = new ComboBox<>();
 			vaccinationInfoSource.setId("vaccinationInfoSource");

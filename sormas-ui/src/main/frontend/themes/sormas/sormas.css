@@ -437,7 +437,9 @@ vaadin-vertical-layout > :first-child:is(h1, .h1, h2, .h2, h3, .h3, h4, .h4) {
   white-space: nowrap;
   display: block;
 }
-.side-component :is(span, div, label) {
+/* label.scss .side-component .v-label: only the elements that stand for a Vaadin 8 label (text, or text in spans),
+   not the captions, layout wrappers, list rows or button containers around them */
+.side-component :is(span, div, label):not(.v-caption):not(:has(> :not(span))) {
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1564,3 +1566,18 @@ vaadin-custom-field[required] :is(vaadin-date-picker, vaadin-time-picker, vaadin
 vaadin-custom-field[required]:has(> :is(vaadin-date-picker, vaadin-radio-group, vaadin-checkbox-group)[readonly])::part(required-indicator) {
   display: none;
 }
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 17. Review fixes (R3 review minors, ticket 2a-19). The grid shim gives the cell style generator's class names to the
+ *     body cells as part names (Grid.Column.setStyleGenerator), inside the grid's shadow DOM, so the class rules of
+ *     sections 5 and 6 (.inaccessible-column, .align-center) do not reach them.
+ * ------------------------------------------------------------------------------------------------------------- */
+
+/* cells of values the user may not see (pseudonymised or restricted): italic and dimmed (global.scss
+   .inaccessible-column, .v-table-cell-content-inaccessible-column) */
+vaadin-grid::part(inaccessible-column) { font-style: italic; opacity: 0.5; }
+
+/* centred cells: CssStyles.ALIGN_CENTER (global.scss .align-center) and Valo's v-align-center (orderedlayout.scss); text
+   and inline content only, a layout in a component column keeps its own alignment */
+vaadin-grid::part(align-center),
+vaadin-grid::part(v-align-center) { text-align: center; }

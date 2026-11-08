@@ -17,6 +17,8 @@ package de.symeda.sormas.ui.login;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.server.VaadinServletRequest;
 
@@ -27,16 +29,22 @@ import de.symeda.sormas.ui.login.LoginScreen.LoginListener;
 /**
  * The login page, route {@value #ROUTE} of every session (registered by {@link LoginUI#init}). It shows the
  * {@link LoginScreen} as the Vaadin 8 login UI did; after a successful login (and the default password dialogs) the
- * browser loads the address the user asked for, or the start page.
+ * browser loads the address the user asked for (the {@value LoginUI#TARGET_PARAMETER} parameter of this page's
+ * address, set by the login check), or the start page.
  * <p>
  * With Keycloak as the authentication provider the page shows nothing and sends the browser to the
  * {@link LoginUI.OidcLoginServlet}, which redirects to the provider's login page.
  */
-public class LoginView extends Div implements HasDynamicTitle {
+public class LoginView extends Div implements HasDynamicTitle, BeforeEnterObserver {
 
 	private static final long serialVersionUID = 1L;
 
 	public static final String ROUTE = "login";
+
+	/**
+	 * The address asked for before the login, from this page's address; {@code null}: the start page.
+	 */
+	private String target;
 
 	public LoginView() {
 		setSizeFull();
@@ -48,7 +56,12 @@ public class LoginView extends Div implements HasDynamicTitle {
 		add(
 			new LoginScreen(
 				DefaultPasswordUIHelper
-					.getInterceptionLoginListener((LoginListener) () -> ui.getPage().setLocation(LoginUI.getTargetUrl()), ui)));
+					.getInterceptionLoginListener((LoginListener) () -> ui.getPage().setLocation(LoginUI.getTargetUrl(target)), ui)));
+	}
+
+	@Override
+	public void beforeEnter(BeforeEnterEvent event) {
+		target = event.getLocation().getQueryParameters().getSingleParameter(LoginUI.TARGET_PARAMETER).orElse(null);
 	}
 
 	@Override

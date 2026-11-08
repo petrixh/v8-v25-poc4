@@ -225,7 +225,9 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> impl
 			}
 		};
 		table.addGeneratedColumn(ACTION_COLUMN_ID, editColumnGenerator);
-		table.setColumnWidth(ACTION_COLUMN_ID, 20);
+		// was setColumnWidth(ACTION_COLUMN_ID, 20): Vaadin 7 set the content width, a Flow width includes the cell padding,
+		// so a 20 px column cut off the button
+		table.setColumnWidthToContent(ACTION_COLUMN_ID);
 		table.setColumnHeader(ACTION_COLUMN_ID, "");
 
 		// As in Vaadin 7: a double click on a row, or a click in the action column next to the button, opens the entry. A
@@ -760,6 +762,7 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> impl
 		private final List<Object> visibleColumns = new ArrayList<>();
 		private final Map<Object, String> columnHeaders = new HashMap<>();
 		private final Map<Object, Integer> columnWidths = new HashMap<>();
+		private final Set<Object> contentWidthColumns = new HashSet<>();
 		private final Map<Object, Float> columnExpandRatios = new HashMap<>();
 		private FieldAccessCellStyleGenerator cellStyleGenerator;
 		private BeanItemContainer<?> container;
@@ -910,6 +913,15 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> impl
 			updateColumns();
 		}
 
+		/**
+		 * Flow only: the column is as wide as its content and takes no extra space. Vaadin 7 {@link #setColumnWidth}
+		 * gave the content width without the cell padding, which a fixed Flow column width (padding included) does not.
+		 */
+		public void setColumnWidthToContent(Object propertyId) {
+			contentWidthColumns.add(propertyId);
+			updateColumns();
+		}
+
 		public void setColumnExpandRatio(Object propertyId, float expandRatio) {
 			columnExpandRatios.put(propertyId, expandRatio);
 			updateColumns();
@@ -967,7 +979,10 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> impl
 				}
 				column.setKey(key);
 				column.setHeader(headerText(columnHeaders.containsKey(id) ? columnHeaders.get(id) : key));
-				if (columnWidths.containsKey(id)) {
+				if (contentWidthColumns.contains(id)) {
+					column.setAutoWidth(true);
+					column.setFlexGrow(0);
+				} else if (columnWidths.containsKey(id)) {
 					column.setWidth(columnWidths.get(id));
 				} else {
 					column.setAutoWidth(true);

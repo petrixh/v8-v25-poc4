@@ -109,6 +109,15 @@ public class ComboBox extends com.vaadin.flow.component.combobox.ComboBox<Object
 	}
 
 	/**
+	 * A read-only combo box refuses a different value, as in V7 ({@link ReadOnlyWrites}); this includes {@code clear()}
+	 * and removing the selected item or all items while it has a value.
+	 */
+	@Override
+	public void setValue(Object value) {
+		ReadOnlyWrites.write(this, value, () -> super.setValue(value));
+	}
+
+	/**
 	 * V7 null selection off: the user cannot clear the combo box. A {@code null} from the client is ignored (the value
 	 * stays, no value change event) and the client shows the kept value again. A programmatic {@code setValue(null)} or
 	 * {@code clear()} still works, as in V7.

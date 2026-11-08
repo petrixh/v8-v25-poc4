@@ -47,9 +47,15 @@ public class CheckBox extends com.vaadin.flow.component.checkbox.Checkbox implem
 	 * V7 {@code CheckBox.setValue(null)} was allowed: the box shows unchecked and the value stays {@code null}; Flow
 	 * throws on {@code null}. A change between {@code null} and {@code false} fires a value change event, as in V7, though
 	 * the box looks the same.
+	 * <p>
+	 * A read-only field refuses a different value, as in V7 ({@link ReadOnlyWrites}).
 	 */
 	@Override
 	public void setValue(Boolean value) {
+		ReadOnlyWrites.write(this, value, () -> setValueUnchecked(value));
+	}
+
+	private void setValueUnchecked(Boolean value) {
 		Boolean oldValue = getValue();
 		boolean wasNull = nullValue;
 		nullValue = value == null;

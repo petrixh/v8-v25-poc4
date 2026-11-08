@@ -55,9 +55,15 @@ public class TextArea extends com.vaadin.flow.component.textfield.TextArea imple
 	 * V7 {@code setValue(null)}: the value is {@code null} and the field shows the
 	 * {@link #getNullRepresentation() null representation} (Flow rejects {@code null}). A change between {@code null}
 	 * and the null representation fires a value change event, as in V7, though the field looks the same.
+	 * <p>
+	 * A read-only field refuses a different value, as in V7 ({@link ReadOnlyWrites}).
 	 */
 	@Override
 	public void setValue(String value) {
+		ReadOnlyWrites.write(this, value, () -> setValueUnchecked(value));
+	}
+
+	private void setValueUnchecked(String value) {
 		String oldValue = getValue();
 		boolean wasNull = nullValue;
 		nullValue = value == null;

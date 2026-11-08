@@ -28,6 +28,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
@@ -285,5 +287,99 @@ public class RequiredFieldFeedbackTest {
 		fieldSampleId.setValue("bad");
 		assertTrue(fieldSampleId.isInvalid());
 		assertEquals("not bad", fieldSampleId.getErrorMessage());
+	}
+
+	private static String tooltip(Field<?> field) {
+		Tooltip tooltip = ((HasTooltip) field).getTooltip();
+		return tooltip == null ? null : tooltip.getText();
+	}
+
+	/**
+	 * Ticket 2b-16: Vaadin 7 sent the required error of a marked empty field to the browser although it hid the error
+	 * indicator; hovering the field showed it as a tooltip. Only while the field is marked: not before the first Save
+	 * of a create form, not after it is filled.
+	 */
+	@Test
+	public void markedEmptyRequiredFieldShowsRequiredErrorAsTooltip() {
+		TextField fieldSampleId = requiredText("Field sample ID");
+		DateField receivedDate = requiredDate("Date sample received at lab");
+		BeanFieldGroup<SampleDto> group = group();
+		group.bind(fieldSampleId, SampleDto.FIELD_SAMPLE_ID);
+		group.bind(receivedDate, SampleDto.RECEIVED_DATE);
+		hideValidationUntilNextCommit(group);
+		group.setItemDataSource(new SampleDto());
+		endOfRequest();
+		assertNoMessage(tooltip(fieldSampleId));
+		assertNoMessage(tooltip(receivedDate));
+
+		assertThrows(InvalidValueException.class, group::commit);
+		endOfRequest();
+		assertEquals("Field sample ID", tooltip(fieldSampleId));
+		assertEquals("Date sample received at lab", tooltip(receivedDate));
+
+		fieldSampleId.setValue("S-1");
+		endOfRequest();
+		assertNoMessage(tooltip(fieldSampleId));
+		assertEquals("Date sample received at lab", tooltip(receivedDate));
+
+		fieldSampleId.setValue("");
+		assertEquals("Field sample ID", tooltip(fieldSampleId));
+	}
+
+	/**
+	 * 2b-16: a description stays the tooltip; while the field is marked the required error shows above it, as in the
+	 * Vaadin 7 tooltip. A description set while marked keeps the error.
+	 */
+	@Test
+	public void requiredErrorTooltipKeepsDescription() {
+		TextField fieldSampleId = requiredText("Field sample ID");
+		fieldSampleId.setDescription("The ID on the tube");
+		BeanFieldGroup<SampleDto> group = group();
+		group.bind(fieldSampleId, SampleDto.FIELD_SAMPLE_ID);
+		group.setItemDataSource(new SampleDto());
+		endOfRequest();
+		assertEquals("Field sample ID\nThe ID on the tube", tooltip(fieldSampleId));
+
+		fieldSampleId.setDescription("Lab ID");
+		assertEquals("Field sample ID\nLab ID", tooltip(fieldSampleId));
+
+		fieldSampleId.setValue("S-1");
+		endOfRequest();
+		assertEquals("Lab ID", tooltip(fieldSampleId));
+	}
+
+	/**
+	 * 2b-16: no required-error tooltip where Vaadin 7 showed no required error (empty required error, read-only, hidden
+	 * validation), nor for a validator error, which shows its message under the field.
+	 */
+	@Test
+	public void noRequiredErrorTooltip() {
+		TextField noRequiredError = requiredText("");
+		DateField readOnly = requiredDate("Date sample received at lab");
+		readOnly.setReadOnly(true);
+		TextField hidden = requiredText("Comment");
+		hidden.setValidationVisible(false);
+		BeanFieldGroup<SampleDto> group = group();
+		group.bind(noRequiredError, SampleDto.FIELD_SAMPLE_ID);
+		group.bind(readOnly, SampleDto.RECEIVED_DATE);
+		group.bind(hidden, SampleDto.COMMENT);
+		group.setItemDataSource(new SampleDto());
+		assertThrows(InvalidValueException.class, group::commit);
+		endOfRequest();
+		assertNoMessage(tooltip(noRequiredError));
+		assertNoMessage(tooltip(readOnly));
+		assertNoMessage(tooltip(hidden));
+
+		TextField validated = requiredText("Lab sample ID");
+		validated.addValidator(value -> {
+			if ("bad".equals(value)) {
+				throw new Field.InvalidValueException("not bad");
+			}
+		});
+		validated.setValue("bad");
+		validated.showValidation();
+		assertTrue(validated.isInvalid());
+		assertEquals("not bad", validated.getErrorMessage());
+		assertNoMessage(tooltip(validated));
 	}
 }

@@ -1581,3 +1581,22 @@ vaadin-grid::part(inaccessible-column) { font-style: italic; opacity: 0.5; }
    and inline content only, a layout in a component column keeps its own alignment */
 vaadin-grid::part(align-center),
 vaadin-grid::part(v-align-center) { text-align: center; }
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 18. Invalid fields (ticket 2b-01). Valo framed a field with an error in the error colour (.v-textfield-error and
+ *     the like: $v-error-indicator-color), also an empty required field after a refused Save. Here the required rule
+ *     of section 2 (and of section 16 inside custom fields) set the frame colour on the same element as Lumo's
+ *     invalid state, and won. The shim's date, date-time and option group fields carry the invalid state on the
+ *     custom field around their pickers or option group: the inputs and options directly inside get the error frame
+ *     too (not the fields of a form, which is a custom field as well). Read-only fields keep the read-only look of
+ *     section 2.
+ * ------------------------------------------------------------------------------------------------------------- */
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker)[invalid]:not([readonly]),
+vaadin-custom-field[invalid] > :is(vaadin-text-field, vaadin-date-picker, vaadin-time-picker, vaadin-combo-box):not([readonly]),
+vaadin-custom-field[invalid] > :is(vaadin-radio-group, vaadin-checkbox-group):not([readonly]) > :is(vaadin-radio-button, vaadin-checkbox),
+vaadin-custom-field[invalid] > vaadin-horizontal-layout > :is(vaadin-combo-box, vaadin-time-picker):not([readonly]),
+vaadin-custom-field[invalid] > vaadin-horizontal-layout > vaadin-custom-field > vaadin-date-picker:not([readonly]) {
+  --vaadin-input-field-border-color: var(--lumo-error-color);
+}

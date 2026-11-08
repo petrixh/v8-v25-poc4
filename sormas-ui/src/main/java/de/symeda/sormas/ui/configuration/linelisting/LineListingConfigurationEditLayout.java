@@ -25,6 +25,7 @@ import de.symeda.sormas.api.utils.HtmlHelper;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.DefaultDateFormat;
 import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
 @SuppressWarnings("serial")
@@ -89,6 +90,7 @@ public class LineListingConfigurationEditLayout extends VerticalLayout {
 		controlLayout.add(btnDisableAll);
 
 		dfEndDate = new DatePicker();
+		DefaultDateFormat.applyOnAttach(dfEndDate);
 		dfEndDate.setId("endDate");
 		dfEndDate.setPlaceholder(I18nProperties.getCaption(Captions.lineListingEndDate));
 		dfEndDate.setMin(LocalDate.now());

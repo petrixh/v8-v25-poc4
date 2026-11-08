@@ -65,6 +65,8 @@ public class DateField extends CustomField<Date> {
 		// V7 PopupDateField opened its calendar only from its button, not on typing or clicking into the text. An overlay
 		// opened by typing would also take the next click outside (e.g. on Save) only to close itself.
 		datePicker.setAutoOpen(false);
+		// V7 without setDateFormat: the short date pattern of the locale (e.g. M/d/yy), not Flow's four-digit year
+		DefaultDateFormat.applyOnAttach(datePicker);
 		datePicker.addValueChangeListener(e -> {
 			if (e.isFromClient()) {
 				updateValue();

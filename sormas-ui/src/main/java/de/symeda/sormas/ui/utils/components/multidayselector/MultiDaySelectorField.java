@@ -16,6 +16,7 @@ import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.i18n.Validations;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.fields.CustomField;
+import de.symeda.sormas.ui.utils.fields.DefaultDateFormat;
 
 public class MultiDaySelectorField extends CustomField<MultiDaySelectorDto> {
 
@@ -36,6 +37,8 @@ public class MultiDaySelectorField extends CustomField<MultiDaySelectorDto> {
 		multiDaySelect = new Checkbox();
 		startDate = new DatePicker();
 		endDate = new DatePicker();
+		DefaultDateFormat.applyOnAttach(startDate);
+		DefaultDateFormat.applyOnAttach(endDate);
 
 		this.properties = new Properties();
 	}

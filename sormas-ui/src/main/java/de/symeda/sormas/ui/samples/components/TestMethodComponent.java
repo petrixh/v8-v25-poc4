@@ -52,6 +52,7 @@ import de.symeda.sormas.ui.samples.events.TestTypeChangedEvent;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.FormComponent;
 import de.symeda.sormas.ui.utils.FormEventBus;
+import de.symeda.sormas.ui.utils.fields.DefaultDateFormat;
 
 /**
  * Test type, typing ID, test date/time, lab, lab details.
@@ -134,6 +135,7 @@ public class TestMethodComponent extends FormComponent<PathogenTestDto> {
 
 		// Test date/time — custom IDs so created manually and tracked
 		testDateField = new DatePicker();
+		DefaultDateFormat.applyOnAttach(testDateField);
 		testDateField.setId(PathogenTestDto.TEST_DATE_TIME + "_date");
 		testDateField.setLabel(I18nProperties.getPrefixCaption(PathogenTestDto.I18N_PREFIX, PathogenTestDto.TEST_DATE_TIME));
 		testDateField.setRequiredIndicatorVisible(true);

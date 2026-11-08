@@ -113,9 +113,17 @@ public class NullableOptionGroup extends OptionGroup {
 		super.setValue(value);
 	}
 
+	/**
+	 * The selected item: the first element of a multi select's set, or the value of a required (single select) group.
+	 * V7 cast the value to {@code Set} and threw a {@code ClassCastException} for a single select; callers check
+	 * {@code isMultiSelect()} first, so this only avoids that exception.
+	 */
 	public Object getNullableValue() {
 		final Object value = super.getValue();
-		return ObjectUtils.isNotEmpty(value) ? getFirstValue((Set) value) : null;
+		if (!(value instanceof Collection)) {
+			return value;
+		}
+		return ObjectUtils.isNotEmpty(value) ? ((Collection<?>) value).stream().findFirst().orElse(null) : null;
 	}
 
 	public void setNullableValue(Object value) {

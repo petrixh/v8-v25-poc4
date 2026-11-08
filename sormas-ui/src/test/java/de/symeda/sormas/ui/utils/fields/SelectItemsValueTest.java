@@ -40,7 +40,8 @@ import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
 /**
  * Vaadin 7 {@code AbstractSelect} value rules of the select shims: adding items never changes the value (also a value
  * that is not an item yet, such as a bound property read before the form fills the items); removing the selected item
- * or all items clears it; removing another item keeps it.
+ * or all items clears it; removing another item keeps it. A value that is not an item gets there only through the bean
+ * read: a direct {@code setValue} of a non-item is ignored (2b-12, {@link SelectNonItemWriteTest}).
  */
 public class SelectItemsValueTest {
 
@@ -48,18 +49,26 @@ public class SelectItemsValueTest {
 		return new UserReferenceDto(uuid, "First" + uuid, "Last" + uuid);
 	}
 
+	/**
+	 * 2b-12: V7 ignored a direct {@code setValue} of a value that is not an item (it took it before 2b-12); the value
+	 * that is not an item yet comes from the bean read here, as in the forms.
+	 */
 	@Test
 	public void comboBoxKeepsValueWhileItemsAreAdded() {
+		BeanFieldGroup<TaskDto> group = new BeanFieldGroup<>(TaskDto.class);
 		ComboBox combo = new ComboBox();
+		group.bind(combo, TaskDto.ASSIGNEE_USER);
+		TaskDto task = new TaskDto();
+		task.setAssigneeUser(user("U2"));
+		group.setItemDataSource(task);
 		AtomicInteger events = new AtomicInteger();
-		combo.setValue("b");
 		combo.addValueChangeListener(e -> events.incrementAndGet());
 
-		combo.addItem("a");
-		combo.addItem("b");
-		combo.addItems(Arrays.asList("c", "d"));
+		combo.addItem(user("U1"));
+		combo.addItem(user("U2"));
+		combo.addItems(Arrays.asList(user("U3"), user("U4")));
 
-		assertEquals("b", combo.getValue());
+		assertEquals(user("U2"), combo.getValue());
 		assertEquals(0, events.get());
 	}
 
@@ -86,6 +95,7 @@ public class SelectItemsValueTest {
 	@Test
 	public void comboBoxRemoveAllItemsClearsValue() {
 		ComboBox combo = new ComboBox();
+		combo.addItem("x");
 		combo.setValue("x");
 		combo.removeAllItems();
 		assertNull(combo.getValue());
@@ -97,6 +107,12 @@ public class SelectItemsValueTest {
 		combo.addItems(Arrays.asList("b", "c"));
 		combo.setValue("b");
 		assertEquals("b", combo.getValue());
+
+		// 2b-12: the value is not among the new items: cleared, as in V7
+		combo.removeAllItems();
+		combo.addItems(Arrays.asList("c", "d"));
+		combo.setValue("b");
+		assertNull(combo.getValue());
 	}
 
 	/**
@@ -162,22 +178,27 @@ public class SelectItemsValueTest {
 		assertEquals(Set.of(), group.getValue());
 	}
 
+	/** 2b-12: the value that is not an item yet comes from the bean read (a direct {@code setValue} is ignored). */
 	@Test
 	@SuppressWarnings("unchecked")
 	public void singleOptionGroupKeepsValueWhileItemsAreAdded() {
 		OptionGroup group = new OptionGroup();
-		group.setValue("b");
+		BeanFieldGroup<TaskDto> fieldGroup = new BeanFieldGroup<>(TaskDto.class);
+		fieldGroup.bind(group, TaskDto.ASSIGNEE_USER);
+		TaskDto task = new TaskDto();
+		task.setAssigneeUser(user("b"));
+		fieldGroup.setItemDataSource(task);
 
-		group.addItem("a");
-		group.addItem("b");
+		group.addItem(user("a"));
+		group.addItem(user("b"));
 		group.getSelectItems().flushRefresh();
 
-		assertEquals("b", group.getValue());
-		assertEquals("b", ((RadioButtonGroup<Object>) group.getGroupComponent()).getValue());
+		assertEquals(user("b"), group.getValue());
+		assertEquals(user("b"), ((RadioButtonGroup<Object>) group.getGroupComponent()).getValue());
 
-		group.removeItem("a");
-		assertEquals("b", group.getValue());
-		group.removeItem("b");
+		group.removeItem(user("a"));
+		assertEquals(user("b"), group.getValue());
+		group.removeItem(user("b"));
 		assertNull(group.getValue());
 	}
 }

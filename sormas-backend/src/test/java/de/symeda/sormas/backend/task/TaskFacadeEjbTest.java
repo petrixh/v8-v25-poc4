@@ -61,11 +61,13 @@ import de.symeda.sormas.api.feature.FeatureConfigurationIndexDto;
 import de.symeda.sormas.api.feature.FeatureType;
 import de.symeda.sormas.api.infrastructure.community.CommunityDto;
 import de.symeda.sormas.api.person.PersonDto;
+import de.symeda.sormas.api.person.Sex;
 import de.symeda.sormas.api.sormastosormas.share.incoming.ShareRequestDataType;
 import de.symeda.sormas.api.sormastosormas.share.incoming.ShareRequestStatus;
 import de.symeda.sormas.api.task.TaskContext;
 import de.symeda.sormas.api.task.TaskCriteria;
 import de.symeda.sormas.api.task.TaskDto;
+import de.symeda.sormas.api.task.TaskExportDto;
 import de.symeda.sormas.api.task.TaskIndexDto;
 import de.symeda.sormas.api.task.TaskStatus;
 import de.symeda.sormas.api.task.TaskType;
@@ -81,6 +83,48 @@ import de.symeda.sormas.backend.AbstractBeanTest;
 import de.symeda.sormas.backend.TestDataCreator.RDCF;
 
 public class TaskFacadeEjbTest extends AbstractBeanTest {
+
+	/**
+	 * The export selects the person's sex through COALESCE over the case and contact person; it must stay a {@link Sex} so
+	 * that a {@link TaskExportDto} constructor matches (ticket 2b-14).
+	 */
+	@Test
+	public void testGetExportList() {
+		RDCF rdcf = creator.createRDCF("Region", "District", "Community", "Facility");
+		UserDto user = creator.createUser(
+			rdcf.region.getUuid(),
+			rdcf.district.getUuid(),
+			rdcf.facility.getUuid(),
+			"Surv",
+			"Sup",
+			creator.userRoleDtoMap.get(DefaultUserRole.SURVEILLANCE_SUPERVISOR));
+		PersonDto cazePerson = creator.createPerson("Case", "Person", Sex.FEMALE);
+		CaseDataDto caze = creator.createCase(
+			user.toReference(),
+			cazePerson.toReference(),
+			Disease.EVD,
+			CaseClassification.PROBABLE,
+			InvestigationStatus.PENDING,
+			new Date(),
+			rdcf);
+		TaskDto task = creator.createTask(
+			TaskContext.CASE,
+			TaskType.OTHER,
+			TaskStatus.PENDING,
+			caze.toReference(),
+			null,
+			null,
+			null,
+			DateHelper.addDays(new Date(), 1),
+			user.toReference());
+
+		List<TaskExportDto> exportList = getTaskFacade().getExportList(new TaskCriteria(), null, 0, 100);
+
+		TaskExportDto export = exportList.stream().filter(t -> t.getUuid().equals(task.getUuid())).findFirst().get();
+		assertEquals(caze.getUuid(), export.getCazeUuid());
+		assertEquals("Case", export.getPersonFirstName());
+		assertEquals(Sex.FEMALE, export.getPersonSex());
+	}
 
 	@Test
 	public void testTaskDirectoryForDeletedLinkedCase() {

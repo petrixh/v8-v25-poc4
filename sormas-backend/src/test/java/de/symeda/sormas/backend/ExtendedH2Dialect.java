@@ -1,13 +1,16 @@
 package de.symeda.sormas.backend;
 
 import org.hibernate.boot.model.FunctionContributions;
+import org.hibernate.boot.model.TypeContributions;
 import org.hibernate.dialect.H2Dialect;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 import org.hibernate.query.sqm.function.SqmFunctionRegistry;
+import org.hibernate.service.ServiceRegistry;
 import org.hibernate.type.BasicType;
 import org.hibernate.type.BasicTypeReference;
 import org.hibernate.type.SqlTypes;
 import org.hibernate.type.StandardBasicTypes;
+import org.hibernate.type.descriptor.jdbc.VarcharJdbcType;
 import org.hibernate.type.spi.TypeConfiguration;
 
 public class ExtendedH2Dialect extends H2Dialect {
@@ -86,6 +89,17 @@ public class ExtendedH2Dialect extends H2Dialect {
 	@Override
 	protected String columnType(int sqlTypeCode) {
 		return sqlTypeCode == SqlTypes.TINYINT ? "integer" : super.columnType(sqlTypeCode);
+	}
+
+	/**
+	 * {@code @Enumerated(STRING)} columns are varchar, as on PostgreSQL. H2Dialect maps them to H2's ENUM type, and Hibernate 7
+	 * types expressions over them differently: a String-typed function (e.g. COALESCE) over an enum column is a String on
+	 * PostgreSQL but the enum on H2, so a DTO constructor that fails on PostgreSQL passed the tests (ticket 2b-14).
+	 */
+	@Override
+	public void contributeTypes(TypeContributions typeContributions, ServiceRegistry serviceRegistry) {
+		super.contributeTypes(typeContributions, serviceRegistry);
+		typeContributions.getTypeConfiguration().getJdbcTypeRegistry().addDescriptor(SqlTypes.ENUM, VarcharJdbcType.INSTANCE);
 	}
 
 	/**

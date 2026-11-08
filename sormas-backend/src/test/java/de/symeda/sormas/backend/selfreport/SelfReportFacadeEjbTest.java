@@ -20,12 +20,15 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 import java.util.Date;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import de.symeda.sormas.api.Disease;
 import de.symeda.sormas.api.person.Sex;
+import de.symeda.sormas.api.selfreport.SelfReportCriteria;
 import de.symeda.sormas.api.selfreport.SelfReportDto;
+import de.symeda.sormas.api.selfreport.SelfReportExportDto;
 import de.symeda.sormas.api.selfreport.SelfReportType;
 import de.symeda.sormas.backend.AbstractBeanTest;
 
@@ -39,6 +42,19 @@ public class SelfReportFacadeEjbTest extends AbstractBeanTest {
 
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), is(dto.getUuid()));
+	}
+
+	@Test
+	public void testGetExportList() {
+		SelfReportDto dto = createSelfReport();
+
+		List<SelfReportExportDto> exportList = getSelfReportFacade().getExportList(new SelfReportCriteria(), null, 0, 100);
+
+		assertThat(exportList.size(), is(1));
+		assertThat(exportList.get(0).getUuid(), is(dto.getUuid()));
+		assertThat(exportList.get(0).getType(), is(SelfReportType.CASE));
+		assertThat(exportList.get(0).getDisease(), is(Disease.CORONAVIRUS));
+		assertThat(exportList.get(0).getSex(), is(Sex.MALE));
 	}
 
 	private SelfReportDto createSelfReport() {

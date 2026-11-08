@@ -203,6 +203,11 @@ public abstract class AbstractEditForm<DTO> extends AbstractForm<DTO> implements
 		}
 
 		for (Field<?> field : customFields) {
+			// Vaadin 7 painted the errors of the custom fields after the commit (the bound fields: BeanFieldGroup)
+			field.showValidationLater();
+		}
+
+		for (Field<?> field : customFields) {
 			try {
 				field.validateValue();
 			} catch (Field.InvalidValueException e) {

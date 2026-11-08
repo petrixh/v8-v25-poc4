@@ -22,10 +22,15 @@ import static org.hamcrest.Matchers.not;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
 import de.symeda.sormas.api.Disease;
+import de.symeda.sormas.api.caze.CaseDataDto;
+import de.symeda.sormas.api.caze.ReinfectionDetail;
+import de.symeda.sormas.api.i18n.I18nProperties;
+import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.utils.Diseases;
 
 public class EntityColumnsTest {
@@ -43,15 +48,40 @@ public class EntityColumnsTest {
 		private String fieldWithoutHide;
 
 		private String fieldWithoutAnnotation;
+
+		private Map<ReinfectionDetail, Boolean> enumToBoolean;
+
+		private Map<Boolean, ReinfectionDetail> booleanToEnum;
 	}
 
 	private String invokeGetDiseases(String fieldName) throws Exception {
+		return invoke("getDiseases", EntityColumnTestObject.class, fieldName);
+	}
+
+	private String invoke(String methodName, Class<?> entityClass, String fieldName) throws Exception {
 		EntityColumns entityColumns = new EntityColumns(null, false);
-		Field field = EntityColumnTestObject.class.getDeclaredField(fieldName);
-		FieldData fieldData = new FieldData(field, EntityColumnTestObject.class, "Test");
-		Method getDiseases = EntityColumns.class.getDeclaredMethod("getDiseases", FieldData.class);
-		getDiseases.setAccessible(true);
-		return (String) getDiseases.invoke(entityColumns, fieldData);
+		Field field = entityClass.getDeclaredField(fieldName);
+		FieldData fieldData = new FieldData(field, entityClass, "Test");
+		Method method = EntityColumns.class.getDeclaredMethod(methodName, FieldData.class);
+		method.setAccessible(true);
+		return (String) method.invoke(entityColumns, fieldData);
+	}
+
+	private static String mapOf(String key, String value) {
+		return String.format(I18nProperties.getString(Strings.mapOf), key, value);
+	}
+
+	/**
+	 * The type of a Map field names its key and value types in declaration order. Both fields use the type variables of
+	 * Map, so an order taken from a hash map of type variables gets one of the two wrong.
+	 */
+	@Test
+	public void testGetFieldType_mapKeepsDeclaredTypeArgumentOrder() throws Exception {
+		assertThat(invoke("getFieldType", EntityColumnTestObject.class, "enumToBoolean"), is(mapOf("ReinfectionDetail", "Boolean")));
+		assertThat(invoke("getFieldType", EntityColumnTestObject.class, "booleanToEnum"), is(mapOf("Boolean", "ReinfectionDetail")));
+		assertThat(
+			invoke("getFieldType", CaseDataDto.class, CaseDataDto.REINFECTION_DETAILS),
+			is(mapOf("ReinfectionDetail", "Boolean")));
 	}
 
 	@Test

@@ -704,7 +704,12 @@ public class UserRoleFacadeEjb implements UserRoleFacade {
 
 			Cell requiredUserRightsCell = row.createCell(columnIndex++);
 			requiredUserRightsCell.setCellValue(
-				UserRight.getRequiredUserRights(Collections.singleton(userRight)).stream().map(UserRight::name).collect(Collectors.joining(", ")));
+				UserRight.getRequiredUserRights(Collections.singleton(userRight))
+					.stream()
+					// declaration order; the set iterates in hash order
+					.sorted()
+					.map(UserRight::name)
+					.collect(Collectors.joining(", ")));
 
 		}
 	}

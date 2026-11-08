@@ -12,6 +12,7 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.notification.Notification;
 
+import de.symeda.sormas.ui.utils.fields.DefaultDateFormat;
 import de.symeda.sormas.ui.utils.grid.Grid;
 import de.symeda.sormas.ui.utils.NotificationHelper;
 import de.symeda.sormas.ui.utils.NotificationHelper.Type;
@@ -107,6 +108,7 @@ public class LineListingConfigurationsGrid extends Grid<FeatureConfigurationInde
 		}).setCaption(I18nProperties.getPrefixCaption(FeatureConfigurationIndexDto.I18N_PREFIX, FeatureConfigurationIndexDto.ENABLED));
 		addComponentColumn(config -> {
 			DatePicker dfEndDate = new DatePicker();
+			DefaultDateFormat.applyOnAttach(dfEndDate);
 			dfEndDate.setValue(UtilDate.toLocalDate(config.getEndDate()));
 			dfEndDate.addValueChangeListener(e -> {
 				if (e.getValue() != null && e.getValue().isBefore(LocalDate.now())) {

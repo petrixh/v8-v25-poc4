@@ -24,6 +24,7 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.contact.components.linelisting.CaseSelector;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.fields.CustomField;
+import de.symeda.sormas.ui.utils.fields.KeepValueComboBox;
 import de.symeda.sormas.ui.utils.FieldHelper;
 
 public class SharedInfoField extends CustomField<SharedInfoFieldDto> {
@@ -44,8 +45,8 @@ public class SharedInfoField extends CustomField<SharedInfoFieldDto> {
 			? new CaseSelector(caseReferenceDto)
 			: new CaseSelector(I18nProperties.getString(Strings.infoNoSourceCaseSelectedLineListing));
 		disease = new ComboBox<>(I18nProperties.getCaption(Captions.lineListingDiseaseOfSourceCase));
-		region = new ComboBox<>(I18nProperties.getCaption(Captions.Region));
-		district = new ComboBox<>(I18nProperties.getCaption(Captions.District));
+		region = new KeepValueComboBox<>(I18nProperties.getCaption(Captions.Region));
+		district = new KeepValueComboBox<>(I18nProperties.getCaption(Captions.District));
 		region.setItemLabelGenerator(item -> item.buildCaption());
 		district.setItemLabelGenerator(item -> item.buildCaption());
 

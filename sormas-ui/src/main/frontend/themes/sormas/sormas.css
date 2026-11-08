@@ -1532,3 +1532,35 @@ vaadin-radio-button[disabled][checked]:not([readonly]:not([disabled]) > *) {
   color: var(--sormas-font-color);
   -webkit-text-fill-color: var(--sormas-font-color);
 }
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 16. Required and residual. Vaadin 7 and 8 mark a field as required (the caption's "*" and Valo's .v-required
+ *     border) only while it is not read-only (client AbstractFieldConnector.isRequiredIndicatorVisible(): required
+ *     and not read-only); here the required rule of section 2 also matched read-only fields. Valo gave the date and
+ *     combo inputs inside a required custom component the required border too (customcomponent.scss): the shim's date
+ *     fields (a vaadin-custom-field around a vaadin-date-picker) and date-time fields carry the required state on the
+ *     custom field, not on the picker. vaadin-custom-field does not reflect read-only as an attribute; for the shim's
+ *     date fields and option groups (which pass their read-only state to the field inside) it is read from that field.
+ * ------------------------------------------------------------------------------------------------------------- */
+
+/* date, time and combo inputs inside a required custom field: the required border of section 2, also when disabled
+   (section 15 gives disabled fields that are not required the focus colour) */
+vaadin-custom-field[required] :is(vaadin-date-picker, vaadin-time-picker, vaadin-combo-box):not([readonly]) {
+  --vaadin-input-field-border-color: var(--sormas-primary-color);
+}
+
+/* read-only fields: no required border, the read-only look of section 2 */
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker)[required][readonly] {
+  --vaadin-input-field-border-color: transparent;
+}
+
+/* read-only fields: no "*" after the caption */
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker, vaadin-radio-group,
+    vaadin-checkbox-group)[required][readonly]::part(required-indicator),
+vaadin-custom-field[required]:has(> :is(vaadin-date-picker, vaadin-radio-group, vaadin-checkbox-group)[readonly])::part(required-indicator) {
+  display: none;
+}

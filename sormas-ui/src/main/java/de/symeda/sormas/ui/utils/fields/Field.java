@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
@@ -70,6 +71,7 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 	String DATA_MODIFIED = "sormas.modified";
 	String DATA_VALIDATION_SHOWN = "sormas.validationShown";
 	String DATA_VALIDATION_PENDING = "sormas.validationPending";
+	String DATA_ERROR_TOOLTIP = "sormas.errorTooltip";
 
 	/**
 	 * The label of a field whose Vaadin 8 caption was empty (see {@link #setCaption(String)}).
@@ -156,14 +158,25 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 	}
 
 	/**
-	 * V7 description: shown as the field's tooltip.
+	 * V7 description: shown as the field's tooltip (below a required error, see
+	 * {@link #applyValidationError(boolean, String)}).
 	 */
 	default void setDescription(String description) {
 		ComponentUtil.setData(asComponent(), DATA_DESCRIPTION, description);
+		applyTooltip();
+	}
+
+	/**
+	 * The field's tooltip as Vaadin 7 showed it ({@code VTooltip}): the error message, if any, above the description.
+	 */
+	private void applyTooltip() {
+		String description = getDescription();
+		String error = (String) ComponentUtil.getData(asComponent(), DATA_ERROR_TOOLTIP);
+		String text = error == null ? description : description == null || description.isEmpty() ? error : error + "\n" + description;
 		if (this instanceof HasTooltip) {
-			((HasTooltip) this).setTooltipText(description);
+			((HasTooltip) this).setTooltipText(text);
 		} else {
-			getElement().setAttribute("title", description == null ? "" : description);
+			getElement().setAttribute("title", text == null ? "" : text);
 		}
 	}
 
@@ -369,6 +382,9 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 	 * indicator or text ({@code shouldHideErrors()}), and only when its required error was not empty
 	 * ({@code InvalidValueException.isInvisible()}); a read-only field showed no required state at all. Here the error
 	 * style is the Flow invalid state, the text is the error message under the field.
+	 * <p>
+	 * Vaadin 7 still sent the hidden required error to the browser, which showed it in the field's tooltip on hover.
+	 * Here it is the field's tooltip text while the required error is shown, above the description, if any.
 	 *
 	 * @param error
 	 *            whether the field's value is invalid
@@ -388,6 +404,11 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 		HasValidation hasValidation = (HasValidation) this;
 		hasValidation.setErrorMessage(show && !requiredEmpty ? message : null);
 		hasValidation.setInvalid(show);
+		String errorTooltip = show && requiredEmpty ? requiredError : null;
+		if (!Objects.equals(errorTooltip, ComponentUtil.getData(asComponent(), DATA_ERROR_TOOLTIP))) {
+			ComponentUtil.setData(asComponent(), DATA_ERROR_TOOLTIP, errorTooltip);
+			applyTooltip();
+		}
 		ComponentUtil.setData(asComponent(), DATA_VALIDATION_SHOWN, show ? Boolean.TRUE : null);
 		return show;
 	}

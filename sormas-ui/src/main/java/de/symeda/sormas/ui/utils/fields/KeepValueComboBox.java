@@ -14,6 +14,7 @@
  */
 package de.symeda.sormas.ui.utils.fields;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Supplier;
 
@@ -22,6 +23,7 @@ import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
+import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -33,6 +35,10 @@ import com.vaadin.flow.function.SerializablePredicate;
  * Flow's {@code setItems(..)} sets the value to {@code null} (with a value change event); here, setting new items keeps
  * the value without an event when it is still among them, and clears it with one value change event when it is not.
  * With a lazy (back-end) data provider the value is kept, as membership cannot be checked.
+ * <p>
+ * A value can be set before any items, as in Vaadin 8 (which showed it with its caption). Flow throws "Cannot set a value
+ * for a ComboBox without items" there; this combo box first takes an empty item list. Items set later keep the value as
+ * above.
  */
 public class KeepValueComboBox<T> extends com.vaadin.flow.component.combobox.ComboBox<T> {
 
@@ -50,12 +56,17 @@ public class KeepValueComboBox<T> extends com.vaadin.flow.component.combobox.Com
 	}
 
 	/**
-	 * Ignores the reset to {@code null} that Flow performs while the items are being replaced.
+	 * Ignores the reset to {@code null} that Flow performs while the items are being replaced. A value set before any
+	 * items is taken (Vaadin 8), with an empty item list until the items are set.
 	 */
 	@Override
 	public void setValue(T value) {
 		if (settingItems) {
 			return;
+		}
+		if (value != null && getDataProvider() instanceof DataCommunicator.EmptyDataProvider) {
+			// Flow's default before setItems; its setValue throws for it
+			setItems(new ArrayList<>());
 		}
 		super.setValue(value);
 	}

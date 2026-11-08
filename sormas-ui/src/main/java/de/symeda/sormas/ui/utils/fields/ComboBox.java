@@ -109,11 +109,19 @@ public class ComboBox extends com.vaadin.flow.component.combobox.ComboBox<Object
 	}
 
 	/**
+	 * V7 {@code AbstractSelect.setValue}: a value that is not an item is ignored (the value stays, no value change event,
+	 * also when the combo box is read-only); {@code null} is always taken. An item added later does not select it. A read
+	 * of the data source (the form's field group, {@link ReadOnlyWrites#isDataSourceWrite}) takes any value, as V7
+	 * {@code setPropertyDataSource} did; value change listeners running during that read are code and follow the rule.
+	 * <p>
 	 * A read-only combo box refuses a different value, as in V7 ({@link ReadOnlyWrites}); this includes {@code clear()}
 	 * and removing the selected item or all items while it has a value.
 	 */
 	@Override
 	public void setValue(Object value) {
+		if (value != null && !containsId(value) && !ReadOnlyWrites.isDataSourceWrite(this)) {
+			return;
+		}
 		ReadOnlyWrites.write(this, value, () -> super.setValue(value));
 	}
 
@@ -133,7 +141,7 @@ public class ComboBox extends com.vaadin.flow.component.combobox.ComboBox<Object
 
 	/**
 	 * V7: removing the selected item, or all items, clears the value. Adding items or removing other items keeps it, also
-	 * when it is not an item (yet).
+	 * when it is not an item (yet: a value read from the data source).
 	 */
 	protected void itemsRemoved(java.util.function.Predicate<Object> wasRemoved) {
 		Object value = getValue();

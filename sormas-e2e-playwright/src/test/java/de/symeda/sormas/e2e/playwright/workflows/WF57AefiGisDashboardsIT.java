@@ -86,7 +86,7 @@ class WF57AefiGisDashboardsIT extends WorkflowTest {
 		assertTrue(ui.waitText("Geographical Analysis", 15_000), "title");
 		ui.settle(2500);
 		assertTrue(ui.mapPresent(), "map shown");
-		ui.clickEntry("Ebenen");
+		ui.clickClearOfBanner(ui.button("Ebenen"));
 		ui.settle(600);
 		assertTrue(ui.checkboxChecked("Fälle anzeigen"), "cases on by default");
 		for (String name : List.of("Kontakte anzeigen", "Ereignisse anzeigen")) {

@@ -1715,4 +1715,23 @@ public final class Ui {
 		}
 		return windowCount();
 	}
+
+	/**
+	 * Clicks a control the CI banner may cover (it sits at the bottom of the page): a click that the banner intercepts
+	 * closes the banner and tries again; the last resort is the click event on the control itself. Licensed builds
+	 * have no banner and the first click works.
+	 */
+	public void clickClearOfBanner(Locator control) {
+		try {
+			control.click(new Locator.ClickOptions().setTimeout(4000));
+			return;
+		} catch (TimeoutError first) {
+			closeCommercialBanner();
+		}
+		try {
+			control.click(new Locator.ClickOptions().setTimeout(4000));
+		} catch (TimeoutError second) {
+			control.dispatchEvent("click");
+		}
+	}
 }

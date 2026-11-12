@@ -9,7 +9,7 @@
 ### END INIT INFO
 
 
-ASADMIN="/opt/payara5/bin/asadmin"
+ASADMIN="/opt/payara7/bin/asadmin"
 
 case "$1" in
 start)

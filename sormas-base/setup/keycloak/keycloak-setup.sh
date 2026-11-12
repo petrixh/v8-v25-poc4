@@ -60,7 +60,7 @@ if [[ -z "$PORT_ADMIN" ]]; then
   echo "Using default Payara PORT_ADMIN ${PORT_ADMIN}"
 fi
 if [[ -z "$PAYARA_HOME" ]]; then
-  PAYARA_HOME=${ROOT_PREFIX}/opt/payara5
+  PAYARA_HOME=${ROOT_PREFIX}/opt/payara7
   echo "Using default PAYARA_HOME ${PAYARA_HOME}"
 fi
 if [[ -z "$DOMAINS_HOME" ]]; then

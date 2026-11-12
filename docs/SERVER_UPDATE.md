@@ -156,6 +156,6 @@ For minor updates of the payara version, you will most often be able to keep the
 
 1. Download the needed version of [Payara server](https://www.payara.fish/downloads/payara-platform-community-edition/).
 2. Undeploy all sormas modules from the payara domain and stop the domain.
-3. Replace your payara server in ``/opt/payara5`` (default path) with the downloaded one. Remove the default domain in ``opt/payara5/glassfish/domains`` as it is not needed.
+3. Replace your payara server in ``/opt/payara7`` (default path) with the downloaded one. Remove the default domain in ``opt/payara7/glassfish/domains`` as it is not needed.
 4. Replace the application server in your IDE with the new server. See [IDE setup guide](DEVELOPMENT_ENVIRONMENT.md#step-5-install-and-configure-your-ide)
 5. If you are facing any problems, restart your IDE and clean all generated files from the sormas domain.

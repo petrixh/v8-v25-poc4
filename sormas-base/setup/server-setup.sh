@@ -88,7 +88,7 @@ DOCUMENTS_DIR=${ROOT_PREFIX}/opt/sormas/documents
 GENERATED_DIR=${ROOT_PREFIX}/opt/sormas/generated
 CUSTOM_DIR=${ROOT_PREFIX}/opt/sormas/custom
 ABOUT_FILES_DIR=${CUSTOM_DIR}/aboutfiles
-PAYARA_HOME=${ROOT_PREFIX}/opt/payara5
+PAYARA_HOME=${ROOT_PREFIX}/opt/payara7
 DOMAINS_HOME=${ROOT_PREFIX}/opt/domains
 SORMAS2SORMAS_DIR=${ROOT_PREFIX}/opt/sormas/sormas2sormas
 

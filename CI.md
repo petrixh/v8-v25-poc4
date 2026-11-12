@@ -4,7 +4,7 @@ CI is one GitHub Actions workflow, [`.github/workflows/ci.yml`](.github/workflow
 
 ## What CI runs
 
-On every push to any branch (there is no pull request trigger: a pushed commit's checks show on its PR), one job on `ubuntu-latest`:
+On every push to any branch (there is no pull request trigger: a pushed commit's checks show on its PR), two jobs on `ubuntu-latest`, side by side: "Build and test" (below) and "End-to-end workflow tests" (see "End-to-end workflow tests"). The build job:
 
 1. **Skip if already green.** If this commit already has a successful run of this workflow (for example a branch created at a commit that was already checked, or a re-run of a green run), the job ends after this step.
 2. Checkout, JDK 21 (Temurin), Maven dependency cache (Actions cache, keyed on the `pom.xml` files).
@@ -34,6 +34,28 @@ The smoke steps use the reproducible environment ([`env/README.md`](env/README.m
 5. Always, also after a failure or a cancel once the app was started: the app's server log is saved to `env/.state/smoke/app.log`, then `env/down.sh` removes the copy.
 
 The smoke uses a real-browser user agent (`HeadlessChrome` replaced with `Chrome`): Vaadin 8 serves the old ES5 client bundle to `HeadlessChrome`.
+
+## End-to-end workflow tests
+
+The second job runs the Playwright workflow tests of [`sormas-e2e-playwright`](sormas-e2e-playwright/README.md): the
+critical user workflows (create a case, classify it, export, bulk edit, import, lab results, task mails, German locale,
+...) as browser tests against the built app, each test class on a freshly reset app copy, with database checks. A failed
+workflow test fails the job.
+
+1. **Skip if already green**, as in the build job.
+2. Checkout, JDK 21, Maven cache (the same cache as the build job).
+3. `mvn -B -ntp clean install -Dmaven.test.skip=true -Dvaadin.commercialWithBanner` in `sormas-base`: the app without
+   tests (the build job runs them), with the commercial banner (see "Vaadin licence key"; never shipped).
+4. The artefacts and the Payara image for `env/`, as in the smoke step of the build job.
+5. Node 22 and Chromium for Playwright 1.63 with its system libraries (Playwright for Java 1.63.0 uses the same
+   Chromium build).
+6. `mvn -B -ntp -f sormas-e2e-playwright/pom.xml verify -De2e.ports=18720-18721`: the suite starts two app copies
+   (`env/up.sh --no-build`, C1 or C2 as each workflow needs) and runs two workflows at a time.
+7. The steps per workflow go in the job summary. Always: each copy's server log is saved and the copy removed
+   (`env/down.sh`). On failure only: test reports, failure screenshots, the workflows' downloads and the copies' logs
+   are uploaded as a diagnostics artifact kept for 3 days.
+
+Run it locally: [`sormas-e2e-playwright/README.md`](sormas-e2e-playwright/README.md) ("Run").
 
 ## Run the same locally
 

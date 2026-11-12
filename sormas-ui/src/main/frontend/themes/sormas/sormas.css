@@ -1,0 +1,1583 @@
+/*
+ * SORMAS global theme settings on Lumo (Vaadin 25). Loaded by SormasAppShell (@StyleSheet), after
+ * bootstrap-grid.min.css and lumo/lumo.css. Served at VAADIN/themes/sormas/sormas.css in both Vaadin modes
+ * (this folder is copied to the war, see sormas-ui/pom.xml; dev mode reads it here).
+ *
+ * Carries the global look of the Vaadin 8 Valo theme "sormas" (webapp/VAADIN/themes/sormas/sormas.scss, global.scss,
+ * components/label.scss, components/menu.scss, views/view.scss): palette, font, sizes, density, the menu bar and the
+ * SORMAS style class names of CssStyles that set layout or the global look. Structural parity, not pixel parity:
+ * component-level styles of the old theme (grid, window, tabsheet, option group, dashboard, login, ...) are not here.
+ */
+
+/* Open Sans, as Valo loaded it for $v-font-family. Files from vaadin-themes 8.14.3 (VAADIN/themes/valo/fonts/open-sans),
+   Open Sans by Steve Matteson, Apache License 2.0. */
+@font-face {
+  font-family: 'Open Sans';
+  src: url('fonts/OpenSans-Regular-webfont.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Open Sans';
+  src: url('fonts/OpenSans-Italic-webfont.woff') format('woff');
+  font-weight: 400;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'Open Sans';
+  src: url('fonts/OpenSans-Semibold-webfont.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Open Sans';
+  src: url('fonts/OpenSans-Bold-webfont.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 1. Settings: the Valo variables of sormas.scss as custom properties, and Lumo set from them
+ * ------------------------------------------------------------------------------------------------------------- */
+html {
+  /* SORMAS palette (sormas.scss $s-*) */
+  --sormas-default-color: #6691C4;          /* $s-default-color: menu background */
+  --sormas-primary-color: #005A9C;          /* $s-primary-color, $v-selection-color */
+  --sormas-secondary-color: #6591C4;        /* $s-secondary-color: h2-h4 */
+  --sormas-critical-color: rgb(200, 0, 0);
+  --sormas-critical-transparent-color: rgba(200, 0, 0, 0.7);
+  --sormas-critical-most-transparent-color: rgba(200, 0, 0, 0.1);
+  --sormas-important-color: rgb(190, 105, 0);
+  --sormas-important-transparent-color: rgba(190, 105, 0, 0.7);
+  --sormas-warning-color: rgb(190, 105, 0);
+  --sormas-relevant-color: rgb(200, 170, 0);
+  --sormas-relevant-transparent-color: rgba(200, 170, 0, 0.7);
+  --sormas-neutral-color: #00BFFF;
+  --sormas-positive-color: #32CD32;
+  --sormas-minor-color: #808080;
+  --sormas-steady-color: #FF8C00;
+  --sormas-highlight-subtle-color: rgba(244, 244, 244, 0.8);
+  --sormas-highlight-slightly-subtle-color: rgba(244, 244, 244, 0.7);
+  --sormas-highlight-color: #C9C9C9;
+  --sormas-background-color: #FEFEFE;       /* $v-background-color */
+  --sormas-font-color: #394C5B;             /* $v-font-color */
+  --sormas-focus-color: #CDD8EC;            /* $v-focus-color: borders, selected rows */
+  --sormas-focus-light-color: #EDF2FD;      /* $v-focus-light-color */
+  --sormas-link-color: #1565A2;             /* $v-link-font-color */
+  --sormas-font-family: "Open Sans", sans-serif, "Source Sans Pro";
+  --sormas-font-size: 12px;                 /* $v-font-size */
+  --sormas-unit-size: 32px;                 /* $v-unit-size: field and button height */
+  --sormas-layout-margin: 21px;             /* $v-layout-margin: round(32 / 1.5) */
+  --sormas-layout-spacing: 18px;            /* $v-layout-spacing: round(32 / 1.8) */
+
+  /* Lumo colours */
+  --lumo-base-color: var(--sormas-background-color);
+  --lumo-primary-color: var(--sormas-primary-color);
+  --lumo-primary-color-50pct: rgba(0, 90, 156, 0.5);
+  --lumo-primary-color-10pct: rgba(0, 90, 156, 0.1);
+  --lumo-primary-text-color: var(--sormas-primary-color);
+  --lumo-primary-contrast-color: #FFFFFF;
+  --lumo-error-color: var(--sormas-critical-color);
+  --lumo-error-color-50pct: var(--sormas-critical-more-transparent-color, rgba(200, 0, 0, 0.5));
+  --lumo-error-color-10pct: var(--sormas-critical-most-transparent-color);
+  --lumo-error-text-color: var(--sormas-critical-color);
+  --lumo-warning-color: var(--sormas-warning-color);
+  --lumo-warning-text-color: var(--sormas-warning-color);
+  --lumo-body-text-color: var(--sormas-font-color);
+  --lumo-header-text-color: var(--sormas-font-color);
+
+  /* Lumo typography: Valo's 12px base; h3 16px, h2 1.6em, h1 2.4em as in Valo */
+  --lumo-font-family: var(--sormas-font-family);
+  --lumo-font-size-xxs: 9px;
+  --lumo-font-size-xs: 10px;
+  --lumo-font-size-s: 11px;                 /* $v-font-size--small */
+  --lumo-font-size-m: 12px;                 /* $v-font-size */
+  --lumo-font-size-l: 14px;
+  --lumo-font-size-xl: 16px;                /* $v-font-size--h3 */
+  --lumo-font-size-xxl: 19px;               /* h2 */
+  --lumo-font-size-xxxl: 29px;              /* h1 */
+  --lumo-line-height-m: 1.55;               /* $v-line-height */
+
+  /* Lumo density: Valo's 32px unit */
+  --lumo-size-xl: 48px;
+  --lumo-size-l: 40px;
+  --lumo-size-m: 32px;                      /* $v-unit-size */
+  --lumo-size-s: 27px;                      /* $v-unit-size--small */
+  --lumo-size-xs: 24px;
+  --lumo-space-xl: 32px;
+  --lumo-space-l: 21px;                     /* layout margin */
+  --lumo-space-m: 12px;
+  --lumo-space-s: 8px;
+  --lumo-space-xs: 4px;
+  --lumo-border-radius-m: 4px;              /* $v-border-radius */
+  --vaadin-vertical-layout-padding: var(--sormas-layout-margin);
+  --vaadin-horizontal-layout-padding: var(--sormas-layout-margin);
+  --vaadin-vertical-layout-gap: var(--sormas-layout-spacing);
+  --vaadin-horizontal-layout-gap: var(--sormas-layout-spacing);
+
+  /* Fields: white with a 2px focus-colour border, uppercase semi-bold caption (global.scss .v-caption, $v-border) */
+  --vaadin-input-field-background: #FFFFFF;
+  --vaadin-input-field-border-width: 2px;
+  --vaadin-input-field-border-color: var(--sormas-focus-color);
+  --vaadin-input-field-label-font-size: 11px;
+  --vaadin-input-field-label-font-weight: 600;
+  --vaadin-input-field-label-color: var(--sormas-font-color);
+  --vaadin-input-field-focused-label-color: var(--sormas-font-color);
+  --vaadin-input-field-hovered-label-color: var(--sormas-font-color);
+  --vaadin-input-field-required-indicator: "*";            /* Valo: red asterisk after the caption */
+  --vaadin-input-field-required-indicator-color: var(--sormas-critical-color);
+
+  /* Buttons: outlined in the selection colour, primary filled (button.scss, $v-border-primary) */
+  --vaadin-button-background: #FFFFFF;
+  --vaadin-button-text-color: var(--sormas-font-color);
+  --vaadin-button-border: 1px solid var(--sormas-primary-color);
+  --vaadin-button-primary-background: var(--sormas-primary-color);
+  --vaadin-button-primary-text-color: #FFFFFF;
+  --vaadin-button-primary-border: 1px solid var(--sormas-primary-color);
+  --vaadin-button-tertiary-border: none;
+  --vaadin-button-tertiary-text-color: var(--sormas-link-color);
+
+  /* bootstrap-grid.min.css sets html { font-size: 10px }; Lumo sizes are in rem: back to the browser default */
+  font-size: 16px;
+}
+
+body {
+  /* bootstrap-grid.min.css (normalize) styles body directly; Lumo's own body rule has no specificity */
+  font-family: var(--lumo-font-family);
+  font-size: var(--lumo-font-size-m);
+  line-height: var(--lumo-line-height-m);
+  color: var(--lumo-body-text-color);
+  background-color: var(--lumo-base-color);
+}
+
+a,
+a:not(:any-link) {
+  /* Vaadin 8 links without an address (grid id links) were link-coloured; Lumo greys them out */
+  color: var(--sormas-link-color);
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 2. Captions and buttons (global.scss .v-caption, button.scss .v-button)
+ * ------------------------------------------------------------------------------------------------------------- */
+vaadin-text-field::part(label),
+vaadin-text-area::part(label),
+vaadin-password-field::part(label),
+vaadin-email-field::part(label),
+vaadin-integer-field::part(label),
+vaadin-number-field::part(label),
+vaadin-big-decimal-field::part(label),
+vaadin-combo-box::part(label),
+vaadin-multi-select-combo-box::part(label),
+vaadin-select::part(label),
+vaadin-date-picker::part(label),
+vaadin-date-time-picker::part(label),
+vaadin-time-picker::part(label),
+vaadin-radio-group::part(label),
+vaadin-checkbox-group::part(label),
+vaadin-custom-field::part(label),
+vaadin-list-box::part(label),
+.v-caption {
+  text-transform: uppercase;
+}
+
+.v-caption {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* required fields: border in the selection colour (textfield.scss .v-required) */
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker)[required] {
+  --vaadin-input-field-border-color: var(--sormas-primary-color);
+}
+
+.no-uppercase::part(label),
+.v-caption.no-uppercase {
+  text-transform: none;
+}
+
+vaadin-button {
+  text-transform: uppercase;
+}
+
+vaadin-button[theme~="tertiary-inline"],
+vaadin-button.filter {
+  /* Valo .v-button-link and the SORMAS filter buttons (button.scss) keep their case */
+  text-transform: none;
+}
+
+vaadin-button[theme~="tertiary-inline"] {
+  /* Valo .v-button-link: link-coloured text, no frame */
+  --vaadin-button-border: none;
+  --vaadin-button-text-color: var(--sormas-link-color);
+}
+
+/* read-only fields show their value as text, without a frame (textfield.scss .v-readonly) */
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker)[readonly] {
+  --vaadin-input-field-readonly-border: none;
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 3. Headings (global.scss h1-h4 colours on the Valo label sizes)
+ * ------------------------------------------------------------------------------------------------------------- */
+h1, .h1,
+h2, .h2,
+h3, .h3,
+h4, .h4 {
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+h1, .h1 {
+  color: var(--sormas-primary-color);
+  font-size: 2.4em;
+  letter-spacing: -0.03em;
+  margin-top: 1.4em;
+  margin-bottom: 1em;
+}
+
+h2, .h2 {
+  color: var(--sormas-secondary-color);
+  font-size: 1.6em;
+  letter-spacing: -0.02em;
+  margin-top: 1.6em;
+  margin-bottom: 0.77em;
+}
+
+h3, .h3 {
+  color: var(--sormas-secondary-color);
+  font-size: 16px;
+  margin-top: 1.8em;
+  margin-bottom: 0.77em;
+}
+
+h4, .h4 {
+  color: var(--sormas-secondary-color);
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-top: 2.4em;
+  margin-bottom: 0.8em;
+}
+
+vaadin-vertical-layout > :first-child:is(h1, .h1, h2, .h2, h3, .h3, h4, .h4) {
+  margin-top: var(--sormas-font-size);
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 4. Application shell: menu as a vertical left bar, view area, view header (menu.scss, view.scss)
+ * ------------------------------------------------------------------------------------------------------------- */
+.sormas-content {
+  overflow: auto;
+}
+
+.valo-menu {
+  flex: none;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: var(--sormas-default-color);
+  border-right: 1px solid var(--sormas-focus-color);
+  color: #FFFFFF;
+  font-size: 16px;
+  padding-bottom: var(--sormas-unit-size);
+}
+
+.valo-menu .valo-menu-title {
+  padding: 36px 12px;
+  background: var(--sormas-background-color);
+  color: var(--sormas-default-color);
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 32px;
+  line-height: 32px;
+  letter-spacing: -1px;
+  border-bottom: 3px solid var(--sormas-critical-color);
+}
+
+.valo-menu .valo-menu-logo {
+  display: inline-block;
+  height: auto;
+  max-height: 64px;
+  width: auto;
+}
+
+/* "Menu" toggle: Valo shows it on narrow screens only */
+.valo-menu .valo-menu-toggle {
+  display: none;
+}
+
+.valo-menu .valo-menuitems {
+  display: flex;
+  flex-direction: column;
+}
+
+.valo-menu vaadin-button.valo-menu-item {
+  --vaadin-button-background: transparent;
+  --vaadin-button-border: none;
+  --vaadin-button-text-color: #FFFFFF;
+  justify-content: flex-start;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 8px 16px;
+  border-radius: 0;
+  font-size: 16px;
+  line-height: 36px;
+  text-transform: none;
+  font-weight: 400;
+  position: relative;
+}
+
+.valo-menu vaadin-button.valo-menu-item vaadin-icon {
+  width: 28px;
+  height: 28px;
+  min-width: 36px;
+  margin-right: 8px;
+}
+
+.valo-menu vaadin-button.valo-menu-item.selected {
+  --vaadin-button-background: var(--sormas-background-color);
+  --vaadin-button-text-color: var(--sormas-primary-color);
+}
+
+.valo-menu vaadin-button.valo-menu-item.selected::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 4px;
+  height: 100%;
+  background-color: var(--sormas-primary-color);
+  content: "";
+}
+
+/* Settings and logout: Valo's user menu, below the items */
+.valo-menu .user-menu {
+  margin: 8px 0;
+  --vaadin-button-background: transparent;
+  --vaadin-button-border: none;
+  --vaadin-button-text-color: #FFFFFF;
+}
+
+.valo-menu .user-menu vaadin-menu-bar-button,
+.valo-menu .user-menu vaadin-menu-bar-item {
+  text-transform: none;
+  font-size: 16px;
+}
+
+.valo-menu .settings-menu {
+  margin-top: 42px;
+}
+
+.top-menu-container {
+  max-height: 115px;
+}
+
+.menu-subtitle {
+  font-size: 24px;
+}
+
+.view-header {
+  padding-left: var(--sormas-layout-margin);
+  padding-right: var(--sormas-layout-margin);
+  border-bottom: 3px solid var(--sormas-focus-color);
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 5. Label styles (components/label.scss): colours, sizes, font styles. Scoped to plain elements: the same class
+ *    names (primary, small, warning, ...) are button variants or other components' names in CssStyles.
+ * ------------------------------------------------------------------------------------------------------------- */
+:is(span, div, label, p, a, li, td, b, strong, i, em).primary { color: var(--sormas-primary-color); font-weight: 600; }
+:is(span, div, label, p, a, li, td, b, strong, i, em).secondary { color: var(--sormas-secondary-color); }
+:is(span, div, label, p, a, li, td, b, strong, i, em).critical { color: var(--sormas-critical-color); font-weight: 600; }
+:is(span, div, label, p, a, li, td, b, strong, i, em).important { color: var(--sormas-important-color); font-weight: 600; }
+:is(span, div, label, p, a, li, td, b, strong, i, em).warning { color: var(--sormas-warning-color); font-weight: 600; }
+:is(span, div, label, p, a, li, td, b, strong, i, em).relevant { color: var(--sormas-relevant-color); }
+:is(span, div, label, p, a, li, td, b, strong, i, em).neutral { color: var(--sormas-neutral-color); }
+:is(span, div, label, p, a, li, td, b, strong, i, em).positive { color: var(--sormas-positive-color); }
+:is(span, div, label, p, a, li, td, b, strong, i, em).minor { color: var(--sormas-minor-color); }
+:is(span, div, label, p, a, li, td, b, strong, i, em).discarded { text-decoration: line-through; color: #888; }
+:is(span, div, label, p, a, li, td, b, strong, i, em).done { color: #888; }
+:is(span, div, label, p, a, li, td, b, strong, i, em).not { color: #C44; }
+:is(span, div, label, p, a, li, td, b, strong, i, em).white { color: #FFF; }
+
+.bg-follow-up-symptomatic { background: var(--sormas-critical-color); line-height: 2em; }
+.bg-follow-up-not-symptomatic { background: var(--sormas-positive-color); line-height: 2em; }
+.bg-follow-up-unavailable { background: #6277cc; line-height: 2em; }
+.bg-follow-up-uncooperative { background: #ff19ff; line-height: 2em; }
+.bg-follow-up-not-performed { background: var(--sormas-minor-color); line-height: 2em; }
+
+.rounded-corners { border-radius: 8px; padding: 8px; }
+.rounded-corners-slim { border-radius: 4px; padding: 4px; }
+.background-focus-light { background: var(--sormas-focus-light-color); }
+.vertical-align-super { vertical-align: super; }
+
+:is(span, div, label, p, a, li, td).small { font-size: 0.75em; }
+:is(span, div, label, p, a, li, td).medium { font-size: 1em; }
+:is(span, div, label, p, a, li, td).large { font-size: 1.25em; }
+.large-alt { font-size: 1.25em; line-height: 1.1; }
+.xlarge { font-size: 1.5em; }
+.xxlarge { font-size: 2em; }
+.xxxlarge { font-size: 2.5em; }
+.really-large { font-size: 5em; line-height: 1em; }
+
+.bold { font-weight: bold; }
+.italic { font-style: italic; }
+.uppercase { text-transform: uppercase; }
+.bottom-line { border-bottom: 1px solid var(--sormas-focus-color); }
+.white-space-normal { white-space: normal !important; }
+.text-align-right { text-align: right; }
+.caption-truncated {
+  width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  display: block;
+}
+/* label.scss .side-component .v-label: only the elements that stand for a Vaadin 8 label (text, or text in spans),
+   not the captions, layout wrappers, list rows or button containers around them */
+.side-component :is(span, div, label):not(.v-caption):not(:has(> :not(span))) {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 6. Layout and global style classes (global.scss "CUSTOM STYLES", orderedlayout.scss)
+ * ------------------------------------------------------------------------------------------------------------- */
+.v-caption-multiline { white-space: normal; }
+.force-caption { margin-top: 1.5em; margin-bottom: 16px; }
+.force-caption-checkbox { margin-top: 2.2em; margin-bottom: 16px; }
+
+/* like bootstrap grid with free columns */
+.inline-container { margin-left: -15px; margin-right: -15px; }
+.inline-container > div { padding-left: 15px; padding-right: 15px; display: inline-block; vertical-align: top; }
+
+/* filter bars: filters side by side, wrapping */
+.filters-container { margin-left: -8px; margin-right: -8px; white-space: normal; font-size: 0; }
+.filters-container > * { display: inline-block; vertical-align: top; font-size: var(--sormas-font-size); }
+.filters-container > * .filter-item { margin-left: 8px; margin-right: 8px; }
+
+.fieldextrainfo { font-size: 0.9em; }
+vaadin-text-area.resizable::part(input-field) { resize: vertical; overflow: auto; }
+
+.badge {
+  padding: 2px 9px 2px;
+  margin-left: 5px;
+  font-weight: bold;
+  white-space: nowrap;
+  color: #ffffff;
+  background-color: var(--sormas-primary-color);
+  border-radius: 9px;
+}
+
+.vspace-0 { margin-bottom: 64px; }
+.vspace-1 { margin-bottom: 36px; }
+.vspace-2 { margin-bottom: 24px; }
+.vspace-3 { margin-bottom: 16px; }
+.vspace-4 { margin-bottom: 6px; }
+.vspace-5 { margin-bottom: 2px; }
+.vspace-none { margin-bottom: 0 !important; }
+
+.vspace-top-0 { margin-top: 64px; }
+.vspace-top-1 { margin-top: 36px; }
+.vspace-top-2 { margin-top: 24px; }
+.vspace-top-3 { margin-top: 16px; }
+.vspace-top-4 { margin-top: 6px; }
+.vspace-top-5 { margin-top: 2px; }
+.vspace-top-6 { margin-top: -8px; }
+.vspace-top-none { margin-top: 0 !important; }
+
+.hspace-left-0 { margin-left: 64px; }
+.hspace-left-1 { margin-left: 36px; }
+.hspace-left-2 { margin-left: 20px; }
+.hspace-left-3 { margin-left: 10px; }
+.hspace-left-4 { margin-left: 6px; }
+.hspace-left-5 { margin-left: 2px; }
+.hspace-left-6 { margin-left: -50px; }
+.hspace-left-none { margin-left: 0 !important; }
+
+.hspace-right-0 { margin-right: 64px; }
+.hspace-right-1 { margin-right: 36px; }
+.hspace-right-2 { margin-right: 20px; }
+.hspace-right-3 { margin-right: 10px; }
+.hspace-right-4 { margin-right: 6px; }
+.hspace-right-5 { margin-right: 2px; }
+.hspace-right-none { margin-right: 0 !important; }
+
+.indent-left-1 { margin-left: 15px; }
+.indent-left-2 { margin-left: 30px; }
+.indent-left-3 { margin-left: 45px; }
+
+.margin-x-4 { margin-left: 4px; margin-right: 4px; }
+.margin-top-4 { margin-top: 4px; }
+.padding-none { padding: 0 !important; }
+.padding-x-8 { padding: 0 8px !important; }
+.padding-x-20 { padding: 0 20px !important; }
+
+.vertical-rule { border-right: 1px solid var(--sormas-focus-color); }
+
+.rich-text-content-container {
+  box-shadow: inset 0 0 4px var(--sormas-focus-color);
+  border-radius: 4px;
+  padding: 10px;
+  background-color: #F7F8F8;
+  margin-top: 10px;
+}
+.rich-text-content-container .reply {
+  border-top: 2px dashed var(--sormas-focus-color);
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.text-bold { font-weight: bold; }
+.align-right { text-align: right; }
+.align-center { text-align: center; }
+
+/* classification criteria */
+.background-criteria { background: var(--sormas-highlight-subtle-color); }
+.background-sub-criteria { background: var(--sormas-highlight-slightly-subtle-color); }
+.background-suspect-criteria { background: var(--sormas-relevant-transparent-color); }
+.background-probable-criteria { background: var(--sormas-important-transparent-color); }
+.background-confirmed-criteria { background: var(--sormas-critical-transparent-color); }
+.background-not-a-case-criteria { background: var(--sormas-highlight-color); }
+.background-duplicate-aggregate-report { background: var(--sormas-critical-most-transparent-color); }
+.background-rounded-corners { border-radius: 8px; padding: 8px; }
+
+.geocode-button-highlight { color: var(--sormas-critical-color) !important; }
+
+.root-component { min-width: 640px; max-width: 1280px; }
+.main-component { min-width: 640px; margin-bottom: 24px; }
+.side-component {
+  min-width: 420px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 12px 20px;
+  margin-bottom: 24px;
+}
+.active-side-component-element {
+  background-color: var(--sormas-focus-color);
+  border-radius: 6px;
+  padding: 6px;
+}
+
+.grid-row-gap-1 > div:first-child { padding-right: 0 !important; }
+
+.view-section,
+.view-section-width-auto {
+  padding: 5px 8px;
+  margin-left: 4px;
+  background-color: #ffffff;
+  border: 0 solid #ffffff;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.14);
+}
+.view-section { width: 99% !important; border-radius: 8px; }
+.view-section-width-auto { width: auto !important; border-radius: 4px; }
+
+.page-title { font-size: 24px !important; }
+
+.rounded-border { border-radius: 8px; }
+.rounded-border-top { border-top-left-radius: 8px; border-top-right-radius: 8px; }
+.rounded-border-bottom { border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
+.rounded-border-sm { border-radius: 4px; }
+.rounded-border-sm-top { border-top-left-radius: 4px; border-top-right-radius: 4px; }
+.rounded-border-sm-bottom { border-bottom-left-radius: 4px; border-bottom-right-radius: 4px; }
+
+.form-section-accordion-panel-title-button {
+  font-size: 16px !important;
+  font-weight: 600;
+  color: var(--sormas-secondary-color);
+  text-decoration: none !important;
+  padding-left: 0;
+}
+
+.spacing-small {
+  --vaadin-vertical-layout-gap: 4px;
+  --vaadin-horizontal-layout-gap: 4px;
+}
+.minimal {
+  --vaadin-vertical-layout-padding: 4px;
+  --vaadin-horizontal-layout-padding: 4px;
+  --vaadin-vertical-layout-gap: 8px;
+  --vaadin-horizontal-layout-gap: 8px;
+}
+.spacious {
+  --vaadin-vertical-layout-padding: 36px;
+  --vaadin-horizontal-layout-padding: 36px;
+  --vaadin-vertical-layout-gap: 36px;
+  --vaadin-horizontal-layout-gap: 36px;
+}
+.wrap { white-space: normal !important; }
+
+.no-border { border: none; }
+.float-right { float: right; }
+.inaccessible-field { font-style: italic; }
+.inaccessible-column,
+.inaccessible-label { font-style: italic; opacity: 0.5; }
+
+.case-notifier-side-view { border-top: 1px solid var(--sormas-focus-color); padding: 9px 0; }
+
+.underline { text-decoration: underline; }
+.front-element { z-index: 99999 !important; }
+.min-row-height { min-height: 79px; }
+
+/* bootstrap-grid.scss: empty hidden slots take no room */
+.row div[location].hide-invisble:empty { display: none; }
+
+/* deprecated.scss */
+.callout {
+  text-align: center;
+  padding: 0 14px;
+  color: #191919;
+  font-weight: 500;
+  border-radius: 4px;
+  border: 1px solid #c5c5c5;
+  border-left: 7px solid #60a0ea;
+  border-bottom-color: #bcbcbc;
+  background-color: #fafafa;
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 7. Disease colours (views/disease.scss; CssStyles.getDiseaseColor): one class per disease and a darker variant.
+ *    Generated by migration/prs/evidence/fix-2a-01-global-theme/disease-scss-to-css.py, values unchanged.
+ * ------------------------------------------------------------------------------------------------------------- */
+.background-disease-afp { background-color: #00E0A1; fill: #00E0A1; }
+.background-disease-afp.background-darker { background-color: #00B582; fill: #00B582; }
+.background-disease-cholera { background-color: #FEBA01; fill: #FEBA01; }
+.background-disease-cholera.background-darker { background-color: #E5A701; fill: #E5A701; }
+.background-disease-csm { background-color: #59BDEF; fill: #59BDEF; }
+.background-disease-csm.background-darker { background-color: #50AAD7; fill: #50AAD7; }
+.background-disease-dengue { background-color: #44BEC7; fill: #44BEC7; }
+.background-disease-dengue.background-darker { background-color: #3DABB3; fill: #3DABB3; }
+.background-disease-evd { background-color: #8C45AD; fill: #8C45AD; }
+.background-disease-evd.background-darker { background-color: #7E3E9C; fill: #7E3E9C; }
+.background-disease-guinea-worm { background-color: #3FD100; fill: #3FD100; }
+.background-disease-guinea-worm.background-darker { background-color: #38BA00; fill: #38BA00; }
+.background-disease-lassa { background-color: #EA579B; fill: #EA579B; }
+.background-disease-lassa.background-darker { background-color: #D34E8B; fill: #D34E8B; }
+.background-disease-measles { background-color: #66AD45; fill: #66AD45; }
+.background-disease-measles.background-darker { background-color: #5C9C3E; fill: #5C9C3E; }
+.background-disease-monkeypox { background-color: #FF9299; fill: #FF9299; }
+.background-disease-monkeypox.background-darker { background-color: #E5838A; fill: #E5838A; }
+.background-disease-new-flu { background-color: #4550AC; fill: #4550AC; }
+.background-disease-new-flu.background-darker { background-color: #3E489B; fill: #3E489B; }
+.background-disease-plague { background-color: #8270CC; fill: #8270CC; }
+.background-disease-plague.background-darker { background-color: #7565B8; fill: #7565B8; }
+.background-disease-polio { background-color: #A6E300; fill: #A6E300; }
+.background-disease-polio.background-darker { background-color: #96CC00; fill: #96CC00; }
+.background-disease-unspecified-vhf { background-color: #448282; fill: #448282; }
+.background-disease-unspecified-vhf.background-darker { background-color: #2F4F4F; fill: #2F4F4F; }
+.background-disease-west-nile-fever { background-color: #87CEFA; fill: #87CEFA; }
+.background-disease-west-nile-fever.background-darker { background-color: #5b94b7; fill: #5b94b7; }
+.background-disease-yellow-fever { background-color: #E2D320; fill: #E2D320; }
+.background-disease-yellow-fever.background-darker { background-color: #CBBE1D; fill: #CBBE1D; }
+.background-disease-congenital-rubella { background-color: #d4d4f7; fill: #d4d4f7; }
+.background-disease-congenital-rubella.background-darker { background-color: #aaaaee; fill: #aaaaee; }
+.background-disease-other { background-color: #888; fill: #888; }
+.background-disease-other.background-darker { background-color: #6D6D6D; fill: #6D6D6D; }
+.background-disease-undefined { background-color: #cccccc; fill: #cccccc; }
+.background-disease-undefined.background-darker { background-color: #d9d9d9; fill: #d9d9d9; }
+.background-disease-rabies { background-color: #ef5a6c; fill: #ef5a6c; }
+.background-disease-rabies.background-darker { background-color: #e04a5b; fill: #e04a5b; }
+.background-disease-anthrax { background-color: #5a95f4; fill: #5a95f4; }
+.background-disease-anthrax.background-darker { background-color: #3b7fed; fill: #3b7fed; }
+.background-disease-coronavirus { background-color: #bf8678; fill: #bf8678; }
+.background-disease-coronavirus.background-darker { background-color: #b0796b; fill: #b0796b; }
+.background-disease-pneumonia { background-color: #b0c4de; fill: #b0c4de; }
+.background-disease-pneumonia.background-darker { background-color: #7b8fa3; fill: #7b8fa3; }
+.background-disease-malaria { background-color: #7ed957; fill: #7ed957; }
+.background-disease-malaria.background-darker { background-color: #5fa23f; fill: #5fa23f; }
+.background-disease-typhoid-fever { background-color: #f7b267; fill: #f7b267; }
+.background-disease-typhoid-fever.background-darker { background-color: #d9983a; fill: #d9983a; }
+.background-disease-acute-viral-hepatitis { background-color: #f9e79f; fill: #f9e79f; }
+.background-disease-acute-viral-hepatitis.background-darker { background-color: #f7ca18; fill: #f7ca18; }
+.background-disease-non-neonatal-tetanus { background-color: #b2bec3; fill: #b2bec3; }
+.background-disease-non-neonatal-tetanus.background-darker { background-color: #636e72; fill: #636e72; }
+.background-disease-hiv { background-color: #e17055; fill: #e17055; }
+.background-disease-hiv.background-darker { background-color: #b03a2e; fill: #b03a2e; }
+.background-disease-schistosomiasis { background-color: #00b894; fill: #00b894; }
+.background-disease-schistosomiasis.background-darker { background-color: #00897b; fill: #00897b; }
+.background-disease-soil-transmitted-helminths { background-color: #a0522d; fill: #a0522d; }
+.background-disease-soil-transmitted-helminths.background-darker { background-color: #6e2c00; fill: #6e2c00; }
+.background-disease-trypanosomiasis { background-color: #6c3483; fill: #6c3483; }
+.background-disease-trypanosomiasis.background-darker { background-color: #512e5f; fill: #512e5f; }
+.background-disease-diarrhea-dehydration { background-color: #85c1e9; fill: #85c1e9; }
+.background-disease-diarrhea-dehydration.background-darker { background-color: #2874a6; fill: #2874a6; }
+.background-disease-diarrhea-blood { background-color: #c0392b; fill: #c0392b; }
+.background-disease-diarrhea-blood.background-darker { background-color: #922b21; fill: #922b21; }
+.background-disease-snake-bite { background-color: #a3a847; fill: #a3a847; }
+.background-disease-snake-bite.background-darker { background-color: #7d8334; fill: #7d8334; }
+.background-disease-rubella { background-color: #f1948a; fill: #f1948a; }
+.background-disease-rubella.background-darker { background-color: #c0392b; fill: #c0392b; }
+.background-disease-tuberculosis { background-color: #b9770e; fill: #b9770e; }
+.background-disease-tuberculosis.background-darker { background-color: #7e5109; fill: #7e5109; }
+.background-disease-leprosy { background-color: #f5cba7; fill: #f5cba7; }
+.background-disease-leprosy.background-darker { background-color: #ca6f1e; fill: #ca6f1e; }
+.background-disease-lymphatic-filariasis { background-color: #48c9b0; fill: #48c9b0; }
+.background-disease-lymphatic-filariasis.background-darker { background-color: #148f77; fill: #148f77; }
+.background-disease-buruli-ulcer { background-color: #f7cac9; fill: #f7cac9; }
+.background-disease-buruli-ulcer.background-darker { background-color: #e9967a; fill: #e9967a; }
+.background-disease-pertussis { background-color: #f8c471; fill: #f8c471; }
+.background-disease-pertussis.background-darker { background-color: #b9770e; fill: #b9770e; }
+.background-disease-neonatal-tetanus { background-color: #f9e79f; fill: #f9e79f; }
+.background-disease-neonatal-tetanus.background-darker { background-color: #f7ca18; fill: #f7ca18; }
+.background-disease-onchocerciasis { background-color: #34495e; fill: #34495e; }
+.background-disease-onchocerciasis.background-darker { background-color: #212f3c; fill: #212f3c; }
+.background-disease-diphteria { background-color: #e67e22; fill: #e67e22; }
+.background-disease-diphteria.background-darker { background-color: #ca6f1e; fill: #ca6f1e; }
+.background-disease-trachoma { background-color: #aed6f1; fill: #aed6f1; }
+.background-disease-trachoma.background-darker { background-color: #5499c7; fill: #5499c7; }
+.background-disease-yaws-endemic-syphilis { background-color: #f5b7b1; fill: #f5b7b1; }
+.background-disease-yaws-endemic-syphilis.background-darker { background-color: #c0392b; fill: #c0392b; }
+.background-disease-maternal-deaths { background-color: #f1948a; fill: #f1948a; }
+.background-disease-maternal-deaths.background-darker { background-color: #922b21; fill: #922b21; }
+.background-disease-perinatal-deaths { background-color: #f7dc6f; fill: #f7dc6f; }
+.background-disease-perinatal-deaths.background-darker { background-color: #b7950b; fill: #b7950b; }
+.background-disease-influenza { background-color: #5dade2; fill: #5dade2; }
+.background-disease-influenza.background-darker { background-color: #21618c; fill: #21618c; }
+.background-disease-influenza-a { background-color: #2874a6; fill: #2874a6; }
+.background-disease-influenza-a.background-darker { background-color: #154360; fill: #154360; }
+.background-disease-influenza-b { background-color: #85c1e9; fill: #85c1e9; }
+.background-disease-influenza-b.background-darker { background-color: #2874a6; fill: #2874a6; }
+.background-disease-h-metapneumovirus { background-color: #a569bd; fill: #a569bd; }
+.background-disease-h-metapneumovirus.background-darker { background-color: #76448a; fill: #76448a; }
+.background-disease-respiratory-syncytial-virus { background-color: #48c9b0; fill: #48c9b0; }
+.background-disease-respiratory-syncytial-virus.background-darker { background-color: #148f77; fill: #148f77; }
+.background-disease-parainfluenza-1-4 { background-color: #f7ca18; fill: #f7ca18; }
+.background-disease-parainfluenza-1-4.background-darker { background-color: #b7950b; fill: #b7950b; }
+.background-disease-adenovirus { background-color: #f5b041; fill: #f5b041; }
+.background-disease-adenovirus.background-darker { background-color: #b9770e; fill: #b9770e; }
+.background-disease-rhinovirus { background-color: #76d7c4; fill: #76d7c4; }
+.background-disease-rhinovirus.background-darker { background-color: #117864; fill: #117864; }
+.background-disease-enterovirus { background-color: #f1948a; fill: #f1948a; }
+.background-disease-enterovirus.background-darker { background-color: #922b21; fill: #922b21; }
+.background-disease-m-pneumoniae { background-color: #f7cac9; fill: #f7cac9; }
+.background-disease-m-pneumoniae.background-darker { background-color: #e9967a; fill: #e9967a; }
+.background-disease-c-pneumoniae { background-color: #f9e79f; fill: #f9e79f; }
+.background-disease-c-pneumoniae.background-darker { background-color: #f7ca18; fill: #f7ca18; }
+.background-disease-ari { background-color: #aed6f1; fill: #aed6f1; }
+.background-disease-ari.background-darker { background-color: #5499c7; fill: #5499c7; }
+.background-disease-chikungunya { background-color: #e67e22; fill: #e67e22; }
+.background-disease-chikungunya.background-darker { background-color: #ca6f1e; fill: #ca6f1e; }
+.background-disease-post-immunization-adverse-events-mild { background-color: #f7cac9; fill: #f7cac9; }
+.background-disease-post-immunization-adverse-events-mild.background-darker { background-color: #e9967a; fill: #e9967a; }
+.background-disease-post-immunization-adverse-events-severe { background-color: #c0392b; fill: #c0392b; }
+.background-disease-post-immunization-adverse-events-severe.background-darker { background-color: #922b21; fill: #922b21; }
+.background-disease-fha { background-color: #f5b7b1; fill: #f5b7b1; }
+.background-disease-fha.background-darker { background-color: #c0392b; fill: #c0392b; }
+.background-disease-invasive-meningococcal-infection { background-color: #00E0A1; fill: #00E0A1; }
+.background-disease-invasive-meningococcal-infection.background-darker { background-color: #00B582; fill: #00B582; }
+.background-disease-invasive-pneumococcal-infection { background-color: #e67e22; fill: #e67e22; }
+.background-disease-invasive-pneumococcal-infection.background-darker { background-color: #ca6f1e; fill: #ca6f1e; }
+.background-disease-giardiasis { background-color: #22b8e6; fill: #22b8e6; }
+.background-disease-giardiasis.background-darker { background-color: #064c63; fill: #064c63; }
+.background-disease-cryptosporidiosis { background-color: #9938ca; fill: #9938ca; }
+.background-disease-cryptosporidiosis.background-darker { background-color: #4b066a; fill: #4b066a; }
+.background-disease-salmonellosis { background-color: #d35400; fill: #d35400; }
+.background-disease-salmonellosis.background-darker { background-color: #a04000; fill: #a04000; }
+.background-disease-shigellosis { background-color: #bd1307; fill: #bd1307; }
+.background-disease-shigellosis.background-darker { background-color: #DAAA69; fill: #DAAA69; }
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 8. Sub menu: the tab bar of the detail views, the configuration and the dashboards (SubMenu.java, which builds the
+ *    elements of a Valo tab sheet: .v-tabsheet > .v-tabsheet-tabcontainer > .v-tabsheet-tabitemcell >
+ *    .v-tabsheet-tabitem[.back|.selected] > a.v-caption). components/tabsheet.scss on the Valo tab sheet rules it relied
+ *    on (valo/components/_tabsheet.scss, and Vaadin 8's .v-widget { display: inline-block } for the CssLayout cells).
+ *    One row of tabs that wraps onto further rows when the window is too narrow, as in the old app (no scroller).
+ * ------------------------------------------------------------------------------------------------------------- */
+.v-tabsheet {
+  position: relative;
+  margin-top: -3px; /* the selected tab's bar lies on the view header's bottom line */
+}
+.v-tabsheet-tabcontainer {
+  position: relative;
+  box-sizing: border-box;
+  white-space: normal;
+}
+.v-tabsheet-tabitemcell {
+  display: inline-block;
+  vertical-align: top;
+  border-top: 3px solid transparent;
+}
+.v-tabsheet-tabitemcell:first-child {
+  margin-left: 20px;
+}
+.v-tabsheet-tabitem {
+  display: inline-block;
+  overflow: visible;
+  line-height: 0;
+}
+.v-tabsheet-tabitem > .v-caption {
+  display: inline-block;
+  box-sizing: border-box;
+  margin: -3px 0 0 16px;
+  padding: 0 8px;
+  border-top: 3px solid transparent;
+  line-height: 32px;
+  white-space: nowrap;
+  color: var(--sormas-primary-color);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.v-tabsheet-tabitemcell:first-child .v-tabsheet-tabitem > .v-caption {
+  margin-left: 0;
+}
+.v-tabsheet-tabitem.back {
+  border-right: 3px solid var(--sormas-focus-color);
+  padding-right: 16px;
+}
+.v-tabsheet-tabitem.back > .v-caption vaadin-icon {
+  width: 1em;
+  height: 1em;
+  margin-right: 0.4em;
+  vertical-align: -0.15em;
+}
+.v-tabsheet-tabitem.selected > .v-caption {
+  border-top-color: var(--sormas-primary-color);
+  font-size: 16px;
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 9. Grids (components/grid.scss on the Valo grid; Lumo's vaadin-grid styled through its part names). Column widths
+ *    come from the utils.grid Grid shim (content width, Vaadin 8 expand ratios); these rules give the cells the old
+ *    density, header style and frame, the per-column width limits and the cell and row style classes (CssStyles
+ *    GRID_*), which the shim sets as part names.
+ * ------------------------------------------------------------------------------------------------------------- */
+vaadin-grid {
+  --sormas-grid-row-height: 38px;            /* Valo $v-grid-row-height 32px line + 3px padding */
+  --vaadin-grid-cell-padding: 3px 6px;       /* grid.scss .v-grid-cell padding */
+}
+
+/* Frame: top and bottom lines only (grid.scss: no left and right border on the table wrapper) */
+vaadin-grid:not([theme~="no-border"]) {
+  border-color: var(--sormas-focus-color);
+  border-left-width: 0;
+  border-right-width: 0;
+}
+
+vaadin-grid::part(cell) {
+  border-top-color: var(--sormas-focus-color);
+}
+
+vaadin-grid::part(body-cell) {
+  min-height: var(--sormas-grid-row-height);
+}
+
+/* Vaadin 8 HeightMode.UNDEFINED (Grid.setHeightMode, setAllRowsVisible): the rows give the height, also when the grid
+   sits in an expanded layout slot (Vaadin 8 expanded the slot, not the grid) */
+vaadin-grid[all-rows-visible] {
+  flex-grow: 0 !important;
+}
+
+/* Header: small, semi-bold, upper case captions over a 2px line */
+vaadin-grid::part(header-cell) {
+  min-height: var(--sormas-grid-row-height);
+  background-color: var(--sormas-background-color);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+vaadin-grid::part(last-header-row-cell) {
+  border-bottom: 2px solid var(--sormas-focus-color);
+}
+
+/* Vaadin 8 column minimum and maximum widths (Grid.Column setMinimumWidth / setMaximumWidth): part names
+   sormas-col-min-<px> and sormas-col-max-<px> on the header, body and footer cells of the column. One rule per width
+   the app uses; a new width needs a rule here. */
+vaadin-grid::part(sormas-col-min-150) { min-width: 150px; }
+vaadin-grid::part(sormas-col-min-180) { min-width: 180px; }
+vaadin-grid::part(sormas-col-min-260) { min-width: 260px; }
+vaadin-grid::part(sormas-col-min-280) { min-width: 280px; }
+vaadin-grid::part(sormas-col-max-50) { max-width: 50px; }
+vaadin-grid::part(sormas-col-max-120) { max-width: 120px; }
+vaadin-grid::part(sormas-col-max-150) { max-width: 150px; }
+vaadin-grid::part(sormas-col-max-200) { max-width: 200px; }
+vaadin-grid::part(sormas-col-max-300) { max-width: 300px; }
+vaadin-grid::part(sormas-col-max-700) { max-width: 700px; }
+
+/* Cell style classes (CssStyles GRID_CELL_*) */
+vaadin-grid::part(link) { cursor: pointer; }
+vaadin-grid::part(priority-high) { color: var(--sormas-important-color); font-weight: 600; }
+vaadin-grid::part(priority-normal) { color: var(--sormas-default-color); }
+vaadin-grid::part(warning) { color: var(--sormas-warning-color); font-weight: 600; }
+vaadin-grid::part(status-pending) { color: var(--sormas-warning-color); }
+vaadin-grid::part(status-in-progress) { color: var(--sormas-neutral-color); }
+vaadin-grid::part(status-completed) { color: var(--sormas-positive-color); }
+vaadin-grid::part(status-failed) { color: var(--sormas-critical-color); }
+vaadin-grid::part(status-cancelled) { color: var(--sormas-font-color); }
+vaadin-grid::part(odd) { background-color: #eee; }
+vaadin-grid::part(row-title) { text-transform: uppercase; font-weight: 600; font-size: 10px; }
+/* Row styles (Grid.setStyleGenerator): the shim puts them on the row's cells with the prefix row- */
+vaadin-grid::part(row-status-discarded) { text-decoration: line-through; color: #888; }
+vaadin-grid::part(row-status-done) { color: #888; }
+vaadin-grid::part(row-status-not) { color: #C44; }
+vaadin-grid::part(row-v-treegrid-parent-row) { background-color: var(--sormas-focus-light-color); }
+vaadin-grid::part(row-v-treegrid-child-row) { border-bottom: 3px solid var(--sormas-focus-color); }
+vaadin-grid::part(row-background-duplicate-aggregate-report) { background-color: var(--sormas-critical-most-transparent-color); }
+vaadin-grid::part(follow-up-symptomatic) { background-color: var(--sormas-critical-color); }
+vaadin-grid::part(follow-up-not-symptomatic) { background-color: var(--sormas-positive-color); }
+vaadin-grid::part(follow-up-unavailable) { background-color: #6277cc; }
+vaadin-grid::part(follow-up-uncooperative) { background-color: #ff19ff; }
+vaadin-grid::part(follow-up-not-performed) { background-color: var(--sormas-minor-color); }
+vaadin-grid::part(follow-up-symptomatic-external),
+vaadin-grid::part(follow-up-not-symptomatic-external),
+vaadin-grid::part(follow-up-unavailable-external),
+vaadin-grid::part(follow-up-uncooperative-external),
+vaadin-grid::part(follow-up-not-performed-external) {
+  background-image: url(img/smartphone.png);
+  background-repeat: no-repeat;
+  background-size: 40% 80%;
+  background-position: center;
+}
+vaadin-grid::part(follow-up-symptomatic-external) { background-color: var(--sormas-critical-color); }
+vaadin-grid::part(follow-up-not-symptomatic-external) { background-color: var(--sormas-positive-color); }
+vaadin-grid::part(follow-up-unavailable-external) { background-color: #6277cc; }
+vaadin-grid::part(follow-up-uncooperative-external) { background-color: #ff19ff; }
+vaadin-grid::part(follow-up-not-performed-external) { background-color: var(--sormas-minor-color); }
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 10. Forms, filter bars, buttons, dialogs
+ * ------------------------------------------------------------------------------------------------------------- */
+
+/* Detail views with a side panel (LayoutWithSidePanel): Vaadin 8 placed the form and the side panel in bootstrap
+   columns col-lg-8 and col-lg-4 of the root component, so they split its width 8:4. The Flow HorizontalLayout grows
+   them 8:4 from their content widths instead: start both from zero so the split is the old one again. */
+vaadin-horizontal-layout.root-component > * {
+  flex-basis: 0;
+}
+
+/* CssStyles.LAYOUT_COL_HIDE_INVSIBLE (bootstrap-grid.scss): a column whose component is hidden takes no room. Vaadin 8
+   left such a slot empty; Flow keeps the hidden component in it, so ":empty" (section 6) no longer matches. */
+.row div[location].hide-invisble:not(:has(> :not([hidden]))) {
+  display: none;
+}
+
+/* Fields without a width of their own: Valo's default field width ($v-default-field-width, 5 x 32px); Lumo's is 12em */
+html {
+  --vaadin-field-default-width: 160px;
+}
+
+/* Captions in the bootstrap-grid forms (CustomLayout slots): Vaadin 8 never cut them off; a caption longer than its field
+   runs on past the field's end. CssStyles.CAPTION_OVERFLOW (global.scss .v-caption-caption-overflow: the date of birth
+   caption over the year, month and day fields) does the same wherever it is set. */
+[location] > :is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field,
+    vaadin-integer-field, vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box,
+    vaadin-select, vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker, vaadin-radio-group,
+    vaadin-checkbox-group, vaadin-custom-field)::part(label),
+.caption-overflow::part(label) {
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+/* Delete buttons: CssStyles.BUTTON_DANGER maps to Lumo's "error" variant; Valo's danger button (button.scss) is filled
+   in the critical colour with a darker border. Link-style (tertiary) error buttons stay unfilled. */
+vaadin-button[theme~="error"]:not([theme~="tertiary"]):not([theme~="tertiary-inline"]) {
+  --vaadin-button-background: var(--sormas-critical-color);
+  --vaadin-button-text-color: #FFFFFF;
+  --vaadin-button-border: 1px solid rgb(72, 0, 0);
+  color: #FFFFFF;
+}
+
+/* Dialogs (window.scss): a white title bar with the caption in 24px semi-bold primary colour and a 3px line below it,
+   the close button in the top right corner, and Valo's dark modality curtain */
+vaadin-dialog::part(header) {
+  padding: 16px 32px 8px 32px;
+  background-color: #FFFFFF;
+  border-bottom: 3px solid var(--sormas-focus-color);
+}
+
+/* the dialog sets font: inherit !important on its slotted title: the font goes on the title part */
+vaadin-dialog::part(title) {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 31px;
+}
+
+vaadin-dialog > h2[slot="title"] {
+  margin: 0;
+  color: var(--sormas-primary-color);
+}
+
+vaadin-dialog::part(header-content) {
+  align-self: flex-start;
+  margin: -16px -32px 0 0;
+}
+
+vaadin-dialog::part(backdrop) {
+  background-color: rgba(34, 34, 34, 0.8);
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 11. Dashboards, login, statistics (views/dashboard.scss, components/countelement.scss, components/svg.scss,
+ *     views/login.scss, views/statistics.scss). Class names as the Flow code sets them (DashboardCssStyles, CssStyles).
+ * ------------------------------------------------------------------------------------------------------------- */
+
+/* Dashboards: section backgrounds (dashboard.scss) */
+.curve-and-map-layout { background-color: var(--sormas-focus-color); }
+.highlighted-statistics-component { background-color: var(--sormas-focus-light-color); padding-top: 16px; }
+.statistics-sublayout { background-color: var(--sormas-focus-light-color); }
+.background-highlight { background-color: #EDF2FD; }
+.background-critical { background-color: #DE5555; }
+.dashboard-screen { overflow-x: hidden; }
+.dashboard-screen .heading-title-label { margin-top: 12px; }
+.cfr-info-button { margin-top: -3px; }
+.follow-up-status-info-button { margin-top: 10px; }
+.statistics-info-label { margin-top: 10px; }
+hr { margin-top: 0; margin-bottom: 0; }
+
+.dashboard-key {
+  text-align: center;
+  padding: 7px;
+  color: #191919;
+  font-weight: 500;
+  border-radius: 4px;
+  border: 1px solid #c5c5c5;
+  border-bottom-color: #bcbcbc;
+  background-color: #fafafa;
+}
+
+/* Dashboards: Vaadin 8 labels and layouts of undefined width did not wrap (Valo .v-label-undef-w and
+   .v-horizontallayout: white-space nowrap); the Flow spans of the dashboard rows and counters keep that */
+.dashboard-screen vaadin-horizontal-layout > span,
+.dashboard-screen .count-element > span {
+  white-space: nowrap;
+}
+
+/* Info icons next to dashboard headings: the size of the heading's text, as the Vaadin 8 icon font */
+.dashboard-screen span > vaadin-icon { width: 1em; height: 1em; }
+/* an info icon next to a heading moved up with vspace-top-5 sits on the heading's line (Vaadin 8 slot alignment) */
+.dashboard-screen span.vspace-top-5 + span.h3:has(> vaadin-icon) { margin-top: 2px; }
+
+/* Count elements: the count over a 4px line in the element's colour (countelement.scss) */
+.count-element > :first-child { border-bottom: 4px solid; align-self: stretch !important; text-align: center; }
+.count-element.important > * { border-color: var(--sormas-important-color); }
+.count-element.critical > * { border-color: var(--sormas-critical-color); }
+.count-element.critical-transparent > * { border-color: var(--sormas-critical-transparent-color); }
+.count-element.critical-more-transparent > * { border-color: rgba(200, 0, 0, 0.5); }
+.count-element.relevant > * { border-color: var(--sormas-relevant-color); }
+.count-element.neutral > * { border-color: var(--sormas-neutral-color); }
+.count-element.positive > * { border-color: var(--sormas-positive-color); }
+.count-element.minor > * { border-color: var(--sormas-minor-color); }
+.count-element.primary > * { border-color: var(--sormas-primary-color); }
+
+/* SVG bars and circles of the statistics elements (svg.scss). SvgBarElement is a span set 4px high around an inline svg:
+   the svg overflowed it onto the next row (labels looked struck through). As the Vaadin 8 label in its slot, the span
+   takes one text line and the bar sits on its baseline, 10px below the row above */
+span:has(> svg > rect.svg-bar) { height: auto !important; }
+.svg-circle { fill: none; stroke-width: 3; }
+.svg-fill-primary { fill: var(--sormas-primary-color); }
+.svg-fill-critical { fill: var(--sormas-critical-color); }
+.svg-fill-important { fill: var(--sormas-important-color); }
+.svg-fill-positive { fill: var(--sormas-positive-color); }
+.svg-fill-minor { fill: var(--sormas-minor-color); }
+.svg-fill-neutral { fill: var(--sormas-neutral-color); }
+.svg-fill-background { fill: #E6E6E6; }
+.svg-stroke-primary { stroke: var(--sormas-primary-color); }
+.svg-stroke-critical { stroke: var(--sormas-critical-color); }
+.svg-stroke-important { stroke: var(--sormas-important-color); }
+.svg-stroke-positive { stroke: var(--sormas-positive-color); }
+.svg-stroke-minor { stroke: var(--sormas-minor-color); }
+.svg-stroke-background { stroke: #E6E6E6; }
+
+/* Samples dashboard tiles (dashboard.scss) */
+.background-external-lab-samples { background-color: #3E489B; fill: #3E489B; }
+.background-internal-lab-samples { background-color: #7565B8; fill: #7565B8; }
+.background-specimen-condition-adequate { background-color: #5a95f4; fill: #5a95f4; }
+.background-specimen-condition-adequate.background-darker { background-color: #3b7fed; fill: #3b7fed; }
+.background-specimen-condition-inadequate { background-color: #FEBA01; fill: #FEBA01; }
+.background-specimen-condition-inadequate.background-darker { background-color: #E5A701; fill: #E5A701; }
+.background-specimen-condition-not-specified { background-color: #8C45AD; fill: #8C45AD; }
+.background-specimen-condition-not-specified.background-darker { background-color: #7E3E9C; fill: #7E3E9C; }
+.background-shipment-status-shipped { background-color: #44BEC7; fill: #44BEC7; }
+.background-shipment-status-shipped.background-darker { background-color: #3DABB3; fill: #3DABB3; }
+.background-shipment-status-not-shipped { background-color: #ef5a6c; fill: #ef5a6c; }
+.background-shipment-status-not-shipped.background-darker { background-color: #e04a5b; fill: #e04a5b; }
+.background-shipment-status-received { background-color: #E2D320; fill: #E2D320; }
+.background-shipment-status-received.background-darker { background-color: #CBBE1D; fill: #CBBE1D; }
+
+/* Map overlay (dashboard.scss) */
+.map-container { position: relative; }
+.map-component { z-index: 1; }
+.map-overlay, .map-overlay-background { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.map-overlay-background { background-color: #222; opacity: 0.6; z-index: 2; }
+.map-overlay { z-index: 3; }
+
+/* Statistics: captioned frames, the caption on the frame's top line (statistics.scss .title, .title-box) */
+span.title {
+  margin-left: 10px;
+  position: relative;
+  background: var(--sormas-background-color);
+  padding-left: 10px;
+  padding-right: 10px;
+  color: var(--sormas-secondary-color);
+  font-weight: 600;
+  font-size: 1.25em;
+  text-align: center;
+}
+.title-box {
+  padding: 12px;
+  border: 1px solid var(--sormas-primary-color);
+  margin-top: -28px;
+  box-sizing: border-box;
+}
+
+/* Login (login.scss): world map under a blue curtain, the login box centred, the side bar at the right */
+.login-screen-back {
+  background: #FFFFFF url(img/world.png) center / cover;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 460px;
+}
+.login-screen {
+  background-color: rgba(27, 84, 154, 0.9);
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+}
+.login-screen .login-form-container {
+  height: 100%;
+  width: auto;
+  display: flex;
+  flex: 1 1 auto;
+  overflow: visible;
+  text-align: center;
+  position: relative;
+}
+.login-screen .login-form {
+  width: auto !important;
+  background: #FFFFFF;
+  border-radius: 4px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.05);
+  text-align: left;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: 0;
+  transform: translate(-50%, -50%);
+}
+.login-screen .login-sidebar {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  background: #FFFFFF;
+  height: 100%;
+  overflow: auto;
+  padding: var(--sormas-layout-margin);
+  padding-right: 0;
+  box-sizing: border-box;
+}
+.login-screen .login-sidebar .headline-label {
+  background-color: rgba(0, 90, 156, 0.7);
+  color: #FFF;
+  padding: 10px;
+}
+.login-screen .login-sidebar .login-sidebar-custom-header { flex-grow: 1; min-width: 350px; }
+
+/* narrow windows: the parts one below the other (login.scss, width range 0-960px) */
+@media (max-width: 960px) {
+  .login-screen-back, .login-screen { height: auto; }
+  .login-screen { display: block; }
+  .login-screen .login-sidebar { display: block; width: 100%; height: auto; text-align: center; padding-right: var(--sormas-layout-margin); }
+  .login-screen .login-form-container { display: block; width: 100%; height: auto; padding: 30px 0; }
+  .login-screen .login-form { position: static; transform: none; max-width: 100%; display: inline-block; }
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 12. Option groups and small items. Option groups (utils.fields.OptionGroup and NullableOptionGroup, a
+ *     vaadin-custom-field around a vaadin-radio-group or vaadin-checkbox-group, and the Flow groups converted from
+ *     Vaadin 8 RadioButtonGroup and CheckBoxGroup) get the Vaadin 8 orientation and caption placement of the style
+ *     names the code sets (Valo _optiongroup.scss, components/optiongroup.scss). The Lumo radio button and check box
+ *     shapes stay (2a-01). Outbreak overview cells drawn as Valo buttons (OutbreakOverviewGrid).
+ * ------------------------------------------------------------------------------------------------------------- */
+
+/* Vaadin 8 lists the options one per line; the style name "horizontal" (SormasFieldGroupFieldFactory.OPTIONGROUP_HORIZONTAL,
+   ValoTheme.OPTIONGROUP_HORIZONTAL) puts them side by side. The style name is on the group itself or, for the shim's
+   option groups, on the vaadin-custom-field around it. Lumo lays groups out side by side by default. */
+:is(vaadin-radio-group, vaadin-checkbox-group)::part(group-field) {
+  flex-direction: column;
+}
+
+:is(vaadin-radio-group, vaadin-checkbox-group):is(.horizontal, .checkboxes-horizontal)::part(group-field),
+vaadin-custom-field:is(.horizontal, .checkboxes-horizontal) > :is(vaadin-radio-group, vaadin-checkbox-group)::part(group-field) {
+  flex-direction: row;
+}
+
+/* CssStyles.OPTIONGROUP_CHECKBOXES_HORIZONTAL (optiongroup.scss): side by side with 10px after each option */
+:is(vaadin-checkbox-group.checkboxes-horizontal, vaadin-custom-field.checkboxes-horizontal > vaadin-checkbox-group) > vaadin-checkbox {
+  padding-right: 10px;
+}
+
+/* CssStyles.OPTIONGROUP_CAPTION_INLINE (optiongroup.scss .v-caption-caption-inline; set on every Yes/No/Unknown and symptom
+   field by SormasFieldGroupFieldFactory): the caption on the left in the options' row, not upper case, 12px; the options at
+   the right end of the field. Vaadin 8 floated the caption; here the options come first and the caption is moved up into
+   their row (35px: the Lumo group's height) and is at least that high, so the field is as high as the options or, when
+   the caption wraps, as the caption, as with the float. The caption keeps clear of the options (Vaadin 8: 160px for the
+   narrower Valo buttons; three Lumo options take up to about 205px). No caption row above the field. */
+vaadin-custom-field.caption-inline {
+  padding-top: 0;
+}
+
+vaadin-custom-field.caption-inline::before {
+  margin-top: 0;
+}
+
+vaadin-custom-field.caption-inline::part(input-fields) {
+  order: -1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+vaadin-custom-field.caption-inline::part(label) {
+  box-sizing: border-box;
+  min-height: 35px;
+  margin: -35px 210px 0 0;
+  padding: 8px 0 0 0;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16.5px;
+  text-transform: none;
+  white-space: normal;
+  text-align: left;
+}
+
+/* Vaadin 8 drew the caption outside the field, across its layout slot, and CssStyles.FLOAT_RIGHT put the field at the
+   slot's right end (campaign form Yes/No fields: 33% wide; drug susceptibility results). The Flow field holds its own
+   caption: it spans the slot, so the caption starts at the left and the options end at the right, as before. */
+vaadin-custom-field.caption-inline.float-right {
+  float: none;
+  width: 100% !important;
+}
+
+/* CssStyles.OPTIONGROUP_GRID_LAYOUT (optiongroup.scss): two options per row, each half the width */
+:is(vaadin-radio-group.grid-layout, vaadin-checkbox-group.grid-layout,
+    vaadin-custom-field.grid-layout > :is(vaadin-radio-group, vaadin-checkbox-group)) > :is(vaadin-radio-button, vaadin-checkbox) {
+  box-sizing: border-box;
+  width: 50%;
+}
+
+/* CssStyles.OPTIONGROUP_MAX_HEIGHT_150 (optiongroup.scss): the option list scrolls past 150px */
+:is(vaadin-radio-group.max-height-150, vaadin-checkbox-group.max-height-150,
+    vaadin-custom-field.max-height-150 > :is(vaadin-radio-group, vaadin-checkbox-group))::part(group-field) {
+  flex-wrap: nowrap;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+/* Outbreak overview (OutbreakOverviewGrid): the cells are HTML "div.v-button" (CssStyles.buildVaadinStyle, in the span of the
+   grid shim's HtmlRenderer), which Valo drew
+   as a button (button.scss, measured on the old app: 32px high, 14px side padding, 2px primary border, 4px radius,
+   12px upper case); critical and warning are filled in the status colour with a 25% darker border */
+vaadin-grid-cell-content div.v-button {
+  display: inline-block;
+  box-sizing: border-box;
+  height: 32px;
+  padding: 0 14px;
+  border: 2px solid var(--sormas-primary-color);
+  border-radius: 4px;
+  background-color: var(--sormas-background-color);
+  color: var(--sormas-font-color);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 28px;
+  text-align: center;
+  text-transform: uppercase;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+vaadin-grid-cell-content div.v-button.v-button-critical {
+  border-color: rgb(72, 0, 0);
+  background-color: var(--sormas-critical-color);
+  color: #FFFFFF;
+}
+
+vaadin-grid-cell-content div.v-button.v-button-warning {
+  border-color: rgb(63, 35, 0);
+  background-color: var(--sormas-warning-color);
+  color: #FFFFFF;
+}
+
+/* Geographical analysis dashboard (GisDashboardView, global.scss): the filter button row lies over the top left of the map
+   and the legend and layers buttons over its bottom right, so the map fills the view below the header without scrolling;
+   the buttons are white and rounded to stand out on the map */
+.gis-dashboard-map-header {
+  position: relative;
+  z-index: 5;
+  margin: 12px 0 -80px 0 !important;
+  padding-left: 70px;
+}
+
+.gis-dashboard-map-footer {
+  position: relative;
+  z-index: 5;
+  float: right;
+  clear: both;
+  margin: -60px 0 0 0;
+  padding-right: 10px;
+}
+
+:is(.gis-dashboard-map-header, .gis-dashboard-map-footer) vaadin-button {
+  --vaadin-button-background: #FFFFFF;
+  --vaadin-button-text-color: #000000;
+  --vaadin-button-font-weight: 600;
+  --vaadin-button-border-radius: 24px;
+  border-radius: 24px;
+  background-color: #FFFFFF;
+  color: #000000;
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 13. Maps. The Leaflet zoom control of the Vaadin 8 maps (dashboards, location map, statistics map), drawn by
+ *     LeafletMap as two Flow buttons over the top left corner of the map: Leaflet's touch style that Chromium got
+ *     (VAADIN/map/leaflet.css .leaflet-touch .leaflet-bar): 30px buttons in a 2px translucent frame, 10px from the
+ *     corner, bold 22px monospace + and -.
+ * ------------------------------------------------------------------------------------------------------------- */
+.sormas-map-zoom {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  background-clip: padding-box;
+}
+
+.sormas-map-zoom vaadin-button {
+  --vaadin-button-background: #FFFFFF;
+  --vaadin-button-text-color: #000000;
+  --vaadin-button-border-radius: 0;
+  --vaadin-button-padding: 0;
+  --vaadin-button-margin: 0;
+  --vaadin-button-height: 30px;
+  --vaadin-button-min-width: 30px;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  background-color: #FFFFFF;
+  color: #000000;
+  font: bold 22px 'Lucida Console', Monaco, monospace;
+  text-indent: 1px;
+}
+
+.sormas-map-zoom vaadin-button:first-child {
+  border-bottom: 1px solid #CCCCCC;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+}
+
+.sormas-map-zoom vaadin-button:last-child {
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+}
+
+.sormas-map-zoom vaadin-button:hover {
+  background-color: #F4F4F4;
+}
+
+.sormas-map-zoom vaadin-button[disabled] {
+  background-color: #F4F4F4;
+  color: #BBBBBB;
+}
+
+/* Geographical analysis dashboard: the filter and the legend rows (section 12) lie over the map, the filter row's left
+   padding over the zoom buttons. Only the rows' own buttons take the pointer, so the zoom buttons and the map under the
+   rows stay usable, as the Leaflet controls lay above these rows in Vaadin 8 */
+:is(.gis-dashboard-map-header, .gis-dashboard-map-footer) {
+  pointer-events: none;
+}
+
+:is(.gis-dashboard-map-header, .gis-dashboard-map-footer) > * {
+  pointer-events: auto;
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 14. Residuals (sweep 2a-002)
+ * ------------------------------------------------------------------------------------------------------------- */
+
+/* Filter buttons (button.scss .v-button-filter): the status, assignee and shipment filters above the lists. Grey pills
+   in the focus colour with bold dark text; the unselected ones ("filter-light") lighter, so the selected filter shows
+   as the darker pill. The Flow buttons are borderless, i.e. Lumo tertiary, whose background, colour, weight and
+   padding are set through its custom properties (the variant sets its background with !important). Padding as the
+   Valo button ($v-unit-size / 2.4). */
+vaadin-button.filter {
+  --vaadin-button-tertiary-background: var(--sormas-focus-color);
+  --vaadin-button-tertiary-text-color: var(--sormas-font-color);
+  --vaadin-button-tertiary-font-weight: bold;
+  --vaadin-button-tertiary-padding: 0 calc(var(--lumo-size-m) / 2.4);
+  text-decoration: none;
+}
+
+vaadin-button.filter.filter-light {
+  --vaadin-button-tertiary-background: var(--sormas-focus-light-color);
+}
+
+vaadin-button.filter.filter-light:hover {
+  --vaadin-button-tertiary-background: var(--sormas-focus-color);
+}
+
+vaadin-button.filter.filter-light[disabled] {
+  --vaadin-button-tertiary-background: var(--sormas-focus-light-color);
+}
+
+vaadin-button.filter.filter-dark {
+  --vaadin-button-tertiary-background: var(--sormas-primary-color);
+  --vaadin-button-tertiary-text-color: #FFFFFF;
+}
+
+vaadin-button.filter.filter-enabled {
+  --vaadin-button-tertiary-background: #2EB82E;
+  --vaadin-button-tertiary-text-color: #FFFFFF;
+}
+
+vaadin-button.filter.filter-enabled:hover {
+  --vaadin-button-tertiary-background: #248F24;
+}
+
+vaadin-button.filter.filter-disabled {
+  --vaadin-button-tertiary-background: #C8C8C8;
+}
+
+vaadin-button.filter.filter-disabled:hover {
+  --vaadin-button-tertiary-background: #B8B8B8;
+}
+
+vaadin-button.filter.filter-small {
+  --vaadin-button-tertiary-padding: 0 7px;
+  height: 26px;
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 15. Disabled fields. Valo ($v-disabled-opacity 0.5) dimmed a disabled field to half opacity and kept its look: white
+ *     field, its border, the value in the font colour; the caption stayed dark at full opacity. Option groups stayed
+ *     at full opacity and only their options were dimmed; a check box was dimmed with its label. Lumo instead greys
+ *     the caption, fills the field grey and greys the value. Here the field keeps its enabled look and is dimmed to
+ *     0.5, the caption keeps the caption colour. Read-only fields (section 2: no frame) are not dimmed unless they are
+ *     disabled too, as in Valo.
+ * ------------------------------------------------------------------------------------------------------------- */
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker)[disabled] {
+  --vaadin-input-field-disabled-background: var(--vaadin-input-field-background);
+  --vaadin-input-field-disabled-value-color: var(--sormas-font-color);
+}
+
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker)[disabled]:not([required]) {
+  /* Lumo sets a lighter border on disabled fields; required ones keep theirs (section 2), as in Valo */
+  --vaadin-input-field-border-color: var(--sormas-focus-color);
+}
+
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker)[disabled][readonly] {
+  /* disabled and read-only: the read-only look (no frame, no fill), dimmed (Valo .v-readonly.v-disabled) */
+  --vaadin-input-field-disabled-background: transparent;
+  --vaadin-input-field-border-color: transparent;
+}
+
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-time-picker)[disabled]::part(input-field) {
+  opacity: 0.5;
+}
+
+:is(vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select, vaadin-date-picker, vaadin-time-picker)[disabled]::part(toggle-button) {
+  /* the arrow and calendar icons in their enabled colour (Lumo: nearly invisible), dimmed with the field */
+  color: var(--lumo-contrast-60pct);
+}
+
+/* Captions of disabled fields, groups and the shim's option groups (vaadin-custom-field) stay in the caption colour */
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker, vaadin-radio-group, vaadin-checkbox-group,
+    vaadin-custom-field)[disabled]::part(label) {
+  color: var(--vaadin-input-field-label-color);
+  -webkit-text-fill-color: var(--vaadin-input-field-label-color);
+}
+
+/* Check boxes and radio buttons (alone or as the options of a group): the enabled look, label in the font colour,
+   dimmed to 0.5 with their label. The group around them and its caption stay at full opacity. A read-only radio group
+   disables its unselected options: those keep Lumo's read-only look (not dimmed, as the read-only Valo option group) */
+:is(vaadin-checkbox, vaadin-radio-button)[disabled]:not([readonly]:not([disabled]) > *) {
+  opacity: 0.5;
+  color: var(--sormas-font-color);
+  --vaadin-checkbox-disabled-background: var(--vaadin-checkbox-background, var(--lumo-contrast-20pct));
+  --vaadin-checkbox-disabled-checkmark-color: var(--lumo-primary-contrast-color);
+  --vaadin-radio-button-disabled-background: var(--vaadin-radio-button-background, var(--lumo-contrast-20pct));
+  --vaadin-radio-button-disabled-dot-color: var(--lumo-primary-contrast-color);
+}
+
+vaadin-checkbox[disabled]:not([readonly]:not([disabled]) > *):is([checked], [indeterminate]) {
+  --vaadin-checkbox-disabled-background: var(--lumo-primary-color);
+}
+
+vaadin-radio-button[disabled][checked]:not([readonly]:not([disabled]) > *) {
+  --vaadin-radio-button-disabled-background: var(--lumo-primary-color);
+}
+
+:is(vaadin-checkbox, vaadin-radio-button)[disabled]:not([readonly]:not([disabled]) > *)::part(label) {
+  color: var(--sormas-font-color);
+  -webkit-text-fill-color: var(--sormas-font-color);
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 16. Required and residual. Vaadin 7 and 8 mark a field as required (the caption's "*" and Valo's .v-required
+ *     border) only while it is not read-only (client AbstractFieldConnector.isRequiredIndicatorVisible(): required
+ *     and not read-only); here the required rule of section 2 also matched read-only fields. Valo gave the date and
+ *     combo inputs inside a required custom component the required border too (customcomponent.scss): the shim's date
+ *     fields (a vaadin-custom-field around a vaadin-date-picker) and date-time fields carry the required state on the
+ *     custom field, not on the picker. vaadin-custom-field does not reflect read-only as an attribute; for the shim's
+ *     date fields and option groups (which pass their read-only state to the field inside) it is read from that field.
+ * ------------------------------------------------------------------------------------------------------------- */
+
+/* date, time and combo inputs inside a required custom field: the required border of section 2, also when disabled
+   (section 15 gives disabled fields that are not required the focus colour) */
+vaadin-custom-field[required] :is(vaadin-date-picker, vaadin-time-picker, vaadin-combo-box):not([readonly]) {
+  --vaadin-input-field-border-color: var(--sormas-primary-color);
+}
+
+/* read-only fields: no required border, the read-only look of section 2 */
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker)[required][readonly] {
+  --vaadin-input-field-border-color: transparent;
+}
+
+/* read-only fields: no "*" after the caption */
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker, vaadin-radio-group,
+    vaadin-checkbox-group)[required][readonly]::part(required-indicator),
+vaadin-custom-field[required]:has(> :is(vaadin-date-picker, vaadin-radio-group, vaadin-checkbox-group)[readonly])::part(required-indicator) {
+  display: none;
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 17. Review fixes (R3 review minors, ticket 2a-19). The grid shim gives the cell style generator's class names to the
+ *     body cells as part names (Grid.Column.setStyleGenerator), inside the grid's shadow DOM, so the class rules of
+ *     sections 5 and 6 (.inaccessible-column, .align-center) do not reach them.
+ * ------------------------------------------------------------------------------------------------------------- */
+
+/* cells of values the user may not see (pseudonymised or restricted): italic and dimmed (global.scss
+   .inaccessible-column, .v-table-cell-content-inaccessible-column) */
+vaadin-grid::part(inaccessible-column) { font-style: italic; opacity: 0.5; }
+
+/* centred cells: CssStyles.ALIGN_CENTER (global.scss .align-center) and Valo's v-align-center (orderedlayout.scss); text
+   and inline content only, a layout in a component column keeps its own alignment */
+vaadin-grid::part(align-center),
+vaadin-grid::part(v-align-center) { text-align: center; }

@@ -388,7 +388,10 @@ public class MainScreen extends HorizontalLayout {
 			subWindowGdpR.setModal(true);
 			// closable as the Vaadin 8 window: close button and Escape, not a click outside
 			subWindowGdpR.setCloseOnOutsideClick(false);
-			subWindowGdpR.getHeader().add(new Button(VaadinIcon.CLOSE.create(), e -> subWindowGdpR.close()));
+			// the close button of the other windows (VaadinUiUtil.setClosable): an unframed cross, as Valo's window close
+			Button closeGdprButton = new Button(VaadinIcon.CLOSE_SMALL.create(), e -> subWindowGdpR.close());
+			closeGdprButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+			subWindowGdpR.getHeader().add(closeGdprButton);
 
 			Span textGdpr = new Span();
 			textGdpr.setWidth("80%");

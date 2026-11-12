@@ -15,14 +15,24 @@
 
 package de.symeda.sormas.ui;
 
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.component.page.Viewport;
+import com.vaadin.flow.theme.lumo.Lumo;
 
 /**
- * Application shell: page settings that Vaadin 8 read from annotations on the UI class ({@code @Viewport} on
- * {@link SormasUI}). No theme: the Vaadin 8 theme is not used in this stage.
+ * Application shell: page settings that Vaadin 8 read from annotations on the UI class ({@code @Viewport} and
+ * {@code @Theme("sormas")} on {@link SormasUI}).
+ * <p>
+ * The look: the bootstrap grid of the Vaadin 8 theme (form layouts), Lumo, and the SORMAS global theme settings on top
+ * of it. The two SORMAS files live in {@code src/main/frontend/themes/sormas/}, next to the theme images; both Vaadin
+ * modes serve them under {@code VAADIN/themes/sormas/} (see the war plugin in {@code pom.xml}). Order matters: the
+ * grid's normalize rules come first, SORMAS last.
  */
 @Viewport("user-scalable=no,initial-scale=1.0")
+@StyleSheet("context://VAADIN/themes/sormas/bootstrap-grid.min.css")
+@StyleSheet(Lumo.STYLESHEET)
+@StyleSheet("context://VAADIN/themes/sormas/sormas.css")
 public class SormasAppShell implements AppShellConfigurator {
 
 	private static final long serialVersionUID = 1L;

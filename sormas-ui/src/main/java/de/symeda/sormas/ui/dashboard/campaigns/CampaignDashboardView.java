@@ -173,8 +173,9 @@ public class CampaignDashboardView extends AbstractDashboardView {
 			final GridTemplateAreaCreator gridTemplateAreaCreator = new GridTemplateAreaCreator(dashboardElements);
 
 			final VerticalLayout diagramsWrapper = new VerticalLayout();
-			// was a left and right margin only (MarginInfo); spacing details belong to the theme work
+			// was a left and right margin only (MarginInfo(false, true, false, true)): the layout margin at the sides
 			diagramsWrapper.setPadding(false);
+			diagramsWrapper.getStyle().set("padding-left", "var(--lumo-space-l)").set("padding-right", "var(--lumo-space-l)");
 			diagramsWrapper.setId(tabId + "_" + subTabId);
 			currentDiagramsWrapper = diagramsWrapper;
 

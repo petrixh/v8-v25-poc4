@@ -135,9 +135,12 @@ public class DatabaseExportView extends AbstractStatisticsView {
 		databaseTablesLayout.setPadding(false);
 		databaseTablesLayout.setSpacing(true);
 
+		// The columns: 100% wide (the VerticalLayout default) in a layout of undefined width, which Vaadin 8 ignored and
+		// sized each column to its check boxes. Flow shares the row out between them and wraps the captions.
 		VerticalLayout sormasDataLayout = new VerticalLayout();
 		sormasDataLayout.setPadding(false);
 		sormasDataLayout.setSpacing(false);
+		sormasDataLayout.setWidth(null);
 		Span sormasDataHeadline = new Span(I18nProperties.getCaption(Captions.exportSormasData));
 		CssStyles.style(sormasDataHeadline, CssStyles.H4);
 		sormasDataLayout.add(sormasDataHeadline);
@@ -145,6 +148,7 @@ public class DatabaseExportView extends AbstractStatisticsView {
 		VerticalLayout infrastructureDataLayout = new VerticalLayout();
 		infrastructureDataLayout.setPadding(false);
 		infrastructureDataLayout.setSpacing(false);
+		infrastructureDataLayout.setWidth(null);
 		Span infrastructureDataHeadline = new Span(I18nProperties.getCaption(Captions.exportInfrastructureData));
 		CssStyles.style(infrastructureDataHeadline, CssStyles.H4);
 		infrastructureDataLayout.add(infrastructureDataHeadline);
@@ -152,6 +156,7 @@ public class DatabaseExportView extends AbstractStatisticsView {
 		VerticalLayout configurationDataLayout = new VerticalLayout();
 		configurationDataLayout.setPadding(false);
 		configurationDataLayout.setSpacing(false);
+		configurationDataLayout.setWidth(null);
 		Span configurationDataHeadline = new Span(I18nProperties.getCaption(Captions.exportConfigurationData));
 		CssStyles.style(configurationDataHeadline, CssStyles.H4);
 		configurationDataLayout.add(configurationDataHeadline);
@@ -159,6 +164,7 @@ public class DatabaseExportView extends AbstractStatisticsView {
 		VerticalLayout externalDataLayout = new VerticalLayout();
 		externalDataLayout.setPadding(false);
 		externalDataLayout.setSpacing(false);
+		externalDataLayout.setWidth(null);
 		Span externalDataHeadline = new Span(I18nProperties.getCaption(Captions.exportExternalData));
 		CssStyles.style(externalDataHeadline, CssStyles.H4);
 		externalDataLayout.add(externalDataHeadline);

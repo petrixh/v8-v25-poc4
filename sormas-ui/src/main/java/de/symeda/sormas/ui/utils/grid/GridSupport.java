@@ -16,7 +16,9 @@ package de.symeda.sormas.ui.utils.grid;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.function.ValueProvider;
@@ -27,6 +29,9 @@ import de.symeda.sormas.ui.utils.GridExportStreamResource;
  * Code shared by {@link Grid} and {@link TreeGrid}, which extend different Flow classes.
  */
 final class GridSupport {
+
+	static final String WIDTH_LIMIT_PART_PREFIX = "sormas-col-";
+	static final String ROW_PART_PREFIX = "row-";
 
 	private GridSupport() {
 	}
@@ -64,6 +69,70 @@ final class GridSupport {
 			}
 		}
 		grid.setColumnOrder(ordered);
+		updateFlexGrow(grid);
+	}
+
+	/**
+	 * @return whether a column of the grid has a Vaadin 8 expand ratio
+	 */
+	static boolean hasExpandRatio(com.vaadin.flow.component.grid.Grid<?> grid) {
+		return grid.getColumns().stream().anyMatch(column -> column instanceof Grid.Column && ((Grid.Column<?, ?>) column).getExpandRatio() >= 0);
+	}
+
+	/**
+	 * Vaadin 8 expansion: every column without a fixed width takes an equal share of the free width, until a column has
+	 * an expand ratio; then only columns with an expand ratio grow, by their ratio.
+	 */
+	static void updateFlexGrow(com.vaadin.flow.component.grid.Grid<?> grid) {
+		if (grid == null) {
+			return;
+		}
+		boolean gridHasExpandRatio = hasExpandRatio(grid);
+		grid.getColumns().stream().filter(Grid.Column.class::isInstance).forEach(column -> ((Grid.Column<?, ?>) column).applyFlexGrow(gridHasExpandRatio));
+	}
+
+	/**
+	 * Part names of a column's minimum and maximum width ({@code sormas-col-min-<pixels>}, {@code sormas-col-max-<pixels>}),
+	 * or {@code null} if it has neither. {@code sormas.css} ("Grids") sets the CSS widths of these part names.
+	 */
+	static String widthLimitPartNames(double minimumWidth, double maximumWidth) {
+		StringBuilder names = new StringBuilder();
+		if (minimumWidth >= 0) {
+			names.append(WIDTH_LIMIT_PART_PREFIX).append("min-").append(BigDecimal.valueOf(minimumWidth).stripTrailingZeros().toPlainString());
+		}
+		if (maximumWidth >= 0) {
+			if (names.length() > 0) {
+				names.append(' ');
+			}
+			names.append(WIDTH_LIMIT_PART_PREFIX).append("max-").append(BigDecimal.valueOf(maximumWidth).stripTrailingZeros().toPlainString());
+		}
+		return names.length() > 0 ? names.toString() : null;
+	}
+
+	/**
+	 * Vaadin 8 row style names as part names: Flow puts a row's part names on each of its cells, where a row style
+	 * {@code status-pending} would also match the cell style {@code status-pending}. Each name gets the prefix
+	 * {@code row-} ({@code sormas.css} "Grids" styles the rows by these names).
+	 *
+	 * @return the prefixed names, or {@code null} for no names
+	 */
+	static String rowPartNames(String styleNames) {
+		if (styleNames == null || styleNames.isBlank()) {
+			return null;
+		}
+		return Arrays.stream(styleNames.trim().split("\\s+")).map(name -> ROW_PART_PREFIX + name).collect(Collectors.joining(" "));
+	}
+
+	/**
+	 * @return the part names of both arguments, or {@code null} if both are empty
+	 */
+	static String joinPartNames(String partNames, String limits) {
+		boolean hasPartNames = partNames != null && !partNames.isEmpty();
+		boolean hasLimits = limits != null && !limits.isEmpty();
+		if (hasPartNames && hasLimits) {
+			return partNames + " " + limits;
+		}
+		return hasPartNames ? partNames : hasLimits ? limits : null;
 	}
 
 	static String pixels(double pixels) {
@@ -72,9 +141,10 @@ final class GridSupport {
 
 	/**
 	 * Height of a grid showing a header row and {@code rows} body rows (Vaadin 8 {@code HeightMode.ROW}), from the
-	 * theme's row height.
+	 * theme's grid row height ({@code sormas.css} "Grids").
 	 */
 	static String heightByRows(double rows) {
-		return "calc(" + BigDecimal.valueOf(rows + 1).stripTrailingZeros().toPlainString() + " * (var(--lumo-size-m, 36px) + 1px) + 2px)";
+		return "calc(" + BigDecimal.valueOf(rows + 1).stripTrailingZeros().toPlainString()
+			+ " * (var(--sormas-grid-row-height, var(--lumo-size-m, 36px)) + 1px) + 2px)";
 	}
 }

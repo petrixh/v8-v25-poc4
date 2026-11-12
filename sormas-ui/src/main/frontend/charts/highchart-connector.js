@@ -22,6 +22,36 @@ function evaluateOptions(hcjs) {
   return new Function('Highcharts', `${hcjs}\n;return options;`)(Highcharts);
 }
 
+// Vaadin 8 drew the chart in the page, so the SORMAS colour classes that the options give a point as `className` (e.g. the
+// disease colours of CssStyles.getDiseaseColor, which set the CSS `fill`) coloured it. The chart is now drawn inside the
+// shadow root of <vaadin-chart>, which the page's CSS does not reach: such a point gets the fill of its classes as `color`.
+function applyClassNameColors(options) {
+  const series = Array.isArray(options.series) ? options.series : [];
+  let probe;
+  let plainFill;
+  series.forEach((serie) => {
+    (Array.isArray(serie.data) ? serie.data : []).forEach((point) => {
+      if (!point || typeof point !== 'object' || !point.className || point.color !== undefined) {
+        return;
+      }
+      if (!probe) {
+        probe = document.createElement('div');
+        probe.style.display = 'none';
+        document.body.appendChild(probe);
+        plainFill = getComputedStyle(probe).fill;
+      }
+      probe.className = point.className;
+      const fill = getComputedStyle(probe).fill;
+      if (fill && fill !== plainFill) {
+        point.color = fill;
+      }
+    });
+  });
+  if (probe) {
+    probe.remove();
+  }
+}
+
 window.Vaadin = window.Vaadin || {};
 window.Vaadin.sormasHighChart = {
   update(chart, hcjs, functionNames) {
@@ -39,6 +69,10 @@ window.Vaadin.sormasHighChart = {
     if (!options.colors) {
       options.colors = HIGHCHARTS_8_COLORS;
     }
+    applyClassNameColors(options);
+    // A chart without data says so, as in Vaadin 8 (Highcharts' default text, English in every language; Vaadin Charts'
+    // default is blank). In the options, not through <vaadin-chart>'s emptyText, which redraws every new configuration.
+    options.lang = { noData: 'No data to display', ...options.lang };
     chart.updateConfiguration(options, true);
   }
 };

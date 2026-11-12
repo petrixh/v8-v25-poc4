@@ -51,7 +51,6 @@ public class SurveillanceOverviewLayout extends CustomLayout {
 	private Boolean isShowingAllDiseases;
 
 	public SurveillanceOverviewLayout(DashboardDataProvider dashboardDataProvider) {
-
 		setTemplateContents(
 			LayoutUtil.fluidRow(LayoutUtil.fluidColumnLoc(6, 0, 12, 0, BURDEN_LOC), LayoutUtil.fluidColumnLoc(6, 0, 12, 0, DIFFERENCE_LOC))
 				+ LayoutUtil.loc(EXTEND_BUTTONS_LOC));
@@ -80,8 +79,9 @@ public class SurveillanceOverviewLayout extends CustomLayout {
 		HorizontalLayout buttonsLayout = new HorizontalLayout();
 		buttonsLayout.setHeight(null);
 		buttonsLayout.setWidth(100, Unit.PERCENTAGE);
-		// was a left and right margin only (MarginInfo); spacing details belong to the theme work
+		// was a left and right margin only (MarginInfo(false, true, false, true)): the layout margin at the sides
 		buttonsLayout.setPadding(false);
+		buttonsLayout.getStyle().set("padding-left", "var(--lumo-space-l)").set("padding-right", "var(--lumo-space-l)");
 
 		showMoreButton = ButtonHelper.createIconButton(
 			Captions.dashboardShowAllDiseases,
@@ -141,6 +141,8 @@ public class SurveillanceOverviewLayout extends CustomLayout {
 		buttonsLayout.add(hideOverview);
 		buttonsLayout.setVerticalComponentAlignment(FlexComponent.Alignment.END, hideOverview);
 		buttonsLayout.setFlexGrow(0, hideOverview);
+		// was BOTTOM_RIGHT: the check box stays at the right end also when both buttons are hidden
+		buttonsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
 		addComponent(buttonsLayout, EXTEND_BUTTONS_LOC);
 

@@ -149,7 +149,8 @@ public class MergeContactsFilterComponent extends VerticalLayout {
 		});
 		firstRowLayout.add(cbIgnoreRegion);
 		firstRowLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, cbIgnoreRegion);
-		firstRowLayout.setFlexGrow(1, cbIgnoreRegion);
+		// was Alignment.MIDDLE_RIGHT in an expanding slot: the component keeps its width and goes right
+		cbIgnoreRegion.getStyle().set("margin-left", "auto");
 
 		add(firstRowLayout);
 	}
@@ -238,7 +239,8 @@ public class MergeContactsFilterComponent extends VerticalLayout {
 			CssStyles.LABEL_BOLD);
 		secondRowLayout.add(lblNumberOfDuplicates);
 		secondRowLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, lblNumberOfDuplicates);
-		secondRowLayout.setFlexGrow(1, lblNumberOfDuplicates);
+		// was Alignment.MIDDLE_RIGHT in an expanding slot: the component keeps its width and goes right
+		lblNumberOfDuplicates.getStyle().set("margin-left", "auto");
 
 		queryDetailsBinder.bind(cbResultLimit, QueryDetails.RESULT_LIMIT);
 

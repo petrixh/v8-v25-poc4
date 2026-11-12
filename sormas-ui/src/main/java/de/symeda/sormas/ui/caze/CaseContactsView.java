@@ -32,6 +32,7 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -267,7 +268,8 @@ public class CaseContactsView extends AbstractCaseView {
 			statusFilterLayout.add(statusButton);
 			statusButtons.put(statusButton, status.toString());
 		}
-		statusFilterLayout.setFlexGrow(1, statusFilterLayout.getComponentAt(statusFilterLayout.getComponentCount() - 1));
+		// was expand ratio 1 on the last status button: its slot took the free width, the button kept its own width
+		statusFilterLayout.getComponentAt(statusFilterLayout.getComponentCount() - 1).getElement().getStyle().set("margin-right", "auto");
 
 		if (isEditAllowed) {
 			// Bulk operation dropdown
@@ -296,6 +298,8 @@ public class CaseContactsView extends AbstractCaseView {
 				statusFilterLayout.add(bulkOperationsDropdown);
 				statusFilterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.START, bulkOperationsDropdown);
 				statusFilterLayout.setFlexGrow(1, bulkOperationsDropdown);
+				// was expand ratio 1 and Alignment.TOP_RIGHT: the dropdown takes the free width, its button sits at the right end
+				bulkOperationsDropdown.addThemeVariants(MenuBarVariant.LUMO_END_ALIGNED);
 			}
 
 			if (UiUtil.permitted(UserRight.CONTACT_IMPORT)) {
@@ -311,7 +315,9 @@ public class CaseContactsView extends AbstractCaseView {
 				statusFilterLayout.add(importButton);
 				statusFilterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, importButton);
 				if (!UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS)) {
-					statusFilterLayout.setFlexGrow(1, importButton);
+					// was expand ratio 1 and Alignment.MIDDLE_RIGHT: its slot took a share of the free width, the button kept its
+					// own width at the slot's right end
+					importButton.getElement().getStyle().set("margin-left", "auto");
 				}
 			}
 
@@ -327,7 +333,9 @@ public class CaseContactsView extends AbstractCaseView {
 				statusFilterLayout.add(exportButton);
 				statusFilterLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, exportButton);
 				if (!UiUtil.permitted(UserRight.PERFORM_BULK_OPERATIONS)) {
-					statusFilterLayout.setFlexGrow(1, exportButton);
+					// was expand ratio 1 and Alignment.MIDDLE_RIGHT: its slot took a share of the free width, the button kept its
+					// own width at the slot's right end
+					exportButton.getElement().getStyle().set("margin-left", "auto");
 				}
 				DownloadHandler streamResource = GridExportStreamResource.createStreamResourceWithSelectedItems(
 					grid,

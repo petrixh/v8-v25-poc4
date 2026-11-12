@@ -62,8 +62,9 @@ public class CaseCountDifferenceComponent extends VerticalLayout {
 		add(chart);
 		setFlexGrow(1, chart);
 
-		// was a margin on all sides but the bottom (MarginInfo); spacing details belong to the theme work
+		// was a margin on all sides but the bottom (MarginInfo)
 		setPadding(true);
+		getStyle().set("padding-bottom", "0");
 		setSpacing(false);
 		setSizeFull();
 	}

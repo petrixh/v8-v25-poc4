@@ -67,6 +67,11 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 	String DATA_NULL_SETTING_ALLOWED = "sormas.nullSettingAllowed";
 	String DATA_MODIFIED = "sormas.modified";
 
+	/**
+	 * The label of a field whose Vaadin 8 caption was empty (see {@link #setCaption(String)}).
+	 */
+	String EMPTY_CAPTION_LABEL = "\u200b";
+
 	// Value methods, implemented by the Flow HasValue superclass
 
 	T getValue();
@@ -124,17 +129,21 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 	// V7 conveniences
 
 	default String getCaption() {
-		if (this instanceof HasLabel) {
-			return ((HasLabel) this).getLabel();
-		}
-		return getElement().getProperty("label");
+		String label = this instanceof HasLabel ? ((HasLabel) this).getLabel() : getElement().getProperty("label");
+		return EMPTY_CAPTION_LABEL.equals(label) ? "" : label;
 	}
 
+	/**
+	 * Vaadin 8 rendered an empty caption ({@code ""}, unlike {@code null}) as an empty caption row, so the field lines up
+	 * with captioned fields next to it (e.g. the month and day of a birth date under the year's caption). A Flow field
+	 * hides an empty (or blank) label: a zero-width space keeps the row.
+	 */
 	default void setCaption(String caption) {
+		String label = "".equals(caption) ? EMPTY_CAPTION_LABEL : caption;
 		if (this instanceof HasLabel) {
-			((HasLabel) this).setLabel(caption);
+			((HasLabel) this).setLabel(label);
 		} else {
-			getElement().setProperty("label", caption);
+			getElement().setProperty("label", label);
 		}
 	}
 

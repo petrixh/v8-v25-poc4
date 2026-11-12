@@ -153,7 +153,8 @@ public class TaskGridComponent extends VerticalLayout {
 			if (UiUtil.permitted(UserRight.TASK_VIEW)) {
 				relevanceStatusFilter = ComboBoxHelper.createComboBoxV7();
 				relevanceStatusFilter.setId("relevanceStatusFilter");
-				relevanceStatusFilter.setWidth(140, Unit.PERCENTAGE);
+				// was 140%: Vaadin 8 ignored a relative width in this undefined-width layout and showed the default width
+				relevanceStatusFilter.setWidth(160, Unit.PIXELS);
 				relevanceStatusFilter.setNullSelectionAllowed(false);
 				relevanceStatusFilter.addItems(EntityRelevanceStatus.getAllExceptDeleted());
 				relevanceStatusFilter.setItemCaption(EntityRelevanceStatus.ACTIVE, I18nProperties.getCaption(Captions.taskActiveTasks));

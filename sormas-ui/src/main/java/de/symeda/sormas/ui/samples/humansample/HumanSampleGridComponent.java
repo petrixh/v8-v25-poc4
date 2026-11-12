@@ -214,7 +214,8 @@ public class HumanSampleGridComponent extends SampleGridComponent<SampleIndexDto
 			}
 
 			sampleTypeFilter = ComboBoxHelper.createComboBoxV7();
-			sampleTypeFilter.setWidth(140, Unit.PERCENTAGE);
+			// was 140%: Vaadin 8 ignored a relative width in this undefined-width layout and showed the default width
+			sampleTypeFilter.setWidth(160, Unit.PIXELS);
 			sampleTypeFilter.setId("sampleTypeFilter");
 			sampleTypeFilter.setNullSelectionAllowed(false);
 			Object[] sampleAssociationTypes = SampleAssociationType.values();

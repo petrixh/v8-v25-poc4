@@ -761,6 +761,12 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> impl
 		private final Map<Object, ColumnGenerator> columnGenerators = new LinkedHashMap<>();
 		private final List<Object> visibleColumns = new ArrayList<>();
 		private final Map<Object, String> columnHeaders = new HashMap<>();
+		/**
+		 * Vaadin 7 table column widths are content widths; a grid column width includes the cell's horizontal padding
+		 * ({@code sormas.css} "Grids": 6px on each side).
+		 */
+		private static final int CELL_PADDING = 12;
+
 		private final Map<Object, Integer> columnWidths = new HashMap<>();
 		private final Set<Object> contentWidthColumns = new HashSet<>();
 		private final Map<Object, Float> columnExpandRatios = new HashMap<>();
@@ -983,7 +989,7 @@ public abstract class AbstractTableField<E> extends CustomField<Collection> impl
 					column.setAutoWidth(true);
 					column.setFlexGrow(0);
 				} else if (columnWidths.containsKey(id)) {
-					column.setWidth(columnWidths.get(id));
+					column.setWidth(columnWidths.get(id) + CELL_PADDING);
 				} else {
 					column.setAutoWidth(true);
 				}

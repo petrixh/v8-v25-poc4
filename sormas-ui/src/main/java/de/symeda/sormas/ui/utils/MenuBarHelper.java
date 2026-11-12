@@ -10,6 +10,7 @@ import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.menubar.MenuBarVariant;
 
 import de.symeda.sormas.api.i18n.I18nProperties;
 
@@ -22,6 +23,8 @@ public class MenuBarHelper {
 	public static MenuBar createDropDown(String captionKey, List<MenuBarItem> items) {
 		MenuBar menuBar = new MenuBar();
 		menuBar.setId(captionKey);
+		// Vaadin 8 showed an arrow after the caption of a menu item that opens a sub menu
+		menuBar.addThemeVariants(MenuBarVariant.LUMO_DROPDOWN_INDICATORS);
 
 		MenuItem mainItem = menuBar.addItem(I18nProperties.getCaption(captionKey));
 

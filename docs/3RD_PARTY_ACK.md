@@ -3,6 +3,10 @@
 Nearform **temporal tables** postgres function is licensed under MIT:
 sormas-backend/src/main/resources/sql/temporal_tables/LICENSE
 
+**Open Sans** web fonts in `sormas-ui/src/main/frontend/themes/sormas/fonts/` (by Steve Matteson, taken from the
+Vaadin 8 Valo theme, `com.vaadin:vaadin-themes` 8.14.3) are licensed under the Apache License 2.0:
+https://www.apache.org/licenses/LICENSE-2.0
+
 **Country flags** in `sormas-ui/src/main/webapp/VAADIN/themes/sormas/img/flag-icons/` are licensed under MIT:
 ```text
 Copyright (c) 2017 Go Squared Ltd. http://www.gosquared.com/

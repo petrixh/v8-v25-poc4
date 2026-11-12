@@ -60,4 +60,10 @@ public class EventParticipantPersonView extends AbstractEventParticipantView imp
 	protected boolean isEditAllowed() {
 		return FacadeProvider.getPersonFacade().isEditAllowed(person.getUuid());
 	}
+
+	@Override
+	public boolean isScrollPositionKeptOnRefresh() {
+		// as in Vaadin 8: after Save the person form is shown again from the top
+		return false;
+	}
 }

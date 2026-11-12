@@ -135,8 +135,9 @@ public class AefiDashboardView extends AbstractDashboardView {
 		aefiCountsLayout.addComponent(allAefiInvestigationHeading, ALL_AEFI_INVESTIGATION_HEADING_LOC);
 
 		VerticalLayout investigationStatusLayout = new VerticalLayout();
-		// was MarginInfo(false, true, false, true), a left and right margin only: partial V8 margins become no padding (look only)
+		// was a left and right margin only (MarginInfo(false, true, false, true)): the layout margin at the sides
 		investigationStatusLayout.setPadding(false);
+		investigationStatusLayout.getStyle().set("padding-left", "var(--lumo-space-l)").set("padding-right", "var(--lumo-space-l)");
 		investigationStatusLayout.setSpacing(false);
 
 		investigationStatusDone = new DashboardStatisticsPercentageElement(
@@ -151,8 +152,9 @@ public class AefiDashboardView extends AbstractDashboardView {
 		aefiCountsLayout.addComponent(investigationStatusLayout, INVESTIGATION_STATUS_LOC);
 
 		VerticalLayout aefiClassificationLayout = new VerticalLayout();
-		// was MarginInfo(false, true, false, true), a left and right margin only: partial V8 margins become no padding (look only)
+		// was a left and right margin only (MarginInfo(false, true, false, true)): the layout margin at the sides
 		aefiClassificationLayout.setPadding(false);
+		aefiClassificationLayout.getStyle().set("padding-left", "var(--lumo-space-l)").set("padding-right", "var(--lumo-space-l)");
 		aefiClassificationLayout.setSpacing(false);
 
 		aefiClassificationVaccineRelated = new DashboardStatisticsPercentageElement(

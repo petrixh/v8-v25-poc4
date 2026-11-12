@@ -20,6 +20,7 @@ package de.symeda.sormas.ui.utils;
 import java.util.Optional;
 
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import de.symeda.sormas.ui.SubMenu;
 import de.symeda.sormas.ui.navigation.ViewChangeListener.ViewChangeEvent;
@@ -70,7 +71,12 @@ public abstract class AbstractSubNavigationView<SC extends HasElement> extends A
 		if (subComponent != null) {
 			// Make sure that the sub component is always the first component below the navigation
 			getElement().insertChild(2, subComponent.getElement());
-			setFlexGrow(1, subComponent);
+			// was setExpandRatio(subComponent, 1): the slot took the free height; a sub component of undefined height (most
+			// forms and their CommitDiscardWrapperComponent) kept its own height at the top of the slot, so the Save / Discard
+			// footer followed the form. Only a sub component with a height grows.
+			if (!(subComponent instanceof HasSize) || ((HasSize) subComponent).getHeight() != null) {
+				setFlexGrow(1, subComponent);
+			}
 		}
 	}
 

@@ -375,8 +375,16 @@ public final class Ui {
 		settle(after);
 	}
 
+	/** The texts of the visible suggestions; waits up to 3 s for the list to show (an empty list is read after that). */
 	public String suggestionsText() {
-		return String.join(" ", suggestions().allInnerTexts());
+		for (int i = 0; i < 12; i++) {
+			List<String> t = suggestions().allInnerTexts();
+			if (!t.isEmpty()) {
+				return String.join(" ", t);
+			}
+			page.waitForTimeout(250);
+		}
+		return "";
 	}
 
 	/** Type, then pick: the common way to set a combo box. */
@@ -559,15 +567,26 @@ public final class Ui {
 		windows().getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName(text).setExact(true)).first().click();
 	}
 
+	/** Closes the last window with its Close, Discard or Cancel button, else with Escape; a window that is replaced while it is clicked is looked up again. */
 	public void closeWindow() {
-		Locator w = windows().last();
-		Locator x = w.getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName(Pattern.compile("^(close|discard|cancel)$", Pattern.CASE_INSENSITIVE)))
-			.first();
-		if (x.count() > 0) {
-			x.click();
-			return;
+		for (int attempt = 0; attempt < 4; attempt++) {
+			if (windowCount() == 0) {
+				return;
+			}
+			try {
+				Locator x = windows().last()
+					.getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName(Pattern.compile("^(close|discard|cancel)$", Pattern.CASE_INSENSITIVE)))
+					.first();
+				if (x.count() > 0) {
+					x.click(new Locator.ClickOptions().setTimeout(5000));
+				} else {
+					page.keyboard().press("Escape");
+				}
+				return;
+			} catch (RuntimeException e) {
+				page.waitForTimeout(300);
+			}
 		}
-		page.keyboard().press("Escape");
 	}
 
 	/** A field of the open windows by label: the first or the last one with that label. */

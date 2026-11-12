@@ -41,6 +41,11 @@ public final class BrowserSession implements AutoCloseable {
 		BrowserContext ctx = browser.newContext(
 			new Browser.NewContextOptions().setViewportSize(WIDTH, HEIGHT).setUserAgent(userAgent).setAcceptDownloads(true));
 		ctx.setDefaultTimeout(30_000);
+		// CI builds the app with Vaadin's commercial-with-banner option (CI.md, decision E002 C): a fixed banner at the
+		// bottom of the window covers buttons there (the dashboard map's Layers button). It is not part of the app and
+		// licensed builds have none; its shadow root is closed, so it is hidden here rather than closed.
+		ctx.addInitScript("document.addEventListener('DOMContentLoaded', () => { const s = document.createElement('style');"
+			+ " s.textContent = 'vaadin-commercial-banner { display: none !important; }'; document.head.appendChild(s); });");
 		Page page = ctx.newPage();
 		page.onConsoleMessage(m -> {
 			// ERR_NETWORK_CHANGED: Chromium aborts a request when the host's network interfaces change, which they do

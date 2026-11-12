@@ -213,7 +213,7 @@ public final class Ui {
 	public void clickEntry(Object text, int nth) {
 		for (Locator l : entries(text)) {
 			if (l.count() > nth) {
-				centre(l.nth(nth)).click();
+				l.nth(nth).click();
 				return;
 			}
 		}
@@ -244,15 +244,6 @@ public final class Ui {
 	/** Clicks a link by its exact text: an anchor, or the app's link-styled label (.v-link) where Flow gives no link role. */
 	public void clickLink(String text) {
 		page.locator("a, .v-link").filter(new Locator.FilterOptions().setHasText(exact(text))).first().click();
-	}
-
-	/**
-	 * Scrolls the element to the middle of its scrolling container. An element at the bottom edge can be covered by an
-	 * overlay at the bottom of the window: the Vaadin commercial banner of CI builds (-Dvaadin.commercialWithBanner).
-	 */
-	public Locator centre(Locator l) {
-		l.evaluate("e => e.scrollIntoView({ block: 'center', inline: 'nearest' })");
-		return l;
 	}
 
 	// ---- Fields ----
@@ -434,7 +425,7 @@ public final class Ui {
 	}
 
 	public void clickCheckbox(String text) {
-		centre(page.locator("vaadin-checkbox").filter(new Locator.FilterOptions().setHasText(exact(text))).locator("label").first()).click();
+		page.locator("vaadin-checkbox").filter(new Locator.FilterOptions().setHasText(exact(text))).locator("label").first().click();
 	}
 
 	/** The "Yes" option of the yes/no field with that caption. */

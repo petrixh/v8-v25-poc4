@@ -1588,6 +1588,8 @@ public final class Ui {
 			closeWindow();
 			noModal();
 		}
+		// the notice is modal: a banner of a CI build could not be closed while it was open
+		closeCommercialBanner();
 	}
 
 	// ---- 3-02 batch 11: option groups by caption, period pop-up of the C2 dashboards, buttons ----

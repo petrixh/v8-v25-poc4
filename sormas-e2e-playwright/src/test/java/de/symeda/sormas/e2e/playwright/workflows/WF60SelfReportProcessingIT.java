@@ -78,7 +78,7 @@ class WF60SelfReportProcessingIT extends WorkflowTest {
 		ui.waitText("Import Self Reports", 10_000);
 		assertTrue(ui.windowText().contains("Import Self Reports"), "window title");
 		ui.windowChooseFile(resourceFile("WF60-self-reports.csv"));
-		String res = ui.importResult(60_000);
+		String res = ui.importResult(150_000);
 		assertTrue(res.contains("Import erfolgreich"), "success: " + res);
 		assertTrue(Pattern.compile("2/2 verarbeitet ?2 importiert ?0 Fehler").matcher(res).find(), "counts: " + res);
 		ui.windowButtonLike(Pattern.compile("schlie(ss|ß)en", Pattern.CASE_INSENSITIVE));

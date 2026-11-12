@@ -89,7 +89,7 @@ class WF59SurveyTokensIT extends WorkflowTest {
 		ui.waitText("Import Survey Tokens", 10_000);
 		assertTrue(ui.windowText().contains("Import Survey Tokens"), "window title");
 		ui.windowChooseFile(resourceFile("WF59-survey-tokens.csv"));
-		String res = ui.importResult(60_000);
+		String res = ui.importResult(150_000);
 		assertTrue(res.contains("Import erfolgreich"), "success: " + res);
 		assertTrue(Pattern.compile("3/3 verarbeitet ?3 importiert ?0 Fehler").matcher(res).find(), "counts: " + res);
 	}

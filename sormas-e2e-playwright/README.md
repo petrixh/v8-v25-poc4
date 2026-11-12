@@ -74,9 +74,9 @@ System properties (`-D...`):
   a class run in order on one thread.
 - **Browser** (`support/BrowserSession`): Chromium, window 2300 x 1300 (the case grid is wide), a real Chrome user agent
   (`HeadlessChrome` replaced). Each `newUi()` is its own browser context, so a workflow can act as two users.
-  On CI builds (commercial-with-banner option, see [`CI.md`](../CI.md)) Vaadin adds a fixed banner at the bottom of the
-  window that covers buttons there; it is not part of the app, so each browser context hides it
-  (`vaadin-commercial-banner`). Licensed builds have no banner.
+  On CI builds (commercial-with-banner option, see [`CI.md`](../CI.md)) Vaadin adds a fixed banner at the bottom of
+  each page that covers buttons there; `Ui.login` closes it with its own Close button (keyboard: Shift+Tab, Enter; it
+  is in closed shadow roots). Licensed builds have no banner.
 - **Test users:** the default users of the test environment. Their passwords are read at run time from
   `sormas-api/.../DefaultEntityHelper.java` (`support/Credentials`) and never written into a test, a log or a report.
   `CfgUser` (C2) logs in with `NatUser`'s password.

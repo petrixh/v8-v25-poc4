@@ -119,6 +119,25 @@ public final class Ui {
 		submitLogin(user);
 		menu().waitFor(new Locator.WaitForOptions().setState(WaitForSelectorState.VISIBLE).setTimeout(60_000));
 		settle(1500);
+		closeCommercialBanner();
+	}
+
+	/**
+	 * CI builds the app with Vaadin's commercial-with-banner option (CI.md, decision E002 C). Flow then adds a fixed
+	 * banner at the bottom of every page it loads, which covers buttons there (the dashboard map's Layers button). It
+	 * sits in closed shadow roots, so no locator reaches it: it is closed with its own Close button the way a keyboard
+	 * user would, as the last focusable element of the page (Shift+Tab from the page start, Enter). Only on pages that
+	 * carry the banner's script; licensed builds have none, and nothing else is pressed.
+	 */
+	public void closeCommercialBanner() {
+		boolean banner = (Boolean) page.evaluate("() => [...document.scripts].some(s => s.textContent.includes('vaadin-commercial-banner'))");
+		if (!banner) {
+			return;
+		}
+		page.evaluate("() => { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }");
+		page.keyboard().press("Shift+Tab");
+		page.keyboard().press("Enter");
+		settle(500);
 	}
 
 	public boolean loginVisible() {

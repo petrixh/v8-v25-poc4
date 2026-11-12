@@ -196,3 +196,145 @@ jobs:
           include-hidden-files: true
           retention-days: 3
           if-no-files-found: ignore
+
+  # End-to-end workflow tests (sormas-e2e-playwright/README.md): the critical workflows of migration/workflows as
+  # Playwright for Java tests, against app copies started with env/ from this job's own build. Runs next to the build
+  # job, not after it. A failed workflow test fails this job.
+  e2e:
+    name: End-to-end workflow tests (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Skip if this commit already has a green run
+        id: dedupe
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          wf="${GITHUB_WORKFLOW_REF%@*}"; wf="${wf##*/}"
+          prev=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$wf/runs?head_sha=$GITHUB_SHA&status=success&per_page=100" \
+            --jq "[.workflow_runs[] | select(.id != $GITHUB_RUN_ID)][0].html_url // empty") \
+            || { echo "::warning::Could not query earlier runs; running the full job"; prev=""; }
+          if [ -z "$prev" ] && [ "$GITHUB_RUN_ATTEMPT" -gt 1 ]; then
+            for ((a = 1; a < GITHUB_RUN_ATTEMPT; a++)); do
+              c=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/attempts/$a" --jq '.conclusion // empty') || c=""
+              if [ "$c" = success ]; then prev="attempt $a of this run"; break; fi
+            done
+          fi
+          if [ -n "$prev" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Commit $GITHUB_SHA already has a green run: $prev. Skipping." | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "No earlier green run of $GITHUB_SHA; running the full job."
+          fi
+
+      - name: Checkout
+        if: steps.dedupe.outputs.skip != 'true'
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 21 (Temurin)
+        if: steps.dedupe.outputs.skip != 'true'
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Cache Maven dependencies
+        if: steps.dedupe.outputs.skip != 'true'
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.m2/repository
+            !~/.m2/repository/de/symeda
+          key: ${{ runner.os }}-jdk21-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-jdk21-m2-
+
+      # The app only, tests neither compiled nor run (the build job runs them); commercial banner as in the build job
+      # (decision E002 C). The artefacts stay in this job and are never uploaded.
+      - name: Build the app (no tests, commercial banner)
+        if: steps.dedupe.outputs.skip != 'true'
+        working-directory: sormas-base
+        run: mvn -B -ntp clean install -Dmaven.test.skip=true -Dvaadin.commercialWithBanner
+
+      # Same as the build job's smoke step: keep the two in step with env/build.sh (collect and image).
+      - name: 'env/ artefacts and Payara image from this build'
+        if: steps.dedupe.outputs.skip != 'true'
+        run: |
+          source env/lib.sh
+          D=$APP_ENV_DEPLOY_DIR
+          mkdir -p "$D/apps" "$D/setup" "$BUILD_DIR/dl" "$BUILD_DIR/ctx"
+          cp sormas-ear/target/sormas-ear.ear sormas-ui/target/sormas-ui.war sormas-rest/target/sormas-rest.war "$D/apps/"
+          cp sormas-base/setup/{sormas.properties,logback.xml,loginsidebar.html,loginsidebar-header.html,logindetails.html,loginmain.html} "$D/setup/"
+          cat sormas-base/setup/sormas.properties env/sormas.properties.env > "$D/sormas.properties"
+          mvn -B -ntp -q -f sormas-serverlibs/pom.xml -DincludeScope=compile -DoutputDirectory="$D/serverlibs" dependency:copy-dependencies
+          git rev-parse HEAD > "$D/commit"
+          ZIP=$BUILD_DIR/dl/payara-$PAYARA_VERSION.zip
+          curl -sSfL -o "$ZIP" "$PAYARA_ZIP_URL"
+          [ "$(sha1sum < "$ZIP" | cut -c1-40)" = "$(curl -sSfL "$PAYARA_ZIP_URL.sha1" | cut -c1-40)" ] || { echo "::error::Payara zip sha1 mismatch"; exit 1; }
+          cp env/payara/{Dockerfile,payara-setup.sh,entrypoint.sh} "$BUILD_DIR/ctx/"
+          mv "$ZIP" "$BUILD_DIR/ctx/payara.zip"
+          docker build -q -t "$APP_ENV_IMAGE" "$BUILD_DIR/ctx"
+          ls -l "$D/apps"; echo "server libs: $(find "$D/serverlibs" -name "*.jar" | wc -l)"
+
+      - name: Node 22
+        if: steps.dedupe.outputs.skip != 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      # Playwright for Java 1.63.0 uses the same Chromium build as Playwright for Node 1.63.0; installed with its system
+      # libraries as for the smoke. The tests never download a browser themselves.
+      - name: Chromium for Playwright 1.63
+        if: steps.dedupe.outputs.skip != 'true'
+        run: |
+          npm install -g --no-fund --no-audit playwright@1.63.0
+          playwright install --with-deps chromium
+
+      # Two app copies (ports 18720-18721), each test class on a freshly reset copy. The copies are kept for the log
+      # step below, which removes them.
+      - name: Run the workflow tests
+        id: e2e_run
+        if: steps.dedupe.outputs.skip != 'true'
+        run: mvn -B -ntp -f sormas-e2e-playwright/pom.xml verify -De2e.ports=18720-18721 -De2e.keepCopies=true
+
+      # Test counts per workflow in the job summary
+      - name: Workflow test report
+        if: ${{ !cancelled() && steps.dedupe.outputs.skip != 'true' && steps.e2e_run.outcome != 'skipped' }}
+        run: |
+          python3 - <<'EOF'
+          import glob, os, xml.etree.ElementTree as ET
+          lines = ['### Workflow tests', '', '| Workflow | Steps | Failures | Errors | Skipped | Time (s) |', '|---|---|---|---|---|---|']
+          for f in sorted(glob.glob('sormas-e2e-playwright/target/failsafe-reports/TEST-*.xml')):
+              r = ET.parse(f).getroot()
+              v = [int(float(r.get(k, 0))) for k in ('tests', 'failures', 'errors', 'skipped')]
+              lines.append('| %s | %d | %d | %d | %d | %.0f |' % (r.get('name', '').split('.')[-1], *v, float(r.get('time', 0))))
+          text = '\n'.join(lines) + '\n'
+          print(text)
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as s:
+              s.write(text)
+          EOF
+
+      # Always once the tests ran: each copy's server log, then env/down.sh for each copy
+      - name: App logs, stop the copies
+        if: ${{ always() && steps.e2e_run.outcome != 'skipped' && steps.dedupe.outputs.skip != 'true' }}
+        run: |
+          mkdir -p sormas-e2e-playwright/target/e2e/copies
+          for port in 18720 18721; do
+            p=sormas-e2e-$port
+            docker logs "$p-app" > "sormas-e2e-playwright/target/e2e/copies/$p-app.log" 2>&1 || true
+            APP_ENV_PORT=$port APP_ENV_PROJECT=$p env/down.sh || true
+          done
+
+      # Diagnostics only on failure: test reports, failure screenshots (synthetic data; password fields are masked),
+      # downloads of the tests and the copies' logs. Never the built artefacts.
+      - name: Upload diagnostics
+        if: ${{ failure() && steps.dedupe.outputs.skip != 'true' }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            sormas-e2e-playwright/target/failsafe-reports/
+            sormas-e2e-playwright/target/e2e/
+          retention-days: 3
+          if-no-files-found: ignore

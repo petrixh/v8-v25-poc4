@@ -7,7 +7,7 @@
   - [Content](#content)
   - [Related](#related)
   - [Prerequisites](#prerequisites)
-    - [Java 11](#java-11)
+    - [Java 21](#java-21)
       - [Linux](#linux)
       - [Windows](#windows)
     - [Postgres Database](#postgres-database)
@@ -41,9 +41,9 @@
 
 ## Prerequisites
 
-### Java 11
+### Java 21
 
-Download and install the Java 11 **JDK** (not JRE) for your operating system. We suggest using the [Zulu OpenJDK](https://www.azul.com/downloads/zulu/).
+Download and install the Java 21 **JDK** (not JRE) for your operating system. SORMAS runs on Payara Server 7, which needs Java 21. We suggest using the [Zulu OpenJDK](https://www.azul.com/downloads/zulu/); the server setup was tested with Eclipse Temurin 21.
 
 #### [Linux](https://docs.azul.com/zulu/zuludocs/#ZuluUserGuide/PrepareZuluPlatform/AttachAPTRepositoryUbuntuOrDebianSys.htm)
 
@@ -51,12 +51,12 @@ Download and install the Java 11 **JDK** (not JRE) for your operating system. We
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0xB1998361219BD9C9
 sudo apt-add-repository 'deb https://repos.azul.com/zulu/deb/ stable main'
 sudo apt-get update
-sudo apt-get install zulu11
+sudo apt-get install zulu21-jdk
 ```
 
 #### Windows
 
-For testing and development environments we suggest to download and run the installer of the Java 11 **JDK** for 32 or 64 bit client systems (depending on your system).
+For testing and development environments we suggest to download and run the installer of the Java 21 **JDK** for 32 or 64 bit client systems (depending on your system).
 You can check your Java version from the shell/command-line using: ``java -version``.
 
 ### Postgres Database
@@ -110,11 +110,18 @@ You can configure the audit logger of SORMAS by providing a Logback [configurati
 ### Sormas installation
 
 * Optional: Open ``server-setup.sh`` in a text editor to customize the install paths, database access and ports for the server. The default ports are 6080 (HTTP), 6081 (HTTPS) and 6048 (admin). **Important:** Do not change the name of the database user. The predefined name is used in the statements executed in the database.
-* Set up the database and a Payara domain for SORMAS by executing the setup script: ``sudo -s ./server-setup.sh`` Press enter whenever asked for it
+* Set up the database and a Payara domain for SORMAS by executing the setup script: ``sudo -s ./server-setup.sh`` Press enter whenever asked for it. The script downloads Payara Server 7.2026.10 (Community, from Maven Central) into ``/opt/payara7`` and checks for a Java 21 JDK.
 * **IMPORTANT**: Make sure the script executed successfully. If anything goes wrong you need to fix the problem (or ask for help), then delete the created domain directory and re-execute the script.
 * **IMPORTANT**: Adjust the SORMAS configuration for your country in /opt/domains/sormas/sormas.properties
 * Adjust the logging configuration in ``/opt/domains/sormas/config/logback.xml`` based on your needs (e.g. configure and activate email appender)
 * Linux: [Update the SORMAS domain](SERVER_UPDATE.md)
+
+The setup script configures these Payara 7 domain settings. Set them yourself if you set up a domain without the script (e.g. a container image):
+
+* JVM: ``-Xmx4096m``, system property ``fish.payara.classloading.delegate=false``, the logback options (``-Dlogback.configurationFile=${com.sun.aas.instanceRoot}/config/logback.xml``, ``-DlogbackDisableServletContainerInitializer=true``)
+* Pools: EJB ``max-pool-size`` 128 (Payara 7 accepts the ``set`` only after a ``get`` of the value; if it still fails, the pool stays at Payara's default of 32 and the script prints a warning), HTTP thread pool max 50, JDBC pool max 128
+* Transport: ``configs.config.server-config.network-config.transports.transport.tcp.socket-write-buffer-size=1048576``. **Required on Payara 7**: without it, Payara closes a connection when more than 16 times the socket write buffer would wait to be sent on it; left unset, that buffer is the operating system's (the limit was about 680 KB on one test host), and large SORMAS screens stay blank
+* Resources: ``jdbc/sormasDataPool``, ``mail/MailSession``, ``sormas/Properties``; the server libraries in the domain's ``lib`` directory (``server-update.sh`` copies them)
 
 ## Keycloak Server
 
@@ -423,9 +430,9 @@ Check that the users table does have a corresponding entry. If not, the database
 Old servers were set up with a memory size of less than 2048MB. You can change this using the following commands:
 
 ```bash
-/opt/payara-172/glassfish/bin/asadmin --port 6048 delete-jvm-options -Xmx512m
-/opt/payara-172/glassfish/bin/asadmin --port 6048 delete-jvm-options -Xmx1024m
-/opt/payara-172/glassfish/bin/asadmin --port 6048 create-jvm-options -Xmx2048m
+/opt/payara7/bin/asadmin --port 6048 delete-jvm-options -Xmx512m
+/opt/payara7/bin/asadmin --port 6048 delete-jvm-options -Xmx1024m
+/opt/payara7/bin/asadmin --port 6048 create-jvm-options -Xmx2048m
 ```
 
 Alternative: You can edit the settings directly in the domain.xml in the config directory of the SORMAS domain. Just search for ``Xmx`` - there should be two entries that need to be changed.

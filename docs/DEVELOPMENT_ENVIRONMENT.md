@@ -12,12 +12,12 @@ This step-by-step guide explains how to set up your development environment, usi
 - Open Git Bash and execute the following command to ensure that rebase is used when pulling the development branch rather than merge: `git config --global branch.development.rebase true`
 
 ## Step 2: Install Java
-Download and install the **Java 11 JDK** (not JRE) for your operating system, which is also needed for the [Server Setup](SERVER_SETUP.md).
-We suggest using [Zulu OpenJDK](https://www.azul.com/downloads/?version=java-11-lts&package=jdk). If you're running Linux, please refer to the [official documentation](https://docs.azul.com/zulu/zuludocs/ZuluUserGuide/PrepareZuluPlatform/AttachAPTRepositoryUbuntuOrDebianSys.htm) on how to install Zulu OpenJDK on your system.
+Download and install the **Java 21 JDK** (not JRE) for your operating system, which is also needed for the [Server Setup](SERVER_SETUP.md).
+We suggest using [Zulu OpenJDK](https://www.azul.com/downloads/?version=java-21-lts&package=jdk). If you're running Linux, please refer to the [official documentation](https://docs.azul.com/zulu/zuludocs/ZuluUserGuide/PrepareZuluPlatform/AttachAPTRepositoryUbuntuOrDebianSys.htm) on how to install Zulu OpenJDK on your system.
 
 Note: To work with the Android app JDK 17 is needed for the gradle build. The needed JDK is part of Android Studio, thus there is no need to manually install it.
 
-The SORMAS CI is using JDK 17 to build all modules. The only known difference though are slight differences in the Java time API that affect unit tests, so again there is no need to setup two JDKs on your local system.
+The SORMAS CI is using JDK 21 to build all modules, the same JDK as the server.
 
 ## Step 3: Install Maven
 The scripts in `sormas-base/dev` expect `mvn` as command-line tool.
@@ -44,7 +44,7 @@ Please follow the [Server Installation Instructions](../docs/SERVER_SETUP.md#sor
   - Click on `Configure` next to `Application server` and create a new server configuration by selecting your Payara installation directory
   - Check the `After launch` checkbox and specify the browser that you want SORMAS to open in once the server has been deployed
   - Enter `http://localhost:6080/sormas-ui` into the `URL` field
-  - Make sure that the correct JRE is specified (your Java 11 JDK)
+  - Make sure that the correct JRE is specified (your Java 21 JDK)
   - Enter the path to the SORMAS domain and the credentials that you've specified when setting up the server
   - Open the `Deployment` tab and add the artifacts `sormas-ear`, `sormas-rest` and `sormas-ui` (make sure to respect this order as there are dependencies between artifacts at startup)
   - Open the `Logs` tab and add a new log file pointing to the `logs/server.log` file in your SORMAS domain
@@ -113,7 +113,7 @@ Optional, but strongly recommended:
 
 ## Issues which can appear during installation process of the project
 
-1. If debug mode does not work: To replace opt\payara5\glassfish\modules\launcher.jar with sormas-base/setup/launcher.jar
+1. Payara 5 only: if debug mode does not work, replace opt\payara5\glassfish\modules\launcher.jar with sormas-base/setup/launcher.jar. That file is Payara 5's launcher; do not copy it into Payara 7
 
 2. For Windows: Please check your java_version. In case if you have the multiple java_versions installed on the system, it will always show to you the first version installed.
    I had the java 8 instead of 11.

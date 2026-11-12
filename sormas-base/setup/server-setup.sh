@@ -48,10 +48,10 @@ else
 fi
 
 # The Java JDK for the payara server (note that spaces in the path are not supported by payara at the moment)
-#AS_JAVA_NATIVE='C:\zulu-11'
-#AS_JAVA_NATIVE='/opt/zulu-11'
+#AS_JAVA_NATIVE='C:\zulu-21'
+#AS_JAVA_NATIVE='/opt/zulu-21'
 
-PAYARA_VERSION=5.2022.5
+PAYARA_VERSION=7.2026.10
 
 if [[ $(expr substr "$(uname -a)" 1 5) = "Linux" ]]; then
 	LINUX=true
@@ -88,7 +88,7 @@ DOCUMENTS_DIR=${ROOT_PREFIX}/opt/sormas/documents
 GENERATED_DIR=${ROOT_PREFIX}/opt/sormas/generated
 CUSTOM_DIR=${ROOT_PREFIX}/opt/sormas/custom
 ABOUT_FILES_DIR=${CUSTOM_DIR}/aboutfiles
-PAYARA_HOME=${ROOT_PREFIX}/opt/payara5
+PAYARA_HOME=${ROOT_PREFIX}/opt/payara7
 DOMAINS_HOME=${ROOT_PREFIX}/opt/domains
 SORMAS2SORMAS_DIR=${ROOT_PREFIX}/opt/sormas/sormas2sormas
 
@@ -182,7 +182,7 @@ else
 	if [[ -f "${PAYARA_ZIP_FILE}" ]]; then
 		echo "Payara already downloaded: ${PAYARA_ZIP_FILE}"
 	else
-		echo "Downloading Payara 5..."
+		echo "Downloading Payara 7..."
 		PAYARA_DOWNLOAD_URL="https://search.maven.org/remotecontent?filepath=fish/payara/distributions/payara/${PAYARA_VERSION}/${PAYARA_ZIP_FILE_NAME}"
 		if [[ ${LINUX} = true ]]; then
 			wget -O "${PAYARA_ZIP_FILE}" "${PAYARA_DOWNLOAD_URL}"
@@ -195,8 +195,8 @@ else
 
 	echo "Unzipping Payara..."
 	unzip -q -o "${PAYARA_ZIP_FILE}" -d "${PAYARA_HOME}"
-	mv "${PAYARA_HOME}/payara5"/* "${PAYARA_HOME}"
-	rm -R "${PAYARA_HOME}/payara5"
+	mv "${PAYARA_HOME}/payara7"/* "${PAYARA_HOME}"
+	rm -R "${PAYARA_HOME}/payara7"
 	rm -R "${PAYARA_HOME}/glassfish/domains"
 fi
 
@@ -234,7 +234,7 @@ else
 fi
 
 # Check Java JDK
-JAVA_JDK_VERSION=11
+JAVA_JDK_VERSION=21
 JAVA_VERSION=$("${JAVAC}" -version 2>&1 | sed 's/javac //;s/^.\+ //;s/^1\.//;s/[^0-9].*//')
 if [[ ! "${JAVA_VERSION}" =~ ^[0-9]+$ ]]; then
 	if [[ -z "${PAYARA_ZIP_FILE}" ]]; then
@@ -368,11 +368,16 @@ ${ASADMIN} delete-jvm-options -Xmx512m
 ${ASADMIN} create-jvm-options -Xmx${DOMAIN_XMX}
 ${ASADMIN} create-jvm-options '-XX\:+IgnoreUnrecognizedVMOptions'
 ${ASADMIN} create-system-properties --target server-config fish.payara.classloading.delegate=false
+# Payara 7 accepts the "set" only after a "get" of the ejb-container (else "No configuration found")
 ${ASADMIN} get configs.config.server-config.ejb-container.max-pool-size
 ${ASADMIN} set configs.config.server-config.ejb-container.max-pool-size=128
+if [[ 0 != $? ]]; then
+	echo "WARNING: EJB max-pool-size could not be set to 128; the domain keeps the Payara default of 32. Please note this in your installation records."
+fi
 ${ASADMIN} set configs.config.server-config.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=50
-# Payara 7 (Grizzly 5) refuses to write a response chunk above 16 x the socket write buffer size and closes the
-# connection. Left at -1 the size comes from the OS (often 696,320 bytes in total), too small for large UI responses.
+# Payara 7 (Grizzly 5) closes the connection when a response would leave more than 16 x the socket write buffer size
+# pending on it. Left at -1 the size comes from the OS and depends on the host (696,320 bytes in total on one test
+# host), too small for large UI responses. 1 MiB raises the limit to 16 MiB.
 ${ASADMIN} set configs.config.server-config.network-config.transports.transport.tcp.socket-write-buffer-size=1048576
 
 # JDBC pool

@@ -51,6 +51,11 @@ public abstract class WorkflowTest {
 		return new Ui(page, copy.base());
 	}
 
+	/** A second tab of the same browser session as the given Ui. */
+	protected Ui newTab(Ui other) {
+		return new Ui(browser.newTab(other.page), copy.base());
+	}
+
 	/** today + days in the app's English format, M/D/YYYY. */
 	protected String en(int days) {
 		return today.plusDays(days).format(EN);

@@ -51,19 +51,26 @@ public final class Ui {
 		} catch (TimeoutError ignored) {
 			// not a Vaadin page or still loading: the wait below covers it
 		}
-		page.waitForTimeout(ms);
+		// No fixed sleep of ms: wait until no Vaadin request is in flight, then a short quiet period (at most 200 ms,
+		// for client-side rendering that follows a response), then idle again.
+		waitVaadinIdle();
+		page.waitForTimeout(Math.min(ms, 200));
+		waitVaadinIdle();
+	}
+
+	private void waitVaadinIdle() {
 		try {
 			page.waitForFunction(
 				"() => { const c = window.Vaadin && window.Vaadin.Flow && window.Vaadin.Flow.clients; return !c || !Object.values(c).some(x => x && x.isActive && x.isActive()); }",
 				null,
-				new Page.WaitForFunctionOptions().setTimeout(10_000).setPollingInterval(100));
+				new Page.WaitForFunctionOptions().setTimeout(10_000).setPollingInterval(50));
 		} catch (TimeoutError ignored) {
 			// a long request: the next step's own waits decide
 		}
 	}
 
 	public void settle() {
-		settle(800);
+		settle(400);
 	}
 
 	/** Visible text of the page, white space normalised. */

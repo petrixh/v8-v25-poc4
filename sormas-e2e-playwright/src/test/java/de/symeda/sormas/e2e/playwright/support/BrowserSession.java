@@ -23,6 +23,9 @@ public final class BrowserSession implements AutoCloseable {
 	public static final int WIDTH = 2300;
 	public static final int HEIGHT = 1300;
 
+	/** The exact text Chromium logs for a request aborted by a network interface change; any other text fails the step. */
+	static final String NETWORK_CHANGED = "Failed to load resource: net::ERR_NETWORK_CHANGED";
+
 	private final Playwright playwright;
 	private final Browser browser;
 	private final String userAgent;
@@ -41,11 +44,19 @@ public final class BrowserSession implements AutoCloseable {
 		BrowserContext ctx = browser.newContext(
 			new Browser.NewContextOptions().setViewportSize(WIDTH, HEIGHT).setUserAgent(userAgent).setAcceptDownloads(true));
 		ctx.setDefaultTimeout(30_000);
-		Page page = ctx.newPage();
+		return watch(ctx.newPage());
+	}
+
+	/** A second tab in the same browser context (same session) as the given page. */
+	public Page newTab(Page sameContext) {
+		return watch(sameContext.context().newPage());
+	}
+
+	private Page watch(Page page) {
 		page.onConsoleMessage(m -> {
 			// ERR_NETWORK_CHANGED: Chromium aborts a request when the host's network interfaces change, which they do
 			// whenever another app copy's Docker network is created or removed during a parallel run. Not the app's error.
-			if ("error".equals(m.type()) && !m.text().contains("net::ERR_NETWORK_CHANGED")) {
+			if ("error".equals(m.type()) && !NETWORK_CHANGED.equals(m.text().trim())) {
 				problems.add("console error: " + m.text());
 			}
 		});

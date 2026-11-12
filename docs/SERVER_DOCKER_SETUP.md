@@ -4,7 +4,7 @@
 
 ## Content
 * [Prerequisites](#prerequisites)
-  * [Java 11](#java-11)
+  * [Java 21](#java-21)
   * [ant](#ant)
   * [Postgres Database](#postgres-database)
 * [SORMAS Server](#sormas-server)
@@ -14,11 +14,10 @@
 
 ## Prerequisites
 
-### Java 11
-See [Installing Java](SERVER_SETUP.md#java-11)
+### Java 21
+See [Installing Java](SERVER_SETUP.md#java-21)
 
-SORMAS just recently moved to Java 11. We still need to support Java 8 for a transition period. Therefore, please just
-use Java 8 language features for now.
+SORMAS runs on Payara 7 with Java 21 and is compiled for Java 21.
 
 ### Ant
 

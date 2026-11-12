@@ -60,6 +60,16 @@ If you are **not** using [SORMAS-Docker](https://github.com/SORMAS-Foundation/SO
 ### 1.89.0
 When installing this version on new systems or upgrading postgres version on Ubuntu make sure you have at least Ubuntu LTS 20 with postgres 14 (or 18 with postgres 12 from APT).
 
+### Vaadin 25 migration (Payara 7, Java 21)
+The server moves from Payara 5.2022.5 on Java 11 to Payara Server 7.2026.10 (Jakarta EE 11) on Java 21. Payara 5 cannot run this version, and a Payara 5 domain cannot be reused. Upgrade as in the [Payara migration](SERVER_UPDATE.md#how-to-migrate-to-new-payara-server):
+
+1. Install a Java 21 JDK ([Java 21](SERVER_SETUP.md#java-21)).
+2. Stop the old domain, back up the database and move the old domain away (step 1 of the Payara migration). Keep the database and ``/opt/sormas``: this version changes no database table, so the existing database is used as it is.
+3. Run the new ``server-setup.sh``: it installs Payara 7 into ``/opt/payara7`` next to ``/opt/payara5`` and creates a new domain. Answer *YES* to "connecting to an already existing DB" and enter the existing password of the database user ``sormas_user``.
+4. Carry your settings over into the new domain's ``sormas.properties`` and ``logback.xml`` (step 3 of the Payara migration). Check that ``ui.url`` is still the address of the UI: notification e-mails build their links from it.
+5. Run ``server-update.sh``: it copies the new server libraries into the new domain's ``lib`` directory and deploys SORMAS. The service script ``/etc/init.d/payara-sormas`` now points to ``/opt/payara7``.
+6. Remove ``/opt/payara5`` once the new server runs.
+
 ## Automatic Server Update
 * Navigate to the  folder containing the unzipped deploy files:
   ``cd /root/deploy/sormas/$(date +%F)``

@@ -197,7 +197,7 @@ jobs:
           retention-days: 3
           if-no-files-found: ignore
 
-  # End-to-end workflow tests (sormas-e2e-playwright/README.md): the critical workflows of migration/workflows as
+  # End-to-end workflow tests (sormas-e2e-playwright/README.md): the 62 workflows of migration/workflows as
   # Playwright for Java tests, against app copies started with env/ from this job's own build. Runs next to the build
   # job, not after it. A failed workflow test fails this job.
   e2e:

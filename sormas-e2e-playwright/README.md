@@ -45,8 +45,9 @@ A failed step ends its workflow: the later steps of that class are skipped ("not
 either. After each step the test also fails on any console error, page error or HTTP response of 400 or more in the
 browser.
 
-Measured on a 10-CPU arm64 host (2026-11-12): see the PR that added this module; about 2 minutes per workflow on one
-copy, mostly the copy's reset (about 25 s) and the workflow's own waits.
+Measured on a 10-CPU arm64 host (2026-11-12): all 21 workflows (107 steps) in 8 minutes with five copies
+(`-De2e.ports=18720-18724`). Starting a copy takes 85 to 100 s, a reset 30 to 40 s, a workflow 1 to 2.5 minutes. One
+workflow alone on one new copy: about 1.5 minutes.
 
 ### Settings
 

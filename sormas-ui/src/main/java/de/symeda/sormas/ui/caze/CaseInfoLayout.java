@@ -38,6 +38,7 @@ import de.symeda.sormas.ui.ControllerProvider;
 import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.FieldAccessHelper;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 
 @SuppressWarnings("serial")
 public class CaseInfoLayout extends AbstractInfoLayout<CaseDataDto> {
@@ -80,22 +81,28 @@ public class CaseInfoLayout extends AbstractInfoLayout<CaseDataDto> {
 			caseIdLabel.setTitle(caseDto.getUuid());
 
 			if (FacadeProvider.getConfigFacade().isConfiguredCountry(CountryHelper.COUNTRY_CODE_GERMANY)) {
-				addDescLabel(
-					leftColumnLayout,
-					CaseDataDto.EXTERNAL_ID,
-					caseDto.getExternalID(),
-					I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.EXTERNAL_ID)).setTitle(caseDto.getEpidNumber());
-				addDescLabel(
-					leftColumnLayout,
-					CaseDataDto.EXTERNAL_TOKEN,
-					caseDto.getExternalToken(),
-					I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.EXTERNAL_TOKEN)).setTitle(caseDto.getExternalToken());
+				VaadinUiUtil.setDescription(
+					addDescLabel(
+						leftColumnLayout,
+						CaseDataDto.EXTERNAL_ID,
+						caseDto.getExternalID(),
+						I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.EXTERNAL_ID)),
+					caseDto.getEpidNumber());
+				VaadinUiUtil.setDescription(
+					addDescLabel(
+						leftColumnLayout,
+						CaseDataDto.EXTERNAL_TOKEN,
+						caseDto.getExternalToken(),
+						I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.EXTERNAL_TOKEN)),
+					caseDto.getExternalToken());
 			} else {
-				addDescLabel(
-					leftColumnLayout,
-					CaseDataDto.EPID_NUMBER,
-					caseDto.getEpidNumber(),
-					I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.EPID_NUMBER)).setTitle(caseDto.getEpidNumber());
+				VaadinUiUtil.setDescription(
+					addDescLabel(
+						leftColumnLayout,
+						CaseDataDto.EPID_NUMBER,
+						caseDto.getEpidNumber(),
+						I18nProperties.getPrefixCaption(CaseDataDto.I18N_PREFIX, CaseDataDto.EPID_NUMBER)),
+					caseDto.getEpidNumber());
 			}
 
 			if (hasUserRightCaseView) {

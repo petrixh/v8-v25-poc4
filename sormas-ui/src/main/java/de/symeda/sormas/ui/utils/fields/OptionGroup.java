@@ -17,6 +17,7 @@ package de.symeda.sormas.ui.utils.fields;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import com.vaadin.flow.component.Component;
@@ -32,13 +33,31 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 
 	private static final long serialVersionUID = 1L;
 
-	private final SelectItems selectItems = new SelectItems(this::itemsChanged);
+	private final SelectItems selectItems = new SelectItems(this, this::itemsRemoved);
 	private boolean multiSelect;
 	private RadioButtonGroup<Object> radioGroup;
 	private CheckboxGroup<Object> checkboxGroup;
+	/**
+	 * Multi select read from a {@code null} property and not changed since: V7 kept {@code null} as the field's
+	 * internal value and wrote it back on commit, while {@link #getValue()} showed an empty set.
+	 */
+	private boolean nullRead;
+	/**
+	 * Set by the form binding right before it sets the {@code null} it read ({@link #readNull()}).
+	 */
+	private boolean readingNull;
+	/**
+	 * Multi select: V7's internal value is {@code null} while {@link #getValue()} shows an empty set. V7 had it after
+	 * reading a {@code null} property, and, with a converter ({@link NullableOptionGroup}), after any change to an
+	 * empty value (the {@code setValue} round trip through the converter gives {@code null}). Reading {@code null}
+	 * fired a value change event only when the internal value was not {@code null} yet.
+	 */
+	private boolean internalNull;
 
 	public OptionGroup() {
 		super();
+		// the inner Flow group clears its selection when its items are refreshed; show the value again
+		selectItems.setOnRefresh(() -> setPresentationValue(getValue()));
 		createGroup();
 	}
 
@@ -77,6 +96,8 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 			} else {
 				setValue(value instanceof Collection ? ((Collection<?>) value).stream().findFirst().orElse(null) : value);
 			}
+			// V7 converted the value before the converter was set: a multi select starts with an empty set
+			internalNull = false;
 		}
 	}
 
@@ -127,16 +148,87 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 				return;
 			}
 		}
+		nullRead = false;
+		internalNull = multiSelect && isEmptyValue(clientValue) && getConverter() != null;
 		updateValue();
 	}
 
 	/**
 	 * V7 {@code AbstractSelect.setValue}: in multi select, {@code null} is stored as an empty set, so the value of a
-	 * multi select is never {@code null}.
+	 * multi select is never {@code null}. A {@code null} the form binding read is the exception ({@link #readNull()}).
+	 * <p>
+	 * Reading {@code null} into a multi select whose value is already an empty set fires a value change event, as V7
+	 * {@code AbstractField.setPropertyDataSource} did when its internal value was not {@code null} yet (a new field
+	 * holds an empty set): form listeners on the field (e.g. hiding dependent fields unless the value is Yes) run when
+	 * the form reads an empty property. Reading {@code null} again fires nothing, as in V7.
+	 * <p>
+	 * Also V7 {@code AbstractSelect.setValue}: a multi select stores a collection as a {@code LinkedHashSet} and
+	 * ignores a value that is not a collection (no change, no event), e.g. {@code setValue(TypeOfPlace.FACILITY)} on a
+	 * not required {@link de.symeda.sormas.ui.utils.NullableOptionGroup}.
+	 * <p>
+	 * V7 {@code AbstractSelect.setValue}: a single select ignores a value that is not an item (no change, no event, also
+	 * when read-only), unless the data source writes it ({@link ReadOnlyWrites#isDataSourceWrite}, the form's field group
+	 * reading its bean); an item added later does not select it. A multi select takes any collection, items or not, as
+	 * V7 did.
+	 * <p>
+	 * A read-only group refuses a different value, as in V7 ({@link ReadOnlyWrites}); a multi select compares the value
+	 * as a set.
 	 */
 	@Override
 	public void setValue(Object value) {
-		super.setValue(multiSelect && value == null ? new LinkedHashSet<>() : value);
+		if (multiSelect && value != null && !(value instanceof Collection)) {
+			readingNull = false;
+			return;
+		}
+		if (!multiSelect && value != null && !containsId(value) && !ReadOnlyWrites.isDataSourceWrite(this)) {
+			readingNull = false;
+			return;
+		}
+		Object checkedValue = multiSelect ? (value == null ? new LinkedHashSet<>() : new LinkedHashSet<>((Collection<?>) value)) : value;
+		ReadOnlyWrites.write(this, checkedValue, () -> setValueUnchecked(value));
+	}
+
+	private void setValueUnchecked(Object value) {
+		boolean fromRead = readingNull && value == null;
+		readingNull = false;
+		Object newValue = multiSelect ? (value == null ? new LinkedHashSet<>() : new LinkedHashSet<>((Collection<?>) value)) : value;
+		Object oldValue = getValue();
+		boolean fireRead = fromRead && multiSelect && !internalNull && isEmptyValue(oldValue);
+		nullRead = fromRead && multiSelect;
+		if (!multiSelect) {
+			internalNull = false;
+		} else if (fromRead) {
+			internalNull = true;
+		} else if (internalNull || !Objects.equals(newValue, oldValue)) {
+			// V7 AbstractField.setValue: a value equal to the internal value changes nothing; otherwise the value goes
+			// through the converter and back, which makes an empty value null with a converter
+			internalNull = isEmptyValue(newValue) && getConverter() != null;
+		}
+		super.setValue(newValue);
+		if (fireRead) {
+			fireEvent(new ComponentValueChangeEvent<>(this, this, oldValue, false));
+		}
+	}
+
+	private static boolean isEmptyValue(Object value) {
+		return value == null || (value instanceof Collection && ((Collection<?>) value).isEmpty());
+	}
+
+	/**
+	 * The form binding is about to set the {@code null} it read from the property (V7
+	 * {@code AbstractField.setPropertyDataSource}): a multi select then shows an empty set but writes {@code null} back
+	 * until the value changes ({@link #isNullRead()}).
+	 */
+	void readNull() {
+		readingNull = true;
+	}
+
+	/**
+	 * Whether the form binding writes {@code null} back: a multi select read from a {@code null} property and not
+	 * changed since (V7 {@code AbstractField.commit} wrote the internal value, {@code null}).
+	 */
+	boolean isNullRead() {
+		return nullRead;
 	}
 
 	/**
@@ -154,6 +246,10 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 		return radioGroup.getValue();
 	}
 
+	/**
+	 * Shows the value in the inner group. An unchanged selection is not set again: Flow's {@code CheckboxGroup.setValue}
+	 * updates every check box (one client call each) even when the selection is equal.
+	 */
 	@Override
 	protected void setPresentationValue(Object value) {
 		if (multiSelect) {
@@ -164,26 +260,33 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 				selected.add(value);
 			}
 			selected.retainAll(selectItems.getItemIds());
-			checkboxGroup.setValue(selected);
+			if (!selected.equals(checkboxGroup.getValue())) {
+				checkboxGroup.setValue(selected);
+			}
 		} else if (radioGroup != null) {
 			Object single = value instanceof Collection ? ((Collection<?>) value).stream().findFirst().orElse(null) : value;
-			radioGroup.setValue(single != null && selectItems.contains(single) ? single : null);
+			Object shown = single != null && selectItems.contains(single) ? single : null;
+			if (!Objects.equals(shown, radioGroup.getValue())) {
+				radioGroup.setValue(shown);
+			}
 		}
 	}
 
 	/**
-	 * V7: removing the selected item removes it from the value.
+	 * V7: removing a selected item removes it from the value; removing all items empties it. Adding items or removing
+	 * other items keeps the value, also a part that is not an item (yet); the inner group shows it once its item is
+	 * there (after the refresh, see the constructor).
 	 */
-	protected void itemsChanged() {
+	protected void itemsRemoved(java.util.function.Predicate<Object> wasRemoved) {
 		Object value = getValue();
 		if (multiSelect && value instanceof Collection) {
 			Set<Object> retained = new LinkedHashSet<>((Collection<?>) value);
-			retained.retainAll(selectItems.getItemIds());
+			retained.removeIf(wasRemoved);
 			if (retained.size() != ((Collection<?>) value).size()) {
 				setValue(retained);
 				return;
 			}
-		} else if (!multiSelect && value != null && !selectItems.contains(value)) {
+		} else if (!multiSelect && value != null && wasRemoved.test(value)) {
 			setValue(null);
 			return;
 		}
@@ -208,10 +311,14 @@ public class OptionGroup extends CustomField<Object> implements SelectField {
 	}
 
 	/**
-	 * Selects the item (V7 {@code select}); in multi select it is added to the selection.
+	 * Selects the item (V7 {@code select}); in multi select it is added to the selection. An item id that is not an item
+	 * is ignored, as in V7 (single select: see {@link #setValue}).
 	 */
 	public void select(Object itemId) {
 		if (multiSelect) {
+			if (!containsId(itemId)) {
+				return;
+			}
 			Set<Object> selected = getValue() instanceof Collection ? new LinkedHashSet<>((Collection<?>) getValue()) : new LinkedHashSet<>();
 			selected.add(itemId);
 			setValue(selected);

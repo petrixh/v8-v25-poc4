@@ -64,6 +64,7 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 	String DATA_INVALID_COMMITTED = "sormas.invalidCommitted";
 	String DATA_DESCRIPTION = "sormas.description";
 	String DATA_NULL_REPRESENTATION = "sormas.nullRepresentation";
+	String DATA_NULL_SETTING_ALLOWED = "sormas.nullSettingAllowed";
 	String DATA_MODIFIED = "sormas.modified";
 
 	// Value methods, implemented by the Flow HasValue superclass
@@ -209,9 +210,14 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 	}
 
 	/**
-	 * V7 null representation: the text a text field ({@link TextField}, {@link TextArea}, {@link PasswordField}) shows
-	 * when its value is set to {@code null}. Default {@code ""}, which every SORMAS text field set in V7 (the field
-	 * factory and all direct uses); the V7 component default {@code "null"} is not copied.
+	 * V7 null representation: the text a text field ({@link TextField}, {@link TextArea}, {@link PasswordField},
+	 * {@link SormasRichTextArea}) shows when its value is {@code null}. Default {@code ""}, which every SORMAS text field
+	 * set in V7 (the field factory and all direct uses); the V7 component default {@code "null"} is not copied.
+	 * <p>
+	 * As in V7, the value of these fields can be {@code null}: an untouched field read from a {@code null} property
+	 * stays {@code null}, and so does the property on commit. Text the user enters that equals the null representation
+	 * keeps a {@code null} value {@code null}; on a field with a value it is the new value ({@code ""}), unless
+	 * {@link #isNullSettingAllowed() null setting is allowed}.
 	 */
 	default String getNullRepresentation() {
 		String nullRepresentation = (String) ComponentUtil.getData(asComponent(), DATA_NULL_REPRESENTATION);
@@ -224,6 +230,22 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 	 */
 	default void setNullRepresentation(String nullRepresentation) {
 		ComponentUtil.setData(asComponent(), DATA_NULL_REPRESENTATION, nullRepresentation);
+	}
+
+	/**
+	 * V7 {@code AbstractTextField.isNullSettingAllowed()}: whether text the user enters that equals the
+	 * {@link #getNullRepresentation() null representation} sets the value to {@code null} also when the value was not
+	 * {@code null}. Default {@code false}, as in V7; no SORMAS field changed it.
+	 */
+	default boolean isNullSettingAllowed() {
+		return Boolean.TRUE.equals(ComponentUtil.getData(asComponent(), DATA_NULL_SETTING_ALLOWED));
+	}
+
+	/**
+	 * V7 null setting, see {@link #isNullSettingAllowed()}. It has no effect on fields other than text fields.
+	 */
+	default void setNullSettingAllowed(boolean nullSettingAllowed) {
+		ComponentUtil.setData(asComponent(), DATA_NULL_SETTING_ALLOWED, nullSettingAllowed ? Boolean.TRUE : null);
 	}
 
 	default void addStyleName(String styleName) {
@@ -367,13 +389,17 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 	}
 
 	/**
-	 * V7 {@code validate()}: required check, conversion and all validators. Named differently because Flow fields have
-	 * a protected {@code validate()}.
+	 * V7 {@code validate()}: unparsable input ({@link #getUnparsableInputError()}), required check, conversion and all
+	 * validators. Named differently because Flow fields have a protected {@code validate()}.
 	 *
 	 * @throws InvalidValueException
 	 *             with the first error message
 	 */
 	default void validateValue() {
+		String unparsableInputError = getUnparsableInputError();
+		if (unparsableInputError != null) {
+			throw new InvalidValueException(unparsableInputError);
+		}
 		if (isRequired() && isEmpty()) {
 			throw new InvalidValueException(getRequiredError() != null ? getRequiredError() : "");
 		}
@@ -382,6 +408,17 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 		if (result.isError()) {
 			throw new InvalidValueException(result.getErrorMessage());
 		}
+	}
+
+	/**
+	 * The error of input the field could not parse, or {@code null}. As in V7 ({@code DateField.validate()}, which threw
+	 * {@code UnparsableDateString} before any other check), such input makes {@link #validateValue()} and the form's
+	 * binding validator ({@link #asBindingValidator()}) fail first, also when the field's value is empty, so a form
+	 * commit fails and writes nothing. Default: {@code null} (the field has no input of its own to parse; text fields
+	 * with a converter fail in the conversion instead). Overridden by {@link DateField}.
+	 */
+	default String getUnparsableInputError() {
+		return null;
 	}
 
 	/**
@@ -420,10 +457,15 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 	}
 
 	/**
-	 * Validator for the form's binding: required check plus the field's validators, looked up on every call.
+	 * Validator for the form's binding: unparsable input ({@link #getUnparsableInputError()}), required check, then the
+	 * field's validators, looked up on every call.
 	 */
 	default Validator<Object> asBindingValidator() {
 		return (value, context) -> {
+			String unparsableInputError = getUnparsableInputError();
+			if (unparsableInputError != null) {
+				return ValidationResult.error(unparsableInputError);
+			}
 			if (isRequired() && isEmpty()) {
 				return ValidationResult.error(getRequiredError() != null ? getRequiredError() : "");
 			}
@@ -441,6 +483,19 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 
 		public InvalidValueException(String message) {
 			super(message);
+		}
+	}
+
+	/**
+	 * V7 {@code Property.ReadOnlyException}: a read-only field refused a programmatic write of a different value (see
+	 * {@link ReadOnlyWrites}). Like in V7 it is not caught; the error handler shows the "unexpected error" notification.
+	 */
+	class ReadOnlyException extends RuntimeException {
+
+		private static final long serialVersionUID = 1L;
+
+		public ReadOnlyException() {
+			super();
 		}
 	}
 }

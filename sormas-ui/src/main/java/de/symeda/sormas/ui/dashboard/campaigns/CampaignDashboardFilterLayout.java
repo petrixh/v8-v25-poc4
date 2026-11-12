@@ -28,6 +28,7 @@ import de.symeda.sormas.ui.UiUtil;
 import de.symeda.sormas.ui.utils.ComboBoxHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
+import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.fields.ComboBox;
 import de.symeda.sormas.ui.utils.fields.OptionGroup;
 
@@ -259,6 +260,6 @@ public class CampaignDashboardFilterLayout extends HorizontalLayout {
 	}
 
 	public void setInfoLabelText(String text) {
-		infoLabel.setTitle(text);
+		VaadinUiUtil.setDescription(infoLabel, text);
 	}
 }

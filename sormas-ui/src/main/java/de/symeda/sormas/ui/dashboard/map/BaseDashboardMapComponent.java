@@ -156,7 +156,7 @@ public abstract class BaseDashboardMapComponent<C extends BaseDashboardCriteria<
 		CssStyles.style(headingInfoIcon, CssStyles.H3, CssStyles.VSPACE_4, CssStyles.VSPACE_TOP_NONE, CssStyles.HSPACE_LEFT_4);
 
 		if (headingInfoTag != null) {
-			headingInfoIcon.setTitle(I18nProperties.getString(headingInfoTag));
+			VaadinUiUtil.setDescription(headingInfoIcon, I18nProperties.getString(headingInfoTag));
 			HorizontalLayout mapLabelLayout = new HorizontalLayout(mapLabel, headingInfoIcon);
 			mapLabelLayout.setPadding(false);
 			mapLabelLayout.setSpacing(false);

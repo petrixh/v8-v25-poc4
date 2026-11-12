@@ -21,4 +21,20 @@ package de.symeda.sormas.ui.utils.fields;
 public interface AbstractTextField extends Field<String> {
 
 	void setMaxLength(int maxLength);
+
+	/**
+	 * V7 {@code AbstractTextField.changeVariables} (8.14.3): the value for the text the user entered. Text equal to the
+	 * {@link Field#getNullRepresentation() null representation} gives {@code null} when the value was {@code null} or
+	 * {@link Field#isNullSettingAllowed() null setting is allowed}; any other text is the value. So an empty field
+	 * read from a {@code null} property stays {@code null}, and a field the user cleared gets {@code ""}.
+	 *
+	 * @param valueWasNull
+	 *            whether the field's value was {@code null} before the user's change
+	 */
+	static String valueFromClient(Field<String> field, String text, boolean valueWasNull) {
+		if (text != null && (valueWasNull || field.isNullSettingAllowed()) && text.equals(field.getNullRepresentation())) {
+			return null;
+		}
+		return text;
+	}
 }

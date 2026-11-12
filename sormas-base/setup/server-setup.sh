@@ -371,6 +371,9 @@ ${ASADMIN} create-system-properties --target server-config fish.payara.classload
 ${ASADMIN} get configs.config.server-config.ejb-container.max-pool-size
 ${ASADMIN} set configs.config.server-config.ejb-container.max-pool-size=128
 ${ASADMIN} set configs.config.server-config.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=50
+# Payara 7 (Grizzly 5) refuses to write a response chunk above 16 x the socket write buffer size and closes the
+# connection. Left at -1 the size comes from the OS (often 696,320 bytes in total), too small for large UI responses.
+${ASADMIN} set configs.config.server-config.network-config.transports.transport.tcp.socket-write-buffer-size=1048576
 
 # JDBC pool
 ${ASADMIN} create-jdbc-connection-pool --restype javax.sql.ConnectionPoolDataSource --datasourceclassname org.postgresql.ds.PGConnectionPoolDataSource --isconnectvalidatereq true --validationmethod custom-validation --validationclassname org.glassfish.api.jdbc.validation.PostgresConnectionValidation --maxpoolsize ${DB_JDBC_MAXPOOLSIZE} --property "portNumber=${DB_PORT}:databaseName=${DB_NAME}:serverName=${DB_HOST}:user=${DB_USER}:password=${DB_PW}" ${DOMAIN_NAME}DataPool

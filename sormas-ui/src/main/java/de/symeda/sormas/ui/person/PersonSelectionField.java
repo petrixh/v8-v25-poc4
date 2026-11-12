@@ -344,8 +344,12 @@ public class PersonSelectionField extends CustomField<SimilarPersonDto> {
 
 	public void selectBestMatch() {
 		// Vaadin 8 built the content when the window was added; a Flow dialog attaches its content only before the
-		// response, after the callers' selectBestMatch(), so build it here
-		getContent();
+		// response, after the callers' selectBestMatch(), so build it here. Not while it is being built: initContent()
+		// selects "select a person" when there are matches, and that listener calls this method (a second
+		// initContent() would recurse until StackOverflowError)
+		if (mainLayout == null) {
+			getContent();
+		}
 		if (personGrid.getListDataView().getItemCount() == 1) {
 			setValue(personGrid.getListDataView().getItem(0));
 		} else {

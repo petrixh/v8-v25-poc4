@@ -38,7 +38,7 @@ public class ComboBox extends com.vaadin.flow.component.combobox.ComboBox<Object
 		void addNewItem(String newItemCaption);
 	}
 
-	private final SelectItems selectItems = new SelectItems(this::itemsChanged);
+	private final SelectItems selectItems = new SelectItems(this, this::itemsRemoved);
 	private FilteringMode filteringMode = FilteringMode.STARTSWITH;
 	private NewItemHandler newItemHandler;
 
@@ -62,13 +62,26 @@ public class ComboBox extends com.vaadin.flow.component.combobox.ComboBox<Object
 		setItemLabelGenerator(selectItems::getCaption);
 		setClearButtonVisible(selectItems.isNullSelectionAllowed());
 		selectItems.setOnNullSelectionAllowedChange(() -> setClearButtonVisible(selectItems.isNullSelectionAllowed()));
+		// V7 showed the value with its current item caption; Flow sends the caption only when the value is set, so a
+		// caption set afterwards (or an item added after the value) would not show
+		selectItems.setOnRefresh(() -> {
+			if (getValue() != null) {
+				refreshValue();
+			}
+		});
 		addCustomValueSetListener(e -> {
+			if (!isNewItemsAllowed()) {
+				return;
+			}
 			if (newItemHandler != null) {
 				newItemHandler.addNewItem(e.getDetail());
 			} else {
 				addNewItemDefault(e.getDetail());
 			}
 		});
+		// V7 default: no new items. Flow's addCustomValueSetListener turns custom values on; without this, typed text
+		// that is no item plus Enter became the value (a String where the binding expects the item type).
+		setAllowCustomValue(false);
 	}
 
 	/**
@@ -96,6 +109,23 @@ public class ComboBox extends com.vaadin.flow.component.combobox.ComboBox<Object
 	}
 
 	/**
+	 * V7 {@code AbstractSelect.setValue}: a value that is not an item is ignored (the value stays, no value change event,
+	 * also when the combo box is read-only); {@code null} is always taken. An item added later does not select it. A read
+	 * of the data source (the form's field group, {@link ReadOnlyWrites#isDataSourceWrite}) takes any value, as V7
+	 * {@code setPropertyDataSource} did; value change listeners running during that read are code and follow the rule.
+	 * <p>
+	 * A read-only combo box refuses a different value, as in V7 ({@link ReadOnlyWrites}); this includes {@code clear()}
+	 * and removing the selected item or all items while it has a value.
+	 */
+	@Override
+	public void setValue(Object value) {
+		if (value != null && !containsId(value) && !ReadOnlyWrites.isDataSourceWrite(this)) {
+			return;
+		}
+		ReadOnlyWrites.write(this, value, () -> super.setValue(value));
+	}
+
+	/**
 	 * V7 null selection off: the user cannot clear the combo box. A {@code null} from the client is ignored (the value
 	 * stays, no value change event) and the client shows the kept value again. A programmatic {@code setValue(null)} or
 	 * {@code clear()} still works, as in V7.
@@ -110,11 +140,12 @@ public class ComboBox extends com.vaadin.flow.component.combobox.ComboBox<Object
 	}
 
 	/**
-	 * V7: removing the selected item clears the value.
+	 * V7: removing the selected item, or all items, clears the value. Adding items or removing other items keeps it, also
+	 * when it is not an item (yet: a value read from the data source).
 	 */
-	protected void itemsChanged() {
+	protected void itemsRemoved(java.util.function.Predicate<Object> wasRemoved) {
 		Object value = getValue();
-		if (value != null && !selectItems.contains(value)) {
+		if (value != null && wasRemoved.test(value)) {
 			clear();
 		}
 	}

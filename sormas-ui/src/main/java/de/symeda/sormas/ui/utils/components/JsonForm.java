@@ -71,6 +71,7 @@ public class JsonForm extends CustomField<Map<String, String>> {
 
 	private void doSetValue(Map<String, String> value) {
 		gridLayout.removeAll();
+		fields = null;
 
 		if (value != null) {
 			fields = buildFields(value);
@@ -82,10 +83,18 @@ public class JsonForm extends CustomField<Map<String, String>> {
 
 	/**
 	 * As in V7, the value is the set value with the edited texts of the fields.
+	 * <p>
+	 * Flow calls {@code getValue()} inside {@code setValue} (for the value change event), which V7 never did; a field
+	 * with no value (no external data) therefore returns {@code null} instead of failing.
 	 */
 	@Override
 	public Map<String, String> getValue() {
-		Map<String, String> data = new HashMap<>(super.getValue());
+		Map<String, String> value = super.getValue();
+		if (value == null || fields == null) {
+			return value;
+		}
+
+		Map<String, String> data = new HashMap<>(value);
 
 		for (Field<?> field : fields) {
 			data.put(field.getId().orElse(null), (String) field.getValue());

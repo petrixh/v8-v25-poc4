@@ -73,6 +73,19 @@ public final class VaadinUiUtil {
 		// Hide Utility Class Constructor
 	}
 
+	/**
+	 * Vaadin 8 {@code setDescription(description)}: the component's tooltip (the HTML {@code title}). {@code null}
+	 * means no tooltip, as in Vaadin 8; Flow {@code HtmlComponent.setTitle(null)} throws.
+	 */
+	public static <C extends Component> C setDescription(C component, String description) {
+		if (description == null) {
+			component.getElement().removeAttribute("title");
+		} else {
+			component.getElement().setAttribute("title", description);
+		}
+		return component;
+	}
+
 	public static Dialog createPopupWindow() {
 		Dialog window = new Dialog();
 		window.setModal(true);

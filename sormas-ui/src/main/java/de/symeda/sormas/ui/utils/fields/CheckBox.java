@@ -14,12 +14,22 @@
  */
 package de.symeda.sormas.ui.utils.fields;
 
+import java.util.Objects;
+
 /**
  * Flow checkbox as a SORMAS {@link Field} (replaces {@code com.vaadin.v7.ui.CheckBox}). The empty value is {@code false}.
+ * <p>
+ * As in V7, the value can be {@code null}: it shows unchecked, and {@link #getValue()} (so also the form's write-back of
+ * a nullable {@code Boolean} property) stays {@code null} until the user or code sets {@code true} or {@code false}.
  */
 public class CheckBox extends com.vaadin.flow.component.checkbox.Checkbox implements Field<Boolean> {
 
 	private static final long serialVersionUID = 1L;
+
+	/**
+	 * The value is {@code null}; the Flow value underneath is {@code false} (Flow check boxes do not take {@code null}).
+	 */
+	private boolean nullValue;
 
 	public CheckBox() {
 		super();
@@ -31,6 +41,54 @@ public class CheckBox extends com.vaadin.flow.component.checkbox.Checkbox implem
 
 	public CheckBox(String caption, boolean initialValue) {
 		super(caption, initialValue);
+	}
+
+	/**
+	 * V7 {@code CheckBox.setValue(null)} was allowed: the box shows unchecked and the value stays {@code null}; Flow
+	 * throws on {@code null}. A change between {@code null} and {@code false} fires a value change event, as in V7, though
+	 * the box looks the same.
+	 * <p>
+	 * A read-only field refuses a different value, as in V7 ({@link ReadOnlyWrites}).
+	 */
+	@Override
+	public void setValue(Boolean value) {
+		ReadOnlyWrites.write(this, value, () -> setValueUnchecked(value));
+	}
+
+	private void setValueUnchecked(Boolean value) {
+		Boolean oldValue = getValue();
+		boolean wasNull = nullValue;
+		nullValue = value == null;
+		Boolean shown = value == null ? Boolean.FALSE : value;
+		if (!Objects.equals(super.getValue(), shown)) {
+			super.setValue(shown);
+		} else if (wasNull != nullValue) {
+			fireEvent(new ComponentValueChangeEvent<>(this, this, oldValue, false));
+		}
+	}
+
+	@Override
+	public Boolean getValue() {
+		return nullValue ? null : super.getValue();
+	}
+
+	/**
+	 * A click in the browser sets {@code true} or {@code false}.
+	 */
+	@Override
+	protected void setModelValue(Boolean newModelValue, boolean fromClient) {
+		if (fromClient) {
+			nullValue = false;
+		}
+		super.setModelValue(newModelValue, fromClient);
+	}
+
+	/**
+	 * {@code null} and {@code false} are empty.
+	 */
+	@Override
+	public boolean isEmpty() {
+		return !Boolean.TRUE.equals(getValue());
 	}
 
 	// Flow implements these as interface defaults; declared here because Field declares them too

@@ -1,8 +1,13 @@
 package de.symeda.sormas.ui.utils;
 
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -43,6 +48,7 @@ import de.symeda.sormas.ui.utils.fields.DateField;
 import de.symeda.sormas.ui.utils.fields.Field;
 import de.symeda.sormas.ui.utils.fields.FieldGroup;
 import de.symeda.sormas.ui.utils.fields.FilteringMode;
+import de.symeda.sormas.ui.utils.fields.ReadOnlyWrites;
 import de.symeda.sormas.ui.utils.fields.TextArea;
 import de.symeda.sormas.ui.utils.fields.TextField;
 
@@ -718,6 +724,14 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 			setFieldModified(field, false);
 		}
 
+		/**
+		 * Vaadin 7 data source read: the bean's values are written into the bound fields also when a field is
+		 * read-only ({@link ReadOnlyWrites#readFromDataSource}).
+		 */
+		private void readFromBean(Runnable read) {
+			ReadOnlyWrites.readFromDataSource(bindings.keySet(), read);
+		}
+
 		public Binder<T> getBinder() {
 			return binder;
 		}
@@ -744,6 +758,46 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 			PropertyDefinition<T, ?> property = propertySet.getProperty(propertyId.toString())
 				.orElseThrow(() -> new IllegalArgumentException("Property " + propertyId + " not found in " + beanType.getName()));
 			return wrapperType(property.getType());
+		}
+
+		/**
+		 * The property type the field factory gets, as in Vaadin 7: {@code BeanFieldGroup.getPropertyType} returned the
+		 * declared type (a primitive stays primitive) while no bean was set, and the wrapper type once a bean was set. The
+		 * factory makes a check box for a primitive {@code boolean} and a Yes/No option group for a {@code Boolean}.
+		 */
+		private Class<?> getFieldFactoryType(Object propertyId) {
+			Class<?> propertyType = getPropertyType(propertyId);
+			if (bean != null || !isWrapperType(propertyType)) {
+				return propertyType;
+			}
+			// the Flow property set reports primitives as wrapper types: read the declared type from the bean class
+			try {
+				Class<?> declaredType = beanType;
+				for (String name : propertyId.toString().split("\\.")) {
+					PropertyDescriptor descriptor = Arrays.stream(Introspector.getBeanInfo(declaredType).getPropertyDescriptors())
+						.filter(d -> d.getName().equals(name))
+						.findFirst()
+						.orElse(null);
+					if (descriptor == null || descriptor.getPropertyType() == null) {
+						return propertyType;
+					}
+					declaredType = descriptor.getPropertyType();
+				}
+				return declaredType;
+			} catch (IntrospectionException e) {
+				return propertyType;
+			}
+		}
+
+		private static boolean isWrapperType(Class<?> type) {
+			return type == Boolean.class
+				|| type == Integer.class
+				|| type == Long.class
+				|| type == Double.class
+				|| type == Float.class
+				|| type == Short.class
+				|| type == Byte.class
+				|| type == Character.class;
 		}
 
 		private static Class<?> wrapperType(Class<?> type) {
@@ -775,7 +829,7 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 		 */
 		@SuppressWarnings("rawtypes")
 		public <F extends Field> F buildAndBind(String caption, Object propertyId, Class<F> fieldType) {
-			Class<?> propertyType = getPropertyType(propertyId);
+			Class<?> propertyType = getFieldFactoryType(propertyId);
 			F field = fieldFactory.createField(propertyType, fieldType);
 			if (field == null) {
 				throw new IllegalStateException("Unable to build a field of type " + fieldType.getName() + " for editing " + propertyType.getName());
@@ -827,7 +881,7 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 			if (bean != null) {
 				// reading a field is not a change
 				boolean wasModified = modified;
-				binding.read(bean);
+				ReadOnlyWrites.readFromDataSource(Collections.singleton(field), () -> binding.read(bean));
 				modified = wasModified;
 			}
 		}
@@ -847,7 +901,10 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 				return;
 			}
 			HasValidation hasValidation = (HasValidation) field;
-			boolean show = status.isError() && field.isValidationVisible() && !(field.isRequired() && field.isEmpty());
+			// an empty required field is not marked, but unparsable input (which empties the value) is, as in Vaadin 7
+			boolean show = status.isError()
+				&& field.isValidationVisible()
+				&& (field.getUnparsableInputError() != null || !(field.isRequired() && field.isEmpty()));
 			hasValidation.setErrorMessage(show ? status.getMessage().orElse(null) : null);
 			hasValidation.setInvalid(show);
 		}
@@ -898,11 +955,13 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 		 */
 		public void setItemDataSource(T bean) {
 			this.bean = bean;
-			if (buffered) {
-				binder.readBean(bean);
-			} else {
-				binder.setBean(bean);
-			}
+			readFromBean(() -> {
+				if (buffered) {
+					binder.readBean(bean);
+				} else {
+					binder.setBean(bean);
+				}
+			});
 			clearModified();
 		}
 
@@ -1037,7 +1096,7 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 				}
 			}
 			if (buffered && bean != null) {
-				binder.readBean(bean);
+				readFromBean(() -> binder.readBean(bean));
 			}
 			clearModified();
 		}
@@ -1089,12 +1148,14 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 					modifiedFields.add(f);
 				}
 			});
-			if (buffered) {
-				binder.removeBean();
-				binder.readBean(bean);
-			} else {
-				binder.setBean(bean);
-			}
+			readFromBean(() -> {
+				if (buffered) {
+					binder.removeBean();
+					binder.readBean(bean);
+				} else {
+					binder.setBean(bean);
+				}
+			});
 			modified = wasModified;
 			bindings.keySet().forEach(f -> setFieldModified(f, modifiedFields.contains(f)));
 		}

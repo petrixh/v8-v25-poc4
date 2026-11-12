@@ -24,14 +24,20 @@ import java.util.Map;
 import java.util.Set;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.BeforeLeaveEvent;
 import com.vaadin.flow.router.Location;
+import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
+import com.vaadin.flow.server.ErrorEvent;
+import com.vaadin.flow.server.ErrorHandler;
 import com.vaadin.flow.server.VaadinSession;
 /**
  * Session-scope route shim with the API of the Vaadin 8 {@code com.vaadin.navigator.Navigator} that SORMAS uses.
@@ -52,6 +58,12 @@ import com.vaadin.flow.server.VaadinSession;
  * {@link ViewChangeListener#afterViewChange(ViewChangeListener.ViewChangeEvent)}. Every navigation gets a new view
  * instance, also to the current view class or the current state ({@code SormasUI.refreshView()}), as with Vaadin 8's
  * class-based view registration. {@link MainLayout} forwards the Flow navigation events here.
+ * <p>
+ * <b>Open dialogs stay open</b> when the current view is shown again ({@link #keepDialogsOpen(UI, Runnable)}): Vaadin 8
+ * sub-windows belonged to the UI, and its Navigator never touched them.
+ * <p>
+ * <b>Errors</b> go to the session error handler, as in Vaadin 8: from {@code enter()} and the after-view-change
+ * listeners directly (the view stays shown), from all earlier stages through {@link NavigationExceptionView}.
  */
 public class Navigator implements Serializable {
 
@@ -149,7 +161,7 @@ public class Navigator implements Serializable {
 
 		Location location = toLocation(target);
 		if (currentView != null && location.getPathWithQueryParameters().equals(toLocation(state).getPathWithQueryParameters())) {
-			ui.refreshCurrentRoute(false);
+			keepDialogsOpen(ui, () -> ui.refreshCurrentRoute(false));
 		} else {
 			ui.navigate(location.getPath(), location.getQueryParameters());
 		}
@@ -255,7 +267,7 @@ public class Navigator implements Serializable {
 
 	void beforeLeave(BeforeLeaveEvent event) {
 
-		if (currentView == null || internalRefresh) {
+		if (currentView == null || internalRefresh || isExceptionNavigation(event)) {
 			return;
 		}
 		LeaveAction leaveAction = new LeaveAction(event);
@@ -265,7 +277,7 @@ public class Navigator implements Serializable {
 
 	void beforeEnter(BeforeEnterEvent event) {
 
-		if (internalRefresh) {
+		if (internalRefresh || isExceptionNavigation(event)) {
 			return;
 		}
 
@@ -308,6 +320,15 @@ public class Navigator implements Serializable {
 		}
 		View newView = (View) target;
 
+		if (newView instanceof NavigationExceptionView) {
+			// the navigation failed (NavigationExceptionView has reported it); as in Vaadin 8, no enter() and no
+			// after-view-change listeners. The error view is now what the user sees, so it is the current view.
+			internalRefresh = false;
+			currentView = newView;
+			state = toState(toViewNameAndParameters(event.getLocation(), event.getRouteParameters()));
+			return;
+		}
+
 		if (internalRefresh) {
 			internalRefresh = false;
 		} else if (newView == currentView) {
@@ -316,7 +337,7 @@ public class Navigator implements Serializable {
 			internalRefresh = true;
 			ui.beforeClientResponse(ui, context -> {
 				try {
-					ui.refreshCurrentRoute(false);
+					keepDialogsOpen(ui, () -> ui.refreshCurrentRoute(false));
 				} finally {
 					internalRefresh = false;
 				}
@@ -327,14 +348,95 @@ public class Navigator implements Serializable {
 		String[] viewNameAndParameters = toViewNameAndParameters(event.getLocation(), event.getRouteParameters());
 		View oldView = currentView;
 		currentView = newView;
-		state = viewNameAndParameters[1].isEmpty() ? viewNameAndParameters[0] : viewNameAndParameters[0] + "/" + viewNameAndParameters[1];
+		state = toState(viewNameAndParameters);
 
 		ViewChangeListener.ViewChangeEvent changeEvent =
 			new ViewChangeListener.ViewChangeEvent(this, oldView, newView, viewNameAndParameters[0], viewNameAndParameters[1]);
-		newView.enter(changeEvent);
-		for (ViewChangeListener listener : new ArrayList<>(listeners)) {
-			listener.afterViewChange(changeEvent);
+		try {
+			newView.enter(changeEvent);
+			for (ViewChangeListener listener : new ArrayList<>(listeners)) {
+				listener.afterViewChange(changeEvent);
+			}
+		} catch (Throwable e) {
+			// Vaadin 8: anything thrown by enter() or an after-view-change listener reached the session error handler
+			// (log, generic error notification); the view stayed shown as far as it was built and the remaining
+			// listeners did not run. Flow would instead replace the view with an error view (NavigationExceptionView).
+			if (!toSessionErrorHandler(e)) {
+				throw e;
+			}
 		}
+	}
+
+	/**
+	 * Runs a refresh of the current route ({@link UI#refreshCurrentRoute(boolean)}) and keeps the open dialogs open,
+	 * with their content and state, as Vaadin 8 kept its sub-windows when the Navigator showed a new view instance.
+	 * <p>
+	 * Flow's route refresh removes every component with modality from the UI (open dialogs: modal and, by default,
+	 * visually modal), and while there is one it re-creates the whole route chain instead of only the route target. So
+	 * the open dialogs leave the modality tracking for the refresh (they stay attached and open) and get their modality
+	 * back after it, oldest first, which restores the order. A dialog that the refreshed view closed or removed in the
+	 * meantime is left as it is.
+	 */
+	static void keepDialogsOpen(UI ui, Runnable refresh) {
+
+		List<Dialog> dialogs = new ArrayList<>();
+		collectOpenDialogs(ui, dialogs);
+		dialogs.forEach(dialog -> ui.setChildComponentModal(dialog, ModalityMode.MODELESS));
+		try {
+			refresh.run();
+		} finally {
+			for (Dialog dialog : dialogs) {
+				if (dialog.getUI().orElse(null) == ui && dialog.isOpened() && dialog.isVisible()) {
+					ui.setChildComponentModal(dialog, dialog.getModality());
+				}
+			}
+		}
+	}
+
+	/**
+	 * Collects the open dialogs with modality: the ones attached to the UI and, after each, the ones opened from it
+	 * (Flow adds a dialog opened while another one is shown to that one). A dialog tracks its modality only while it is
+	 * open and visible (Flow's {@code Dialog}).
+	 */
+	private static void collectOpenDialogs(Component parent, List<Dialog> dialogs) {
+
+		parent.getChildren().forEach(child -> {
+			if (child instanceof Dialog) {
+				Dialog dialog = (Dialog) child;
+				if (dialog.isOpened() && dialog.isVisible() && dialog.getModality() != ModalityMode.MODELESS) {
+					dialogs.add(dialog);
+				}
+				collectOpenDialogs(dialog, dialogs);
+			}
+		});
+	}
+
+	private static String toState(String[] viewNameAndParameters) {
+		return viewNameAndParameters[1].isEmpty() ? viewNameAndParameters[0] : viewNameAndParameters[0] + "/" + viewNameAndParameters[1];
+	}
+
+	/**
+	 * @return whether this is Flow's navigation to {@link NavigationExceptionView} after an exception in the navigation
+	 *         (view constructor, before-leave or before-view-change): the views and listeners are not asked again
+	 */
+	private static boolean isExceptionNavigation(BeforeEvent event) {
+		return NavigationExceptionView.class.equals(event.getNavigationTarget());
+	}
+
+	/**
+	 * Hands an error to the session error handler ({@code SormasErrorHandler}: log, generic error notification), where
+	 * Vaadin 8 sent every exception of a request.
+	 *
+	 * @return {@code false} when there is no session or handler
+	 */
+	static boolean toSessionErrorHandler(Throwable throwable) {
+		VaadinSession session = VaadinSession.getCurrent();
+		ErrorHandler errorHandler = session != null ? session.getErrorHandler() : null;
+		if (errorHandler == null) {
+			return false;
+		}
+		errorHandler.error(new ErrorEvent(throwable));
+		return true;
 	}
 
 	/**
@@ -357,7 +459,12 @@ public class Navigator implements Serializable {
 			if (inHandler) {
 				proceeded = true;
 			} else if (postponed != null) {
-				postponed.proceed();
+				if (event.getTrigger() == NavigationTrigger.REFRESH_ROUTE) {
+					// a refresh of the current view, confirmed later (unsaved changes): the open dialogs stay open
+					keepDialogsOpen(event.getUI(), postponed::proceed);
+				} else {
+					postponed.proceed();
+				}
 			}
 		}
 

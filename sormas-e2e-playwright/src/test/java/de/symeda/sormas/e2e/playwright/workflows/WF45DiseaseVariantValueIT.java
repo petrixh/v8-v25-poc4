@@ -70,7 +70,7 @@ class WF45DiseaseVariantValueIT extends WorkflowTest {
 		admin.settle(400);
 		admin.windowButton("Save");
 		admin.noModal();
-		assertEquals(0, admin.windowCount(), "windows left");
+		assertEquals(0, admin.windowsAfterClose(), "windows left");
 		admin.waitRow("WF variant", 10_000);
 		String row = admin.rowTextWith("WF variant");
 		assertTrue(row.contains("Disease variant") && row.contains("WF_VARIANT") && row.contains("All diseases"), "listed: " + row);

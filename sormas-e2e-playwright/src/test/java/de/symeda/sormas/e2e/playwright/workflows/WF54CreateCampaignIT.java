@@ -58,7 +58,7 @@ class WF54CreateCampaignIT extends WorkflowTest {
 		String note = ui.newestNotificationText(10_000);
 		assertTrue(note != null && note.contains("Neue Kampagne erstellt"), "created: " + note);
 		ui.noModal();
-		assertEquals(0, ui.windowCount(), "window closed");
+		assertEquals(0, ui.windowsAfterClose(), "window closed");
 	}
 
 	@Test

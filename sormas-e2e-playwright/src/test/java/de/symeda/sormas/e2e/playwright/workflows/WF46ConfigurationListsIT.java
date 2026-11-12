@@ -124,7 +124,7 @@ class WF46ConfigurationListsIT extends WorkflowTest {
 		ui.settle(800);
 		assertEquals(0, ui.rowTexts().size(), "no entries");
 		assertTrue(hasButton("create"), "create button");
-		assertEquals(0, ui.windowCount(), "no window");
+		assertEquals(0, ui.windowsAfterClose(), "no window");
 		// Data check: nothing changed
 		assertEquals(countsAtStart, counts(), "configuration table counts");
 	}

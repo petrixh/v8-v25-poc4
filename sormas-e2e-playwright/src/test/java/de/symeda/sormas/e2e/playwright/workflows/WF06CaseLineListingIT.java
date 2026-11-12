@@ -99,7 +99,7 @@ class WF06CaseLineListingIT extends WorkflowTest {
 		ui.windowButton("Save");
 		assertTrue(ui.waitText("saved", 10_000) || ui.waitText("created", 3000), "confirmation");
 		ui.noModal();
-		assertEquals(0, ui.windowCount(), "window closed");
+		assertEquals(0, ui.windowsAfterClose(), "window closed");
 		ui.openView("Cases");
 		ui.fillSearch("personLike", "Line");
 		ui.applyFilters();

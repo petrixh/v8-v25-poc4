@@ -100,7 +100,7 @@ class WF25AggregateAndWeeklyReportsIT extends WorkflowTest {
 		ui.settle(300);
 		ui.windowButton("Save");
 		ui.noModal();
-		assertEquals(0, ui.windowCount(), "window closed");
+		assertEquals(0, ui.windowsAfterClose(), "window closed");
 		setFromWeek(7, "Wk " + weekNo);
 		ui.applyFilters();
 		ui.settle(1200);
@@ -121,7 +121,7 @@ class WF25AggregateAndWeeklyReportsIT extends WorkflowTest {
 		assertEquals("Attention: Duplicate reports have been found for the above criteria. Diseases marked with red already have reports.", m.group(), "warning");
 		ui.windowButton("Discard");
 		ui.noModal();
-		assertEquals(0, ui.windowCount(), "window closed");
+		assertEquals(0, ui.windowsAfterClose(), "window closed");
 	}
 
 	@Test

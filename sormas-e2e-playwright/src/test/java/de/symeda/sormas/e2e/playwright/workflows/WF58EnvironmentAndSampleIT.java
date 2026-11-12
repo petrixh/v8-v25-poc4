@@ -102,7 +102,7 @@ class WF58EnvironmentAndSampleIT extends WorkflowTest {
 		pick(inWin("^Labor"), "Vor", "Voreingestelltes Labor");
 		ui.windowButtonLike(Pattern.compile("^Speichern$"));
 		ui.noModal();
-		assertEquals(0, ui.windowCount(), "window closed");
+		assertEquals(0, ui.windowsAfterClose(), "window closed");
 		ui.dismissNotifications();
 		ui.waitMatch("nicht versendet", 10_000);
 		String t = body();

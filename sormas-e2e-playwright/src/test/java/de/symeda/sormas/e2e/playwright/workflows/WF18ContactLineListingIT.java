@@ -102,7 +102,7 @@ class WF18ContactLineListingIT extends WorkflowTest {
 	void step4() {
 		ui.windowButton("Save");
 		ui.noModal();
-		assertEquals(0, ui.windowCount(), "window closed");
+		assertEquals(0, ui.windowsAfterClose(), "window closed");
 		ui.fillSearch("personLike", "Contactline");
 		ui.applyFilters();
 		ui.settle(1000);

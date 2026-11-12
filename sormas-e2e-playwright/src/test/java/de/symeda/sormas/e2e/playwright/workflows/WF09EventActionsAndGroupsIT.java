@@ -66,7 +66,7 @@ class WF09EventActionsAndGroupsIT extends WorkflowTest {
 		assertTrue(ui.optionChecked("Pending", true), "pending preset");
 		ui.windowButton("Save");
 		ui.noModal();
-		assertEquals(0, ui.windowCount(), "window closed");
+		assertEquals(0, ui.windowsAfterClose(), "window closed");
 		String t = ui.pageText();
 		assertFalse(t.contains("There are no actions for this Event"), "no empty text");
 		assertTrue(find("Actions\\W*NEW ACTION\\W*PENDING\\W*1(\\W|$)", t), "one pending: " + t);
@@ -88,7 +88,7 @@ class WF09EventActionsAndGroupsIT extends WorkflowTest {
 		ui.selectOption("Done", true);
 		ui.windowButton("Save");
 		ui.noModal();
-		assertEquals(0, ui.windowCount(), "window closed");
+		assertEquals(0, ui.windowsAfterClose(), "window closed");
 		ui.waitText("Done", 10_000);
 		String t1 = ui.pageText();
 		assertTrue(find("Action status:\\s*Done", t1), "shows Done");
@@ -114,7 +114,7 @@ class WF09EventActionsAndGroupsIT extends WorkflowTest {
 		ui.windowButton("Save");
 		assertTrue(ui.waitText("New event group created", 8000), "created message");
 		ui.noModal();
-		assertEquals(0, ui.windowCount(), "window closed");
+		assertEquals(0, ui.windowsAfterClose(), "window closed");
 		String t = ui.pageText();
 		assertTrue(find("workflow group", t), "group shown");
 		assertFalse(find("no event groups", t), "no empty groups text");

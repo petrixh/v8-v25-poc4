@@ -90,7 +90,7 @@ class WF07LineListingConfigurationIT extends WorkflowTest {
 		ui.windowButton("Save changes");
 		assertTrue(ui.waitText("saved", 6000) || ui.waitText("Line listing", 3000), "confirmation");
 		ui.noModal();
-		assertEquals(0, ui.windowCount(), "window closed");
+		assertEquals(0, ui.windowsAfterClose(), "window closed");
 		assertTrue(ui.pageText().contains("Measles"), "Measles listed");
 		ui.clickButton(EDIT);
 		ui.waitText("Edit Line Listing", 10_000);
@@ -122,7 +122,7 @@ class WF07LineListingConfigurationIT extends WorkflowTest {
 		ui.settle(300);
 		ui.windowButton("Save changes");
 		ui.noModal();
-		assertEquals(0, ui.windowCount(), "window closed");
+		assertEquals(0, ui.windowsAfterClose(), "window closed");
 		assertEquals(0, ui.buttonCount(EDIT), "Measles no longer listed");
 		ui.comboPick(ui.filterCombo(0), "Meas", "Measles");
 		ui.clickButton(ENABLE);

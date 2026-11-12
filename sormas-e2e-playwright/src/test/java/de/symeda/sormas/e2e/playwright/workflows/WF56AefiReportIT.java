@@ -111,7 +111,7 @@ class WF56AefiReportIT extends WorkflowTest {
 		assertEquals("BioNTech/Pfizer", wtb("^Impfstoffhersteller").inputValue(), "manufacturer");
 		ui.windowButtonLike(Pattern.compile("^Erledigt$"));
 		ui.noModal();
-		assertEquals(0, ui.windowCount(), "window closed");
+		assertEquals(0, ui.windowsAfterClose(), "window closed");
 		save();
 		String n = note();
 		assertTrue(n != null && n.contains("Immunisierungsdaten gespeichert"), "saved: " + n);

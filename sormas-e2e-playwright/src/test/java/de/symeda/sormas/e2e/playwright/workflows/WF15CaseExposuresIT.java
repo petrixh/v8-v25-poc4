@@ -62,7 +62,7 @@ class WF15CaseExposuresIT extends WorkflowTest {
 		ui.windowField("Description", true).press("Tab");
 		ui.windowButton("Done");
 		ui.noModal();
-		assertEquals(0, ui.windowCount(), "exposure window closed: " + e.type());
+		assertEquals(0, ui.windowsAfterClose(), "exposure window closed: " + e.type());
 	}
 
 	@Test
@@ -160,7 +160,7 @@ class WF15CaseExposuresIT extends WorkflowTest {
 		assertEquals(VISIT.description(), ui.windowField("Description", true).inputValue(), "visit description");
 		ui.windowButton("Discard");
 		ui.noModal();
-		assertEquals(0, ui.windowCount(), "window closed");
+		assertEquals(0, ui.windowsAfterClose(), "window closed");
 		// Data check: SCAS02 has fever and headache with the onset date; exactly three exposures with the dates entered
 		assertEquals(
 			"YES|YES|" + today.plusDays(-4),

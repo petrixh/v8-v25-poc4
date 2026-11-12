@@ -88,7 +88,7 @@ class WF61CampaignFormDataEntryIT extends WorkflowTest {
 		rem.press("Tab");
 		ui.windowButtonLike(Pattern.compile("^Speichern$"));
 		ui.noModal();
-		assertEquals(0, ui.windowCount(), "window closed");
+		assertEquals(0, ui.windowsAfterClose(), "window closed");
 	}
 
 	@Test

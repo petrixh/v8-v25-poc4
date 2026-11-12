@@ -1705,4 +1705,12 @@ public final class Ui {
 		settle(500);
 		return norm(res.innerText());
 	}
+
+	/** Number of open windows once they have had up to 5 s to close: for "the window closed" checks. */
+	public int windowsAfterClose() {
+		for (int i = 0; i < 20 && windowCount() > 0; i++) {
+			page.waitForTimeout(250);
+		}
+		return windowCount();
+	}
 }

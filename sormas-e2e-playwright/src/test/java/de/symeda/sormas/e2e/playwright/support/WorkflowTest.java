@@ -51,6 +51,18 @@ public abstract class WorkflowTest {
 		return new Ui(page, copy.base());
 	}
 
+	/** A prepared test file from src/test/resources/workflows, copied to this class's output folder so a window can upload it. */
+	protected Path resourceFile(String name) {
+		try (java.io.InputStream in = getClass().getResourceAsStream("/workflows/" + name)) {
+			Path target = out.resolve(name);
+			java.nio.file.Files.createDirectories(out);
+			java.nio.file.Files.copy(in, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+			return target;
+		} catch (java.io.IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
 	/** A second tab of the same browser session as the given Ui. */
 	protected Ui newTab(Ui other) {
 		return new Ui(browser.newTab(other.page), copy.base());

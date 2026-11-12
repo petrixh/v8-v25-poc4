@@ -36,4 +36,40 @@ public final class Docx {
 		}
 		return out;
 	}
+
+	/** The sheet names of an .xlsx workbook (xl/workbook.xml), in order. */
+	public static List<String> sheetNames(Path file) throws IOException {
+		String xml;
+		try (ZipFile z = new ZipFile(file.toFile())) {
+			xml = new String(z.getInputStream(z.getEntry("xl/workbook.xml")).readAllBytes(), StandardCharsets.UTF_8);
+		}
+		List<String> out = new ArrayList<>();
+		Matcher m = Pattern.compile("<sheet [^>]*name=\"([^\"]+)\"").matcher(xml);
+		while (m.find()) {
+			out.add(m.group(1));
+		}
+		return out;
+	}
+
+	/** The strings of an .xlsx workbook's shared string table, one per entry, white space collapsed. */
+	public static List<String> sharedStrings(Path file) throws IOException {
+		String xml;
+		try (ZipFile z = new ZipFile(file.toFile())) {
+			xml = new String(z.getInputStream(z.getEntry("xl/sharedStrings.xml")).readAllBytes(), StandardCharsets.UTF_8);
+		}
+		List<String> out = new ArrayList<>();
+		Matcher si = Pattern.compile("<si>(.*?)</si>", Pattern.DOTALL).matcher(xml);
+		while (si.find()) {
+			StringBuilder sb = new StringBuilder();
+			Matcher t = Pattern.compile("<t[^>]*>(.*?)</t>", Pattern.DOTALL).matcher(si.group(1));
+			while (t.find()) {
+				sb.append(t.group(1));
+			}
+			String s = sb.toString().replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"").replace("&apos;", "'").replaceAll("\\s+", " ").trim();
+			if (!s.isEmpty()) {
+				out.add(s);
+			}
+		}
+		return out;
+	}
 }

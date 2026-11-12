@@ -1909,6 +1909,14 @@
 		</profile>
 
 		<profile>
+			<!-- End-to-end workflow tests against app copies started with env/ (sormas-e2e-playwright/README.md). Not in the default build -->
+			<id>e2e-playwright</id>
+			<modules>
+				<module>../sormas-e2e-playwright</module>
+			</modules>
+		</profile>
+
+		<profile>
 			<id>generate-reports</id>
 			<!-- Create reports of used dependencies, plugins etc. and available newer versions -->
 			<properties>

@@ -15,6 +15,7 @@
 package de.symeda.sormas.ui.utils.fields;
 
 import java.text.DateFormatSymbols;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.Locale;
@@ -38,7 +39,9 @@ import de.symeda.sormas.api.i18n.Strings;
  * The Flow pop-up also has "today" and "cancel" buttons (Vaadin 8 had none); their texts follow the same locale, from the
  * SORMAS strings of the matching language (English when SORMAS has no such language or no translation).
  * <p>
- * Only these texts are set; the date formats, reference date and error messages of the picker are kept.
+ * {@link #apply} sets only these texts; the date formats, reference date and error messages of the picker are kept. The
+ * {@code applyOnAttach} methods also set the two-digit years of pickers with a format of their own
+ * ({@link DefaultDateFormat#ownFormatTwoDigitYears}): every picker that uses them has one.
  */
 public final class DatePickerLocale {
 
@@ -71,14 +74,14 @@ public final class DatePickerLocale {
 	 * For pickers without a locale of their own, as all but two in SORMAS; see {@link #applyOwnLocaleOnAttach}.
 	 */
 	public static void applyOnAttach(DatePicker picker) {
-		picker.addAttachListener(e -> picker.setI18n(apply(orNew(picker.getI18n()), e.getUI().getLocale())));
+		picker.addAttachListener(e -> picker.setI18n(onAttach(picker.getI18n(), e.getUI().getLocale())));
 	}
 
 	/**
 	 * {@link #applyOnAttach(DatePicker)} for the date part of a date-time picker.
 	 */
 	public static void applyOnAttach(DateTimePicker picker) {
-		picker.addAttachListener(e -> picker.setDatePickerI18n(apply(orNew(picker.getDatePickerI18n()), e.getUI().getLocale())));
+		picker.addAttachListener(e -> picker.setDatePickerI18n(onAttach(picker.getDatePickerI18n(), e.getUI().getLocale())));
 	}
 
 	/**
@@ -86,7 +89,11 @@ public final class DatePickerLocale {
 	 * {@code FormComponent.createDateField}, as Vaadin 8's {@code setLocale} on the field).
 	 */
 	public static void applyOwnLocaleOnAttach(DatePicker picker) {
-		picker.addAttachListener(e -> picker.setI18n(apply(orNew(picker.getI18n()), picker.getLocale())));
+		picker.addAttachListener(e -> picker.setI18n(onAttach(picker.getI18n(), picker.getLocale())));
+	}
+
+	private static DatePicker.DatePickerI18n onAttach(DatePicker.DatePickerI18n i18n, Locale locale) {
+		return DefaultDateFormat.ownFormatTwoDigitYears(apply(orNew(i18n), locale), LocalDate.now());
 	}
 
 	private static DatePicker.DatePickerI18n orNew(DatePicker.DatePickerI18n i18n) {

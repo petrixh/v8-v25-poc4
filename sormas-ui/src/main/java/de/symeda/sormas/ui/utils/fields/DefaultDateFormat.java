@@ -38,10 +38,17 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 public final class DefaultDateFormat {
 
 	/**
-	 * Flow chooses the century of a two-digit year within 50 years of the reference date; 30 years back gives the GWT
-	 * window of 80 years before and 20 years after today.
+	 * Flow chooses the century of a two-digit year within 50 years of the reference date's year (from 50 years before to
+	 * 49 after); 30 years back gives the GWT window of 80 years before and 20 years after today.
 	 */
 	static final int REFERENCE_YEARS_BACK = 30;
+
+	/**
+	 * For pickers with a format of their own: 39 years back gives 89 years before to 10 years after this year, the
+	 * century correction of the old app's date fields ({@code DateHelper.toCorrectCentury}, see
+	 * {@link #ownFormatTwoDigitYears}).
+	 */
+	static final int OWN_FORMAT_REFERENCE_YEARS_BACK = 39;
 
 	private DefaultDateFormat() {
 	}
@@ -83,9 +90,24 @@ public final class DefaultDateFormat {
 	}
 
 	/**
+	 * Two-digit years in a picker with a format of its own (e.g. {@code DateFormatHelper.getDateFormatPattern()},
+	 * {@code M/d/yyyy}), as the old app's form date fields read them: the client took {@code 70} as the year 70 and the
+	 * date converter ({@code DateConverter}, {@code DateHelper.toCorrectCentury}) moved it to the century that puts it at
+	 * most 10 years after and 89 years before this year (2026: {@code 37} to {@code 99} are 1937 to 1999, {@code 00}
+	 * to {@code 36} are 2000 to 2036). Flow's default reads {@code 70} as 2070 (50 years either side of today). Flow
+	 * applies the reference date to the two-digit variant of a {@code yyyy} format too. Returns {@code i18n} (migration
+	 * ticket 3-07, CR04).
+	 */
+	public static DatePicker.DatePickerI18n ownFormatTwoDigitYears(DatePicker.DatePickerI18n i18n, LocalDate today) {
+		i18n.setReferenceDate(today.minusYears(OWN_FORMAT_REFERENCE_YEARS_BACK));
+		return i18n;
+	}
+
+	/**
 	 * When the picker is attached and has no date format of its own, gives it the default format of the locale of the UI
 	 * it is attached to (see the class comment; no caller sets a locale on these pickers). A format set later replaces it.
-	 * Also gives it the calendar language of that locale ({@link DatePickerLocale}), with or without a format of its own.
+	 * Also gives it the calendar language of that locale ({@link DatePickerLocale}), with or without a format of its own,
+	 * and with a format of its own the two-digit years of {@link #ownFormatTwoDigitYears}.
 	 */
 	public static void applyOnAttach(DatePicker picker) {
 		picker.addAttachListener(e -> {
@@ -94,6 +116,8 @@ public final class DefaultDateFormat {
 			List<String> formats = i18n.getDateFormats();
 			if (formats == null || formats.isEmpty()) {
 				configure(i18n, e.getUI().getLocale(), LocalDate.now());
+			} else {
+				ownFormatTwoDigitYears(i18n, LocalDate.now());
 			}
 			picker.setI18n(DatePickerLocale.apply(i18n, e.getUI().getLocale()));
 		});

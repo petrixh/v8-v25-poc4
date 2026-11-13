@@ -123,6 +123,7 @@ import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.DateFormatHelper;
 import de.symeda.sormas.ui.utils.VaadinUiUtil;
+import de.symeda.sormas.ui.utils.fields.DefaultDateFormat;
 import de.symeda.sormas.ui.utils.fields.KeepValueComboBox;
 
 public class DevModeView extends AbstractConfigurationView {
@@ -1770,7 +1771,8 @@ public class DevModeView extends AbstractConfigurationView {
 	private static DatePicker.DatePickerI18n createDatePickerI18n() {
 		DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
 		i18n.setDateFormat(DateFormatHelper.getDateFormatPattern());
-		return i18n;
+		// two-digit years as in the other date fields with a format (migration ticket 3-07)
+		return DefaultDateFormat.ownFormatTwoDigitYears(i18n, LocalDate.now());
 	}
 
 	@Override

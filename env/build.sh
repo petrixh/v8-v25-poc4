@@ -90,5 +90,11 @@ else
   done
   mkdir -p "$D/apps"
   cp "$SRC"/sormas-ear/target/sormas-ear.ear "$SRC"/sormas-ui/target/sormas-ui.war "$SRC"/sormas-rest/target/sormas-rest.war "$D/apps/"
+  # For copies with APP_ENV_AUTH=keycloak (env/README.md "Keycloak"): the realm, the login theme and the password hash
+  # provider (sormas-sha256) Keycloak needs. Collected for every build, so any copy can use the shared build.
+  mkdir -p "$D/keycloak/providers"
+  cp -r "$SRC"/sormas-base/setup/keycloak/SORMAS.json "$SRC"/sormas-base/setup/keycloak/themes "$D/keycloak/"
+  cp "$SRC"/sormas-keycloak-service-provider/target/sormas-keycloak-service-provider-*.jar "$D/keycloak/providers/" ||
+    die "missing the Keycloak password hash provider after the build"
 fi
 log "build: done in $((SECONDS - t0)) s"

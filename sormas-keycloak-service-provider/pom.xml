@@ -10,6 +10,14 @@
 	<artifactId>sormas-keycloak-service-provider</artifactId>
 	<name>${project.artifactId}</name>
 
+	<properties>
+		<!-- Runs inside Keycloak 21.1.2 (keycloak.version), whose server runs on Java 17: class files for Java 17 and no
+			SORMAS classes in the jar (sormas-api is built for Java 21 and uses jakarta.validation, which Keycloak 21 does not have).
+			The tests compare the hash with sormas-api's PasswordHelper, so they are built for Java 21. -->
+		<maven.compiler.release>17</maven.compiler.release>
+		<maven.compiler.testRelease>21</maven.compiler.testRelease>
+	</properties>
+
 	<dependencies>
 
 		<!-- *** Payara modules *** -->
@@ -33,17 +41,26 @@
 
 		<!-- *** Domain libs END *** -->
 
-		<!-- *** Compile dependencies *** -->
+		<!-- *** Test dependencies *** -->
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>sormas-api</artifactId>
 			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
-
-		<!-- *** Compile dependencies END *** -->
-
-		<!-- *** Test dependencies *** -->
+		<dependency>
+			<!-- PasswordHelper (sormas-api) needs it; Keycloak 21 does not have it -->
+			<groupId>jakarta.validation</groupId>
+			<artifactId>jakarta.validation-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- the Keycloak credential model logs with it; Keycloak has it -->
+			<groupId>org.jboss.logging</groupId>
+			<artifactId>jboss-logging</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- *** Test dependencies END *** -->
 

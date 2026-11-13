@@ -18,7 +18,12 @@
 
 package de.symeda.sormas.providers.credential.hash;
 
-import de.symeda.sormas.api.utils.PasswordHelper;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.HexFormat;
+
 import org.keycloak.Config;
 import org.keycloak.credential.hash.PasswordHashProvider;
 import org.keycloak.credential.hash.PasswordHashProviderFactory;
@@ -79,12 +84,34 @@ public class SormasPasswordHashProvider implements PasswordHashProviderFactory, 
 		return ID;
 	}
 
+	/**
+	 * Characters of a salt, as {@code PasswordHelper.createPass} in sormas-api: a-z without l and v, A-Z without I, O and V,
+	 * 2-9.
+	 */
+	static final String SALT_CHARS = "abcdefghijkmnopqrstuwxyzABCDEFGHJKLMNPQRSTUWXYZ23456789";
+
+	private static final SecureRandom RANDOM = new SecureRandom();
+
 	private String getSalt() {
-		return PasswordHelper.createPass(16);
+		StringBuilder salt = new StringBuilder(16);
+		for (int i = 0; i < 16; i++) {
+			salt.append(SALT_CHARS.charAt(RANDOM.nextInt(SALT_CHARS.length())));
+		}
+		return salt.toString();
 	}
 
-	private String encodePassword(String rawPassword, String salt) {
-		return PasswordHelper.encodePassword(rawPassword, salt);
+	/**
+	 * The SORMAS password hash, as {@code PasswordHelper.encodePassword} in sormas-api (SHA-256 of password + salt, lower
+	 * case hex). Not taken from sormas-api: this provider runs inside Keycloak 21 on Java 17, sormas-api is built for Java 21
+	 * and needs jakarta.validation (SormasPasswordHashProviderTest keeps the two equal).
+	 */
+	static String encodePassword(String rawPassword, String salt) {
+		try {
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+			return HexFormat.of().formatHex(digest.digest((rawPassword + salt).getBytes(StandardCharsets.UTF_8)));
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 }

@@ -30,6 +30,8 @@ public final class AppCopyPool implements AutoCloseable {
 	private final String projectPrefix;
 	private final boolean keep;
 	private final boolean reuse;
+	/** Keycloak of a copy with @AppCopy(keycloak = true): on the copy's port + this (e2e.keycloakPortOffset). */
+	private final int keycloakPortOffset;
 	private final List<Slot> slots = new ArrayList<>();
 
 	private static final class Slot {
@@ -43,12 +45,13 @@ public final class AppCopyPool implements AutoCloseable {
 		}
 	}
 
-	AppCopyPool(Path envDir, Path logDir, String projectPrefix, List<Integer> ports, boolean keep, boolean reuse) {
+	AppCopyPool(Path envDir, Path logDir, String projectPrefix, List<Integer> ports, boolean keep, boolean reuse, int keycloakPortOffset) {
 		this.envDir = envDir;
 		this.logDir = logDir;
 		this.projectPrefix = projectPrefix;
 		this.keep = keep;
 		this.reuse = reuse;
+		this.keycloakPortOffset = keycloakPortOffset;
 		ports.forEach(p -> slots.add(new Slot(p)));
 	}
 
@@ -64,7 +67,8 @@ public final class AppCopyPool implements AutoCloseable {
 			System.getProperty("e2e.project", "sormas-e2e"),
 			ports(System.getProperty("e2e.ports", "18720-18721")),
 			Boolean.parseBoolean(System.getProperty("e2e.keepCopies", "false")),
-			Boolean.parseBoolean(System.getProperty("e2e.reuseCopies", "false")));
+			Boolean.parseBoolean(System.getProperty("e2e.reuseCopies", "false")),
+			Integer.parseInt(System.getProperty("e2e.keycloakPortOffset", "100")));
 	}
 
 	/** "18720-18724" or "18720,18722" */
@@ -155,7 +159,7 @@ public final class AppCopyPool implements AutoCloseable {
 	}
 
 	private Copy candidate(Slot s, AppCopy kind) {
-		return new Copy(s.port, projectPrefix + "-" + s.port, kind.value(), kind.passwordCheck());
+		return new Copy(s.port, projectPrefix + "-" + s.port, kind.value(), kind.passwordCheck(), kind.keycloak() ? s.port + keycloakPortOffset : 0);
 	}
 
 	public synchronized void release(Copy copy) {
@@ -173,23 +177,26 @@ public final class AppCopyPool implements AutoCloseable {
 
 	/**
 	 * Whether a running copy is of the copy's kind, from the sormas.properties up.sh wrote for it (later lines win): C2
-	 * sets country.locale=de-DE, the password check sets skipDefaultPasswordCheck=false.
+	 * sets country.locale=de-DE, the password check sets skipDefaultPasswordCheck=false, Keycloak
+	 * authentication.provider=KEYCLOAK.
 	 */
 	private boolean sameKind(Copy c) {
 		String stateDir = System.getenv().getOrDefault("APP_ENV_STATE_DIR", envDir.resolve(".state").toString());
 		Path props = Path.of(stateDir, "copies", c.project, "sormas.properties");
 		try {
-			String locale = "", skip = "true";
+			String locale = "", skip = "true", auth = "SORMAS";
 			for (String line : Files.readAllLines(props)) {
 				String l = line.trim();
 				if (l.startsWith("country.locale=")) {
 					locale = l.substring("country.locale=".length()).trim();
 				} else if (l.startsWith("skipDefaultPasswordCheck=")) {
 					skip = l.substring("skipDefaultPasswordCheck=".length()).trim();
+				} else if (l.startsWith("authentication.provider=")) {
+					auth = l.substring("authentication.provider=".length()).trim();
 				}
 			}
 			AppCopy.Config config = locale.startsWith("de") ? AppCopy.Config.C2 : AppCopy.Config.C1;
-			return config == c.config && "false".equals(skip) == c.passwordCheck;
+			return config == c.config && "false".equals(skip) == c.passwordCheck && "KEYCLOAK".equalsIgnoreCase(auth) == (c.keycloakPort != 0);
 		} catch (IOException e) {
 			return false;
 		}
@@ -215,6 +222,12 @@ public final class AppCopyPool implements AutoCloseable {
 		env.put("APP_ENV_CONFIG", c.config.name());
 		env.put("APP_ENV_PWCHECK", c.passwordCheck ? "on" : "off");
 		env.put("APP_ENV_RESET_MODE", "restart");
+		env.put("APP_ENV_AUTH", c.keycloakPort != 0 ? "keycloak" : "sormas");
+		if (c.keycloakPort != 0) {
+			env.put("APP_ENV_KC_PORT", String.valueOf(c.keycloakPort));
+		} else {
+			env.remove("APP_ENV_KC_PORT");
+		}
 		try {
 			Files.createDirectories(logDir);
 			File log = logDir.resolve(c.project + ".log").toFile();

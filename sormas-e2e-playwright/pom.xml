@@ -29,6 +29,9 @@
 		<e2e.keepCopies>false</e2e.keepCopies>
 		<e2e.reuseCopies>false</e2e.reuseCopies>
 		<e2e.headless>true</e2e.headless>
+		<!-- Classes tagged "keycloak" need a copy with Keycloak and run only when asked for (README.md "Keycloak") -->
+		<e2e.excludedGroups>keycloak</e2e.excludedGroups>
+		<e2e.keycloakPortOffset>100</e2e.keycloakPortOffset>
 	</properties>
 
 	<dependencies>
@@ -78,12 +81,14 @@
 						<e2e.keepCopies>${e2e.keepCopies}</e2e.keepCopies>
 						<e2e.reuseCopies>${e2e.reuseCopies}</e2e.reuseCopies>
 						<e2e.headless>${e2e.headless}</e2e.headless>
+						<e2e.keycloakPortOffset>${e2e.keycloakPortOffset}</e2e.keycloakPortOffset>
 						<e2e.out>${project.build.directory}/e2e</e2e.out>
 					</systemPropertyVariables>
 					<environmentVariables>
 						<!-- Browsers are installed beforehand (README.md "Requirements"); the tests never download one -->
 						<PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD>1</PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD>
 					</environmentVariables>
+					<excludedGroups>${e2e.excludedGroups}</excludedGroups>
 					<trimStackTrace>false</trimStackTrace>
 				</configuration>
 				<executions>

@@ -21,6 +21,12 @@ public @interface AppCopy {
 	/** true: the copy shows the "Security Alert: default password" window after a default-user login (APP_ENV_PWCHECK=on). */
 	boolean passwordCheck() default false;
 
+	/**
+	 * true: the copy logs in through a local Keycloak (APP_ENV_AUTH=keycloak, env/README.md "Keycloak"). Opt-in: such
+	 * classes carry the JUnit tag "keycloak", which the default run excludes (README.md "Keycloak").
+	 */
+	boolean keycloak() default false;
+
 	enum Config {
 		C1,
 		C2

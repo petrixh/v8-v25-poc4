@@ -15,12 +15,15 @@ public final class Copy {
 	final String project;
 	final AppCopy.Config config;
 	final boolean passwordCheck;
+	/** Port of the copy's Keycloak (APP_ENV_KC_PORT), or 0 for a copy with the app's own login. */
+	final int keycloakPort;
 
-	Copy(int port, String project, AppCopy.Config config, boolean passwordCheck) {
+	Copy(int port, String project, AppCopy.Config config, boolean passwordCheck, int keycloakPort) {
 		this.port = port;
 		this.project = project;
 		this.config = config;
 		this.passwordCheck = passwordCheck;
+		this.keycloakPort = keycloakPort;
 	}
 
 	/** scheme://host:port of the app; the UI is under /sormas-ui. */
@@ -32,8 +35,16 @@ public final class Copy {
 		return project;
 	}
 
+	/** scheme://host:port of the copy's Keycloak (APP_ENV_AUTH=keycloak); Keycloak itself is under /keycloak. */
+	public String keycloakBase() {
+		if (keycloakPort == 0) {
+			throw new IllegalStateException(this + " has no Keycloak");
+		}
+		return "http://localhost:" + keycloakPort;
+	}
+
 	boolean is(AppCopy kind) {
-		return config == kind.value() && passwordCheck == kind.passwordCheck();
+		return config == kind.value() && passwordCheck == kind.passwordCheck() && (keycloakPort != 0) == kind.keycloak();
 	}
 
 	/** The mail sink's web UI and API (Mailpit) of this copy, from its published port. */
@@ -76,6 +87,7 @@ public final class Copy {
 
 	@Override
 	public String toString() {
-		return project + " (" + config + (passwordCheck ? ", password check on" : "") + ", port " + port + ")";
+		return project + " (" + config + (passwordCheck ? ", password check on" : "") + (keycloakPort != 0 ? ", Keycloak on " + keycloakPort : "")
+			+ ", port " + port + ")";
 	}
 }

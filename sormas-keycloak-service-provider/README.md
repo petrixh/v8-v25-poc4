@@ -13,7 +13,10 @@ This Service Provider is implementing in Keycloak a Hash Mechanism for passwords
 to the one used in SORMAS to allow migrating of credentials for already existing users.
 
 Since SORMAS and Keycloak are using different hashing techniques, the `SormasPasswordHashProvider` replicates the
-SORMAS technique by importing the `sormas-api` dependency where the technique is defined.
+SORMAS technique (SHA-256 of password + salt, as `PasswordHelper` in `sormas-api`). It does not bundle `sormas-api`: the
+provider runs inside Keycloak 21 on Java 17, while `sormas-api` is built for Java 21 and needs `jakarta.validation`.
+The jar is built for Java 17 and holds only the provider; `SormasPasswordHashProviderTest` keeps its hash equal to
+`PasswordHelper`'s.
 
 ### SORMAS Hashing Technique
 *For more info about the SORMAS hashing technique see `sormas-api/src/main/java/de/symeda/sormas/api/utils/PasswordHelper.java`*
@@ -39,5 +42,7 @@ their credentials will be updated using the default or configured Password Polic
 
 ## Deployment of the SPI
 
-To deploy the Custom SPI, make sure to build this project and then follow the steps described in
+Built jar: `target/sormas-keycloak-service-provider-<version>.jar`. On Keycloak 21 (Quarkus) copy it to
+`/opt/keycloak/providers/` (the test environment mounts it there, `env/README.md` "Keycloak"). For older Keycloak versions
+follow the steps described in
 [Register an SPI Using the Keycloak Deployer](https://www.keycloak.org/docs/11.0/server_development/#using-the-keycloak-deployer)

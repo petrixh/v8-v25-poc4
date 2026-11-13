@@ -7,7 +7,7 @@ import org.junit.jupiter.api.ClassOrderer;
 import org.junit.jupiter.api.ClassOrdererContext;
 
 /**
- * Classes needing a rare copy kind first (the default-password check on, then C2), then C1, each group by name: the
+ * Classes needing a rare copy kind first (Keycloak, the default-password check on, then C2), then C1, each group by name: the
  * rare copies start together with the first C1 copies instead of replacing a C1 copy at the end of the run.
  */
 public class KindOrder implements ClassOrderer {
@@ -17,7 +17,7 @@ public class KindOrder implements ClassOrderer {
 		if (k == null) {
 			return 3;
 		}
-		return k.passwordCheck() ? 0 : k.value() == AppCopy.Config.C2 ? 1 : 2;
+		return k.keycloak() || k.passwordCheck() ? 0 : k.value() == AppCopy.Config.C2 ? 1 : 2;
 	}
 
 	@Override

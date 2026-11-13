@@ -32,12 +32,21 @@ APP_ENV_PWCHECK=${APP_ENV_PWCHECK:-off}
 export APP_ENV_UI_URL=${APP_ENV_UI_URL:-https://localhost:$APP_ENV_PORT/sormas-ui/}
 # up.sh data: snapshot (the committed env/seed/snapshot-<C>.pgdump) or rest (the small REST seed only, as env/seed/generate.sh needs)
 APP_ENV_SEED=${APP_ENV_SEED:-snapshot}
+# Login: sormas (default, the app's own login) or keycloak (opt-in: a local Keycloak next to the app, env/compose.keycloak.yml,
+# Keycloak on 127.0.0.1:$APP_ENV_KC_PORT). Matters to up.sh only: reset.sh and down.sh read it from the copy's state dir.
+if [ -z "${APP_ENV_AUTH:-}" ] && [ -s "$APP_ENV_STATE_DIR/copies/$APP_ENV_PROJECT/auth" ] && docker container inspect "${APP_ENV_CONTAINER}" >/dev/null 2>&1; then
+  APP_ENV_AUTH=$(cat "$APP_ENV_STATE_DIR/copies/$APP_ENV_PROJECT/auth")   # a running copy keeps the login up.sh gave it
+fi
+export APP_ENV_AUTH=${APP_ENV_AUTH:-sormas}
+export APP_ENV_KC_PORT=${APP_ENV_KC_PORT:-$((APP_ENV_PORT + 100))}
 
 [[ "$APP_ENV_PROJECT" =~ ^[a-z0-9][a-z0-9_.-]*$ ]] || { echo "APP_ENV_PROJECT must match ^[a-z0-9][a-z0-9_.-]*\$: $APP_ENV_PROJECT" >&2; exit 2; }
 [[ "$APP_ENV_PORT" =~ ^[0-9]+$ ]] || { echo "APP_ENV_PORT must be a number: $APP_ENV_PORT" >&2; exit 2; }
 [[ "$APP_ENV_CONFIG" =~ ^C[12]$ ]] || { echo "APP_ENV_CONFIG must be C1 or C2: $APP_ENV_CONFIG" >&2; exit 2; }
 [[ "$APP_ENV_PWCHECK" =~ ^(on|off)$ ]] || { echo "APP_ENV_PWCHECK must be on or off: $APP_ENV_PWCHECK" >&2; exit 2; }
 [[ "$APP_ENV_SEED" =~ ^(snapshot|rest)$ ]] || { echo "APP_ENV_SEED must be snapshot or rest: $APP_ENV_SEED" >&2; exit 2; }
+[[ "$APP_ENV_AUTH" =~ ^(sormas|keycloak)$ ]] || { echo "APP_ENV_AUTH must be sormas or keycloak: $APP_ENV_AUTH" >&2; exit 2; }
+[[ "$APP_ENV_KC_PORT" =~ ^[0-9]+$ ]] || { echo "APP_ENV_KC_PORT must be a number: $APP_ENV_KC_PORT" >&2; exit 2; }
 
 PAYARA_VERSION=7.2026.10
 PAYARA_ZIP_URL=https://repo1.maven.org/maven2/fish/payara/distributions/payara/$PAYARA_VERSION/payara-$PAYARA_VERSION.zip
@@ -70,10 +79,12 @@ SNAPSHOT_META=$ENV_DIR/seed/snapshot-$APP_ENV_CONFIG.json
 log() { echo "[$(date -u +%H:%M:%S)] $APP_ENV_PROJECT: $*" >&2; }
 die() { log "ERROR: $*"; exit 1; }
 
-# APP_ENV_MODE=dev adds env/compose.dev.yml (project folder mount, dev-tools host rule, Vaadin key by name)
+# APP_ENV_MODE=dev adds env/compose.dev.yml (project folder mount, dev-tools host rule, Vaadin key by name),
+# APP_ENV_AUTH=keycloak env/compose.keycloak.yml (Keycloak; the app in its network)
 compose() {
   local files=(-f "$ENV_DIR/compose.yml")
   [ "$APP_ENV_MODE" = prod ] || files+=(-f "$ENV_DIR/compose.dev.yml")
+  [ "$APP_ENV_AUTH" = sormas ] || files+=(-f "$ENV_DIR/compose.keycloak.yml")
   docker compose -p "$APP_ENV_PROJECT" "${files[@]}" "$@"
 }
 

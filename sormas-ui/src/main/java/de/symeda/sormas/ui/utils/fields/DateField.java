@@ -150,12 +150,14 @@ public class DateField extends CustomField<Date> {
 	}
 
 	/**
-	 * Display and parse pattern, e.g. {@code dd/MM/yyyy}.
+	 * Display and parse pattern, e.g. {@code dd/MM/yyyy}. A typed two-digit year is read as the old app's form fields
+	 * read it ({@link DefaultDateFormat#ownFormatTwoDigitYears}).
 	 */
 	public void setDateFormat(String dateFormat) {
 		this.dateFormat = dateFormat;
 		DatePicker.DatePickerI18n i18n = datePicker.getI18n() != null ? datePicker.getI18n() : new DatePicker.DatePickerI18n();
 		i18n.setDateFormat(dateFormat);
+		DefaultDateFormat.ownFormatTwoDigitYears(i18n, LocalDate.now());
 		datePicker.setI18n(i18n);
 	}
 

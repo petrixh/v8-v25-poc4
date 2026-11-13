@@ -61,7 +61,7 @@ class WF49TaskNotificationMailIT extends WorkflowTest {
 		ui.windows().getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName(SAVE)).click();
 		ui.settle(2500);
 		ui.noModal();
-		assertEquals(0, ui.windowCount(), "windows left");
+		assertEquals(0, ui.windowsAfterClose(), "windows left");
 		ui.clickRow(ui.rowIndex(" SurvSup "));
 		ui.settle(2000);
 		assertEquals(EMAIL, ui.windowField("Email", false).inputValue(), "e-mail after");
@@ -91,7 +91,7 @@ class WF49TaskNotificationMailIT extends WorkflowTest {
 		ui.windows().getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName(SAVE)).click();
 		ui.settle(2500);
 		ui.noModal();
-		assertEquals(0, ui.windowCount(), "windows left");
+		assertEquals(0, ui.windowsAfterClose(), "windows left");
 		String r = ui.rowTexts().stream().filter(x -> x.contains("Synthetic seed task")).findFirst().orElse("");
 		assertTrue(Pattern.compile("Surveillance SUPERVISOR[\\s\\S]*Synthetic seed task").matcher(r).find() && !r.contains("OFFICER"), "assignee: " + r);
 	}

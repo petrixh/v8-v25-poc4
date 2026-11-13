@@ -95,7 +95,7 @@ class WF21WorkAssignedTasksIT extends WorkflowTest {
 		ui.settle(800);
 		ui.windowButton("Save");
 		ui.settle(2500);
-		assertEquals(0, ui.windowCount(), "window closed");
+		assertEquals(0, ui.windowsAfterClose(), "window closed");
 		assertEquals(0, ui.rowTexts().size(), "no pending contact follow-up left");
 	}
 

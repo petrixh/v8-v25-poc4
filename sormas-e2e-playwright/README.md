@@ -11,9 +11,11 @@ The Selenium/Cucumber suite `sormas-e2e-tests` is separate and unchanged.
 
 ## What is covered
 
-The 21 critical workflows: WF01, WF03, WF04, WF08, WF11, WF12, WF13, WF16, WF17, WF19, WF20, WF21, WF28, WF31, WF38,
-WF39, WF40, WF48, WF49 in configuration C1, and WF50, WF51 in C2 (Germany). The class name says which
-(`WF03CreateCaseIT`), its display name gives the workflow's title, user and configuration.
+All 62 workflows of the migration's catalogue, one test class each (about 255 steps): WF01 to WF49 in configuration C1,
+WF50 to WF62 in C2 (Germany, German captions). The class name says which (`WF03CreateCaseIT`), its display name gives the
+workflow's title, user and configuration. Accepted differences between the old and the new app stay accepted: WF49's
+mail link uses the new route form; WF37 checks the contact's stored follow-up end date, not the follow-up status text,
+which depends on today's date against the seeded end date.
 
 ## Requirements
 
@@ -31,7 +33,7 @@ WF39, WF40, WF48, WF49 in configuration C1, and WF50, WF51 in C2 (Germany). The 
 
 ```sh
 env/build.sh                                         # once, and after each change to the app
-mvn -f sormas-e2e-playwright/pom.xml verify          # all workflow tests, 2 app copies (ports 18720-18721)
+mvn -f sormas-e2e-playwright/pom.xml verify          # all 62 workflows, 2 app copies (ports 18720-18721)
 mvn -f sormas-e2e-playwright/pom.xml verify -De2e.ports=18720-18723      # 4 copies, 4 classes at once
 mvn -f sormas-e2e-playwright/pom.xml verify -Dit.test='WF03*'           # one workflow
 cd sormas-base && mvn -Pe2e-playwright -pl ../sormas-e2e-playwright verify   # the same through the profile
@@ -45,9 +47,9 @@ A failed step ends its workflow: the later steps of that class are skipped ("not
 either. After each step the test also fails on any console error, page error or HTTP response of 400 or more in the
 browser.
 
-Measured on a 10-CPU arm64 host (2026-11-12): all 21 workflows (107 steps) in 8 minutes with five copies
-(`-De2e.ports=18720-18724`). Starting a copy takes 85 to 100 s, a reset 30 to 40 s, a workflow 1 to 2.5 minutes. One
-workflow alone on one new copy: about 1.5 minutes.
+Measured on a 10-CPU arm64 host (2026-11-12): all 62 workflows with five copies (`-De2e.ports=18720-18724`) in
+about 15 minutes (62 classes, 288 steps; 11 runs: 14 min 55 s to 15 min 33 s). Starting a copy takes 85 to 100 s, a reset 30 to 50 s, a workflow 1 to 3 minutes. One workflow alone on one
+new copy: about 1.5 minutes. On the CI runner (4 vCPU) with three copies: 61 minutes of tests and 64 minutes for the whole job in the last run (83 and 89 minutes in the first, when one hung step cost 10 minutes).
 
 ### Settings
 
@@ -106,6 +108,12 @@ System properties (`-D...`):
    the time of day.
 5. Put the data checks in the last step (`copy.sql`), relative to the seed data (fixed short ids such as `SCAS01`).
 6. Run it alone a few times (`-De2e.keepCopies=true -De2e.reuseCopies=true -Dit.test='WFxx*'`), then with the others.
+7. Waits: wait for the visible outcome (`ui.waitText`, `ui.waitMatch`, `ui.waitRow`, `ui.noModal`), never for a fixed
+   time. `Ui.settle(ms)` waits for the page to be quiet (no Vaadin request in flight, then at most 200 ms); do not rely
+   on its number. A suggestion is only picked from the visible combo box overlay.
+8. Notes from the 41 classes added in 3-02: a grid row is clicked by its text (`ui.clickRowWith`) where the row's
+   position and its text can disagree; a date field in the line listing windows shows two-digit years (`Ui.dateValue`);
+   regular expressions given to the browser must not carry Java-only syntax (`\Q...\E`) and need `/` escaped.
 
 Prepared files a workflow uploads go in `src/test/resources/workflows/` (synthetic data only).
 
@@ -114,6 +122,6 @@ Prepared files a workflow uploads go in `src/test/resources/workflows/` (synthet
 The job "End-to-end workflow tests (Playwright)" of [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) runs this
 suite on every pushed commit, next to the build job: it builds the app without tests and with Vaadin's
 commercial-with-banner option (as the build job, decision E002 C; the artefacts are never kept), puts the artefacts
-where `env/` takes them, installs Chromium, and runs `mvn -f sormas-e2e-playwright/pom.xml verify` with two copies. The
+where `env/` takes them, installs Chromium, and runs `mvn -f sormas-e2e-playwright/pom.xml verify` with three copies (`-De2e.ports=18720-18722`; the job has a 150 minute timeout). The
 job summary lists the steps per workflow; on failure, the test reports, screenshots, downloads and the copies' server
 logs are uploaded for 3 days. See [`CI.md`](../CI.md).

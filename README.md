@@ -86,7 +86,7 @@ The project consists of the following modules:
 - [**sormas-cargoserver:**](/sormas-cargoserver) Setup for a local dev server using maven-cargo
 - [**sormas-e2e-performance-tests:**](/sormas-e2e-performance-tests) Automated performance tests addressing the ReST interface (sormas-rest)
 - [**sormas-e2e-tests:**](/sormas-e2e-tests) Automated frontend tests addressing sormas-ui **and** API tests against sormas-rest. The API steps are partly used to prepare data for UI tests.
-- [**sormas-e2e-playwright:**](/sormas-e2e-playwright) End-to-end tests of the critical user workflows (Playwright for Java), against app copies started with `env/`; not in the default build, run by CI. See its [`README.md`](sormas-e2e-playwright/README.md)
+- [**sormas-e2e-playwright:**](/sormas-e2e-playwright) End-to-end tests of the 62 user workflows (Playwright for Java), against app copies started with `env/`; not in the default build, run by CI. See its [`README.md`](sormas-e2e-playwright/README.md)
 - [**sormas-ear:**](/sormas-ear) The ear needed to build the application
 - [**sormas-keycloak-service-provider:**](/sormas-keycloak-service-provider) Custom Keycloak SPI for SORMAS
 - [**sormas-rest:**](/sormas-rest) The REST interface; see [`sormas-rest/README.md`](sormas-rest/README.md)

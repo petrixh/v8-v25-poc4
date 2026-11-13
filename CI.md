@@ -38,8 +38,8 @@ The smoke uses a real-browser user agent (`HeadlessChrome` replaced with `Chrome
 ## End-to-end workflow tests
 
 The second job runs the Playwright workflow tests of [`sormas-e2e-playwright`](sormas-e2e-playwright/README.md): the
-critical user workflows (create a case, classify it, export, bulk edit, import, lab results, task mails, German locale,
-...) as browser tests against the built app, each test class on a freshly reset app copy, with database checks. A failed
+62 user workflows (create a case, classify it, export, bulk edit, import, lab results, task mails, German locale, ...)
+as browser tests against the built app, each test class on a freshly reset app copy, with database checks. A failed
 workflow test fails the job.
 
 1. **Skip if already green**, as in the build job.
@@ -49,8 +49,9 @@ workflow test fails the job.
 4. The artefacts and the Payara image for `env/`, as in the smoke step of the build job.
 5. Node 22 and Chromium for Playwright 1.63 with its system libraries (Playwright for Java 1.63.0 uses the same
    Chromium build).
-6. `mvn -B -ntp -f sormas-e2e-playwright/pom.xml verify -De2e.ports=18720-18721`: the suite starts two app copies
-   (`env/up.sh --no-build`, C1 or C2 as each workflow needs) and runs two workflows at a time.
+6. `mvn -B -ntp -f sormas-e2e-playwright/pom.xml verify -De2e.ports=18720-18722`: the suite starts three app copies
+   (`env/up.sh --no-build`, C1 or C2 as each workflow needs) and runs three workflows at a time. All 62 workflows run;
+   the job's timeout is 150 minutes (measured: 64 minutes, 61 of them the tests; 89 and 83 in the first run).
 7. The steps per workflow go in the job summary. Always: each copy's server log is saved and the copy removed
    (`env/down.sh`). On failure only: test reports, failure screenshots, the workflows' downloads and the copies' logs
    are uploaded as a diagnostics artifact kept for 3 days.

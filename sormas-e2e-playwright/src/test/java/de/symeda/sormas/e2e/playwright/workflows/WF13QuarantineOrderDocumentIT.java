@@ -107,7 +107,7 @@ class WF13QuarantineOrderDocumentIT extends WorkflowTest {
 			ui.closeWindow();
 			ui.settle(1500);
 		}
-		assertEquals(0, ui.windowCount(), "windows closed");
+		assertEquals(0, ui.windowsAfterClose(), "windows closed");
 		assertTrue(caseSectionText().contains(TEMPLATE), "listed in the case section");
 	}
 

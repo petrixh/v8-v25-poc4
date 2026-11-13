@@ -197,13 +197,13 @@ jobs:
           retention-days: 3
           if-no-files-found: ignore
 
-  # End-to-end workflow tests (sormas-e2e-playwright/README.md): the critical workflows of migration/workflows as
+  # End-to-end workflow tests (sormas-e2e-playwright/README.md): the 62 workflows of migration/workflows as
   # Playwright for Java tests, against app copies started with env/ from this job's own build. Runs next to the build
   # job, not after it. A failed workflow test fails this job.
   e2e:
     name: End-to-end workflow tests (Playwright)
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 150
     steps:
       - name: Skip if this commit already has a green run
         id: dedupe
@@ -290,12 +290,12 @@ jobs:
           npm install -g --no-fund --no-audit playwright@1.63.0
           playwright install --with-deps chromium
 
-      # Two app copies (ports 18720-18721), each test class on a freshly reset copy. The copies are kept for the log
+      # Three app copies (ports 18720-18722), each test class on a freshly reset copy. The copies are kept for the log
       # step below, which removes them.
       - name: Run the workflow tests
         id: e2e_run
         if: steps.dedupe.outputs.skip != 'true'
-        run: mvn -B -ntp -f sormas-e2e-playwright/pom.xml verify -De2e.ports=18720-18721 -De2e.keepCopies=true
+        run: mvn -B -ntp -f sormas-e2e-playwright/pom.xml verify -De2e.ports=18720-18722 -De2e.keepCopies=true
 
       # Test counts per workflow in the job summary
       - name: Workflow test report
@@ -319,7 +319,7 @@ jobs:
         if: ${{ always() && steps.e2e_run.outcome != 'skipped' && steps.dedupe.outputs.skip != 'true' }}
         run: |
           mkdir -p sormas-e2e-playwright/target/e2e/copies
-          for port in 18720 18721; do
+          for port in 18720 18721 18722; do
             p=sormas-e2e-$port
             docker logs "$p-app" > "sormas-e2e-playwright/target/e2e/copies/$p-app.log" 2>&1 || true
             APP_ENV_PORT=$port APP_ENV_PROJECT=$p env/down.sh || true

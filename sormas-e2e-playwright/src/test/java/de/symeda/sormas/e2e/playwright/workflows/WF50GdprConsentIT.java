@@ -60,7 +60,7 @@ class WF50GdprConsentIT extends WorkflowTest {
 	void step2() {
 		confirm().click();
 		ui.settle(1500);
-		assertEquals(0, ui.windowCount(), "window closed");
+		assertEquals(0, ui.windowsAfterClose(), "window closed");
 		assertTrue(ui.bodyText().contains("Überwachungsübersicht"), "start page");
 		ui.openView("Fälle");
 		assertTrue(ui.bodyText().contains("Fallverzeichnis"), "usable");
@@ -83,7 +83,7 @@ class WF50GdprConsentIT extends WorkflowTest {
 		assertTrue(ui.windowCheckbox(null).isChecked(), "ticked");
 		confirm().click();
 		ui.settle(1500);
-		assertEquals(0, ui.windowCount(), "window closed");
+		assertEquals(0, ui.windowsAfterClose(), "window closed");
 	}
 
 	@Test
@@ -95,7 +95,7 @@ class WF50GdprConsentIT extends WorkflowTest {
 		ui.settle(800);
 		ui.login("SurvOff");
 		ui.settle(2500);
-		assertEquals(0, ui.windowCount(), "no window");
+		assertEquals(0, ui.windowsAfterClose(), "no window");
 		assertTrue(ui.bodyText().contains("Überwachungsübersicht"), "start page");
 		// Data check: SurvOff stored as having consented
 		assertEquals("t", copy.sql("SELECT hasconsentedtogdpr FROM users WHERE username = 'SurvOff'"));

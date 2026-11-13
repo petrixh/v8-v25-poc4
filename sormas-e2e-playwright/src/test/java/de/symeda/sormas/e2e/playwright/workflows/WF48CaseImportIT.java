@@ -196,12 +196,12 @@ class WF48CaseImportIT extends WorkflowTest {
 		assertEquals("10/10 processed, 10 imported, 0 errors, 0 skipped as duplicates, 0 skipped",
 			String.format("%d/%d processed, %d imported, %d errors, %d skipped as duplicates, %d skipped", x[0], x[1], x[2], x[3], x[4], x[5]));
 		win().getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName("Close").setExact(true)).click();
-		ui.settle(1200);
+		ui.noModal();
 		if (ui.windowCount() > 0) {
 			ui.closeWindow();
-			ui.settle(1200);
+			ui.noModal();
 		}
-		assertEquals(0, ui.windowCount(), "windows closed");
+		assertEquals(0, ui.windowsAfterClose(), "windows closed");
 	}
 
 	@Test

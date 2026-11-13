@@ -83,7 +83,7 @@ class WF01DefaultPasswordAlertIT extends WorkflowTest {
 	void step3() {
 		remind().click();
 		ui.settle(2500);
-		assertEquals(0, ui.windowCount(), "windows closed");
+		assertEquals(0, ui.windowsAfterClose(), "windows closed");
 		assertTrue(ui.menuVisible(), "menu shown");
 		String t = ui.pageText();
 		assertTrue(t.contains("Surveillance Dashboard"), "start page");
@@ -108,7 +108,7 @@ class WF01DefaultPasswordAlertIT extends WorkflowTest {
 	void step5() {
 		remind().click();
 		ui.settle(2500);
-		assertEquals(0, ui.windowCount(), "windows closed");
+		assertEquals(0, ui.windowsAfterClose(), "windows closed");
 		assertTrue(ui.pageText().contains("Surveillance Dashboard"), "dashboard");
 		assertTrue(ui.menuVisible(), "menu shown");
 		// Data check: no password changed

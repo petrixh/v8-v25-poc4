@@ -49,7 +49,7 @@ browser.
 
 Measured on a 10-CPU arm64 host (2026-11-12): all 62 workflows with five copies (`-De2e.ports=18720-18724`) in
 about 15 minutes (62 classes, 288 steps; 11 runs: 14 min 55 s to 15 min 33 s). Starting a copy takes 85 to 100 s, a reset 30 to 50 s, a workflow 1 to 3 minutes. One workflow alone on one
-new copy: about 1.5 minutes. On the CI runner (4 vCPU) with three copies: about 80 minutes of tests, 90 minutes for the whole job (first run, 2026-11-12).
+new copy: about 1.5 minutes. On the CI runner (4 vCPU) with three copies: 61 minutes of tests and 64 minutes for the whole job in the last run (83 and 89 minutes in the first, when one hung step cost 10 minutes).
 
 ### Settings
 

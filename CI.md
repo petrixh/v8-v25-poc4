@@ -51,7 +51,7 @@ workflow test fails the job.
    Chromium build).
 6. `mvn -B -ntp -f sormas-e2e-playwright/pom.xml verify -De2e.ports=18720-18722`: the suite starts three app copies
    (`env/up.sh --no-build`, C1 or C2 as each workflow needs) and runs three workflows at a time. All 62 workflows run;
-   the job's timeout is 150 minutes (measured: the job took 89 minutes, 83 of them the tests).
+   the job's timeout is 150 minutes (measured: 64 minutes, 61 of them the tests; 89 and 83 in the first run).
 7. The steps per workflow go in the job summary. Always: each copy's server log is saved and the copy removed
    (`env/down.sh`). On failure only: test reports, failure screenshots, the workflows' downloads and the copies' logs
    are uploaded as a diagnostics artifact kept for 3 days.

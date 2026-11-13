@@ -909,6 +909,12 @@ vaadin-grid::part(last-header-row-cell) {
   border-bottom: 2px solid var(--sormas-focus-color);
 }
 
+/* Sort indicator only on a sorted column (Valo: none on unsorted sortable columns; Lumo shows a faint double arrow in
+   every sortable header, which made wide lists wider). The header still sorts on a click. */
+vaadin-grid-sorter:not([direction])::part(indicators) {
+  display: none;
+}
+
 /* Vaadin 8 column minimum and maximum widths (Grid.Column setMinimumWidth / setMaximumWidth): part names
    sormas-col-min-<px> and sormas-col-max-<px> on the header, body and footer cells of the column. One rule per width
    the app uses; a new width needs a rule here. */

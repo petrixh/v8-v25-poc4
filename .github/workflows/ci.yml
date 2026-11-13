@@ -295,7 +295,10 @@ jobs:
       - name: Run the workflow tests
         id: e2e_run
         if: steps.dedupe.outputs.skip != 'true'
-        run: mvn -B -ntp -f sormas-e2e-playwright/pom.xml verify -De2e.ports=18720-18722 -De2e.keepCopies=true
+        run: |
+          nproc; free -m
+          ( while :; do echo "$(date +%s) $(free -m | awk '/Mem:/{print $3, $7}') $(cut -d' ' -f1 /proc/loadavg)"; sleep 10; done ) > /tmp/mem.txt &
+          mvn -B -ntp -f sormas-e2e-playwright/pom.xml verify -De2e.ports=18720-18722 -De2e.keepCopies=true
 
       # Test counts per workflow in the job summary
       - name: Workflow test report
@@ -319,7 +322,8 @@ jobs:
         if: ${{ always() && steps.e2e_run.outcome != 'skipped' && steps.dedupe.outputs.skip != 'true' }}
         run: |
           mkdir -p sormas-e2e-playwright/target/e2e/copies
-          for port in 18720 18721 18722; do
+          echo "peak used MiB: $(sort -k2 -n -r /tmp/mem.txt | head -1)  peak load: $(sort -k4 -n -r /tmp/mem.txt | head -1)"
+          for port in 18720 18721 18722 18723 18724 18725 18726 18727; do
             p=sormas-e2e-$port
             docker logs "$p-app" > "sormas-e2e-playwright/target/e2e/copies/$p-app.log" 2>&1 || true
             APP_ENV_PORT=$port APP_ENV_PROJECT=$p env/down.sh || true

@@ -220,6 +220,29 @@ vaadin-button[theme~="tertiary-inline"] {
   --vaadin-input-field-readonly-border: none;
 }
 
+/* ... as plain text in the font colour, flush with the caption, without the drop-down and calendar icons: Valo's
+   .v-readonly fields (textfield.scss, combobox.scss, datefield.scss) dropped padding, background and buttons. Lumo
+   greys the value and keeps the field's inner indent and its (faint) buttons. Disabled fields: section 15 */
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker)[readonly]::part(input-field) {
+  color: var(--sormas-font-color);
+  padding-left: 0;
+  padding-right: 0;
+}
+
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker)[readonly] > :is(input, textarea),
+vaadin-select[readonly] > vaadin-select-value-button {
+  padding-left: 0;
+  color: var(--sormas-font-color);
+}
+
+:is(vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select, vaadin-date-picker, vaadin-time-picker)[readonly]::part(toggle-button) {
+  display: none;
+}
+
 /* ---------------------------------------------------------------------------------------------------------------
  * 3. Headings (global.scss h1-h4 colours on the Valo label sizes)
  * ------------------------------------------------------------------------------------------------------------- */

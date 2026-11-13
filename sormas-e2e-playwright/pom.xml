@@ -75,9 +75,10 @@
 				<configuration>
 					<forkCount>${e2e.forks}</forkCount>
 					<reuseForks>true</reuseForks>
+					<runOrder>alphabetical</runOrder>
+					<argLine>-De2e.forkNumber=${surefire.forkNumber}</argLine>
 					<systemPropertyVariables>
 						<e2e.copiesPerFork>${e2e.copiesPerFork}</e2e.copiesPerFork>
-						<e2e.forkNumber>${surefire.forkNumber}</e2e.forkNumber>
 						<e2e.ports>${e2e.ports}</e2e.ports>
 						<e2e.project>${e2e.project}</e2e.project>
 						<e2e.envDir>${e2e.envDir}</e2e.envDir>

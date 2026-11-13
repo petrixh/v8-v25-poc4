@@ -33,18 +33,18 @@ public class AppCopyExtension implements BeforeAllCallback, AfterAllCallback, Ex
 	public static final ZoneId APP_ZONE = ZoneId.of("Europe/Berlin");
 	private static final Namespace NS = Namespace.create(AppCopyExtension.class);
 
-	private static final class PoolResource implements ExtensionContext.Store.CloseableResource, AutoCloseable {
+	/**
+	 * One pool for the JVM's lifetime, closed by a shutdown hook. With several failsafe forks the JUnit launcher is called
+	 * once per test class, so a pool kept in the launcher's root store would be closed (copies removed) after every class.
+	 */
+	private static AppCopyPool shared;
 
-		final AppCopyPool pool = AppCopyPool.fromSystemProperties();
-
-		@Override
-		public void close() {
-			pool.close();
+	private static synchronized AppCopyPool pool(ExtensionContext context) {
+		if (shared == null) {
+			shared = AppCopyPool.fromSystemProperties();
+			Runtime.getRuntime().addShutdownHook(new Thread(shared::close, "e2e-pool-close"));
 		}
-	}
-
-	private static AppCopyPool pool(ExtensionContext context) {
-		return context.getRoot().getStore(NS).getOrComputeIfAbsent(PoolResource.class, k -> new PoolResource(), PoolResource.class).pool;
+		return shared;
 	}
 
 	@Override

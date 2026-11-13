@@ -124,7 +124,8 @@ public class TwoDigitYearsTest {
 		for (int year = 2000; year <= 2088; year++) {
 			LocalDate day = LocalDate.of(year, 6, 1);
 			LocalDate ref = DefaultDateFormat.ownFormatTwoDigitYears(new DatePicker.DatePickerI18n(), day).getReferenceDate();
-			for (int yy = 0; yy < 100; yy++) {
+			// from 01: a typed 00 is the year 0 for the client and 1 BC for java.util.Calendar, so not comparable here
+			for (int yy = 1; yy < 100; yy++) {
 				assertEquals(oldFormFieldYear(yy, day), clientYear(yy, ref), "today " + day + ", typed " + yy);
 			}
 		}

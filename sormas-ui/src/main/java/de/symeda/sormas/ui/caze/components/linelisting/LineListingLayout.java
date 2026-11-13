@@ -53,6 +53,7 @@ import de.symeda.sormas.ui.utils.components.linelisting.model.LineDto;
 import de.symeda.sormas.ui.utils.components.linelisting.person.PersonField;
 import de.symeda.sormas.ui.utils.components.linelisting.person.PersonFieldDto;
 import de.symeda.sormas.ui.utils.components.linelisting.section.LineListingSection;
+import de.symeda.sormas.ui.utils.fields.DefaultDateFormat;
 import de.symeda.sormas.ui.utils.fields.KeepValueComboBox;
 
 public class LineListingLayout extends VerticalLayout {
@@ -430,6 +431,7 @@ public class LineListingLayout extends VerticalLayout {
 			binder.forField(type).asRequired().bind(CaseLineDto.FACILITY_TYPE);
 
 			dateOfReport = new DatePicker();
+			DefaultDateFormat.applyOnAttach(dateOfReport);
 			dateOfReport.setId("lineListingDateOfReport_" + lineIndex);
 			dateOfReport.setWidth("100px");
 			binder.forField(dateOfReport).asRequired().bind(CaseLineDto.DATE_OF_REPORT);
@@ -474,6 +476,7 @@ public class LineListingLayout extends VerticalLayout {
 			binder.forField(person).bind(CaseLineDto.PERSON);
 
 			dateOfOnset = new DatePicker();
+			DefaultDateFormat.applyOnAttach(dateOfOnset);
 			dateOfOnset.setId("lineListingDateOfOnSet_" + lineIndex);
 			dateOfOnset.setWidth("100px");
 			dateOfOnset.addClassName(CssStyles.CAPTION_FIXED_WIDTH_100);

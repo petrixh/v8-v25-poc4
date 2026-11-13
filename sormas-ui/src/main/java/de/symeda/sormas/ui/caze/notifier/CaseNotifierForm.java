@@ -37,6 +37,7 @@ import de.symeda.sormas.api.person.notifier.NotifierDto;
 import de.symeda.sormas.api.utils.YesNoUnknown;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
+import de.symeda.sormas.ui.utils.fields.DefaultDateFormat;
 
 /**
  * Form for creating and editing notifier information.
@@ -166,11 +167,13 @@ public class CaseNotifierForm extends VerticalLayout {
         dateLayout.setWidthFull();
 
         notificationDateField = new DatePicker(I18nProperties.getCaption(Captions.Notification_dateOfNotification));
+        DefaultDateFormat.applyOnAttach(notificationDateField);
         notificationDateField.setWidthFull();
         notificationDateField.setEnabled(false); // Read-only as it's automatically set
         notificationDateField.setTooltipText(I18nProperties.getString(Strings.notificationNotificationDateInformation));
 
         diagnosticDateField = new DatePicker(I18nProperties.getCaption(Captions.SurveillanceReport_dateOfDiagnosis));
+        DefaultDateFormat.applyOnAttach(diagnosticDateField);
         diagnosticDateField.setWidthFull();
 
         dateLayout.add(notificationDateField, diagnosticDateField);

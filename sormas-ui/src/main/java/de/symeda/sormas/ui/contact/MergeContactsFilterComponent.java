@@ -32,6 +32,7 @@ import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.QueryDetails;
+import de.symeda.sormas.ui.utils.fields.DefaultDateFormat;
 
 @SuppressWarnings("serial")
 public class MergeContactsFilterComponent extends VerticalLayout {
@@ -88,6 +89,7 @@ public class MergeContactsFilterComponent extends VerticalLayout {
 		firstRowLayout.setWidth(100, Unit.PERCENTAGE);
 
 		dfCreationDateFrom = new DatePicker();
+		DefaultDateFormat.applyOnAttach(dfCreationDateFrom);
 		dfCreationDateFrom.setId(ContactCriteria.CREATION_DATE_FROM);
 		dfCreationDateFrom.setWidth(200, Unit.PIXELS);
 		dfCreationDateFrom.setPlaceholder(I18nProperties.getString(Strings.promptCreationDateFrom));
@@ -98,6 +100,7 @@ public class MergeContactsFilterComponent extends VerticalLayout {
 		firstRowLayout.add(dfCreationDateFrom);
 
 		dfCreationDateTo = new DatePicker();
+		DefaultDateFormat.applyOnAttach(dfCreationDateTo);
 		dfCreationDateTo.setId(ContactCriteria.CREATION_DATE_TO);
 		dfCreationDateTo.setWidth(200, Unit.PIXELS);
 		CssStyles.style(dfCreationDateTo, CssStyles.FORCE_CAPTION);

@@ -61,6 +61,7 @@ import de.symeda.sormas.api.utils.DateFormatHelper;
 import de.symeda.sormas.api.utils.YesNoUnknown;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.components.CheckboxSet;
+import de.symeda.sormas.ui.utils.fields.DatePickerLocale;
 import de.symeda.sormas.ui.utils.fields.KeepValueComboBox;
 
 /**
@@ -217,6 +218,7 @@ public class CustomizableFieldEditForm extends CustomLayout {
         DatePicker.DatePickerI18n dateI18n = new DatePicker.DatePickerI18n();
         dateI18n.setDateFormat(DateFormatHelper.getDateFormatPattern());
         defaultValueDateField.setI18n(dateI18n);
+        DatePickerLocale.applyOnAttach(defaultValueDateField);
 
         defaultValueDateTimeField = new DateTimePicker(defaultValueCaption);
         defaultValueDateTimeField.setWidth(100, Unit.PERCENTAGE);
@@ -225,6 +227,7 @@ public class CustomizableFieldEditForm extends CustomLayout {
         DatePicker.DatePickerI18n dateTimeI18n = new DatePicker.DatePickerI18n();
         dateTimeI18n.setDateFormat(DateFormatHelper.getDateFormatPattern());
         defaultValueDateTimeField.setDatePickerI18n(dateTimeI18n);
+        DatePickerLocale.applyOnAttach(defaultValueDateTimeField);
 
         optionsHeading = new Span(I18nProperties.getString(Strings.labelCustomizableFieldOptions));
         optionsHeading.addClassName(CssStyles.VAADIN_CAPTION);

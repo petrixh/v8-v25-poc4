@@ -270,7 +270,8 @@ public class Navigator implements Serializable {
 	}
 
 	void removeView(HasElement oldContent) {
-		if (oldContent != null) {
+		// the content may be gone already (afterNavigation removes a view it replaces by a new instance)
+		if (oldContent != null && display.getElement().equals(oldContent.getElement().getParent())) {
 			display.getElement().removeChild(oldContent.getElement());
 		}
 	}
@@ -347,6 +348,11 @@ public class Navigator implements Serializable {
 		} else if (newView == currentView) {
 			// Flow keeps the instance when the target class stays the same; Vaadin 8 created a new view for every
 			// navigation, and the views rely on that. Show a new instance of the target (no new leave or enter checks).
+			// The kept instance leaves the page now, before the client calls its components scheduled for this response
+			// run: Flow then drops them. Removed only by the refresh, they would still reach the browser, with the
+			// removed element as null (a filter combo box that triggered this navigation resets its connector:
+			// "Cannot read properties of null (reading '$connector')").
+			removeView((HasElement) newView);
 			internalRefresh = true;
 			ui.beforeClientResponse(ui, context -> {
 				try {

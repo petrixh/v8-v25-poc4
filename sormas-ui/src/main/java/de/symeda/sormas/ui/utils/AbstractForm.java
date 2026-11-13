@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BeanPropertySet;
@@ -331,6 +330,18 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 		return field;
 	}
 
+	/**
+	 * A custom field is not bound, so no binding shows its validation error: as Vaadin 7 painted it on every value
+	 * change, it is shown here (see {@link Field#showValidationLater()}).
+	 */
+	@SuppressWarnings({
+		"rawtypes",
+		"unchecked" })
+	private void addToCustomFields(Field field) {
+		customFields.add(field);
+		field.addValueChangeListener(e -> field.showValidationLater());
+	}
+
 	@SuppressWarnings("rawtypes")
 	protected <F extends Field> F addCustomField(String fieldId, Class<?> dataType, Class<F> fieldType) {
 		F field = getFieldGroup().getFieldFactory().createField(dataType, fieldType);
@@ -339,7 +350,7 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 		addDefaultAdditionalValidators(field, dataType);
 		setDefaultAdditionalParameters(field);
 		getContent().addComponent(field.asComponent(), fieldId);
-		customFields.add(field);
+		addToCustomFields(field);
 		return field;
 	}
 
@@ -351,7 +362,7 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 		addDefaultAdditionalValidators(field, dataType);
 		setDefaultAdditionalParameters(field);
 		getContent().addComponent(field.asComponent(), fieldId);
-		customFields.add(field);
+		addToCustomFields(field);
 		return field;
 	}
 
@@ -362,7 +373,7 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 		addDefaultAdditionalValidators(field, getValueType(field));
 		setDefaultAdditionalParameters(field);
 		getContent().addComponent(field.asComponent(), fieldId);
-		customFields.add(field);
+		addToCustomFields(field);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -374,7 +385,7 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 		addDefaultAdditionalValidators(field, dataType);
 		setDefaultAdditionalParameters(field);
 		getContent().addComponent(field.asComponent(), fieldId);
-		customFields.add(field);
+		addToCustomFields(field);
 		return field;
 	}
 
@@ -582,6 +593,8 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 	@Override
 	protected void setPresentationValue(T newValue) {
 		getFieldGroup().setItemDataSource(newValue);
+		// Vaadin 7 painted the custom fields with the form, with their errors (the bound fields: BeanFieldGroup)
+		customFields.forEach(Field::showValidationLater);
 	}
 
 	/**
@@ -668,8 +681,9 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 	 * is invalid (Vaadin 7 committed field by field, and a bound form's commit wrote its bean at once);</li>
 	 * <li>{@link #isModified()} is the Vaadin 7 modified state: any value change since the last read, commit or
 	 * discard;</li>
-	 * <li>errors are shown on a field only while {@code isValidationVisible()} and not for a required empty field (Vaadin
-	 * 7 showed only the required indicator there);</li>
+	 * <li>errors are shown on a field by the Vaadin 7 rule ({@link Field#applyValidationError(boolean, String)}): only
+	 * while {@code isValidationVisible()}; an empty required field gets the invalid state without a message. As Vaadin 7
+	 * painted them, they are shown when the bean is read, on every value change and after a refused commit;</li>
 	 * <li>a property without setter makes its field read-only.</li>
 	 * </ul>
 	 */
@@ -883,6 +897,7 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 				boolean wasModified = modified;
 				ReadOnlyWrites.readFromDataSource(Collections.singleton(field), () -> binding.read(bean));
 				modified = wasModified;
+				field.showValidationLater();
 			}
 		}
 
@@ -897,16 +912,15 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 
 		@SuppressWarnings("rawtypes")
 		private static void showValidationStatus(Field field, BindingValidationStatus<?> status) {
-			if (!(field instanceof HasValidation)) {
-				return;
-			}
-			HasValidation hasValidation = (HasValidation) field;
-			// an empty required field is not marked, but unparsable input (which empties the value) is, as in Vaadin 7
-			boolean show = status.isError()
-				&& field.isValidationVisible()
-				&& (field.getUnparsableInputError() != null || !(field.isRequired() && field.isEmpty()));
-			hasValidation.setErrorMessage(show ? status.getMessage().orElse(null) : null);
-			hasValidation.setInvalid(show);
+			field.applyValidationError(status.isError(), status.getMessage().orElse(null));
+		}
+
+		/**
+		 * Vaadin 7 painted the errors of all fields again at the end of the request (see
+		 * {@link Field#showValidationLater()}).
+		 */
+		private void showValidationLater() {
+			bindings.keySet().forEach(Field::showValidationLater);
 		}
 
 		public void unbind(Field<?> field) {
@@ -963,6 +977,9 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 				}
 			});
 			clearModified();
+			if (bean != null) {
+				showValidationLater();
+			}
 		}
 
 		/**
@@ -1000,17 +1017,23 @@ public abstract class AbstractForm<T> extends CustomField<T> implements WithChil
 				for (CommitHandler handler : new ArrayList<>(commitHandlers)) {
 					handler.preCommit(event);
 				}
-			} catch (CommitException e) {
-				throw toRuntimeException(e);
-			}
 
-			if (bean != null) {
-				Map<Field<?>, de.symeda.sormas.ui.utils.InvalidValueException> invalidFields = validateForCommit();
-				if (!invalidFields.isEmpty()) {
-					throw new FieldGroupInvalidValueException(invalidFields);
+				if (bean != null) {
+					Map<Field<?>, de.symeda.sormas.ui.utils.InvalidValueException> invalidFields = validateForCommit();
+					if (!invalidFields.isEmpty()) {
+						throw new FieldGroupInvalidValueException(invalidFields);
+					}
+					write();
+					clearModified();
 				}
-				write();
-				clearModified();
+			} catch (CommitException e) {
+				showValidationLater();
+				throw toRuntimeException(e);
+			} catch (RuntimeException e) {
+				// a refused commit: Vaadin 7 painted the errors of the fields afterwards, also when a pre-commit handler
+				// refused it before the fields were validated (AbstractEditForm: a custom field)
+				showValidationLater();
+				throw e;
 			}
 
 			try {

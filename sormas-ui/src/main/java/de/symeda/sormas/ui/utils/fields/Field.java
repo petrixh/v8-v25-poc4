@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
@@ -30,6 +31,7 @@ import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasTooltip;
@@ -38,6 +40,7 @@ import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.binder.ValueContext;
 import com.vaadin.flow.data.converter.Converter;
+import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -66,6 +69,9 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 	String DATA_NULL_REPRESENTATION = "sormas.nullRepresentation";
 	String DATA_NULL_SETTING_ALLOWED = "sormas.nullSettingAllowed";
 	String DATA_MODIFIED = "sormas.modified";
+	String DATA_VALIDATION_SHOWN = "sormas.validationShown";
+	String DATA_VALIDATION_PENDING = "sormas.validationPending";
+	String DATA_ERROR_TOOLTIP = "sormas.errorTooltip";
 
 	/**
 	 * The label of a field whose Vaadin 8 caption was empty (see {@link #setCaption(String)}).
@@ -152,14 +158,25 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 	}
 
 	/**
-	 * V7 description: shown as the field's tooltip.
+	 * V7 description: shown as the field's tooltip (below a required error, see
+	 * {@link #applyValidationError(boolean, String)}).
 	 */
 	default void setDescription(String description) {
 		ComponentUtil.setData(asComponent(), DATA_DESCRIPTION, description);
+		applyTooltip();
+	}
+
+	/**
+	 * The field's tooltip as Vaadin 7 showed it ({@code VTooltip}): the error message, if any, above the description.
+	 */
+	private void applyTooltip() {
+		String description = getDescription();
+		String error = (String) ComponentUtil.getData(asComponent(), DATA_ERROR_TOOLTIP);
+		String text = error == null ? description : description == null || description.isEmpty() ? error : error + "\n" + description;
 		if (this instanceof HasTooltip) {
-			((HasTooltip) this).setTooltipText(description);
+			((HasTooltip) this).setTooltipText(text);
 		} else {
-			getElement().setAttribute("title", description == null ? "" : description);
+			getElement().setAttribute("title", text == null ? "" : text);
 		}
 	}
 
@@ -172,7 +189,12 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 	 * value.
 	 */
 	default void setRequired(boolean required) {
+		boolean changed = required != isRequired();
 		setRequiredIndicatorVisible(required);
+		if (changed) {
+			// Vaadin 7 painted the field again, with or without its required error (see showValidation())
+			showValidationLater();
+		}
 	}
 
 	default String getRequiredError() {
@@ -345,7 +367,93 @@ public interface Field<T> extends HasElement, HasEnabled, HasStyle, HasSize {
 	 * V7 validation visibility. The form's binding status handler shows errors only when this is true (default).
 	 */
 	default void setValidationVisible(boolean validationVisible) {
+		boolean changed = validationVisible != isValidationVisible();
 		ComponentUtil.setData(asComponent(), DATA_VALIDATION_VISIBLE, validationVisible);
+		if (changed) {
+			// Vaadin 7 painted the field again, with or without its error (see showValidation())
+			showValidationLater();
+		}
+	}
+
+	/**
+	 * Shows or clears the field's validation error by the Vaadin 7 rule. Vaadin 7 painted a field's error
+	 * ({@code AbstractField.getErrorMessage()}) every time it painted the field: while {@link #isValidationVisible()} and
+	 * {@code validate()} failed with a message. An empty required field got the error style (a red frame) but no error
+	 * indicator or text ({@code shouldHideErrors()}), and only when its required error was not empty
+	 * ({@code InvalidValueException.isInvisible()}); a read-only field showed no required state at all. Here the error
+	 * style is the Flow invalid state, the text is the error message under the field.
+	 * <p>
+	 * Vaadin 7 still sent the hidden required error to the browser, which showed it in the field's tooltip on hover.
+	 * Here it is the field's tooltip text while the required error is shown, above the description, if any.
+	 *
+	 * @param error
+	 *            whether the field's value is invalid
+	 * @param message
+	 *            the error message
+	 * @return whether the error is shown
+	 */
+	default boolean applyValidationError(boolean error, String message) {
+		if (!(this instanceof HasValidation)) {
+			return false;
+		}
+		boolean requiredEmpty = getUnparsableInputError() == null && isRequired() && isEmpty();
+		String requiredError = getRequiredError();
+		boolean show = error
+			&& isValidationVisible()
+			&& (!requiredEmpty || (!isReadOnly() && requiredError != null && !requiredError.isEmpty()));
+		HasValidation hasValidation = (HasValidation) this;
+		hasValidation.setErrorMessage(show && !requiredEmpty ? message : null);
+		hasValidation.setInvalid(show);
+		String errorTooltip = show && requiredEmpty ? requiredError : null;
+		if (!Objects.equals(errorTooltip, ComponentUtil.getData(asComponent(), DATA_ERROR_TOOLTIP))) {
+			ComponentUtil.setData(asComponent(), DATA_ERROR_TOOLTIP, errorTooltip);
+			applyTooltip();
+		}
+		ComponentUtil.setData(asComponent(), DATA_VALIDATION_SHOWN, show ? Boolean.TRUE : null);
+		return show;
+	}
+
+	/**
+	 * Vaadin 7 painted a field's validation error each time it painted the field (see
+	 * {@link #applyValidationError(boolean, String)}): when the form was shown, when its value, required flag or
+	 * validation visibility changed, after a refused commit. This shows the error the same way, from
+	 * {@link #validateValue()}. It clears only an error this rule has shown, so an error a form sets itself (Flow has one
+	 * invalid state for both) stays.
+	 */
+	default void showValidation() {
+		boolean error = false;
+		String message = null;
+		try {
+			validateValue();
+		} catch (InvalidValueException e) {
+			error = true;
+			message = e.getMessage();
+		} catch (RuntimeException e) {
+			// a validator or converter that cannot run on the current value: leave the field as it is
+			return;
+		}
+		if (error) {
+			applyValidationError(true, message);
+		} else if (Boolean.TRUE.equals(ComponentUtil.getData(asComponent(), DATA_VALIDATION_SHOWN))) {
+			applyValidationError(false, null);
+		}
+	}
+
+	/**
+	 * {@link #showValidation()} once, at the end of the current request, when the server-side changes of the request are
+	 * done, as Vaadin 7 painted the field at the end of the request. Calls within one request are merged.
+	 */
+	default void showValidationLater() {
+		Component component = asComponent();
+		VaadinRequest request = VaadinRequest.getCurrent();
+		if (request != null && request == ComponentUtil.getData(component, DATA_VALIDATION_PENDING)) {
+			return;
+		}
+		ComponentUtil.setData(component, DATA_VALIDATION_PENDING, request);
+		component.getElement().getNode().runWhenAttached(ui -> ui.beforeClientResponse(component, context -> {
+			ComponentUtil.setData(component, DATA_VALIDATION_PENDING, null);
+			showValidation();
+		}));
 	}
 
 	default boolean isInvalidCommitted() {

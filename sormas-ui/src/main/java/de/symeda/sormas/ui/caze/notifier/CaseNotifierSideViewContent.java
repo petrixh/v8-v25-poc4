@@ -36,6 +36,7 @@ import de.symeda.sormas.api.person.notifier.NotifierDto;
 import de.symeda.sormas.api.utils.YesNoUnknown;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.SormasFieldGroupFieldFactory;
+import de.symeda.sormas.ui.utils.fields.DefaultDateFormat;
 
 /**
  * Side view content for case notifiers.
@@ -110,6 +111,7 @@ public class CaseNotifierSideViewContent extends VerticalLayout {
 
         // Date of notification
         DatePicker notificationDateField = new DatePicker(I18nProperties.getCaption(Captions.Notification_dateOfNotification));
+        DefaultDateFormat.applyOnAttach(notificationDateField);
         if (surveillanceReport != null && surveillanceReport.getReportDate() != null) {
             notificationDateField.setValue(surveillanceReport.getReportDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
         } else {
@@ -122,6 +124,7 @@ public class CaseNotifierSideViewContent extends VerticalLayout {
 
         // Date of diagnostic
         DatePicker diagnosticDateField = new DatePicker(I18nProperties.getCaption(Captions.SurveillanceReport_dateOfDiagnosis));
+        DefaultDateFormat.applyOnAttach(diagnosticDateField);
         if (surveillanceReport != null && surveillanceReport.getDateOfDiagnosis() != null) {
             diagnosticDateField.setValue(surveillanceReport.getDateOfDiagnosis().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
         }

@@ -25,6 +25,7 @@ import com.vaadin.flow.function.ValueProvider;
 import de.symeda.sormas.api.customizablefield.CustomizableFieldMetadataDto;
 import de.symeda.sormas.api.customizablefield.CustomizableFieldValueDto;
 import de.symeda.sormas.api.utils.DateFormatHelper;
+import de.symeda.sormas.ui.utils.fields.DatePickerLocale;
 
 /**
  * Concrete {@link CustomizableFieldInput} for {@link de.symeda.sormas.api.customizablefield.CustomizableFieldType#DATE}.
@@ -77,6 +78,7 @@ public class CustomizableFieldInputDate extends CustomizableFieldInput<LocalDate
 		DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
 		i18n.setDateFormat(DateFormatHelper.getDateFormatPattern());
 		dateField.setI18n(i18n);
+		DatePickerLocale.applyOnAttach(dateField);
 
 		// Apply any value that arrived before the component was first rendered.
 		if (pendingValue != null) {

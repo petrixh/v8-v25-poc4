@@ -35,6 +35,7 @@ import de.symeda.sormas.ui.ViewModelProviders;
 import de.symeda.sormas.ui.utils.ButtonHelper;
 import de.symeda.sormas.ui.utils.CssStyles;
 import de.symeda.sormas.ui.utils.QueryDetails;
+import de.symeda.sormas.ui.utils.fields.DefaultDateFormat;
 
 @SuppressWarnings("serial")
 public class MergeCasesFilterComponent extends VerticalLayout {
@@ -99,6 +100,7 @@ public class MergeCasesFilterComponent extends VerticalLayout {
 		firstRowLayout.setWidth(100, Unit.PERCENTAGE);
 
 		dfCreationDateFrom = new DatePicker();
+		DefaultDateFormat.applyOnAttach(dfCreationDateFrom);
 		dfCreationDateFrom.setId(CaseCriteria.CREATION_DATE_FROM);
 		dfCreationDateFrom.setWidth(120, Unit.PIXELS);
 		dfCreationDateFrom.setPlaceholder(I18nProperties.getString(Strings.promptCreationDateFrom));
@@ -109,6 +111,7 @@ public class MergeCasesFilterComponent extends VerticalLayout {
 		firstRowLayout.add(dfCreationDateFrom);
 
 		dfCreationDateTo = new DatePicker();
+		DefaultDateFormat.applyOnAttach(dfCreationDateTo);
 		dfCreationDateTo.setId(CaseCriteria.CREATION_DATE_TO);
 		dfCreationDateTo.setWidth(120, Unit.PIXELS);
 		CssStyles.style(dfCreationDateTo, CssStyles.FORCE_CAPTION);
@@ -217,6 +220,8 @@ public class MergeCasesFilterComponent extends VerticalLayout {
 		cbNewCaseDateType = new ComboBox<>();
 		dfNewCaseDateFrom = new DatePicker();
 		dfNewCaseDateTo = new DatePicker();
+		DefaultDateFormat.applyOnAttach(dfNewCaseDateFrom);
+		DefaultDateFormat.applyOnAttach(dfNewCaseDateTo);
 		ComboBox<Integer> cbResultLimit = new ComboBox<>();
 
 		cbNewCaseDateType.setId(CaseCriteria.NEW_CASE_DATE_TYPE);

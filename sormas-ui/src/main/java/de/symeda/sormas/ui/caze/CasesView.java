@@ -103,6 +103,7 @@ import de.symeda.sormas.ui.utils.VaadinUiUtil;
 import de.symeda.sormas.ui.utils.components.expandablebutton.ExpandableButton;
 import de.symeda.sormas.ui.utils.components.popupmenu.PopupMenu;
 import de.symeda.sormas.ui.utils.fields.ComboBox;
+import de.symeda.sormas.ui.utils.fields.DefaultDateFormat;
 import de.symeda.sormas.ui.utils.fields.OptionGroup;
 import de.symeda.sormas.ui.utils.grid.renderers.HtmlRenderer;
 
@@ -949,6 +950,7 @@ public class CasesView extends AbstractView implements HasName {
 		DatePicker toReferenceDate = criteria.getFollowUpVisitsTo() == null
 			? new DatePicker(I18nProperties.getCaption(Captions.to), LocalDate.now())
 			: new DatePicker(I18nProperties.getCaption(Captions.to), UtilDate.toLocalDate(criteria.getFollowUpVisitsTo()));
+		DefaultDateFormat.applyOnAttach(toReferenceDate);
 		toReferenceDate.setId("toReferenceDateField");
 
 		LocalDate fromReferenceLocal = criteria.getFollowUpVisitsFrom() == null
@@ -956,6 +958,7 @@ public class CasesView extends AbstractView implements HasName {
 			: UtilDate.toLocalDate(criteria.getFollowUpVisitsFrom());
 
 		DatePicker fromReferenceDate = new DatePicker(I18nProperties.getCaption(Captions.from), fromReferenceLocal);
+		DefaultDateFormat.applyOnAttach(fromReferenceDate);
 		fromReferenceDate.setId("fromReferenceDateField");
 
 		Button minusDaysButton = ButtonHelper.createButton(I18nProperties.getCaption(Captions.caseMinusDays), e -> {

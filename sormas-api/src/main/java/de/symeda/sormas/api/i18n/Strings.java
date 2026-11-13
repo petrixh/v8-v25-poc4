@@ -20,6 +20,7 @@ public interface Strings {
 	String between = "between";
 	String bpm = "bpm";
 	String by = "by";
+	String cancel = "cancel";
 	String caseDefinitionForDisease = "caseDefinitionForDisease";
 	String checkboxSetTickAnAnswerForAll = "checkboxSetTickAnAnswerForAll";
 	String classificationAllOf = "classificationAllOf";
@@ -1995,6 +1996,7 @@ public interface Strings {
 	String subheadingDiagnosisCriteria = "subheadingDiagnosisCriteria";
 	String text = "text";
 	String toCase = "toCase";
+	String today = "today";
 	String total = "total";
 	String transmissionEndDate = "transmissionEndDate";
 	String transmissionStartDate = "transmissionStartDate";

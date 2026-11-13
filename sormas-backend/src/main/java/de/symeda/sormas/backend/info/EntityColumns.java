@@ -135,7 +135,8 @@ public class EntityColumns {
 				.map(type -> String.format(I18nProperties.getString(Strings.listOf), DataHelper.getHumanClassName((Class<?>) type)))
 				.orElseGet(fieldType::getSimpleName);
 		} else if (Map.class.isAssignableFrom(fieldType)) {
-			Type[] generics = TypeUtils.getTypeArguments((ParameterizedType) fieldData.getField().getGenericType()).values().toArray(new Type[0]);
+			// declaration order (key, value); the values of TypeUtils.getTypeArguments come in hash order
+			Type[] generics = ((ParameterizedType) fieldData.getField().getGenericType()).getActualTypeArguments();
 			if (generics.length != 2) {
 				throw new IllegalStateException("Could not clearly determine key and value generics.");
 			}

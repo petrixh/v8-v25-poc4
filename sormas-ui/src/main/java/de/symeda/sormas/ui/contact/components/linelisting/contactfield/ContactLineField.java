@@ -24,6 +24,7 @@ import de.symeda.sormas.ui.utils.fields.CustomField;
 import de.symeda.sormas.ui.utils.components.linelisting.person.PersonField;
 import de.symeda.sormas.ui.utils.components.linelisting.person.PersonFieldDto;
 import de.symeda.sormas.ui.utils.components.multidayselector.MultiDaySelectorDto;
+import de.symeda.sormas.ui.utils.fields.DefaultDateFormat;
 
 public class ContactLineField extends CustomField<ContactLineFieldDto> {
 
@@ -39,6 +40,7 @@ public class ContactLineField extends CustomField<ContactLineFieldDto> {
 
 	public ContactLineField() {
 		dateOfReport = new DatePicker();
+		DefaultDateFormat.applyOnAttach(dateOfReport);
 		multiDay = new MultiDayContactField(dateOfReport);
 		typeOfContact = new ComboBox<>();
 		relationToCase = new ComboBox<>();

@@ -39,6 +39,7 @@ import de.symeda.sormas.api.utils.ApplicableToPathogenTests;
 import de.symeda.sormas.api.utils.Diseases;
 import de.symeda.sormas.api.utils.fieldaccess.UiFieldAccessCheckers;
 import de.symeda.sormas.api.utils.fieldvisibility.FieldVisibilityCheckers;
+import de.symeda.sormas.ui.utils.fields.DatePickerLocale;
 import de.symeda.sormas.ui.utils.fields.KeepValueComboBox;
 
 /**
@@ -110,6 +111,7 @@ public abstract class FormComponent<T> extends VerticalLayout {
 		DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
 		i18n.setDateFormat(DateFormatHelper.getDateFormatPattern());
 		field.setI18n(i18n);
+		DatePickerLocale.applyOwnLocaleOnAttach(field);
 		trackField(field);
 		return field;
 	}

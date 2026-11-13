@@ -47,6 +47,7 @@ import de.symeda.sormas.api.i18n.Strings;
 import de.symeda.sormas.api.utils.AccessDeniedException;
 import de.symeda.sormas.api.utils.OutdatedEntityException;
 import de.symeda.sormas.api.utils.ValidationRuntimeException;
+import de.symeda.sormas.ui.utils.NotificationHelper;
 
 public class SormasErrorHandler implements ErrorHandler {
 
@@ -126,6 +127,7 @@ public class SormasErrorHandler implements ErrorHandler {
 			descriptionDiv.setText(description);
 		}
 		Div content = new Div(captionDiv, descriptionDiv);
+		content.addClassName(NotificationHelper.CLOSABLE_STYLE);
 
 		Notification notification = new Notification(content);
 		notification.setDuration(0);

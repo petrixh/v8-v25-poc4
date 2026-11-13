@@ -1629,3 +1629,38 @@ vaadin-custom-field[invalid] > vaadin-horizontal-layout > :is(vaadin-combo-box, 
 vaadin-custom-field[invalid] > vaadin-horizontal-layout > vaadin-custom-field > vaadin-date-picker:not([readonly]) {
   --vaadin-input-field-border-color: var(--lumo-error-color);
 }
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 19. Notifications (ticket 3-06). The SORMAS theme gave every Valo notification the closable style
+ *     (components/notification.scss: valo-notification-closable-style): caption and description side by side on one
+ *     bar, and a round close icon at the right end; a click anywhere on the notification closed it, as here
+ *     (NotificationHelper, SormasErrorHandler: class NotificationHelper.CLOSABLE_STYLE on the content). The icon is
+ *     drawn on the content, so clicking it is a click on the content. Timing unchanged (M0 P10c).
+ * ------------------------------------------------------------------------------------------------------------- */
+.sormas-notification-closable {
+  display: flex;
+  align-items: center;
+  gap: var(--lumo-space-l);
+  cursor: pointer;
+}
+
+.sormas-notification-closable::after {
+  /* Valo: "\00d7" in a 25px circle in the text colour at half opacity, full opacity on hover */
+  content: "\00d7";
+  flex: none;
+  margin-left: auto;
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  line-height: 17px;
+  font-size: 16px;
+  text-align: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  opacity: 0.5;
+  transition: opacity 200ms;
+}
+
+.sormas-notification-closable:hover::after {
+  opacity: 1;
+}

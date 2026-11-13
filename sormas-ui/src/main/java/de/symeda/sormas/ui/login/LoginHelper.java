@@ -37,6 +37,7 @@ import de.symeda.sormas.api.i18n.I18nProperties;
 import de.symeda.sormas.api.user.UserDto;
 import de.symeda.sormas.api.user.UserRight;
 import de.symeda.sormas.api.user.UserRoleDto;
+import de.symeda.sormas.ui.utils.LeavePageWarning;
 
 public final class LoginHelper {
 
@@ -113,6 +114,8 @@ public final class LoginHelper {
 	 */
 	public static boolean logout() {
 
+		// logging out discards unsaved changes without asking, as in Vaadin 8: no browser leave-page warning
+		LeavePageWarning.leaveWithoutWarning(UI.getCurrent());
 		if (!AuthProvider.getProvider(FacadeProvider.getConfigFacade()).isDefaultProvider()) {
 			UI.getCurrent().getPage().setLocation("logout");
 		} else {

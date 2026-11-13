@@ -133,6 +133,16 @@
 					<groupId>com.vaadin</groupId>
 					<artifactId>vaadin-dev</artifactId>
 				</exclusion>
+				<!-- Collaboration Engine (real-time collaboration) and the Vaadin AI components (chat and LLM orchestration):
+					SORMAS uses neither (no reference in the code); both come along with vaadin-core and are Apache 2.0 (3-08, CR35) -->
+				<exclusion>
+					<groupId>com.vaadin</groupId>
+					<artifactId>collaboration-engine</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.vaadin</groupId>
+					<artifactId>vaadin-ai-core-flow</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<!-- Vaadin commercial component (M0 D10): Rich Text Editor for the rich-text fields (utils/fields/SormasRichTextArea).

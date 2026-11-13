@@ -915,6 +915,28 @@ vaadin-grid-sorter:not([direction])::part(indicators) {
   display: none;
 }
 
+/* The sorted column keeps its width, as in Valo: the arrow follows the caption, or lies over the caption's end where
+   the caption fills the column (Lumo shortens the caption with "..." instead). Caption in the header colour, as in
+   Valo (Lumo: the selection colour). */
+vaadin-grid-sorter[direction] {
+  position: relative;
+  box-sizing: border-box;
+  padding-right: 12px;
+  color: inherit;
+}
+
+vaadin-grid-sorter[direction]::part(content) {
+  flex: none;
+}
+
+vaadin-grid-sorter[direction]::part(indicators) {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+}
+
 /* Vaadin 8 column minimum and maximum widths (Grid.Column setMinimumWidth / setMaximumWidth): part names
    sormas-col-min-<px> and sormas-col-max-<px> on the header, body and footer cells of the column. One rule per width
    the app uses; a new width needs a rule here. */

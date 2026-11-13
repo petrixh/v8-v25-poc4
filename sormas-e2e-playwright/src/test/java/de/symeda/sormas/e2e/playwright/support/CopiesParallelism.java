@@ -10,7 +10,7 @@ public class CopiesParallelism implements ParallelExecutionConfigurationStrategy
 
 	@Override
 	public ParallelExecutionConfiguration createConfiguration(ConfigurationParameters parameters) {
-		int copies = AppCopyPool.ports(System.getProperty("e2e.ports", "18720-18721")).size();
+		int copies = AppCopyPool.copyPorts().size();
 		return DefaultParallelExecutionConfigurationStrategy.FIXED.createConfiguration(new ConfigurationParameters() {
 
 			@Override

@@ -62,9 +62,25 @@ public final class AppCopyPool implements AutoCloseable {
 			envDir,
 			out.resolve("copies"),
 			System.getProperty("e2e.project", "sormas-e2e"),
-			ports(System.getProperty("e2e.ports", "18720-18721")),
+			copyPorts(),
 			Boolean.parseBoolean(System.getProperty("e2e.keepCopies", "false")),
 			Boolean.parseBoolean(System.getProperty("e2e.reuseCopies", "false")));
+	}
+
+	/**
+	 * The ports of this JVM's copies. Without forks (or with e2e.forkNumber 1) all of e2e.ports. With several forks each
+	 * fork takes its own block of e2e.copiesPerFork consecutive ports counted from the first port of e2e.ports, so no two
+	 * forks share a port, a compose project or a container name.
+	 */
+	static List<Integer> copyPorts() {
+		List<Integer> all = ports(System.getProperty("e2e.ports", "18720-18721"));
+		int perFork = Integer.getInteger("e2e.copiesPerFork", 0);
+		if (perFork <= 0) {
+			return all;
+		}
+		int fork = Integer.parseInt(System.getProperty("e2e.forkNumber", "1"));
+		int first = all.get(0) + (fork - 1) * perFork;
+		return ports(first + "-" + (first + perFork - 1));
 	}
 
 	/** "18720-18724" or "18720,18722" */

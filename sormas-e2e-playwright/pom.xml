@@ -29,6 +29,9 @@
 		<e2e.keepCopies>false</e2e.keepCopies>
 		<e2e.reuseCopies>false</e2e.reuseCopies>
 		<e2e.headless>true</e2e.headless>
+		<!-- JVM forks (failsafe forkCount); with e2e.copiesPerFork > 0 each fork owns that many consecutive ports counted from the first of e2e.ports -->
+		<e2e.forks>1</e2e.forks>
+		<e2e.copiesPerFork>0</e2e.copiesPerFork>
 	</properties>
 
 	<dependencies>
@@ -70,7 +73,11 @@
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<version>3.5.6</version>
 				<configuration>
+					<forkCount>${e2e.forks}</forkCount>
+					<reuseForks>true</reuseForks>
 					<systemPropertyVariables>
+						<e2e.copiesPerFork>${e2e.copiesPerFork}</e2e.copiesPerFork>
+						<e2e.forkNumber>${surefire.forkNumber}</e2e.forkNumber>
 						<e2e.ports>${e2e.ports}</e2e.ports>
 						<e2e.project>${e2e.project}</e2e.project>
 						<e2e.envDir>${e2e.envDir}</e2e.envDir>

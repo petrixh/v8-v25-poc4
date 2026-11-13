@@ -53,10 +53,15 @@ class WF14CreateTaskIT extends WorkflowTest {
 
 	@Test
 	@Order(2)
-	@DisplayName("2. Case investigation, due in 3 days, High, assignee SurvOff, comment (GDPR hint confirmed); save: listed in the case's tasks as pending")
+	@DisplayName("2. Case investigation, due in 3 days (two-digit years 70 and 30 read as 1970 and 2030 first), High, assignee SurvOff, comment (GDPR hint confirmed); save: listed in the case's tasks as pending")
 	void step2() {
 		pick("Task type", "Case inv", "^case investigation$");
 		var due = ui.dateInput(1, true);
+		// a typed two-digit year is read as in the old app: at most 10 years ahead, 89 back (ticket 3-07, CR04)
+		ui.fillDate(due, "3/14/70", 400);
+		assertEquals("3/14/1970", due.inputValue(), "two-digit year 70");
+		ui.fillDate(due, "3/14/30", 400);
+		assertEquals("3/14/2030", due.inputValue(), "two-digit year 30");
 		ui.fillDate(due, en(3), 400);
 		pick("Priority", "High", "^high$");
 		pick("Assigned to", "Surv", "OFFICER");

@@ -35,6 +35,7 @@ import javax.naming.CannotProceedException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasValue;
@@ -230,7 +231,7 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 			}
 		}
 
-		dirty = false;
+		setDirty(false);
 		addDirtyHandler(fieldGroups);
 	}
 
@@ -327,6 +328,9 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 					}
 				} else {
 					dirty = true;
+				}
+				if (dirty) {
+					LeavePageWarning.setUnsavedChanges(this, true);
 				}
 			})));
 		}
@@ -562,7 +566,7 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 		} else {
 			// NOOP
 		}
-		dirty = false;
+		setDirty(false);
 
 		onCommit();
 		commited = true;
@@ -683,7 +687,7 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 		} else {
 			// NOOP
 		}
-		dirty = false;
+		setDirty(false);
 
 		onDiscard();
 		onDone();
@@ -1010,6 +1014,13 @@ public class CommitDiscardWrapperComponent<C extends Component> extends Vertical
 
 	public void setDirty(boolean dirty) {
 		this.dirty = dirty;
+		LeavePageWarning.setUnsavedChanges(this, dirty);
+	}
+
+	@Override
+	protected void onAttach(AttachEvent attachEvent) {
+		super.onAttach(attachEvent);
+		LeavePageWarning.install(this);
 	}
 
 	//In case of having delete right without edit right the delete button should remain enabled

@@ -220,6 +220,29 @@ vaadin-button[theme~="tertiary-inline"] {
   --vaadin-input-field-readonly-border: none;
 }
 
+/* ... as plain text in the font colour, flush with the caption, without the drop-down and calendar icons: Valo's
+   .v-readonly fields (textfield.scss, combobox.scss, datefield.scss) dropped padding, background and buttons. Lumo
+   greys the value and keeps the field's inner indent and its (faint) buttons. Disabled fields: section 15 */
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker)[readonly]::part(input-field) {
+  color: var(--sormas-font-color);
+  padding-left: 0;
+  padding-right: 0;
+}
+
+:is(vaadin-text-field, vaadin-text-area, vaadin-password-field, vaadin-email-field, vaadin-integer-field,
+    vaadin-number-field, vaadin-big-decimal-field, vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select,
+    vaadin-date-picker, vaadin-date-time-picker, vaadin-time-picker)[readonly] > :is(input, textarea),
+vaadin-select[readonly] > vaadin-select-value-button {
+  padding-left: 0;
+  color: var(--sormas-font-color);
+}
+
+:is(vaadin-combo-box, vaadin-multi-select-combo-box, vaadin-select, vaadin-date-picker, vaadin-time-picker)[readonly]::part(toggle-button) {
+  display: none;
+}
+
 /* ---------------------------------------------------------------------------------------------------------------
  * 3. Headings (global.scss h1-h4 colours on the Valo label sizes)
  * ------------------------------------------------------------------------------------------------------------- */
@@ -884,6 +907,34 @@ vaadin-grid::part(header-cell) {
 
 vaadin-grid::part(last-header-row-cell) {
   border-bottom: 2px solid var(--sormas-focus-color);
+}
+
+/* Sort indicator only on a sorted column (Valo: none on unsorted sortable columns; Lumo shows a faint double arrow in
+   every sortable header, which made wide lists wider). The header still sorts on a click. */
+vaadin-grid-sorter:not([direction])::part(indicators) {
+  display: none;
+}
+
+/* The sorted column keeps its width, as in Valo: the arrow follows the caption, or lies over the caption's end where
+   the caption fills the column (Lumo shortens the caption with "..." instead). Caption in the header colour, as in
+   Valo (Lumo: the selection colour). */
+vaadin-grid-sorter[direction] {
+  position: relative;
+  box-sizing: border-box;
+  padding-right: 12px;
+  color: inherit;
+}
+
+vaadin-grid-sorter[direction]::part(content) {
+  flex: none;
+}
+
+vaadin-grid-sorter[direction]::part(indicators) {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
 }
 
 /* Vaadin 8 column minimum and maximum widths (Grid.Column setMinimumWidth / setMaximumWidth): part names
@@ -1599,4 +1650,39 @@ vaadin-custom-field[invalid] > :is(vaadin-radio-group, vaadin-checkbox-group):no
 vaadin-custom-field[invalid] > vaadin-horizontal-layout > :is(vaadin-combo-box, vaadin-time-picker):not([readonly]),
 vaadin-custom-field[invalid] > vaadin-horizontal-layout > vaadin-custom-field > vaadin-date-picker:not([readonly]) {
   --vaadin-input-field-border-color: var(--lumo-error-color);
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * 19. Notifications (ticket 3-06). The SORMAS theme gave every Valo notification the closable style
+ *     (components/notification.scss: valo-notification-closable-style): caption and description side by side on one
+ *     bar, and a round close icon at the right end; a click anywhere on the notification closed it, as here
+ *     (NotificationHelper, SormasErrorHandler: class NotificationHelper.CLOSABLE_STYLE on the content). The icon is
+ *     drawn on the content, so clicking it is a click on the content. Timing unchanged (M0 P10c).
+ * ------------------------------------------------------------------------------------------------------------- */
+.sormas-notification-closable {
+  display: flex;
+  align-items: center;
+  gap: var(--lumo-space-l);
+  cursor: pointer;
+}
+
+.sormas-notification-closable::after {
+  /* Valo: "\00d7" in a 25px circle in the text colour at half opacity, full opacity on hover */
+  content: "\00d7";
+  flex: none;
+  margin-left: auto;
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  line-height: 17px;
+  font-size: 16px;
+  text-align: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  opacity: 0.5;
+  transition: opacity 200ms;
+}
+
+.sormas-notification-closable:hover::after {
+  opacity: 1;
 }

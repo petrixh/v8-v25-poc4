@@ -134,6 +134,8 @@ public final class NotificationHelper {
 		if (description != null && !description.isEmpty()) {
 			content.add(createText(new Div(), description, htmlContentAllowed));
 		}
+		// the theme draws the close icon of the Vaadin 8 notifications on it (CLOSABLE_STYLE)
+		content.addClassName(CLOSABLE_STYLE);
 		content.addClickListener(e -> notification.close());
 		notification.add(content);
 		return notification;
@@ -151,6 +153,12 @@ public final class NotificationHelper {
 	}
 
 	private static final String DELAY_PROPERTY = "sormasDelayMsec";
+
+	/**
+	 * Class name of a notification's content that closes it on a click: caption and description on one line and a
+	 * close icon at the end, as Valo's closable notification style (theme sormas.css).
+	 */
+	public static final String CLOSABLE_STYLE = "sormas-notification-closable";
 
 	/**
 	 * Installed once per attach: one-shot listeners on the document that close the notification

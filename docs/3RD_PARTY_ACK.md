@@ -36,7 +36,9 @@ are in the upstream packages.
 licensed under Apache 2.0 or MIT (your choice): https://github.com/visjs/vis-network
 
 **Highcharts**, delivered inside the Vaadin Charts component (`com.vaadin:vaadin-charts-flow`), is by Highsoft AS and is
-used under the Vaadin Charts commercial licence, not under SORMAS's GPL v3. To be confirmed by the licence holder.
+used under the Vaadin Charts commercial licence, not under SORMAS's GPL v3. The Vaadin licence that allows the use of
+Vaadin Charts includes the Highcharts licence for the Highcharts library bundled with Vaadin Charts; it does not cover
+other copies of Highcharts used directly or loaded from elsewhere.
 
 **HighChart.java** (`sormas-ui/src/main/java/de/symeda/sormas/ui/highcharts/`) is based on `highcharts-vaadin7`
 by Stefan Endrullis, https://github.com/xylo/highcharts-vaadin7, Apache 2.0.

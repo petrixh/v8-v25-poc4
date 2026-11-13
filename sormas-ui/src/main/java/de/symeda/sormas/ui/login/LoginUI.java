@@ -19,6 +19,7 @@ package de.symeda.sormas.ui.login;
 
 import java.io.IOException;
 import java.util.function.BooleanSupplier;
+import java.util.regex.Pattern;
 
 import jakarta.inject.Inject;
 import jakarta.security.enterprise.AuthenticationStatus;
@@ -73,6 +74,12 @@ public final class LoginUI {
 	 * also after a logout (migration ticket 2b-05).
 	 */
 	static final String TARGET_PARAMETER = "target";
+
+	/**
+	 * Route path of a login target: segments of letters, digits, {@code -}, {@code _}, {@code .} and {@code ~}, separated
+	 * by single slashes. No leading slash, backslash, scheme ({@code :}), percent-encoding or other characters.
+	 */
+	private static final Pattern ROUTE_PATH = Pattern.compile("[A-Za-z0-9_.~-]+(/[A-Za-z0-9_.~-]+)*");
 
 	private LoginUI() {
 		// Hide Utility Class Constructor
@@ -131,12 +138,28 @@ public final class LoginUI {
 	}
 
 	/**
-	 * @return the target as a path inside this application, without leading slashes: the parameter comes from the
-	 *         address, so it must not lead to another site ({@code //host}, {@code /\host}; browsers drop tabs and line
-	 *         breaks in addresses)
+	 * @return the target if it names a route of this application ({@code <route>[?<query>]}, as the login check keeps
+	 *         it), otherwise the start page ({@code ""}): the parameter comes from the address, so it must not lead to
+	 *         another site ({@code //host}, {@code /\host}, {@code https:}) or to another path on this server
+	 *         ({@code ../metrics}, also percent-encoded). Browsers drop tabs and line breaks in addresses, so they are
+	 *         dropped before the check (migration ticket 3-07, CR15).
 	 */
 	static String toApplicationPath(String target) {
-		return target != null ? target.replaceAll("[\\p{Cntrl}\\s]", "").replaceFirst("^[/\\\\]+", "") : "";
+		if (target == null) {
+			return "";
+		}
+		String cleaned = target.replaceAll("[\\p{Cntrl}\\s]", "");
+		int queryIndex = cleaned.indexOf('?');
+		String path = queryIndex >= 0 ? cleaned.substring(0, queryIndex) : cleaned;
+		if (!ROUTE_PATH.matcher(path).matches()) {
+			return "";
+		}
+		for (String segment : path.split("/")) {
+			if (segment.equals(".") || segment.equals("..")) {
+				return "";
+			}
+		}
+		return cleaned;
 	}
 
 	public static class OidcLogoutServlet extends HttpServlet {

@@ -23,6 +23,8 @@ import java.util.concurrent.TimeUnit;
  */
 public final class AppCopyPool implements AutoCloseable {
 
+	/** e2e.resetMode=mixed: database-only reset unless the previous class dirtied the app's memory (DirtiesAppMemory). */
+	private static final boolean MIXED = "mixed".equals(System.getProperty("e2e.resetMode", "restart"));
 	private static final Duration SCRIPT_TIMEOUT = Duration.ofMinutes(20);
 
 	private final Path envDir;
@@ -134,7 +136,9 @@ public final class AppCopyPool implements AutoCloseable {
 			}
 			try {
 				if (action.equals("reset")) {
-					script("reset.sh", slot.copy);
+					boolean db = MIXED && !slot.copy.dirty;
+					slot.copy.dirty = false;
+					script("reset.sh", db ? "db" : "restart", slot.copy);
 				} else {
 					if (slot.copy != null) {
 						script("down.sh", slot.copy);
@@ -221,6 +225,10 @@ public final class AppCopyPool implements AutoCloseable {
 
 	/** Runs env/&lt;name&gt; for the copy; its output goes to target/e2e/copies/&lt;project&gt;.log. */
 	private void script(String name, Copy c, String... args) {
+		script(name, "restart", c, args);
+	}
+
+	private void script(String name, String resetMode, Copy c, String... args) {
 		List<String> cmd = new ArrayList<>(List.of("bash", envDir.resolve(name).toString()));
 		cmd.addAll(List.of(args));
 		ProcessBuilder pb = new ProcessBuilder(cmd);
@@ -230,7 +238,7 @@ public final class AppCopyPool implements AutoCloseable {
 		env.remove("APP_ENV_CONTAINER");
 		env.put("APP_ENV_CONFIG", c.config.name());
 		env.put("APP_ENV_PWCHECK", c.passwordCheck ? "on" : "off");
-		env.put("APP_ENV_RESET_MODE", "restart");
+		env.put("APP_ENV_RESET_MODE", resetMode);
 		try {
 			Files.createDirectories(logDir);
 			File log = logDir.resolve(c.project + ".log").toFile();
@@ -244,7 +252,7 @@ public final class AppCopyPool implements AutoCloseable {
 			if (p.exitValue() != 0) {
 				throw new IllegalStateException(name + " failed for " + c + " (exit " + p.exitValue() + ", log: " + log + ")");
 			}
-			System.out.printf("[e2e] %s %s: %d s%n", name, c, Duration.between(t0, Instant.now()).toSeconds());
+			System.out.printf("[e2e] %s %s: %d s%n", name.equals("reset.sh") && resetMode.equals("db") ? "reset.sh(db)" : name, c, Duration.between(t0, Instant.now()).toSeconds());
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		} catch (InterruptedException e) {

@@ -13,11 +13,13 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import de.symeda.sormas.e2e.playwright.support.AppCopy;
+import de.symeda.sormas.e2e.playwright.support.DirtiesAppMemory;
 import de.symeda.sormas.e2e.playwright.support.Ui;
 import de.symeda.sormas.e2e.playwright.support.WorkflowTest;
 
 /** migration/workflows/WF45-disease-variant-value.md */
 @DisplayName("WF45 Add a disease variant value and use it on a case (admin, SurvSup; C1)")
+@DirtiesAppMemory("adds a customizable enum value: enum cache")
 @AppCopy(AppCopy.Config.C1)
 class WF45DiseaseVariantValueIT extends WorkflowTest {
 

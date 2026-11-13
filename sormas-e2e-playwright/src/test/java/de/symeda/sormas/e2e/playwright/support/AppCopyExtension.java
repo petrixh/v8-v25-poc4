@@ -73,6 +73,7 @@ public class AppCopyExtension implements BeforeAllCallback, AfterAllCallback, Ex
 			}
 		} finally {
 			if (copy != null) {
+				copy.dirty = context.getRequiredTestClass().isAnnotationPresent(DirtiesAppMemory.class);
 				pool(context).release(copy);
 			}
 		}

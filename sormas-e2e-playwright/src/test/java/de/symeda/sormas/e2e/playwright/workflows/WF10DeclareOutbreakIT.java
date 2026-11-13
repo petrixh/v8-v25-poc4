@@ -11,11 +11,13 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import de.symeda.sormas.e2e.playwright.support.AppCopy;
+import de.symeda.sormas.e2e.playwright.support.DirtiesAppMemory;
 import de.symeda.sormas.e2e.playwright.support.Ui;
 import de.symeda.sormas.e2e.playwright.support.WorkflowTest;
 
 /** migration/workflows/WF10-declare-outbreak.md */
 @DisplayName("WF10 Declare and end a disease outbreak in a district (SurvSup, C1)")
+@DirtiesAppMemory("outbreak per district and disease is disease configuration")
 @AppCopy(AppCopy.Config.C1)
 class WF10DeclareOutbreakIT extends WorkflowTest {
 

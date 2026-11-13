@@ -14,11 +14,13 @@ import org.junit.jupiter.api.Test;
 import com.microsoft.playwright.Locator;
 
 import de.symeda.sormas.e2e.playwright.support.AppCopy;
+import de.symeda.sormas.e2e.playwright.support.DirtiesAppMemory;
 import de.symeda.sormas.e2e.playwright.support.Ui;
 import de.symeda.sormas.e2e.playwright.support.WorkflowTest;
 
 /** migration/workflows/WF07-line-listing-configuration.md */
 @DisplayName("WF07 Switch on line listing for a disease in a district (SurvSup, C1)")
+@DirtiesAppMemory("line listing is feature/disease configuration, cached")
 @AppCopy(AppCopy.Config.C1)
 class WF07LineListingConfigurationIT extends WorkflowTest {
 

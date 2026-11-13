@@ -12,11 +12,13 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import de.symeda.sormas.e2e.playwright.support.AppCopy;
+import de.symeda.sormas.e2e.playwright.support.DirtiesAppMemory;
 import de.symeda.sormas.e2e.playwright.support.Ui;
 import de.symeda.sormas.e2e.playwright.support.WorkflowTest;
 
 /** migration/workflows/WF02-failed-login-and-logout.md */
 @DisplayName("WF02 Wrong password is refused; logout ends the session (SurvOff, C1)")
+@DirtiesAppMemory("logout and failed logins end or change sessions")
 @AppCopy(AppCopy.Config.C1)
 class WF02FailedLoginAndLogoutIT extends WorkflowTest {
 

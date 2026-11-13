@@ -15,11 +15,13 @@ import org.junit.jupiter.api.Test;
 import com.microsoft.playwright.Locator;
 
 import de.symeda.sormas.e2e.playwright.support.AppCopy;
+import de.symeda.sormas.e2e.playwright.support.DirtiesAppMemory;
 import de.symeda.sormas.e2e.playwright.support.Ui;
 import de.symeda.sormas.e2e.playwright.support.WorkflowTest;
 
 /** migration/workflows/WF43-infrastructure-and-cache.md */
 @DisplayName("WF43 Infrastructure changes show up in forms at once (admin, C1)")
+@DirtiesAppMemory("edits infrastructure: infrastructure cache")
 @AppCopy(AppCopy.Config.C1)
 class WF43InfrastructureAndCacheIT extends WorkflowTest {
 

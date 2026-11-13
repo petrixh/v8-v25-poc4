@@ -12,11 +12,13 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import de.symeda.sormas.e2e.playwright.support.AppCopy;
+import de.symeda.sormas.e2e.playwright.support.DirtiesAppMemory;
 import de.symeda.sormas.e2e.playwright.support.Ui;
 import de.symeda.sormas.e2e.playwright.support.WorkflowTest;
 
 /** migration/workflows/WF44-geography-archive.md */
 @DisplayName("WF44 Continents, subcontinents and countries; archive and de-archive a country (admin, C1)")
+@DirtiesAppMemory("archives a country: infrastructure cache")
 @AppCopy(AppCopy.Config.C1)
 class WF44GeographyArchiveIT extends WorkflowTest {
 

@@ -15,6 +15,8 @@ public final class Copy {
 	final String project;
 	final AppCopy.Config config;
 	final boolean passwordCheck;
+	/** The last class on this copy changed data the app holds in memory: the next reset restarts the app. */
+	volatile boolean dirty;
 
 	Copy(int port, String project, AppCopy.Config config, boolean passwordCheck) {
 		this.port = port;

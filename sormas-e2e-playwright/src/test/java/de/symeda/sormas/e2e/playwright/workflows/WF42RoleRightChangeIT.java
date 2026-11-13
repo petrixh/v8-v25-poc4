@@ -14,11 +14,13 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import de.symeda.sormas.e2e.playwright.support.AppCopy;
+import de.symeda.sormas.e2e.playwright.support.DirtiesAppMemory;
 import de.symeda.sormas.e2e.playwright.support.Ui;
 import de.symeda.sormas.e2e.playwright.support.WorkflowTest;
 
 /** migration/workflows/WF42-role-right-change.md */
 @DisplayName("WF42 Changing a role's right changes what its users see (admin, LabOff; C1)")
+@DirtiesAppMemory("changes a role right: user role and rights cache")
 @AppCopy(AppCopy.Config.C1)
 class WF42RoleRightChangeIT extends WorkflowTest {
 

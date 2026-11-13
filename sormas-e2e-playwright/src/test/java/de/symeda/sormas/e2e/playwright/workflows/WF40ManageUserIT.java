@@ -16,6 +16,7 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 
 import de.symeda.sormas.e2e.playwright.support.AppCopy;
+import de.symeda.sormas.e2e.playwright.support.DirtiesAppMemory;
 import de.symeda.sormas.e2e.playwright.support.Ui;
 import de.symeda.sormas.e2e.playwright.support.WorkflowTest;
 
@@ -24,6 +25,7 @@ import de.symeda.sormas.e2e.playwright.support.WorkflowTest;
  * recorded, and no screenshot is taken while it shows.
  */
 @DisplayName("WF40 Create, edit and deactivate a user (admin, C1)")
+@DirtiesAppMemory("creates, edits and deactivates a user: user cache")
 @AppCopy(AppCopy.Config.C1)
 class WF40ManageUserIT extends WorkflowTest {
 

@@ -14,11 +14,13 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
 
 import de.symeda.sormas.e2e.playwright.support.AppCopy;
+import de.symeda.sormas.e2e.playwright.support.DirtiesAppMemory;
 import de.symeda.sormas.e2e.playwright.support.Ui;
 import de.symeda.sormas.e2e.playwright.support.WorkflowTest;
 
 /** migration/workflows/WF01-default-password-alert.md. Never generates a password: it would change the test users. */
 @DisplayName("WF01 Security alert for default passwords after login (admin, SurvOff; C1, password check on)")
+@DirtiesAppMemory("default-password users and their sessions")
 @AppCopy(value = AppCopy.Config.C1, passwordCheck = true)
 class WF01DefaultPasswordAlertIT extends WorkflowTest {
 

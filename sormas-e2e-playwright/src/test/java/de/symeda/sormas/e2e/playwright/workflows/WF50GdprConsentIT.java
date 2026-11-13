@@ -13,11 +13,13 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.options.AriaRole;
 
 import de.symeda.sormas.e2e.playwright.support.AppCopy;
+import de.symeda.sormas.e2e.playwright.support.DirtiesAppMemory;
 import de.symeda.sormas.e2e.playwright.support.Ui;
 import de.symeda.sormas.e2e.playwright.support.WorkflowTest;
 
 /** migration/workflows/WF50-gdpr-consent.md. Captions in German (C2). */
 @DisplayName("WF50 GDPR notice after login until the user consents (SurvOff, C2)")
+@DirtiesAppMemory("user consent stored on the user: user cache and session")
 @AppCopy(AppCopy.Config.C2)
 class WF50GdprConsentIT extends WorkflowTest {
 

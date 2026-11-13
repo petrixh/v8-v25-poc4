@@ -298,7 +298,7 @@ jobs:
         run: |
           nproc; free -m
           ( while :; do echo "$(date +%s) $(free -m | awk '/Mem:/{print $3, $7}') $(cut -d' ' -f1 /proc/loadavg)"; sleep 10; done ) > /tmp/mem.txt &
-          mvn -B -ntp -f sormas-e2e-playwright/pom.xml verify -De2e.ports=18720-18722 -De2e.keepCopies=true
+          mvn -B -ntp -f sormas-e2e-playwright/pom.xml verify -De2e.ports=18720-18722 -De2e.resetMode=mixed -De2e.keepCopies=true
 
       # Test counts per workflow in the job summary
       - name: Workflow test report
